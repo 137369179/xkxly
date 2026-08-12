@@ -44,6 +44,8 @@ export const NAV_ITEMS: NavItem[] = [
   { id: 'growth', label: '成长博物馆', short: '成长', emoji: '🏆', imageIcon: '/icons/felt_album.jpg', tone: 'green', desc: '徽章墙 · 等级 · 成长树' },
   { id: 'content', label: 'AI 内容站', short: '内容', emoji: '📡', imageIcon: '/icons/felt_storybook.jpg', tone: 'purple', desc: 'AI 生成 · 故事谜语科普' },
 
+  { id: 'research', label: '研究乐园', short: '研究', emoji: '🔬', imageIcon: '/icons/storybook.jpg', tone: 'blue', desc: '选题探索 · 记录发现' },
+
   { id: 'adventure', label: '闯关冒险', short: '闯关', emoji: '🚀', imageIcon: '/icons/icon-192.png', tone: 'purple', desc: '闯关拿星星徽章', bottom: true },
 
 
@@ -65,7 +67,7 @@ export const NAV_MAP = new Map(NAV_ITEMS.map((n) => [n.id, n]));
  * 品类模型（规格四：导航按品类重组 —— 学习 / 游戏 / 故事 / 创意 / AI小老师 / 家长中心）
  * 纯数据映射，不改动任何页面路由，零回归。标签走 i18n(categories.*)，emoji/tone 在代码侧。
  * ===================================================================== */
-export type NavCategory = 'home' | 'learn' | 'game' | 'story' | 'create' | 'ai' | 'parent' | 'growth';
+export type NavCategory = 'home' | 'learn' | 'game' | 'story' | 'create' | 'ai' | 'parent' | 'growth' | 'research';
 
 export const NAV_CATEGORY_META: { key: NavCategory; emoji: string; tone: NavItem['tone'] }[] = [
   { key: 'learn', emoji: '📚', tone: 'blue' },
@@ -73,6 +75,7 @@ export const NAV_CATEGORY_META: { key: NavCategory; emoji: string; tone: NavItem
   { key: 'story', emoji: '📖', tone: 'pink' },
   { key: 'create', emoji: '🎨', tone: 'orange' },
   { key: 'ai', emoji: '🤖', tone: 'green' },
+  { key: 'research', emoji: '🔬', tone: 'blue' },
   { key: 'growth', emoji: '🏆', tone: 'yellow' },
   { key: 'parent', emoji: '👨‍👩‍👧', tone: 'green' },
 ];
@@ -109,6 +112,7 @@ export const NAV_CATEGORY_MAP: Record<RouteId, NavCategory> = {
   story: 'story',
   growth: 'growth',
   content: 'ai',
+  research: 'research',
   adventure: 'game',
   rewards: 'parent',
   passport: 'parent',

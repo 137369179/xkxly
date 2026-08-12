@@ -9,6 +9,7 @@ import { getBestToday, getCombo, subscribeCombo } from '@/lib/combo';
 import { cn } from '@/lib/utils';
 import { navigate, type RouteId } from '@/lib/router';
 import { safeGetItem, safeSetItem, safeRemoveItem } from '@/lib/safeStorage';
+import type { Progress } from '@/types';
 import { useTranslation } from '@/i18n/useTranslation';
 
 /**
@@ -22,7 +23,7 @@ interface Challenge {
   label: string;
   emoji: string;
   target: number;
-  check: (p: any) => number; // 返回当前进度
+  check: (p: Progress) => number; // 返回当前进度
   reward: number;
   /** 点击未完成任务跳转的模块；无则不可跳 */
   route?: RouteId;

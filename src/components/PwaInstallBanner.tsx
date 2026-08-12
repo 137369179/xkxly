@@ -3,18 +3,21 @@ import { motion, AnimatePresence } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxWin } from '@/lib/sfx';
 
+/** beforeinstallprompt 事件类型（浏览器未统一纳入 WindowEventMap） */
+type InstallPromptEvent = BeforeInstallPromptEvent & { type: 'beforeinstallprompt' };
+
 export function PwaInstallBanner() {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<InstallPromptEvent | null>(null);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     const handler = (e: Event) => {
       e.preventDefault();
-      setDeferredPrompt(e);
+      setDeferredPrompt(e as InstallPromptEvent);
     };
 
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+    window.addEventListener('beforeinstallprompt', handler as EventListener);
+    return () => window.removeEventListener('beforeinstallprompt', handler as EventListener);
   }, []);
 
   if (!deferredPrompt || dismissed) return null;

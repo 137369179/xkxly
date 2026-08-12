@@ -1,0 +1,248 @@
+/**
+ * 英语单词连连看 - 英文↔中文连线游戏
+ */
+
+import { useState, useEffect, useRef } from 'react';
+import { PageHeader, Panel } from '@/components/ui/Card';
+import { CandyButton } from '@/components/ui/Button';
+import { getWordsByLevel } from '@/data/wordIndex';
+import type { WordEntry } from '@/data/words';
+import { sfxTap, sfxCorrect, sfxWrong, sfxStar } from '@/lib/sfx';
+import { useTranslation } from '@/i18n/useTranslation';
+import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
+import { motion } from 'motion/react';
+import { useStore } from '@/store/useStore';
+import { shuffle } from '@/lib/utils';
+import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
+import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
+
+type Phase = 'playing' | 'result';
+type Side = 'en' | 'zh';
+
+interface Pair {
+  word: WordEntry;
+  matched: boolean;
+}
+
+interface DiffEntry {
+  id: 1 | 2 | 3;
+  label: string;
+  pairs: number;
+  level: 1 | 2 | 3;
+}
+
+const DIFFS: DiffEntry[] = [
+  { id: 1, label: 'wordMatch.easy', pairs: 6, level: 1 },
+  { id: 2, label: 'wordMatch.medium', pairs: 8, level: 2 },
+  { id: 3, label: 'wordMatch.hard', pairs: 10, level: 3 },
+];
+
+export function WordMatch() {
+  const { t: tr } = useTranslation();
+  const [diff, setDiff, diffMeta] = useAdaptiveDifficultyState('word');
+  const [pairs, setPairs] = useState<Pair[]>([]);
+  const [enOrder, setEnOrder] = useState<number[]>([]);
+  const [zhOrder, setZhOrder] = useState<number[]>([]);
+  const [selected, setSelected] = useState<{ side: Side; idx: number } | null>(null);
+  const [combo, setCombo] = useState(0);
+  const [score, setScore] = useState(0);
+  const [time, setTime] = useState(0);
+  const [phase, setPhase] = useState<Phase>('playing');
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const practice = useStore(s => s.practice);
+
+  const start = (d: DiffEntry) => {
+    sfxTap();
+    const pool = getWordsByLevel(d.level);
+    const picked = shuffle(pool).slice(0, d.pairs);
+    const newPairs = picked.map(word => ({ word, matched: false }));
+    setPairs(newPairs);
+    setEnOrder(shuffle(newPairs.map((_, i) => i)));
+    setZhOrder(shuffle(newPairs.map((_, i) => i)));
+    setSelected(null);
+    setCombo(0);
+    setScore(0);
+    setTime(0);
+    setPhase('playing');
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => setTime(t => t + 1), 1000);
+  };
+
+  /** 按档位 id 开一局（找不到就退回最简单那档） */
+  const startById = (id: 1 | 2 | 3) => start(DIFFS.find(d => d.id === id) ?? DIFFS[0]!);
+
+  useEffect(() => {
+    // 开局用小智推荐的档位（而不是恒定最简单那档）
+    startById(diff);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    // intentional: only start on mount, diff change triggers remount via key
+  }, []);
+
+  const allMatched = pairs.length > 0 && pairs.every(p => p.matched);
+  useEffect(() => {
+    if (allMatched && phase === 'playing') {
+      if (timerRef.current) clearInterval(timerRef.current);
+      sfxStar();
+      celebrateBig();
+      setPhase('result');
+    }
+  }, [allMatched, phase]);
+
+  const handleClick = (side: Side, idx: number) => {
+    if (phase !== 'playing') return;
+    const pairIdx = side === 'en' ? enOrder[idx] : zhOrder[idx];
+    if (pairs[pairIdx!]?.matched) return;
+    sfxTap();
+
+    if (!selected) {
+      setSelected({ side, idx });
+      return;
+    }
+
+    if (selected.side === side) {
+      setSelected({ side, idx });
+      return;
+    }
+
+    // 检查是否匹配
+    const enIdx = selected.side === 'en' ? enOrder[selected.idx] : enOrder[idx];
+    const zhIdx = selected.side === 'zh' ? zhOrder[selected.idx] : zhOrder[idx];
+
+    if (enIdx === zhIdx) {
+      // 匹配成功
+      sfxCorrect();
+      celebrateSmall();
+      const newCombo = combo + 1;
+      setCombo(newCombo);
+      const gain = 10 + (newCombo - 1) * 2;
+      setScore(s => s + gain);
+      setPairs(prev => prev.map((p, i) => i === enIdx ? { ...p, matched: true } : p));
+      practice(`word:${pairs[enIdx!]!.word.word}`, true, 0, diff);
+    } else {
+      sfxWrong();
+      setCombo(0);
+    }
+    setSelected(null);
+  };
+
+  if (phase === 'result') {
+    const stars = score >= pairs.length * 12 ? 3 : score >= pairs.length * 8 ? 2 : 1;
+    return (
+      <Panel className="text-center">
+        <div className="text-6xl">🏆</div>
+        <p className="mt-3 text-xl font-extrabold text-ink">{tr('wordMatch.complete')}</p>
+        <p className="text-3xl font-black text-candy-green-deep">{'⭐'.repeat(stars)}</p>
+        <div className="mt-2 grid grid-cols-3 gap-2">
+          <div className="rounded-xl bg-candy-blue-soft p-2">
+            <div className="text-lg font-extrabold text-candy-blue-deep">{score}</div>
+            <div className="text-xs font-bold text-ink-soft">{tr('wordMatch.score')}</div>
+          </div>
+          <div className="rounded-xl bg-candy-orange-soft p-2">
+            <div className="text-lg font-extrabold text-candy-orange-deep">{time}s</div>
+            <div className="text-xs font-bold text-ink-soft">{tr('wordMatch.time')}</div>
+          </div>
+          <div className="rounded-xl bg-candy-pink-soft p-2">
+            <div className="text-lg font-extrabold text-candy-pink-deep">{pairs.length}</div>
+            <div className="text-xs font-bold text-ink-soft">{tr('wordMatch.pairs')}</div>
+          </div>
+        </div>
+        <CandyButton
+          tone="green"
+          size="sm"
+          className="mt-4"
+          onClick={() => {
+            // 一局结束是安全边界：让小智把最新建议应用上来
+            diffMeta.syncNow();
+            const nextDiff = (diffMeta.auto ? diffMeta.recommended : diff) as 1 | 2 | 3;
+            startById(nextDiff);
+          }}
+        >
+          🔄 {tr('wordMatch.playAgain')}
+        </CandyButton>
+      </Panel>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <PageHeader emoji="🔗" title={tr('wordMatch.title')} subtitle={tr('wordMatch.subtitle')} tone="green" />
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex gap-2">
+            {DIFFS.map(d => (
+              <CandyButton
+                key={d.id}
+                tone={diff === d.id ? 'green' : 'purple'}
+                variant={diff === d.id ? 'solid' : 'soft'}
+                size="sm"
+                onClick={() => { setDiff(d.id); start(d); }}
+              >
+                {tr(d.label)}
+              </CandyButton>
+            ))}
+          </div>
+          <div className="text-sm font-extrabold text-ink-soft">
+            ⏱️ {time}s · ⭐ {score} {combo > 1 && `· 🔥${combo}`}
+          </div>
+        </div>
+        <AdaptiveDifficultyHint
+          meta={diffMeta}
+          labels={{ 1: '简单', 2: '中等', 3: '挑战' }}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        {/* 英文列 */}
+        <div className="space-y-2">
+          {enOrder.map((pairIdx, displayIdx) => {
+            const p = pairs[pairIdx]!!
+            const isSel = selected?.side === 'en' && selected.idx === displayIdx;
+            return (
+              <motion.button
+                key={displayIdx}
+                animate={{ opacity: p.matched ? 0.3 : 1, scale: p.matched ? 0.9 : 1 }}
+                onClick={() => handleClick('en', displayIdx)}
+                disabled={p.matched}
+                className={`w-full rounded-2xl border-4 p-3 text-center text-lg font-extrabold transition-all ${
+                  p.matched
+                    ? 'border-candy-green-soft bg-candy-green-soft text-ink-soft'
+                    : isSel
+                    ? 'border-candy-green-deep bg-candy-green-soft text-ink scale-105'
+                    : 'border-candy-green-soft bg-white text-ink hover:bg-candy-green-soft'
+                }`}
+              >
+                {p.word.word} {p.word.emoji}
+              </motion.button>
+            );
+          })}
+        </div>
+
+        {/* 中文列 */}
+        <div className="space-y-2">
+          {zhOrder.map((pairIdx, displayIdx) => {
+            const p = pairs[pairIdx]!!
+            const isSel = selected?.side === 'zh' && selected.idx === displayIdx;
+            return (
+              <motion.button
+                key={displayIdx}
+                animate={{ opacity: p.matched ? 0.3 : 1, scale: p.matched ? 0.9 : 1 }}
+                onClick={() => handleClick('zh', displayIdx)}
+                disabled={p.matched}
+                className={`w-full rounded-2xl border-4 p-3 text-center text-lg font-extrabold transition-all ${
+                  p.matched
+                    ? 'border-candy-pink-soft bg-candy-pink-soft text-ink-soft'
+                    : isSel
+                    ? 'border-candy-pink-deep bg-candy-pink-soft text-ink scale-105'
+                    : 'border-candy-pink-soft bg-white text-ink hover:bg-candy-pink-soft'
+                }`}
+              >
+                {p.word.zh}
+              </motion.button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}

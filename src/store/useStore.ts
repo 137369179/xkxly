@@ -5,10 +5,11 @@ import { findEquipmentByFragment, EQUIPMENT_MAP } from '@/data/equipment';
 
 import { dateKey } from '@/lib/dailyPlan';
 import { setAiEnabled as aiSetEnabled } from '@/lib/ai/client';
-import { PIN_FAIL_LIMIT, PIN_LOCK_MS } from '@/lib/pin';
 import { review } from '@/lib/srs';
 import { registerTtsBridge } from '@/lib/speech';
 import { createInitialProgress } from '@/lib/progress';
+import { useSettingsStore } from './useSettingsStore';
+import { useTtsStore } from './useTtsStore';
 
 const todayStr = () => dateKey();
 
@@ -22,8 +23,6 @@ const todayStr = () => dateKey();
  * 策略：500ms 内多次 set 只保留最新值，定时器到期才写盘。
  * 关闭页面时通过 beforeunload 立即 flush，避免丢最后一次未落盘的进度。
  */
-// 节流写盘：主 Store 与设置 Store 共用同一工厂实现（storeHelpers.createThrottledStorage），
-// 消除重复代码；工厂内部已注册 beforeunload/pagehide 的 flush，HMR 下只注册一次。
 const { storage: throttledLocalStorage } = createThrottledStorage();
 
 import {
@@ -43,56 +42,10 @@ import { localDailyQuestPlan } from '@/lib/ai/tasks';
 // Keep initialProgress as a constant for reference (but resetAll uses factory)
 const initialProgress: Progress = createInitialProgress();
 
-
-interface Settings {
-  sound: boolean;
-  /** 拼音显示开关 */
-  showPinyin: boolean;
-  /** 家长中心 PIN，'' 表示未设置；新格式为 `sha256:<salt>:<hash>`，旧明文 4 位数字自动兼容 */
-  parentPin: string;
-  /** PIN 连续失败次数，达到 PIN_FAIL_LIMIT 后锁定 */
-  pinFails: number;
-  /** PIN 锁定到期时间戳（ms），0 表示未锁定 */
-  pinLockUntil: number;
-  /** 每日学习时长上限（分钟），0 = 不限制 */
-  dailyLimitMin: number;
-  /** 护眼提醒间隔（分钟），0 = 关闭 */
-  eyeCareMin: number;
-  /** 全站 AI 总开关，关闭后所有 AI 点静默退回本地内容 */
-  aiEnabled: boolean;
-  /** 语音引导开关（页面/步骤切换时的引导朗读），默认开；仍受 sound 总开关约束 */
-  voiceGuide: boolean;
-}
-
-/**
- * 全局朗读状态切片（核心加强 U）
- * ------------------------------------------------------------
- * 现状：TtsPlayHandle 状态只在 Kokoro 引擎内，WebSpeech 仅 per-call Promise，
- * UI 无法统一显示「正在朗读」全局指示器，多页面切换时状态丢失。
- *
- * 方案：在 store 加 ttsState（不持久化），由 speech.ts 在 speak/stop 时推送。
- * UI 可订阅 ttsState.isSpeaking 显示全局指示器、自动停止按钮等。
- */
-export type TtsState = {
-  /** 当前是否在朗读 */
-  isSpeaking: boolean;
-  /** 当前朗读的文本摘要（前 20 字），用于 UI 显示 */
-  snippet: string;
-  /** 朗读开始时间戳，用于显示已读时长 */
-  startedAt: number;
-  /** 朗读模块（quiz/poem/hanzi/letter/number/word/story/ai/praise），用于场景化 UI */
-  module: string;
-};
-
 interface StoreState {
   progress: Progress;
-  settings: Settings;
   /** 刚解锁、还未展示给用户的徽章队列（不持久化） */
   pendingBadges: string[];
-  /** 全局朗读状态（不持久化，由 speech.ts 推送） */
-  ttsState: TtsState;
-  /** 设置朗读状态（speech.ts 调用） */
-  setTtsState: (s: Partial<TtsState>) => void;
 
   // —— 原有 actions ——
   addStars: (n: number) => void;
@@ -120,8 +73,6 @@ interface StoreState {
   recordLogic: (correct: boolean, skill?: string) => void;
   completeLevel: (levelId: number, stars: number) => void;
   checkIn: () => void;
-  setSound: (v: boolean) => void;
-  setShowPinyin: (v: boolean) => void;
   consumeBadge: () => void;
   resetAll: () => void;
 
@@ -144,18 +95,6 @@ interface StoreState {
   buySticker: (id: string, cost: number) => boolean;
   /** 清空错题本 */
   clearWrongBook: () => void;
-  setParentPin: (pin: string) => void;
-  /** 记录一次 PIN 校验失败（自增计数 + 触发锁定） */
-  recordPinFail: () => void;
-  /** 记录一次 PIN 校验成功（清零失败计数与锁定） */
-  recordPinSuccess: () => void;
-  /** 忘记密码：清空 PIN 与锁定状态，需重新设置 */
-  clearPin: () => void;
-  setDailyLimit: (min: number) => void;
-  setEyeCare: (min: number) => void;
-  setAiEnabled: (v: boolean) => void;
-  /** 开/关语音引导（页面与步骤切换时的引导朗读） */
-  setVoiceGuide: (v: boolean) => void;
   incPkCount: () => void;
   incCreativeCount: () => void;
   /** 增加小鱼干 */
@@ -230,6 +169,17 @@ interface StoreState {
   /** P4: 记录Boss战结果 */
   recordBossResult: (levelId: number, defeated: boolean, turns: number) => void;
 
+  // —— 设置路由（委托到 useSettingsStore，保持旧 API 兼容）——
+  setSound: (v: boolean) => void;
+  setShowPinyin: (v: boolean) => void;
+  setParentPin: (pin: string) => void;
+  recordPinFail: () => void;
+  recordPinSuccess: () => void;
+  clearPin: () => void;
+  setDailyLimit: (min: number) => void;
+  setEyeCare: (min: number) => void;
+  setAiEnabled: (v: boolean) => void;
+  setVoiceGuide: (v: boolean) => void;
 }
 
 /**
@@ -241,20 +191,7 @@ export const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
       progress: initialProgress,
-      settings: {
-        sound: true,
-        showPinyin: true,
-        parentPin: '',
-        pinFails: 0,
-        pinLockUntil: 0,
-        dailyLimitMin: 0,
-        eyeCareMin: 20,
-        aiEnabled: true,
-        voiceGuide: true,
-      },
       pendingBadges: [],
-      ttsState: { isSpeaking: false, snippet: '', startedAt: 0, module: '' },
-      setTtsState: (patch) => set((s) => ({ ttsState: { ...s.ttsState, ...patch } })),
 
       addStars: (n) =>
         set((s) =>
@@ -490,9 +427,6 @@ export const useStore = create<StoreState>()(
             };
           }),
         ),
-
-      setSound: (v) => set((s) => ({ settings: { ...s.settings, sound: v } })),
-      setShowPinyin: (v) => set((s) => ({ settings: { ...s.settings, showPinyin: v } })),
 
       consumeBadge: () => set((s) => ({ pendingBadges: s.pendingBadges.slice(1) })),
 
@@ -752,11 +686,11 @@ export const useStore = create<StoreState>()(
             // Feeding also slightly increases affection
             const nextAffection = Math.min(100, (s.progress.catAffection ?? 20) + Math.floor(amount / 2));
             return {
-              progress: { 
-                ...s.progress, 
-                fishCount: curFish - cost, 
-                catFullness: nextFullness, 
-                catAffection: nextAffection 
+              progress: {
+                ...s.progress,
+                fishCount: curFish - cost,
+                catFullness: nextFullness,
+                catAffection: nextAffection,
               },
             };
           }
@@ -779,15 +713,15 @@ export const useStore = create<StoreState>()(
           const now = Date.now();
           const lastUpdate = s.progress.lastCatUpdate ?? now;
           const diffHours = (now - lastUpdate) / (1000 * 60 * 60);
-          
+
           if (diffHours < 1) return s; // Not enough time passed
 
           // Decay 2 points per hour
           const decay = Math.floor(diffHours * 2);
-          
+
           const newFullness = Math.max(0, (s.progress.catFullness ?? 80) - decay);
           const newCleanliness = Math.max(0, (s.progress.catCleanliness ?? 80) - decay);
-          
+
           return {
             progress: {
               ...s.progress,
@@ -887,7 +821,7 @@ export const useStore = create<StoreState>()(
           const curLv = s.progress.catLevel ?? 1;
           const curAff = s.progress.catAffection ?? 20;
           const stars = s.progress.stars ?? 0;
-          
+
           let canEvolve = false;
           if (curLv === 1 && stars >= 50 && curAff >= 50) canEvolve = true;
           if (curLv === 2 && stars >= 200 && curAff >= 80) canEvolve = true;
@@ -1067,64 +1001,45 @@ export const useStore = create<StoreState>()(
         };
       })),
 
-
-      setParentPin: (pin) =>
-        set((s) => ({
-          settings: { ...s.settings, parentPin: pin, pinFails: 0, pinLockUntil: 0 },
-        })),
-      recordPinFail: () =>
-        set((s) => {
-          const fails = s.settings.pinFails + 1;
-          const lockUntil = fails >= PIN_FAIL_LIMIT ? Date.now() + PIN_LOCK_MS : s.settings.pinLockUntil;
-          return { settings: { ...s.settings, pinFails: fails, pinLockUntil: lockUntil } };
-        }),
-      recordPinSuccess: () =>
-        set((s) => ({ settings: { ...s.settings, pinFails: 0, pinLockUntil: 0 } })),
-      clearPin: () =>
-        set((s) => ({
-          settings: { ...s.settings, parentPin: '', pinFails: 0, pinLockUntil: 0 },
-        })),
-      setDailyLimit: (min) => set((s) => ({ settings: { ...s.settings, dailyLimitMin: min } })),
-      setEyeCare: (min) => set((s) => ({ settings: { ...s.settings, eyeCareMin: min } })),
-      setAiEnabled: (v) => {
-        aiSetEnabled(v);
-        set((s) => ({ settings: { ...s.settings, aiEnabled: v } }));
-      },
-      setVoiceGuide: (v) => set((s) => ({ settings: { ...s.settings, voiceGuide: v } })),
       incPkCount: () => set((s) => ({ progress: { ...s.progress, pkCount: s.progress.pkCount + 1 } })),
       incCreativeCount: () => set((s) => ({ progress: { ...s.progress, creativeCount: s.progress.creativeCount + 1 } })),
+
+      // —— 设置路由：委托到 useSettingsStore，不再在主 store 维护 settings 状态 ——
+      setSound: (v) => useSettingsStore.getState().setSound(v),
+      setShowPinyin: (v) => useSettingsStore.getState().setShowPinyin(v),
+      setParentPin: (pin) => useSettingsStore.getState().setParentPin(pin),
+      recordPinFail: () => useSettingsStore.getState().recordPinFail(),
+      recordPinSuccess: () => useSettingsStore.getState().recordPinSuccess(),
+      clearPin: () => useSettingsStore.getState().clearPin(),
+      setDailyLimit: (min) => useSettingsStore.getState().setDailyLimit(min),
+      setEyeCare: (min) => useSettingsStore.getState().setEyeCare(min),
+      setAiEnabled: (v) => {
+        aiSetEnabled(v);
+        useSettingsStore.getState().setAiEnabled(v);
+      },
+      setVoiceGuide: (v) => useSettingsStore.getState().setVoiceGuide(v),
     }),
     {
       name: 'baby-learning-park-v1',
-      version: 2,
-      // 包装 localStorage：setItem 超出配额（QuotaExceededError）时静默失败，
-      // 而不是把异常抛到控制台、卡住整个状态订阅。孩子长期使用后数据接近
-      // 5MB 上限时这个分支会被触发——宁可本次不落盘，也不能让应用崩。
-      //
-      // 性能优化（核心加强 N）：写入节流。
-      // zustand persist 默认每次 set 都同步 localStorage.setItem，连答时每答一题
-      // 都全量 JSON.stringify + 同步写盘，主线程压力大、答题跟手度下降。
-      // 用 500ms 节流合并高频写入：连续答题时多次 set 只在最后一次后写盘一次。
-      // 关闭页面风险：通过 beforeunload 注册立即 flush，避免丢最后一次未落盘的进度。
+      version: 3,
+      // 仅持久化 progress；settings 已由 useSettingsStore 单独持久化
       storage: createJSONStorage(() => throttledLocalStorage),
       // pendingBadges 是瞬时 UI 队列，不写入 localStorage
-      partialize: (s) => ({ progress: s.progress, settings: s.settings }),
+      partialize: (s) => ({ progress: s.progress }),
       // 恢复后把 AI 开关同步给服务层（client 是模块级单例，不读 store）
       onRehydrateStorage: () => (state) => {
-        if (state) aiSetEnabled(state.settings.aiEnabled !== false);
+        if (state?.progress) {
+          // settings 从 useSettingsStore 独立读取，无需再同步
+          const settings = useSettingsStore.getState().settings;
+          aiSetEnabled(settings.aiEnabled !== false);
+        }
       },
       merge: (persisted, current) => {
-        const p = persisted as Partial<StoreState> | undefined;
-        const mergedSettings = { ...current.settings, ...(p?.settings ?? {}) };
-        // 老数据升级：补齐新增的 PIN 锁定字段
-        if (mergedSettings.pinFails === undefined) mergedSettings.pinFails = 0;
-        if (mergedSettings.pinLockUntil === undefined) mergedSettings.pinLockUntil = 0;
+        const p = persisted as { progress?: Partial<Progress> } | undefined;
         return {
           ...current,
-          ...p,
-          // 与初始值做深合并，保证 v1 老数据升级到 v2 时新字段不为 undefined
+          // 与初始值做深合并，保证老数据升级时新字段不为 undefined
           progress: { ...initialProgress, ...(p?.progress ?? {}) },
-          settings: mergedSettings,
           pendingBadges: [],
         };
       },
@@ -1134,15 +1049,20 @@ export const useStore = create<StoreState>()(
 
 /** 选择器：便捷读取 */
 export const useProgress = () => useStore((s) => s.progress);
-export const useSettings = () => useStore((s) => s.settings);
+
+/**
+ * 兼容层：settings selector 委托到 useSettingsStore，
+ * 避免进度 store 随 settings 变化而重渲染（核心加强 O）。
+ */
+export const useSettings = () => useSettingsStore((s) => s.settings);
 
 /* ------------------------------------------------------------ */
 /* 桥接 lib/speech → 全局 store（消除 lib→store 层倒置）          */
 /* ------------------------------------------------------------ */
 registerTtsBridge(
-  (report) => useStore.getState().setTtsState(report),
+  (report) => useTtsStore.getState().setTtsState(report),
   () => {
-    const s = useStore.getState().settings;
+    const s = useSettingsStore.getState().settings;
     return s.sound && s.voiceGuide;
   },
 );

@@ -7,6 +7,7 @@ import { sfxCorrect, sfxFlip, sfxWrong } from '@/lib/sfx';
 import { celebrateBig, celebrateSmall } from '@/lib/celebrate';
 import { randomPraise, speak, speakLetter } from '@/lib/speech';
 import { useStore, useProgress } from '@/store/useStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
@@ -51,7 +52,7 @@ export function MatchGame() {
   const { t: tr } = useTranslation();
   const wonMatchGame = useStore((s) => s.wonMatchGame);
   const practice = useStore((s) => s.practice);
-  const aiOn = useStore((s) => s.settings.aiEnabled);
+  const aiOn = useSettingsStore((s) => s.settings.aiEnabled);
   const progress = useProgress();
   const [aiMode, setAiMode] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);

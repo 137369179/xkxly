@@ -12,15 +12,6 @@ export interface SpeechRecogOptions {
   onStart?: () => void;
 }
 
-// 扩展 window 类型
-declare global {
-  interface Window {
-    SpeechRecognition?: any;
-    webkitSpeechRecognition?: any;
-    webkitAudioContext?: typeof AudioContext;
-  }
-}
-
 /** 检查浏览器是否支持语音识别 */
 export function isSpeechRecogSupported(): boolean {
   if (typeof window === 'undefined') return false;
@@ -31,8 +22,10 @@ export function isSpeechRecogSupported(): boolean {
   );
 }
 
+type RecogInstance = InstanceType<NonNullable<Window['SpeechRecognition']>>;
+
 class SpeechRecogManager {
-  private recognition: any = null;
+  private recognition: RecogInstance | null = null;
   private isListening = false;
   private audioStream: MediaStream | null = null;
   private audioCtx: AudioContext | null = null;
@@ -128,15 +121,15 @@ class SpeechRecogManager {
           options.onStart?.();
         };
 
-        this.recognition.onresult = (event: any) => {
+        this.recognition.onresult = (event: SpeechRecognitionEvent) => {
           let interimTranscript = '';
           let finalTranscript = '';
 
           for (let i = event.resultIndex; i < event.results.length; ++i) {
             if (event.results[i]!.isFinal) {
-              finalTranscript += event.results[i]![0].transcript;
+              finalTranscript += event.results[i]![0]!.transcript;
             } else {
-              interimTranscript += event.results[i]![0].transcript;
+              interimTranscript += event.results[i]![0]!.transcript;
             }
           }
 
@@ -148,7 +141,7 @@ class SpeechRecogManager {
           }
         };
 
-        this.recognition.onerror = (event: any) => {
+        this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
           this.isListening = false;
           this.stopVolumeSensing();
           let errMsg = '语音识别遇到一点小问题';

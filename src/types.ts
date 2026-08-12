@@ -306,6 +306,28 @@ export interface Progress {
   equippedItems?: Record<string, string>;
   /** P4: Boss战记录（key: levelId, value: { defeated: boolean, bestTurns: number }） */
   bossRecords?: Record<number, { defeated: boolean; bestTurns: number }>;
+
+  // —— 研究模式（CMML）：跨会话聚合量，须与 createInitialProgress() 同步登记（C4 硬门槛）——
+  /** 研究笔记（key: topicId，value: 一句话发现），仿 poemNotes 模式 */
+  researchNotes: Record<string, string>;
+  /** 收藏的知识卡 kvId 列表（跨会话资产，家长可见） */
+  discoveries: string[];
+  /** 研究行为计数（F19 行为型徽章唯一数据源，必须持久） */
+  researchStats: ResearchStats;
+}
+
+/** 研究模式行为统计（F19 / ADR-003）：只统计探索行为，绝不读正确率/掌握度 */
+export interface ResearchStats {
+  /** 探索过的主题 id（去重）→ 徽章「博物学者」 */
+  topicsExplored: string[];
+  /** 累计探索交互次数 → 徽章「小小探险家」 */
+  exploreActions: number;
+  /** 读过的知识卡数（含降级兜底卡） */
+  cardsRead: number;
+  /** 完成的研究会话数（走到 COMPLETE） */
+  sessionsCompleted: number;
+  /** 累计探索时长（秒），家长中心用 */
+  exploreSeconds: number;
 }
 
 

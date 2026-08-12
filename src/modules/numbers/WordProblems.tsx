@@ -1,0 +1,183 @@
+/**
+ * 数学应用题专项练习
+ */
+
+import { useState, useMemo } from 'react';
+import { PageHeader, Panel } from '@/components/ui/Card';
+import { CandyButton } from '@/components/ui/Button';
+import { ProgressBar } from '@/components/ui/ProgressBar';
+import { useStore } from '@/store/useStore';
+import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
+import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
+import { randomPraise, randomEncourage } from '@/lib/speech';
+import { getProblemsByLevel } from '@/data/wordProblems';
+
+
+type Level = 1 | 2 | 3;
+
+const LEVEL_INFO: Record<Level, { label: string; emoji: string; tone: 'green' | 'blue' | 'purple' }> = {
+  1: { label: '入门', emoji: '🌱', tone: 'green' },
+  2: { label: '进阶', emoji: '🌿', tone: 'blue' },
+  3: { label: '挑战', emoji: '🌳', tone: 'purple' },
+};
+
+export function WordProblems() {
+  const [level, setLevel] = useState<Level>(1);
+  const [idx, setIdx] = useState(0);
+  const [picked, setPicked] = useState<number | null>(null);
+  const [wrong, setWrong] = useState<Set<string>>(new Set());
+  const [done, setDone] = useState(false);
+  const practice = useStore(s => s.practice);
+
+  const problems = useMemo(() => getProblemsByLevel(level), [level]);
+  const p = problems[idx]!!
+
+  const handlePick = (val: number) => {
+    if (picked !== null) return;
+    sfxTap();
+    setPicked(val);
+    const correct = val === p.answer;
+    if (correct) {
+      sfxCorrect();
+      celebrateSmall();
+      randomPraise();
+      practice('math:word', true, 1);
+    } else {
+      sfxWrong();
+      setWrong(prev => new Set(prev).add(p.id));
+      randomEncourage();
+      practice('math:word', false, 0);
+    }
+  };
+
+  const next = () => {
+    sfxTap();
+    if (idx + 1 >= problems.length) {
+      setDone(true);
+      celebrateBig();
+    } else {
+      setIdx(idx + 1);
+      setPicked(null);
+    }
+  };
+
+  const restart = () => {
+    sfxTap();
+    setIdx(0);
+    setPicked(null);
+    setDone(false);
+    setWrong(new Set());
+  };
+
+  const changeLevel = (l: Level) => {
+    sfxTap();
+    setLevel(l);
+    setIdx(0);
+    setPicked(null);
+    setDone(false);
+    setWrong(new Set());
+  };
+
+  if (done) {
+    const correctCount = problems.length - wrong.size;
+    const stars = wrong.size === 0 ? 3 : wrong.size <= 2 ? 2 : 1;
+    return (
+      <div className="space-y-4">
+        <Panel className="text-center">
+          <div className="text-6xl">{stars === 3 ? '🏆' : '🎉'}</div>
+          <p className="mt-3 text-xl font-extrabold text-ink">应用题挑战完成！</p>
+          <p className="mt-1 text-base font-bold text-ink-soft">
+            答对 {correctCount} / {problems.length} 题 · {'⭐'.repeat(stars)}
+          </p>
+          <div className="mt-4 flex justify-center gap-2">
+            <CandyButton tone="purple" size="sm" onClick={restart}>🔄 再做一遍</CandyButton>
+            <CandyButton tone="green" size="sm" onClick={() => changeLevel(level === 1 ? 2 : level === 2 ? 3 : 1)}>
+              {level < 3 ? `➡️ ${LEVEL_INFO[(level + 1) as Level].label}` : '🔄 换难度'}
+            </CandyButton>
+          </div>
+        </Panel>
+      </div>
+    );
+  }
+
+  const info = LEVEL_INFO[level]!!
+
+  return (
+    <div className="space-y-4">
+      <PageHeader emoji="📐" title="应用题" subtitle="生活中的数学问题" tone={info.tone} />
+
+      <div className="flex gap-2">
+        {([1, 2, 3] as Level[]).map(l => (
+          <CandyButton
+            key={l}
+            tone={level === l ? info.tone : 'purple'}
+            variant={level === l ? 'solid' : 'soft'}
+            size="sm"
+            onClick={() => changeLevel(l)}
+          >
+            {LEVEL_INFO[l]!.emoji} {LEVEL_INFO[l]!.label}
+          </CandyButton>
+        ))}
+      </div>
+
+      <ProgressBar value={idx + 1} max={problems.length} tone={info.tone} />
+
+      <Panel key={p.id} className="space-y-4">
+        <div className="flex items-start gap-3">
+          <span className="text-4xl">{p.emoji}</span>
+          <div className="flex-1">
+            <p className="text-base font-bold text-ink">{p.scenario}</p>
+            <p className="mt-2 text-lg font-extrabold text-ink">{p.question}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          {p.options.map(opt => {
+            const isPicked = picked === opt;
+            const isAnswer = opt === p.answer;
+            const show = picked !== null;
+            return (
+              <button
+                key={opt}
+                onClick={() => handlePick(opt)}
+                disabled={picked !== null}
+                className={`min-h-[56px] rounded-2xl border-4 p-4 text-xl font-extrabold transition-all active:translate-y-[1px] ${
+                  show && isAnswer
+                    ? 'border-candy-green-deep bg-candy-green-soft text-candy-green-deep'
+                    : show && isPicked && !isAnswer
+                    ? 'border-candy-red-deep bg-candy-red-soft text-candy-red-deep opacity-60'
+                    : 'border-candy-blue-soft bg-white text-ink'
+                }`}
+              >
+                {opt}
+                {show && isAnswer && ' ✅'}
+                {show && isPicked && !isAnswer && ' ❌'}
+              </button>
+            );
+          })}
+        </div>
+
+        {picked !== null && (
+          <div className="rounded-2xl bg-candy-yellow-soft p-3">
+            <p className="text-sm font-bold text-ink">
+              💡 {p.hint}
+            </p>
+            <p className="mt-1 text-sm font-bold text-ink-soft">
+              {p.why}
+            </p>
+          </div>
+        )}
+
+        {picked !== null && (
+          <CandyButton tone="green" size="lg" fullWidth onClick={next}>
+            {idx + 1 >= problems.length ? '🏁 看看成绩' : '➡️ 下一题'}
+          </CandyButton>
+        )}
+      </Panel>
+
+      <p className="text-center text-sm font-bold text-ink-soft">
+        第 {idx + 1} / {problems.length} 题
+      </p>
+    </div>
+  );
+}

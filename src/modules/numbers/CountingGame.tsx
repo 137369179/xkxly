@@ -7,6 +7,7 @@ import { makeSpacedDrill } from '@/lib/drill';
 import { genCountQuestion } from '@/lib/ai/tasks';
 import type { Question } from '@/types';
 import { useStore } from '@/store/useStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
 import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
 
@@ -23,7 +24,7 @@ const POOL_TARGET = 2;
 
 export function CountingGame() {
   const recordCount = useStore((s) => s.recordCount);
-  const aiOn = useStore((s) => s.settings.aiEnabled);
+  const aiOn = useSettingsStore((s) => s.settings.aiEnabled);
   const [diff, setDiff, diffMeta] = useAdaptiveDifficultyState('number');
   const [aiMode, setAiMode] = useState(false);
   const [poolSize, setPoolSize] = useState(0);

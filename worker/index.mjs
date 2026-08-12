@@ -84,7 +84,9 @@ async function handleContentGenerate(request, env, cors) {
   if (!env.STEPFUN_API_KEY) {
     return json({ error: { code: 'no_key', message: '服务端未配置 STEPFUN_API_KEY' } }, cors, 500);
   }
-  if (await rateLimited(request, Number(env.AI_RATE_LIMIT_PER_MIN) || 30)) {
+  // B1 裁决（2026-08-12）：内容生成走独立限速桶 'content'，不共享 /api/ai/* 聊天配额，
+  // 避免研究模式的 AI 知识卡把聊天请求挤爆；需重新部署后生效。
+  if (await rateLimited(request, Number(env.AI_RATE_LIMIT_PER_MIN) || 30, 'content')) {
     return json({ error: { code: 'rate_limited', message: '生成太频繁，稍后再试' } }, cors, 429);
   }
   let payload;

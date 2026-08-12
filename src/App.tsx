@@ -11,7 +11,7 @@ import { StudyGuard } from '@/components/StudyGuard';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { OfflineToast } from '@/components/OfflineIndicator';
 import { FriendlyLoading } from '@/components/FriendlyLoading';
-import { useStore } from '@/store/useStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { useTtsStore } from '@/store/useTtsStore';
 import { useProfilesStore } from '@/store/useProfilesStore';
 import { OnboardingModal } from '@/components/OnboardingModal';
@@ -58,6 +58,7 @@ const GameCenterPage = lazy(() => import('@/modules/game/GameCenterPage'));
 const StoryLibraryPage = lazy(() => import('@/modules/story/StoryLibraryPage'));
 const GrowthMuseumPage = lazy(() => import('@/modules/growth/GrowthMuseumPage'));
 const ContentStationPage = lazy(() => import('@/modules/content/ContentStationPage'));
+const ResearchModePage = lazy(() => import('@/modules/research/ResearchModePage'));
 
 function Page() {
   const { route, param } = useRoute();
@@ -104,6 +105,7 @@ function Page() {
       case 'story': return <StoryLibraryPage />;
       case 'growth': return <GrowthMuseumPage />;
       case 'content': return <ContentStationPage />;
+      case 'research': return <ResearchModePage />;
       default: return <HomePage />;
     }
   }, [route]);
@@ -127,7 +129,7 @@ function Page() {
 
 export function App() {
   const { route } = useRoute();
-  const sound = useStore((s) => s.settings.sound);
+  const sound = useSettingsStore((s) => s.settings.sound);
   const voiceModalOpen = useTtsStore((s) => s.voiceModalOpen);
   const closeVoiceModal = useTtsStore((s) => s.closeVoiceModal);
   const onboarded = useProfilesStore((s) => s.onboarded);

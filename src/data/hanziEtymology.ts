@@ -1,0 +1,373 @@
+/**
+ * 汉字字理数据（六书 + 部件拆分 + 派生字）—— 自动生成，请勿手改
+ * ------------------------------------------------------------------
+ * 生成器：scripts/fetch-hanzi-etymology.mjs
+ * 数据源：Make Me a Hanzi dictionary.txt（Arphic 宽松许可）+ 人工校订表 CURATED
+ * 覆盖：300 字（与 src/data/hanzi.ts 的 HANZI_DATA 一一对应）
+ * 六书分布：ideographic=22 pictographic=58 pictophonetic=110 compound-ideographic=110
+ * 有部件拆分：157 字；有派生字（可作字族根）：51 字
+ * 声旁表音校验：同音 33 / 同韵 20 / 同声母 10
+ *              已不表音而丢弃 40
+ *
+ * 六书说明：
+ *   pictographic         象形——描画事物形状（日、月、山、水）
+ *   ideographic          指事——用符号/加标记表抽象义（上、下、一、本）
+ *   compound-ideographic 会意——多部件合起来表意（休、明、林、森）
+ *   pictophonetic        形声——形旁表义 + 声旁表音（清、江、妈、请）
+ *
+ * 【教学正确性约定】
+ *   1. 象形字不给 components（象形是整体一幅画，拆笔画会教错）。
+ *   2. components 里每一项都是孩子能读出的部件；凑不齐 2 项就整组不展示。
+ *   3. phonetic 只在**读音关系确实成立**时才有值（见 soundRel）——
+ *      形声字的声旁在现代普通话里未必还表音（时=日+寸、江=氵+工 已不表音），
+ *      这类字只讲形旁表义，绝不声称"右边告诉我们读音"。
+ */
+
+export type Liushu =
+  | 'pictographic'
+  | 'ideographic'
+  | 'compound-ideographic'
+  | 'pictophonetic';
+
+export interface HanziEtymology {
+  /** 汉字（与 HANZI_DATA.c 对齐） */
+  c: string;
+  /** 六书类型 */
+  liushu: Liushu;
+  /**
+   * 直接构成部件，如 清 → ['氵','青']、林 → ['木','木']（重复部件保留，是教学核心）。
+   * 象形字与独体字为空数组（象形字是整体一幅画，不可拆）。
+   */
+  components: string[];
+  /** 形声字的形旁（表义），如 清 → '氵'。必定同时出现在 components 里 */
+  semantic?: string;
+  /**
+   * 形声字的声旁（表音），如 清 → '青'。
+   * **仅在读音关系确实成立时才有值**（见 soundRel）；
+   * 声旁已不表音的字（时/江/树/柳…）此字段为空，UI 不得声称声旁表音。
+   */
+  phonetic?: string;
+  /** 声旁的读音（带声调），供 UI 直接说出「青 读 qīng」 */
+  phoneticPinyin?: string;
+  /**
+   * 声旁与本字的读音关系：
+   *   exact   同音（清 qīng ← 青 qīng）——可直接讲"声旁告诉我们读音"
+   *   rhyme   同韵母（草 cǎo ← 早 zǎo）——讲"韵母一样"
+   *   initial 同声母（沙 shā ← 少 shǎo）——讲"开头的音一样"
+   */
+  soundRel?: 'exact' | 'rhyme' | 'initial';
+  /** 以本字为部件派生出的字（仅取本项目字库内、按教学顺序、最多 8 个） */
+  derived?: string[];
+  /**
+   * 六书归类存疑（多为简化字，现代字形已看不出造字理据）。
+   * UI 应弱化表述，不做"这是 X 字"的断言。
+   */
+  uncertain?: boolean;
+}
+
+export const HANZI_ETYMOLOGY_LIST: HanziEtymology[] = [
+  { c: '不', liushu: 'ideographic', components: [], derived: ['还'] },
+  { c: '一', liushu: 'ideographic', components: [], derived: ['天', '生', '三', '开', '未', '百', '大', '应'] },
+  { c: '人', liushu: 'pictographic', components: [], derived: ['大', '从'] },
+  { c: '山', liushu: 'pictographic', components: [], derived: ['微'] },
+  { c: '花', liushu: 'pictophonetic', components: ['艹', '化'], semantic: '艹', phonetic: '化', phoneticPinyin: 'huà', soundRel: 'exact' },
+  { c: '风', liushu: 'pictographic', components: [] },
+  { c: '无', liushu: 'pictographic', components: [], uncertain: true },
+  { c: '日', liushu: 'pictographic', components: [], derived: ['时', '明', '阳', '间', '暮', '香', '晴', '晚'] },
+  { c: '春', liushu: 'compound-ideographic', components: [] },
+  { c: '月', liushu: 'pictographic', components: [], derived: ['明', '阴', '望', '散', '胜'] },
+  { c: '水', liushu: 'pictographic', components: [] },
+  { c: '天', liushu: 'ideographic', components: ['一', '大'] },
+  { c: '来', liushu: 'compound-ideographic', components: [] },
+  { c: '时', liushu: 'pictophonetic', components: ['日', '寸'], semantic: '日' },
+  { c: '江', liushu: 'pictophonetic', components: ['氵', '工'], semantic: '氵' },
+  { c: '有', liushu: 'compound-ideographic', components: [] },
+  { c: '夜', liushu: 'compound-ideographic', components: [] },
+  { c: '上', liushu: 'ideographic', components: [] },
+  { c: '白', liushu: 'pictographic', components: [], derived: ['百'] },
+  { c: '家', liushu: 'compound-ideographic', components: ['宀', '豕'] },
+  { c: '是', liushu: 'compound-ideographic', components: [] },
+  { c: '何', liushu: 'pictophonetic', components: ['亻', '可'], semantic: '亻', phonetic: '可', phoneticPinyin: 'kě', soundRel: 'rhyme', derived: ['荷'] },
+  { c: '雨', liushu: 'pictographic', components: [], derived: ['霜', '露'] },
+  { c: '声', liushu: 'ideographic', components: [] },
+  { c: '知', liushu: 'compound-ideographic', components: ['矢', '口'] },
+  { c: '中', liushu: 'ideographic', components: [] },
+  { c: '青', liushu: 'compound-ideographic', components: [], derived: ['清', '情', '晴'] },
+  { c: '归', liushu: 'compound-ideographic', components: [] },
+  { c: '明', liushu: 'compound-ideographic', components: ['日', '月'] },
+  { c: '千', liushu: 'ideographic', components: [], derived: ['重'] },
+  { c: '万', liushu: 'pictographic', components: [], uncertain: true },
+  { c: '处', liushu: 'compound-ideographic', components: [] },
+  { c: '里', liushu: 'compound-ideographic', components: ['田', '土'], derived: ['重', '童', '野'] },
+  { c: '秋', liushu: 'compound-ideographic', components: ['禾', '火'], derived: ['愁'] },
+  { c: '东', liushu: 'pictographic', components: [] },
+  { c: '去', liushu: 'compound-ideographic', components: [] },
+  { c: '在', liushu: 'pictophonetic', components: ['才', '土'], semantic: '土', phonetic: '才', phoneticPinyin: 'cái', soundRel: 'rhyme' },
+  { c: '落', liushu: 'pictophonetic', components: ['艹', '洛'], semantic: '艹', phonetic: '洛', phoneticPinyin: 'luò', soundRel: 'exact' },
+  { c: '生', liushu: 'compound-ideographic', components: ['一', '土'], derived: ['胜', '星'] },
+  { c: '君', liushu: 'compound-ideographic', components: [] },
+  { c: '草', liushu: 'pictophonetic', components: ['艹', '早'], semantic: '艹', phonetic: '早', phoneticPinyin: 'zǎo', soundRel: 'rhyme' },
+  { c: '子', liushu: 'pictographic', components: [], derived: ['孤', '好'] },
+  { c: '红', liushu: 'pictophonetic', components: ['纟', '工'], semantic: '纟', phonetic: '工', phoneticPinyin: 'gōng', soundRel: 'rhyme' },
+  { c: '下', liushu: 'ideographic', components: [] },
+  { c: '飞', liushu: 'pictographic', components: [] },
+  { c: '云', liushu: 'pictographic', components: [] },
+  { c: '尽', liushu: 'compound-ideographic', components: [] },
+  { c: '黄', liushu: 'pictographic', components: [], derived: ['横'] },
+  { c: '南', liushu: 'pictographic', components: [] },
+  { c: '雪', liushu: 'pictophonetic', components: [], semantic: '雨' },
+  { c: '年', liushu: 'ideographic', components: [] },
+  { c: '清', liushu: 'pictophonetic', components: ['氵', '青'], semantic: '氵', phonetic: '青', phoneticPinyin: 'qīng', soundRel: 'exact' },
+  { c: '三', liushu: 'ideographic', components: ['一', '二'] },
+  { c: '柳', liushu: 'pictophonetic', components: ['木', '卯'], semantic: '木' },
+  { c: '行', liushu: 'compound-ideographic', components: [] },
+  { c: '长', liushu: 'ideographic', components: [] },
+  { c: '心', liushu: 'pictographic', components: [], derived: ['思', '愁', '意', '忽'] },
+  { c: '头', liushu: 'pictophonetic', components: [], semantic: '大' },
+  { c: '入', liushu: 'ideographic', components: [] },
+  { c: '开', liushu: 'compound-ideographic', components: ['一', '廾'] },
+  { c: '满', liushu: 'pictophonetic', components: ['氵', '艹', '两'], semantic: '氵' },
+  { c: '见', liushu: 'compound-ideographic', components: [] },
+  { c: '相', liushu: 'compound-ideographic', components: ['木', '目'], derived: ['霜'] },
+  { c: '如', liushu: 'compound-ideographic', components: ['女', '口'] },
+  { c: '绿', liushu: 'pictophonetic', components: ['纟', '录'], semantic: '纟', phonetic: '录', phoneticPinyin: 'lù', soundRel: 'initial' },
+  { c: '得', liushu: 'compound-ideographic', components: ['彳', '旦', '寸'] },
+  { c: '欲', liushu: 'pictophonetic', components: ['谷', '欠'], semantic: '欠', phonetic: '谷', phoneticPinyin: 'gǔ', soundRel: 'rhyme' },
+  { c: '西', liushu: 'pictographic', components: [] },
+  { c: '树', liushu: 'pictophonetic', components: ['木', '对'], semantic: '木' },
+  { c: '小', liushu: 'ideographic', components: [], derived: ['尘'] },
+  { c: '自', liushu: 'pictographic', components: [] },
+  { c: '前', liushu: 'compound-ideographic', components: [] },
+  { c: '两', liushu: 'compound-ideographic', components: [], derived: ['满'] },
+  { c: '寒', liushu: 'compound-ideographic', components: [] },
+  { c: '我', liushu: 'compound-ideographic', components: ['扌', '戈'] },
+  { c: '叶', liushu: 'pictophonetic', components: ['口', '十'], semantic: '口', uncertain: true },
+  { c: '深', liushu: 'compound-ideographic', components: [] },
+  { c: '出', liushu: 'compound-ideographic', components: [] },
+  { c: '兮', liushu: 'compound-ideographic', components: [], uncertain: true },
+  { c: '未', liushu: 'compound-ideographic', components: ['一', '木'] },
+  { c: '酒', liushu: 'compound-ideographic', components: ['氵', '酉'] },
+  { c: '阴', liushu: 'compound-ideographic', components: ['阝', '月'] },
+  { c: '阳', liushu: 'compound-ideographic', components: ['阝', '日'] },
+  { c: '故', liushu: 'pictophonetic', components: ['古', '攵'], semantic: '攵', phonetic: '古', phoneticPinyin: 'gǔ', soundRel: 'exact' },
+  { c: '看', liushu: 'compound-ideographic', components: ['手', '目'] },
+  { c: '回', liushu: 'compound-ideographic', components: ['囗', '口'] },
+  { c: '城', liushu: 'pictophonetic', components: ['土', '成'], semantic: '土', phonetic: '成', phoneticPinyin: 'chéng', soundRel: 'exact' },
+  { c: '路', liushu: 'pictophonetic', components: ['足', '各'], semantic: '足', derived: ['露'] },
+  { c: '边', liushu: 'pictophonetic', components: ['辶', '力'], semantic: '辶' },
+  { c: '半', liushu: 'ideographic', components: [] },
+  { c: '光', liushu: 'compound-ideographic', components: [] },
+  { c: '谁', liushu: 'pictophonetic', components: ['讠', '隹'], semantic: '讠', phonetic: '隹', phoneticPinyin: 'zhuī', soundRel: 'rhyme' },
+  { c: '流', liushu: 'pictophonetic', components: [], semantic: '氵' },
+  { c: '更', liushu: 'compound-ideographic', components: [] },
+  { c: '门', liushu: 'pictographic', components: [], derived: ['问', '间', '闻', '闲'] },
+  { c: '问', liushu: 'pictophonetic', components: ['门', '口'], semantic: '口', phonetic: '门', phoneticPinyin: 'mén', soundRel: 'rhyme' },
+  { c: '与', liushu: 'compound-ideographic', components: [], uncertain: true },
+  { c: '间', liushu: 'compound-ideographic', components: ['门', '日'] },
+  { c: '望', liushu: 'compound-ideographic', components: ['亡', '月', '王'] },
+  { c: '思', liushu: 'compound-ideographic', components: ['田', '心'] },
+  { c: '儿', liushu: 'pictographic', components: [], derived: ['四'] },
+  { c: '作', liushu: 'compound-ideographic', components: ['亻', '乍'] },
+  { c: '此', liushu: 'pictophonetic', components: [] },
+  { c: '梅', liushu: 'pictophonetic', components: ['木', '每'], semantic: '木', phonetic: '每', phoneticPinyin: 'měi', soundRel: 'exact' },
+  { c: '闻', liushu: 'pictophonetic', components: ['门', '耳'], semantic: '耳', phonetic: '门', phoneticPinyin: 'mén', soundRel: 'rhyme' },
+  { c: '多', liushu: 'compound-ideographic', components: ['夕', '夕'] },
+  { c: '楼', liushu: 'pictophonetic', components: ['木', '娄'], semantic: '木', phonetic: '娄', phoneticPinyin: 'lóu', soundRel: 'exact' },
+  { c: '成', liushu: 'pictophonetic', components: ['丁', '戈'], semantic: '戈', derived: ['城'] },
+  { c: '为', liushu: 'compound-ideographic', components: [], uncertain: true },
+  { c: '百', liushu: 'pictophonetic', components: ['一', '白'], semantic: '一', phonetic: '白', phoneticPinyin: 'bái', soundRel: 'exact' },
+  { c: '平', liushu: 'pictographic', components: [] },
+  { c: '还', liushu: 'compound-ideographic', components: ['辶', '不'] },
+  { c: '今', liushu: 'ideographic', components: [] },
+  { c: '独', liushu: 'pictophonetic', components: ['犭', '虫'], semantic: '犭' },
+  { c: '道', liushu: 'pictophonetic', components: ['辶', '首'], semantic: '辶' },
+  { c: '吹', liushu: 'pictophonetic', components: ['口', '欠'], semantic: '口' },
+  { c: '斜', liushu: 'pictophonetic', components: ['余', '斗'], semantic: '斗' },
+  { c: '客', liushu: 'compound-ideographic', components: ['宀', '各'] },
+  { c: '四', liushu: 'compound-ideographic', components: ['囗', '儿'] },
+  { c: '重', liushu: 'compound-ideographic', components: ['千', '里'] },
+  { c: '闲', liushu: 'compound-ideographic', components: ['门', '木'] },
+  { c: '似', liushu: 'compound-ideographic', components: ['亻', '以'] },
+  { c: '起', liushu: 'pictophonetic', components: ['走', '己'], semantic: '走', phonetic: '己', phoneticPinyin: 'jǐ', soundRel: 'rhyme' },
+  { c: '乡', liushu: 'compound-ideographic', components: [], uncertain: true },
+  { c: '河', liushu: 'pictophonetic', components: ['氵', '可'], semantic: '氵', phonetic: '可', phoneticPinyin: 'kě', soundRel: 'rhyme' },
+  { c: '又', liushu: 'pictographic', components: [], derived: ['轻', '难', '鸡'] },
+  { c: '远', liushu: 'pictophonetic', components: ['辶', '元'], semantic: '辶', phonetic: '元', phoneticPinyin: 'yuán', soundRel: 'exact' },
+  { c: '高', liushu: 'pictographic', components: [] },
+  { c: '新', liushu: 'compound-ideographic', components: ['亲', '斤'] },
+  { c: '村', liushu: 'pictophonetic', components: ['木', '寸'], semantic: '木', phonetic: '寸', phoneticPinyin: 'cùn', soundRel: 'exact' },
+  { c: '只', liushu: 'compound-ideographic', components: ['口', '八'], derived: ['识'] },
+  { c: '到', liushu: 'pictophonetic', components: ['至', '刂'], semantic: '至', phonetic: '刂', phoneticPinyin: 'dāo', soundRel: 'exact' },
+  { c: '向', liushu: 'compound-ideographic', components: [] },
+  { c: '当', liushu: 'pictophonetic', components: [], uncertain: true },
+  { c: '烟', liushu: 'pictophonetic', components: ['火', '因'], semantic: '火', phonetic: '因', phoneticPinyin: 'yīn', soundRel: 'initial' },
+  { c: '窗', liushu: 'pictophonetic', components: [], semantic: '穴' },
+  { c: '孤', liushu: 'pictophonetic', components: ['子', '瓜'], semantic: '子', phonetic: '瓜', phoneticPinyin: 'guā', soundRel: 'initial' },
+  { c: '杨', liushu: 'pictophonetic', components: [], semantic: '木' },
+  { c: '采', liushu: 'compound-ideographic', components: ['手', '木'] },
+  { c: '情', liushu: 'pictophonetic', components: ['忄', '青'], semantic: '忄', phonetic: '青', phoneticPinyin: 'qīng', soundRel: 'exact' },
+  { c: '枝', liushu: 'pictophonetic', components: ['木', '支'], semantic: '木', phonetic: '支', phoneticPinyin: 'zhī', soundRel: 'exact' },
+  { c: '十', liushu: 'ideographic', components: [], derived: ['叶', '古'] },
+  { c: '好', liushu: 'compound-ideographic', components: ['女', '子'] },
+  { c: '暮', liushu: 'compound-ideographic', components: ['莫', '日'] },
+  { c: '木', liushu: 'pictographic', components: [], derived: ['柳', '相', '树', '未', '梅', '楼', '闲', '村'] },
+  { c: '却', liushu: 'pictophonetic', components: [] },
+  { c: '溪', liushu: 'pictophonetic', components: ['氵', '奚'], semantic: '氵', phonetic: '奚', phoneticPinyin: 'xī', soundRel: 'exact' },
+  { c: '霜', liushu: 'pictophonetic', components: ['雨', '相'], semantic: '雨' },
+  { c: '海', liushu: 'pictophonetic', components: ['氵', '每'], semantic: '氵' },
+  { c: '童', liushu: 'compound-ideographic', components: ['立', '里'] },
+  { c: '莲', liushu: 'pictophonetic', components: ['艹', '连'], semantic: '艹', phonetic: '连', phoneticPinyin: 'lián', soundRel: 'exact' },
+  { c: '玉', liushu: 'pictographic', components: [], derived: ['国'] },
+  { c: '过', liushu: 'pictophonetic', components: ['辶', '寸'], semantic: '辶' },
+  { c: '愁', liushu: 'pictophonetic', components: ['秋', '心'], semantic: '心' },
+  { c: '北', liushu: 'compound-ideographic', components: [] },
+  { c: '地', liushu: 'pictophonetic', components: ['土', '也'], semantic: '土' },
+  { c: '鸟', liushu: 'pictographic', components: [], derived: ['鸣', '鸡'] },
+  { c: '少', liushu: 'pictographic', components: [], derived: ['沙'] },
+  { c: '照', liushu: 'pictophonetic', components: ['昭', '灬'], semantic: '灬', phonetic: '昭', phoneticPinyin: 'zhāo', soundRel: 'exact' },
+  { c: '香', liushu: 'compound-ideographic', components: ['禾', '日'] },
+  { c: '晴', liushu: 'pictophonetic', components: ['日', '青'], semantic: '日', phonetic: '青', phoneticPinyin: 'qīng', soundRel: 'exact' },
+  { c: '古', liushu: 'compound-ideographic', components: ['十', '口'], derived: ['故', '苦'] },
+  { c: '言', liushu: 'compound-ideographic', components: [] },
+  { c: '发', liushu: 'compound-ideographic', components: [], uncertain: true },
+  { c: '轻', liushu: 'pictophonetic', components: ['车', '又', '工'], semantic: '车' },
+  { c: '关', liushu: 'compound-ideographic', components: [], derived: ['送'], uncertain: true },
+  { c: '已', liushu: 'ideographic', components: [], uncertain: true },
+  { c: '可', liushu: 'pictophonetic', components: ['丁', '口'], semantic: '丁', derived: ['何', '河'] },
+  { c: '马', liushu: 'pictographic', components: [] },
+  { c: '金', liushu: 'pictographic', components: [] },
+  { c: '女', liushu: 'pictographic', components: [], derived: ['如', '好'] },
+  { c: '舟', liushu: 'pictographic', components: [], derived: ['船'] },
+  { c: '林', liushu: 'compound-ideographic', components: ['木', '木'] },
+  { c: '野', liushu: 'pictophonetic', components: ['里', '予'], semantic: '里', phonetic: '予', phoneticPinyin: 'yǔ', soundRel: 'initial' },
+  { c: '芳', liushu: 'pictophonetic', components: ['艹', '方'], semantic: '艹', phonetic: '方', phoneticPinyin: 'fāng', soundRel: 'exact' },
+  { c: '送', liushu: 'compound-ideographic', components: ['辶', '关'] },
+  { c: '别', liushu: 'compound-ideographic', components: [] },
+  { c: '竹', liushu: 'pictographic', components: [] },
+  { c: '空', liushu: 'pictophonetic', components: ['穴', '工'], semantic: '穴', phonetic: '工', phoneticPinyin: 'gōng', soundRel: 'rhyme' },
+  { c: '国', liushu: 'compound-ideographic', components: ['囗', '玉'] },
+  { c: '几', liushu: 'pictographic', components: [], derived: ['船'] },
+  { c: '色', liushu: 'compound-ideographic', components: [], derived: ['绝'] },
+  { c: '片', liushu: 'pictographic', components: [] },
+  { c: '影', liushu: 'pictophonetic', components: ['景', '彡'], semantic: '彡', phonetic: '景', phoneticPinyin: 'jǐng', soundRel: 'rhyme' },
+  { c: '桃', liushu: 'pictophonetic', components: ['木', '兆'], semantic: '木', phonetic: '兆', phoneticPinyin: 'zhào', soundRel: 'rhyme' },
+  { c: '沙', liushu: 'pictophonetic', components: ['氵', '少'], semantic: '氵', phonetic: '少', phoneticPinyin: 'shǎo', soundRel: 'initial' },
+  { c: '大', liushu: 'ideographic', components: ['一', '人'], derived: ['天'] },
+  { c: '塘', liushu: 'pictophonetic', components: ['土', '唐'], semantic: '土', phonetic: '唐', phoneticPinyin: 'táng', soundRel: 'exact' },
+  { c: '萧', liushu: 'pictophonetic', components: [] },
+  { c: '啼', liushu: 'pictophonetic', components: ['口', '帝'], semantic: '口', phonetic: '帝', phoneticPinyin: 'dì', soundRel: 'rhyme' },
+  { c: '鸣', liushu: 'compound-ideographic', components: ['口', '鸟'] },
+  { c: '才', liushu: 'ideographic', components: [], derived: ['在'] },
+  { c: '散', liushu: 'compound-ideographic', components: ['月', '攵'] },
+  { c: '然', liushu: 'pictophonetic', components: [], semantic: '灬' },
+  { c: '离', liushu: 'pictographic', components: [] },
+  { c: '台', liushu: 'compound-ideographic', components: [], uncertain: true },
+  { c: '晚', liushu: 'compound-ideographic', components: ['日', '免'] },
+  { c: '近', liushu: 'pictophonetic', components: ['辶', '斤'], semantic: '辶', phonetic: '斤', phoneticPinyin: 'jīn', soundRel: 'exact' },
+  { c: '身', liushu: 'pictographic', components: [] },
+  { c: '惊', liushu: 'pictophonetic', components: ['忄', '京'], semantic: '忄', phonetic: '京', phoneticPinyin: 'jīng', soundRel: 'exact' },
+  { c: '将', liushu: 'compound-ideographic', components: ['丬', '夕', '寸'] },
+  { c: '衣', liushu: 'pictographic', components: [], derived: ['依'] },
+  { c: '寻', liushu: 'pictophonetic', components: [] },
+  { c: '老', liushu: 'pictographic', components: [] },
+  { c: '笑', liushu: 'compound-ideographic', components: [] },
+  { c: '莫', liushu: 'compound-ideographic', components: [], derived: ['暮'] },
+  { c: '同', liushu: 'compound-ideographic', components: ['凡', '口'] },
+  { c: '若', liushu: 'compound-ideographic', components: ['艹', '右'] },
+  { c: '桥', liushu: 'pictophonetic', components: ['木', '乔'], semantic: '木', phonetic: '乔', phoneticPinyin: 'qiáo', soundRel: 'exact' },
+  { c: '旧', liushu: 'compound-ideographic', components: [] },
+  { c: '低', liushu: 'pictophonetic', components: [], semantic: '亻' },
+  { c: '爱', liushu: 'compound-ideographic', components: [] },
+  { c: '荷', liushu: 'pictophonetic', components: ['艹', '何'], semantic: '艹', phonetic: '何', phoneticPinyin: 'hé', soundRel: 'exact' },
+  { c: '露', liushu: 'pictophonetic', components: ['雨', '路'], semantic: '雨', phonetic: '路', phoneticPinyin: 'lù', soundRel: 'exact' },
+  { c: '意', liushu: 'pictophonetic', components: ['音', '心'], semantic: '心', phonetic: '音', phoneticPinyin: 'yīn', soundRel: 'initial' },
+  { c: '忽', liushu: 'pictophonetic', components: ['勿', '心'], semantic: '心', phonetic: '勿', phoneticPinyin: 'wù', soundRel: 'rhyme' },
+  { c: '能', liushu: 'pictographic', components: [] },
+  { c: '事', liushu: 'compound-ideographic', components: [] },
+  { c: '纷', liushu: 'pictophonetic', components: ['纟', '分'], semantic: '纟', phonetic: '分', phoneticPinyin: 'fēn', soundRel: 'exact' },
+  { c: '碧', liushu: 'compound-ideographic', components: [] },
+  { c: '分', liushu: 'compound-ideographic', components: ['八', '刀'], derived: ['纷'] },
+  { c: '外', liushu: 'compound-ideographic', components: [] },
+  { c: '须', liushu: 'compound-ideographic', components: ['彡', '页'] },
+  { c: '池', liushu: 'pictophonetic', components: ['氵', '也'], semantic: '氵' },
+  { c: '点', liushu: 'pictophonetic', components: ['占', '灬'], semantic: '灬' },
+  { c: '泪', liushu: 'compound-ideographic', components: ['氵', '目'] },
+  { c: '五', liushu: 'ideographic', components: [] },
+  { c: '觉', liushu: 'pictophonetic', components: [], semantic: '见' },
+  { c: '歌', liushu: 'pictophonetic', components: ['哥', '欠'], semantic: '欠', phonetic: '哥', phoneticPinyin: 'gē', soundRel: 'exact' },
+  { c: '波', liushu: 'pictophonetic', components: ['氵', '皮'], semantic: '氵' },
+  { c: '船', liushu: 'pictophonetic', components: ['舟', '几', '口'], semantic: '舟' },
+  { c: '绝', liushu: 'pictophonetic', components: ['纟', '色'], semantic: '纟' },
+  { c: '细', liushu: 'pictophonetic', components: ['纟', '田'], semantic: '纟' },
+  { c: '识', liushu: 'pictophonetic', components: ['讠', '只'], semantic: '讠', phonetic: '只', phoneticPinyin: 'zhī', soundRel: 'rhyme' },
+  { c: '复', liushu: 'compound-ideographic', components: [] },
+  { c: '应', liushu: 'pictophonetic', components: ['广', '一'], semantic: '广', phonetic: '一', phoneticPinyin: 'yī', soundRel: 'initial', uncertain: true },
+  { c: '后', liushu: 'compound-ideographic', components: [], uncertain: true },
+  { c: '鱼', liushu: 'pictographic', components: [] },
+  { c: '燕', liushu: 'pictographic', components: [] },
+  { c: '恨', liushu: 'pictophonetic', components: ['忄', '艮'], semantic: '忄', phonetic: '艮', phoneticPinyin: 'gěn', soundRel: 'rhyme' },
+  { c: '苍', liushu: 'pictophonetic', components: ['艹', '仓'], semantic: '艹', phonetic: '仓', phoneticPinyin: 'cāng', soundRel: 'exact' },
+  { c: '游', liushu: 'compound-ideographic', components: [] },
+  { c: '雁', liushu: 'pictophonetic', components: [], semantic: '隹' },
+  { c: '田', liushu: 'pictographic', components: [], derived: ['里', '思', '细', '留'] },
+  { c: '书', liushu: 'compound-ideographic', components: [] },
+  { c: '初', liushu: 'compound-ideographic', components: ['衤', '刀'] },
+  { c: '园', liushu: 'pictophonetic', components: ['囗', '元'], semantic: '囗', phonetic: '元', phoneticPinyin: 'yuán', soundRel: 'exact' },
+  { c: '之', liushu: 'ideographic', components: [] },
+  { c: '眠', liushu: 'pictophonetic', components: ['目', '民'], semantic: '目', phonetic: '民', phoneticPinyin: 'mín', soundRel: 'initial' },
+  { c: '依', liushu: 'pictophonetic', components: ['亻', '衣'], semantic: '亻', phonetic: '衣', phoneticPinyin: 'yī', soundRel: 'exact' },
+  { c: '遥', liushu: 'pictophonetic', components: [], semantic: '辶' },
+  { c: '二', liushu: 'ideographic', components: ['一', '一'], derived: ['三'] },
+  { c: '醉', liushu: 'pictophonetic', components: ['酉', '卒'], semantic: '酉', phonetic: '卒', phoneticPinyin: 'zú', soundRel: 'initial' },
+  { c: '牛', liushu: 'pictographic', components: [], derived: ['物'] },
+  { c: '火', liushu: 'pictographic', components: [], derived: ['秋', '烟'] },
+  { c: '最', liushu: 'compound-ideographic', components: ['日', '取'] },
+  { c: '坐', liushu: 'compound-ideographic', components: ['从', '土'] },
+  { c: '石', liushu: 'pictographic', components: [] },
+  { c: '于', liushu: 'pictographic', components: [], uncertain: true },
+  { c: '微', liushu: 'pictophonetic', components: ['彳', '山', '兀', '攵'], semantic: '彳' },
+  { c: '面', liushu: 'pictographic', components: [] },
+  { c: '气', liushu: 'pictographic', components: [] },
+  { c: '听', liushu: 'compound-ideographic', components: ['口', '斤'] },
+  { c: '户', liushu: 'pictographic', components: [] },
+  { c: '难', liushu: 'compound-ideographic', components: ['又', '隹'] },
+  { c: '晓', liushu: 'pictophonetic', components: ['日', '尧'], semantic: '日' },
+  { c: '银', liushu: 'pictophonetic', components: ['钅', '艮'], semantic: '钅' },
+  { c: '立', liushu: 'pictographic', components: [], derived: ['童'] },
+  { c: '垂', liushu: 'pictographic', components: [] },
+  { c: '语', liushu: 'pictophonetic', components: ['讠', '吾'], semantic: '讠', phonetic: '吾', phoneticPinyin: 'wú', soundRel: 'rhyme' },
+  { c: '物', liushu: 'pictophonetic', components: ['牛', '勿'], semantic: '牛', phonetic: '勿', phoneticPinyin: 'wù', soundRel: 'exact' },
+  { c: '朝', liushu: 'compound-ideographic', components: [] },
+  { c: '尘', liushu: 'compound-ideographic', components: ['小', '土'] },
+  { c: '断', liushu: 'compound-ideographic', components: ['米', '斤'] },
+  { c: '夕', liushu: 'pictographic', components: [], derived: ['多', '将'] },
+  { c: '住', liushu: 'compound-ideographic', components: ['亻', '主'] },
+  { c: '州', liushu: 'pictographic', components: [] },
+  { c: '渡', liushu: 'pictophonetic', components: ['氵', '度'], semantic: '氵', phonetic: '度', phoneticPinyin: 'dù', soundRel: 'exact' },
+  { c: '横', liushu: 'pictophonetic', components: ['木', '黄'], semantic: '木', phonetic: '黄', phoneticPinyin: 'huáng', soundRel: 'initial' },
+  { c: '犹', liushu: 'pictophonetic', components: ['犭', '尤'], semantic: '犭', phonetic: '尤', phoneticPinyin: 'yóu', soundRel: 'exact' },
+  { c: '从', liushu: 'compound-ideographic', components: ['人', '人'], derived: ['坐'] },
+  { c: '卧', liushu: 'compound-ideographic', components: [] },
+  { c: '乱', liushu: 'compound-ideographic', components: [], uncertain: true },
+  { c: '鸡', liushu: 'compound-ideographic', components: ['又', '鸟'] },
+  { c: '胜', liushu: 'pictophonetic', components: ['月', '生'], semantic: '月', phonetic: '生', phoneticPinyin: 'shēng', soundRel: 'exact' },
+  { c: '方', liushu: 'pictographic', components: [], derived: ['芳'] },
+  { c: '正', liushu: 'compound-ideographic', components: ['一', '止'] },
+  { c: '留', liushu: 'pictophonetic', components: ['卯', '田'], semantic: '田' },
+  { c: '涯', liushu: 'pictophonetic', components: [], semantic: '氵' },
+  { c: '疑', liushu: 'compound-ideographic', components: [] },
+  { c: '苦', liushu: 'pictophonetic', components: ['艹', '古'], semantic: '艹', phonetic: '古', phoneticPinyin: 'gǔ', soundRel: 'rhyme' },
+  { c: '九', liushu: 'pictographic', components: [] },
+  { c: '学', liushu: 'compound-ideographic', components: [] },
+  { c: '豆', liushu: 'pictographic', components: [] },
+  { c: '幽', liushu: 'compound-ideographic', components: [] },
+  { c: '松', liushu: 'pictophonetic', components: ['木', '公'], semantic: '木', phonetic: '公', phoneticPinyin: 'gōng', soundRel: 'rhyme' },
+  { c: '岸', liushu: 'compound-ideographic', components: [] },
+  { c: '亭', liushu: 'pictographic', components: [] },
+  { c: '星', liushu: 'compound-ideographic', components: ['日', '生'] },
+  { c: '浅', liushu: 'pictophonetic', components: [], semantic: '氵' },
+];
+
+/** 字 → 字理，O(1) 查询 */
+export const HANZI_ETYMOLOGY: Record<string, HanziEtymology> =
+  Object.fromEntries(HANZI_ETYMOLOGY_LIST.map((e) => [e.c, e]));

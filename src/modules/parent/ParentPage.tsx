@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { WorksheetGenerator } from '@/components/WorksheetGenerator';
 import { useStore, useProgress } from '@/store/useStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { dateKey } from '@/lib/dailyPlan';
 import {
   touchedCount,
@@ -63,7 +64,7 @@ const EYE = [0, 15, 20, 30];
 export default function ParentPage() {
   const { t: translate } = useTranslation();
   const progress = useProgress();
-  const settings = useStore((s) => s.settings);
+  const settings = useSettingsStore((s) => s.settings);
   const setParentPin = useStore((s) => s.setParentPin);
   const recordPinFail = useStore((s) => s.recordPinFail);
   const recordPinSuccess = useStore((s) => s.recordPinSuccess);
