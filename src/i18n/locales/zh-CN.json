@@ -285,11 +285,6 @@
       "label": "研究乐园",
       "short": "研究",
       "desc": "选题探索 · 记录发现"
-    },
-    "realistic_cat": {
-      "label": "写实猫咪3D",
-      "short": "写实猫",
-      "desc": "真实毛发 · PBR渲染 · 品种切换"
     }
   },
   "research": {
@@ -300,6 +295,17 @@
     },
     "topicSelect": {
       "hint": "今天想研究什么呢？选一个主题开始探索吧！"
+    },
+    "launch": {
+      "title": "我的研究出发台",
+      "subtitle": "你研究过的主题会越来越懂，常回来看看吧！",
+      "summaryExplored": "已探索 {explored}/{total}",
+      "summaryDiscovery": "收藏 {n}",
+      "summaryNote": "笔记 {n}",
+      "mastery": "掌握度 {n}/5",
+      "notStarted": "还没开始",
+      "continue": "继续探索",
+      "start": "开始探索"
     },
     "topic": {
       "color": {
@@ -1572,7 +1578,9 @@
     "finalScore": "总得分：{score} 分 · 小猫亲密度 +{affection}",
     "playAgain": "🔄 再玩一次接鱼干！",
     "gameOver": "游戏结束啦！恭喜接到了 {count} 条小鱼干！",
-    "gameStartTip": "猫爪接鱼干开始啦！快速答题接住小鱼干吧！"
+    "gameStartTip": "猫爪接鱼干开始啦！快速答题接住小鱼干吧！",
+    "realisticOn": "✨ 写实 3D",
+    "realisticOff": "🧶 羊毛毡"
   },
   "tts": {
     "pageTitle": "🎙 语音引擎诊断台",

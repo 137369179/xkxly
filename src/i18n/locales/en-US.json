@@ -285,11 +285,6 @@
       "label": "Research Park",
       "short": "Research",
       "desc": "Pick a topic · explore · record findings"
-    },
-    "realistic_cat": {
-      "label": "3D Cat",
-      "short": "3D Cat",
-      "desc": "Real fur · PBR · Breeds"
     }
   },
   "research": {
@@ -300,6 +295,17 @@
     },
     "topicSelect": {
       "hint": "What would you like to explore today? Pick a topic!"
+    },
+    "launch": {
+      "title": "My Research Launch Pad",
+      "subtitle": "The more you research, the more you know. Come back anytime!",
+      "summaryExplored": "Explored {explored}/{total}",
+      "summaryDiscovery": "Saved {n}",
+      "summaryNote": "Notes {n}",
+      "mastery": "Mastery {n}/5",
+      "notStarted": "Not started",
+      "continue": "Keep exploring",
+      "start": "Start exploring"
     },
     "topic": {
       "color": {
@@ -1572,7 +1578,9 @@
     "finalScore": "Score: {score} pts · Cat Affection +{affection}",
     "playAgain": "🔄 Play Again!",
     "gameOver": "Game over! You caught {count} fish!",
-    "gameStartTip": "Cat Catch Fish starts now! Answer fast to catch fish!"
+    "gameStartTip": "Cat Catch Fish starts now! Answer fast to catch fish!",
+    "realisticOn": "✨ Realistic 3D",
+    "realisticOff": "🧶 Felt Style"
   },
   "tts": {
     "pageTitle": "🎙 Voice Engine Diagnostic",

@@ -3,8 +3,9 @@ import { RoundRunner } from '@/components/RoundRunner';
 import { CandyButton } from '@/components/ui/Button';
 import { ResearchCanvas } from '@/modules/research/ResearchCanvas';
 import { KnowledgeCardPanel } from '@/modules/research/KnowledgeCardPanel';
+import { ResearchLaunchHub } from '@/modules/research/ResearchLaunchHub';
 import { useResearchSession } from '@/store/researchSession';
-import { RESEARCH_TOPICS, getTopic } from '@/lib/research/researchTopics';
+import { getTopic } from '@/lib/research/researchTopics';
 import { makeResearchQuestion } from '@/lib/research/questions';
 import { dueSkills } from '@/lib/srs';
 import { celebrateBig } from '@/lib/celebrate';
@@ -118,26 +119,6 @@ export default function ResearchModePage() {
   const onExploreAgain = useCallback(() => emit({ type: 'EXPLORE_AGAIN' }), [emit]);
   const onRestart = useCallback(() => emit({ type: 'RESTART' }), [emit]);
 
-  // —— 主题选择网格（TOPIC_SELECT）——
-  const topicGrid = useMemo(
-    () => (
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {RESEARCH_TOPICS.map((tp) => (
-          <button
-            key={tp.id}
-            onClick={() => emit({ type: 'SELECT_TOPIC', topicId: tp.id })}
-            className="flex flex-col items-center gap-2 rounded-2xl bg-white p-4 shadow-sm transition-transform hover:scale-[1.03] active:scale-95"
-          >
-            <span className="text-4xl">{tp.emoji}</span>
-            <span className="text-base font-extrabold text-ink">{t(`${tp.i18nKey}.label`)}</span>
-            <span className="text-xs text-ink-soft">{t(`${tp.i18nKey}.desc`)}</span>
-          </button>
-        ))}
-      </div>
-    ),
-    [t, emit],
-  );
-
   // —— QUIZ 段（RoundRunner 零改动复用，C3 锁存；Sprint 4-C：SRS 复习混入）——
   const quizRunner = useMemo(() => {
     if (!session.topicId) return null;
@@ -184,15 +165,10 @@ export default function ResearchModePage() {
       </header>
 
       {session.status === 'TOPIC_SELECT' && (
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-sm text-ink-soft">{t('research.topicSelect.hint')}</p>
-            <CandyButton tone="orange" size="sm" variant="ghost" onClick={() => navigate('discoveries')}>
-              ⭐ {t('research.gallery.entry')}
-            </CandyButton>
-          </div>
-          {topicGrid}
-        </div>
+        <ResearchLaunchHub
+          onSelectTopic={(topicId) => emit({ type: 'SELECT_TOPIC', topicId })}
+          onOpenGallery={() => navigate('discoveries')}
+        />
       )}
 
       {session.status === 'EXPLORE' && topic && (
