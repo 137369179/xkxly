@@ -4,7 +4,7 @@
  * 调 Worker 的 /api/content/generate（生成并持久化）与 /api/content/list（浏览）。
  * 同源部署走相对路径；生成含 10s 本地冷却 + 错误降级提示。
  */
-export type AiContentType = 'story' | 'riddle' | 'science';
+export type AiContentType = 'story' | 'riddle' | 'science' | 'explainer';
 
 export interface AiContentItem {
   id: string;

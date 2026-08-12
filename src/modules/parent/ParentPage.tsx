@@ -383,6 +383,46 @@ export default function ParentPage() {
         })}
       </div>
 
+      {/* 研究乐园（F4：行为量 + 笔记，零正确率，R8 缓解文案必放顶部） */}
+      <Panel>
+        <PanelTitle emoji="🔬" title={translate('research.parentBlock.title')} subtitle={translate('research.parentBlock.subtitle')} tone="blue" />
+        <p className="mb-3 rounded-2xl bg-blue-50 px-3 py-2 text-xs font-bold leading-relaxed text-ink-soft">
+          {translate('research.parentBlock.r8Hint')}
+        </p>
+        <div className="grid grid-cols-4 gap-2 text-center">
+          {[
+            { label: translate('research.growthBlock.explored'), value: `${progress.researchStats?.topicsExplored.length ?? 0}`, emoji: '🗺️' },
+            { label: translate('research.growthBlock.actions'), value: `${progress.researchStats?.exploreActions ?? 0}`, emoji: '🔍' },
+            { label: translate('research.gallery.savedCards'), value: `${progress.discoveries?.length ?? 0}`, emoji: '⭐' },
+            { label: translate('research.gallery.notes'), value: `${Object.keys(progress.researchNotes ?? {}).length}`, emoji: '📝' },
+          ].map((c) => (
+            <div key={c.label} className="rounded-2xl bg-blue-50 px-1 py-2">
+              <div className="text-lg">{c.emoji}</div>
+              <div className="mt-0.5 text-base font-black tabular-nums text-candy-blue-deep">{c.value}</div>
+              <div className="mt-0.5 text-[10px] font-bold text-ink-soft">{c.label}</div>
+            </div>
+          ))}
+        </div>
+        {Object.entries(progress.researchNotes ?? {}).filter(([, v]) => v?.trim()).length > 0 && (
+          <div className="mt-3 space-y-1.5">
+            {Object.entries(progress.researchNotes ?? {})
+              .filter(([, v]) => v?.trim())
+              .slice(0, 4)
+              .map(([topicId, text]) => (
+                <div key={topicId} className="flex items-start gap-2 rounded-xl bg-amber-50 px-3 py-2">
+                  <span className="text-base">{['🔬', '🗺️', '📝', '✨'][topicId.length % 4]}</span>
+                  <p className="text-xs font-bold leading-relaxed text-ink">{text}</p>
+                </div>
+              ))}
+          </div>
+        )}
+        <div className="mt-3">
+          <CandyButton tone="blue" size="sm" onClick={() => navigate('discoveries')}>
+            ⭐ {translate('research.gallery.entry')}
+          </CandyButton>
+        </div>
+      </Panel>
+
       {/* AI 学情分析 */}
       <AiReport progress={progress} />
 

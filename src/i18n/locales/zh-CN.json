@@ -517,6 +517,42 @@
       "hint": "你是勇敢的小小研究员",
       "restart": "再来一次",
       "home": "回首页"
+    },
+    "gallery": {
+      "entry": "我的收藏",
+      "title": "发现画廊",
+      "subtitle": "回看你的收藏与笔记",
+      "savedCards": "收藏的知识卡",
+      "notes": "研究笔记",
+      "notesHint": "你的一句话发现",
+      "listen": "朗读",
+      "unfavorite": "取消收藏",
+      "offlineTag": "离线缓存",
+      "emptyCards": "还没有收藏的知识卡",
+      "emptyCardsHint": "研究时点「收藏 ⭐」就会出现在这里",
+      "goResearch": "去研究 🔬",
+      "emptyNotes": "还没有研究笔记，去探索时记下你的发现吧",
+      "emptyAll": "去研究乐园开始你的第一次探索吧～",
+      "editNote": "编辑笔记",
+      "deleteNote": "删除笔记",
+      "edit": "编辑",
+      "save": "保存",
+      "cancel": "取消",
+      "noteInput": "笔记内容"
+    },
+    "growthBlock": {
+      "title": "研究乐园",
+      "subtitle": "好奇心的足迹 · 行为量展示",
+      "explored": "探索主题",
+      "actions": "探索次数",
+      "sessions": "研究轮次",
+      "goResearch": "去研究",
+      "notes": "已写 {n} 条笔记"
+    },
+    "parentBlock": {
+      "title": "研究乐园",
+      "subtitle": "好奇心足迹 · 家长视角",
+      "r8Hint": "孩子在研究乐园的进步看这里——研究重在好奇与探索，而不是答对多少题。鼓励每一次发现，比纠正对错更重要。"
     }
   },
   "learning": {
@@ -3734,5 +3770,87 @@
     "name": "宝贝学习乐园",
     "tagline": "AI 儿童成长学习乐园",
     "defaultProfileName": "宝贝"
+  },
+  "learnFlow": {
+    "finishLesson": "完成这一课",
+    "nextStep": "下一步 · {step}",
+    "completeTaskFirst": "先完成上面的小任务，就能继续啦～"
+  },
+  "shadowMatch": {
+    "title": "影子配对",
+    "subtitle": "先选物品，再选它的影子",
+    "itemsLabel": "物品",
+    "shadowsLabel": "影子",
+    "matchSuccess": "✅ 配对成功！",
+    "matchWrong": "❌ 不匹配，再试试",
+    "pairProgress": "配对 {matched}/{total} · 得分 {score}",
+    "newSet": "换一组"
+  },
+  "verticalMath": {
+    "title": "竖式计算",
+    "subtitle": "分步演示加减乘除",
+    "op.add": "加法",
+    "op.sub": "减法",
+    "op.mul": "乘法",
+    "op.div": "除法",
+    "placeOnes": "个位",
+    "placeTens": "十位",
+    "placeHundreds": "百位",
+    "sumLabel": "相加",
+    "verifyLabel": "验证",
+    "hideAnswer": "🙈 隐藏答案",
+    "showAnswer": "👁️ 显示答案",
+    "newQuestion": "换一题",
+    "stepsTitle": "计算步骤"
+  },
+  "sequenceLogic": {
+    "title": "序列推理",
+    "subtitle": "找规律，填下一个",
+    "hintLabel": "提示",
+    "progress": "第 {current}/{total} 题 · 得分 {score}",
+    "correctFeedback": "✅ 对了！好聪明！",
+    "wrongFeedback": "❌ 答案是 {answer}"
+  },
+  "cvcWordBuilder": {
+    "badge": "自然拼读拖拽拼词 ({current} / {total})",
+    "spellPrompt": "拼出单词：",
+    "clear": "清空重新拼",
+    "nextWord": "下一个单词",
+    "correctFeedback": "太棒了！拼对了！{word}！",
+    "wrongFeedback": "顺序不太对，再试一次吧！"
+  },
+  "connectMaze": {
+    "title": "连线迷宫",
+    "subtitle": "从 🏠 走到 🎁，不能穿过 🧱",
+    "winFeedback": "🎉 通关了！你找到了出路！",
+    "restart": "重来",
+    "nextLevel": "下一关",
+    "stats": "得分 {score} · 路径 {steps} 步"
+  },
+  "weekCompare": {
+    "title": "本周 vs 上周",
+    "subtitle": "学习数据对比",
+    "daysLabel": "学习天数",
+    "daysSuffix": "天",
+    "durationLabel": "学习时长",
+    "minutesSuffix": "分",
+    "itemsLabel": "练习题数",
+    "questionsSuffix": "题",
+    "correctLabel": "正确题数",
+    "starsLabel": "获得星星",
+    "thisWeekMin": "本周(分)",
+    "lastWeekMin": "上周(分)",
+    "summaryMore": "🎉 本周比上周更努力，继续加油！",
+    "summaryLess": "💪 本周稍少了，下周加把劲！",
+    "summarySame": "✨ 和上周持平，保持稳定！"
+  },
+  "phonicsListen": {
+    "title": "听力辨音",
+    "subtitle": "听发音，选出对应的字母或字母组合",
+    "listenBtn": "听发音",
+    "soundInfo": "发音：/{sound}/ &nbsp; 例：{example}",
+    "correctFeedback": "对了！/{sound}/",
+    "wrongFeedback": "答案是 {answer} /{sound}/",
+    "progress": "第 {round} 题 · 得分 {score}"
   }
 }

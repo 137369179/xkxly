@@ -38,4 +38,11 @@ describe('C6 研究模式路由四件套', () => {
   it('NAV_CATEGORY_MAP 将 research 路由映射到 research 品类', () => {
     expect(NAV_CATEGORY_MAP['research']).toBe('research');
   });
+
+  it('Sprint 3：ROUTES 注册 discoveries（发现画廊），NAV_CATEGORY_MAP 归研究品类且不入底部 Tab', () => {
+    expect(ROUTES).toContain('discoveries');
+    expect(NAV_CATEGORY_MAP['discoveries']).toBe('research');
+    const item = NAV_ITEMS.find((n) => n.id === 'discoveries');
+    expect(item?.bottom).toBeFalsy(); // 画廊不是底部 Tab 导航
+  });
 });

@@ -20,6 +20,7 @@ const TYPE_META: Record<AiContentType, { tone: string; bg: string }> = {
   story: { tone: 'text-candy-purple-deep', bg: 'from-purple-50 to-pink-50' },
   riddle: { tone: 'text-candy-orange-deep', bg: 'from-amber-50 to-yellow-50' },
   science: { tone: 'text-candy-blue-deep', bg: 'from-sky-50 to-cyan-50' },
+  explainer: { tone: 'text-candy-blue-deep', bg: 'from-sky-50 to-cyan-50' },
 };
 
 function formatDate(ts: number): string {

@@ -59,6 +59,7 @@ const StoryLibraryPage = lazy(() => import('@/modules/story/StoryLibraryPage'));
 const GrowthMuseumPage = lazy(() => import('@/modules/growth/GrowthMuseumPage'));
 const ContentStationPage = lazy(() => import('@/modules/content/ContentStationPage'));
 const ResearchModePage = lazy(() => import('@/modules/research/ResearchModePage'));
+const DiscoveryGallery = lazy(() => import('@/modules/research/DiscoveryGallery'));
 
 function Page() {
   const { route, param } = useRoute();
@@ -106,6 +107,7 @@ function Page() {
       case 'growth': return <GrowthMuseumPage />;
       case 'content': return <ContentStationPage />;
       case 'research': return <ResearchModePage />;
+      case 'discoveries': return <DiscoveryGallery />;
       default: return <HomePage />;
     }
   }, [route]);

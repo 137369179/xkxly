@@ -674,6 +674,52 @@ export const BADGES: BadgeDef[] = [
     check: (p) => (p.ownedEquipment?.length ?? 0) >= 6,
     meter: (p) => [Math.min(p.ownedEquipment?.length ?? 0, 6), 6],
   },
+  // —— 研究模式（CMML）F19 行为型徽章（2026-08-12，Sprint 3）——
+  {
+    id: 'research-first',
+    name: '小小研究员',
+    desc: '完成第一次研究',
+    emoji: '🔬',
+    tone: 'blue',
+    check: (p) => (p.researchStats?.sessionsCompleted ?? 0) >= 1,
+    meter: (p) => [Math.min(p.researchStats?.sessionsCompleted ?? 0, 1), 1],
+  },
+  {
+    id: 'research-explore-20',
+    name: '好奇宝宝',
+    desc: '探索 20 次',
+    emoji: '🔍',
+    tone: 'orange',
+    check: (p) => (p.researchStats?.exploreActions ?? 0) >= 20,
+    meter: (p) => [Math.min(p.researchStats?.exploreActions ?? 0, 20), 20],
+  },
+  {
+    id: 'research-topics-5',
+    name: '博物学者',
+    desc: '探索 5 个主题',
+    emoji: '🗺️',
+    tone: 'green',
+    check: (p) => (p.researchStats?.topicsExplored.length ?? 0) >= 5,
+    meter: (p) => [Math.min(p.researchStats?.topicsExplored.length ?? 0, 5), 5],
+  },
+  {
+    id: 'research-cards-3',
+    name: '知识收集家',
+    desc: '读 3 张知识卡',
+    emoji: '🃏',
+    tone: 'pink',
+    check: (p) => (p.researchStats?.cardsRead ?? 0) >= 3,
+    meter: (p) => [Math.min(p.researchStats?.cardsRead ?? 0, 3), 3],
+  },
+  {
+    id: 'research-notes-5',
+    name: '笔记小达人',
+    desc: '写 5 条研究笔记',
+    emoji: '📝',
+    tone: 'purple',
+    check: (p) => Object.keys(p.researchNotes ?? {}).length >= 5,
+    meter: (p) => [Math.min(Object.keys(p.researchNotes ?? {}).length, 5), 5],
+  },
 ];
 
 export const BADGE_MAP = new Map(BADGES.map((b) => [b.id, b]));

@@ -517,6 +517,42 @@
       "hint": "You are a brave little researcher",
       "restart": "Do it again",
       "home": "Home"
+    },
+    "gallery": {
+      "entry": "My collection",
+      "title": "Discovery Gallery",
+      "subtitle": "Look back at your saved cards and notes",
+      "savedCards": "Saved cards",
+      "notes": "Research notes",
+      "notesHint": "Your one-line discoveries",
+      "listen": "Listen",
+      "unfavorite": "Unsave",
+      "offlineTag": "Offline",
+      "emptyCards": "No saved cards yet",
+      "emptyCardsHint": "Tap \"Save ⭐\" while researching and it will show up here",
+      "goResearch": "Go research 🔬",
+      "emptyNotes": "No notes yet — jot down discoveries while exploring",
+      "emptyAll": "Start your first adventure in Research Park!",
+      "editNote": "Edit note",
+      "deleteNote": "Delete note",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "noteInput": "Note content"
+    },
+    "growthBlock": {
+      "title": "Research Park",
+      "subtitle": "Footprints of curiosity · behavior stats",
+      "explored": "Topics",
+      "actions": "Explorations",
+      "sessions": "Rounds",
+      "goResearch": "Go research",
+      "notes": "{n} notes written"
+    },
+    "parentBlock": {
+      "title": "Research Park",
+      "subtitle": "Curiosity footprint · parent view",
+      "r8Hint": "Look here for progress in Research Park — research is about curiosity and exploration, not how many answers were right. Encourage every discovery; it matters more than correcting mistakes."
     }
   },
   "learning": {
@@ -3734,5 +3770,87 @@
     "name": "Baby Learning Park",
     "tagline": "AI Children Learning Park",
     "defaultProfileName": "Baby"
+  },
+  "learnFlow": {
+    "finishLesson": "Finish this lesson",
+    "nextStep": "Next · {step}",
+    "completeTaskFirst": "Finish the little task above first, then you can continue~"
+  },
+  "shadowMatch": {
+    "title": "Shadow Match",
+    "subtitle": "Pick an item, then pick its shadow",
+    "itemsLabel": "Items",
+    "shadowsLabel": "Shadows",
+    "matchSuccess": "✅ Matched!",
+    "matchWrong": "❌ Not a match, try again",
+    "pairProgress": "Matched {matched}/{total} · Score {score}",
+    "newSet": "New set"
+  },
+  "verticalMath": {
+    "title": "Column Arithmetic",
+    "subtitle": "Step-by-step add, subtract, multiply, divide",
+    "op.add": "Addition",
+    "op.sub": "Subtraction",
+    "op.mul": "Multiplication",
+    "op.div": "Division",
+    "placeOnes": "Ones",
+    "placeTens": "Tens",
+    "placeHundreds": "Hundreds",
+    "sumLabel": "Sum",
+    "verifyLabel": "Verify",
+    "hideAnswer": "🙈 Hide answer",
+    "showAnswer": "👁️ Show answer",
+    "newQuestion": "New question",
+    "stepsTitle": "Calculation Steps"
+  },
+  "sequenceLogic": {
+    "title": "Sequence Logic",
+    "subtitle": "Find the pattern, fill in the next",
+    "hintLabel": "Hint",
+    "progress": "Q {current}/{total} · Score {score}",
+    "correctFeedback": "✅ Correct! So smart!",
+    "wrongFeedback": "❌ The answer is {answer}"
+  },
+  "cvcWordBuilder": {
+    "badge": "Phonics Drag & Spell ({current} / {total})",
+    "spellPrompt": "Spell the word:",
+    "clear": "Clear & restart",
+    "nextWord": "Next word",
+    "correctFeedback": "Great job! You spelled it! {word}!",
+    "wrongFeedback": "Order is a bit off, try again!"
+  },
+  "connectMaze": {
+    "title": "Connect Maze",
+    "subtitle": "Go from 🏠 to 🎁, don’t cross 🧱",
+    "winFeedback": "🎉 Cleared! You found the way out!",
+    "restart": "Restart",
+    "nextLevel": "Next level",
+    "stats": "Score {score} · Path {steps} steps"
+  },
+  "weekCompare": {
+    "title": "This Week vs Last Week",
+    "subtitle": "Learning Data Comparison",
+    "daysLabel": "Study Days",
+    "daysSuffix": "d",
+    "durationLabel": "Study Time",
+    "minutesSuffix": "min",
+    "itemsLabel": "Practice Items",
+    "questionsSuffix": "q",
+    "correctLabel": "Correct Answers",
+    "starsLabel": "Stars Earned",
+    "thisWeekMin": "This Week (min)",
+    "lastWeekMin": "Last Week (min)",
+    "summaryMore": "🎉 More effort this week than last, keep it up!",
+    "summaryLess": "💪 A bit less this week, push harder next week!",
+    "summarySame": "✨ Same as last week, keep steady!"
+  },
+  "phonicsListen": {
+    "title": "Listening & Sounds",
+    "subtitle": "Listen and pick the matching letter or letter team",
+    "listenBtn": "Listen",
+    "soundInfo": "Sound: /{sound}/ &nbsp; e.g. {example}",
+    "correctFeedback": "Correct! /{sound}/",
+    "wrongFeedback": "The answer is {answer} /{sound}/",
+    "progress": "Q {round} · Score {score}"
   }
 }

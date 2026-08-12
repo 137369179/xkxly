@@ -26,6 +26,8 @@ import { useTranslation } from '@/i18n/useTranslation';
 const CARD_CACHE_KEY = 'research-card-cache';
 
 interface CardCacheItem {
+  /** KV 键名（item:<type>:<id>）；离线兜底画廊按此匹配收藏 */
+  kvId?: string;
   title: string;
   content: string | string[];
   tags: string[];
@@ -101,7 +103,7 @@ export function KnowledgeCardPanel({
     );
     if (cached) {
       onCardReady({
-        kvId: null, // 本地缓存无 KV 回捞 → 不允许收藏（§2.3 场景④）
+        kvId: cached.kvId ?? null, // 本地缓存优先回填 kvId（收藏）；无则不允许收藏（§2.3 场景④）
         title: cached.title,
         body: cached.content,
         source: 'kv',
@@ -143,7 +145,7 @@ export function KnowledgeCardPanel({
     if (gen.ok && gen.item) {
       const item = gen.item;
       writeCardCache([
-        { title: item.title, content: item.content, tags: item.tags ?? [], ageRange, type: topic.aiContentType, cachedAt: Date.now() },
+        { kvId: item.id, title: item.title, content: item.content, tags: item.tags ?? [], ageRange, type: topic.aiContentType, cachedAt: Date.now() },
         ...readCardCache(),
       ]);
       onCardReady({

@@ -8,6 +8,7 @@ import { RESEARCH_TOPICS, getTopic } from '@/lib/research/researchTopics';
 import { makeResearchQuestion } from '@/lib/research/questions';
 import { useActiveProfileMeta } from '@/store/useProfilesStore';
 import { useStore } from '@/store/useStore';
+import { navigate } from '@/lib/router';
 import { useTranslation } from '@/i18n/useTranslation';
 
 /**
@@ -155,7 +156,12 @@ export default function ResearchModePage() {
 
       {session.status === 'TOPIC_SELECT' && (
         <div className="flex flex-col gap-3">
-          <p className="text-sm text-ink-soft">{t('research.topicSelect.hint')}</p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-sm text-ink-soft">{t('research.topicSelect.hint')}</p>
+            <CandyButton tone="orange" size="sm" variant="ghost" onClick={() => navigate('discoveries')}>
+              ⭐ {t('research.gallery.entry')}
+            </CandyButton>
+          </div>
           {topicGrid}
         </div>
       )}
@@ -178,7 +184,11 @@ export default function ResearchModePage() {
           topic={topic}
           ageRange={ageRange}
           card={session.knowledgeCard}
-          onCardReady={(card) => emit({ type: 'CARD_READY', card })}
+          onCardReady={(card) => {
+            // F19：读卡计数（research-cards-3 徽章数据源）；同一会话重复读卡也计（行为累积型）
+            if (topic) useStore.getState().recordResearchAction(topic.id, 0, { readCard: true });
+            emit({ type: 'CARD_READY', card });
+          }}
           onCardFailed={(reason) => emit({ type: 'CARD_FAILED', reason })}
           onStartQuiz={onStartQuiz}
           onBackToExplore={onBackToExplore}

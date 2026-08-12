@@ -42,6 +42,7 @@ export const ROUTES = [
   'growth',
   'content',
   'research',
+  'discoveries',
 ] as const;
 
 export type RouteId = (typeof ROUTES)[number];

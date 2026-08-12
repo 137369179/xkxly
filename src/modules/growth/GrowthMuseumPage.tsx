@@ -8,7 +8,9 @@ import { TONE_STYLE, type Tone } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 import { PageHeader, Panel, PanelTitle } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
+import { CandyButton } from '@/components/ui/Button';
 import { FriendlyLoading } from '@/components/FriendlyLoading';
+import { navigate } from '@/lib/router';
 import { useTranslation } from '@/i18n/useTranslation';
 
 const GrowthTree = lazy(() =>
@@ -34,6 +36,10 @@ export default function GrowthMuseumPage() {
         .sort((a, b) => b[1] - a[1]),
     [p.badgeDates],
   );
+
+  const researchStats = p.researchStats;
+  const discoveryCount = p.discoveries?.length ?? 0;
+  const noteCount = Object.keys(p.researchNotes ?? {}).filter((k) => p.researchNotes?.[k]?.trim()).length;
 
   const statCards = [
     { emoji: '⭐', label: t('growth.stars'), value: String(stars), tone: 'yellow' as Tone },
@@ -84,6 +90,35 @@ export default function GrowthMuseumPage() {
             <ProgressBar value={levelPct} max={100} tone="green" showLabel />
           </div>
         </div>
+      </Panel>
+
+      {/* 研究乐园（F19 行为量 + 发现画廊入口，R8：零正确率） */}
+      <Panel>
+        <PanelTitle emoji="🔬" title={t('research.growthBlock.title')} subtitle={t('research.growthBlock.subtitle')} tone="blue" />
+        <div className="mb-3 grid grid-cols-3 gap-2 text-center">
+          {[
+            { label: t('research.growthBlock.explored'), value: `${researchStats?.topicsExplored.length ?? 0}`, emoji: '🗺️' },
+            { label: t('research.growthBlock.actions'), value: `${researchStats?.exploreActions ?? 0}`, emoji: '🔍' },
+            { label: t('research.growthBlock.sessions'), value: `${researchStats?.sessionsCompleted ?? 0}`, emoji: '🎉' },
+          ].map((c) => (
+            <div key={c.label} className="rounded-2xl bg-blue-50 px-2 py-2.5">
+              <div className="text-xl">{c.emoji}</div>
+              <div className="mt-0.5 text-lg font-black tabular-nums text-candy-blue-deep">{c.value}</div>
+              <div className="text-[10px] font-bold text-ink-soft">{c.label}</div>
+            </div>
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <CandyButton tone="blue" size="md" onClick={() => navigate('discoveries')}>
+            ⭐ {t('research.gallery.entry')}（{discoveryCount}）
+          </CandyButton>
+          <CandyButton tone="pink" size="md" variant="ghost" onClick={() => navigate('research')}>
+            🔬 {t('research.growthBlock.goResearch')}
+          </CandyButton>
+        </div>
+        {noteCount > 0 && (
+          <p className="mt-2 text-xs font-bold text-ink-soft">📝 {t('research.growthBlock.notes', { n: noteCount })}</p>
+        )}
       </Panel>
 
       {/* 徽章墙 */}

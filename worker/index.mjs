@@ -48,7 +48,7 @@ const INJECTION_PATTERNS = [
  * 生成走 STEPFUN（step-3.7-flash），输出校验 + 儿童安全黑名单过滤，
  * 持久化到 CONTENT_KV；列表按类型前缀扫描 KV。
  * ==================================================================== */
-const CONTENT_TYPES = ['story', 'riddle', 'science'];
+const CONTENT_TYPES = ['story', 'riddle', 'science', 'explainer'];
 
 /** 生成内容二次过滤：命中即拒（AI 输出兜底，防模型偶发越界） */
 const CONTENT_BLOCKLIST = [
@@ -63,6 +63,8 @@ const CONTENT_PROMPTS = {
 严格输出 JSON（不要任何多余文字）：{"title":"谜语主题","content":["谜面1（答案：XXX）","谜面2（答案：XXX）","谜面3（答案：XXX）"],"tags":["2个标签"]}`,
   science: `请讲 3 条适合 3-8 岁儿童的趣味科普小知识（自然/动物/天气），每条 30-50 字，简单易懂。
 严格输出 JSON（不要任何多余文字）：{"title":"科普主题","content":["知识1","知识2","知识3"],"tags":["2个标签"]}`,
+  explainer: `请针对给定研究主题，为 3-8 岁儿童讲 3 条核心知识点 + 1 个引发好奇的延伸小问题，每条 30-50 字，用孩子听得懂的话、可配合日常观察。
+严格输出 JSON（不要任何多余文字）：{"title":"主题讲解","content":["知识点1","知识点2","知识点3","延伸小问题：……？"],"tags":["2个标签"]}`,
 };
 
 /** 从 LLM 输出中稳健提取 JSON（容忍 markdown 围栏与首尾噪音） */
@@ -97,7 +99,7 @@ async function handleContentGenerate(request, env, cors) {
   }
   const type = payload.type;
   if (!CONTENT_TYPES.includes(type)) {
-    return json({ error: { code: 'bad_type', message: '仅支持 story/riddle/science' } }, cors, 400);
+    return json({ error: { code: 'bad_type', message: '仅支持 story/riddle/science/explainer' } }, cors, 400);
   }
 
   const messages = [

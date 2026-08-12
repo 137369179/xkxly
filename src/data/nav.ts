@@ -113,6 +113,7 @@ export const NAV_CATEGORY_MAP: Record<RouteId, NavCategory> = {
   growth: 'growth',
   content: 'ai',
   research: 'research',
+  discoveries: 'research',
   adventure: 'game',
   rewards: 'parent',
   passport: 'parent',

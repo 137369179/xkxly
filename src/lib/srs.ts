@@ -173,6 +173,7 @@ export const SUBJECTS: {
   { key: 'logic', label: '逻辑', emoji: '🧩', tone: 'purple', color: '#a855f7' },
   { key: 'idiom', label: '成语', emoji: '📜', tone: 'orange', color: '#ef4444' },
   { key: 'sentence', label: '造句', emoji: '✍️', tone: 'blue', color: '#14b8a6' },
+  { key: 'research', label: '研究', emoji: '🔬', tone: 'blue', color: '#6366f1' },
 ];
 
 /**
