@@ -294,7 +294,230 @@
   },
   "research": {
     "title": "Research Park",
-    "comingSoon": "Research mode is under construction — stay tuned!"
+    "comingSoon": "Research mode is under construction — stay tuned!",
+    "common": {
+      "exit": "Exit"
+    },
+    "topicSelect": {
+      "hint": "What would you like to explore today? Pick a topic!"
+    },
+    "topic": {
+      "color": {
+        "label": "Colors",
+        "desc": "A world of red, yellow and blue"
+      },
+      "dino": {
+        "label": "Dinosaurs",
+        "desc": "Secrets of ancient giants"
+      },
+      "space": {
+        "label": "Space",
+        "desc": "Stars and planets"
+      },
+      "body": {
+        "label": "Body",
+        "desc": "Amazing body secrets"
+      },
+      "vehicle": {
+        "label": "Vehicles",
+        "desc": "Things that roll and fly"
+      },
+      "job": {
+        "label": "Jobs",
+        "desc": "What people do"
+      }
+    },
+    "explore": {
+      "discoveryLabel": "My discoveries",
+      "behaviorHint": "Look around and tap — exploring is its own reward",
+      "more": "More?",
+      "requestCard": "I want to know more 💡",
+      "changeTopic": "Switch topic",
+      "color": {
+        "fact0": "Red is the color of apples",
+        "fact1": "Blue is the color of sky and sea",
+        "fact2": "Green is the color of leaves",
+        "fact3": "Yellow is the color of sun and bananas",
+        "fact4": "Mixing red and yellow makes orange"
+      },
+      "dino": {
+        "fact0": "T-Rex was a huge dinosaur",
+        "fact1": "Pterosaurs had wings and could fly",
+        "fact2": "Triceratops had three horns",
+        "fact3": "Dinosaurs ate different foods",
+        "fact4": "Dinosaurs lived very long ago"
+      },
+      "space": {
+        "fact0": "The Sun is a big star",
+        "fact1": "The Moon goes around Earth",
+        "fact2": "Stars are very far away",
+        "fact3": "Earth is our home",
+        "fact4": "Astronauts ride rockets to space"
+      },
+      "body": {
+        "fact0": "Your heart pumps blood all over",
+        "fact1": "Your brain is the control center",
+        "fact2": "Bones hold up your body",
+        "fact3": "Lungs help you breathe",
+        "fact4": "Eyes help you see the world"
+      },
+      "vehicle": {
+        "fact0": "Cars have four wheels",
+        "fact1": "Trains run on rails",
+        "fact2": "Planes fly in the sky",
+        "fact3": "Ships sail on the sea",
+        "fact4": "Buses carry many people"
+      },
+      "job": {
+        "fact0": "Doctors help sick people",
+        "fact1": "Firefighters put out fires",
+        "fact2": "Teachers help kids learn",
+        "fact3": "Chefs cook yummy food",
+        "fact4": "Police keep everyone safe"
+      }
+    },
+    "card": {
+      "title": "Fun fact",
+      "loading": "Zhi is looking it up…",
+      "cooldown": "Wait {n} more seconds",
+      "degradedHint": "Zhi is busy — here's a quick fact instead",
+      "favorite": "Save ⭐",
+      "startQuiz": "Let's play a quiz",
+      "backToExplore": "Back to explore"
+    },
+    "fallbackFacts": {
+      "color": {
+        "title": "Color secrets",
+        "body": "Colors make the world pretty! Red like apples, blue like the sky, green like leaves."
+      },
+      "dino": {
+        "title": "Dino secrets",
+        "body": "T-Rex was a huge dinosaur that lived about 60 million years ago."
+      },
+      "space": {
+        "title": "Space secrets",
+        "body": "The Sun is a shining star, and Earth goes around it in a big circle."
+      },
+      "body": {
+        "title": "Body secrets",
+        "body": "Your brain is like a little commander that tells your whole body what to do."
+      },
+      "vehicle": {
+        "title": "Vehicle secrets",
+        "body": "Cars, trains, planes and ships take us to different places."
+      },
+      "job": {
+        "title": "Job secrets",
+        "body": "Doctors, teachers, chefs and firefighters — everyone has a super skill."
+      }
+    },
+    "quiz": {
+      "opt": {
+        "true": "True",
+        "false": "False"
+      },
+      "hint": "Think about what you just learned",
+      "why": "You looked carefully. Great job!",
+      "summaryStars": "You earned {n} stars",
+      "replay": "Play again",
+      "confirm": "Done",
+      "color": {
+        "q0": {
+          "stem": "Red is the color of apples"
+        },
+        "q1": {
+          "stem": "Blue is the color of sky and sea"
+        },
+        "q2": {
+          "stem": "Green is the color of the sun"
+        },
+        "q3": {
+          "stem": "Yellow is the color of bananas"
+        }
+      },
+      "dino": {
+        "q0": {
+          "stem": "T-Rex was a huge dinosaur"
+        },
+        "q1": {
+          "stem": "Pterosaurs swim in the sea"
+        },
+        "q2": {
+          "stem": "Triceratops had three horns"
+        },
+        "q3": {
+          "stem": "Dinosaurs lived very long ago"
+        }
+      },
+      "space": {
+        "q0": {
+          "stem": "The Sun is a big star"
+        },
+        "q1": {
+          "stem": "The Moon goes around Earth"
+        },
+        "q2": {
+          "stem": "Earth is our home"
+        },
+        "q3": {
+          "stem": "Astronauts row a boat to space"
+        }
+      },
+      "body": {
+        "q0": {
+          "stem": "Your brain is the control center"
+        },
+        "q1": {
+          "stem": "Your heart helps you breathe"
+        },
+        "q2": {
+          "stem": "Bones hold up your body"
+        },
+        "q3": {
+          "stem": "Eyes help you see the world"
+        }
+      },
+      "vehicle": {
+        "q0": {
+          "stem": "Cars have four wheels"
+        },
+        "q1": {
+          "stem": "Trains fly in the sky"
+        },
+        "q2": {
+          "stem": "Planes fly in the sky"
+        },
+        "q3": {
+          "stem": "Buses carry many people"
+        }
+      },
+      "job": {
+        "q0": {
+          "stem": "Doctors help sick people"
+        },
+        "q1": {
+          "stem": "Firefighters cook food"
+        },
+        "q2": {
+          "stem": "Teachers help kids learn"
+        },
+        "q3": {
+          "stem": "Police keep everyone safe"
+        }
+      }
+    },
+    "review": {
+      "title": "Round summary",
+      "discoveries": "You discovered {n} new things",
+      "exploreAgain": "Keep exploring",
+      "done": "Done"
+    },
+    "complete": {
+      "title": "Research complete!",
+      "hint": "You are a brave little researcher",
+      "restart": "Do it again",
+      "home": "Home"
+    }
   },
   "learning": {
     "start": "Start Learning",
@@ -1002,7 +1225,16 @@
     "emptyChart": "🎉 Wrong book is empty!",
     "distributionTotal": "Distribution ({count} questions)",
     "wrongLabel": "Wrong",
-    "questionCount": "{count} Qs"
+    "questionCount": "{count} Qs",
+    "title": "Wrong Answers",
+    "dueCount": "{count} wrong answers are due for review!",
+    "reviewNow": "Review now",
+    "tab.overview": "Overview",
+    "tab.train": "Train",
+    "tab.badges": "Badges",
+    "emptyTitle": "No wrong answers yet!",
+    "emptyHint": "Go learn some new things, then come back to review!",
+    "backHome": "Back to Home"
   },
   "storybook": {
     "pageTitle": "AI Storybook",
@@ -1551,7 +1783,11 @@
     "strokeLoading": "Loading stroke data…",
     "strokeGuide": "Trace the glowing stroke, starting at the gold dot",
     "rewriteAll": "Rewrite All",
-    "keepWriting": "Keep Going ✏️"
+    "keepWriting": "Keep Going ✏️",
+    "compoundMeaning": "Made of {comp1} and {comp2}, meaning…",
+    "assembleExplain": "{char} is made of {comp1} and {comp2}, meaning…",
+    "clickToStart": "▶ Click to start",
+    "assembleSuccess": "✨ Assembly complete!"
   },
   "timeseq": {
     "title": "⏰ Time Order",
@@ -3139,5 +3375,364 @@
     "nextChar": "Next char →",
     "correct": "✅ Right",
     "thinkAgain": "🤔 Think again"
+  },
+  "analyticsInsight": {
+    "active7": "Active (7d)",
+    "active14": "Active (14d)",
+    "active30": "Active (30d)",
+    "days": "{count} days",
+    "longestStreak": "Longest streak (days)",
+    "favWeekday": "Favorite weekday",
+    "aiTitle": "🤖 AI Teacher Chats",
+    "aiSummary": "Today {today} · This week {week} · Total {total}",
+    "aiCount": "{count} times",
+    "totalPractice": "Total practice",
+    "totalDuration": "Total time",
+    "avgAccuracy": "Avg accuracy",
+    "minutes": "{count} min",
+    "questions": "{count} Qs",
+    "todayActiveTip": "🎉 Learning today too — awesome!",
+    "todayIdleTip": "💤 Nothing yet today — light up the flame!",
+    "weekday0": "Su",
+    "weekday1": "Mo",
+    "weekday2": "Tu",
+    "weekday3": "We",
+    "weekday4": "Th",
+    "weekday5": "Fr",
+    "weekday6": "Sa",
+    "weekShort": "{day}"
+  },
+  "balance": {
+    "correct": "✅ Correct!",
+    "wrongDetail": "❌ Left {l}, right {r}, {s}",
+    "balanced": "balanced",
+    "unbalanced": "not balanced",
+    "title": "⚖️ Weight Balance",
+    "question": "Is the scale balanced?",
+    "left": "Left={n}",
+    "right": "Right={n}",
+    "yes": "⚖️ Balanced",
+    "no": "⬇️ Not balanced",
+    "levelScore": "Level {n} · Score {s}"
+  },
+  "calendar": {
+    "correctDate": "✅ {m}/{d} is {w}",
+    "wrongDate": "❌ Wrong date",
+    "title": "📅 Calendar Learning",
+    "prev": "Previous month",
+    "next": "Next month",
+    "findDate": "🎯 Find {m}/{d}, tap it!",
+    "score": "Score {n}",
+    "weekday0": "Sunday",
+    "weekday1": "Monday",
+    "weekday2": "Tuesday",
+    "weekday3": "Wednesday",
+    "weekday4": "Thursday",
+    "weekday5": "Friday",
+    "weekday6": "Saturday",
+    "viewMode": "📖 View",
+    "quizMode": "🎯 Find date",
+    "week": "Week {n}"
+  },
+  "chain": {
+    "level0": "Not started",
+    "level1": "Basic",
+    "level2": "Intermediate",
+    "level3": "Proficient",
+    "level4": "Advanced",
+    "level5": "Challenge",
+    "title": "Adaptive Learning Chain",
+    "avgLevel": "Overall Level {lv}",
+    "upgrading": "Upgrading...",
+    "streakWin": "Win {n}",
+    "streakLose": "Lose {n}",
+    "downgrade": "→Downgrade",
+    "holding": "Holding",
+    "hint": "5 correct → upgrade · 3 wrong → downgrade · higher level = harder",
+    "waitUpgrade": "🎯 Awaiting upgrade",
+    "refresh": "Refresh",
+    "confirmReset": "Confirm reset",
+    "cancel": "Cancel",
+    "reset": "Reset",
+    "resetTip": "Reset chain to initial state"
+  },
+  "colorExplore": {
+    "c0": "Red",
+    "c1": "Blue",
+    "c2": "Yellow",
+    "c3": "Green",
+    "c4": "Orange",
+    "c5": "Purple",
+    "c6": "Pink",
+    "c7": "Brown",
+    "c8": "White",
+    "c9": "Black",
+    "correct": "✅ Right! This is {n}",
+    "wrong": "❌ This is {n}",
+    "title": "🌈 Color Learning",
+    "question": "What color is this?",
+    "score": "Score {n}"
+  },
+  "dictation": {
+    "done": "Dictation complete!",
+    "correct": "Correct",
+    "accuracy": "Accuracy",
+    "again": "🔄 Again",
+    "title": "Pinyin Dictation",
+    "subtitle": "Listen and pick the pinyin",
+    "hint": "Listen carefully and pick the right pinyin",
+    "relisten": "🔊 Listen again",
+    "answer": "Answer: {p}"
+  },
+  "hanzi500": {
+    "all": "All",
+    "xiangxing": "Pictograms",
+    "zhishi": "Indicatives",
+    "huiyi": "Associatives",
+    "xingsheng": "Phonosemantics",
+    "back": "◀️ Back",
+    "read": "🔊 Read",
+    "origin": "📜 Origins",
+    "words": "📝 Words",
+    "example": "💬 Examples",
+    "title": "Hanzi Library",
+    "strokeInfo": "{s} strokes · {r} radicals",
+    "shown": "Showing {v} / {t}",
+    "loadMore": "Scroll to load more"
+  },
+  "hanziDictation": {
+    "title": "Hanzi Dictation",
+    "subtitle": "Listen and pick the right character",
+    "selectLevel": "Choose a level ({count} characters learned)",
+    "level1": "🌱 Starter",
+    "level2": "🌿 Common",
+    "level3": "🌳 Advanced",
+    "levelShort1": "Starter",
+    "levelShort2": "Common",
+    "levelShort3": "Advanced",
+    "rulesTitle": "Dictation Rules",
+    "rule1": "1. Tap play and listen carefully to the word",
+    "rule2": "2. Pick the character you heard from the grid",
+    "rule3": "3. First half: listen & pick. Second half: similar-character challenge",
+    "rule4": "4. Prioritizes characters you should review or got wrong before",
+    "start": "Start Dictation ({round} questions)",
+    "dictating": "Dictating · Q{idx} / {total} · Score {score}",
+    "exit": "Exit",
+    "dictateMeta": "Dictation {idx}/{total}",
+    "finishDictation": "Finish Dictation",
+    "perfectTitle": "Perfect dictation! Amazing!",
+    "doneTitle": "Dictation done, {score} / {total} correct",
+    "perfectDesc": "You heard and recognized every character~",
+    "doneDesc": "Wrong characters go to the wrong-book for review",
+    "againRound": "One More Round",
+    "changeLevel": "Change Level"
+  },
+  "job": {
+    "correctDetail": "✅ Correct! {n} - {d}",
+    "wrongDetail": "❌ Answer: {n}",
+    "title": "👮 Jobs & Professions",
+    "toolUniform": "🔧 Tool: {t} · 👕 {u}",
+    "question": "Who uses this tool?",
+    "score": "Score {n}"
+  },
+  "pinyinGroup": {
+    "title": "🎶 Vowel Sorting",
+    "subtitle": "Drag each vowel into the right category",
+    "pendingLabel": "👇 Vowels to sort:",
+    "single": "Simple Vowel",
+    "compound": "Compound Vowel",
+    "frontNasal": "Front Nasal",
+    "backNasal": "Back Nasal",
+    "hintSingle": "Mouth shape stays the same",
+    "hintCompound": "Two simple vowels combined",
+    "hintFrontNasal": "Ends with n, tongue tip up",
+    "hintBackNasal": "Ends with ng, nasal buzz",
+    "allDone": "🎉 All sorted!",
+    "selectedHint": "Selected「{p}」— tap a category box to drop it",
+    "correctFeedback": "✅ {p} is right!",
+    "wrongFeedback": "❌ {p} doesn't belong here",
+    "score": "Score {score}",
+    "newBatch": "🔄 New Batch"
+  },
+  "poetArchive": {
+    "back": "◀️ Back",
+    "bio": "📖 Biography",
+    "timeline": "⏳ Timeline",
+    "art": "🎨 Artistic Achievements",
+    "works": "📚 Representative Works",
+    "count": "Works in archive ({n})",
+    "source": "📚 Sources",
+    "title": "Poet Archive",
+    "subtitle": "Learn about the poet's life"
+  },
+  "reciteRecorder": {
+    "micError": "Cannot access microphone. Please check permissions.",
+    "title": "Recite & Record",
+    "subtitle": "Record your recitation and compare with the model",
+    "listen": "🔊 Listen",
+    "start": "🎙️ Start",
+    "stop": "⏹️ Stop",
+    "recording": "Recording... {t}",
+    "duration": "Duration: {t}",
+    "play": "▶️ Play",
+    "redo": "🔄 Re-record",
+    "done": "✅ I finished!"
+  },
+  "rhythm": {
+    "title": "🥉 Rhythm Repeat",
+    "correct": "🎉 Perfect! Great rhythm!",
+    "wrong": "❌ Wrong rhythm, listen again",
+    "listening": "🔊 Listening...",
+    "tapNow": "👆 Tap in order!",
+    "replay": "🔊 Listen again",
+    "nextLevel": "Next level",
+    "score": "Score {n}"
+  },
+  "skip": {
+    "step1": "Count by 1s",
+    "step2": "Count by 2s",
+    "step5": "Count by 5s",
+    "step10": "Count by 10s",
+    "correct": "✅ Correct!",
+    "wrongAns": "❌ Answer is {a}",
+    "title": "🔢 Skip Counting",
+    "question": "What comes next?",
+    "score": "Score {n}",
+    "fromStart": "Start over",
+    "learnMode": "📖 Count",
+    "quizMode": "🎯 Quiz"
+  },
+  "stickerScene": {
+    "title": "Sticker Scene",
+    "subtitle": "Pick a scene → Add stickers → Save your work!",
+    "sceneBlueSky": "Blue Sky",
+    "sceneOcean": "Under the Sea",
+    "sceneStarry": "Starry Night",
+    "sceneForest": "Forest Meadow",
+    "sceneRainbow": "Rainbow Bridge",
+    "dragHint": "Drag to move / tap to remove",
+    "emptyHint": "👇 Pick stickers below and drop them here",
+    "clear": "🗑️ Clear",
+    "saveWork": "📸 Save Artwork",
+    "myStickers": "🎨 My Stickers ({owned}/{total})",
+    "all": "All",
+    "albumCount": "📚 {name} ×{count}",
+    "noStickers": "No stickers yet — do some practice to earn them!",
+    "saveName": "My Sticker Artwork"
+  },
+  "strokeAnim": {
+    "title": "Stroke Demo",
+    "writing": "Writing...",
+    "redo": "Do it again 🔄",
+    "play": "▶ Play",
+    "remembered": "「{char}」 has {total} strokes, did you remember?",
+    "watch": "Watch the stroke order carefully~",
+    "clickToPlay": "Click play to see how to write「{char}」",
+    "noData": "No stroke data for this character yet, try tracing along",
+    "loading": "Loading stroke data..."
+  },
+  "symmetry": {
+    "butterfly": "Butterfly",
+    "apple": "Apple",
+    "star": "Star",
+    "heart": "Heart",
+    "leaf": "Leaf",
+    "umbrella": "Umbrella",
+    "car": "Car",
+    "sock": "Sock",
+    "beer": "Beer mug",
+    "crab": "Crab",
+    "bee": "Bee",
+    "key": "Key",
+    "correct": "✅ Correct!",
+    "wrong": "❌ Try again",
+    "correctDetail": "✅ Correct! {n} is {s}",
+    "wrongDetail": "❌ {n} is {s}",
+    "yes": "symmetric",
+    "no": "not symmetric",
+    "title": "🦋 Symmetry"
+  },
+  "tangram": {
+    "title": "Tangram",
+    "subtitle": "Drag shapes to build the picture",
+    "puzzleCat": "Cat",
+    "puzzleHouse": "House",
+    "puzzleBoat": "Boat",
+    "puzzleRocket": "Rocket",
+    "puzzleBird": "Bird",
+    "hintCat": "Pointy ears, long tail",
+    "hintHouse": "Pointy roof, square body",
+    "hintBoat": "Triangular sail, flat hull",
+    "hintRocket": "Pointy head up",
+    "hintBird": "Wings spread",
+    "goal": "🎯 Goal: build {emoji}「{name}」— {hint}",
+    "reset": "🔄 Reset",
+    "done": "✅ Done!",
+    "next": "➡️ Next",
+    "tip": "💡 Drag the colorful shapes onto the outline, tap buttons to rotate. Tap 'Done!' to earn stars!"
+  },
+  "tenFrame": {
+    "addMode": "➕ Make Ten (Addition)",
+    "subMode": "➖ Break Ten (Subtraction)",
+    "step1Add": "✨ Step 1: How many to make ten? (borrow {count})",
+    "step2Add": "🎉 Step 2: Total! (10 + {remain})",
+    "step1Sub": "✨ Step 1: Break ten! (10 − {sub} leaves {breakTen})",
+    "step2Sub": "🎉 Step 2: Add the rest! ({breakTen} + {remain})",
+    "nextAdd": "🚀 Great job! Next question ➔",
+    "nextSub": "🚀 Break-ten works! Next question ➔"
+  },
+  "tonePractice": {
+    "title": "Tone Practice",
+    "subtitle": "Listen and pick the right tone",
+    "tone1": "1st Tone",
+    "tone2": "2nd Tone",
+    "tone3": "3rd Tone",
+    "tone4": "4th Tone",
+    "listenQuestion": "Which tone is this syllable?",
+    "listenAgain": "🔊 Listen Again",
+    "doneTitle": "Tone Practice Complete!",
+    "doneScore": "{correct} / {total} correct · {stars}",
+    "againRound": "🔄 One More Round",
+    "progress": "Q{idx} / {total}",
+    "nextQuestion": "➡️ Next Question",
+    "seeResult": "🏁 See Results"
+  },
+  "trainView": {
+    "title": "Training Center",
+    "search": "Which poem? Search by title / author / theme...",
+    "myFocus": "My Training Focus",
+    "difficult": "{n} difficult points",
+    "bestRecite": "Best {best} · Stage {stage}",
+    "empty": "No training records yet~ Mark difficult points when reading in the poem library, or do self-tests in the study view."
+  },
+  "wordReview": {
+    "back": "Back",
+    "tapHint": "Tap card to flip",
+    "speak": "Speak",
+    "next": "Next",
+    "title": "Word Review",
+    "subtitle": "Browse by category + card review",
+    "byTheme": "By theme",
+    "byLevel": "By level",
+    "weak": "Weak words",
+    "startReview": "Start card review ({n} words)",
+    "noWords": "No matching words"
+  },
+  "ai": {
+    "thinking": "Xiaozhi is thinking…"
+  },
+  "quizCard": {
+    "progressAria": "Question {current} of {total}",
+    "progressLabel": "Progress",
+    "difficulty": "Difficulty:",
+    "optionAria": "Option {letter}: {label}",
+    "correct": "Correct",
+    "wrong": "Wrong",
+    "explanation": "💡 Explanation:"
+  },
+  "app": {
+    "name": "Baby Learning Park",
+    "tagline": "AI Children Learning Park",
+    "defaultProfileName": "Baby"
   }
 }

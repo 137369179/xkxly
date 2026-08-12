@@ -294,7 +294,230 @@
   },
   "research": {
     "title": "研究乐园",
-    "comingSoon": "研究模式正在建设中，敬请期待～"
+    "comingSoon": "研究模式正在建设中，敬请期待～",
+    "common": {
+      "exit": "退出研究"
+    },
+    "topicSelect": {
+      "hint": "今天想研究什么呢？选一个主题开始探索吧！"
+    },
+    "topic": {
+      "color": {
+        "label": "颜色",
+        "desc": "红黄蓝绿的世界"
+      },
+      "dino": {
+        "label": "恐龙",
+        "desc": "远古巨兽的秘密"
+      },
+      "space": {
+        "label": "太空",
+        "desc": "星星和行星的故事"
+      },
+      "body": {
+        "label": "人体",
+        "desc": "身体的奇妙秘密"
+      },
+      "vehicle": {
+        "label": "车辆",
+        "desc": "会跑的铁盒子"
+      },
+      "job": {
+        "label": "职业",
+        "desc": "大家都在做什么"
+      }
+    },
+    "explore": {
+      "discoveryLabel": "我的发现",
+      "behaviorHint": "多看看多点点，探索本身就是奖励",
+      "more": "还有吗？",
+      "requestCard": "我想知道更多 💡",
+      "changeTopic": "换主题",
+      "color": {
+        "fact0": "红色是苹果的颜色",
+        "fact1": "蓝色是天空和海洋的颜色",
+        "fact2": "绿色是树叶和小草的颜色",
+        "fact3": "黄色是太阳和香蕉的颜色",
+        "fact4": "把红色和黄色混在一起，会变成橙色"
+      },
+      "dino": {
+        "fact0": "霸王龙是恐龙里的大家伙",
+        "fact1": "翼龙有翅膀，会飞",
+        "fact2": "三角龙头上有三只角",
+        "fact3": "恐龙吃的东西不一样",
+        "fact4": "恐龙生活在很久很久以前"
+      },
+      "space": {
+        "fact0": "太阳是一颗大星星",
+        "fact1": "月亮围着地球转",
+        "fact2": "星星在很远很远的地方",
+        "fact3": "地球是我们的家",
+        "fact4": "宇航员坐着火箭去太空"
+      },
+      "body": {
+        "fact0": "心脏让血液流遍全身",
+        "fact1": "大脑是身体的指挥中心",
+        "fact2": "骨头支撑着我们的身体",
+        "fact3": "肺帮我们呼吸空气",
+        "fact4": "眼睛帮我们看见世界"
+      },
+      "vehicle": {
+        "fact0": "汽车有四个轮子",
+        "fact1": "火车在铁轨上跑",
+        "fact2": "飞机在天空中飞",
+        "fact3": "轮船在大海上航行",
+        "fact4": "公交车载很多人"
+      },
+      "job": {
+        "fact0": "医生帮大家看病",
+        "fact1": "消防员救火救人",
+        "fact2": "老师教小朋友学知识",
+        "fact3": "厨师做出好吃的饭菜",
+        "fact4": "警察维护秩序保护大家"
+      }
+    },
+    "card": {
+      "title": "小知识",
+      "loading": "小智正在查资料…",
+      "cooldown": "再等 {n} 秒就能继续啦",
+      "degradedHint": "小智有点忙，先用这份小知识吧",
+      "favorite": "收藏 ⭐",
+      "startQuiz": "来玩小测验",
+      "backToExplore": "返回探索"
+    },
+    "fallbackFacts": {
+      "color": {
+        "title": "颜色的小秘密",
+        "body": "颜色让世界变得漂亮！红色像苹果，蓝色像天空，绿色像树叶。"
+      },
+      "dino": {
+        "title": "恐龙的小秘密",
+        "body": "霸王龙是恐龙里的大个子，它生活在大约六千万年前。"
+      },
+      "space": {
+        "title": "太空的小秘密",
+        "body": "太阳是一颗会发光的星星，地球绕着太阳转圈圈。"
+      },
+      "body": {
+        "title": "人体的小秘密",
+        "body": "我们的大脑就像身体的小指挥官，指挥所有地方工作。"
+      },
+      "vehicle": {
+        "title": "车辆的小秘密",
+        "body": "汽车、火车、飞机、轮船，它们带我们去不同的地方。"
+      },
+      "job": {
+        "title": "职业的小秘密",
+        "body": "医生、老师、厨师、消防员，每个人都有自己的本领。"
+      }
+    },
+    "quiz": {
+      "opt": {
+        "true": "对",
+        "false": "错"
+      },
+      "hint": "想一想刚才看到的知识",
+      "why": "你仔细观察了，真棒！",
+      "summaryStars": "获得 {n} 颗星",
+      "replay": "再来一轮",
+      "confirm": "完成",
+      "color": {
+        "q0": {
+          "stem": "红色是苹果的颜色"
+        },
+        "q1": {
+          "stem": "蓝色是天空和海洋的颜色"
+        },
+        "q2": {
+          "stem": "绿色是太阳的颜色"
+        },
+        "q3": {
+          "stem": "黄色是香蕉的颜色"
+        }
+      },
+      "dino": {
+        "q0": {
+          "stem": "霸王龙是恐龙里的大个子"
+        },
+        "q1": {
+          "stem": "翼龙会在海里游泳"
+        },
+        "q2": {
+          "stem": "三角龙头上有三只角"
+        },
+        "q3": {
+          "stem": "恐龙生活在很久很久以前"
+        }
+      },
+      "space": {
+        "q0": {
+          "stem": "太阳是一颗大星星"
+        },
+        "q1": {
+          "stem": "月亮围着地球转"
+        },
+        "q2": {
+          "stem": "地球是我们的家"
+        },
+        "q3": {
+          "stem": "宇航员划着小船去太空"
+        }
+      },
+      "body": {
+        "q0": {
+          "stem": "大脑是身体的指挥中心"
+        },
+        "q1": {
+          "stem": "心脏帮我们呼吸空气"
+        },
+        "q2": {
+          "stem": "骨头支撑着我们的身体"
+        },
+        "q3": {
+          "stem": "眼睛帮我们看见世界"
+        }
+      },
+      "vehicle": {
+        "q0": {
+          "stem": "汽车有四个轮子"
+        },
+        "q1": {
+          "stem": "火车在天空中飞"
+        },
+        "q2": {
+          "stem": "飞机在天空中飞"
+        },
+        "q3": {
+          "stem": "公交车载很多人"
+        }
+      },
+      "job": {
+        "q0": {
+          "stem": "医生帮大家看病"
+        },
+        "q1": {
+          "stem": "消防员会做饭"
+        },
+        "q2": {
+          "stem": "老师教小朋友学知识"
+        },
+        "q3": {
+          "stem": "警察维护秩序保护大家"
+        }
+      }
+    },
+    "review": {
+      "title": "本轮小结",
+      "discoveries": "你发现了 {n} 条新知识",
+      "exploreAgain": "继续探索",
+      "done": "完成"
+    },
+    "complete": {
+      "title": "研究完成！",
+      "hint": "你是勇敢的小小研究员",
+      "restart": "再来一次",
+      "home": "回首页"
+    }
   },
   "learning": {
     "start": "开始学习",
@@ -1002,7 +1225,16 @@
     "emptyChart": "🎉 错题本空空如也！",
     "distributionTotal": "错题分布（共 {count} 题）",
     "wrongLabel": "错题",
-    "questionCount": "{count} 题"
+    "questionCount": "{count} 题",
+    "title": "错题本",
+    "dueCount": "有 {count} 个错题到了最佳复习时间！",
+    "reviewNow": "立即复习",
+    "tab.overview": "概览",
+    "tab.train": "训练",
+    "tab.badges": "徽章",
+    "emptyTitle": "错题本空空如也！",
+    "emptyHint": "去学习积攒一些错题，再来这里消灭它们吧！",
+    "backHome": "回首页学习"
   },
   "storybook": {
     "pageTitle": "AI 绘本工坊",
@@ -1551,7 +1783,11 @@
     "strokeLoading": "笔顺数据加载中…",
     "strokeGuide": "沿着发光的笔画写，从金色小圆点起笔",
     "rewriteAll": "重写整字",
-    "keepWriting": "继续写 ✏️"
+    "keepWriting": "继续写 ✏️",
+    "compoundMeaning": "{comp1} 和 {comp2} 组成，意思是……",
+    "assembleExplain": "{char} 由 {comp1} 和 {comp2} 组成，意思是……",
+    "clickToStart": "▶ 点击开始",
+    "assembleSuccess": "✨ 拼装成功！"
   },
   "timeseq": {
     "title": "⏰ 时间顺序",
@@ -3139,5 +3375,364 @@
     "nextChar": "下一字 →",
     "correct": "✅ 对了",
     "thinkAgain": "🤔 再想想"
+  },
+  "analyticsInsight": {
+    "active7": "近 7 天活跃",
+    "active14": "近 14 天活跃",
+    "active30": "近 30 天活跃",
+    "days": "{count} 天",
+    "longestStreak": "最长连续天数",
+    "favWeekday": "最喜欢的星期",
+    "aiTitle": "🤖 和小智聊天",
+    "aiSummary": "今天 {today} · 本周 {week} · 累计 {total}",
+    "aiCount": "{count} 次",
+    "totalPractice": "累计练习",
+    "totalDuration": "累计时长",
+    "avgAccuracy": "平均正确率",
+    "minutes": "{count} 分钟",
+    "questions": "{count} 题",
+    "todayActiveTip": "🎉 今天也在学习，太棒了！",
+    "todayIdleTip": "💤 今天还没学习，点亮小火苗吧！",
+    "weekday0": "周日",
+    "weekday1": "周一",
+    "weekday2": "周二",
+    "weekday3": "周三",
+    "weekday4": "周四",
+    "weekday5": "周五",
+    "weekday6": "周六",
+    "weekShort": "{day}"
+  },
+  "balance": {
+    "correct": "✅ 平衡啦！",
+    "wrongDetail": "❌ 左边 {l}，右边 {r}，{s}",
+    "balanced": "平衡",
+    "unbalanced": "不平衡",
+    "title": "⚖️ 天平称重",
+    "question": "天平平衡吗？",
+    "left": "左边",
+    "right": "右边",
+    "yes": "⚖️ 平衡",
+    "no": "⬇️ 不平衡",
+    "levelScore": "第 {n} 关 · 得分 {s}"
+  },
+  "calendar": {
+    "correctDate": "✅ {m}月{d}日是{w}",
+    "wrongDate": "❌ 日期不对哦",
+    "title": "📅 日历学习",
+    "prev": "上个月",
+    "next": "下个月",
+    "findDate": "🎯 找到 {m}月{d}日，点它！",
+    "score": "得分 {n}",
+    "weekday0": "周日",
+    "weekday1": "周一",
+    "weekday2": "周二",
+    "weekday3": "周三",
+    "weekday4": "周四",
+    "weekday5": "周五",
+    "weekday6": "周六",
+    "viewMode": "📖 查看",
+    "quizMode": "🎯 找日期",
+    "week": "第 {n} 周"
+  },
+  "chain": {
+    "level0": "未开始",
+    "level1": "入门",
+    "level2": "进阶",
+    "level3": "熟练",
+    "level4": "高手",
+    "level5": "挑战",
+    "title": "🔗 逻辑链",
+    "avgLevel": "综合等级 {lv}",
+    "upgrading": "升级中…",
+    "streakWin": "连胜 {n}",
+    "streakLose": "连败 {n}",
+    "downgrade": "→降级",
+    "holding": "保持",
+    "hint": "想一想哪个先发生呢？",
+    "waitUpgrade": "🎯 等待升级",
+    "refresh": "刷新",
+    "confirmReset": "确认重置",
+    "cancel": "取消",
+    "reset": "重新开始",
+    "resetTip": "重置链条到初始状态"
+  },
+  "colorExplore": {
+    "c0": "红色",
+    "c1": "蓝色",
+    "c2": "黄色",
+    "c3": "绿色",
+    "c4": "橙色",
+    "c5": "紫色",
+    "c6": "粉色",
+    "c7": "棕色",
+    "c8": "黑色",
+    "c9": "白色",
+    "correct": "✅ 答对啦！",
+    "wrong": "再找找看",
+    "title": "🎨 颜色探索",
+    "question": "这是什么颜色？",
+    "score": "得分 {n}"
+  },
+  "dictation": {
+    "done": "🎉 听写完成！",
+    "correct": "正确",
+    "accuracy": "正确率",
+    "again": "🔄 再来一次",
+    "title": "拼音听写",
+    "subtitle": "听一听，写一写",
+    "hint": "仔细听，选出正确的拼音",
+    "relisten": "🔊 再听一遍",
+    "answer": "答案：{p}"
+  },
+  "hanzi500": {
+    "all": "全部",
+    "xiangxing": "象形字",
+    "zhishi": "指事字",
+    "huiyi": "会意字",
+    "xingsheng": "形声字",
+    "back": "返回",
+    "read": "🔊 朗读",
+    "origin": "📜 字源",
+    "words": "📝 组词",
+    "example": "💬 例句",
+    "title": "📚 汉字五百",
+    "strokeInfo": "{s} 画 · {r} 部首",
+    "shown": "显示 {v} / {t}",
+    "loadMore": "滚动加载更多"
+  },
+  "hanziDictation": {
+    "title": "汉字听写",
+    "subtitle": "听一听，选出正确的字",
+    "selectLevel": "选择关卡（已学 {count} 字）",
+    "level1": "🌱 入门",
+    "level2": "🌿 常用",
+    "level3": "🌳 进阶",
+    "levelShort1": "入门",
+    "levelShort2": "常用",
+    "levelShort3": "进阶",
+    "rulesTitle": "听写规则",
+    "rule1": "1. 点击播放，仔细听词语",
+    "rule2": "2. 从字格里选出你听到的字",
+    "rule3": "3. 前半场听音选字，后半场形近字挑战",
+    "rule4": "4. 优先考你该复习和之前写错的字",
+    "start": "开始听写（{round} 题）",
+    "dictating": "听写中 · 第{idx} / {total}题 · 得分 {score}",
+    "exit": "退出",
+    "dictateMeta": "听写 {idx}/{total}",
+    "finishDictation": "完成听写",
+    "perfectTitle": "听写全对！太厉害了！",
+    "doneTitle": "听写完成，答对 {score} / {total} 题",
+    "perfectDesc": "每个字都听对了~",
+    "doneDesc": "写错的字会进入错题本复习",
+    "againRound": "再来一轮",
+    "changeLevel": "更换关卡"
+  },
+  "job": {
+    "correctDetail": "✅ 正确！{n} - {d}",
+    "wrongDetail": "❌ 答案：{n}",
+    "title": "👮 职业与工具",
+    "toolUniform": "🔧 工具：{t} · 👕 {u}",
+    "question": "谁在使用这个工具？",
+    "score": "得分 {n}"
+  },
+  "pinyinGroup": {
+    "title": "🎶 韵母分类",
+    "subtitle": "把韵母拖到正确的分类里",
+    "pendingLabel": "👇 待分类的韵母：",
+    "single": "单韵母",
+    "compound": "复韵母",
+    "frontNasal": "前鼻音",
+    "backNasal": "后鼻音",
+    "hintSingle": "口型保持不变",
+    "hintCompound": "两个单韵母组合",
+    "hintFrontNasal": "以 n 结尾，舌尖上翘",
+    "hintBackNasal": "以 ng 结尾，鼻腔共鸣",
+    "allDone": "🎉 全部分类完成！",
+    "selectedHint": "已选中「{p}」——点击分类框放入",
+    "correctFeedback": "✅ {p} 分对了！",
+    "wrongFeedback": "❌ {p} 不属于这里",
+    "score": "得分",
+    "newBatch": "🔄 新一批"
+  },
+  "poetArchive": {
+    "back": "◀️ 返回",
+    "bio": "📖 生平",
+    "timeline": "⏳ 时间线",
+    "art": "🎨 艺术成就",
+    "works": "📚 代表作品",
+    "count": "收录作品（{n}）",
+    "source": "📚 资料来源",
+    "title": "诗人档案",
+    "subtitle": "了解诗人的一生"
+  },
+  "reciteRecorder": {
+    "micError": "无法访问麦克风，请检查权限设置",
+    "title": "🎙️ 背诵录音",
+    "subtitle": "录下你的背诵，和范读比一比",
+    "listen": "🔊 听范读",
+    "start": "🎙️ 开始录音",
+    "stop": "⏹ 停止",
+    "recording": "录音中… {t}",
+    "duration": "时长：{t}",
+    "play": "▶️ 播放",
+    "redo": "🔄 重新录音",
+    "done": "✅ 我背完了！"
+  },
+  "rhythm": {
+    "title": "🥁 节奏模仿",
+    "correct": "🎉 太棒了！节奏完美！",
+    "wrong": "❌ 节奏不对，再听一次",
+    "listening": "🔊 听节奏…",
+    "tapNow": "👆 按顺序拍一拍！",
+    "replay": "🔊 再听一次",
+    "nextLevel": "下一关",
+    "score": "得分"
+  },
+  "skip": {
+    "step1": "1 个 1 个数",
+    "step2": "2 个 2 个数",
+    "step5": "5 个 5 个数",
+    "step10": "10 个 10 个数",
+    "correct": "✅ 正确！",
+    "wrongAns": "❌ 答案是 {a}",
+    "title": "🔢 跳数练习",
+    "question": "下一个是什么？",
+    "score": "得分",
+    "fromStart": "重新开始",
+    "learnMode": "📖 数一数",
+    "quizMode": "🎯 闯关"
+  },
+  "stickerScene": {
+    "title": "贴纸场景",
+    "subtitle": "选场景 → 贴贴纸 → 保存作品！",
+    "sceneBlueSky": "蓝天",
+    "sceneOcean": "海底世界",
+    "sceneStarry": "星空",
+    "sceneForest": "森林",
+    "sceneRainbow": "彩虹桥",
+    "dragHint": "拖动移动 / 点击删除",
+    "emptyHint": "👇 在下面选贴纸，放到这里",
+    "clear": "清空",
+    "saveWork": "📸 保存作品",
+    "myStickers": "🎨 我的贴纸（{owned}/{total}）",
+    "all": "全部",
+    "albumCount": "📚 {name} ×{count}",
+    "noStickers": "还没有贴纸——做练习来赚取吧！",
+    "saveName": "我的贴纸作品"
+  },
+  "strokeAnim": {
+    "title": "笔画演示",
+    "writing": "书写中…",
+    "redo": "🔄 再写一遍",
+    "play": "▶ 播放",
+    "remembered": "「{char}」有 {total} 画，你记住了吗？",
+    "watch": "仔细观察笔顺~",
+    "clickToPlay": "点击播放，看看「{char}」怎么写",
+    "noData": "这个字暂时没有笔顺数据，试着描一描",
+    "loading": "加载笔顺数据…"
+  },
+  "symmetry": {
+    "butterfly": "蝴蝶",
+    "apple": "苹果",
+    "star": "星星",
+    "heart": "爱心",
+    "leaf": "树叶",
+    "umbrella": "雨伞",
+    "car": "小汽车",
+    "sock": "袜子",
+    "beer": "啤酒杯",
+    "crab": "螃蟹",
+    "bee": "蜜蜂",
+    "key": "钥匙",
+    "correct": "✅ 正确！",
+    "wrong": "❌ 再找找",
+    "correctDetail": "✅ 正确！{n} 是{s}",
+    "wrongDetail": "❌ {n} 是{s}",
+    "yes": "对称的",
+    "no": "不对称",
+    "title": "🦋 对称之美"
+  },
+  "tangram": {
+    "title": "🧩 七巧板",
+    "subtitle": "拖动形状拼出图案",
+    "puzzleCat": "小猫",
+    "puzzleHouse": "房子",
+    "puzzleBoat": "小船",
+    "puzzleRocket": "火箭",
+    "puzzleBird": "小鸟",
+    "hintCat": "尖耳朵，长尾巴",
+    "hintHouse": "尖屋顶，方身子",
+    "hintBoat": "三角帆，平船底",
+    "hintRocket": "尖头朝上",
+    "hintBird": "翅膀展开",
+    "goal": "🎯 目标：拼出 {emoji}「{name}」— {hint}",
+    "reset": "重新拼",
+    "done": "完成！",
+    "next": "下一关",
+    "tip": "💡 把彩色形状拖到轮廓上，点按钮旋转。点「完成！」赚星星！"
+  },
+  "tenFrame": {
+    "addMode": "➕ 凑十法（加法）",
+    "subMode": "➖ 破十法（减法）",
+    "step1Add": "✨ 第一步：还要几个凑成十？（借 {count}）",
+    "step2Add": "🎉 第二步：算总数！（10 + {remain}）",
+    "step1Sub": "✨ 第一步：破十！（10 − {sub} 剩 {breakTen}）",
+    "step2Sub": "🎉 第二步：加个位！（{ten} + {unit}）",
+    "nextAdd": "🚀 太棒了！下一题 ➔",
+    "nextSub": "🚀 破十成功！下一题 ➔"
+  },
+  "tonePractice": {
+    "title": "🎵 声调练习",
+    "subtitle": "听一听，选出正确的声调",
+    "tone1": "一声",
+    "tone2": "二声",
+    "tone3": "三声",
+    "tone4": "四声",
+    "listenQuestion": "这个音节是几声？",
+    "listenAgain": "🔊 再听一遍",
+    "doneTitle": "声调练习完成！",
+    "doneScore": "答对 {correct} / {total} · {stars}",
+    "againRound": "🔄 再来一轮",
+    "progress": "第{idx} / {total}题",
+    "nextQuestion": "➡️ 下一题",
+    "seeResult": "🏁 查看成绩"
+  },
+  "trainView": {
+    "title": "🎯 训练中心",
+    "search": "想练哪首？按题目 / 作者 / 主题搜索…",
+    "myFocus": "我的训练重点",
+    "difficult": "{n} 个难点",
+    "bestRecite": "最佳 {best} · 阶段 {stage}",
+    "empty": "还没有训练记录"
+  },
+  "wordReview": {
+    "back": "返回",
+    "tapHint": "点卡片翻面",
+    "speak": "朗读",
+    "next": "下一个",
+    "title": "📇 词语复习",
+    "subtitle": "按分类浏览 + 卡片复习",
+    "byTheme": "按主题",
+    "byLevel": "按等级",
+    "weak": "薄弱词",
+    "startReview": "开始卡片复习（{n} 词）",
+    "noWords": "没有匹配的词语"
+  },
+  "ai": {
+    "thinking": "小智思考中…"
+  },
+  "quizCard": {
+    "progressAria": "第 {current} 题，共 {total} 题",
+    "progressLabel": "题目进度",
+    "difficulty": "难度：",
+    "optionAria": "选项 {letter}：{label}",
+    "correct": "正确",
+    "wrong": "错误",
+    "explanation": "💡 解析："
+  },
+  "app": {
+    "name": "宝贝学习乐园",
+    "tagline": "AI 儿童成长学习乐园",
+    "defaultProfileName": "宝贝"
   }
 }

@@ -180,6 +180,16 @@ interface StoreState {
   setEyeCare: (min: number) => void;
   setAiEnabled: (v: boolean) => void;
   setVoiceGuide: (v: boolean) => void;
+
+  // —— 研究模式（CMML）：F19 行为型数据源 + 收藏 + 笔记 ——
+  /** 记录一次研究探索行为（计数 + 累计时长；exploreMs 单位秒）。行为型徽章唯一数据源。 */
+  recordResearchAction: (topicId: string, deltaSec?: number) => void;
+  /** 收藏一张知识卡（kvId 非空才可调；去重） */
+  discoverCard: (kvId: string) => void;
+  /** 记录一条研究笔记（仿 setPoemNote） */
+  setResearchNote: (topicId: string, text: string) => void;
+  /** 完成一个研究会话（researchStats.sessionsCompleted+1） */
+  completeResearchSession: () => void;
 }
 
 /**
@@ -1018,6 +1028,45 @@ export const useStore = create<StoreState>()(
         useSettingsStore.getState().setAiEnabled(v);
       },
       setVoiceGuide: (v) => useSettingsStore.getState().setVoiceGuide(v),
+
+      // —— 研究模式（CMML）——
+      // 全部走 _applyProgress：progress 变更后统一跑 findNewBadges（F19 行为型徽章）
+      recordResearchAction: (topicId, deltaSec = 0) =>
+        set((s) =>
+          _applyProgress(s, (p) => {
+            const st = p.researchStats ?? { topicsExplored: [], exploreActions: 0, cardsRead: 0, sessionsCompleted: 0, exploreSeconds: 0 };
+            return {
+              ...p,
+              researchStats: {
+                ...st,
+                topicsExplored: st.topicsExplored.includes(topicId) ? st.topicsExplored : [...st.topicsExplored, topicId],
+                exploreActions: st.exploreActions + 1,
+                exploreSeconds: st.exploreSeconds + deltaSec,
+              },
+            };
+          }),
+        ),
+      discoverCard: (kvId) =>
+        set((s) =>
+          _applyProgress(s, (p) => ({
+            ...p,
+            discoveries: p.discoveries.includes(kvId) ? p.discoveries : [...p.discoveries, kvId],
+          })),
+        ),
+      setResearchNote: (topicId, text) =>
+        set((s) =>
+          _applyProgress(s, (p) => ({
+            ...p,
+            researchNotes: { ...p.researchNotes, [topicId]: text },
+          })),
+        ),
+      completeResearchSession: () =>
+        set((s) =>
+          _applyProgress(s, (p) => {
+            const st = p.researchStats ?? { topicsExplored: [], exploreActions: 0, cardsRead: 0, sessionsCompleted: 0, exploreSeconds: 0 };
+            return { ...p, researchStats: { ...st, sessionsCompleted: st.sessionsCompleted + 1 } };
+          }),
+        ),
     }),
     {
       name: 'baby-learning-park-v1',
