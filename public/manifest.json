@@ -1,0 +1,24 @@
+{
+  "short_name": "宝贝乐园",
+  "name": "宝贝学习乐园 - 幼小衔接AI智能伴学",
+  "id": "/?source=pwa",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#FAF5FF",
+  "theme_color": "#9333ea",
+  "display": "standalone",
+  "orientation": "any"
+}

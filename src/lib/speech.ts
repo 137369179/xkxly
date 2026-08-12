@@ -1,0 +1,569 @@
+/**
+ * Web Speech API 语音引擎
+ * ------------------------------------------------------------
+ * 幼儿场景的三个关键点：
+ * 1. voices 在部分浏览器是异步加载的，需要等待 voiceschanged
+ * 2. 中文 onboundary 事件在多数浏览器不可靠 —— 逐句高亮改为「按句排队播放」实现
+ * 3. 语速要慢（幼儿跟读），中文尤其要慢
+ */
+
+import type { ChantSegment } from './chant';
+import { applyUserPrefs, getSettings } from './tts/settings';
+import { correctText } from './tts/polyphone';
+import { buildNeuralSegments } from './tts/neuralCurve';
+import { tts } from './tts/manager';
+import type { SpeakLang } from '@/types';
+
+export type { SpeakLang };
+
+/* ------------------------------------------------------------------ */
+/* Store 桥接（解耦：lib 不反向依赖 store）                            */
+/* ------------------------------------------------------------------ */
+export interface TtsReport {
+  isSpeaking: boolean;
+  snippet: string;
+  startedAt: number;
+  module: string;
+}
+type TtsStateReporter = (report: TtsReport) => void;
+type VoiceGuideChecker = () => boolean;
+let ttsStateReporter: TtsStateReporter | null = null;
+let voiceGuideChecker: VoiceGuideChecker | null = null;
+/** 由 store 层在初始化时调用，把 TTS 状态推送与语音引导开关判断接回全局 store，
+ *  从而让 lib/speech 保持对 store 的零依赖（消除 lib→store 层倒置循环依赖）。 */
+export function registerTtsBridge(reporter: TtsStateReporter, checker: VoiceGuideChecker): void {
+  ttsStateReporter = reporter;
+  voiceGuideChecker = checker;
+}
+
+// 表扬/鼓励语库已拆至 ./praise（保持 re-export 兼容既有 import）
+export {
+  randomPraise,
+  randomEncourage,
+  praiseByScene,
+  encourageByScene,
+  skillToPraiseScene,
+  skillToEncourageScene,
+} from './praise';
+// PraiseScene, EncourageScene from ./praise
+
+
+const synth: SpeechSynthesis | null =
+  typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null;
+
+export const speechSupported = !!synth;
+
+let voicesCache: SpeechSynthesisVoice[] = [];
+let voicesReady: Promise<SpeechSynthesisVoice[]> | null = null;
+
+function loadVoices(): Promise<SpeechSynthesisVoice[]> {
+  if (!synth) return Promise.resolve([]);
+  if (voicesReady) return voicesReady;
+
+  voicesReady = new Promise((resolve) => {
+    const immediate = synth.getVoices();
+    if (immediate.length) {
+      voicesCache = immediate;
+      resolve(immediate);
+      return;
+    }
+    let settled = false;
+    const done = () => {
+      if (settled) return;
+      settled = true;
+      voicesCache = synth.getVoices();
+      resolve(voicesCache);
+    };
+    synth.addEventListener('voiceschanged', done, { once: true });
+    // 兜底：某些 WebView 永远不触发 voiceschanged
+    setTimeout(done, 1200);
+  });
+
+  return voicesReady;
+}
+
+// 预热
+if (synth) void loadVoices();
+
+/**
+ * 为指定语言挑选最合适的声音。
+ * 优先级：用户在家长中心选定的音色 > 神经/增强音色 > 儿童友好女声 > 本地音色。
+ *
+ * 「神经/增强音色」优先级很关键：同一台设备上 Windows 的
+ * "Microsoft Xiaoxiao Online (Natural)"、macOS/iOS 的 Siri 音色，
+ * 与老式拼接式音色（Ting-Ting 等）自然度差了整整一代，
+ * 但 getVoices() 的默认顺序并不会把它们排在前面 —— 必须主动识别。
+ */
+function pickVoice(lang: SpeakLang, preferURI?: string): SpeechSynthesisVoice | undefined {
+  if (!voicesCache.length) voicesCache = synth?.getVoices() ?? [];
+  const list = voicesCache;
+  if (!list.length) return undefined;
+
+  // 用户显式指定的音色最优先（跨语言也尊重，除非该音色已不存在）
+  if (preferURI) {
+    const chosen = list.find((v) => v.voiceURI === preferURI);
+    if (chosen) return chosen;
+  }
+
+  const prefix = lang === 'zh-CN' ? 'zh' : 'en';
+  const candidates = list.filter((v) => v.lang?.toLowerCase().startsWith(prefix));
+  if (!candidates.length) return undefined;
+
+  // 一代音质差距：优先挑神经网络 / 增强 / Siri 音色
+  const NEURAL = ['natural', 'neural', 'siri', 'online', 'enhanced', 'premium', '晓', '云'];
+  const neural = candidates.find((v) => {
+    const n = v.name.toLowerCase();
+    return NEURAL.some((k) => n.includes(k));
+  });
+  if (neural) return neural;
+
+  const preferredNames =
+    lang === 'zh-CN'
+      ? ['tingting', 'ting-ting', 'meijia', 'sinji', 'huihui', 'yaoyao', 'xiaoxiao', 'female']
+      : ['samantha', 'karen', 'moira', 'tessa', 'victoria', 'zira', 'female', 'google us english'];
+
+  const byName = candidates.find((v) =>
+    preferredNames.some((n) => v.name.toLowerCase().includes(n)),
+  );
+  if (byName) return byName;
+
+  const exact = candidates.find((v) => v.lang.replace('_', '-') === lang);
+  if (exact) return exact;
+
+  const local = candidates.find((v) => v.localService);
+  return local ?? candidates[0];
+}
+
+export interface SpeakOptions {
+  lang?: SpeakLang;
+  rate?: number;
+  pitch?: number;
+  volume?: number;
+  /** 内容模块 key，用于套用家长中心的「分模块朗读微调」 */
+  module?: import('./tts/types').TtsModuleKey | string;
+  /** 诗歌情绪 key（古诗范读时传入，神经引擎据此做情感化语速曲线） */
+  moodKey?: string;
+  /** 播放结束（或被打断）时回调 */
+  onEnd?: () => void;
+  onStart?: () => void;
+}
+
+let currentUtterance: SpeechSynthesisUtterance | null = null;
+
+// ============================================================
+// P2-7 / P2-8：全局朗读状态推送 + 优先级朗读队列
+// ------------------------------------------------------------
+// 现状：speak() 直接 synth.cancel() 打断上一条，多组件并发朗读时
+// 会出现「表扬语把古诗打断」「连击提示把讲解打断」等混乱。而且
+// ttsState 没有任何地方推送，UI 的全局朗读指示器拿不到数据。
+//
+// 方案：
+//  1. 引入优先级队列（praise > quiz > poem > story > general），
+//     高优先级打断低优先级；同/低优先级排队，避免重叠；
+//  2. speak() 在真正开始/结束时把状态推给 store.ttsState，
+//     UI 可订阅 isSpeaking 显示全局指示器、自动停止按钮。
+// ============================================================
+
+/** 朗读优先级：数值越大越优先；高优先级会打断当前低优先级朗读 */
+export type SpeakPriority = 'praise' | 'quiz' | 'poem' | 'story' | 'general';
+const PRIORITY_RANK: Record<SpeakPriority, number> = {
+  praise: 5, // 表扬/鼓励语最高，孩子答对瞬间立即反馈
+  quiz: 4, // 答题反馈次之
+  poem: 3, // 古诗范读
+  story: 2, // 故事/讲解
+  general: 1, // 一般朗读最低
+};
+
+/** 把模块 key 推断为优先级 */
+function moduleToPriority(module?: string): SpeakPriority {
+  if (module === 'praise') return 'praise';
+  if (module === 'quiz') return 'quiz';
+  if (module === 'poem') return 'poem';
+  if (module === 'story' || module === 'ai') return 'story';
+  return 'general';
+}
+
+interface QueueItem {
+  text: string;
+  options: SpeakOptions;
+  priority: SpeakPriority;
+  resolve: () => void;
+}
+
+/** 当前正在朗读项的优先级（用于判断新请求是否可打断） */
+let currentPriority: SpeakPriority | null = null;
+/** 排队等待的低优先级朗读（FIFO，仅在当前朗读结束后才会处理） */
+const pendingQueue: QueueItem[] = [];
+
+/** 推送朗读状态到全局 store（UI 订阅用），经桥接注入，lib 不依赖 store */
+function pushTtsState(isSpeaking: boolean, snippet = '', module = ''): void {
+  ttsStateReporter?.({
+    isSpeaking,
+    snippet: snippet ? snippet.slice(0, 20) : '',
+    startedAt: isSpeaking ? Date.now() : 0,
+    module,
+  });
+}
+
+/** 立刻停止所有朗读，并清空排队项 */
+export function stopSpeaking(): void {
+  // 清空等待队列，避免停止后又被队列里的项触发
+  while (pendingQueue.length) {
+    const item = pendingQueue.shift()!;
+    item.resolve();
+  }
+  currentPriority = null;
+  currentUtterance = null;
+  if (synth) {
+    try {
+      synth.cancel();
+    } catch {
+      /* noop */
+    }
+  }
+  pushTtsState(false);
+}
+
+/** 仅清空等待队列（不打断当前朗读），返回被丢弃的项数 */
+export function clearPendingQueue(): number {
+  let n = 0;
+  while (pendingQueue.length) {
+    const item = pendingQueue.shift()!;
+    item.resolve();
+    n++;
+  }
+  return n;
+}
+
+/**
+ * 朗读一段文本。返回 Promise，在朗读结束 / 被取消 / 出错时 resolve。
+ *
+ * P2-8：内置优先级调度——
+ *  - 高于或等于当前优先级：立即打断当前并播放（保证表扬语第一时间反馈）；
+ *  - 低于当前优先级：进入排队，当前朗读结束后自动播放（避免故事/讲解互相打断）；
+ *  - 队列最多保留 1 项，溢出时丢弃最旧的同级排队项，防止堆积。
+ */
+export function speak(text: string, options: SpeakOptions = {}): Promise<void> {
+  const { lang = 'zh-CN', onEnd, onStart } = options;
+
+  if (!synth || !text.trim()) {
+    onEnd?.();
+    return Promise.resolve();
+  }
+
+  // 日常词库纠音（P9 · ①）：自由文本（故事/讲解/跟读）无逐字拼音，引擎易把
+  // 「银行/重新/音乐」等高频多音词读错。开启纠音时整词替换成同音词送进 TTS。
+  // 古诗走 correctChars（单字+拼音），不在此处理，避免双重替换。
+  const usePoly = getSettings().polyphone;
+  if (usePoly && lang === 'zh-CN' && options.module !== 'poem') {
+    text = correctText(text);
+  }
+
+  const priority = moduleToPriority(options.module);
+
+  // 优先级调度：若当前有更高优先级朗读在进行，且本项优先级更低 → 排队
+  if (currentPriority !== null && PRIORITY_RANK[priority] < PRIORITY_RANK[currentPriority]) {
+    return new Promise<void>((resolve) => {
+      // 队列上限 1：丢弃最旧的低优先级排队项，防止堆积后孩子听到一长串过时内容
+      if (pendingQueue.length >= 1) {
+        const dropped = pendingQueue.shift()!;
+        dropped.resolve();
+      }
+      pendingQueue.push({ text, options, priority, resolve });
+    });
+  }
+
+  return loadVoices().then(() => runSpeak(text, options, priority, onEnd, onStart));
+}
+
+/** 真正执行朗读（已通过优先级判断），结束后处理排队项 */
+function runSpeak(
+  text: string,
+  options: SpeakOptions,
+  priority: SpeakPriority,
+  onEnd?: () => void,
+  onStart?: () => void,
+): Promise<void> {
+  const { lang = 'zh-CN', rate, pitch = 1.15, volume = 1 } = options;
+  currentPriority = priority;
+  pushTtsState(true, text, options.module ?? '');
+
+  /** 朗读结束的统一收尾：触发回调、推送状态、处理排队项 */
+  const cleanup = () => {
+    if (currentPriority === priority) {
+      currentPriority = null;
+      pushTtsState(false);
+    }
+    // 处理排队项：取最早一个继续播放（其优先级必然 <= 本项，否则不会进队列）
+    const next = pendingQueue.shift();
+    if (next) {
+      // 排队项可能在等待期间已不再需要（如页面切换），但 resolve 由其自身播放完成触发
+      void loadVoices().then(() => runSpeak(next.text, next.options, next.priority).then(next.resolve));
+    }
+  };
+
+  return new Promise<void>((resolve) => {
+    // 神经网络朗读：中文且家长开启了 Kokoro 引擎 → 走本地模型推理（自然度更高）。
+    // 英文（字母/单词）仍用系统语音，保证清脆跟读；模型加载失败由管理器内部降级系统语音。
+    const useKokoro = lang === 'zh-CN' && getSettings().engine === 'kokoro';
+    if (useKokoro) {
+      const base = rate ?? 0.78;
+      const prefs = applyUserPrefs({ rate: base, pitch, volume, lang, module: options.module });
+      const rateOut = prefs.rate ?? base;
+      // 情感化语速曲线（P9 · ②）：把整段切成句子，按模块/情绪算出每句速度与停顿，
+      // 交给 Kokoro 分段生成拼接，古诗/故事因此抑扬顿挫、句末拖腔。
+      const segments = buildNeuralSegments(text, options.module, options.moodKey);
+      tts
+        .play(text, {
+          rate: rateOut,
+          pitch: prefs.pitch ?? pitch,
+          volume: prefs.volume ?? volume,
+          segments,
+        })
+        .then((handle) => handle.done)
+        .then(() => {
+          onEnd?.();
+          cleanup();
+          resolve();
+        })
+        .catch(() => {
+          // 理论上管理器已降级系统语音；此处兜底保证 Promise 必然 resolve
+          onEnd?.();
+          cleanup();
+          resolve();
+        });
+      return;
+    }
+
+    // 系统语音路径：synth 必须可用（speak 入口已检查，这里收窄类型供 TS）
+    if (!synth) {
+      onEnd?.();
+      cleanup();
+      resolve();
+      return;
+    }
+
+    // 打断上一条（同优先级或更高优先级抢播时）
+    try {
+      synth.cancel();
+    } catch {
+      /* noop */
+    }
+
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = lang;
+    // 幼儿跟读：中文更慢一点。再叠加家长中心的全局偏好（倍率调制，
+    // 保留各调用点手调的相对差异，不做粗暴覆盖）
+    const base = rate ?? (lang === 'zh-CN' ? 0.78 : 0.82);
+    const prefs = applyUserPrefs({ rate: base, pitch, volume, lang, module: options.module });
+    u.rate = prefs.rate ?? base;
+    u.pitch = prefs.pitch ?? pitch;
+    u.volume = prefs.volume ?? volume;
+
+    const voice = pickVoice(lang, prefs.voiceURI);
+    if (voice) u.voice = voice;
+
+    let finished = false;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      if (currentUtterance === u) currentUtterance = null;
+      onEnd?.();
+      cleanup();
+      resolve();
+    };
+
+    u.onstart = () => onStart?.();
+    u.onend = finish;
+    u.onerror = finish;
+
+    currentUtterance = u;
+
+    // Chrome 的经典 bug：长时间闲置后 speak 无声，先 resume 一下
+    try {
+      synth.resume();
+    } catch {
+      /* noop */
+    }
+    synth.speak(u);
+
+    // 兜底超时：按字数估算最长时长，避免 Promise 永久挂起
+    const est = Math.max(2500, text.length * 420 + 2000);
+    timeoutId = setTimeout(() => {
+      // 无论 utterance 状态如何，超时即强制收尾（某些 WebView 不回调 onend/onerror）
+      if (!finished) finish();
+    }, est);
+  });
+}
+
+/**
+ * 按序朗读多句，每句开始前触发 onLine（用于逐句高亮）。
+ * 返回一个可取消的控制器。
+ */
+export interface SequenceController {
+  cancel: () => void;
+  done: Promise<void>;
+}
+
+export function speakSequence(
+  lines: string[],
+  options: SpeakOptions & {
+    onLine?: (index: number) => void;
+    /** 句间停顿（毫秒） */
+    gap?: number;
+    /** 内容模块 key（分模块微调） */
+    module?: import('./tts/types').TtsModuleKey | string;
+  } = {},
+): SequenceController {
+  const { onLine, gap = 260, ...speakOpts } = options;
+  let cancelled = false;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  const done = (async () => {
+    for (let i = 0; i < lines.length; i++) {
+      if (cancelled) break;
+      onLine?.(i);
+      await speak(lines[i]!, speakOpts);
+      if (cancelled) break;
+      if (gap > 0 && i < lines.length - 1) {
+        await new Promise<void>((r) => {
+          timer = setTimeout(r, gap);
+        });
+      }
+    }
+    if (!cancelled) onLine?.(-1);
+  })();
+
+  return {
+    cancel() {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+      stopSpeaking();
+    },
+    done,
+  };
+}
+
+/** 朗读单个英文字母（字母名称，如 A 读作 "ay"） */
+export function speakLetter(letter: string): Promise<void> {
+  return speak(letter.toUpperCase(), { lang: 'en-US', rate: 0.6, pitch: 1.2, module: 'letter' });
+}
+
+/** 朗读数字（中文） */
+export function speakNumber(n: number): Promise<void> {
+  return speak(String(n), { lang: 'zh-CN', rate: 0.8, pitch: 1.2, module: 'number' });
+}
+
+/**
+ * 有感情朗读一首古诗：按 buildChantSegments 生成的分段逐单元播放。
+ * - speak 片段用 baseRate/basePitch/baseVolume 叠加该段的微调（平仄、韵脚）；
+ * - pause 片段插入停顿，实现句读分明与韵脚拖腔；
+ * - onLine 在每句开始时回调，用于逐句高亮。
+ * 返回可取消的控制器。
+ */
+export function speakChant(
+  lines: ChantSegment[][],
+  options: SpeakOptions & {
+    /** 基础语速（会被每个片段的 rateMul 缩放） */
+    baseRate?: number;
+    /** 基础音高（会被每个片段的 pitchAdd 偏移） */
+    basePitch?: number;
+    /** 基础音量 */
+    baseVolume?: number;
+    /** 每句开始时回调（下标），-1 表示结束 */
+    onLine?: (index: number) => void;
+    /** 内容模块 key（默认古诗 poem，分模块微调） */
+    module?: import('./tts/types').TtsModuleKey | string;
+    /** 诗歌情绪 key（神经引擎情感曲线用） */
+    moodKey?: string;
+  } = {},
+): SequenceController {
+  const { onLine, baseRate = 0.74, basePitch = 1.1, baseVolume = 1, module = 'poem', moodKey, ...speakOpts } = options;
+  let cancelled = false;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  const wait = (ms: number) =>
+    new Promise<void>((r) => {
+      timer = setTimeout(r, ms);
+    });
+
+  const done = (async () => {
+    for (let i = 0; i < lines.length; i++) {
+      if (cancelled) break;
+      onLine?.(i);
+      // 关键修复：整句合为一个 utterance 朗读，不再按平仄/韵脚切成多个片段。
+      // 旧实现每段都新建 SpeechSynthesisUtterance，会重置语速音高、插入不可控
+      // 间隙，造成「一顿一顿的机械拼接感」。有感情改由整句 mood 级语速/音高体现。
+      //
+      // spoken 是多音字纠音后的文本（还→环、见→限），页面显示仍是原文；
+      // 家长可在设置里关掉纠音回到原文发音。
+      const usePoly = getSettings().polyphone;
+      const text = lines[i]!
+        .filter((s) => s.type === 'speak')
+        .map((s) => (usePoly ? s.spoken || s.text : s.text))
+        .join('');
+      if (text.trim()) {
+        await speak(text, {
+          ...speakOpts,
+          rate: baseRate,
+          pitch: basePitch,
+          volume: baseVolume,
+          module,
+          moodKey,
+        });
+      }
+      if (cancelled) break;
+      // 句末停顿：依据本句最后一个停顿片段（标点）时长，保留句读分明
+      const last = lines[i]!![lines[i]!.length - 1];
+      const endMs = last && last.type === 'pause' ? last.ms : 220;
+      if (endMs > 0 && i < lines.length - 1) await wait(endMs);
+    }
+    if (!cancelled) onLine?.(-1);
+  })();
+
+  return {
+    cancel() {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+      stopSpeaking();
+    },
+    done,
+  };
+}
+
+/** 表扬场景：通用 / 汉字 / 拼音 / 数字 / 古诗 / 数学 / 连击 */
+export type PraiseScene = 'general' | 'hanzi' | 'pinyin' | 'number' | 'poem' | 'math' | 'combo';
+/** 鼓励场景：通用 / 汉字 / 拼音 / 数字 / 古诗 / 数学 */
+export type EncourageScene = 'general' | 'hanzi' | 'pinyin' | 'number' | 'poem' | 'math';
+
+/* ============================================================
+   语音引导（A2）：页面 / 步骤切换时朗读引导语
+   ------------------------------------------------------------
+   - 同时受「全局静音 settings.sound」与「语音引导开关 settings.voiceGuide」约束：
+     任一关闭都不朗读，避免打扰。
+   - 这里用 useStore.getState() 同步读取（非 hook），可在普通函数中调用；
+     Zustand 的 getState() 在循环依赖场景下也安全——只在函数体运行时取值，
+     不在模块加载阶段访问。
+   - 引导语短促、语速略快于跟读，避免抢内容焦点。
+   ============================================================ */
+
+/** 是否允许朗读语音引导（受静音与语音引导开关双重约束），经桥接注入 */
+function voiceGuideEnabled(): boolean {
+  return voiceGuideChecker ? voiceGuideChecker() : true;
+}
+
+/** 页面引导语：进入新页面时朗读 */
+export function announcePage(title: string, subtitle?: string): void {
+  if (!voiceGuideEnabled()) return;
+  const text = subtitle ? `${title}，${subtitle}` : title;
+  // 引导语略快一点，避免拖沓；不传 onEnd，打断/出错由 speak 内部兜底
+  void speak(text, { lang: 'zh-CN', rate: 0.9, pitch: 1.15, module: 'ai' });
+}
+
+/** 步骤引导语：步骤切换时朗读（如"现在我们来练习写一写"） */
+export function announceStep(stepLabel: string): void {
+  if (!voiceGuideEnabled()) return;
+  void speak(stepLabel, { lang: 'zh-CN', rate: 0.88, pitch: 1.15, module: 'ai' });
+}

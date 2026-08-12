@@ -1,0 +1,48 @@
+# 依赖
+node_modules
+
+# 构建产物
+dist
+.DS_Store
+
+# ============================================================
+# 🔒 安全：环境变量（绝对不能提交到版本控制）
+# ============================================================
+.env
+.env.local
+.env.*.local
+.env.production
+.env.production.local
+
+# 日志与临时文件
+*.log
+.vite
+
+# 编辑器临时文件
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+.vscode/
+.idea/
+
+# Cloudflare Wrangler 构建产物
+.wrangler/
+
+# 构建时自动生成的 PWA 预缓存清单（由 scripts/gen-sw-precache.mjs 生成）
+public/precache-manifest.json
+
+# CI 测试报告（JUnit XML 等运行时产物，不入库）
+test-results/
+
+# 本地调试
+.joycode/
+.workbuddy/
+logs/
+
+# ============================================================
+# 📝 项目特定忽略规则
+# ============================================================
+# 升级报告等本地文档（可选提交）
+升级建议报告.md

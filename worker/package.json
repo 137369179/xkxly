@@ -1,0 +1,16 @@
+{
+  "name": "baobei-bff-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "宝贝学习乐园 AI BFF · Cloudflare Worker 适配层（免费托管）",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "secrets": "wrangler secret put AGNES_API_KEY && wrangler secret put AGNES_BASE_URL",
+    "test": "node test.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "^4"
+  }
+}

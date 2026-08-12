@@ -1,0 +1,38 @@
+# 静止态 HTML（SPA 入口）被边缘缓存成旧版本：每次请求重新校验，
+# 保证部署后立刻生效。带 hash 的静态资源（chunk/font）保持长期缓存，不影响性能。
+/index.html
+  Cache-Control: no-cache
+
+# P2-1 预渲染独立页（dist/<route>/index.html）：内容随部署更新，需重新校验
+/gamecenter/index.html
+  Cache-Control: no-cache
+/story/index.html
+  Cache-Control: no-cache
+/growth/index.html
+  Cache-Control: no-cache
+/today/index.html
+  Cache-Control: no-cache
+/letters/index.html
+  Cache-Control: no-cache
+/numbers/index.html
+  Cache-Control: no-cache
+/hanzi/index.html
+  Cache-Control: no-cache
+/poems/index.html
+  Cache-Control: no-cache
+
+# Service Worker 与其清单：每次请求重新校验，
+# 保证部署后浏览器能侦测到 sw.js 更新（否则边缘缓存会让用户长期停留在旧 SW）。
+/sw.js
+  Cache-Control: no-cache
+/precache-manifest.json
+  Cache-Control: no-cache
+
+# 全局安全响应头（与 worker SECURITY_HEADERS 保持一致）
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://static.cloudflareinsights.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://static.cloudflareinsights.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; media-src 'self' blob:; worker-src 'self' blob:; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Permissions-Policy: camera=(), microphone=(self), geolocation=()

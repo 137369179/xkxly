@@ -1,0 +1,13 @@
+{
+  "name": "baobei-bff",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "宝贝学习乐园 AI BFF 代理（零依赖，仅 node 内置模块）",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

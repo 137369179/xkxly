@@ -1,0 +1,30 @@
+# Cloudflare Worker 配置 · 宝贝学习乐园（静态站 + AI BFF 一体）
+# 部署：wrangler deploy；密钥用 wrangler secret put（不入库）
+name = "baobei-bff"
+main = "index.mjs"
+compatibility_date = "2025-07-04"
+workers_dev = true
+
+# 静态站：同域托管前端构建产物（免备案、免费、全球 CDN）。
+# 前端构建后执行 wrangler deploy 即同时更新网站与 API。
+[assets]
+directory = "../dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+# P2-3 AI 内容中心：云端生成内容的持久存储（故事/谜语/科普）
+[[kv_namespaces]]
+binding = "CONTENT_KV"
+id = "af279d90683b496dafe49e164c24e994"
+
+[vars]
+# 前端静态站域名白名单；部署后改为实际访问域名（逗号分隔）。
+# 必须为具体域名，禁止用 "*"，否则 AI 接口（携带付费密钥）会被任意网站盗刷。
+AI_ALLOW_ORIGIN = "https://xkxly.ccwu.cc"
+VITE_AI_DEFAULT_MODEL = "step-3.7-flash"
+AI_RATE_LIMIT_PER_MIN = "30"
+
+# 密钥（wrangler secret put，不写进本文件）：
+#   wrangler secret put STEPFUN_API_KEY     # 阶跃星辰（全站默认模型 step-3.7-flash）
+#   wrangler secret put AGNES_API_KEY       # 旧 Agnes 模型族（step-* 之外的请求用它）
+#   wrangler secret put AGNES_BASE_URL      # 可选，默认 https://api.agnes-ai.cn/v1
