@@ -59,9 +59,11 @@ describe('T7 · 选题注册表 i18n 完整性（C7 红线）', () => {
 
   it('数据文件内无中文字面量（C7 红线：展示型字段）', () => {
     const src = require('fs').readFileSync(__filename.replace('.test.ts', '.ts'), 'utf-8');
-    // cardMatchTags 是内部 KV 匹配数据（AI 生成内容的 tags 为中文，匹配必需），
+    // cardMatchTags/explainerHint 是内部数据（KV 匹配关键词 + AI prompt 主题上下文），
     // 从不渲染给孩子 → 从断言中挖除；其余展示型字段（i18nKey/emoji/tone 等）必须无中文
-    const withoutMatchTags = src.replace(/cardMatchTags: \[[^\]]*\]/g, 'cardMatchTags: []');
+    const withoutMatchTags = src
+      .replace(/cardMatchTags: \[[^\]]*\]/g, 'cardMatchTags: []')
+      .replace(/explainerHint: '[^']*'/g, 'explainerHint: ""');
     // 排除注释行（/**、*、// 前缀）后，断言代码区无 CJK 字符
     const codeLines = withoutMatchTags.split('\n').filter(
       (l: string) => !l.trim().startsWith('*') && !l.trim().startsWith('//') && !l.trim().startsWith('/**'),

@@ -34,8 +34,10 @@ export interface ResearchTopic {
   emoji: string;
   tone: Tone;
   exploreSlot: ExploreSlotKey;
-  /** 知识卡走哪个既有 AI 类型（C2：MVP 复用 science/story/riddle，不新增端点） */
+  /** 知识卡走哪个既有 AI 类型（Sprint 4 起统一走 explainer 专属讲解端点，带主题上下文 hint） */
   aiContentType: AiContentType;
+  /** explainer 生成的主题上下文一句话（如「恐龙为什么消失了」），注入 worker prompt（Sprint 4-A） */
+  explainerHint: string;
   /** KV 复用匹配用的关键词（list-first 策略） */
   cardMatchTags: string[];
   /** AI 全线不可用时的静态兜底知识点 i18n 键（降级） */

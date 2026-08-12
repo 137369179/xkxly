@@ -22,10 +22,11 @@ const GENERATE_COOLDOWN_MS = 10_000;
 
 let lastGenerateAt = 0;
 
-/** 生成一条 AI 内容（服务端持久化到 KV） */
+/** 生成一条 AI 内容（服务端持久化到 KV）；hint 为主题上下文（explainer 用） */
 export async function generateContent(
   type: AiContentType,
   ageRange?: string,
+  hint?: string,
 ): Promise<{ ok: boolean; item?: AiContentItem; error?: string; cooldown?: number }> {
   const wait = lastGenerateAt + GENERATE_COOLDOWN_MS - Date.now();
   if (wait > 0) return { ok: false, cooldown: Math.ceil(wait / 1000), error: 'cooldown' };
@@ -35,7 +36,7 @@ export async function generateContent(
     const res = await fetch('/api/content/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type, ageRange: ageRange ?? '7-8' }),
+      body: JSON.stringify({ type, ageRange: ageRange ?? '7-8', hint }),
     });
     const data = await res.json().catch(() => null);
     if (!res.ok) {

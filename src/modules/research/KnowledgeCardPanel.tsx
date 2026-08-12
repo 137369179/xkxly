@@ -2,6 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { CandyButton } from '@/components/ui/Button';
 import { generateContent, listContent } from '@/lib/ai/contentClient';
 import { safeGetJSON, safeSetJSON } from '@/lib/safeStorage';
+import { speak } from '@/lib/speech';
+import { sfxTap } from '@/lib/sfx';
+import { cn } from '@/lib/utils';
 import type { KnowledgeCard, ResearchTopic } from '@/lib/research/types';
 import { useTranslation } from '@/i18n/useTranslation';
 
@@ -76,6 +79,7 @@ export function KnowledgeCardPanel({
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const [readingId, setReadingId] = useState<string | null>(null);
   const busyRef = useRef(false);
 
   /** 从静态兜底构造 degraded 卡（§2.3 场景③④⑤共用） */
@@ -140,8 +144,8 @@ export function KnowledgeCardPanel({
       /* 继续走 generate */
     }
 
-    // ④ generateContent（受限写路径）
-    const gen = await generateContent(topic.aiContentType, ageRange);
+    // ④ generateContent（受限写路径；Sprint 4-A：explainer + 主题 hint → 研究主题专属讲解卡）
+    const gen = await generateContent(topic.aiContentType, ageRange, topic.explainerHint);
     if (gen.ok && gen.item) {
       const item = gen.item;
       writeCardCache([
@@ -188,10 +192,41 @@ export function KnowledgeCardPanel({
 
   const bodyText = typeof card?.body === 'string' ? card.body : Array.isArray(card?.body) ? card.body.join('\n') : '';
   const isReady = (card?.status === 'ready' || card?.status === 'degraded');
+  // Sprint 4-B：explainer 卡 content 数组最后一项为「延伸小问题」（以 ? 结尾或第 4+ 项）→ 独立展示引导好奇
+  const bodyList = Array.isArray(card?.body) ? card.body : [];
+  const hasAsk = bodyList.length >= 4;
+  const knowledgeLines = hasAsk ? bodyList.slice(0, -1) : bodyList;
+  const askLine = hasAsk ? bodyList[bodyList.length - 1] : '';
+
+  const handleSpeak = () => {
+    if (!bodyText) return;
+    sfxTap();
+    if (readingId === 'card') {
+      setReadingId(null);
+      return;
+    }
+    setReadingId('card');
+    void speak(bodyText, { lang: 'zh-CN', module: 'story' }).finally(() => setReadingId(null));
+  };
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm">
-      <h3 className="text-lg font-extrabold text-ink">{card?.title || t('research.card.title')}</h3>
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="text-lg font-extrabold text-ink">{card?.title || t('research.card.title')}</h3>
+        {isReady && bodyText && (
+          <button
+            type="button"
+            aria-label={t('research.card.listen')}
+            onClick={handleSpeak}
+            className={cn(
+              'no-select shrink-0 rounded-full px-3 py-2 text-lg shadow-sm transition-transform active:scale-90',
+              readingId === 'card' ? 'bg-candy-purple-deep text-white' : 'bg-white text-candy-purple-deep',
+            )}
+          >
+            {readingId === 'card' ? '🔊' : '🔈'}
+          </button>
+        )}
+      </div>
 
       {loading && <p className="text-sm text-ink-soft">{t('research.card.loading')}</p>}
 
@@ -202,7 +237,31 @@ export function KnowledgeCardPanel({
       )}
 
       {isReady && bodyText && (
-        <p className="whitespace-pre-line leading-relaxed text-ink">{bodyText}</p>
+        <>
+          {typeof card?.body === 'string' ? (
+            <p className="whitespace-pre-line leading-relaxed text-ink">{card.body}</p>
+          ) : (
+            <div className="space-y-2">
+              {knowledgeLines.map((line, i) => (
+                <p key={i} className="flex items-start gap-2 rounded-xl bg-purple-50/70 px-3 py-2 leading-relaxed text-ink">
+                  <span className="mt-0.5 shrink-0">{['🌟', '✨', '🎈'][i % 3]}</span>
+                  <span>{line}</span>
+                </p>
+              ))}
+              {askLine && (
+                <div className="mt-1 rounded-xl border-2 border-dashed border-candy-purple-deep/40 bg-purple-50 px-3 py-2">
+                  <p className="text-[10px] font-extrabold uppercase tracking-wide text-candy-purple-deep">
+                    {t('research.card.askTitle')}
+                  </p>
+                  <p className="mt-0.5 flex items-start gap-2 text-sm font-bold leading-relaxed text-ink">
+                    <span className="shrink-0">💡</span>
+                    <span>{askLine}</span>
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </>
       )}
 
       {card?.status === 'degraded' && (

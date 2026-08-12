@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { RoundRunner } from '@/components/RoundRunner';
 import { CandyButton } from '@/components/ui/Button';
 import { ResearchCanvas } from '@/modules/research/ResearchCanvas';
@@ -6,18 +6,27 @@ import { KnowledgeCardPanel } from '@/modules/research/KnowledgeCardPanel';
 import { useResearchSession } from '@/store/researchSession';
 import { RESEARCH_TOPICS, getTopic } from '@/lib/research/researchTopics';
 import { makeResearchQuestion } from '@/lib/research/questions';
+import { dueSkills } from '@/lib/srs';
+import { celebrateBig } from '@/lib/celebrate';
 import { useActiveProfileMeta } from '@/store/useProfilesStore';
-import { useStore } from '@/store/useStore';
+import { useProgress, useStore } from '@/store/useStore';
+import { BADGE_MAP } from '@/data/badges';
 import { navigate } from '@/lib/router';
 import { useTranslation } from '@/i18n/useTranslation';
 
 /**
- * 研究模式路由页（F17 编排层 · Sprint 2 完整实现）
+ * 研究模式路由页（F17 编排层 · Sprint 2 完整实现；Sprint 4 打磨）
  * ------------------------------------------------------------------
  * 7 状态流（FSM）→ 7 段 UI：
  *   IDLE（首帧）→ TOPIC_SELECT（选题网格）→ EXPLORE（ResearchCanvas）
  *   → KNOWLEDGE_CARD（KnowledgeCardPanel）→ QUIZ（RoundRunner，零改动）
- *   → REVIEW（小结）→ COMPLETE（结算 + 行为激励）
+ *   → REVIEW（小结：行为量 + 新徽章庆祝）→ COMPLETE（结算 + 全屏彩带）
+ *
+ * Sprint 4 升级：
+ *   - A：知识卡走 explainer 专属讲解（主题 hint），卡片含延伸问（好奇回流）
+ *   - C：makeResearchQuestion 注入 dueSkills（SRS 到期复习混入 ~35%）
+ *   - D：REVIEW 行为量回顾（探索/发现/答对星星，零正确率）+ 新解锁研究徽章庆祝；
+ *        COMPLETE 触发 celebrateBig 全屏彩带
  *
  * 铁律遵守：
  *   - C3：QUIZ 段难度只用 useResearchSession 锁存值，绝不在页面重算；
@@ -34,10 +43,30 @@ export default function ResearchModePage() {
   const ageRange = profile?.ageRange ?? '5-6';
 
   const completeResearchSession = useStore((s) => s.completeResearchSession);
+  const p = useProgress();
 
   const { session, emit, diff, ddaMeta, recordQuizAttempt } = useResearchSession(ageRange);
 
   const topic = session.topicId ? getTopic(session.topicId) : null;
+
+  // —— Sprint 4-D：记录进入页时的徽章快照，REVIEW 时 diff 出新解锁研究徽章 ——
+  const badgesAtMountRef = useRef<string[] | null>(null);
+  if (badgesAtMountRef.current === null) badgesAtMountRef.current = p.badges;
+  const newBadges = useMemo(() => {
+    if (session.status !== 'REVIEW') return [];
+    const before = new Set(badgesAtMountRef.current ?? []);
+    return p.badges.filter((id) => !before.has(id));
+  }, [session.status, p.badges]);
+
+  // —— Sprint 4-D：进入 COMPLETE 触发全屏彩带庆祝（F19 行为型奖励）——
+  useEffect(() => {
+    if (session.status === 'COMPLETE') {
+      void celebrateBig();
+    }
+  }, [session.status]);
+
+  // —— Sprint 4-C：SRS 到期项（跨主题复习混入数据源）——
+  const due = useMemo(() => dueSkills(p), [p]);
 
   // —— 事件派发闭包（稳定引用，避免重渲染）——
   const onRevealMore = useCallback(() => emit({ type: 'REVEAL_MORE' }), [emit]);
@@ -109,10 +138,10 @@ export default function ResearchModePage() {
     [t, emit],
   );
 
-  // —— QUIZ 段（RoundRunner 零改动复用，C3 锁存）——
+  // —— QUIZ 段（RoundRunner 零改动复用，C3 锁存；Sprint 4-C：SRS 复习混入）——
   const quizRunner = useMemo(() => {
     if (!session.topicId) return null;
-    const makeQ = makeResearchQuestion(session.topicId, t);
+    const makeQ = makeResearchQuestion(session.topicId, t, due);
     return (
       <RoundRunner
         makeQuestion={makeQ}
@@ -140,7 +169,7 @@ export default function ResearchModePage() {
         )}
       />
     );
-  }, [session.topicId, session.quizRef?.questionsPerRound, diff, ddaMeta, onAnswered, onRoundComplete, onConfirm, t]);
+  }, [session.topicId, session.quizRef?.questionsPerRound, diff, ddaMeta, due, onAnswered, onRoundComplete, onConfirm, t]);
 
   return (
     <div className="mx-auto flex min-h-[60vh] w-full max-w-3xl flex-col gap-4 p-4">
@@ -199,10 +228,45 @@ export default function ResearchModePage() {
       {session.status === 'QUIZ' && quizRunner}
 
       {session.status === 'REVIEW' && (
-        <div className="flex flex-col items-center gap-3 rounded-2xl bg-white p-6 text-center shadow-sm">
+        <div className="flex flex-col items-center gap-4 rounded-2xl bg-white p-6 text-center shadow-sm">
           <div className="text-5xl">🔍</div>
           <p className="text-xl font-extrabold text-ink">{t('research.review.title')}</p>
-          <p className="text-sm text-ink-soft">
+
+          {/* Sprint 4-D：本轮行为量回顾（全部行为量，零正确率，R8/F19） */}
+          <div className="grid w-full grid-cols-3 gap-2">
+            {[
+              { emoji: '🔍', label: t('research.growthBlock.actions'), value: String(session.exploreActions) },
+              { emoji: '⭐', label: t('research.review.discovered'), value: String(session.sessionDiscoveries.length) },
+              { emoji: '🎯', label: t('research.review.correctStars'), value: String(session.attempts.filter((a) => a.correct).length) },
+            ].map((c) => (
+              <div key={c.label} className="rounded-2xl bg-purple-50 px-2 py-3">
+                <div className="text-xl">{c.emoji}</div>
+                <div className="mt-0.5 text-xl font-black tabular-nums text-candy-purple-deep">{c.value}</div>
+                <div className="mt-0.5 text-[10px] font-bold text-ink-soft">{c.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Sprint 4-D：新解锁研究徽章庆祝（F19 行为型，零正确率） */}
+          {newBadges.length > 0 && (
+            <div className="w-full rounded-2xl border-2 border-dashed border-candy-yellow-deep/50 bg-gradient-to-r from-amber-50 to-yellow-50 p-3">
+              <p className="text-xs font-extrabold text-candy-yellow-deep">🏅 {t('research.review.newBadge')}</p>
+              <div className="mt-2 flex flex-wrap justify-center gap-2">
+                {newBadges.map((id) => {
+                  const b = BADGE_MAP.get(id);
+                  if (!b) return null;
+                  return (
+                    <div key={id} className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm">
+                      <span className="text-lg">{b.emoji}</span>
+                      <span className="text-xs font-extrabold text-ink">{b.name}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <p className="text-sm font-bold text-ink-soft">
             {t('research.review.discoveries', { n: String(session.sessionDiscoveries.length) })}
           </p>
           <div className="flex gap-2">

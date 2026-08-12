@@ -383,7 +383,9 @@
       "degradedHint": "Zhi is busy — here's a quick fact instead",
       "favorite": "Save ⭐",
       "startQuiz": "Let's play a quiz",
-      "backToExplore": "Back to explore"
+      "backToExplore": "Back to explore",
+      "listen": "Listen",
+      "askTitle": "Curious for more?"
     },
     "fallbackFacts": {
       "color": {
@@ -433,6 +435,18 @@
         },
         "q3": {
           "stem": "Yellow is the color of bananas"
+        },
+        "q4": {
+          "stem": "Mixing red and yellow makes orange"
+        },
+        "q5": {
+          "stem": "The sky is green"
+        },
+        "q6": {
+          "stem": "Bananas are red"
+        },
+        "q7": {
+          "stem": "Leaves are green"
         }
       },
       "dino": {
@@ -447,6 +461,18 @@
         },
         "q3": {
           "stem": "Dinosaurs lived very long ago"
+        },
+        "q4": {
+          "stem": "Dinosaurs lived about 60 million years ago"
+        },
+        "q5": {
+          "stem": "All dinosaurs could fly"
+        },
+        "q6": {
+          "stem": "T-Rex liked to eat meat"
+        },
+        "q7": {
+          "stem": "Dinosaurs lived under the sea"
         }
       },
       "space": {
@@ -461,6 +487,18 @@
         },
         "q3": {
           "stem": "Astronauts row a boat to space"
+        },
+        "q4": {
+          "stem": "The Sun is much bigger than Earth"
+        },
+        "q5": {
+          "stem": "The Moon shines by itself"
+        },
+        "q6": {
+          "stem": "Stars are very close to us"
+        },
+        "q7": {
+          "stem": "Astronauts ride rockets to space"
         }
       },
       "body": {
@@ -475,6 +513,18 @@
         },
         "q3": {
           "stem": "Eyes help you see the world"
+        },
+        "q4": {
+          "stem": "Your lungs help you breathe"
+        },
+        "q5": {
+          "stem": "Your heart helps you digest food"
+        },
+        "q6": {
+          "stem": "Hair helps you think"
+        },
+        "q7": {
+          "stem": "Your bones are hard"
         }
       },
       "vehicle": {
@@ -489,6 +539,18 @@
         },
         "q3": {
           "stem": "Buses carry many people"
+        },
+        "q4": {
+          "stem": "Trains run on rails"
+        },
+        "q5": {
+          "stem": "Ships fly in the sky"
+        },
+        "q6": {
+          "stem": "Planes swim in the sea"
+        },
+        "q7": {
+          "stem": "Bicycles have two wheels"
         }
       },
       "job": {
@@ -503,6 +565,18 @@
         },
         "q3": {
           "stem": "Police keep everyone safe"
+        },
+        "q4": {
+          "stem": "Firefighters put out fires"
+        },
+        "q5": {
+          "stem": "Doctors fix cars"
+        },
+        "q6": {
+          "stem": "Chefs work at a bank"
+        },
+        "q7": {
+          "stem": "Teachers teach at school"
         }
       }
     },
@@ -510,7 +584,10 @@
       "title": "Round summary",
       "discoveries": "You discovered {n} new things",
       "exploreAgain": "Keep exploring",
-      "done": "Done"
+      "done": "Done",
+      "discovered": "Saved finds",
+      "correctStars": "Stars earned",
+      "newBadge": "New badge unlocked!"
     },
     "complete": {
       "title": "Research complete!",
@@ -3852,5 +3929,371 @@
     "correctFeedback": "Correct! /{sound}/",
     "wrongFeedback": "The answer is {answer} /{sound}/",
     "progress": "Q {round} · Score {score}"
+  },
+  "hanziEvolve": {
+    "title": "Hanzi Evolution",
+    "fontEvolution": "📜 Font Evolution",
+    "read": "🔊 Read",
+    "originStory": "📖 Origin Story",
+    "stage0": {
+      "name": "Oracle Bone",
+      "desc": "Script inscribed on turtle shells and animal bones, over 3000 years ago in the Shang Dynasty"
+    },
+    "stage1": {
+      "name": "Bronze Inscription",
+      "desc": "Script cast on bronze vessels, Western Zhou period"
+    },
+    "stage2": {
+      "name": "Small Seal",
+      "desc": "Script unified by Qin Shi Huang, with rounded and even strokes"
+    },
+    "stage3": {
+      "name": "Clerical Script",
+      "desc": "Standard script of the Han Dynasty, flat strokes and square shape"
+    },
+    "stage4": {
+      "name": "Regular Script",
+      "desc": "Standard since the Wei-Jin period; the script we write today"
+    }
+  },
+  "memoryMatch": {
+    "title": "🃏 Memory Match",
+    "pairs": "{count} pairs",
+    "moves": "Moves: {count}",
+    "allFound": "All found! {count} moves",
+    "nextLevel": "Next Level"
+  },
+  "planView": {
+    "title": "My Review Plan",
+    "subtitle": "{count} poems to review · {high} high priority",
+    "empty": "No review plan yet~ Mark difficult points when reading poems in the Library, or practice and recite in Study Mode — the system will automatically build your personalized review route.",
+    "suggestStage": "Suggested level: Stage {stage}/4",
+    "startReview": "Start Review",
+    "priority": {
+      "high": "High Priority",
+      "mid": "Medium Priority",
+      "low": "Low Priority"
+    }
+  },
+  "spotDifference": {
+    "title": "🔍 Spot the Difference",
+    "subtitle": "Find the differences between the two pictures",
+    "found": "Found: {count}/{total}",
+    "score": "Score: {count}",
+    "imageA": "Image A",
+    "imageB": "Image B",
+    "next": "Next Puzzle"
+  },
+  "miniSudoku": {
+    "title": "🎯 Mini Sudoku",
+    "subtitle": "No repeating in each row or column",
+    "win": "🎉 All correct! You're so smart!",
+    "score": "Score: {count}",
+    "newPuzzle": "New Puzzle"
+  },
+  "lineNotes": {
+    "title": "Line-by-Line Commentary",
+    "subtitle": "Expert annotations, line by line",
+    "empty": "No commentary data yet",
+    "readAloud": "🔊 Read Aloud"
+  },
+  "studyReminder": {
+    "title": "Study Reminder",
+    "subtitle": "Daily reminder for study time",
+    "daily": "Daily Reminder",
+    "time": "Reminder Time",
+    "unsupported": "Notifications are not supported in this browser",
+    "enabledAt": "✅ Enabled — will remind at {time} daily",
+    "denied": "❌ Notification permission denied. Please allow notifications in browser settings.",
+    "disabled": "Reminder disabled",
+    "updatedAt": "✅ Updated to {time} daily",
+    "notifyBody": "Time to study! Today's lessons are waiting for you~",
+    "permissionHint": "Notifications require browser permission, and the page must stay open"
+  },
+  "leaderboard": {
+    "title": "Learning Leaderboard",
+    "subtitle": "Local History",
+    "today": "Today",
+    "week": "This Week",
+    "month": "This Month",
+    "dayCount": "Days",
+    "totalTime": "Total Time",
+    "totalItems": "Total Questions",
+    "totalStars": "Total Stars",
+    "minutesValue": "{count}m",
+    "itemsValue": "{count}",
+    "bestDay": "Best Day",
+    "bestDayLine": "{date} · ⭐{stars} · {minutes}m · {rate}% accuracy",
+    "empty": "No learning records for this period yet"
+  },
+  "mathExtra": {
+    "subTabs.mul": "Multiplication",
+    "subTabs.div": "Division",
+    "subTabs.shape": "Shapes",
+    "subTabs.time": "Clocks",
+    "subTabs.coin": "Coins",
+    "difficulty.1": "Beginner",
+    "difficulty.2": "Intermediate",
+    "difficulty.3": "Challenge",
+    "practice": "{label} Practice",
+    "perRound": "5 questions per round"
+  },
+  "poemNotes": {
+    "back": "◀️ Back",
+    "myNotes": "📝 My Notes",
+    "placeholder": "Write your understanding, feelings or favorite lines of this poem...",
+    "save": "💾 Save",
+    "title": "Poem Notes",
+    "subtitle": "Record your learning insights",
+    "empty": "No notes yet — write your first note on the poem detail page!"
+  },
+  "radicalsMagic": {
+    "badge": "Radical Magic ({current} / {total})",
+    "instruction": "Tap the magic wand to combine two radicals into a new character!",
+    "meaning": "Meaning: {meaning}",
+    "mergeBtn": "🪄 Cast Radical Magic",
+    "nextBtn": "🚀 Next Radical ➔"
+  },
+  "slidingPuzzle": {
+    "title": "🧩 Sliding Puzzle",
+    "instruction": "Arrange numbers in order 1,2,3...",
+    "grid3": "3×3 🌱",
+    "grid4": "4×4 🌳",
+    "moves": "Moves: {moves}",
+    "done": "🎉 Done!",
+    "reset": "🔄 Shuffle Again"
+  },
+  "rabbitRunMath": {
+    "title": "🐇 Bunny Obstacle Race",
+    "subtitle": "Answer math problems to help the bunny reach the strawberry!",
+    "progress": "Progress: {step} / {target}",
+    "winMsg": "Congratulations! The bunny ate the big strawberry!",
+    "resetBtn": "Play Again 🔄",
+    "correct": "🎉 Correct! The bunny jumped over the mushroom!",
+    "wrong": "Try again~ You can do it!",
+    "submit": "Submit 🚀"
+  },
+  "storyUnlock": {
+    "label": "📖 Story Unlocked",
+    "title": "Stop {levelId}: {title}",
+    "continueBtn": "Continue Adventure →"
+  },
+  "worksheetGenerator": {
+    "title": "🖨️ Printable Worksheet Generator",
+    "subtitle": "Generate standard English letter worksheets and Chinese character practice sheets — print directly!",
+    "lettersBtn": "🔤 Letter Grid",
+    "hanziBtn": "🈲 Chinese Character Grid",
+    "lettersPreview": "Baby Learning Paradise · 26 Letter Tracing Workbook",
+    "hanziPreview": "Baby Learning Paradise · Chinese Character 米字格 Practice Book",
+    "printBtn": "🖨️ Print / Export PDF"
+  },
+  "milestoneCelebration": {
+    "progressLabel": "🏅 Milestone Progress",
+    "progressCount": "{achieved} / {total}",
+    "emptyMsg": "Study every day to unlock more milestones~",
+    "inProgressMsg": "{pct}% complete — keep going!",
+    "modalLabel": "🎊 Milestone Achieved!",
+    "continueBtn": "Amazing! Keep Learning 🚀"
+  },
+  "speedRankings": {
+    "back": "Back",
+    "empty": "No speed math records for level {level} yet",
+    "emptyTip": "Go to speed math challenge and earn some records!",
+    "clear": "Clear Records"
+  },
+  "sciencePage": {
+    "loading": "Loading…",
+    "title": "Science & Nature Museum",
+    "subtitle": "Dinosaurs · Space · Weather · Animals · Human Body bilingual adventure",
+    "tabDino": "Dinos",
+    "tabSpace": "Space",
+    "tabWeather": "Weather",
+    "tabAnimal": "Animals",
+    "tabBody": "Body"
+  },
+  "letterTrace": {
+    "upper": "A-Z Uppercase",
+    "lower": "a-z Lowercase",
+    "traceTip": "✍️ Trace with your finger",
+    "prev": "◀️",
+    "next": "📝 Next →",
+    "readLetter": "Read the letter"
+  },
+  "poetWorks": {
+    "title": "📜 Poet Works Collection",
+    "tip": "Tap a poet to explore all their poems and life story",
+    "back": "← Back to Poet List",
+    "representative": "Representative works: ",
+    "level": "Difficulty {n}"
+  },
+  "swUpdateToast": {
+    "title": "App updated to the latest version",
+    "body": "Refresh to use the new version",
+    "cleared": " (cleared {count} old cache items)",
+    "refreshNow": "Refresh Now",
+    "later": "Later"
+  },
+  "lessonProgressRing": {
+    "completed": "Completed",
+    "lessons": "lessons",
+    "plan": "About {minutes} min · {planLabel}",
+    "planReview": "{count} reviews",
+    "planToday": "Today's Lesson",
+    "again": "Learn Again 🔄",
+    "continue": "Continue →",
+    "start": "Start Today →"
+  },
+  "comboIndicator": {
+    "hint": "Almost had a combo! Keep going 💪",
+    "label": "combo"
+  },
+  "numberLearn": {
+    "listenNumbers": "🔊 Listen to These Numbers",
+    "traceHint": "Trace the number with your finger",
+    "finish": "Numbers Mastered 🎉"
+  },
+  "streakBanner": {
+    "title": "Learning Streak",
+    "days": " days",
+    "milestone0": "Start your first lesson today!",
+    "milestone1": "Keep going, perseverance wins!",
+    "milestone2": "You have been consistent for days, amazing!",
+    "milestone3": "Over a week! You are a learning star!",
+    "milestone4": "Over two weeks! Absolutely incredible!",
+    "milestone5": "Over a month! You are a learning hero!",
+    "nextMilestone": "Just {daysToNext} more days to reach the {nextMilestone}-day milestone 🎯",
+    "startLearning": "Start Learning →"
+  },
+  "allusionBrowser": {
+    "title": "Allusion Explorer",
+    "subtitle": "Origins of Allusions in Classical Poems",
+    "back": "◀️ Back",
+    "source": "📖 Source",
+    "evolution": "🔄 Evolution",
+    "relatedPoems": "🌸 Related Poems ({count})",
+    "poemTitle": "《{title}》",
+    "authorLabel": " · {author}"
+  },
+  "posterCard": {
+    "title": "Achievement Poster",
+    "subtitle": "Generate Your Learning Poster",
+    "description": "Generate a beautiful poster to record growth",
+    "stars": "Stars",
+    "badges": "Badges",
+    "streakDays": "Streak Days",
+    "generating": "⏳ Generating...",
+    "generatePoster": "🎨 Generate Poster",
+    "download": "📥 Download",
+    "regenerate": "🔄 Regenerate"
+  },
+  "numberTrace": {
+    "changeNumber": "← Change Number",
+    "totalCount": "… {n} in total",
+    "listen": "🔊 Listen",
+    "hint": "Pick a number and trace it with your finger ✍️",
+    "canvasHint": "Trace the dotted line with your finger"
+  },
+  "numbersPage": {
+    "title": "Number Kingdom",
+    "subtitle": "Numbers · Arithmetic · Montessori Ten-Frame",
+    "wall": "Number Wall",
+    "tenframe": "Ten Frame",
+    "math": "Addition & Subtraction",
+    "extra": "Advanced",
+    "speed": "Speed Math",
+    "ladder": "Ladder Math",
+    "run": "Rabbit Race",
+    "vertical": "Column Math",
+    "shape": "Shapes",
+    "clock": "Clock",
+    "measure": "Measure",
+    "skip": "Skip Counting",
+    "fraction": "Fractions",
+    "money": "Money",
+    "word": "Word Problems",
+    "count": "Counting",
+    "trace": "Tracing"
+  },
+  "exploreMore": {
+    "title": "Explore More Modules",
+    "moduleCount": "{n} modules"
+  },
+  "offlineIndicator": {
+    "badge": "Offline",
+    "toastDisconnected": "📶 Network disconnected, entering offline mode",
+    "toastReconnected": "📶 Network restored",
+    "badgeTitle": "Currently offline, some features (e.g. AI explanations) are unavailable"
+  },
+  "studyGuard": {
+    "limitTitle": "Great job today!",
+    "breakTitle": "Time for an eye break",
+    "limitBody": "You have studied for {minutes} minutes today. Go outside and play!",
+    "breakBody": "Look out the window at something far away. Count to 20 and come back — your eyes will feel better.",
+    "limitSnooze": "Study 10 More Minutes",
+    "breakContinue": "I am rested, continue learning",
+    "breakHint": "Break reminder interval can be adjusted in Parent Center → Settings"
+  },
+  "pwaInstallBanner": {
+    "title": "Install Study Paradise Desktop App",
+    "subtitle": "One-tap install on iPad/Desktop with offline support 🚀",
+    "install": "Install Now",
+    "close": "Close install prompt"
+  },
+  "storybookCover": {
+    "ariaLabelFavorite": "Favorite",
+    "ariaLabelUnfavorite": "Unfavorite",
+    "readCount": "Read {n} times"
+  },
+  "friendlyLoading": {
+    "preparing": "Preparing...",
+    "almostReady": "Almost ready!"
+  },
+  "struggleModal": {
+    "restTitle": "Take a break",
+    "wrongStreak": "Missed {count} in a row",
+    "continueBtn": "Keep going",
+    "skipBtn": "Skip this question"
+  },
+  "storybookPage": {
+    "createTab": "Create",
+    "shelfTab": "My Books",
+    "pageTitle": "AI Storybook Studio",
+    "pageSubtitle": "Pick a theme & style — let Little Zhi craft your story!"
+  },
+  "letterStudy": {
+    "changeLetter": "Try another letter",
+    "instruction": "Pick a letter and learn step by step: play → see → practice → write → say ✨"
+  },
+  "adaptiveDifficultyHint": {
+    "levelEasy": "Beginner",
+    "levelMedium": "Intermediate",
+    "levelHard": "Challenge",
+    "aiSuggest": "Little Zhi thinks you could try \"{name}\"",
+    "aiConfirmBtn": "Yes, switch",
+    "aiChose": "Little Zhi chose \"{name}\" based on your recent progress",
+    "manualChose": "You chose this difficulty yourself",
+    "resetBtn": "Let Little Zhi decide (suggests \"{name}\")"
+  },
+  "homeHeader": {
+    "stars": "Stars",
+    "streak": "Day Streak",
+    "badges": "Badges"
+  },
+  "generatingOverlay": {
+    "hint1": "Little Zhi is dreaming up a story…",
+    "hint2": "Illustrating your story…",
+    "hint3": "Almost there…",
+    "cancel": "Cancel"
+  },
+  "parentAdvicePanel": {
+    "panelTitle": "Smart Study Advice",
+    "adviceCount": "({count} tips)"
+  },
+  "studyPassport": {
+    "passportTitle": "Fluffy Achievement Passport",
+    "collected": "Collected {owned}/{total} stamps",
+    "prevPage": "Previous",
+    "nextPage": "Next",
+    "pageInfo": "Page {page} of {total}"
   }
 }

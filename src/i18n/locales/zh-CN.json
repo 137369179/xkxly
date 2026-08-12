@@ -383,7 +383,9 @@
       "degradedHint": "小智有点忙，先用这份小知识吧",
       "favorite": "收藏 ⭐",
       "startQuiz": "来玩小测验",
-      "backToExplore": "返回探索"
+      "backToExplore": "返回探索",
+      "listen": "朗读",
+      "askTitle": "想不想知道更多？"
     },
     "fallbackFacts": {
       "color": {
@@ -433,6 +435,18 @@
         },
         "q3": {
           "stem": "黄色是香蕉的颜色"
+        },
+        "q4": {
+          "stem": "把红色和黄色混在一起，会变成橙色"
+        },
+        "q5": {
+          "stem": "天空是绿色的"
+        },
+        "q6": {
+          "stem": "香蕉是红色的"
+        },
+        "q7": {
+          "stem": "树叶是绿色的"
         }
       },
       "dino": {
@@ -447,6 +461,18 @@
         },
         "q3": {
           "stem": "恐龙生活在很久很久以前"
+        },
+        "q4": {
+          "stem": "恐龙生活在大约六千万年前"
+        },
+        "q5": {
+          "stem": "所有的恐龙都会飞"
+        },
+        "q6": {
+          "stem": "霸王龙喜欢吃肉"
+        },
+        "q7": {
+          "stem": "恐龙生活在海底"
         }
       },
       "space": {
@@ -461,6 +487,18 @@
         },
         "q3": {
           "stem": "宇航员划着小船去太空"
+        },
+        "q4": {
+          "stem": "太阳比地球大很多"
+        },
+        "q5": {
+          "stem": "月亮自己会发光"
+        },
+        "q6": {
+          "stem": "星星离我们很近"
+        },
+        "q7": {
+          "stem": "宇航员坐着火箭去太空"
         }
       },
       "body": {
@@ -475,6 +513,18 @@
         },
         "q3": {
           "stem": "眼睛帮我们看见世界"
+        },
+        "q4": {
+          "stem": "肺帮我们呼吸空气"
+        },
+        "q5": {
+          "stem": "心脏帮我们消化食物"
+        },
+        "q6": {
+          "stem": "头发能帮我们思考"
+        },
+        "q7": {
+          "stem": "我们的骨骼是硬硬的"
         }
       },
       "vehicle": {
@@ -489,6 +539,18 @@
         },
         "q3": {
           "stem": "公交车载很多人"
+        },
+        "q4": {
+          "stem": "火车在铁轨上跑"
+        },
+        "q5": {
+          "stem": "轮船在天上飞"
+        },
+        "q6": {
+          "stem": "飞机在海里游泳"
+        },
+        "q7": {
+          "stem": "自行车有两个轮子"
         }
       },
       "job": {
@@ -503,6 +565,18 @@
         },
         "q3": {
           "stem": "警察维护秩序保护大家"
+        },
+        "q4": {
+          "stem": "消防员帮大家灭火"
+        },
+        "q5": {
+          "stem": "医生会修汽车"
+        },
+        "q6": {
+          "stem": "厨师在银行工作"
+        },
+        "q7": {
+          "stem": "老师在学校教课"
         }
       }
     },
@@ -510,7 +584,10 @@
       "title": "本轮小结",
       "discoveries": "你发现了 {n} 条新知识",
       "exploreAgain": "继续探索",
-      "done": "完成"
+      "done": "完成",
+      "discovered": "发现的收藏",
+      "correctStars": "答对星星",
+      "newBadge": "解锁新徽章！"
     },
     "complete": {
       "title": "研究完成！",
@@ -3852,5 +3929,371 @@
     "correctFeedback": "对了！/{sound}/",
     "wrongFeedback": "答案是 {answer} /{sound}/",
     "progress": "第 {round} 题 · 得分 {score}"
+  },
+  "hanziEvolve": {
+    "title": "汉字演变",
+    "fontEvolution": "📜 字体演变",
+    "read": "🔊 读",
+    "originStory": "📖 字源故事",
+    "stage0": {
+      "name": "甲骨文",
+      "desc": "刻在龟甲兽骨上的文字，3000多年前的商朝"
+    },
+    "stage1": {
+      "name": "金文",
+      "desc": "铸在青铜器上的文字，西周时期"
+    },
+    "stage2": {
+      "name": "小篆",
+      "desc": "秦始皇统一文字，线条圆润匀称"
+    },
+    "stage3": {
+      "name": "隶书",
+      "desc": "汉代通行，笔画平直，字形扁方"
+    },
+    "stage4": {
+      "name": "楷书",
+      "desc": "魏晋以来通行，就是今天写的字"
+    }
+  },
+  "memoryMatch": {
+    "title": "🃏 翻牌记忆",
+    "pairs": "{count}对",
+    "moves": "步数 {count}",
+    "allFound": "全部找到！用了 {count} 步",
+    "nextLevel": "下一关"
+  },
+  "planView": {
+    "title": "我的复习计划",
+    "subtitle": "{count} 首待复习 · 其中 {high} 首高优先",
+    "empty": "还没有复习计划～去「诗库」读诗时点「✏️ 标难点」，或到「研读」做自测、背诵，系统就会自动按你的薄弱点生成复习路线。",
+    "suggestStage": "建议关卡：第 {stage}/4 关",
+    "startReview": "开始复习",
+    "priority": {
+      "high": "高优先",
+      "mid": "中优先",
+      "low": "低优先"
+    }
+  },
+  "spotDifference": {
+    "title": "🔍 找不同",
+    "subtitle": "找出两幅图不同的地方",
+    "found": "找到 {count}/{total}",
+    "score": "得分 {count}",
+    "imageA": "图 A",
+    "imageB": "图 B",
+    "next": "换一题"
+  },
+  "miniSudoku": {
+    "title": "🎯 幼儿数独",
+    "subtitle": "每行每列不能重复哦",
+    "win": "🎉 全部正确！你真聪明！",
+    "score": "得分 {count}",
+    "newPuzzle": "新题"
+  },
+  "lineNotes": {
+    "title": "逐句串讲",
+    "subtitle": "权威注释逐句解读",
+    "empty": "暂无串讲数据",
+    "readAloud": "🔊 朗读"
+  },
+  "studyReminder": {
+    "title": "学习提醒",
+    "subtitle": "每天定时提醒宝贝学习",
+    "daily": "每日提醒",
+    "time": "提醒时间",
+    "unsupported": "当前浏览器不支持通知",
+    "enabledAt": "✅ 已开启，将在每天 {time} 提醒学习",
+    "denied": "❌ 通知权限被拒绝，请在浏览器设置中允许通知",
+    "disabled": "已关闭提醒",
+    "updatedAt": "✅ 已更新为每天 {time} 提醒",
+    "notifyBody": "该学习啦！今天的课程等着你呢～",
+    "permissionHint": "提醒需要浏览器通知权限，且页面需保持打开状态"
+  },
+  "leaderboard": {
+    "title": "学习排行榜",
+    "subtitle": "本地历史记录",
+    "today": "今天",
+    "week": "本周",
+    "month": "本月",
+    "dayCount": "学习天数",
+    "totalTime": "总时长",
+    "totalItems": "总题数",
+    "totalStars": "总星星",
+    "minutesValue": "{count}分",
+    "itemsValue": "{count}题",
+    "bestDay": "最佳一天",
+    "bestDayLine": "{date} · ⭐{stars} · {minutes}分钟 · 正确率{rate}%",
+    "empty": "这个时间段还没有学习记录哦"
+  },
+  "mathExtra": {
+    "subTabs.mul": "乘法",
+    "subTabs.div": "除法",
+    "subTabs.shape": "认图形",
+    "subTabs.time": "认钟表",
+    "subTabs.coin": "认钱币",
+    "difficulty.1": "启蒙",
+    "difficulty.2": "进阶",
+    "difficulty.3": "挑战",
+    "practice": "{label}练习",
+    "perRound": "5 题一轮"
+  },
+  "poemNotes": {
+    "back": "◀️ 返回",
+    "myNotes": "📝 我的学习笔记",
+    "placeholder": "写下你对这首诗的理解、感受或喜欢的句子...",
+    "save": "💾 保存",
+    "title": "古诗笔记",
+    "subtitle": "记录学习心得",
+    "empty": "还没有笔记，去古诗详情页写第一条笔记吧！"
+  },
+  "radicalsMagic": {
+    "badge": "偏旁部首汉字魔法 ({current} / {total})",
+    "instruction": "点击魔法棒，把两个部首合体变成新汉字！",
+    "meaning": "字义：{meaning}",
+    "mergeBtn": "🪄 施展部首合成魔法",
+    "nextBtn": "🚀 下一组偏旁 ➔"
+  },
+  "slidingPuzzle": {
+    "title": "🧩 拼图还原",
+    "instruction": "把数字按 1,2,3... 顺序排好",
+    "grid3": "3×3 🌱",
+    "grid4": "4×4 🌳",
+    "moves": "步数 {moves}",
+    "done": "🎉 完成！",
+    "reset": "🔄 重新打乱"
+  },
+  "rabbitRunMath": {
+    "title": "🐇 3D 羊毛毡小兔障碍赛跑",
+    "subtitle": "答对口算助小兔冲向终点大草莓！",
+    "progress": "进度: {step} / {target} 关",
+    "winMsg": "恭喜！小兔跑赢赛跑吃到大草莓啦！",
+    "resetBtn": "再玩一次 🔄",
+    "correct": "🎉 答对啦！小兔跨过了蘑菇障碍！",
+    "wrong": "再想想哦～加油！",
+    "submit": "提交 🚀"
+  },
+  "storyUnlock": {
+    "label": "📖 剧情解锁",
+    "title": "第 {levelId} 站：{title}",
+    "continueBtn": "继续冒险 →"
+  },
+  "worksheetGenerator": {
+    "title": "🖨️ 幼儿线下打印练习册生成器",
+    "subtitle": "一键生成标准的英语字母四线格与汉字米字格连线描红卡，方便连接打印机打印！",
+    "lettersBtn": "🔤 字母四线格",
+    "hanziBtn": "🈲 汉字米字格",
+    "lettersPreview": "《宝贝学习乐园 · 26 个字母描红练习册》",
+    "hanziPreview": "《宝贝学习乐园 · 基础汉字米字格描红册》",
+    "printBtn": "🖨️ 连连接打印机 · 导出打印 PDF"
+  },
+  "milestoneCelebration": {
+    "progressLabel": "🏅 里程碑进度",
+    "progressCount": "{achieved} / {total}",
+    "emptyMsg": "每天学习，解锁更多里程碑吧～",
+    "inProgressMsg": "已完成 {pct}%，继续加油！",
+    "modalLabel": "🎊 里程碑达成！",
+    "continueBtn": "太棒啦！继续学习 🚀"
+  },
+  "speedRankings": {
+    "back": "返回",
+    "empty": "还没有 level {level} 的速算记录",
+    "emptyTip": "去速算挑战做一场就有了！",
+    "clear": "清除记录"
+  },
+  "sciencePage": {
+    "loading": "正在加载…",
+    "title": "自然科学百科馆",
+    "subtitle": "恐龙 · 太空 · 天气 · 动物 · 人体双语探险",
+    "tabDino": "恐龙",
+    "tabSpace": "太空",
+    "tabWeather": "天气",
+    "tabAnimal": "动物",
+    "tabBody": "人体"
+  },
+  "letterTrace": {
+    "upper": "A-Z 大写",
+    "lower": "a-z 小写",
+    "traceTip": "✍️ 用手指描一描",
+    "prev": "◀️",
+    "next": "📝 下一个 →",
+    "readLetter": "朗读字母"
+  },
+  "poetWorks": {
+    "title": "📜 诗人作品集",
+    "tip": "点击诗人，浏览 TA 的全部诗作和生平故事",
+    "back": "← 返回诗人列表",
+    "representative": "代表作：",
+    "level": "难度{n}"
+  },
+  "swUpdateToast": {
+    "title": "应用已更新到最新版",
+    "body": "刷新一下就能用新版啦",
+    "cleared": "（已清理 {count} 项旧缓存）",
+    "refreshNow": "立即刷新",
+    "later": "稍后"
+  },
+  "lessonProgressRing": {
+    "completed": "已完成",
+    "lessons": "小节",
+    "plan": "约 {minutes} 分钟 · {planLabel}",
+    "planReview": "{count} 个复习",
+    "planToday": "今日课程",
+    "again": "再学一遍 🔄",
+    "continue": "继续学习 →",
+    "start": "开始今日课程 →"
+  },
+  "comboIndicator": {
+    "hint": "差一点就连击啦 💪",
+    "label": "连击"
+  },
+  "numberLearn": {
+    "listenNumbers": "🔊 听一听这些数字",
+    "traceHint": "用手指把数字描出来",
+    "finish": "数字学会啦 🎉"
+  },
+  "streakBanner": {
+    "title": "连续打卡",
+    "days": "天",
+    "milestone0": "今天开始第一次学习吧！",
+    "milestone1": "坚持就是胜利，继续加油！",
+    "milestone2": "已经坚持好几天啦，太棒了！",
+    "milestone3": "一周以上！你是学习小能手！",
+    "milestone4": "两周以上！超级了不起！",
+    "milestone5": "一个月以上！你是学习小英雄！",
+    "nextMilestone": "再坚持 {daysToNext} 天到达 {nextMilestone} 天里程碑 🎯",
+    "startLearning": "马上学习 →"
+  },
+  "allusionBrowser": {
+    "title": "典故溯源",
+    "subtitle": "古诗中的典故来历",
+    "back": "◀️ 返回",
+    "source": "📖 出处",
+    "evolution": "🔄 源流演变",
+    "relatedPoems": "🌸 相关诗作（{count}首）",
+    "poemTitle": "《{title}》",
+    "authorLabel": "· {author}"
+  },
+  "posterCard": {
+    "title": "成就海报",
+    "subtitle": "生成宝贝的学习海报",
+    "description": "一键生成精美海报，记录宝贝的成长",
+    "stars": "星星",
+    "badges": "徽章",
+    "streakDays": "连续天数",
+    "generating": "⏳ 生成中...",
+    "generatePoster": "🎨 生成海报",
+    "download": "📥 下载",
+    "regenerate": "🔄 重新生成"
+  },
+  "numberTrace": {
+    "changeNumber": "← 换个数字",
+    "totalCount": "… 一共 {n} 个",
+    "listen": "🔊 听一听",
+    "hint": "选一个数字，用手指描一描吧 ✍️",
+    "canvasHint": "用手指沿着虚线把数字描出来"
+  },
+  "numbersPage": {
+    "title": "数字王国",
+    "subtitle": "认数字 · 学算术 · 蒙氏十格阵凑十法",
+    "wall": "认数字",
+    "tenframe": "凑十法",
+    "math": "加减法",
+    "extra": "进阶",
+    "speed": "速算",
+    "ladder": "阶梯",
+    "run": "小兔赛跑",
+    "vertical": "竖式",
+    "shape": "图形",
+    "clock": "时钟",
+    "measure": "测量",
+    "skip": "跳数",
+    "fraction": "分数",
+    "money": "钱币",
+    "word": "应用题",
+    "count": "数一数",
+    "trace": "描红"
+  },
+  "exploreMore": {
+    "title": "探索更多模块",
+    "moduleCount": "{n} 个"
+  },
+  "offlineIndicator": {
+    "badge": "离线",
+    "toastDisconnected": "📶 网络断开了，进入离线模式",
+    "toastReconnected": "📶 网络已恢复",
+    "badgeTitle": "当前处于离线模式，部分功能（如 AI 讲解）将不可用"
+  },
+  "studyGuard": {
+    "limitTitle": "今天学得够多啦",
+    "breakTitle": "眼睛该休息一下",
+    "limitBody": "今天已经学习 {minutes} 分钟，去外面跑一跑、玩一玩吧！",
+    "breakBody": "看看窗外远一点的地方，数 20 下再回来，眼睛会舒服很多。",
+    "limitSnooze": "再学 10 分钟",
+    "breakContinue": "休息好了，继续学",
+    "breakHint": "提醒间隔可以在「家长中心 → 设置」里调整"
+  },
+  "pwaInstallBanner": {
+    "title": "安装《宝贝学习乐园》桌面版",
+    "subtitle": "一键安装到 iPad/桌面，支持离线秒开随时玩 🚀",
+    "install": "立即安装",
+    "close": "关闭安装提示"
+  },
+  "storybookCover": {
+    "ariaLabelFavorite": "收藏",
+    "ariaLabelUnfavorite": "取消收藏",
+    "readCount": "已读{n}次"
+  },
+  "friendlyLoading": {
+    "preparing": "正在准备中...",
+    "almostReady": "马上就好啦"
+  },
+  "struggleModal": {
+    "restTitle": "休息一下下",
+    "wrongStreak": "已经连续答错 {count} 题啦",
+    "continueBtn": "继续加油",
+    "skipBtn": "跳过这题"
+  },
+  "storybookPage": {
+    "createTab": "创作",
+    "shelfTab": "书架",
+    "pageTitle": "AI 绘本工坊",
+    "pageSubtitle": "选主题、选风格，小智帮你创作专属绘本"
+  },
+  "letterStudy": {
+    "changeLetter": "换一个字母",
+    "instruction": "选一个字母，跟着「玩 → 认 → 练 → 写 → 说」一步步学 ✨"
+  },
+  "adaptiveDifficultyHint": {
+    "levelEasy": "启蒙",
+    "levelMedium": "进阶",
+    "levelHard": "挑战",
+    "aiSuggest": "小智觉得你可以试试「{name}」了",
+    "aiConfirmBtn": "好，换过去",
+    "aiChose": "小智根据你最近的表现，选了「{name}」",
+    "manualChose": "你自己选的难度",
+    "resetBtn": "交给小智（建议「{name}」）"
+  },
+  "homeHeader": {
+    "stars": "星星",
+    "streak": "连续打卡",
+    "badges": "徽章"
+  },
+  "generatingOverlay": {
+    "hint1": "小智正在想故事…",
+    "hint2": "正在给故事画画…",
+    "hint3": "快好了快好了…",
+    "cancel": "取消"
+  },
+  "parentAdvicePanel": {
+    "panelTitle": "智能学习建议",
+    "adviceCount": "（{count} 条）"
+  },
+  "studyPassport": {
+    "passportTitle": "羊毛毡荣誉成就护照",
+    "collected": "已收集 {owned}/{total} 个印章",
+    "prevPage": "上一页",
+    "nextPage": "下一页",
+    "pageInfo": "第 {page} / {total} 页"
   }
 }

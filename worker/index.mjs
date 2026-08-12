@@ -101,10 +101,14 @@ async function handleContentGenerate(request, env, cors) {
   if (!CONTENT_TYPES.includes(type)) {
     return json({ error: { code: 'bad_type', message: '仅支持 story/riddle/science/explainer' } }, cors, 400);
   }
+  // explainer（Sprint 4-A）：主题上下文 hint 注入 prompt，产出「研究主题专属讲解卡」
+  // hint 为客户端 topics 注册表的 explainerHint（内部数据），内容经 CHILD_SAFETY_PROMPT 兜底
+  const hint = typeof payload.hint === 'string' ? payload.hint.trim().slice(0, 80) : '';
+  const userPrompt = hint ? `${CONTENT_PROMPTS[type]}\n本次研究主题：${hint}` : CONTENT_PROMPTS[type];
 
   const messages = [
     { role: 'system', content: CHILD_SAFETY_PROMPT },
-    { role: 'user', content: CONTENT_PROMPTS[type] },
+    { role: 'user', content: userPrompt },
   ];
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), FIRST_BYTE_TIMEOUT_MS);
