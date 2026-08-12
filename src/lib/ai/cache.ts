@@ -58,7 +58,12 @@ function load(): Store {
   if (!hasLS) return mem;
   const raw = safeGetItem(KEY);
   if (!raw) return mem;
-  const parsed = JSON.parse(raw) as unknown;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return mem;
+  }
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return mem;
 
   // 顺手清掉已过期的，避免脏数据一直占着容量

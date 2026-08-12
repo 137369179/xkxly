@@ -165,7 +165,13 @@ const memoryCelebrated = new Set<string>();
 
 function getCelebrated(): Set<string> {
   const raw = safeGetItem(CELEBRATED_KEY);
-  return raw ? new Set(JSON.parse(raw)) : memoryCelebrated;
+  if (!raw) return memoryCelebrated;
+  try {
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? new Set(arr as string[]) : memoryCelebrated;
+  } catch {
+    return memoryCelebrated;
+  }
 }
 
 function markCelebrated(id: string) {

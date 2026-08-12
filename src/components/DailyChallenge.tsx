@@ -149,7 +149,11 @@ export function DailyChallenge({ compact = false }: { compact?: boolean } = {}) 
   const today = dateKey();
   const [claimed, setClaimed] = useState<string[]>(() => {
     const s = safeGetItem(`dc-claimed-${today}`);
-    return s ? JSON.parse(s) : [];
+    try {
+      return s ? JSON.parse(s) : [];
+    } catch {
+      return [];
+    }
   });
 
   const challenges = useMemo(() => getDailyChallenges(ageRange), [today, ageRange]);
