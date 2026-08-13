@@ -42,7 +42,7 @@ jobs:
       - name: 安装 Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'   # undici 8 / jsdom 30 要求 node >= 22.19，node 20 会触发 CacheStorage 崩溃（markAsUncloneable 缺失）
           cache: 'npm'
 
       - name: 安装依赖

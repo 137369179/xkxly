@@ -45,7 +45,7 @@ jobs:
       - name: 安装 Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'   # 与 CI 保持一致：undici 8 / jsdom 30 要求 node >= 22.19
           cache: 'npm'
 
       - name: 安装依赖
