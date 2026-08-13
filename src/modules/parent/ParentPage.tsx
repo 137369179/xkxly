@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { WorksheetGenerator } from '@/components/WorksheetGenerator';
 import { useStore, useProgress } from '@/store/useStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
@@ -17,9 +17,6 @@ import POEMS from '@/data/poems';
 import { TONE_STYLE } from '@/lib/tones';
 import { PageHeader, Panel, PanelTitle } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
-import { ProgressBar } from '@/components/ui/ProgressBar';
-import { aiLogs, onAiLog } from '@/lib/ai/client';
-import type { AiLogEntry } from '@/lib/ai/types';
 import { StudyTimeChart, MasteryRadar, WrongDistribution, StudyHeatmap } from '@/components/charts/StudyCharts';
 import { AnalyticsInsight } from '@/components/charts/AnalyticsInsight';
 import { GrowthTrend, SubjectBalance, StudyTips } from '@/components/charts/ParentEnhance';
@@ -33,8 +30,7 @@ import { ParentAdvicePanel } from '@/components/ParentAdvicePanel';
 import { LearningCoach } from '@/components/LearningPath';
 import { StudyReminder } from '@/components/StudyReminder';
 import VoiceSettings from './VoiceSettings';
-import { AiReport, WrongAnalyzeCard, Stat } from './ParentSections';
-import { generateAchievementPoster } from '@/lib/posterGenerator';
+import { AiReport, WrongAnalyzeCard } from './ParentSections';
 import {
   hashPin,
   verifyPin,
@@ -44,22 +40,16 @@ import {
   isLegacyPin,
   PIN_FAIL_LIMIT,
 } from '@/lib/pin';
-import {
-  buildBackup,
-  parseBackup,
-  downloadBackup,
-  readBackupFile,
-  type BackupPayload,
-} from '@/lib/backup';
 import { navigate } from '@/lib/router';
 import { useTranslation } from '@/i18n/useTranslation';
-import { sfxTap } from '@/lib/sfx';
-import { useProfilesStore } from '@/store/useProfilesStore';
+import { ParentPosterSection } from './ParentPosterSection';
+import { ParentBackupSection } from './ParentBackupSection';
+import { ParentSettingsSection } from './ParentSettingsSection';
+import { ParentTtsDiagPanel } from './ParentTtsDiagPanel';
+import { ParentAiLogsPanel } from './ParentAiLogsPanel';
+import { ParentTodayLogPanel } from './ParentTodayLogPanel';
 
 const poemTitle = (id: string) => POEMS.find((p) => p.id === id)?.title;
-
-const LIMITS = [0, 15, 30, 45, 60];
-const EYE = [0, 15, 20, 30];
 
 export default function ParentPage() {
   const { t: translate } = useTranslation();
@@ -69,10 +59,6 @@ export default function ParentPage() {
   const recordPinFail = useStore((s) => s.recordPinFail);
   const recordPinSuccess = useStore((s) => s.recordPinSuccess);
   const clearPin = useStore((s) => s.clearPin);
-  const restoreProgress = useStore((s) => s.restoreProgress);
-  const setDailyLimit = useStore((s) => s.setDailyLimit);
-  const setEyeCare = useStore((s) => s.setEyeCare);
-  const setVoiceGuide = useStore((s) => s.setVoiceGuide);
 
   const [unlocked, setUnlocked] = useState(false);
   const [pinInput, setPinInput] = useState('');
@@ -82,16 +68,6 @@ export default function ParentPage() {
   const [pinError, setPinError] = useState('');
   const [now, setNow] = useState(Date.now());
 
-  // 成果海报状态
-  const [posterUrl, setPosterUrl] = useState<string | null>(null);
-  const [isGeneratingPoster, setIsGeneratingPoster] = useState(false);
-
-  // 备份导入状态
-  const [importMsg, setImportMsg] = useState<{ ok: boolean; text: string } | null>(null);
-  const [showImportConfirm, setShowImportConfirm] = useState<BackupPayload | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const importMsgTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   // 锁定倒计时刷新
   useEffect(() => {
     if (!settings.parentPin || unlocked) return;
@@ -99,74 +75,12 @@ export default function ParentPage() {
     return () => clearInterval(t);
   }, [settings.parentPin, unlocked]);
 
-  // 卸载时清理 importMsg 定时器
-  useEffect(() => () => {
-    if (importMsgTimerRef.current) clearTimeout(importMsgTimerRef.current);
-  }, []);
-
   const weak = useMemo(() => weakSkills(progress, 8), [progress]);
   const grid = useMemo(
     () =>
       Object.entries(progress.mastery).map(([skill, m]) => ({ skill, m })),
     [progress.mastery],
   );
-  const todayLog = progress.dailyLog[dateKey()];
-
-  // AI 调用日志（订阅服务层，家长可查最近与小智的对话）
-  const [logs, setLogs] = useState<readonly AiLogEntry[]>(() => aiLogs());
-  useEffect(() => onAiLog(() => setLogs(aiLogs())), []);
-
-  const handleGeneratePoster = async () => {
-    setIsGeneratingPoster(true);
-    try {
-      const url = await generateAchievementPoster({
-        progress,
-        childName: translate('parent.childName'),
-        aiRemark: '学习专注度极高，古诗与数学表现突出，继续加油哦！',
-      });
-      setPosterUrl(url);
-    } catch (e) {
-      if (import.meta.env.DEV) console.error('Poster gen error:', e);
-    } finally {
-      setIsGeneratingPoster(false);
-    }
-  };
-
-  /* —— 备份导出 —— */
-  const handleExport = () => {
-    const payload = buildBackup(progress, settings);
-    downloadBackup(payload);
-    setImportMsg({ ok: true, text: translate('parent.backupDownloaded') });
-    if (importMsgTimerRef.current) clearTimeout(importMsgTimerRef.current);
-    importMsgTimerRef.current = setTimeout(() => setImportMsg(null), 4000);
-  };
-
-  /* —— 备份导入：读取文件 → 校验 → 弹确认 —— */
-  const handleFilePicked = async (file: File | undefined) => {
-    if (!file) return;
-    try {
-      const text = await readBackupFile(file);
-      const payload = parseBackup(text);
-      if (!payload) {
-        setImportMsg({ ok: false, text: translate('parent.backupInvalid') });
-        return;
-      }
-      setShowImportConfirm(payload);
-    } catch {
-      setImportMsg({ ok: false, text: translate('parent.backupReadFail') });
-    }
-  };
-
-  /* —— 确认导入：覆盖当前进度 —— */
-  const handleConfirmImport = () => {
-    if (!showImportConfirm) return;
-    restoreProgress(showImportConfirm.progress);
-    const date = new Date(showImportConfirm.exportedAt).toLocaleDateString('zh-CN');
-    setShowImportConfirm(null);
-    setImportMsg({ ok: true, text: translate('parent.backupRestored', { date }) });
-    if (importMsgTimerRef.current) clearTimeout(importMsgTimerRef.current);
-    importMsgTimerRef.current = setTimeout(() => setImportMsg(null), 6000);
-  };
 
   /* —— 未设置密码：引导设置 —— */
   if (!settings.parentPin) {
@@ -333,33 +247,10 @@ export default function ParentPage() {
       <PageHeader emoji="👨‍👩‍👧" title={translate('parent.title')} subtitle={translate('parent.dashboardSubtitle')} tone="green" />
 
       {/* 海报生成入口 */}
-      <Panel className="bg-gradient-to-r from-candy-purple-soft via-candy-blue-soft to-candy-green-soft">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <h3 className="text-lg font-black text-ink-main flex items-center gap-2">
-              {translate('parent.posterTitle')}
-            </h3>
-            <p className="text-xs font-bold text-ink-soft mt-1">
-              {translate('parent.posterDesc')}
-            </p>
-          </div>
-          <CandyButton
-            tone="purple"
-            size="md"
-            onClick={handleGeneratePoster}
-            disabled={isGeneratingPoster}
-          >
-            {isGeneratingPoster ? translate('parent.posterGenerating') : translate('parent.posterGenerate')}
-          </CandyButton>
-
-        </div>
-      </Panel>
+      <ParentPosterSection />
 
       {/* 智能可打印练习册生成器 */}
       <WorksheetGenerator />
-
-
-
 
       {/* 概览 */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -367,9 +258,9 @@ export default function ParentPage() {
           { label: translate('parent.touched'), value: touchedCount(progress), tone: 'blue' as const },
           { label: translate('parent.mastered'), value: masteredCount(progress), tone: 'green' as const },
           { label: translate('parent.masteryRate'), value: `${Math.round(masteryRate(progress) * 100)}%`, tone: 'purple' as const },
-          { label: translate('parent.todayPractice'), value: todayLog?.items ?? 0, tone: 'orange' as const },
+          { label: translate('parent.todayPractice'), value: progress.dailyLog[dateKey()]?.items ?? 0, tone: 'orange' as const },
         ].map((c) => {
-          const t = TONE_STYLE[c.tone]!
+          const t = TONE_STYLE[c.tone]!;
           return (
             <div key={c.label} className="card-candy flex flex-col items-center gap-1 p-4 text-center" style={{ background: t.soft }}>
               <span className="text-3xl font-extrabold tabular-nums" style={{ color: t.deep }}>
@@ -523,240 +414,22 @@ export default function ParentPage() {
       <StudyReminder />
 
       {/* 设置 */}
-      <Panel>
-        <PanelTitle emoji="⚙️" title={translate('common.settings')} tone="green" />
-        <div className="space-y-4">
-          <div>
-            <div className="mb-2 text-sm font-extrabold text-ink">{translate('parent.dailyLimit')}</div>
-            <div className="flex flex-wrap gap-2">
-              {LIMITS.map((m) => (
-                <CandyButton
-                  key={m}
-                  tone={settings.dailyLimitMin === m ? 'green' : 'purple'}
-                  variant={settings.dailyLimitMin === m ? 'solid' : 'soft'}
-                  size="sm"
-                  onClick={() => setDailyLimit(m)}
-                >
-                  {m === 0 ? translate('parent.noLimit') : translate('common.minutes', { count: m })}
-                </CandyButton>
-              ))}
-            </div>
-          </div>
-          <div>
-            <div className="mb-2 text-sm font-extrabold text-ink">{translate('parent.eyeCareInterval')}</div>
-            <div className="flex flex-wrap gap-2">
-              {EYE.map((m) => (
-                <CandyButton
-                  key={m}
-                  tone={settings.eyeCareMin === m ? 'green' : 'purple'}
-                  variant={settings.eyeCareMin === m ? 'solid' : 'soft'}
-                  size="sm"
-                  onClick={() => setEyeCare(m)}
-                >
-                  {m === 0 ? translate('common.close') : translate('common.minutes', { count: m })}
-                </CandyButton>
-              ))}
-            </div>
-          </div>
-          {/* A2 · 语音引导开关：控制页面/步骤切换时的引导朗读，默认开 */}
-          <div>
-            <div className="mb-2 text-sm font-extrabold text-ink">{translate('parent.voiceGuide')}</div>
-            <div className="flex flex-wrap gap-2">
-              <CandyButton
-                tone={settings.voiceGuide ? 'green' : 'purple'}
-                variant={settings.voiceGuide ? 'solid' : 'soft'}
-                size="sm"
-                onClick={() => setVoiceGuide(true)}
-              >
-                {translate('common.on')}
-              </CandyButton>
-              <CandyButton
-                tone={!settings.voiceGuide ? 'green' : 'purple'}
-                variant={!settings.voiceGuide ? 'solid' : 'soft'}
-                size="sm"
-                onClick={() => setVoiceGuide(false)}
-              >
-                {translate('common.close')}
-              </CandyButton>
-            </div>
-            <p className="mt-1 text-xs font-bold text-ink-soft">
-              {translate('parent.voiceGuideDesc')}
-            </p>
-          </div>
-          {/* 自动登录配置：重新打开首启引导，修改孩子名字 / 头像 / 主题色 */}
-          <div>
-            <div className="mb-2 text-sm font-extrabold text-ink">{translate('onboarding.configTitle')}</div>
-            <CandyButton
-              tone="purple"
-              variant="soft"
-              size="sm"
-              onClick={() => { sfxTap(); useProfilesStore.getState().reopenOnboarding(); }}
-            >
-              ⚙️ {translate('onboarding.configBtn')}
-            </CandyButton>
-            <p className="mt-1 text-xs font-bold text-ink-soft">
-              {translate('onboarding.configDesc')}
-            </p>
-          </div>
-        </div>
-      </Panel>
+      <ParentSettingsSection />
 
       {/* 朗读设置（音色 / 语速 / 多音字纠音） */}
       <VoiceSettings />
 
       {/* 语音引擎诊断（家长诊断工具，PIN 解锁后可见） */}
-      <Panel>
-        <PanelTitle emoji="🎙️" title={translate('parent.ttsDiagTitle')} subtitle={translate('parent.ttsDiagDesc')} tone="purple" />
-        <div className="flex flex-wrap gap-2">
-          <CandyButton
-            tone="purple"
-            size="md"
-            onClick={() => { sfxTap(); navigate('ttstest'); }}
-          >
-            🎙️ {translate('parent.ttsDiagOpen')}
-          </CandyButton>
-        </div>
-      </Panel>
+      <ParentTtsDiagPanel />
 
       {/* AI 调用日志 */}
-      <Panel>
-        <PanelTitle emoji="🤖" title={translate('parent.aiLogsTitle')} subtitle={translate('parent.aiLogsSubtitle')} tone="purple" />
-        {logs.length === 0 ? (
-          <p className="py-2 text-center text-sm font-bold text-ink-soft">{translate('parent.noAiLogs')}</p>
-        ) : (
-          <div className="space-y-1.5">
-            {logs.slice(0, 12).map((e, i) => (
-              <div key={`e-${i}`} className="flex items-center gap-2 rounded-xl bg-white/70 px-3 py-2 text-xs font-bold">
-                <span className="shrink-0 rounded-full bg-candy-purple-soft px-2 py-0.5 text-candy-purple-deep">{e.scene}</span>
-                <span className={e.ok ? 'text-emerald-700' : 'text-rose-600'}>{e.ok ? (e.cached ? translate('parent.cacheHit') : translate('parent.aiOk')) : translate('parent.aiFail')}</span>
-                <span className="text-ink-soft">{e.ms}ms</span>
-                {e.model && e.model !== 'cache' && <span className="text-ink-soft/70">{e.model}</span>}
-                {e.errCode && <span className="text-rose-500">{e.errCode}</span>}
-                <span className="ml-auto text-ink-soft/70">
-                  {new Date(e.at).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </Panel>
+      <ParentAiLogsPanel />
 
       {/* 今日学习日志 */}
-      {todayLog && (
-        <Panel>
-          <PanelTitle emoji="📅" title={translate('parent.todayStudy')} tone="purple" />
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Stat label={translate('parent.studyDuration')} value={`${Math.round(todayLog.sec / 60)}${translate('common.minutesShort', { count: 0 }).replace('0', '')}`} />
-            <Stat label={translate('parent.practiceCount')} value={`${todayLog.items}`} />
-            <Stat label={translate('study.correct')} value={`${todayLog.ok}`} />
-            <Stat label={translate('parent.starsEarnedLabel')} value={`${todayLog.stars}⭐`} />
-          </div>
-          <div className="mt-4">
-            <ProgressBar value={todayLog.items} max={Math.max(1, todayLog.items)} tone="purple" showLabel />
-          </div>
-        </Panel>
-      )}
-
-      {/* 海报预览模态框 */}
-      {posterUrl && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="relative flex max-h-[90vh] flex-col items-center overflow-hidden rounded-3xl bg-white p-4 shadow-2xl">
-            <h3 className="mb-2 text-xl font-extrabold text-ink-main">{translate('parent.posterCardTitle')}</h3>
-            <div className="max-h-[70vh] overflow-y-auto rounded-2xl border-2 border-candy-purple/30">
-              <img src={posterUrl} alt={translate('parent.posterAlt')} loading="lazy" decoding="async" className="h-auto w-[320px] rounded-xl sm:w-[420px]" />
-            </div>
-            <div className="mt-4 flex w-full gap-3">
-              <a
-                href={posterUrl}
-                download={translate('parent.posterFileName')}
-                className="flex-1 rounded-2xl bg-candy-purple py-2.5 text-center font-extrabold text-white shadow-md hover:bg-candy-purple-deep transition-colors"
-              >
-                {translate('parent.downloadPoster')}
-              </a>
-              <button
-                onClick={() => setPosterUrl(null)}
-                className="rounded-2xl bg-cream-dark px-5 py-2.5 font-bold text-ink-soft hover:bg-candy-yellow"
-              >
-                {translate('common.close')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ParentTodayLogPanel />
 
       {/* 数据备份与恢复 */}
-      <Panel>
-        <PanelTitle emoji="💾" title={translate('parent.backupTitle')} subtitle={translate('parent.backupSubtitle')} tone="blue" />
-        <div className="space-y-3">
-          <p className="text-xs font-bold text-ink-soft">
-            {translate('parent.backupDesc')}
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <CandyButton tone="blue" size="sm" onClick={handleExport}>
-              {translate('parent.exportBackup')}
-            </CandyButton>
-            <CandyButton
-              tone="purple"
-              variant="soft"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              {translate('parent.importRestore')}
-            </CandyButton>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="application/json,.json"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                void handleFilePicked(f);
-                // 重置 value 允许重复选同一文件
-                e.target.value = '';
-              }}
-            />
-          </div>
-          {importMsg && (
-            <p
-              className={`text-sm font-bold ${importMsg.ok ? 'text-candy-green-deep' : 'text-candy-orange-deep'}`}
-            >
-              {importMsg.ok ? '✅ ' : '⚠️ '}
-              {importMsg.text}
-            </p>
-          )}
-        </div>
-      </Panel>
-
-      {/* 导入确认弹窗 */}
-      {showImportConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-3xl bg-white p-5 shadow-2xl">
-            <h3 className="mb-2 text-lg font-extrabold text-ink-main">{translate('parent.confirmRestore')}</h3>
-            <p className="mb-4 text-sm font-bold text-ink-soft">
-              {translate('parent.restoreWarn1')}
-              <span className="text-candy-orange-deep">{translate('parent.restoreWarnStrong')}</span>
-              {translate('parent.restoreWarn2')}
-            </p>
-            <p className="mb-4 text-xs font-bold text-ink-soft">
-              {translate('parent.backupTime')}
-              {new Date(showImportConfirm.exportedAt).toLocaleString('zh-CN')}
-              <br />
-              {translate('parent.backupStars', { stars: showImportConfirm.progress.stars, badges: showImportConfirm.progress.badges.length })}
-            </p>
-            <div className="flex gap-3">
-              <CandyButton tone="orange" size="md" fullWidth onClick={handleConfirmImport}>
-                {translate('parent.confirmOverwrite')}
-              </CandyButton>
-              <button
-                onClick={() => setShowImportConfirm(null)}
-                className="rounded-2xl bg-cream-dark px-5 py-2.5 font-bold text-ink-soft hover:bg-candy-yellow"
-              >
-                {translate('common.cancel')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ParentBackupSection />
 
       <button onClick={() => setUnlocked(false)} className="mx-auto block text-sm font-bold text-ink-soft">
         {translate('parent.exit')}
@@ -764,4 +437,3 @@ export default function ParentPage() {
     </div>
   );
 }
-
