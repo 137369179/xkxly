@@ -1,0 +1,176 @@
+{
+  "badge": {
+    "takeIt": "Claim",
+    "unlockNew": "New badge unlocked",
+    "xiaozhiPraise": "Xiaozhi's Praise"
+  },
+  "codeMaze": {
+    "emptyHint": "Drag in commands to start coding!",
+    "fail": "Challenge failed, try again!",
+    "levelN": "Level {i}",
+    "next": "Next Level",
+    "program": "Program {current}/{max}",
+    "reset": "Reset",
+    "run": "Run",
+    "subtitle": "Drag command blocks to help the robot collect all the stars!",
+    "title": "Code Maze",
+    "win": "Collected {got}/{total} stars!"
+  },
+  "common": {
+    "collapse": "Collapse"
+  },
+  "countingGame": {
+    "off": "Off",
+    "on": "On"
+  },
+  "dinoWorld": {
+    "backToList": "Back to list",
+    "chant": "Chant",
+    "chinese": "Chinese",
+    "compareDesc": "Compare the two dinosaurs and tell how they differ!",
+    "compareTitle": "Dino Showdown",
+    "english": "English",
+    "height": "Height",
+    "length": "Length",
+    "weight": "Weight"
+  },
+  "hanziDictation": {
+    "next": "Next"
+  },
+  "kidSudoku": {
+    "complete": "Completed!",
+    "conflictHint": "Conflict at row {row}, col {col}: {animal}",
+    "easy": "Easy",
+    "hard": "Hard",
+    "medium": "Medium",
+    "nextLevel": "Next Level",
+    "rules": "No repeats in any row, column, or box!",
+    "title": "Sudoku Fun"
+  },
+  "lineNotes": {
+    "read": "Read Aloud"
+  },
+  "mathLadder": {
+    "confirm": "Confirm",
+    "correctAnswer": "Answer: {answer}",
+    "nextLevel": "Level {level}",
+    "questionProgress": "Question {current}/{total}",
+    "questionsCount": "{count} questions",
+    "retry": "Retry",
+    "selectLevel": "Select Level",
+    "subtitle": "Climb the math ladder, one step at a time!",
+    "timeLimit": "Time limit {seconds}s",
+    "title": "Math Ladder",
+    "levelName": {
+      "1": "Addition within 5",
+      "2": "Subtraction within 5",
+      "3": "Addition within 10",
+      "4": "Subtraction within 10",
+      "5": "Addition within 20",
+      "6": "Subtraction within 20",
+      "7": "Add & subtract within 50",
+      "8": "Add & subtract within 100",
+      "9": "Intro to multiplication",
+      "10": "Mixed multiplication & division"
+    }
+  },
+  "mirrorDraw": {
+    "brushSize": "Brush Size",
+    "clear": "Clear",
+    "subtitle": "Trace the dotted line to draw a symmetric picture!",
+    "title": "Mirror Tracing"
+  },
+  "music": {
+    "aiFeedback": "🤖 AI Review",
+    "aiHint": "Tap 'AI Review' to let Xiaozhi listen to your creation!",
+    "aiSays": "Xiaozhi says",
+    "clear": "🗑 Clear",
+    "createKeys": "🎵 Colorful Keys",
+    "createSubtitle": "Create freely · Record & playback · AI review",
+    "createTab": "Create",
+    "createTitle": "🎹 Music Creation Stage",
+    "notes": "notes",
+    "pianoTab": "Piano",
+    "playback": "▶ Playback",
+    "playing": "▶ Playing…",
+    "recordPanel": "🎙️ Record My Creation",
+    "recorded": "Recorded",
+    "recording": "Recording…",
+    "rhythmTab": "Rhythm",
+    "startRecord": "🔴 Start Recording",
+    "stopRecord": "⏹ Stop Recording",
+    "thinking": "Reviewing…"
+  },
+  "pinyinGroup": {
+    "correct": "You got it: {p}",
+    "wrong": "Correct sound: {p}"
+  },
+  "poetArchive": {
+    "dynastyCount": "{dynasty} · {n} poets"
+  },
+  "rabbitRunMath": {
+    "correctMsg": "Correct! The bunny hops forward!",
+    "tryAgain": "Oops! Try again!"
+  },
+  "reciteRecorder": {
+    "retry": "Read Again"
+  },
+  "spaceExplorer": {
+    "backToList": "Back to list",
+    "chant": "Chant",
+    "chinese": "Chinese",
+    "days": " days",
+    "diameter": "Diameter",
+    "distanceFromSun": "Distance from Sun",
+    "dragZoomClick": "Drag to rotate, scroll to zoom, click a planet for details",
+    "english": "English",
+    "flyingToSolarSystem": "Flying to the solar system…",
+    "moon": "Moon",
+    "moonCount": " moons",
+    "moons": "Moons",
+    "orbitalPeriod": "Orbital Period",
+    "planetList": "Planet List",
+    "planetNo": "Planet {order}",
+    "solarSystem3D": "Solar System 3D",
+    "star": "Star"
+  },
+  "speedMath": {
+    "bestRecord": "Best: {count} questions",
+    "challengeComplete": "Challenge Complete!",
+    "challengeEnd": "Speed Challenge",
+    "diffEasy": "Easy",
+    "diffHard": "Hard",
+    "diffMedium": "Medium",
+    "newRecord": "New Record!",
+    "rankButton": "Leaderboard",
+    "rankSubtitle": "See who's the mental-math whiz!",
+    "rankTitle": "Speed Leaderboard",
+    "selectDifficulty": "Select Difficulty",
+    "startChallenge": "Start Challenge",
+    "subtitle": "Who's fast and accurate?!",
+    "title": "Speed Math",
+    "tryAgain": "Try Again"
+  },
+  "storybookReader": {
+    "back": "Back",
+    "listenAgain": "Listen Again",
+    "pageNo": "Page {number}",
+    "save": "Save",
+    "saved": "Saved",
+    "turnOffAutoRead": "Turn Off Auto-Read",
+    "turnOnAutoRead": "Turn On Auto-Read"
+  },
+  "streakBanner": {
+    "studyNow": "Study Now"
+  },
+  "tonePractice": {
+    "again": "Try Again",
+    "done": "Done!",
+    "nextQ": "Next",
+    "showResult": "See Results"
+  },
+  "wordReview": {
+    "empty": "No words added yet~",
+    "weakWords": "Weak Words"
+  }
+}

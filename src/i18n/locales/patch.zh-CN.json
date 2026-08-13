@@ -1,0 +1,176 @@
+{
+  "badge": {
+    "takeIt": "领取",
+    "unlockNew": "解锁新徽章",
+    "xiaozhiPraise": "小智夸夸"
+  },
+  "codeMaze": {
+    "emptyHint": "拖入指令，开始你的编程吧！",
+    "fail": "挑战失败，再试一次！",
+    "levelN": "第 {i} 关",
+    "next": "下一关",
+    "program": "程序 {current}/{max}",
+    "reset": "重置",
+    "run": "运行",
+    "subtitle": "拖动指令方块，帮小机器人收集所有星星！",
+    "title": "代码迷宫",
+    "win": "收集到 {got}/{total} 颗星星！"
+  },
+  "common": {
+    "collapse": "收起"
+  },
+  "countingGame": {
+    "off": "关",
+    "on": "开"
+  },
+  "dinoWorld": {
+    "backToList": "返回列表",
+    "chant": "咒语",
+    "chinese": "中文",
+    "compareDesc": "对照两只恐龙，说说它们哪里不一样～",
+    "compareTitle": "恐龙大比拼",
+    "english": "英文",
+    "height": "身高",
+    "length": "身长",
+    "weight": "体重"
+  },
+  "hanziDictation": {
+    "next": "下一题"
+  },
+  "kidSudoku": {
+    "complete": "完成啦！",
+    "conflictHint": "第 {row} 行第 {col} 列冲突：{animal}",
+    "easy": "简单",
+    "hard": "困难",
+    "medium": "中等",
+    "nextLevel": "下一关",
+    "rules": "每行、每列、每宫的数字都不能重复哦！",
+    "title": "数独乐园"
+  },
+  "lineNotes": {
+    "read": "朗读"
+  },
+  "mathLadder": {
+    "confirm": "确认",
+    "correctAnswer": "正确答案：{answer}",
+    "nextLevel": "第 {level} 关",
+    "questionProgress": "第 {current}/{total} 题",
+    "questionsCount": "共 {count} 题",
+    "retry": "重试",
+    "selectLevel": "选择关卡",
+    "subtitle": "一步一个台阶，爬上数学口算高峰！",
+    "timeLimit": "限时 {seconds} 秒",
+    "title": "数学阶梯",
+    "levelName": {
+      "1": "5以内加法",
+      "2": "5以内减法",
+      "3": "10以内加法",
+      "4": "10以内减法",
+      "5": "20以内加法",
+      "6": "20以内减法",
+      "7": "50以内加减",
+      "8": "100以内加减",
+      "9": "乘法启蒙",
+      "10": "乘除混合"
+    }
+  },
+  "mirrorDraw": {
+    "brushSize": "画笔粗细",
+    "clear": "清除",
+    "subtitle": "沿着虚线描摹，画出对称的小画！",
+    "title": "镜像描红"
+  },
+  "music": {
+    "aiFeedback": "🤖 AI 点评",
+    "aiHint": "点击「AI 点评」让小智来听你的创作！",
+    "aiSays": "小智说",
+    "clear": "🗑 清除",
+    "createKeys": "🎵 彩色小琴键",
+    "createSubtitle": "自由创作 · 录制回放 · AI 点评",
+    "createTab": "创作",
+    "createTitle": "🎹 音乐创作小舞台",
+    "notes": "个音符",
+    "pianoTab": "钢琴",
+    "playback": "▶ 回放",
+    "playing": "▶ 播放中…",
+    "recordPanel": "🎙️ 录制我的创作",
+    "recorded": "已录制",
+    "recording": "正在录制…",
+    "rhythmTab": "节奏",
+    "startRecord": "🔴 开始录制",
+    "stopRecord": "⏹ 停止录制",
+    "thinking": "正在点评…"
+  },
+  "pinyinGroup": {
+    "correct": "读对啦：{p}",
+    "wrong": "正确读音：{p}"
+  },
+  "poetArchive": {
+    "dynastyCount": "{dynasty} · {n} 位诗人"
+  },
+  "rabbitRunMath": {
+    "correctMsg": "答对啦，小兔前进！",
+    "tryAgain": "答错了，再试一次吧！"
+  },
+  "reciteRecorder": {
+    "retry": "再读一次"
+  },
+  "spaceExplorer": {
+    "backToList": "返回列表",
+    "chant": "咒语",
+    "chinese": "中文",
+    "days": "天",
+    "diameter": "直径",
+    "distanceFromSun": "距太阳",
+    "dragZoomClick": "拖动旋转，滚轮缩放，点击星球查看详情",
+    "english": "英文",
+    "flyingToSolarSystem": "飞向太阳系…",
+    "moon": "卫星",
+    "moonCount": "颗",
+    "moons": "卫星数",
+    "orbitalPeriod": "公转周期",
+    "planetList": "星球列表",
+    "planetNo": "第 {order} 行星",
+    "solarSystem3D": "太阳系 3D",
+    "star": "恒星"
+  },
+  "speedMath": {
+    "bestRecord": "最佳记录：{count} 题",
+    "challengeComplete": "挑战完成！",
+    "challengeEnd": "速度挑战",
+    "diffEasy": "简单",
+    "diffHard": "困难",
+    "diffMedium": "中等",
+    "newRecord": "新纪录！",
+    "rankButton": "排行榜",
+    "rankSubtitle": "看看谁是口算小高手！",
+    "rankTitle": "速度排行榜",
+    "selectDifficulty": "选择难度",
+    "startChallenge": "开始挑战",
+    "subtitle": "看谁算得又快又准！",
+    "title": "神算挑战",
+    "tryAgain": "再来一次"
+  },
+  "storybookReader": {
+    "back": "返回",
+    "listenAgain": "再听一次",
+    "pageNo": "第 {number} 页",
+    "save": "保存",
+    "saved": "已保存",
+    "turnOffAutoRead": "关闭自动朗读",
+    "turnOnAutoRead": "开启自动朗读"
+  },
+  "streakBanner": {
+    "studyNow": "去学习"
+  },
+  "tonePractice": {
+    "again": "再来一次",
+    "done": "完成！",
+    "nextQ": "下一题",
+    "showResult": "查看结果"
+  },
+  "wordReview": {
+    "empty": "还没有添加单词哦～",
+    "weakWords": "薄弱单词"
+  }
+}
