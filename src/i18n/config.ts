@@ -9,7 +9,7 @@
  */
 
 // 支持的语言列表
-export type Locale = 'zh-CN' | 'en-US';
+export type Locale = 'zh-CN' | 'zh-TW' | 'en-US';
 
 export interface I18nConfig {
   /** 默认语言 */
@@ -22,9 +22,10 @@ export interface I18nConfig {
 
 export const i18nConfig: I18nConfig = {
   defaultLocale: 'zh-CN',
-  availableLocales: ['zh-CN', 'en-US'],
+  availableLocales: ['zh-CN', 'zh-TW', 'en-US'],
   localeNames: {
     'zh-CN': '简体中文',
+    'zh-TW': '繁體中文',
     'en-US': 'English',
   },
 };

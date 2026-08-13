@@ -24,10 +24,12 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { HanziVideoCard } from '@/modules/hanzi/HanziVideoCard';
 import { HanziStrokeWriter } from '@/modules/hanzi/HanziStrokeWriter';
 import { HanziQuizGame } from '@/modules/hanzi/HanziQuizGame';
+import { HanziFlashReview } from '@/modules/hanzi/HanziFlashReview';
+import { HanziTrailMap } from '@/modules/hanzi/HanziTrailMap';
 
 type MainZone = 'trail' | 'library' | 'playground';
 type LibraryTab = 'level1' | 'level2' | 'level3' | 'h500' | 'radical' | 'evolve' | 'family';
-type PlaygroundTab = 'quizgame' | 'writer' | 'dictation' | 'builder' | 'magic' | 'worksheet';
+type PlaygroundTab = 'flash' | 'quizgame' | 'writer' | 'dictation' | 'builder' | 'magic' | 'worksheet';
 
 const MAIN_ZONES: TabItem<MainZone>[] = [
   { id: 'trail', label: '今日闯关', emoji: '🌟' },
@@ -46,6 +48,7 @@ const LIBRARY_TABS: TabItem<LibraryTab>[] = [
 ];
 
 const PLAYGROUND_TABS: TabItem<PlaygroundTab>[] = [
+  { id: 'flash', label: '生字闪卡', emoji: '🃏' },
   { id: 'quizgame', label: '听音识字', emoji: '🎧' },
   { id: 'writer', label: '笔画描红', emoji: '✍️' },
   { id: 'dictation', label: '听写测试', emoji: '📝' },
@@ -299,7 +302,12 @@ export default function HanziPage() {
             </div>
           )}
 
-          {/* 关卡线路图节点展示 (Adventure Trail Map) */}
+          {/* 闯关解锁地图（对标洪恩：单字解锁路径） */}
+          <Panel>
+            <HanziTrailMap onSelect={setSelected} />
+          </Panel>
+
+          {/* 旧流程节点（学习/听写/组词三步指引，保留） */}
           <Panel>
             <h4 className="text-sm font-extrabold text-ink mb-3">📍 闯关路线图</h4>
             <div className="flex items-center justify-around gap-2 py-2">
@@ -418,6 +426,7 @@ export default function HanziPage() {
             layoutId="hanzi-playground-tabs"
           />
 
+          {playTab === 'flash' && <HanziFlashReview />}
           {playTab === 'quizgame' && (
             <HanziQuizGame
               level={levelNum}

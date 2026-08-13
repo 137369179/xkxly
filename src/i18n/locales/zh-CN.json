@@ -1938,7 +1938,14 @@
     "compoundMeaning": "{comp1} 和 {comp2} 组成，意思是……",
     "assembleExplain": "{char} 由 {comp1} 和 {comp2} 组成，意思是……",
     "clickToStart": "▶ 点击开始",
-    "assembleSuccess": "✨ 拼装成功！"
+    "assembleSuccess": "✨ 拼装成功！",
+    "trailMapTitle": "🗺️ 闯关解锁地图",
+    "trailMapProgress": "已解锁 {done} / {total} 字",
+    "trailMapLocked": "「{char}」还没解锁，先学前面的字吧",
+    "trailMapNode": "「{char}」{state}",
+    "trailMapLegendLearned": "已学会",
+    "trailMapLegendCurrent": "当前要学",
+    "trailMapLegendLocked": "待解锁"
   },
   "timeseq": {
     "title": "⏰ 时间顺序",
@@ -4724,7 +4731,10 @@
     "reward": "获得 3 颗星 + 2 条小鱼干！",
     "aiStoryBtn": "🐱 让 AI 小智给【{char}】编个汉字奇妙故事",
     "aiStoryTitle": "🐱 AI 小智汉字奇妙故事：",
-    "aiStoryLoading": "喵喵正在灵光一闪构思故事中..."
+    "aiStoryLoading": "喵喵正在灵光一闪构思故事中...",
+    "rewardPerfect": "太棒啦！【{char}】写得很规范，获得 3 颗星和 {fish} 条小鱼干！",
+    "rewardGood": "写得不错！【{char}】再练练就更好了，获得 2 颗星和 {fish} 条小鱼干！",
+    "rewardTry": "【{char}】还差一点点，跟着虚线再描一描吧～"
   },
   "hanziVideoCard": {
     "readAria": "朗读{char}",
@@ -4732,5 +4742,18 @@
     "close": "关闭视频",
     "videoUnsupported": "您的浏览器不支持视频播放",
     "videoDuration": "50秒教学视频"
+  },
+  "hanziFlashReview": {
+    "noneTitle": "今天没有需要复习的字",
+    "noneTip": "学过的字都会在合适的时候回来复习哦～",
+    "doneTitle": "复习完成啦！",
+    "doneTip": "本次复习了 {count} 个字",
+    "again": "再复习一轮",
+    "progress": "第 {current} / {total} 张",
+    "reviewedCount": "已复习 {count} 字",
+    "tapToFlip": "👆 点击翻面看释义",
+    "readAria": "朗读「{char}」",
+    "forgot": "😕 忘记了",
+    "remember": "😄 记住了"
   }
 }

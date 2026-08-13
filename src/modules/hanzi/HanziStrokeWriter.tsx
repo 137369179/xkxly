@@ -9,6 +9,8 @@ import { useAiStream } from '@/lib/ai/useAi';
 import { companionChatTask } from '@/lib/ai/tasks/companion';
 import type { HanziEntry } from '@/data/hanziIndex';
 import { useTranslation } from '@/i18n/useTranslation';
+import { ensureStrokeData } from '@/lib/strokes';
+import { gradeHanziWriting, canvasToStroke1024 } from '@/lib/hanziWriting';
 
 interface HanziStrokeWriterProps {
   hanzi: HanziEntry;
@@ -29,6 +31,9 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const lastPosRef = useRef<{ x: number; y: number } | null>(null);
+  // 手写轨迹（1024 书法坐标），用于真实评分
+  const trailRef = useRef<[number, number][]>([]);
+  const [submitting, setSubmitting] = useState(false);
 
   const { text: aiStoryText, run: runAiStream } = useAiStream();
 
@@ -41,6 +46,7 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
     ctx.clearRect(0, 0, cvs.width, cvs.height);
     setWrittenStrokes(0);
     setStars(null);
+    trailRef.current = [];
   };
 
   useEffect(() => {
@@ -105,6 +111,9 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
     ctx.lineTo(pos.x, pos.y);
     ctx.stroke();
 
+    // 记录轨迹点（转 1024 书法坐标供评分）
+    trailRef.current.push(canvasToStroke1024(pos.x, pos.y, cvs.width));
+
     lastPosRef.current = pos;
   };
 
@@ -116,15 +125,28 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
     }
   };
 
-  // 提交笔画书写验证
-  const handleVerifyWriting = () => {
+  // 提交笔画书写验证（真实笔顺数据评分）
+  const handleVerifyWriting = async () => {
+    if (submitting) return;
     sfxTap();
-    const earnedStars = 3;
-    setStars(earnedStars);
-    celebrateSmall();
-    addFish(2); // 奖励小鱼干
-    speak(`太棒啦！你写的【${hanzi.c}】字真规范！获得 3 颗星和 2 条小鱼干！`);
-    onComplete?.();
+    setSubmitting(true);
+    try {
+      const data = await ensureStrokeData(hanzi.c);
+      const grade = gradeHanziWriting(trailRef.current, data);
+      setStars(grade.stars);
+      if (grade.fish > 0) addFish(grade.fish);
+      if (grade.stars >= 2) celebrateSmall();
+      const msg =
+        grade.stars >= 3
+          ? t('hanziStrokeWriter.rewardPerfect', { char: hanzi.c, fish: grade.fish })
+          : grade.stars === 2
+            ? t('hanziStrokeWriter.rewardGood', { char: hanzi.c, fish: grade.fish })
+            : t('hanziStrokeWriter.rewardTry', { char: hanzi.c });
+      speak(msg, { lang: 'zh-CN' });
+      onComplete?.();
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // AI 故事生成
@@ -254,6 +276,7 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
             size="md"
             className="w-full max-w-xs"
             onClick={handleVerifyWriting}
+            disabled={submitting}
           >
             {t('hanziStrokeWriter.submit')}
           </CandyButton>
@@ -269,6 +292,7 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
                   key={s}
                   animate={{ scale: [1, 1.3, 1] }}
                   transition={{ delay: s * 0.15 }}
+                  className={s <= (stars ?? 0) ? '' : 'opacity-25 grayscale'}
                 >
                   ⭐
                 </motion.span>

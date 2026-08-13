@@ -1938,7 +1938,14 @@
     "compoundMeaning": "Made of {comp1} and {comp2}, meaning…",
     "assembleExplain": "{char} is made of {comp1} and {comp2}, meaning…",
     "clickToStart": "▶ Click to start",
-    "assembleSuccess": "✨ Assembly complete!"
+    "assembleSuccess": "✨ Assembly complete!",
+    "trailMapTitle": "🗺️ Unlock Map",
+    "trailMapProgress": "Unlocked {done} / {total}",
+    "trailMapLocked": "「{char}」 is locked — learn the earlier characters first",
+    "trailMapNode": "「{char}」 {state}",
+    "trailMapLegendLearned": "Learned",
+    "trailMapLegendCurrent": "Up next",
+    "trailMapLegendLocked": "Locked"
   },
   "timeseq": {
     "title": "⏰ Time Order",
@@ -4724,7 +4731,10 @@
     "reward": "Earned 3 stars + 2 fish treats!",
     "aiStoryBtn": "🐱 Let XiaoZhi make a story for【{char}】",
     "aiStoryTitle": "🐱 XiaoZhi story:",
-    "aiStoryLoading": "XiaoZhi is dreaming up a story..."
+    "aiStoryLoading": "XiaoZhi is dreaming up a story...",
+    "rewardPerfect": "Awesome! {char} looks great — 3 stars and {fish} fish treats!",
+    "rewardGood": "Good job! {char} earned 2 stars and {fish} fish treats — keep practicing!",
+    "rewardTry": "{char} needs a bit more — trace along the dotted line again!"
   },
   "hanziVideoCard": {
     "readAria": "Read {char}",
@@ -4732,5 +4742,18 @@
     "close": "Close video",
     "videoUnsupported": "Your browser does not support video",
     "videoDuration": "50s teaching video"
+  },
+  "hanziFlashReview": {
+    "noneTitle": "Nothing to review today!",
+    "noneTip": "Learned characters will come back for review at the right time.",
+    "doneTitle": "Review complete!",
+    "doneTip": "Reviewed {count} characters",
+    "again": "Review again",
+    "progress": "Card {current} / {total}",
+    "reviewedCount": "{count} reviewed",
+    "tapToFlip": "👆 Tap to flip",
+    "readAria": "Read \"{char}\"",
+    "forgot": "😕 Forgot",
+    "remember": "😄 Remember"
   }
 }

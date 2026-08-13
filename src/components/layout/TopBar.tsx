@@ -6,6 +6,7 @@ import { useActiveProfileMeta } from '@/store/useProfilesStore';
 import { StarCounter } from '@/components/ui/Stars';
 import { OfflineBadge } from '@/components/OfflineIndicator';
 import { useTranslation } from '@/i18n/useTranslation';
+import type { Locale } from '@/i18n/config';
 import { ProfileSwitcher } from './ProfileSwitcher';
 import { CategorySheet } from './CategorySheet';
 
@@ -19,7 +20,18 @@ export function TopBar() {
 
   const toggleLocale = () => {
     sfxTap();
-    setLocale(locale === 'zh-CN' ? 'en-US' : 'zh-CN');
+    const next: Record<string, Locale> = {
+      'zh-CN': 'zh-TW',
+      'zh-TW': 'en-US',
+      'en-US': 'zh-CN',
+    };
+    setLocale(next[locale] ?? 'zh-CN');
+  };
+
+  const localeLabel: Record<string, string> = {
+    'zh-CN': '简',
+    'zh-TW': '繁',
+    'en-US': 'EN',
   };
 
   return (
@@ -45,11 +57,11 @@ export function TopBar() {
           <button
             type="button"
             onClick={toggleLocale}
-            aria-label={locale === 'zh-CN' ? '切换到英文' : 'Switch to Chinese'}
+            aria-label={locale === 'zh-CN' ? '切换到繁体中文' : locale === 'zh-TW' ? 'Switch to English' : '切换到简体中文'}
             className="flex min-h-[42px] items-center gap-1 rounded-full bg-candy-purple-soft/80 px-3 py-1.5 text-xs sm:text-sm font-black text-candy-purple-deep shadow-sm border border-candy-purple/30 active:scale-95 transition-all"
           >
             <span>🌐</span>
-            <span>{locale === 'zh-CN' ? 'EN' : '中'}</span>
+            <span>{localeLabel[locale] ?? '简'}</span>
           </button>
 
           {/* 分类浏览入口 */}

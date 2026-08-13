@@ -28,6 +28,7 @@
     "@types/three": "^0.185.4",
     "canvas-confetti": "^1.9.4",
     "motion": "^12.23.12",
+    "opencc-js": "^1.4.1",
     "pinyin-pro": "^3.28.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

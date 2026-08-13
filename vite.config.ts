@@ -57,6 +57,8 @@ export default defineConfig(({ mode }) => ({
             // 庆祝彩纸只在首次庆祝时才需要，独立成 chunk，不进首屏 vendor
             if (id.includes('canvas-confetti')) return 'confetti';
             if (id.includes('motion') || id.includes('framer-motion')) return 'vendor-motion';
+            // opencc-js 繁简转换字典约 1MB，仅繁体模式按需加载，独立 chunk 不进首屏
+            if (id.includes('opencc-js')) return 'vendor-opencc';
             // three 系 3D 引擎只在写实猫页使用（lazy 加载），独立 chunk 避免进首屏。
             // ⚠️ 必须整族并入同一 chunk：three 内部（core + examples/jsm）与
             // three-stdlib / @react-three / three-mesh-bvh / troika-* / camera-controls

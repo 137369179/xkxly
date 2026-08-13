@@ -25,6 +25,7 @@ import {
   persistLocale,
   i18nConfig,
 } from './config';
+import { toTraditional } from './traditional';
 
 // 导入翻译包
 import zhCN from './locales/zh-CN.json';
@@ -87,6 +88,7 @@ function interpolate(template: string, params?: Record<string, string | number>)
 
 const translations: Record<Locale, TranslationData> = {
   'zh-CN': deepMergeLocale(deepMergeLocale(zhCN, hanziListenZh), patchZh),
+  'zh-TW': deepMergeLocale(deepMergeLocale(zhCN, hanziListenZh), patchZh),
   'en-US': deepMergeLocale(deepMergeLocale(enUS, hanziListenEn), patchEn),
 };
 
@@ -138,7 +140,7 @@ export function useTranslation(): UseTranslationReturn {
 
   const t: TranslateFn = useCallback(
     (key: string, params?: Record<string, string | number>) => {
-      const translationData = translations[locale]!
+      const translationData = translations[locale]!;
       let template = getNestedValue(translationData, key);
       // 缺失键回退链：当前语言缺失 → 默认语言(zh-CN) → 原始键名。
       // 避免 en-US 等未覆盖键在 UI 露出原始 key 路径（如 common.home）。
@@ -146,7 +148,9 @@ export function useTranslation(): UseTranslationReturn {
         const fallback = getNestedValue(translations[i18nConfig.defaultLocale], key);
         if (fallback !== key) template = fallback;
       }
-      return interpolate(template, params);
+      const result = interpolate(template, params);
+      // 繁体模式：运行时简体 → 繁体（zh-TW 复用 zh-CN 字典）
+      return locale === 'zh-TW' ? toTraditional(result) : result;
     },
     [locale]
   );
@@ -155,7 +159,7 @@ export function useTranslation(): UseTranslationReturn {
     t,
     locale,
     setLocale: setLocaleHandler,
-    availableLocales: ['zh-CN', 'en-US'],
+    availableLocales: ['zh-CN', 'zh-TW', 'en-US'],
   };
 }
 
@@ -172,7 +176,8 @@ export function translate(key: string, params?: Record<string, string | number>)
     const fallback = getNestedValue(translations[i18nConfig.defaultLocale], key);
     if (fallback !== key) template = fallback;
   }
-  return interpolate(template, params);
+  const result = interpolate(template, params);
+  return locale === 'zh-TW' ? toTraditional(result) : result;
 }
 
 export default useTranslation;

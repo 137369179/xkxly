@@ -8,6 +8,7 @@
  */
 
 import type { ChantSegment } from './chant';
+import { isSingleHanziVoice, playHanziVoice } from './hanziAudio';
 import { applyUserPrefs, getSettings } from './tts/settings';
 import { correctText } from './tts/polyphone';
 import { buildNeuralSegments } from './tts/neuralCurve';
@@ -246,7 +247,30 @@ export function clearPendingQueue(): number {
 export function speak(text: string, options: SpeakOptions = {}): Promise<void> {
   const { lang = 'zh-CN', onEnd, onStart } = options;
 
-  if (!synth || !text.trim()) {
+  if (!text.trim()) {
+    onEnd?.();
+    return Promise.resolve();
+  }
+
+  // 本地发音旁路：内容为单个已收录汉字时，直接播放本地 mp3（离线、稳定、
+  // 避免系统 TTS 多音字漂移）。加载失败自动回退到下方 Web Speech / Kokoro 链路。
+  if (lang === 'zh-CN' && isSingleHanziVoice(text)) {
+    pushTtsState(true, text, options.module ?? '');
+    return playHanziVoice(text, onEnd)
+      .catch(() => {
+        // 本地资源不可用 → 回退系统 TTS（需 synth 可用）
+        if (!synth) {
+          onEnd?.();
+          return;
+        }
+        return fallbackSingleChar(text, options, onEnd, onStart);
+      })
+      .finally(() => {
+        pushTtsState(false);
+      });
+  }
+
+  if (!synth) {
     onEnd?.();
     return Promise.resolve();
   }
@@ -274,6 +298,61 @@ export function speak(text: string, options: SpeakOptions = {}): Promise<void> {
   }
 
   return loadVoices().then(() => runSpeak(text, options, priority, onEnd, onStart));
+}
+
+/**
+ * 本地发音缺失时的单字回退：直接走系统语音（绕过排队，独立播放一次）。
+ * 与 runSpeak 逻辑等价但入参更简，供 speak() 的本地旁路 catch 分支调用。
+ */
+function fallbackSingleChar(
+  text: string,
+  options: SpeakOptions,
+  onEnd?: () => void,
+  onStart?: () => void,
+): Promise<void> {
+  const { lang = 'zh-CN', rate, pitch = 1.15, volume = 1 } = options;
+  if (!synth) {
+    onEnd?.();
+    return Promise.resolve();
+  }
+  return new Promise<void>((resolve) => {
+    try {
+      synth.cancel();
+    } catch {
+      /* noop */
+    }
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = lang;
+    const base = rate ?? (lang === 'zh-CN' ? 0.78 : 0.82);
+    const prefs = applyUserPrefs({ rate: base, pitch, volume, lang, module: options.module });
+    u.rate = prefs.rate ?? base;
+    u.pitch = prefs.pitch ?? pitch;
+    u.volume = prefs.volume ?? volume;
+    const voice = pickVoice(lang, prefs.voiceURI);
+    if (voice) u.voice = voice;
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      if (currentUtterance === u) currentUtterance = null;
+      onEnd?.();
+      resolve();
+    };
+    u.onstart = () => onStart?.();
+    u.onend = finish;
+    u.onerror = finish;
+    currentUtterance = u;
+    try {
+      synth.resume();
+    } catch {
+      /* noop */
+    }
+    synth.speak(u);
+    const est = Math.max(2500, text.length * 420 + 2000);
+    setTimeout(() => {
+      if (!finished) finish();
+    }, est);
+  });
 }
 
 /** 真正执行朗读（已通过优先级判断），结束后处理排队项 */
