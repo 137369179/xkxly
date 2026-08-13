@@ -1,4 +1,6 @@
 import { RESEARCH_TOPICS, getTopic } from './researchTopics';
+// P3：洗牌统一复用共享实现（原本地重复了一份同逻辑 shuffle）
+import { shuffle } from '@/lib/utils';
 import type { Question, QuizOption } from '@/types';
 import type { Difficulty } from '@/lib/questions/_shared';
 
@@ -97,20 +99,16 @@ const FACT_BANK: Record<string, FactQuestion[]> = {
   ],
 };
 
-function shuffle<T>(arr: readonly T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j]!, a[i]!];
-  }
-  return a;
-}
-
 /** 取某主题题池（无则回退 color 题池，保证任何 topicId 都能出题） */
 export function factBankFor(topicId: string): FactQuestion[] {
   return FACT_BANK[topicId] ?? FACT_BANK.color ?? [];
 }
 
+/**
+ * 出题游标（模块级自增）：只用来在题池里"依次轮转"选题，不是随机源。
+ * 保留自增而非 Math.random()，是为了让同一场次内连续出题不重复扎堆（行为与旧版一致）；
+ * 需要确定性时，调用方可直接传入 fact 参数指定题目（测试即走这条路）。
+ */
 let counter = 0;
 
 /**

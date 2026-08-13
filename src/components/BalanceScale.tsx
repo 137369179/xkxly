@@ -2,7 +2,7 @@
  * 重量平衡 ⚖️ (S2)
  * 简单等式天平 — 左右放砝码，判断是否平衡
  */
-import { memo, useState, useRef } from 'react';
+import { memo, useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
@@ -57,6 +57,11 @@ function _BalanceScale() {
   const [tilt, setTilt] = useState(0);
   const lockRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // P3: 卸载时清理待触发的反馈定时器，避免对已卸载组件 setState
+  useEffect(() => () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }, []);
 
   const leftSum = problem.left.reduce((a, b) => a + b, 0);
   const rightSum = problem.right.reduce((a, b) => a + b, 0);

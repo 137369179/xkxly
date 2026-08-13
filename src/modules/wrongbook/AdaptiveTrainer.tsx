@@ -139,25 +139,27 @@ export function AdaptiveTrainer() {
     nextQuestion();
   };
 
-  // 倒计时
+  // 倒计时：updater 保持纯函数，仅更新数值
   useEffect(() => {
     if (!active) return;
     timerRef.current = setInterval(() => {
-      setTimeLeft((t) => {
-        if (t <= 1) {
-          clearInterval(timerRef.current!);
-          setActive(false);
-          setDone(true);
-          celebrateBig();
-          return 0;
-        }
-        return t - 1;
-      });
+      setTimeLeft((t) => (t > 0 ? t - 1 : 0));
     }, 1000);
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [active]);
+
+  // 时间到：在副作用中统一处理结束与庆祝（移出 setState updater，
+  // 避免 StrictMode 下 updater 双调用导致重复 clearInterval/celebrateBig）
+  useEffect(() => {
+    if (active && timeLeft === 0) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      setActive(false);
+      setDone(true);
+      celebrateBig();
+    }
+  }, [active, timeLeft]);
 
   const handleAnswer = (correct: boolean) => {
     const skill = current?.skill;
@@ -167,16 +169,7 @@ export function AdaptiveTrainer() {
       sfxStar();
       celebrateSmall();
       setScore((s) => ({ ...s, ok: s.ok + 1 }));
-      setStreak((s) => {
-        const ns = s + 1;
-        setBestStreak((b) => Math.max(b, ns));
-        // 更新 wrongHistory bestStreak
-        const wh = progress.wrongHistory;
-        if (!wh || ns > wh.bestStreak) {
-          updateWrongHistory({ bestStreak: ns });
-        }
-        return ns;
-      });
+      setStreak((s) => s + 1);
       // 连续答对 3 题升难度
       setDifficulty((d) => {
         if (streak + 1 >= 3 && d < 3) return Math.min(3, d + 1) as 1 | 2 | 3;
@@ -196,6 +189,14 @@ export function AdaptiveTrainer() {
     if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
     nextTimerRef.current = setTimeout(() => nextQuestion(), 300);
   };
+
+  // 连对数变化时的副作用集中在 effect 中处理（不放在 setState updater 内），
+  // 避免 StrictMode 双调用 updater 触发重复写入/重复庆祝
+  useEffect(() => {
+    const best = progress.wrongHistory?.bestStreak ?? 0;
+    if (streak > best) updateWrongHistory({ bestStreak: streak });
+    setBestStreak((b) => Math.max(b, streak));
+  }, [streak]);
 
   const handleAiAnalyze = () => {
     sfxTap();

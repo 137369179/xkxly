@@ -128,6 +128,25 @@ const EVOLVE_THRESHOLDS: Record<number, { stars: number; affection: number; titl
   3: { stars: 500, affection: 100, title: 'pet.evolve3to4' },
 };
 
+/** 场景氛围 → 主舞台 Panel 背景/边框组合（P3：提到模块级，避免每次渲染重建） */
+const STAGE_THEME: Record<'sunlight' | 'nebula' | 'starry', { panel: string; frame: string; glow: string }> = {
+  nebula: {
+    panel: 'border-2 border-pink-300 bg-gradient-to-tr from-fuchsia-50 via-pink-50 to-violet-50',
+    frame: 'border-fuchsia-400 shadow-[0_10px_40px_-10px_rgba(217,70,239,0.55)]',
+    glow: 'radial-gradient(circle at 50% 30%, rgba(244,114,182,0.35), transparent 65%)',
+  },
+  sunlight: {
+    panel: 'border-2 border-amber-300 bg-gradient-to-tr from-amber-50 via-yellow-50 to-orange-50',
+    frame: 'border-orange-400 shadow-[0_10px_40px_-10px_rgba(251,146,60,0.6)]',
+    glow: 'radial-gradient(circle at 30% 20%, rgba(253,224,71,0.45), transparent 65%)',
+  },
+  starry: {
+    panel: 'border-2 border-indigo-300 bg-gradient-to-tr from-indigo-950 via-slate-900 to-indigo-900 text-white',
+    frame: 'border-indigo-400 shadow-[0_10px_40px_-10px_rgba(99,102,241,0.7)]',
+    glow: 'radial-gradient(circle at 70% 20%, rgba(129,140,248,0.55), transparent 65%)',
+  },
+};
+
 /** 把秒数格式化为 m:ss */
 function formatDuration(sec: number, t: (k: string, p?: Record<string, string | number>) => string): string {
   const m = Math.floor(sec / 60);
@@ -243,24 +262,7 @@ export default function CatHousePage() {
   const [envLighting, setEnvLighting] = useState<'sunlight' | 'nebula' | 'starry'>('nebula');
   const [realisticMode, setRealisticMode] = useState(false);
 
-  /** 场景氛围 → 主舞台 Panel 背景/边框组合 */
-  const STAGE_THEME: Record<'sunlight' | 'nebula' | 'starry', { panel: string; frame: string; glow: string }> = {
-    nebula: {
-      panel: 'border-2 border-pink-300 bg-gradient-to-tr from-fuchsia-50 via-pink-50 to-violet-50',
-      frame: 'border-fuchsia-400 shadow-[0_10px_40px_-10px_rgba(217,70,239,0.55)]',
-      glow: 'radial-gradient(circle at 50% 30%, rgba(244,114,182,0.35), transparent 65%)',
-    },
-    sunlight: {
-      panel: 'border-2 border-amber-300 bg-gradient-to-tr from-amber-50 via-yellow-50 to-orange-50',
-      frame: 'border-orange-400 shadow-[0_10px_40px_-10px_rgba(251,146,60,0.6)]',
-      glow: 'radial-gradient(circle at 30% 20%, rgba(253,224,71,0.45), transparent 65%)',
-    },
-    starry: {
-      panel: 'border-2 border-indigo-300 bg-gradient-to-tr from-indigo-950 via-slate-900 to-indigo-900 text-white',
-      frame: 'border-indigo-400 shadow-[0_10px_40px_-10px_rgba(99,102,241,0.7)]',
-      glow: 'radial-gradient(circle at 70% 20%, rgba(129,140,248,0.55), transparent 65%)',
-    },
-  };
+  /** 场景氛围 → 主舞台 Panel 背景/边框组合（STAGE_THEME 已提升至模块级常量） */
   const stageTheme = STAGE_THEME[envLighting];
 
   /** 拼音已解锁技能点数（用于徽章判定） */
@@ -539,7 +541,7 @@ export default function CatHousePage() {
             className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-pink-500 text-white font-black text-sm shadow-lg hover:scale-105 active:scale-95 transition-all border-2 border-white animate-bounce-soft"
           >
             <span className="text-lg">🎙️</span>
-            <span>跟猫咪语音说话聊天 (+🐟1/+❤️2)</span>
+            <span>{t('pet.voiceChatBtn')}</span>
           </button>
 
           <button
@@ -547,7 +549,7 @@ export default function CatHousePage() {
             className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-black text-sm shadow-lg hover:scale-105 active:scale-95 transition-all border-2 border-white"
           >
             <span className="text-lg">🎮</span>
-            <span>30秒猫爪接鱼干挑战！</span>
+            <span>{t('pet.fishCatchChallengeBtn')}</span>
           </button>
         </div>
 

@@ -27,6 +27,31 @@ function storageAvailable(kind: 'local' | 'session'): Storage | null {
   }
 }
 
+// P2-2 修复：原每次 get/set 都执行 setItem+removeItem 探针写，高频调用放大主线程阻塞。
+// 缓存探针结果 5 分钟，复用同一 Storage 引用；写失败立即失效，下次调用重新探测。
+const PROBE_TTL = 5 * 60 * 1000;
+let _local: Storage | null | undefined = undefined;
+let _localAt = 0;
+let _session: Storage | null | undefined = undefined;
+let _sessionAt = 0;
+
+function getLocal(): Storage | null {
+  const now = Date.now();
+  if (_local !== undefined && now - _localAt < PROBE_TTL) return _local;
+  _local = storageAvailable('local');
+  _localAt = now;
+  return _local;
+}
+function getSession(): Storage | null {
+  const now = Date.now();
+  if (_session !== undefined && now - _sessionAt < PROBE_TTL) return _session;
+  _session = storageAvailable('session');
+  _sessionAt = now;
+  return _session;
+}
+function invalidateLocal() { _local = undefined; _localAt = 0; }
+function invalidateSession() { _session = undefined; _sessionAt = 0; }
+
 function emitError(name: string) {
   if (typeof window !== 'undefined') {
     try {
@@ -41,15 +66,17 @@ export function safeGetItem(name: string): string | null {
   // 1) 优先 memory 兜底（上次同会话写入若 localStorage 不可用，仍可读回）
   if (memoryFallback.has(name)) return memoryFallback.get(name)!;
   try {
-    const ls = storageAvailable('local');
+    const ls = getLocal();
     if (ls) return ls.getItem(name);
   } catch {
+    invalidateLocal();
     /* 落到 sessionStorage */
   }
   try {
-    const ss = storageAvailable('session');
+    const ss = getSession();
     if (ss) return ss.getItem(name);
   } catch {
+    invalidateSession();
     /* 落到内存 */
   }
   return null;
@@ -58,21 +85,23 @@ export function safeGetItem(name: string): string | null {
 export function safeSetItem(name: string, value: string): void {
   memoryFallback.set(name, value);
   try {
-    const ls = storageAvailable('local');
+    const ls = getLocal();
     if (ls) {
       ls.setItem(name, value);
       return;
     }
   } catch {
+    invalidateLocal();
     /* 落到 sessionStorage */
   }
   try {
-    const ss = storageAvailable('session');
+    const ss = getSession();
     if (ss) {
       ss.setItem(name, value);
       return;
     }
   } catch {
+    invalidateSession();
     /* 落到内存 */
   }
   // 全部不可用：仅保留内存态，并通知 UI（不抛错）
@@ -82,15 +111,17 @@ export function safeSetItem(name: string, value: string): void {
 export function safeRemoveItem(name: string): void {
   memoryFallback.delete(name);
   try {
-    const ls = storageAvailable('local');
+    const ls = getLocal();
     if (ls) ls.removeItem(name);
   } catch {
+    invalidateLocal();
     /* noop */
   }
   try {
-    const ss = storageAvailable('session');
+    const ss = getSession();
     if (ss) ss.removeItem(name);
   } catch {
+    invalidateSession();
     /* noop */
   }
 }

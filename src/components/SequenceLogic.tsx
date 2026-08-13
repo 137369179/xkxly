@@ -2,7 +2,7 @@
  * 序列推理 🔗 (R5)
  * 找规律填空 — 图形/数字/颜色序列
  */
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
@@ -38,6 +38,11 @@ export function SequenceLogic() {
   const [showHint, setShowHint] = useState(false);
   const lockRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // P3: 卸载时清理待触发的反馈定时器，避免对已卸载组件 setState
+  useEffect(() => () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }, []);
 
   const puzzle = PUZZLES[idx]!!
 

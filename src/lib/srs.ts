@@ -1,5 +1,7 @@
 import type { MasteryItem, Progress } from '@/types';
 import type { Tone } from '@/lib/tones';
+// 学科 label/emoji/tone 的单一真相源（P2-5：本文件不再重复定义学科展示数据）
+import { getSubjectById } from '@/lib/srs/SUBJECTS';
 
 /**
  * 间隔重复引擎（Spaced Repetition）
@@ -137,24 +139,48 @@ export function weakSkills(p: Progress, n = 6): { skill: string; m: MasteryItem 
 }
 
 /** ---------------- 展示层：知识点 id -> 人类可读 ---------------- */
-const CATEGORY: Record<string, { label: string; tone: Tone; emoji: string }> = {
-  letter: { label: '字母', tone: 'blue', emoji: '🔤' },
-  number: { label: '数字', tone: 'yellow', emoji: '🔢' },
-  hanzi: { label: '汉字', tone: 'green', emoji: '🀄' },
-  pinyin: { label: '拼音', tone: 'blue', emoji: '📋' },
-  poem: { label: '古诗', tone: 'pink', emoji: '🌸' },
-  word: { label: '英语', tone: 'pink', emoji: '💬' },
-  math: { label: '数学', tone: 'green', emoji: '➕' },
-  logic: { label: '逻辑', tone: 'purple', emoji: '🧩' },
-  idiom: { label: '成语', tone: 'orange', emoji: '📜' },
-  sentence: { label: '造句', tone: 'blue', emoji: '✍️' },
+
+/**
+ * 学科展示顺序（图表/报告依赖前 8 项：letter…logic，请勿随意调整顺序）。
+ * label/emoji/tone 一律来自注册表 `@/lib/srs/SUBJECTS`，此处只保留顺序与配色。
+ */
+const SUBJECT_ORDER = [
+  'letter', 'number', 'math', 'poem', 'hanzi',
+  'pinyin', 'word', 'logic', 'idiom', 'sentence', 'research',
+] as const;
+
+/** 图表配色：注册表的 SubjectDef 不含 color 字段，这里按学科 key 补齐 */
+const SUBJECT_COLOR: Record<string, string> = {
+  letter: '#3b82f6',
+  number: '#eab308',
+  math: '#22c55e',
+  poem: '#ec4899',
+  hanzi: '#10b981',
+  pinyin: '#6366f1',
+  word: '#f97316',
+  logic: '#a855f7',
+  idiom: '#ef4444',
+  sentence: '#14b8a6',
+  research: '#6366f1',
 };
 
 /**
- * 学科（顶层模块）单一真相源，供 UI 列表 / 图表复用。
- * 覆盖全部学科：letter/number/math/poem/hanzi/pinyin/word/logic/idiom/sentence。
+ * 注册表未单列的展示细分类：
+ *   - number：注册表把 `number:`/`count:` 并入 math，展示层仍单独成列「数字」
+ *   - sentence / research：造句与研究模式的知识点，注册表无对应顶层模块
+ */
+const SUBJECT_EXTRA: Record<string, { label: string; emoji: string; tone: Tone }> = {
+  number: { label: '数字', emoji: '🔢', tone: 'yellow' },
+  sentence: { label: '造句', emoji: '✍️', tone: 'blue' },
+  research: { label: '研究', emoji: '🔬', tone: 'blue' },
+};
+
+/**
+ * 学科（顶层模块）展示列表，供 UI 列表 / 图表复用。
  * 字段：key 学科标识、label 统一中文名、emoji/tone 展示风格、color 图表配色。
- * 注意：`math` 统一中文名为「数学」（原 CATEGORY 曾用「算术」，此处收敛为单一值）。
+ *
+ * P2-5：label/emoji/tone **不再在此硬编码**，统一引用注册表 `@/lib/srs/SUBJECTS`
+ * （单一真相源），消除此前「math 一处数学一处数字」之类的数据漂移。
  */
 export const SUBJECTS: {
   key: string;
@@ -162,24 +188,28 @@ export const SUBJECTS: {
   emoji: string;
   tone: Tone;
   color: string;
-}[] = [
-  { key: 'letter', label: '字母', emoji: '🔤', tone: 'blue', color: '#3b82f6' },
-  { key: 'number', label: '数字', emoji: '🔢', tone: 'yellow', color: '#eab308' },
-  { key: 'math', label: '数学', emoji: '➕', tone: 'green', color: '#22c55e' },
-  { key: 'poem', label: '古诗', emoji: '🌸', tone: 'pink', color: '#ec4899' },
-  { key: 'hanzi', label: '汉字', emoji: '🀄', tone: 'green', color: '#10b981' },
-  { key: 'pinyin', label: '拼音', emoji: '📋', tone: 'blue', color: '#6366f1' },
-  { key: 'word', label: '英语', emoji: '💬', tone: 'pink', color: '#f97316' },
-  { key: 'logic', label: '逻辑', emoji: '🧩', tone: 'purple', color: '#a855f7' },
-  { key: 'idiom', label: '成语', emoji: '📜', tone: 'orange', color: '#ef4444' },
-  { key: 'sentence', label: '造句', emoji: '✍️', tone: 'blue', color: '#14b8a6' },
-  { key: 'research', label: '研究', emoji: '🔬', tone: 'blue', color: '#6366f1' },
-];
+}[] = SUBJECT_ORDER.map((key) => {
+  const meta = getSubjectById(key) ?? SUBJECT_EXTRA[key]!;
+  return {
+    key,
+    label: meta.label,
+    emoji: meta.emoji,
+    tone: meta.tone as Tone,
+    color: SUBJECT_COLOR[key] ?? '#94a3b8',
+  };
+});
+
+/**
+ * 知识点大类展示元数据，直接由 SUBJECTS 派生（同一真相源，避免第二份 label 表）。
+ */
+const CATEGORY: Record<string, { label: string; tone: Tone; emoji: string }> = Object.fromEntries(
+  SUBJECTS.map((s) => [s.key, { label: s.label, tone: s.tone, emoji: s.emoji }] as const),
+);
 
 /**
  * 学科统一中文名（单一真相源）。
  * 入参可为 skill 字符串（如 `math:add`，自动取前缀 `math`）或直连 key；
- * 优先查 SUBJECTS，其次回退到 CATEGORY（覆盖 count/compare 等子类别），未知返回「其他」。
+ * 优先查 SUBJECTS，其次回退到 CATEGORY，未知返回「其他」。
  */
 export function subjectLabel(skillOrKey: string): string {
   const key = skillOrKey.includes(':') ? skillOrKey.split(':')[0] : skillOrKey;

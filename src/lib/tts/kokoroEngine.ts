@@ -19,6 +19,31 @@
 import type { TtsEngine, TtsEngineInfo, TtsOptions, TtsPlayHandle } from './types';
 import { textToPinyin } from './pinyinG2p';
 
+/** 允许动态加载 kokoro-js 的受信 CDN 域名（P1-2 安全白名单） */
+const KOKORO_LIB_ALLOWLIST = ['cdn.jsdelivr.net', 'huggingface.co', 'unpkg.com'];
+
+/**
+ * 校验 kokoro-js 动态加载地址，防止配置项被篡改为任意远程 JS 造成代码注入。
+ * - 必须是 https 协议
+ * - 域名必须在白名单内（dev 环境额外允许 localhost / 127.0.0.1 便于本地调试）
+ */
+function assertSafeLibUrl(url: string): void {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    throw new Error('kokoro-js 库地址格式非法');
+  }
+  if (parsed.protocol !== 'https:') {
+    throw new Error('kokoro-js 库地址必须为 https');
+  }
+  const host = parsed.hostname;
+  const devLocal = import.meta.env.DEV && (host === 'localhost' || host === '127.0.0.1');
+  if (!devLocal && !KOKORO_LIB_ALLOWLIST.includes(host)) {
+    throw new Error(`kokoro-js 库地址域名不被信任：${host}`);
+  }
+}
+
 interface KokoroTTSInstance {
   generate(text: string, opts: { voice: string; speed?: number }): Promise<{
     audio: Float32Array;
@@ -90,6 +115,7 @@ export class KokoroEngine implements TtsEngine {
   private async doLoad(): Promise<void> {
     try {
       if (!this.libUrl) throw new Error('未配置 kokoro-js 库地址');
+      assertSafeLibUrl(this.libUrl);
       const mod = (await import(/* @vite-ignore */ this.libUrl)) as KokoroLibModule;
       const KokoroTTS = mod?.KokoroTTS ?? mod?.default?.KokoroTTS ?? mod?.default;
       if (!KokoroTTS) throw new Error('kokoro-js 未导出 KokoroTTS');

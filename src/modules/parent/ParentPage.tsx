@@ -121,7 +121,7 @@ export default function ParentPage() {
     try {
       const url = await generateAchievementPoster({
         progress,
-        childName: '宝贝',
+        childName: translate('parent.childName'),
         aiRemark: '学习专注度极高，古诗与数学表现突出，继续加油哦！',
       });
       setPosterUrl(url);
@@ -668,7 +668,7 @@ export default function ParentPage() {
             <div className="mt-4 flex w-full gap-3">
               <a
                 href={posterUrl}
-                download="宝贝学习成果海报.png"
+                download={translate('parent.posterFileName')}
                 className="flex-1 rounded-2xl bg-candy-purple py-2.5 text-center font-extrabold text-white shadow-md hover:bg-candy-purple-deep transition-colors"
               >
                 {translate('parent.downloadPoster')}

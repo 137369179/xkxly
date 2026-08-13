@@ -115,6 +115,19 @@ export function useTranslation(): UseTranslationReturn {
     setLocaleFn(locale);
   }, []);
 
+  // 跨组件同步语言：监听全局 locale-change 事件，使已挂载的其它组件也跟随切换
+  // （setLocale 会更新模块级 currentLocale 并派发该事件；此前无任何监听者，导致切语言后旧页面不刷新）
+  useEffect(() => {
+    const onLocaleChange = (e: Event) => {
+      const next = (e as CustomEvent<{ locale: Locale }>).detail?.locale;
+      if (next && i18nConfig.availableLocales.includes(next)) {
+        setLocaleState(next);
+      }
+    };
+    window.addEventListener('locale-change', onLocaleChange);
+    return () => window.removeEventListener('locale-change', onLocaleChange);
+  }, []);
+
   const setLocaleHandler = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale);
     setLocaleFn(newLocale);

@@ -670,7 +670,8 @@
     "stuckHint": "🤔 Stuck? Let Smart Buddy read it again!",
     "listenAgainBtn": "🔊 Listen Again",
     "smallHint": "💡 Tip: {hint}",
-    "explainByAI": "Explain with Buddy"
+    "explainByAI": "Explain with Buddy",
+    "timeUp": "Time's up!"
   },
   "poem": {
     "title": "Poetry",
@@ -904,6 +905,7 @@
     "pinFailsNotice": "{count} wrong tries; locked for 5 min after {limit} tries",
     "dashboardSubtitle": "Reports & Settings",
     "posterTitle": "🏆 Milestones & Achievement Poster",
+    "childName": "Baby",
     "posterDesc": "Make a long poster of your child's progress in one tap and share it with family!",
     "posterGenerating": "Drawing poster…",
     "posterGenerate": "✨ Make Study Poster",
@@ -941,6 +943,7 @@
     "posterCardTitle": "🏆 Baby Achievement Card",
     "posterAlt": "Achievement poster",
     "downloadPoster": "📥 Download Poster",
+    "posterFileName": "Baby Learning Achievement Poster.png",
     "backupTitle": "Data Backup",
     "backupSubtitle": "Back up before changing devices or clearing the browser",
     "backupDesc": "All progress is stored in this browser. Keep the JSON file safe and use Import to restore on a new device.",
@@ -1090,7 +1093,26 @@
     "moodSleeping": "sleeping",
     "moodExcited": "excited",
     "moodHappy": "in a good mood",
-    "clickInteract": "{name}, {mood}, tap to interact"
+    "clickInteract": "{name}, {mood}, tap to interact",
+    "petCat": "Kitty",
+    "petDog": "Puppy",
+    "petRabbit": "Bunny",
+    "petPanda": "Panda",
+    "moodHappy1": "You did great today!",
+    "moodHappy2": "Keep it up!",
+    "moodHappy3": "You're getting smarter!",
+    "moodExcited1": "Wow, you're amazing!",
+    "moodExcited2": "Awesome, thumbs up!",
+    "moodExcited3": "You're a learning star!",
+    "moodThinking1": "Want to study together?",
+    "moodThinking2": "What would you like to learn today?",
+    "moodThinking3": "Buddy is here to learn with you!",
+    "moodMissing1": "Haven't seen you in a while, I miss you~",
+    "moodMissing2": "Come back and study soon!",
+    "moodMissing3": "Waiting for you~",
+    "moodSleeping1": "zzZ...",
+    "moodSleeping2": "Buddy is resting...",
+    "moodSleeping3": "Shh~ quiet~"
   },
   "actions": {
     "start": "Start",
@@ -1574,6 +1596,8 @@
     "evolve2to3": "Teen → Adult",
     "evolve3to4": "Adult → Legend King",
     "fishCatchTitle": "🐟 Cat Catch Fish · 30-Second Agility Challenge!",
+    "voiceChatBtn": "Talk to the cat (+🐟1/+❤️2)",
+    "fishCatchChallengeBtn": "30s Cat Catch Fish Challenge!",
     "fishCatchRule": "🎮 Rule: Fish falls from the sky — pick the right answer bucket to catch it! Correct = 🐟 fish!",
     "fishCatchStart": "🚀 Start 30-Second Fish Catch!",
     "timeLeft": "⏱️ Time: {time}s",
@@ -3161,12 +3185,6 @@
     "word3": "Learn 3 English words",
     "combo5": "Combo 5 times",
     "lesson1": "Complete today's lesson"
-  },
-  "wordmatch": {
-    "complete": "Match complete!",
-    "pairs": "Pairs",
-    "title": "Word Match",
-    "subtitle": "English ↔ Chinese matching"
   },
   "matchGame": {
     "instruction": "Match uppercase and lowercase letters!",

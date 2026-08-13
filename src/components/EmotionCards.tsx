@@ -2,7 +2,7 @@
  * 情绪表情卡 😊 (R2)
  * 认识情绪 + 情景配对，社交情感学习
  */
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 
@@ -39,6 +39,11 @@ export function EmotionCards() {
   const [score, setScore] = useState(0);
   const lockRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // P3: 卸载时清理待触发的反馈定时器，避免对已卸载组件 setState
+  useEffect(() => () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }, []);
 
   const nextQuiz = () => {
     const sc = SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)]!

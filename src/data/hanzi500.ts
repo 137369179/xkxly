@@ -4,6 +4,9 @@
  * 原始策划字 12 个 + 自动合并 hanzi.ts 主字表 300 字（去重），
  * 通过 getExtendedHanzi500() 对外提供 300+ 字的完整浏览。
  * 合并进来的字使用主字表的字源/组词/例句，并标注造字法分类。
+ *
+ * P2-18 收敛说明：本文件从 hanzi.ts（HANZI_DATA）派生扩展，不重复维护字源/例句主数据，
+ * 仅补充造字法分类等字段；继续以 hanzi.ts 为权威主源。
  */
 
 export interface HanziItem {

@@ -247,11 +247,27 @@ function json(data, cors, status = 200) {
   });
 }
 
-/** 轻量限流（Cache API，尽力而为；免费版跨 POP 不严格，防连点够用）
- *  bucket 区分业务（'ai' / 'log'），避免日志刷量耗尽 AI 配额（自 DOS）。 */
+/** 轻量限流（Cache API，**非原子、尽力而为**）
+ *  bucket 区分业务（'ai' / 'log' / 'content'），避免日志刷量耗尽 AI 配额（自 DOS）。
+ *
+ *  已知精度边界（有意保留，勿当 bug 修）：
+ *   1. read-modify-write 不是原子操作 —— 同一分钟内并发请求可能读到同一个 count，
+ *      各自 +1 后互相覆盖，实际放行量会略高于 limit（并发越高误差越大）。
+ *   2. Cache API 是 POP 本地存储，跨边缘节点不共享，配额按 POP 各算一份。
+ *  这两点对「防孩子连点 / 防脚本轻度刷量」这个目标已经够用；付费密钥的硬额度上限
+ *  由上游供应商侧兜底。
+ *
+ *  为什么不改用 KV：Workers KV 只有 get/put，**没有原子 increment**，最终一致写入的
+ *  竞态比 Cache API 更差，且每请求两次 KV 操作会吃掉免费额度。真要精确计数只能上
+ *  Durable Objects（单实例串行化）或 Rate Limiting binding —— 那属于要改 wrangler
+ *  绑定配置的架构变更，不在本次范围内，故维持 Cache API。
+ *
+ *  当前已做的减小误差处理：整个窗口只用「单键」（含分钟片 + bucket + IP）读改写一次，
+ *  不做多键聚合，把竞态窗口压到最小。 */
 async function rateLimited(request, limit, bucket = 'ai') {
   if (!limit || limit <= 0) return false;
   const ip = request.headers.get('cf-connecting-ip') || 'unknown';
+  // 单键：分钟片自然过期，无需清理逻辑
   const key = `rl:${bucket}:${ip}:${Math.floor(Date.now() / 60_000)}`;
   const url = `https://internal.local/${key}`;
   try {
@@ -259,6 +275,7 @@ async function rateLimited(request, limit, bucket = 'ai') {
     const hit = await cache.match(url);
     const count = hit ? Number(await hit.text()) || 0 : 0;
     if (count >= limit) return true;
+    // 写回即视为本次已计数；与其它并发请求的覆盖竞态见上方说明
     await cache.put(url, new Response(String(count + 1), { headers: { 'Cache-Control': 'no-store' } }));
     return false;
   } catch {

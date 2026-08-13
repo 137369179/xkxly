@@ -15,11 +15,12 @@ import { safeGetItem, safeSetItem } from '@/lib/safeStorage';
  * 伙伴等级：随孩子学习总时长升级
  */
 
+// P2-13: 宠物名改为 i18n 键，渲染与朗读时统一用 t() 解析
 const PETS = [
-  { id: 'cat', emoji: '🐱', name: '小猫咪', sound: '喵～' },
-  { id: 'dog', emoji: '🐶', name: '小狗', sound: '汪汪！' },
-  { id: 'rabbit', emoji: '🐰', name: '小兔子', sound: '蹦蹦～' },
-  { id: 'panda', emoji: '🐼', name: '熊猫', sound: '嗯嗯～' },
+  { id: 'cat', emoji: '🐱', nameKey: 'companion.petCat', sound: '喵～' },
+  { id: 'dog', emoji: '🐶', nameKey: 'companion.petDog', sound: '汪汪！' },
+  { id: 'rabbit', emoji: '🐰', nameKey: 'companion.petRabbit', sound: '蹦蹦～' },
+  { id: 'panda', emoji: '🐼', nameKey: 'companion.petPanda', sound: '嗯嗯～' },
 ] as const;
 
 type Mood = 'happy' | 'excited' | 'thinking' | 'missing' | 'sleeping';
@@ -32,12 +33,13 @@ const MOOD_EMOJI: Record<Mood, string> = {
   sleeping: '😴',
 };
 
-const MOOD_MSG: Record<Mood, string[]> = {
-  happy: ['今天学得真棒呀！', '继续加油哦～', '你又变聪明了！'],
-  excited: ['哇！你太厉害了！', '超级棒！给你点赞！', '你是学习小达人！'],
-  thinking: ['要不要一起学一会？', '今天想学什么呢？', '小智陪你一起学！'],
-  missing: ['好久没见面了，想你了～', '快回来学习吧！', '等你哦～'],
-  sleeping: ['zzZ...', '伙伴在休息...', '嘘～小声点～'],
+// P2-13: 心情文案改为 i18n 键，渲染与朗读时统一用 t() 解析（保持随机展示逻辑不变）
+const MOOD_MSG_KEYS: Record<Mood, string[]> = {
+  happy: ['companion.moodHappy1', 'companion.moodHappy2', 'companion.moodHappy3'],
+  excited: ['companion.moodExcited1', 'companion.moodExcited2', 'companion.moodExcited3'],
+  thinking: ['companion.moodThinking1', 'companion.moodThinking2', 'companion.moodThinking3'],
+  missing: ['companion.moodMissing1', 'companion.moodMissing2', 'companion.moodMissing3'],
+  sleeping: ['companion.moodSleeping1', 'companion.moodSleeping2', 'companion.moodSleeping3'],
 };
 
 function getMood(progress: { dailyLog: Record<string, DailyStat> }): Mood {
@@ -92,8 +94,8 @@ export function Companion() {
   }, [dailyLog]);
 
   useEffect(() => {
-    const msgs = MOOD_MSG[mood]!!
-    setMessage(msgs[Math.floor(Math.random() * msgs.length)]!);
+    const msgs = MOOD_MSG_KEYS[mood]!
+    setMessage(t(msgs[Math.floor(Math.random() * msgs.length)]!));
   }, [mood]);
 
   /** 5 秒无操作“摇摇唤醒”机制 (参考帮帮识字适龄逻辑) */
@@ -125,12 +127,13 @@ export function Companion() {
     setPetId(id);
     safeSetItem('companion-pet', id);
     setShowPicker(false);
-    speak(`${PETS.find(p => p.id === id)?.name}！${pet.sound}`, { lang: 'zh-CN', rate: 0.9 });
+    const picked = PETS.find(p => p.id === id);
+    speak(`${t(picked?.nameKey ?? '')}！${pet.sound}`, { lang: 'zh-CN', rate: 0.9 });
   };
 
   const petClick = () => {
-    const msgs = MOOD_MSG[mood]!!
-    const msg = msgs[Math.floor(Math.random() * msgs.length)]!
+    const msgs = MOOD_MSG_KEYS[mood]!
+    const msg = t(msgs[Math.floor(Math.random() * msgs.length)]!)
     setMessage(msg);
     speak(msg, { lang: 'zh-CN', rate: 0.92 });
   };
@@ -141,7 +144,7 @@ export function Companion() {
         {/* 宠物头像 */}
         <button
           onClick={petClick}
-          aria-label={t('companion.clickInteract', { name: pet.name, mood: mood === 'sleeping' ? t('companion.moodSleeping') : mood === 'excited' ? t('companion.moodExcited') : t('companion.moodHappy') })}
+          aria-label={t('companion.clickInteract', { name: t(pet.nameKey), mood: mood === 'sleeping' ? t('companion.moodSleeping') : mood === 'excited' ? t('companion.moodExcited') : t('companion.moodHappy') })}
           className="relative grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-candy-yellow-soft text-4xl active:scale-95"
         >
           <motion.span
@@ -164,7 +167,7 @@ export function Companion() {
         {/* 对话 */}
         <div className="min-w-0 flex-1">
           <div className="rounded-2xl bg-candy-blue-soft p-2.5">
-            <p className="text-xs font-bold text-candy-blue-deep">{pet.name}</p>
+            <p className="text-xs font-bold text-candy-blue-deep">{t(pet.nameKey)}</p>
             <AnimatePresence mode="wait">
               <motion.p
                 key={message}
@@ -204,7 +207,7 @@ export function Companion() {
                   size="sm"
                   onClick={() => pickPet(p.id)}
                 >
-                  {p.emoji} {p.name}
+                  {p.emoji} {t(p.nameKey)}
                 </CandyButton>
               ))}
             </div>

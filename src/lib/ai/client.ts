@@ -23,8 +23,8 @@ import {
 import { cacheGet, cacheSet } from './cache';
 import type { AiChunk, AiError, AiLogEntry, AiResult, AiUsage, ChatOptions } from './types';
 
-/** Health check endpoint: derive from PROXY_URL by replacing the /chat suffix, or fallback to /api/ai/health */
-const HEALTH_URL = PROXY_URL.replace(/\/chat$/, '/health') || '/api/ai/health';
+/** Health check endpoint: 由 PROXY_URL 去掉 /chat 后缀得到；若 PROXY_URL 本身不含 /chat，则复用其前缀作为健康检查地址（原 `|| '/api/ai/health'` 分支恒为死代码，已移除） */
+const HEALTH_URL = PROXY_URL.replace(/\/chat$/, '/health');
 
 /* ------------------------------------------------------------------ */
 /* 全局开关（家长中心可一键关闭全站 AI）                                */
@@ -245,6 +245,21 @@ async function* streamOnce(
 /* ------------------------------------------------------------------ */
 /* 对外：流式                                                          */
 /* ------------------------------------------------------------------ */
+const MAX_CONCURRENT_AI = 6;
+let activeAiStreams = 0;
+const aiStreamWaiters: Array<() => void> = [];
+function acquireAiStream(): Promise<void> {
+  if (activeAiStreams < MAX_CONCURRENT_AI) {
+    activeAiStreams++;
+    return Promise.resolve();
+  }
+  return new Promise<void>((resolve) => aiStreamWaiters.push(resolve));
+}
+function releaseAiStream(): void {
+  const w = aiStreamWaiters.shift();
+  if (w) w();
+  else if (activeAiStreams > 0) activeAiStreams--;
+}
 /**
  * 流式对话。自动处理重试与模型降级。
  * 调用方只需消费 chunk，无需关心底层失败。
@@ -255,6 +270,9 @@ export async function* chatStream(opts: ChatOptions): AsyncGenerator<AiChunk> {
     return;
   }
 
+  // P2-4：客户端并发上限，避免多组件同发打满代理/后端闸门
+  await acquireAiStream();
+  try {
   const cfg = sceneConfig(opts.scene);
   const started = Date.now();
 
@@ -393,6 +411,9 @@ export async function* chatStream(opts: ChatOptions): AsyncGenerator<AiChunk> {
     ok: false,
     errCode: err.code,
   });
+  } finally {
+    releaseAiStream();
+  }
 }
 
 /* ------------------------------------------------------------------ */

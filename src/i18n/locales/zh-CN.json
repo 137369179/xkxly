@@ -670,7 +670,8 @@
     "stuckHint": "🤔 卡住了吗？小智帮你再读一遍～",
     "listenAgainBtn": "🔊 再听一遍",
     "smallHint": "💡 小提示：{hint}",
-    "explainByAI": "小智讲一讲"
+    "explainByAI": "小智讲一讲",
+    "timeUp": "时间到啦！"
   },
   "poem": {
     "title": "古诗",
@@ -904,6 +905,7 @@
     "pinFailsNotice": "已输错 {count} 次，{limit} 次后将锁定 5 分钟",
     "dashboardSubtitle": "学习报告与设置",
     "posterTitle": "🏆 阶段结业与成果海报",
+    "childName": "宝贝",
     "posterDesc": "一键生成孩子阶段成果长图，分享到朋友圈或家园共育群",
     "posterGenerating": "正在绘制海报…",
     "posterGenerate": "✨ 生成学情海报",
@@ -941,6 +943,7 @@
     "posterCardTitle": "🏆 宝贝成就卡",
     "posterAlt": "成就海报",
     "downloadPoster": "📥 下载海报图片",
+    "posterFileName": "宝贝学习成果海报.png",
     "backupTitle": "数据备份",
     "backupSubtitle": "换设备或清浏览器前请先备份",
     "backupDesc": "学习进度全部存在本浏览器中。备份后请妥善保管 JSON 文件，换设备时可用「导入恢复」。",
@@ -1090,7 +1093,26 @@
     "moodSleeping": "睡觉中",
     "moodExcited": "很兴奋",
     "moodHappy": "心情不错",
-    "clickInteract": "{name}，{mood}，点击互动"
+    "clickInteract": "{name}，{mood}，点击互动",
+    "petCat": "小猫咪",
+    "petDog": "小狗",
+    "petRabbit": "小兔子",
+    "petPanda": "熊猫",
+    "moodHappy1": "今天学得真棒呀！",
+    "moodHappy2": "继续加油哦～",
+    "moodHappy3": "你又变聪明了！",
+    "moodExcited1": "哇！你太厉害了！",
+    "moodExcited2": "超级棒！给你点赞！",
+    "moodExcited3": "你是学习小达人！",
+    "moodThinking1": "要不要一起学一会？",
+    "moodThinking2": "今天想学什么呢？",
+    "moodThinking3": "小智陪你一起学！",
+    "moodMissing1": "好久没见面了，想你了～",
+    "moodMissing2": "快回来学习吧！",
+    "moodMissing3": "等你哦～",
+    "moodSleeping1": "zzZ...",
+    "moodSleeping2": "伙伴在休息...",
+    "moodSleeping3": "嘘～小声点～"
   },
   "actions": {
     "start": "开始",
@@ -1574,6 +1596,8 @@
     "evolve2to3": "少年猫 → 成年猫",
     "evolve3to4": "成年猫 → 传奇猫王",
     "fishCatchTitle": "🐟 猫爪接鱼干 · 30秒限时敏捷大挑战！",
+    "voiceChatBtn": "跟猫咪语音说话聊天 (+🐟1/+❤️2)",
+    "fishCatchChallengeBtn": "30秒猫爪接鱼干挑战！",
     "fishCatchRule": "🎮 规则：小鱼干从空中飘落，选择正确的算式/拼音桶接住小鱼干，答对直接奖励 🐟小鱼干！",
     "fishCatchStart": "🚀 开始 30秒接鱼干挑战！",
     "timeLeft": "⏱️ 剩余时间: {time}s",
@@ -3161,12 +3185,6 @@
     "word3": "学 3 个英语单词",
     "combo5": "连击 5 次",
     "lesson1": "完成今日课程"
-  },
-  "wordmatch": {
-    "complete": "连连看完成！",
-    "pairs": "配对",
-    "title": "单词连连看",
-    "subtitle": "英文 ↔ 中文配对"
   },
   "matchGame": {
     "instruction": "把大写字母和小写字母连起来吧！",

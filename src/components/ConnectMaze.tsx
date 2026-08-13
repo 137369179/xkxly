@@ -2,7 +2,7 @@
  * 连线迷宫 🧶 (P4)
  * 手指画线连线，路径规划+空间推理
  */
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
@@ -28,6 +28,11 @@ export function ConnectMaze() {
   const [score, setScore] = useState(0);
   const lockRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // P3: 卸载时清理待触发的反馈定时器，避免对已卸载组件 setState
+  useEffect(() => () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }, []);
 
   const isWall = (r:number,c:number) => lv.walls.some(([wr,wc])=>wr===r&&wc===c);
   const isStart = (r:number,c:number) => r===lv.start[0]&&c===lv.start[1];

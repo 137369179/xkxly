@@ -4,6 +4,9 @@
  * 生成器：scripts/fetch-hanzi-etymology.mjs
  * 数据源：Make Me a Hanzi dictionary.txt（Arphic 宽松许可）+ 人工校订表 CURATED
  * 覆盖：300 字（与 src/data/hanzi.ts 的 HANZI_DATA 一一对应）
+ *
+ * P2-18 收敛说明：本地字理维度（六书/部件）与 hanzi.ts 主数据按字一一对应，均由 scripts 生成，
+ * 不在此手写重复汉字条目；主源仍归 hanzi.ts。
  * 六书分布：ideographic=22 pictographic=58 pictophonetic=110 compound-ideographic=110
  * 有部件拆分：157 字；有派生字（可作字族根）：51 字
  * 声旁表音校验：同音 33 / 同韵 20 / 同声母 10

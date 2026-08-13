@@ -14,6 +14,7 @@
  */
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 import type { Progress } from '@/types';
 import { createInitialProgress } from '@/lib/progress';
 import { useStore } from './useStore';
@@ -284,5 +285,7 @@ export const useProfilesStore = create<ProfilesState>()(
 
 /** 便捷选择器：当前孩子元信息 */
 export const useActiveProfileMeta = () => useProfilesStore((s) => (s.activeProfileId ? s.meta[s.activeProfileId] : undefined));
-/** 便捷选择器：全部孩子元信息列表（按创建顺序） */
-export const useProfileList = () => useProfilesStore((s) => Object.values(s.meta));
+/** 便捷选择器：全部孩子元信息列表（按创建顺序）。
+ * P2-3 修复：原实现每次返回 Object.values 新数组，任一变更重渲染所有订阅者。
+ * 改用 useShallow 做浅比较，仅当元信息内容真正变化时才触发重渲染，返回稳定引用。 */
+export const useProfileList = () => useProfilesStore(useShallow((s) => Object.values(s.meta)));

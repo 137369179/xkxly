@@ -10,6 +10,7 @@
  *   - 连续打卡 7 / 14 / 30 天
  *   - 星星 50 / 100 / 300 / 500
  */
+import { safeGetItem, safeSetItem } from '@/lib/safeStorage';
 import type { Progress } from '@/types';
 
 export interface Milestone {
@@ -157,8 +158,6 @@ function categoryMastered(p: Progress, category: string): number {
 }
 
 /** 标记已庆祝过的里程碑（格式 milestone:{id}） */
-import { safeGetItem, safeSetItem } from '@/lib/safeStorage';
-
 const CELEBRATED_KEY = 'milestones-celebrated';
 
 const memoryCelebrated = new Set<string>();

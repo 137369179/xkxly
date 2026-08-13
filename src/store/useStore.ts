@@ -10,6 +10,7 @@ import { registerTtsBridge } from '@/lib/speech';
 import { createInitialProgress } from '@/lib/progress';
 import { useSettingsStore } from './useSettingsStore';
 import { useTtsStore } from './useTtsStore';
+import type { BackupPayload } from '@/lib/backup';
 
 const todayStr = () => dateKey();
 
@@ -41,6 +42,50 @@ import { localDailyQuestPlan } from '@/lib/ai/tasks';
 
 // Keep initialProgress as a constant for reference (but resetAll uses factory)
 const initialProgress: Progress = createInitialProgress();
+
+/** 是否为纯对象（非数组、非 null），用于深合并判定 */
+function isPlainObj(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null && !Array.isArray(v);
+}
+
+/**
+ * 真正深合并（P2-8）：原 `restoreProgress` / `merge` 用 `{ ...initialProgress, ...override }` 是浅合并，
+ * 老数据升级时若新增了嵌套字段（如 researchStats.exploreSeconds），覆盖层（旧 backup）里没有该键，
+ * 浅合并会直接用旧对象整体替换初始值对象，导致新字段丢失为 undefined。
+ * 这里对嵌套纯对象做一层「以初始值为底、覆盖层优先」的合并，补齐缺失的新字段默认值；
+ * 数组与原始值直接以覆盖层为准（符合进度语义，避免按索引合并出错）。
+ */
+function deepMergeProgress(base: Progress, override: Partial<Progress>): Progress {
+  const out: Record<string, unknown> = { ...base };
+  for (const key of Object.keys(override) as (keyof Progress)[]) {
+    const ov = override[key];
+    if (ov === undefined) continue;
+    const bv = (base as unknown as Record<string, unknown>)[key];
+    if (isPlainObj(ov) && isPlainObj(bv)) {
+      out[key] = { ...bv, ...ov };
+    } else {
+      out[key] = ov;
+    }
+  }
+  return out as unknown as Progress;
+}
+
+/**
+ * S2 错误连续计数（P3）：recordMath / recordCount / recordLogic 三处 copy-paste 的 wrongStreak 逻辑，
+ * 抽为公共函数复用，避免漂移。连错 >=3 且未安抚时触发安抚并清零，否则累计；答对则清零。
+ */
+function scheduleWrongStreakUpdate(prevStreak: number, comfortingActive: boolean, correct: boolean) {
+  if (correct) {
+    queueMicrotask(() => useStore.setState({ wrongStreak: 0 }));
+    return;
+  }
+  const nextStreak = prevStreak + 1;
+  if (nextStreak >= 3 && !comfortingActive) {
+    queueMicrotask(() => useStore.setState({ wrongStreak: 0, comfortingActive: true }));
+  } else {
+    queueMicrotask(() => useStore.setState({ wrongStreak: nextStreak }));
+  }
+}
 
 interface StoreState {
   progress: Progress;
@@ -125,8 +170,8 @@ interface StoreState {
   claimCatQuest: (id: string) => void;
   /** 猫咪进化：满足星星 + 亲密度阈值时升级，返回是否成功 */
   evolveCat: () => boolean;
-  /** 从备份恢复进度（覆盖当前） */
-  restoreProgress: (progress: Progress) => void;
+  /** 从备份恢复进度（覆盖当前）；可选携带备份设置，空 PIN 不覆盖已有 PIN */
+  restoreProgress: (progress: Progress, settings?: BackupPayload['settings']) => void;
 
   // —— S2 新增：情绪陪伴（不持久化）——
   wrongStreak: number;
@@ -324,17 +369,8 @@ export const useStore = create<StoreState>()(
       recordMath: (correct: boolean, skill = 'math:add') =>
 
         set((s) => {
-          // S2: 错误连续计数
-          if (!correct) {
-            const nextStreak = s.wrongStreak + 1;
-            if (nextStreak >= 3 && !s.comfortingActive) {
-              queueMicrotask(() => useStore.setState({ wrongStreak: 0, comfortingActive: true }));
-            } else {
-              queueMicrotask(() => useStore.setState({ wrongStreak: nextStreak }));
-            }
-          } else {
-            queueMicrotask(() => useStore.setState({ wrongStreak: 0 }));
-          }
+          // S2: 错误连续计数（抽公共函数，见 scheduleWrongStreakUpdate）
+          scheduleWrongStreakUpdate(s.wrongStreak, s.comfortingActive, correct);
           return _applyProgress(s, (p) => {
             const next = _applyPractice(p, skill, correct, 1);
             return {
@@ -364,17 +400,8 @@ export const useStore = create<StoreState>()(
 
       recordCount: (correct) =>
         set((s) => {
-          // S2: 错误连续计数
-          if (!correct) {
-            const nextStreak = s.wrongStreak + 1;
-            if (nextStreak >= 3 && !s.comfortingActive) {
-              queueMicrotask(() => useStore.setState({ wrongStreak: 0, comfortingActive: true }));
-            } else {
-              queueMicrotask(() => useStore.setState({ wrongStreak: nextStreak }));
-            }
-          } else {
-            queueMicrotask(() => useStore.setState({ wrongStreak: 0 }));
-          }
+          // S2: 错误连续计数（抽公共函数，见 scheduleWrongStreakUpdate）
+          scheduleWrongStreakUpdate(s.wrongStreak, s.comfortingActive, correct);
           return _applyProgress(s, (p) => {
             const next = _applyPractice(p, 'number:count', correct, 1);
             return { ...next, countCorrect: next.countCorrect + (correct ? 1 : 0) };
@@ -383,17 +410,8 @@ export const useStore = create<StoreState>()(
 
       recordLogic: (correct, skill = 'logic:pattern') =>
         set((s) => {
-          // S2: 错误连续计数
-          if (!correct) {
-            const nextStreak = s.wrongStreak + 1;
-            if (nextStreak >= 3 && !s.comfortingActive) {
-              queueMicrotask(() => useStore.setState({ wrongStreak: 0, comfortingActive: true }));
-            } else {
-              queueMicrotask(() => useStore.setState({ wrongStreak: nextStreak }));
-            }
-          } else {
-            queueMicrotask(() => useStore.setState({ wrongStreak: 0 }));
-          }
+          // S2: 错误连续计数（抽公共函数，见 scheduleWrongStreakUpdate）
+          scheduleWrongStreakUpdate(s.wrongStreak, s.comfortingActive, correct);
           return _applyProgress(s, (p) => {
             const next = _applyPractice(p, skill, correct, 1);
             return {
@@ -446,12 +464,25 @@ export const useStore = create<StoreState>()(
 
       resetAll: () => set(() => ({ progress: createInitialProgress(), pendingBadges: [] })),
 
-      /** 从备份恢复进度：与初始值深合并，保证字段完整 */
-      restoreProgress: (progress) =>
+      /** 从备份恢复进度：与初始值深合并（P2-8），保证嵌套字段完整回填 */
+      restoreProgress: (progress, settings) => {
+        // 备份导入兼容：备份已剔除 PIN（恒为 ''），空串时跳过 PIN 覆盖——
+        // 既不清空已有 PIN、也不写入空串，避免家长 PIN 丢失；非空 PIN 才覆盖。
+        // 其余设置按需恢复（备份导出已清空锁定态，导入后从 0 开始，安全且不会崩溃）。
+        if (settings) {
+          const s = useSettingsStore.getState();
+          if (settings.parentPin) s.setParentPin(settings.parentPin);
+          s.setSound(settings.sound);
+          s.setShowPinyin(settings.showPinyin);
+          s.setDailyLimit(settings.dailyLimitMin);
+          s.setEyeCare(settings.eyeCareMin);
+          s.setAiEnabled(settings.aiEnabled);
+        }
         set(() => ({
-          progress: { ...initialProgress, ...progress },
+          progress: deepMergeProgress(initialProgress, progress),
           pendingBadges: [],
-        })),
+        }));
+      },
 
       // —— S2 新增：情绪陪伴 ——
       wrongStreak: 0,
@@ -579,8 +610,18 @@ export const useStore = create<StoreState>()(
 
       learnSkill: (skill) => set((s) => _applyProgress(s, (p) => _applyLearn(p, skill))),
 
+      // P1-6 修复：原先每 30s 用 `_bumpLog` 展开整棵 dailyLog（最多 90 天）重建整个 progress 对象，
+      // 触发大量 useProgress 订阅者无谓重渲染。现细粒度只改「今日 dailyLog.sec」这一条，
+      // 不重建整棵 dailyLog / progress 其它字段引用。
       tickTime: (sec) =>
-        set((s) => ({ progress: { ...s.progress, dailyLog: _bumpLog(s.progress, { sec }) } })),
+        set((s) => {
+          const key = todayStr();
+          const cur = s.progress.dailyLog[key] ?? _emptyStat();
+          const nextEntry = { ...cur, sec: cur.sec + sec };
+          return {
+            progress: { ...s.progress, dailyLog: { ...s.progress.dailyLog, [key]: nextEntry } },
+          };
+        }),
 
       setLessonStep: (n) =>
         set((s) => ({
@@ -1107,8 +1148,8 @@ export const useStore = create<StoreState>()(
         const p = persisted as { progress?: Partial<Progress> } | undefined;
         return {
           ...current,
-          // 与初始值做深合并，保证老数据升级时新字段不为 undefined
-          progress: { ...initialProgress, ...(p?.progress ?? {}) },
+          // 与初始值做真正深合并（P2-8），保证老数据升级时新增嵌套字段回填默认值
+          progress: deepMergeProgress(initialProgress, p?.progress ?? {}),
           pendingBadges: [],
         };
       },

@@ -5,6 +5,10 @@
  * 避免 MapView、Sidebar、Nav 等多处硬编码不一致。
  * 
  * 使用方式：import { SUBJECTS, getSubjectById } from '@/lib/srs/SUBJECTS';
+ *
+ * P2-5：本表是全站**唯一**的学科 label/emoji/tone 来源。
+ * `@/lib/srs` 里的展示层 SUBJECTS 数组已改为引用本表（只额外补充图表配色 color
+ * 与本表未单列的展示子类 number/sentence/research），不再各自硬编码，杜绝数据漂移。
  */
 
 export type SubjectId = 'letter' | 'math' | 'hanzi' | 'pinyin' | 'poem' | 'word' | 'logic' | 'science' | 'music' | 'art' | 'idiom' | 'song' | 'safety' | 'geo' | 'vehicle' | 'festival' | 'plant' | 'fun' | 'adventure' | 'rewards' | 'parent' | 'today' | 'home' | 'cat_house' | 'passport';
@@ -38,8 +42,10 @@ export const SUBJECTS: Record<SubjectId, SubjectDef> = {
     skillPrefixes: ['letter:'],
     desc: '26 个字母大冒险',
   },
+  // P2-5：本条覆盖 math:/number:/count: 三类知识点，统一中文名收敛为「数学」
+  // （原为「数字」，与 srs 展示层的「数学」冲突）；「数字」由 srs 展示层的 number 子类承载。
   math: {
-    id: 'math', label: '数字', emoji: '🔢', tone: 'yellow',
+    id: 'math', label: '数学', emoji: '➕', tone: 'green',
     nodes: [
       { emoji: '🔢', label: '1-10', expectedCount: 10 },
       { emoji: '➕', label: '加减法', expectedCount: 15 },
@@ -81,8 +87,9 @@ export const SUBJECTS: Record<SubjectId, SubjectDef> = {
     skillPrefixes: ['poem:'],
     desc: '385 首经典古诗',
   },
+  // P2-5：emoji 由 🔤 收敛为 💬，避免与 letter（字母🔤）图标重复
   word: {
-    id: 'word', label: '英语', emoji: '🔤', tone: 'pink',
+    id: 'word', label: '英语', emoji: '💬', tone: 'pink',
     nodes: [
       { emoji: '🐱', label: '基础词', expectedCount: 40 },
       { emoji: '📖', label: '句子', expectedCount: 20 },
@@ -113,8 +120,9 @@ export const SUBJECTS: Record<SubjectId, SubjectDef> = {
     id: 'art', label: '艺术', emoji: '🎨', tone: 'pink',
     nodes: [], skillPrefixes: ['art:'], desc: '魔法调色盘 · 色彩',
   },
+  // P2-5：emoji/tone 收敛为 📜/orange（与展示层历史取值一致）
   idiom: {
-    id: 'idiom', label: '成语', emoji: '🏯', tone: 'purple',
+    id: 'idiom', label: '成语', emoji: '📜', tone: 'orange',
     nodes: [], skillPrefixes: ['idiom:'], desc: '60 个成语故事',
   },
   song: {

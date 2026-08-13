@@ -2,7 +2,7 @@
  * 时间顺序排列 ⏰ (P2)
  * 日常活动时间线排序，时间认知+因果逻辑
  */
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
@@ -55,6 +55,11 @@ export function TimeSequence() {
   const [score, setScore] = useState(0);
   const lockRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // P3: 卸载时清理待触发的反馈定时器，避免对已卸载组件 setState
+  useEffect(() => () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }, []);
 
   const startNew = (idx: number) => {
     setSeqIdx(idx);

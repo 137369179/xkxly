@@ -35,7 +35,11 @@ export const MODELS: ModelInfo[] = [
 
 interface SceneConfig {
   model: string;
-  /** 失败或模型不可用时的降级链 */
+  /**
+   * 失败或模型不可用时的降级链。
+   * ⚠️ 只能填 MODELS 注册表里存在的 id（P2-9：原先引用了未注册的 `agnes-2.0-flash`，
+   * 降级到该模型必然失败，现已统一为 `agnes-2.5-flash`）。
+   */
   fallback: string[];
   temperature: number;
   /**
@@ -58,13 +62,13 @@ const SCENE_CONFIG: Record<AiScene, SceneConfig> = {
   'logic.explain': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.5, maxTokens: 900 },
 
   // —— 孩子端：质量优先 ——
-  'poem.tutor': { model: DEFAULT_MODEL, fallback: ['agnes-2.0-flash'], temperature: 0.6, maxTokens: 1400 },
-  'math.explain': { model: DEFAULT_MODEL, fallback: ['agnes-2.0-flash'], temperature: 0.5, maxTokens: 1000 },
+  'poem.tutor': { model: DEFAULT_MODEL, fallback: ['agnes-2.5-flash'], temperature: 0.6, maxTokens: 1400 },
+  'math.explain': { model: DEFAULT_MODEL, fallback: ['agnes-2.5-flash'], temperature: 0.5, maxTokens: 1000 },
 
   // —— 结构化输出：低温度 + JSON ——
-  'poem.grade': { model: DEFAULT_MODEL, fallback: ['agnes-2.0-flash'], temperature: 0.3, maxTokens: 1600, json: true },
-  'math.generate': { model: DEFAULT_MODEL, fallback: ['agnes-2.0-flash'], temperature: 0.85, maxTokens: 1600, json: true },
-  'plan.today': { model: DEFAULT_MODEL, fallback: ['agnes-2.0-flash'], temperature: 0.7, maxTokens: 1600, json: true },
+  'poem.grade': { model: DEFAULT_MODEL, fallback: ['agnes-2.5-flash'], temperature: 0.3, maxTokens: 1600, json: true },
+  'math.generate': { model: DEFAULT_MODEL, fallback: ['agnes-2.5-flash'], temperature: 0.85, maxTokens: 1600, json: true },
+  'plan.today': { model: DEFAULT_MODEL, fallback: ['agnes-2.5-flash'], temperature: 0.7, maxTokens: 1600, json: true },
 
   // —— 家长端：质量优先 ——
   'parent.report': { model: DEFAULT_MODEL, fallback: ['deepseek-reasoner', 'deepseek-chat'], temperature: 0.6, maxTokens: 2200 },
@@ -79,35 +83,35 @@ const SCENE_CONFIG: Record<AiScene, SceneConfig> = {
   'daily.summary': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.85, maxTokens: 700 },
 
   // —— v6 新增：孩子端质量优先 ——
-  'poem.compare': { model: DEFAULT_MODEL, fallback: ['agnes-2.0-flash'], temperature: 0.6, maxTokens: 1200 },
-  'poet.story': { model: DEFAULT_MODEL, fallback: ['agnes-2.0-flash'], temperature: 0.85, maxTokens: 1000 },
+  'poem.compare': { model: DEFAULT_MODEL, fallback: ['agnes-2.5-flash'], temperature: 0.6, maxTokens: 1200 },
+  'poet.story': { model: DEFAULT_MODEL, fallback: ['agnes-2.5-flash'], temperature: 0.85, maxTokens: 1000 },
 
   // —— v6 新增：结构化输出 ——
-  'count.generate': { model: DEFAULT_MODEL, fallback: ['agnes-2.0-flash'], temperature: 0.85, maxTokens: 1600, json: true },
-  'letter.match': { model: DEFAULT_MODEL, fallback: ['agnes-2.0-flash'], temperature: 0.8, maxTokens: 1400, json: true },
-  'wrong.analyze': { model: DEFAULT_MODEL, fallback: ['agnes-2.0-flash'], temperature: 0.3, maxTokens: 1200, json: true },
-  'recommend.practice': { model: DEFAULT_MODEL, fallback: ['agnes-2.0-flash'], temperature: 0.5, maxTokens: 1200, json: true },
+  'count.generate': { model: DEFAULT_MODEL, fallback: ['agnes-2.5-flash'], temperature: 0.85, maxTokens: 1600, json: true },
+  'letter.match': { model: DEFAULT_MODEL, fallback: ['agnes-2.5-flash'], temperature: 0.8, maxTokens: 1400, json: true },
+  'wrong.analyze': { model: DEFAULT_MODEL, fallback: ['agnes-2.5-flash'], temperature: 0.3, maxTokens: 1200, json: true },
+  'recommend.practice': { model: DEFAULT_MODEL, fallback: ['agnes-2.5-flash'], temperature: 0.5, maxTokens: 1200, json: true },
 
   // —— 汉字识字：速度优先 ——
   'hanzi.story': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.9, maxTokens: 900 },
   'hanzi.sentence': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.85, maxTokens: 600 },
 
   // —— 汉字识字：质量优先 ——
-  'pinyin.tutor': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.0-flash'], temperature: 0.6, maxTokens: 1000 },
+  'pinyin.tutor': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.6, maxTokens: 1000 },
 
   // —— 英语单词 ——
   'word.story': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.9, maxTokens: 800 },
-  'word.phonics': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.0-flash'], temperature: 0.6, maxTokens: 900 },
+  'word.phonics': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.6, maxTokens: 900 },
 
   // —— AI 故事绘本 ——
-  'storybook.generate': { model: DEFAULT_MODEL, fallback: ['agnes-2.0-flash'], temperature: 0.85, maxTokens: 1800, json: true },
+  'storybook.generate': { model: DEFAULT_MODEL, fallback: ['agnes-2.5-flash'], temperature: 0.85, maxTokens: 1800, json: true },
 
   // —— 朗读发音建议（P3-14）：速度优先，孩子等不了太久 ——
   'speech.advise': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.6, maxTokens: 800, json: true },
 
   // —— AI 个性化学习路径 ——
   'path.narrate': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.85, maxTokens: 700 },
-  'path.weekly': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.0-flash'], temperature: 0.7, maxTokens: 900 },
+  'path.weekly': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.7, maxTokens: 900 },
   'path.coach': { model: DEFAULT_MODEL, fallback: ['deepseek-reasoner', 'deepseek-chat'], temperature: 0.6, maxTokens: 1200 },
 
   // —— AI 陪伴学习伙伴 ——
@@ -115,8 +119,8 @@ const SCENE_CONFIG: Record<AiScene, SceneConfig> = {
   'companion.explain': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.8, maxTokens: 1000 },
 
   // —— S2 Companion 2.0 新增 ——
-  'companion.buddyQuiz': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.0-flash'], temperature: 0.85, maxTokens: 1400, json: true },
-  'companion.dailyQuest': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.0-flash'], temperature: 0.7, maxTokens: 1600, json: true },
+  'companion.buddyQuiz': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.85, maxTokens: 1400, json: true },
+  'companion.dailyQuest': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.7, maxTokens: 1600, json: true },
   'companion.comfort': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.85, maxTokens: 700 },
   'companion.celebrate': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.9, maxTokens: 600 },
   'companion.followUp': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.8, maxTokens: 900 },

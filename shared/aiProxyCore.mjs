@@ -59,6 +59,9 @@ export function validateMessages(messages) {
   return { ok: true, messages };
 }
 
+/** response_format.type 允许值（OpenAI 兼容语义，两运行时共用同一闸门） */
+const ALLOWED_RESPONSE_FORMATS = ['text', 'json_object'];
+
 /**
  * 成型上游请求体（仅透传白名单字段，避免前端注入奇怪参数）。
  * @param {object} payload 原始请求体（已 JSON.parse）
@@ -84,7 +87,13 @@ export function buildUpstreamBody(payload, model, opts = {}) {
     max_tokens: clampInt(payload.max_tokens, 1, 4096, 1200),
     stream,
   };
-  if (payload.response_format) body.response_format = payload.response_format;
+  // response_format 白名单：只放行已知取值并重建为最小结构，非法/未知值直接忽略
+  // （回退上游默认的自由文本）。防客户端透传畸形对象或 json_schema 之类的夹带字段，
+  // 既避免上游 400，也避免绕过本模块的参数闸门。
+  const rfType = payload.response_format?.type;
+  if (typeof rfType === 'string' && ALLOWED_RESPONSE_FORMATS.includes(rfType)) {
+    body.response_format = { type: rfType };
+  }
   return body;
 }
 

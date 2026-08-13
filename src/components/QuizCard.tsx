@@ -102,6 +102,11 @@ export function QuizCard({
   const stuckStartRef = useRef<number | null>(null);
   /** 本题作答起始时间，用于 DDA 反应时信号（识别纠结/走神） */
   const startedAt = useRef<number>(Date.now());
+  /** 用 ref 镜像最新 solved，供倒计时 interval 闭包读取（P2-7：避免闭包捕获旧 solved 恒为 false） */
+  const solvedRef = useRef(false);
+  useEffect(() => {
+    solvedRef.current = solved;
+  }, [solved]);
 
   // —— Boss战：倒计时 ——
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
@@ -187,11 +192,11 @@ export function QuizCard({
           const next = prev - 100;
           if (next <= 0) {
             clearTimer();
-            if (!timeExpiredRef.current && !solved) {
+            if (!timeExpiredRef.current && !solvedRef.current) {
               timeExpiredRef.current = true;
               // 时间到自动判错
               onAnswer?.(false);
-              setFeedback({ kind: 'wrong', text: '时间到啦！' });
+              setFeedback({ kind: 'wrong', text: translate('quiz.timeUp') });
             }
             return 0;
           }
@@ -364,7 +369,7 @@ export function QuizCard({
         <div className="mt-5 mb-1 flex flex-wrap items-center justify-center gap-2 rounded-[1.6rem] bg-white/70 px-4 py-5 shadow-candy-sm sm:gap-3">
           {question.displayShapes.map((s, i) => (
             <span
-              key={`s-${i}`}
+              key={`shape-${s}-${i}`}
               className={cn(
                 'text-4xl sm:text-5xl',
                 s === '❓' && 'animate-bounce-soft rounded-2xl bg-candy-yellow-soft px-2',
@@ -436,7 +441,7 @@ export function QuizCard({
               {opt.shapes && (
                 <span className="flex flex-wrap items-center justify-center gap-1">
                   {opt.shapes.map((s: string, k: number) => (
-                    <span key={k} className="text-3xl sm:text-4xl">
+                    <span key={`optshape-${s}-${k}`} className="text-3xl sm:text-4xl">
                       {s}
                     </span>
                   ))}

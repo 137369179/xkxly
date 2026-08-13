@@ -2,7 +2,7 @@
  * 简单数独 3×3 🎯 (P5)
  * 幼儿版数独：3×3 每行每列不重复
  */
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect } from '@/lib/sfx';
@@ -39,6 +39,11 @@ export function MiniSudoku() {
   const [score, setScore] = useState(0);
   const lockRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // P3: 卸载时清理待触发的反馈定时器，避免对已卸载组件 setState
+  useEffect(() => () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }, []);
 
   const newGame = () => { setState(genBoard()); setSelected(null); setFeedback(''); };
 

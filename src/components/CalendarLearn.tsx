@@ -2,7 +2,7 @@
  * 日历认知 📅 (S4)
  * 看日期找星期、月份认知
  */
-import { memo, useState, useRef } from 'react';
+import { memo, useState, useRef, useEffect } from 'react';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { cn } from '@/lib/utils';
@@ -28,6 +28,11 @@ function _CalendarLearn() {
   const [feedback, setFeedback] = useState('');
   const [score, setScore] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // P3: 卸载时清理待触发的反馈定时器，避免对已卸载组件 setState
+  useEffect(() => () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }, []);
 
   const days = getDaysInMonth(year, month);
   const firstWeekday = getFirstWeekday(year, month);

@@ -44,15 +44,18 @@ export function buildBackup(
   settings: BackupPayload['settings'],
 ): BackupPayload {
   // 导出时清空锁定状态，导入后从 0 开始
-  const { pinFails, pinLockUntil, ...rest } = settings;
+  // 安全（P2-11）：PIN 为 4 位数字，即便哈希+盐同文件存储也可离线穷举，
+  // 故备份不携带任何 PIN 信息，导入后由家长重新设置。
+  const { pinFails, pinLockUntil, parentPin, ...rest } = settings;
   void pinFails;
   void pinLockUntil;
+  void parentPin;
   return {
     app: BACKUP_MAGIC,
     version: BACKUP_VERSION,
     exportedAt: new Date().toISOString(),
     progress,
-    settings: { ...rest, pinFails: 0, pinLockUntil: 0 },
+    settings: { ...rest, parentPin: '', pinFails: 0, pinLockUntil: 0 },
   };
 }
 

@@ -31,14 +31,19 @@ function emit(info: SwUpdateInfo): void {
 }
 
 let registered = false;
+/** 消息/controllerchange 监听只绑一次（registered 会在注册失败时回退，绑定不能跟着重复） */
+let channelsBound = false;
+/** 已尝试注册次数，用于失败自动重试的次数上限 */
+let attempts = 0;
 
-/** 注册 Service Worker。重复调用是安全的，只注册一次。 */
-export function registerSW(): void {
-  if (registered) return;
-  if (typeof window === 'undefined') return;
-  if (!('serviceWorker' in navigator)) return;
+/** 注册失败后的重试上限与退避间隔（弱网/首屏拥塞时给一次机会） */
+const MAX_ATTEMPTS = 3;
+const RETRY_DELAY_MS = 3000;
 
-  registered = true;
+/** 绑定更新通知的两条监听路径（幂等） */
+function bindUpdateChannels(): void {
+  if (channelsBound) return;
+  channelsBound = true;
 
   // 路径 1：接收 SW activate 后 postMessage 来的更新通知（主路径）
   navigator.serviceWorker.addEventListener('message', (event) => {
@@ -67,41 +72,73 @@ export function registerSW(): void {
       at: Date.now(),
     });
   });
+}
 
-  // 等页面 load 后再注册，避免与首屏关键资源争抢带宽
-  window.addEventListener('load', async () => {
-    try {
-      const registration = await navigator.serviceWorker.register('/sw.js');
+/** 真正调用 register()；失败时重置标志并做有限次退避重试 */
+async function doRegister(): Promise<void> {
+  attempts++;
+  try {
+    const registration = await navigator.serviceWorker.register('/sw.js');
 
-      // 路径 3：updatefound + statechange 兜底
-      // 当 register() 发现新版 SW 正在安装时，监听其状态变化
-      const trackWorker = (worker: ServiceWorker | null) => {
-        if (!worker) return;
-        worker.addEventListener('statechange', () => {
-          // 新 SW 已激活（skipWaiting 后立即进入 activated）
-          if (worker.state === 'activated') {
-            emit({ version: 'unknown', clearedCaches: 0, at: Date.now() });
-          }
-        });
-      };
-
-      // 注册时可能已有 waiting 的 SW（浏览器在导航阶段就下载了新版）
-      if (registration.waiting) {
-        emit({ version: 'unknown', clearedCaches: 0, at: Date.now() });
-      }
-      if (registration.installing) {
-        trackWorker(registration.installing);
-      }
-
-      // 后续发现新版 SW
-      registration.addEventListener('updatefound', () => {
-        trackWorker(registration.installing);
+    // 路径 3：updatefound + statechange 兜底
+    // 当 register() 发现新版 SW 正在安装时，监听其状态变化
+    const trackWorker = (worker: ServiceWorker | null) => {
+      if (!worker) return;
+      worker.addEventListener('statechange', () => {
+        // 新 SW 已激活（skipWaiting 后立即进入 activated）
+        if (worker.state === 'activated') {
+          emit({ version: 'unknown', clearedCaches: 0, at: Date.now() });
+        }
       });
-    } catch (err) {
-      // SW 注册失败不阻断应用，只是失去离线能力
-      if (import.meta.env.DEV) console.warn('[SW] 注册失败：', err);
+    };
+
+    // 注册时可能已有 waiting 的 SW（浏览器在导航阶段就下载了新版）
+    if (registration.waiting) {
+      emit({ version: 'unknown', clearedCaches: 0, at: Date.now() });
     }
-  });
+    if (registration.installing) {
+      trackWorker(registration.installing);
+    }
+
+    // 后续发现新版 SW
+    registration.addEventListener('updatefound', () => {
+      trackWorker(registration.installing);
+    });
+  } catch (err) {
+    // SW 注册失败不阻断应用，只是暂时失去离线能力
+    if (import.meta.env.DEV) console.warn('[SW] 注册失败：', err);
+    // 重置标志：允许后续（自动重试或调用方再次调用 registerSW）重新注册
+    registered = false;
+    if (attempts < MAX_ATTEMPTS) {
+      setTimeout(() => registerSW(), RETRY_DELAY_MS * attempts);
+    }
+  }
+}
+
+/** 注册 Service Worker。重复调用是安全的，只注册一次（失败后允许重试）。 */
+export function registerSW(): void {
+  if (registered) return;
+  if (typeof window === 'undefined') return;
+  if (!('serviceWorker' in navigator)) return;
+
+  registered = true;
+  bindUpdateChannels();
+
+  // 原实现死等 load 事件：若本模块在 load 之后才执行（懒加载/动态 import），
+  // load 永不再触发 → SW 永不注册。改为先看 readyState，已就绪就直接注册。
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    void doRegister();
+    return;
+  }
+  // 文档仍在解析：DOM 就绪即可注册（load 兜底，两者只会生效一次）
+  let started = false;
+  const start = () => {
+    if (started) return;
+    started = true;
+    void doRegister();
+  };
+  window.addEventListener('DOMContentLoaded', start, { once: true });
+  window.addEventListener('load', start, { once: true });
 }
 
 /** 订阅 SW 更新事件，返回取消订阅函数 */

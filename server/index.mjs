@@ -230,6 +230,22 @@ function sendJson(res, code, data) {
   res.end(body);
 }
 
+/**
+ * 深度脱敏：递归对对象/数组里的字符串套 redactPII。
+ * 替代原先「stringify → redactPII → parse → 再 stringify」的双重序列化，
+ * 行为等价（只脱敏字符串值），但大响应体只序列化一次。
+ */
+function redactDeep(v) {
+  if (typeof v === 'string') return redactPII(v);
+  if (Array.isArray(v)) return v.map(redactDeep);
+  if (v && typeof v === 'object') {
+    const out = {};
+    for (const [k, val] of Object.entries(v)) out[k] = redactDeep(val);
+    return out;
+  }
+  return v;
+}
+
 /** 安全结束响应：已结束/已销毁时静默跳过，避免二次 end 抛错 */
 function safeEnd(res) {
   try {
@@ -290,10 +306,19 @@ const MIME = {
 /* ------------------------------------------------------------------ */
 const rateBuckets = new Map(); // ip -> number[]（请求时间戳）
 
+// 信任边界：x-forwarded-for 是客户端可任意伪造的普通请求头，默认**不信任**，
+// 否则每次请求换一个假 XFF 即可绕过每 IP 限流（等于限流形同虚设）。
+// 仅当本进程确实跑在自己可信的反代（Nginx / Cloudflare 等，且反代会重写 XFF）之后，
+// 才设 AI_TRUST_PROXY=1 取首值；直连暴露时切勿开启。
+const TRUST_PROXY = String(process.env.AI_TRUST_PROXY ?? '0') === '1';
+
 function ipOf(req) {
-  const xff = req.headers['x-forwarded-for'];
-  if (typeof xff === 'string' && xff.length) return xff.split(',')[0].trim();
-  return req.socket.remoteAddress || 'unknown';
+  if (TRUST_PROXY) {
+    const xff = req.headers['x-forwarded-for'];
+    if (typeof xff === 'string' && xff.length) return xff.split(',')[0].trim();
+  }
+  // 默认取 TCP 层对端地址：伪造 header 无法影响，限流始终生效
+  return req.socket?.remoteAddress || 'unknown';
 }
 
 function rateLimited(ip) {
@@ -353,8 +378,12 @@ async function handleChat(req, res) {
   }
   let messages = guarded.messages;
 
-  // DeepSeek 校验强化：当指定 response_format 为 json_object 时，prompt 内必须包含 "json" 单词
+  // 模型族判定：唯一定义在此处，下面选供应商候选时直接复用（避免重复声明后两处漂移）
+  const isStep = model.startsWith('step');
+  const isXunfei = model.startsWith('xop') || model.includes('qwen');
   const isDeepSeek = model.startsWith('deepseek');
+
+  // DeepSeek 校验强化：当指定 response_format 为 json_object 时，prompt 内必须包含 "json" 单词
   if (isDeepSeek && payload.response_format?.type === 'json_object') {
     const hasJsonWord = messages.some((m) => typeof m.content === 'string' && /json/i.test(m.content));
     if (!hasJsonWord) {
@@ -382,9 +411,6 @@ async function handleChat(req, res) {
   });
 
   try {
-    const isStep = model.startsWith('step');
-    const isXunfei = model.startsWith('xop') || model.includes('qwen');
-    const isDeepSeek = model.startsWith('deepseek');
     const candidateConfigs = isStep
       ? [{ url: STEPFUN_BASE_URL, key: STEPFUN_API_KEY }]
       : isXunfei
@@ -455,12 +481,9 @@ async function handleChat(req, res) {
         textTokens: u?.completion_tokens_details?.text_tokens ?? null,
         reasoningTokens: u?.completion_tokens_details?.reasoning_tokens ?? null,
       });
-      // 返回前脱敏（屏蔽可能泄露的儿童手机号/外部链接），与 Worker 行为一致
-      try {
-        return sendJson(res, 200, JSON.parse(redactPII(JSON.stringify(data))));
-      } catch {
-        return sendJson(res, 200, data);
-      }
+      // 返回前脱敏（屏蔽可能泄露的儿童手机号/外部链接），与 Worker 行为一致；
+      // 直接对对象做深度脱敏，sendJson 内再统一序列化一次即可
+      return sendJson(res, 200, redactDeep(data));
     }
 
     /* ---------- 流式 SSE 透传 ---------- */
@@ -575,7 +598,17 @@ function serveStatic(req, res, urlPath) {
       error: { code: 'no_dist', message: 'dist 不存在，请先 npm run build（开发时请用 vite dev）' },
     });
   }
-  let rel = decodeURIComponent(urlPath.split('?')[0]);
+  // 非法百分号编码（如 /%ZZ、/%E4%A）会让 decodeURIComponent 抛 URIError；
+  // 此前未捕获，异常冒泡后这条请求永远收不到响应（客户端挂到超时），故就地转 400。
+  let rel;
+  try {
+    rel = decodeURIComponent(urlPath.split('?')[0]);
+  } catch (err) {
+    if (err instanceof URIError) {
+      return sendJson(res, 400, { error: { code: 'bad_path', message: '请求路径编码非法' } });
+    }
+    throw err;
+  }
   if (rel === '/' || rel === '') rel = '/index.html';
 
   // 加固：剥离前导斜杠，杜绝 path.join 把绝对 rel 当作根目录拼接而逃逸 DIST

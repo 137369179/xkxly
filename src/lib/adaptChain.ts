@@ -50,20 +50,33 @@ interface ChainState {
 
 const CHAIN_VERSION = 1;
 
+// P2-1 修复：原 loadChain 每次全量 JSON.parse，单次作答 2 读 2 写、渲染期再 parse 多次，
+// 主线程反复序列化。加模块级缓存，写入同步落盘并刷新缓存，避免重复 parse。
+let chainCache: ChainState | null = null;
+
+function freshChain(): ChainState {
+  return { slots: [], updated: Date.now(), version: CHAIN_VERSION };
+}
+
 function loadChain(): ChainState {
+  if (chainCache) return chainCache;
   const raw = safeGetItem(CHAIN_KEY);
-  if (!raw) return { slots: [], updated: Date.now(), version: CHAIN_VERSION };
+  if (!raw) { chainCache = freshChain(); return chainCache; }
   try {
     const s = JSON.parse(raw) as ChainState;
-    if (s.version !== CHAIN_VERSION) return { slots: [], updated: Date.now(), version: CHAIN_VERSION };
+    if (s.version !== CHAIN_VERSION) { chainCache = freshChain(); return chainCache; }
+    chainCache = s;
     return s;
   } catch {
-    return { slots: [], updated: Date.now(), version: CHAIN_VERSION };
+    chainCache = freshChain();
+    return chainCache;
   }
 }
 
 function saveChain(s: ChainState) {
   s.updated = Date.now();
+  // 先更新缓存（引用同一对象），再落盘，避免立即回读又触发 parse
+  chainCache = s;
   safeSetItem(CHAIN_KEY, JSON.stringify(s));
 }
 

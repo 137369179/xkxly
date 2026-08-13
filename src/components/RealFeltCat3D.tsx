@@ -140,16 +140,17 @@ export function RealFeltCat3D({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
-  const [breathPhase, setBreathPhase] = useState(0);
-  // 瞳孔大小 (0~1，明亮=小，黑暗=大)
-  const [pupilDilation, setPupilDilation] = useState(0.45);
-  // 慢眨眼状态
-  const [blinkProgress, setBlinkProgress] = useState(0); // 0=睁开, 1=闭合
+  // 生命周期动画相位（P1-5：合并为单个 state，每帧仅一次 setState，避免整棵大型 SVG 60fps 重渲染）
+  const [anim, setAnim] = useState({
+    breathPhase: 0,
+    tailPhase: 0,
+    pupilDilation: 0.45,
+    blinkProgress: 0,
+  });
+  // 慢眨眼激活标记（点击事件 / 眨眼 FSM 共用，仅在切换时 setState）
   const [isBlinking, setIsBlinking] = useState(false);
-  // 耳朵微颤
+  // 耳朵微颤（偶发事件驱动，非每帧）
   const [earTwitch, setEarTwitch] = useState(0);
-  // 尾巴摇摆相位
-  const [tailPhase, setTailPhase] = useState(0);
   const [isSquashing, setIsSquashing] = useState(false);
   const [particles, setParticles] = useState<Particle[]>([]);
 
@@ -161,8 +162,11 @@ export function RealFeltCat3D({
   const light = LIGHTING[envLighting]!!
 
   // ── 生命周期动画循环 ──
+  // P1-5 修复：原实现在 rAF 里每帧调用 5+ 次 setState（呼吸/尾巴/瞳孔/眨眼/耳颤），
+  // 触发整棵大型 SVG 每帧重渲染；且 loop 与 tick 各开一条 rAF 链、cleanup 只取消一条，存在泄漏。
+  // 现合并为单个 anim state，每帧仅一次 setState；并修正为单一 rAF 链 + 卸载时 cancelAnimationFrame。
   useEffect(() => {
-    let animId: number;
+    let rafId: number;
     let t = 0;
     let blinkTimer = 0;
     let blinkState = 0; // 0=waiting, 1=closing, 2=closed, 3=opening
@@ -171,16 +175,13 @@ export function RealFeltCat3D({
     let earTimer = 0;
     let nextEar = 2 + Math.random() * 5;
     let earTimeout: ReturnType<typeof setTimeout> | undefined;
+    let wasBlinking = false;
 
     const loop = (dt: number) => {
       t += 0.038;
-      // 呼吸
-      setBreathPhase(Math.sin(t * 0.7));
-      // 尾巴
-      setTailPhase(Math.sin(t * 0.9) * 12 + Math.sin(t * 1.7) * 4);
-
-      // 瞳孔扩缩（随时间轻微律动）
-      setPupilDilation(0.42 + Math.sin(t * 0.18) * 0.06);
+      const breathPhase = Math.sin(t * 0.7);
+      const tailPhase = Math.sin(t * 0.9) * 12 + Math.sin(t * 1.7) * 4;
+      const pupilDilation = 0.42 + Math.sin(t * 0.18) * 0.06;
 
       // 慢眨眼 FSM
       blinkTimer += dt / 1000;
@@ -189,30 +190,34 @@ export function RealFeltCat3D({
         blinkSubT = 0;
         blinkTimer = 0;
       }
+      let blinkProgress = 0;
+      let blinkingNow = false;
       if (blinkState === 1) {
         blinkSubT += dt / 1000 / 0.12; // 0.12s 关闭
-        const progress = Math.min(blinkSubT, 1);
-        setBlinkProgress(progress);
-        setIsBlinking(true);
+        blinkProgress = Math.min(blinkSubT, 1);
+        blinkingNow = true;
         if (blinkSubT >= 1) { blinkState = 2; blinkSubT = 0; }
-      }
-      if (blinkState === 2) {
+      } else if (blinkState === 2) {
         blinkSubT += dt / 1000 / 0.06; // 0.06s 保持
         if (blinkSubT >= 1) { blinkState = 3; blinkSubT = 0; }
-      }
-      if (blinkState === 3) {
+      } else if (blinkState === 3) {
         blinkSubT += dt / 1000 / 0.18; // 0.18s 睁开
-        const progress = Math.max(0, 1 - blinkSubT);
-        setBlinkProgress(progress);
+        blinkProgress = Math.max(0, 1 - blinkSubT);
+        blinkingNow = true;
         if (blinkSubT >= 1) {
           blinkState = 0;
-          setIsBlinking(false);
-          setBlinkProgress(0);
+          blinkProgress = 0;
           nextBlink = 3 + Math.random() * 5;
         }
       }
 
-      // 耳尖微颤
+      // 仅在 FSM 切换时更新 isBlinking（点击触发的眨眼由点击事件处理，互不干扰，避免每帧 setState）
+      if (blinkingNow !== wasBlinking) {
+        wasBlinking = blinkingNow;
+        setIsBlinking(blinkingNow);
+      }
+
+      // 耳尖微颤（偶发事件，不每帧 setState）
       earTimer += dt / 1000;
       if (earTimer > nextEar) {
         earTimer = 0;
@@ -221,17 +226,13 @@ export function RealFeltCat3D({
         earTimeout = setTimeout(() => setEarTwitch(0), 400);
       }
 
-      animId = requestAnimationFrame(loop);
+      // 每帧仅一次 setState：合并所有连续相位
+      setAnim({ breathPhase, tailPhase, pupilDilation, blinkProgress });
+      rafId = requestAnimationFrame(loop);
     };
-    let last = performance.now();
-    const tick = (now: number) => {
-      loop(now - last);
-      last = now;
-      animId = requestAnimationFrame(tick);
-    };
-    animId = requestAnimationFrame(tick);
+    rafId = requestAnimationFrame(loop);
     return () => {
-      cancelAnimationFrame(animId);
+      cancelAnimationFrame(rafId);
       if (earTimeout) clearTimeout(earTimeout);
     };
   }, []);
@@ -305,13 +306,13 @@ export function RealFeltCat3D({
   const isFacingBack = normalizedRotY > 88 && normalizedRotY < 272;
 
   // 瞳孔纵轴 ry
-  const pupilRy = 10 * pupilDilation + 2;
-  const pupilRx = 3.5 + (1 - pupilDilation) * 1.5; // 微调横轴
+  const pupilRy = 10 * anim.pupilDilation + 2;
+  const pupilRx = 3.5 + (1 - anim.pupilDilation) * 1.5; // 微调横轴
 
   // 眼睑遮罩高度 (0=全睁, 1=全闭)
   const lidHeight = expression === 'sleepy' ? 0.55
     : expression === 'blinking' ? 1
-    : isBlinking ? blinkProgress
+    : isBlinking ? anim.blinkProgress
     : 0;
 
   // 耳朵偏移（微颤）
@@ -409,13 +410,13 @@ export function RealFeltCat3D({
 
             {/* ── 尾巴（情绪S型摇摆）── */}
             <motion.g
-              animate={{ rotate: tailPhase }}
+              animate={{ rotate: anim.tailPhase }}
               transition={{ type: 'spring', stiffness: 60, damping: 12 }}
               style={{ transformOrigin: '152px 148px' }}
             >
               {/* 尾巴主体 */}
               <path
-                d={`M 152 148 Q 185 ${120 + breathPhase * 3} 176 ${82 + breathPhase * 2} Q 162 58 148 76`}
+                d={`M 152 148 Q 185 ${120 + anim.breathPhase * 3} 176 ${82 + anim.breathPhase * 2} Q 162 58 148 76`}
                 stroke="url(#rfcTail)"
                 strokeWidth="13"
                 strokeLinecap="round"
@@ -429,9 +430,9 @@ export function RealFeltCat3D({
             {/* ── 躯干（软体呼吸）── */}
             <ellipse
               cx="100"
-              cy={142 + breathPhase * 1.8}
-              rx={56 + breathPhase * 0.9}
-              ry={44 - breathPhase * 0.7}
+              cy={142 + anim.breathPhase * 1.8}
+              rx={56 + anim.breathPhase * 0.9}
+              ry={44 - anim.breathPhase * 0.7}
               fill="url(#rfcBody)"
               filter="url(#rfcFelt)"
             />
@@ -516,7 +517,7 @@ export function RealFeltCat3D({
             <g filter="url(#rfcFelt)">
               <ellipse
                 cx="100"
-                cy={84 - breathPhase * 0.9}
+                cy={84 - anim.breathPhase * 0.9}
                 rx="56"
                 ry="46"
                 fill="url(#rfcBody)"

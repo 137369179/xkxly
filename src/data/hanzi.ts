@@ -1,3 +1,6 @@
+// P2-18 收敛说明：本文件（HANZI_DATA / HanziEntry）是汉字数据的「权威主源」——笔顺、字源、组词、例句
+// 均在此定义，被 HanziListen / PhoneticFamilies / WordBuilder / RadicalBrowser 等以及 hanzi500.ts、
+// hanziIndex.ts 复用。其余两个汉字文件（hanzi500.ts、hanziEtymology.ts）均基于此派生，请勿在多处重复维护。
 export interface HanziEntry {
   /** 汉字 */
   c: string;

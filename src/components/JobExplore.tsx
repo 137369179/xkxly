@@ -2,7 +2,7 @@
  * 职业认知 👮 (S6)
  * 认识职业 + 工具配对
  */
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
@@ -34,6 +34,11 @@ export function JobExplore() {
   const [score, setScore] = useState(0);
   const lockRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // P3: 卸载时清理待触发的反馈定时器，避免对已卸载组件 setState
+  useEffect(() => () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }, []);
 
   const j = mode === 'learn' ? JOBS[selected]! : quizJob!;
 
