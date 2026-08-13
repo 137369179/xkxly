@@ -1,0 +1,217 @@
+# 宝贝学习乐园 · CI 流水线
+# ============================================================
+# 触发：push 到 main/master、任意 PR
+# 流程：安装依赖 → 类型检查 → 全量单元测试 → Stuck 日志专项测试 → 生产构建 → 上传报告/产物
+#
+# 设计要点（基于本地验证）：
+#   1. 类型检查 / 全量测试 / stuck 测试 互不阻断：用 steps.id + outcome 记录状态，
+#      即使前面失败也让后续步骤跑完，便于一次看到所有问题，而非逐次修复
+#   2. stuck 测试报告单独 artifact：与全量测试报告分开，PR 检查页可单独下载查看核心功能状态
+#   3. 自动 PR 评论：把 stuck 测试摘要（通过/失败数、耗时）评论到 PR，reviewer 无需点开日志
+#   4. 最终 status 步骤汇总所有关键步骤的 outcome，任一失败则 job 标记失败（exit 1）
+#   5. 失败诊断：失败时打印完整日志路径与 artifact 下载链接，便于排查
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+# 同一 PR 多次 push 时取消旧的运行，节省 CI 资源
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# 最小权限原则：仅授予 PR 评论所需 write 权限，其余默认只读
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  test-and-build:
+    name: 类型检查 / 测试 / 构建
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 安装依赖
+        run: npm ci
+
+      # ──────────────────────────────────────────────────────────
+      # 三个核心检查步骤：互不阻断，用 outcome 记录状态
+      # ──────────────────────────────────────────────────────────
+
+      - name: TypeScript 类型检查
+        id: tsc
+        run: npx tsc -b
+        continue-on-error: true # 失败不阻断后续步骤，最终由 status 步骤统一判定
+
+      - name: 全量单元测试（含 JUnit 报告）
+        id: unittest
+        run: npm run test:ci
+        continue-on-error: true
+
+      - name: QuizCard 超时干预日志专项测试
+        id: stuck
+        # 单独运行刚验证通过的 stuck 测试，输出独立 JUnit 报告
+        # 便于在 PR 检查页快速定位该核心功能的回归
+        # 本地已验证：npm run test:stuck 退出码 0=通过 / 1=失败 / 2=配置错误
+        run: npm run test:stuck
+        continue-on-error: true
+
+      - name: 生产构建
+        id: build
+        # 仅当类型检查通过才构建（构建依赖类型正确，否则无意义）
+        if: steps.tsc.outcome == 'success'
+        run: npm run build
+
+      - name: 运行时冒烟测试（允许失败）
+        id: smoke
+        # 依赖构建产物 dist/；在真实 headless Chrome 中逐路由验证「挂载后无运行时崩溃」。
+        # 作为独立「冒烟报告」步骤：失败不阻断主流程（continue-on-error），
+        # 但会产出报告 artifact 并在 PR 评论中披露状态，便于 reviewer 关注运行时回归。
+        # ubuntu-latest 自带 /usr/bin/google-chrome；脚本也支持 CHROME_BIN 覆盖与跨平台探测。
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        env:
+          CHROME_BIN: /usr/bin/google-chrome
+        run: npm run smoke
+
+      # ──────────────────────────────────────────────────────────
+      # 报告与产物上传：always() 确保即使前面失败也上传，便于排查
+      # ──────────────────────────────────────────────────────────
+
+      - name: 上传 stuck 测试报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stuck-test-results
+          path: test-results/stuck-junit.xml
+          if-no-files-found: warn # stuck 步骤若未跑完可能没生成报告，warn 而非 fail
+          retention-days: 14
+
+      - name: 上传全量测试报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: test-results/junit.xml
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: 上传构建产物
+        if: steps.build.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+      - name: 上传冒烟测试报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-report
+          path: test-results/smoke-report.txt
+          if-no-files-found: warn # smoke 步骤未跑完可能没生成报告，warn 而非 fail
+          retention-days: 14
+
+      # ──────────────────────────────────────────────────────────
+      # PR 评论：把 stuck 测试摘要自动评论到 PR，reviewer 无需点开日志
+      # ──────────────────────────────────────────────────────────
+
+      - name: PR 评论 stuck 测试摘要
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const stuck = '${{ steps.stuck.outcome }}';
+            const unittest = '${{ steps.unittest.outcome }}';
+            const tsc = '${{ steps.tsc.outcome }}';
+            const build = '${{ steps.build.outcome }}';
+            const smoke = '${{ steps.smoke.outcome }}';
+
+            const icon = (s) => s === 'success' ? '✅' : s === 'failure' ? '❌' : '⏭️';
+
+            const body = [
+              '## 🧪 CI 测试摘要',
+              '',
+              `| 步骤 | 状态 |`,
+              `|---|---|`,
+              `| TypeScript 类型检查 | ${icon(tsc)} ${tsc} |`,
+              `| 全量单元测试 | ${icon(unittest)} ${unittest} |`,
+              `| Stuck 日志专项测试 | ${icon(stuck)} ${stuck} |`,
+              `| 生产构建 | ${icon(build)} ${build} |`,
+              `| 运行时冒烟测试 | ${icon(smoke)} ${smoke} |`,
+              '',
+              stuck === 'failure'
+                ? '⚠️ **Stuck 日志测试失败**：QuizCard 超时干预日志输出有回归，请下载 `stuck-test-results` artifact 查看 JUnit 报告。'
+                : '✨ Stuck 日志测试覆盖 4 类事件：arm / clear / trigger / replay，详见 `stuck-test-results` artifact。',
+              smoke === 'failure'
+                ? '⚠️ **运行时冒烟失败（不阻断合并）**：真实 Chrome 逐路由冒烟发现运行时崩溃，请下载 `smoke-report` artifact 查看逐路由结果。'
+                : '🌐 运行时冒烟已执行（允许失败），逐路由崩溃报告见 `smoke-report` artifact。',
+              '',
+              '> 详细日志见 Actions 运行记录，JUnit / 冒烟报告可下载 artifact 查看。',
+            ].join('\n');
+
+            // 查找已有的同类评论，避免重复刷屏
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const marker = '<!-- ci-stuck-summary -->';
+            const existing = comments.find(c => c.body.includes(marker));
+
+            const payload = { owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, body: marker + '\n' + body };
+            if (existing) {
+              await github.rest.issues.updateComment({ ...payload, comment_id: existing.id });
+            } else {
+              await github.rest.issues.createComment(payload);
+            }
+
+      # ──────────────────────────────────────────────────────────
+      # 最终状态判定：任一关键步骤失败则 job 失败
+      # ──────────────────────────────────────────────────────────
+
+      - name: 汇总 CI 状态
+        if: always()
+        run: |
+          echo "=== CI 各步骤状态 ==="
+          echo "类型检查:        ${{ steps.tsc.outcome }}"
+          echo "全量单元测试:    ${{ steps.unittest.outcome }}"
+          echo "Stuck 专项测试:  ${{ steps.stuck.outcome }}"
+          echo "生产构建:        ${{ steps.build.outcome }}"
+          echo "运行时冒烟:      ${{ steps.smoke.outcome }}  (允许失败，不阻断合并)"
+          echo "===================="
+
+          failed=""
+          if [ "${{ steps.tsc.outcome }}" = "failure" ]; then failed="$failed tsc"; fi
+          if [ "${{ steps.unittest.outcome }}" = "failure" ]; then failed="$failed unittest"; fi
+          if [ "${{ steps.stuck.outcome }}" = "failure" ]; then failed="$failed stuck"; fi
+          if [ "${{ steps.build.outcome }}" = "failure" ]; then failed="$failed build"; fi
+          # 注意：smoke 步骤为 allow-failure（continue-on-error），不计入 failed，避免误阻断合并
+
+          if [ -n "$failed" ]; then
+            echo "::error::CI 失败，失败的步骤:$failed"
+            echo "失败诊断："
+            echo "  - 类型检查失败 → 检查 TypeScript 类型错误，运行 npx tsc -b 本地复现"
+            echo "  - 全量测试失败 → 运行 npm run test:ci 本地复现，下载 unit-test-results artifact 查看 JUnit"
+            echo "  - Stuck 测试失败 → 运行 npm run test:stuck 本地复现，下载 stuck-test-results artifact 查看 JUnit"
+            echo "  - 构建失败 → 检查构建错误日志，运行 npm run build 本地复现"
+            echo "  - 运行时冒烟失败（不阻断）→ 运行 SMOKE_LOW_MEMORY=1 npm run smoke 本地复现，下载 smoke-report artifact 查看逐路由崩溃"
+            exit 1
+          fi
+
+          echo "::notice::CI 全部通过 ✅"
