@@ -53,7 +53,7 @@ const VehiclesPage = lazy(() => import('@/modules/vehicles/VehiclesPage'));
 const FestivalsPage = lazy(() => import('@/modules/festivals/FestivalsPage'));
 const PlantsPage = lazy(() => import('@/modules/plants/PlantsPage'));
 const CatHousePage = lazy(() => import('@/modules/pet/CatHousePage'));
-const RealisticCatHousePage = lazy(() => import('@/components/realistic-cat/RealisticCatHousePage'));
+const RealisticCatHousePage = lazy(() => import('@/modules/pet/realistic/RealisticCatHousePage'));
 const StorybookPage = lazy(() => import('@/modules/storybook/StorybookPage'));
 const WrongBookPage = lazy(() => import('@/modules/wrongbook/WrongBookDashboard'));
 const GameCenterPage = lazy(() => import('@/modules/game/GameCenterPage'));

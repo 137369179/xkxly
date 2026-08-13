@@ -7,7 +7,7 @@ import { celebrateSmall } from '@/lib/celebrate';
 import { speak } from '@/lib/speech';
 import { useStore } from '@/store/useStore';
 import { getRandomCatHelpQuestion, type CatHelpQuestion } from '@/lib/catStudyHelp';
-import { CatManorIcon } from '@/components/pet/PetIcons';
+import { CatManorIcon } from '@/modules/pet/PetIcons';
 import { useTranslation } from '@/i18n/useTranslation';
 
 const EMPTY_OUTFITS: Record<string, string> = Object.freeze({});

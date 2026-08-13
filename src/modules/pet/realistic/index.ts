@@ -10,7 +10,7 @@
  * import { RealisticCat3D, RealisticCatScene } from '@/components/realistic-cat';
  *
  * // 方式三：按需导入子模块
- * import { createCatGeometry } from '@/components/realistic-cat/CatGeometry';
+ * import { createCatGeometry } from '@/modules/pet/realistic/CatGeometry';
  */
 
 // 主组件

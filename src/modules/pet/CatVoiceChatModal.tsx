@@ -10,7 +10,7 @@ import { celebrateSmall } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 import { useTtsStore } from '@/store/useTtsStore';
 import { useTranslation } from '@/i18n/useTranslation';
-import { CatPurrIcon } from '@/components/pet/PetIcons';
+import { CatPurrIcon } from '@/modules/pet/PetIcons';
 import type { AiMessage } from '@/lib/ai/types';
 
 interface MessageItem {

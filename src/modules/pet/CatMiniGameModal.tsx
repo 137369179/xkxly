@@ -6,7 +6,7 @@ import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { speak } from '@/lib/speech';
 import { useStore } from '@/store/useStore';
-import { CatFishIcon } from '@/components/pet/PetIcons';
+import { CatFishIcon } from '@/modules/pet/PetIcons';
 import { useTranslation } from '@/i18n/useTranslation';
 
 interface GameQuestion {

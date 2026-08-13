@@ -18,7 +18,7 @@ import { speak } from '@/lib/speech';
 import { useSafeTimeout } from '@/lib/useTimer';
 import { useAiStream } from '@/lib/ai/useAi';
 import { useTranslation } from '@/i18n/useTranslation';
-import { CatVoiceChatModal } from '@/components/pet/CatVoiceChatModal';
+import { CatVoiceChatModal } from '@/modules/pet/CatVoiceChatModal';
 type Expression = 'happy' | 'cute' | 'thinking' | 'sleepy' | 'love' | 'excited';
 
 /** 猫咪动作 → 统一羊毛毡图片映射 */

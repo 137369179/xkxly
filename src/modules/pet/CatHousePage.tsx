@@ -13,10 +13,10 @@ import { motion } from 'motion/react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { useStore } from '@/store/useStore';
-import { CatStudyHelpCard } from '@/components/pet/CatStudyHelpCard';
-import { CatVoiceChatModal } from '@/components/pet/CatVoiceChatModal';
-import { CatMiniGameModal } from '@/components/pet/CatMiniGameModal';
-import { RealisticCat3D } from '@/components/realistic-cat';
+import { CatStudyHelpCard } from '@/modules/pet/CatStudyHelpCard';
+import { CatVoiceChatModal } from '@/modules/pet/CatVoiceChatModal';
+import { CatMiniGameModal } from '@/modules/pet/CatMiniGameModal';
+import { RealisticCat3D } from '@/modules/pet/realistic';
 
 
 
@@ -50,13 +50,13 @@ import {
   CatWardrobeIcon,
   CatManorIcon,
   CatToyboxIcon,
-} from '@/components/pet/PetIcons';
+} from '@/modules/pet/PetIcons';
 import {
   CatScholarMedal,
   CatPinyinMedal,
   CatMathMedal,
   CatNurtureMedal,
-} from '@/components/pet/PetMedalIcons';
+} from '@/modules/pet/PetMedalIcons';
 
 interface Outfit {
   id: string;
