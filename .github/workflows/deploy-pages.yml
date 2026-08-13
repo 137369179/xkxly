@@ -20,6 +20,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  workflow_dispatch:   # 支持在 Actions 页手动触发部署（不依赖代码变更）
 
 # Pages 部署需要：id-token: write（OIDC 身份，供 deploy-pages 无 token 鉴权）
 #                pages: write（upload-pages-artifact 上传产物）
