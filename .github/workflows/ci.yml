@@ -48,13 +48,19 @@ jobs:
       - name: 安装依赖
         run: npm ci
 
+      - name: 安装 Chrome（供运行时冒烟测试）
+        id: setup-chrome
+        # ubuntu-latest 默认不含 Chrome；显式安装并把可执行路径输出给 smoke 脚本
+        # （smoke.mjs 的 resolveChrome 中 CHROME_BIN 优先于内置的平台探测）
+        uses: browser-actions/setup-chrome@v1
+
       # ──────────────────────────────────────────────────────────
       # 三个核心检查步骤：互不阻断，用 outcome 记录状态
       # ──────────────────────────────────────────────────────────
 
       - name: TypeScript 类型检查
         id: tsc
-        run: npx tsc -b
+        run: npx tsc -b --force   # --force 强制全量类型检查，规避增量 tsbuildinfo 缓存造成的幽灵错误
         continue-on-error: true # 失败不阻断后续步骤，最终由 status 步骤统一判定
 
       - name: 全量单元测试（含 JUnit 报告）
@@ -74,6 +80,8 @@ jobs:
         id: build
         # 仅当类型检查通过才构建（构建依赖类型正确，否则无意义）
         if: steps.tsc.outcome == 'success'
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096   # 大仓构建易撞默认堆上限，显式放大避免 OOM 中断
         run: npm run build
 
       - name: 运行时冒烟测试（允许失败）
@@ -81,11 +89,11 @@ jobs:
         # 依赖构建产物 dist/；在真实 headless Chrome 中逐路由验证「挂载后无运行时崩溃」。
         # 作为独立「冒烟报告」步骤：失败不阻断主流程（continue-on-error），
         # 但会产出报告 artifact 并在 PR 评论中披露状态，便于 reviewer 关注运行时回归。
-        # ubuntu-latest 自带 /usr/bin/google-chrome；脚本也支持 CHROME_BIN 覆盖与跨平台探测。
+        # Chrome 由上方「安装 Chrome」步骤提供，路径经 setup-chrome 输出注入 CHROME_BIN（优先于脚本内置探测）。
         if: steps.build.outcome == 'success'
         continue-on-error: true
         env:
-          CHROME_BIN: /usr/bin/google-chrome
+          CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
         run: npm run smoke
 
       # ──────────────────────────────────────────────────────────
