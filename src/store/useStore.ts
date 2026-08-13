@@ -454,6 +454,7 @@ export const useStore = create<StoreState>()(
               streak,
               dailyLog: _bumpLog(p, {
                 startMathTotal: p.mathTotal,
+                startMathCorrect: p.mathCorrect,
                 startLogicTotal: p.logicTotal,
               }),
             };
@@ -941,7 +942,7 @@ export const useStore = create<StoreState>()(
 
             const next = {
               ...p,
-              mastery: { ...p.mastery, [skill]: newMastery },
+              mastery: { ...p.mastery, [skill]: newMastery.firstSeen || newMastery.lv < 1 ? newMastery : { ...newMastery, firstSeen: todayStr() } },
               wrongBook: newWrongBook,
               stars: p.stars + gained,
               fishCount: (p.fishCount ?? 0) + (correct ? 1 : 0),

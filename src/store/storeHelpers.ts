@@ -194,6 +194,8 @@ export function applyPractice(
 ): Progress {
   const now = Date.now();
   const m = review(p.mastery[skill], correct, now, difficulty);
+  // P-每日目标修复：首次达到「已掌握」（lv>=1）时记录日期，供每日「新掌握」目标精确统计（旧数据缺失 firstSeen 视为非今日）
+  if (m.lv >= 1 && !m.firstSeen) m.firstSeen = dateKey();
   const wrongBook = applyWrongBook(p, skill, correct, m);
   const gained = correct ? star : 0;
   // A4: 记录错题变化

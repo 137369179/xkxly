@@ -152,6 +152,8 @@ export interface Question {
 
 export interface MasteryItem {
   lv: number;
+  /** 首次达到 lv>=1（即「已掌握」）的日期 YYYY-MM-DD，用于每日「新掌握」目标统计；旧数据缺失视为非今日 */
+  firstSeen?: string;
   interval?: number;
   dueAt?: number;
   due?: number;
@@ -213,6 +215,8 @@ export interface DailyStat {
 
   /** 当日数学起始值（每日首次登录时记录，用于计算当日增量） */
   startMathTotal?: number;
+  /** 当日数学答对起始值（每日首次登录时记录，用于计算「今日答对数学题」增量） */
+  startMathCorrect?: number;
   /** 当日逻辑起始值（每日首次登录时记录，用于计算当日增量） */
   startLogicTotal?: number;
 }
