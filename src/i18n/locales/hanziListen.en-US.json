@@ -1,0 +1,20 @@
+{
+  "hanziListen": {
+    "title": "Listen & Pick",
+    "subtitle": "Listen to the pronunciation and tap the correct character!",
+    "levelAll": "All Characters",
+    "level1": "Basic",
+    "level2": "Intermediate",
+    "level3": "Challenge",
+    "start": "Start Game",
+    "poolCount": "Word bank: {count} characters",
+    "showPinyin": "Show Pinyin",
+    "hidePinyin": "Hide Pinyin",
+    "exit": "Exit",
+    "listenHint": "👂 Tap the speaker button and listen carefully",
+    "replay": "Play Again",
+    "replayHint": "Missed it? Tap here to hear it once more",
+    "wordLabel": "Word",
+    "sentenceLabel": "Example"
+  }
+}

@@ -20,6 +20,7 @@ export const ROUTES = [
   'parent',
   'ttstest',
   'hanzi',
+  'hanzi-listen',
   'pinyin',
   'words',
   'fun',

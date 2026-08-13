@@ -1,0 +1,20 @@
+{
+  "hanziListen": {
+    "title": "听音识字",
+    "subtitle": "听一听读音，点选正确的汉字吧！",
+    "levelAll": "全部汉字",
+    "level1": "基础字",
+    "level2": "进阶字",
+    "level3": "挑战字",
+    "start": "开始游戏",
+    "poolCount": "题库：{count} 个字",
+    "showPinyin": "显示拼音",
+    "hidePinyin": "隐藏拼音",
+    "exit": "退出",
+    "listenHint": "👂 点击喇叭按钮，仔细听读音",
+    "replay": "再听一次",
+    "replayHint": "没听清？点这里再听一遍",
+    "wordLabel": "组词",
+    "sentenceLabel": "例句"
+  }
+}

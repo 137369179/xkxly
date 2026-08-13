@@ -37,6 +37,7 @@ const StudyPassport = lazy(() => import('@/modules/rewards/StudyPassport'));
 const ParentPage = lazy(() => import('@/modules/parent/ParentPage'));
 const TtsTestPage = lazy(() => import('@/modules/tts-test/TtsTestPage'));
 const HanziPage = lazy(() => import('@/modules/hanzi/HanziPage'));
+const HanziListenPage = lazy(() => import('@/modules/hanzi/HanziListen'));
 const PinyinPage = lazy(() => import('@/modules/pinyin/PinyinPage'));
 const WordsPage = lazy(() => import('@/modules/words/WordsPage'));
 const FunPage = lazy(() => import('@/modules/fun/FunPage'));
@@ -85,6 +86,7 @@ function Page() {
       case 'parent': return <ParentPage />;
       case 'ttstest': return <TtsTestPage />;
       case 'hanzi': return <HanziPage />;
+      case 'hanzi-listen': return <HanziListenPage />;
       case 'pinyin': return <PinyinPage />;
       case 'words': return <WordsPage />;
       case 'fun': return <FunPage />;

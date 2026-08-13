@@ -29,6 +29,23 @@ import {
 // 导入翻译包
 import zhCN from './locales/zh-CN.json';
 import enUS from './locales/en-US.json';
+import hanziListenZh from './locales/hanziListen.zh-CN.json';
+import hanziListenEn from './locales/hanziListen.en-US.json';
+
+/** 深度合并：将模块级翻译增量并入全局字典（不改动全局 i18n 文件，规避并发 WIP 冲突） */
+function deepMergeLocale(base: any, extra: any): any {
+  const out: any = Array.isArray(base) ? [...base] : { ...base };
+  for (const k of Object.keys(extra)) {
+    const bv = out[k];
+    const ev = extra[k];
+    if (ev && typeof ev === 'object' && !Array.isArray(ev) && bv && typeof bv === 'object' && !Array.isArray(bv)) {
+      out[k] = deepMergeLocale(bv, ev);
+    } else {
+      out[k] = ev;
+    }
+  }
+  return out;
+}
 
 type TranslationData = typeof zhCN;
 
@@ -67,8 +84,8 @@ function interpolate(template: string, params?: Record<string, string | number>)
 }
 
 const translations: Record<Locale, TranslationData> = {
-  'zh-CN': zhCN,
-  'en-US': enUS,
+  'zh-CN': deepMergeLocale(zhCN, hanziListenZh),
+  'en-US': deepMergeLocale(enUS, hanziListenEn),
 };
 
 interface UseTranslationReturn {
