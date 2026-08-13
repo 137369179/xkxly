@@ -167,7 +167,7 @@ true;
 `;
 
 // 路由表（与 prerender.mjs 同步）
-const ROUTES = ['today','hanzi','numbers','cat_house','realistic_cat','storybook','parent'];
+const ROUTES = ['today','companion','letters','poems','numbers','logic','adventure','rewards','passport','parent','ttstest','hanzi','pinyin','words','fun','idioms','songs','science','music','art','safety','geography','vehicles','festivals','plants','cat_house','realistic_cat','storybook','wrongbook','gamecenter','story','growth','content'];
 
 // 真正的应用层崩溃（与网络/资源 404 等环境噪声区分）
 const CRASH_RE = /Maximum update depth|Cannot read prop|is not a function|is not defined|Objects are not valid as a React child|Too many re-renders|Each child in a list should have a unique|Rendered more hooks than|Invalid hook call|Cannot update a component|undefined is not iterable|null is not iterable/i;
