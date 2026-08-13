@@ -16,7 +16,7 @@ import { RadicalBrowser } from './RadicalBrowser';
 import { Hanzi500Page } from './Hanzi500Page';
 import { HanziDictation } from './HanziDictation';
 import { PhoneticFamilies } from './PhoneticFamilies';
-import { HanziEvolve } from '@/components/HanziEvolve';
+import { HanziEvolve } from '@/modules/hanzi/HanziEvolve';
 import { WordBuilder } from './WordBuilder';
 import { RadicalsMagic } from '@/components/RadicalsMagic';
 import { makeHanziMixedQuestion } from '@/lib/hanziQuestions';

@@ -5,7 +5,7 @@ import { useStore } from '@/store/useStore';
 
 /* ── 全部子组件懒加载，FunPage chunk 仅含框架 ~5KB ── */
 const ParentChildPK = lazy(() => import('./ParentChildPK').then(m => ({ default: m.ParentChildPK })));
-const StoryBook = lazy(() => import('@/components/StoryBook').then(m => ({ default: m.StoryBook })));
+const StoryBook = lazy(() => import('@/modules/fun/StoryBook').then(m => ({ default: m.StoryBook })));
 const CreativeExpress = lazy(() => import('@/components/CreativeExpress').then(m => ({ default: m.CreativeExpress })));
 const ListenTrainer = lazy(() => import('@/components/ListenTrainer').then(m => ({ default: m.ListenTrainer })));
 const DualPK = lazy(() => import('@/components/DualPK').then(m => ({ default: m.DualPK })));

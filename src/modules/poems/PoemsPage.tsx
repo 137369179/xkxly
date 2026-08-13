@@ -26,7 +26,7 @@ const PoemDetail = lazy(() => import('./PoemDetail'));
 const TrainView = lazy(() => import('./TrainView'));
 const PlanView = lazy(() => import('./PlanView'));
 const PoemNotes = lazy(() => import('./PoemNotes'));
-const PoetTimeline = lazy(() => import('@/components/PoetTimeline'));
+const PoetTimeline = lazy(() => import('@/modules/poems/PoetTimeline'));
 const PoetArchive = lazy(() => import('./PoetArchive'));
 const PoetWorks = lazy(() => import('./PoetWorks').then(m => ({ default: m.PoetWorks })));
 const FlyingFlowers = lazy(() => import('./FlyingFlowers').then(m => ({ default: m.FlyingFlowers })));

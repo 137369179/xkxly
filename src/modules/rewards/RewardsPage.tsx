@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { useStore, useAvailableStars, useProgress } from '@/store/useStore';
 import { ALBUMS, albumStickers, STICKER_MAP } from '@/data/stickers';
 import { BADGES } from '@/data/badges';
-import { StudyPassport } from '@/components/StudyPassport';
+import { BadgeCollection } from '@/modules/rewards/BadgeCollection';
 import { PosterCard } from '@/components/PosterCard';
 import { StickerScene } from '@/components/StickerScene';
 import POEMS from '@/data/poems';
@@ -17,7 +17,7 @@ import { Modal } from '@/components/ui/Modal';
 import { BigPraise } from '@/components/ui/Feedback';
 import { celebrateBig } from '@/lib/celebrate';
 
-import { WrongBookTrainer } from '@/components/WrongBookTrainer';
+import { WrongBookTrainer } from '@/modules/rewards/WrongBookTrainer';
 
 import { FluffyIcon } from '@/components/ui/FluffyIcon';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -202,7 +202,7 @@ export default function RewardsPage() {
       </Panel>
 
       {/* 学习护照 */}
-      <StudyPassport />
+      <BadgeCollection />
       <PosterCard />
 
       {/* 贴纸场景装扮 */}

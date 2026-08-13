@@ -20,7 +20,7 @@ import { ProgressBar } from '@/components/ui/ProgressBar';
 import { QuizCard } from '@/components/QuizCard';
 import { DailyGoal } from '@/components/DailyGoal';
 import { LetterLearn } from '@/components/LetterLearn';
-import { NumberLearn } from '@/components/NumberLearn';
+import { NumberLearn } from '@/modules/today/NumberLearn';
 import { sfxTap, sfxStar } from '@/lib/sfx';
 import { celebrateBig } from '@/lib/celebrate';
 import { useStruggle } from '@/lib/struggle';

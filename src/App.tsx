@@ -22,7 +22,7 @@ import { AiVoiceModal } from '@/components/ai/AiVoiceModal';
 import { PwaInstallBanner } from '@/components/PwaInstallBanner';
 import { SwUpdateToast } from '@/components/SwUpdateToast';
 const CatCompanion = lazy(() =>
-  import('@/components/CatCompanion').then((m) => ({ default: m.CatCompanion })) as Promise<{ default: React.ComponentType<any> }>
+  import('@/modules/companion/CatCompanion').then((m) => ({ default: m.CatCompanion })) as Promise<{ default: React.ComponentType<any> }>
 );
 
 const HomePage = lazy(() => import('@/modules/home/HomePage'));

@@ -15,7 +15,7 @@ import { FluffyIcon } from '@/components/ui/FluffyIcon';
 import { useTranslation } from '@/i18n/useTranslation';
 
 
-export function StudyPassport() {
+export function BadgeCollection() {
   const { t } = useTranslation();
   const progress = useProgress();
   const [page, setPage] = useState(0);
