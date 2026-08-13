@@ -80,6 +80,7 @@ export function HanziLearn({ hanzi, onDone }: { hanzi: HanziEntry; onDone: () =>
         <div className="space-y-4">
           <Panel>
             <div className="text-center">
+              <img src={`/hanzi-imgs/${hanzi.c}.png`} alt={hanzi.c} className="w-32 h-32 object-contain rounded-2xl mx-auto mb-2" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
               <div className="text-7xl font-black text-ink">{hanzi.c}</div>
               <p className="mt-1 text-xl font-bold text-candy-purple-deep">{hanzi.pd}</p>
               {liushu && (

@@ -2,12 +2,8 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { LessonSection, Question } from '@/types';
 import { useProgress, useStore } from '@/store/useStore';
-import { buildDailyPlan, dateKey, currentSlot, splitBySlot, slotDone, SLOT_INFO } from '@/lib/dailyPlan';
-import { buildLearningPath } from '@/lib/learningPath';
+import { buildDailyPlan, dateKey } from '@/lib/dailyPlan';
 import { rampDifficulty } from '@/lib/difficulty';
-import { NAV_MAP } from '@/data/nav';
-import { moduleStat } from '@/lib/moduleStats';
-import { useTranslation } from '@/i18n/useTranslation';
 
 import {
   makeMathQuestion,
@@ -26,15 +22,11 @@ import { LetterLearn } from '@/components/LetterLearn';
 import { NumberLearn } from '@/components/NumberLearn';
 import { sfxTap, sfxStar } from '@/lib/sfx';
 import { celebrateBig } from '@/lib/celebrate';
-import { TONE_STYLE } from '@/lib/tones';
 import { useStruggle } from '@/lib/struggle';
 import { StruggleModal } from '@/components/StruggleModal';
 import { cn } from '@/lib/utils';
-import { useRoute, navigate, type RouteId } from '@/lib/router';
-import { FluffyIcon } from '@/components/ui/FluffyIcon';
-import { DailyChallenge } from '@/components/DailyChallenge';
+import { useRoute, navigate } from '@/lib/router';
 import {
-  AiPlanCard,
   DailySummary,
   PoemActivity,
   HanziActivity,
@@ -268,145 +260,8 @@ function collectTodaySkills(sections: LessonSection[]): string[] {
  * 主页面
  * ===================================================================== */
 /* ========================================================================
- * 今日焦点条（AI 个性化学习路径 · 轻量版）
- * 纯本地引擎，无 AI 请求，随页面即时渲染
+ * 今日课程主页
  * ===================================================================== */
-function TodayFocusStrip() {
-  const progress = useProgress();
-  const path = useMemo(() => buildLearningPath(progress), [progress]);
-  if (path.focus.length === 0) return null;
-  const prioStyle: Record<string, string> = {
-    high: 'bg-candy-orange-soft text-candy-orange-deep',
-    medium: 'bg-candy-yellow-soft text-candy-yellow-deep',
-    low: 'bg-candy-blue-soft text-candy-blue-deep',
-  };
-  const prioLabel: Record<string, string> = { high: '重点', medium: '推荐', low: '可选' };
-  return (
-    <div className="rounded-2xl border-2 border-dashed border-candy-purple-soft bg-white/60 p-3">
-      <div className="mb-2 flex items-center gap-1.5 text-sm font-extrabold text-candy-purple-deep">
-        <span>🎯</span> 今日焦点
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {path.focus.slice(0, 3).map((f) => (
-          <span key={f.skill} className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-ink shadow-sm">
-            <span>{f.emoji}</span>
-            <span className="max-w-[8rem] truncate">{f.label}</span>
-            <span className={cn('rounded-full px-1.5 py-0.5 text-[10px] font-extrabold', prioStyle[f.priority])}>
-              {prioLabel[f.priority]}
-            </span>
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ========================================================================
- * P1：连续打卡周条（近 7 天学习热力）
- * ===================================================================== */
-function WeekStreakStrip() {
-  const progress = useProgress();
-  const { t, locale } = useTranslation();
-  const days = useMemo(() => {
-    const out: { key: string; active: boolean; today: boolean }[] = [];
-    const now = new Date();
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
-      const key = dateKey(d.getTime());
-      const log = progress.dailyLog[key];
-      out.push({ key, active: !!log && ((log.items ?? 0) > 0 || !!log.lesson), today: i === 0 });
-    }
-    return out;
-  }, [progress.dailyLog]);
-  const weekTotal = days.filter((d) => d.active).length;
-  const fmt = useMemo(
-    () => new Intl.DateTimeFormat(locale === 'en-US' ? 'en-US' : 'zh-CN', { weekday: 'narrow' }),
-    [locale],
-  );
-
-  return (
-    <Panel className="!py-4">
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-extrabold text-ink">🔥 {t('today.weekStreak')}</span>
-        <span className="rounded-full bg-candy-orange-soft px-3 py-1 text-sm font-extrabold text-candy-orange-deep tabular-nums">
-          {weekTotal} / 7
-        </span>
-      </div>
-      <div className="mt-3 flex gap-2">
-        {days.map((d, i) => {
-          const label = fmt.format(new Date(new Date().getTime() - (6 - i) * 86400000));
-          return (
-            <div key={d.key} className="flex-1 text-center">
-              <div
-                className={cn(
-                  'mx-auto grid h-10 w-10 place-items-center rounded-2xl border-2 text-lg transition-all',
-                  d.active
-                    ? 'border-amber-300 bg-gradient-to-b from-amber-200 to-orange-300 shadow-sm'
-                    : d.today
-                      ? 'border-pink-300 bg-white'
-                      : 'border-gray-100 bg-white/60',
-                )}
-              >
-                {d.active ? '🔥' : d.today ? '🌟' : '·'}
-              </div>
-              <div className="mt-1 text-[10px] font-bold text-ink-soft">{label}</div>
-            </div>
-          );
-        })}
-      </div>
-      {weekTotal === 0 && (
-        <p className="mt-2 text-xs font-bold text-candy-purple-deep">{t('today.weekStreakEmpty')}</p>
-      )}
-    </Panel>
-  );
-}
-
-/* ========================================================================
- * P1：今日推荐（掌握度最低的 3 个模块快捷入口）
- * ===================================================================== */
-function RecommendRow() {
-  const progress = useProgress();
-  const { t } = useTranslation();
-  const picks = useMemo(() => {
-    const ids: RouteId[] = ['letters', 'numbers', 'hanzi', 'pinyin', 'words', 'poems', 'logic'];
-    return ids
-      .map((id) => ({ id, stat: moduleStat(id, progress) }))
-      .sort((a, b) => a.stat.rate - b.stat.rate)
-      .slice(0, 3);
-  }, [progress]);
-
-  return (
-    <Panel className="!py-4">
-      <div className="mb-3 flex items-center gap-2 text-sm font-extrabold text-ink">🎯 {t('today.recommend')}</div>
-      <div className="grid grid-cols-3 gap-2">
-        {picks.map(({ id, stat }) => {
-          const item = NAV_MAP.get(id);
-          if (!item) return null;
-          const tone = TONE_STYLE[item.tone]!;
-          return (
-            <button
-              key={id}
-              onClick={() => {
-                sfxTap();
-                navigate(id);
-              }}
-              className="no-select flex flex-col items-center gap-1 rounded-2xl border-2 p-3 text-center shadow-sm transition-transform active:scale-95"
-              style={{ borderColor: tone.soft, background: tone.soft + '55' }}
-            >
-              <FluffyIcon type={id} size="sm" />
-              <span className="w-full truncate text-xs font-extrabold text-ink">
-                {t(`nav.${id}.short`) || item.short}
-              </span>
-              <span className="text-[10px] font-bold tabular-nums" style={{ color: tone.deep }}>
-                {Math.round(stat.rate * 100)}%
-              </span>
-            </button>
-          );
-        })}
-      </div>
-    </Panel>
-  );
-}
 
 /* ========================================================================
  * 今日课程主页
@@ -464,19 +319,19 @@ export default function TodayPage() {
       <PageHeader emoji="📅" title="今日课程" subtitle="跟着课程一步步学，每天进步一点点～" tone="purple" />
 
       {/* 概览 */}
-      <Panel className="!py-4">
+      <Panel className="!py-4 rounded-[2.2rem] border-4 border-pink-200/90 bg-white/95 shadow-fluffy">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="rounded-full bg-candy-purple-soft px-3 py-1.5 text-sm font-extrabold text-candy-purple-deep">
-              约 {plan.minutes} 分钟
+            <span className="rounded-full bg-candy-purple-soft px-3.5 py-1.5 text-xs font-black text-candy-purple-deep">
+              ⏱️ 约 {plan.minutes} 分钟
             </span>
             {(plan.dueCount ?? 0) > 0 && (
-              <span className="rounded-full bg-candy-orange-soft px-3 py-1.5 text-sm font-extrabold text-candy-orange-deep">
-                {plan.dueCount} 个要复习
+              <span className="rounded-full bg-candy-orange-soft px-3.5 py-1.5 text-xs font-black text-candy-orange-deep">
+                ✨ {plan.dueCount} 个待巩固
               </span>
             )}
           </div>
-          <span className="text-sm font-bold text-ink-soft">
+          <span className="text-xs font-black text-ink-soft">
             已完成 {Math.min(step, plan.sections.length)} / {plan.sections.length} 节
           </span>
         </div>
@@ -484,45 +339,6 @@ export default function TodayPage() {
           <ProgressBar value={step} max={Math.max(1, plan.sections.length)} tone="purple" showLabel={false} />
         </div>
       </Panel>
-
-      {/* P1：连续打卡周条 + 今日推荐 */}
-      <WeekStreakStrip />
-      <RecommendRow />
-
-      {/* P1-收尾：每日 4 任务卡（规格七完整版，按年龄生成） */}
-      <DailyChallenge />
-
-      {/* 时段指示器 */}
-      <div className="flex gap-2">
-        {SLOT_INFO.map(s => {
-          const slotSections = splitBySlot(plan)[s.id];
-          const isDone = slotDone(plan, s.id, step);
-          const isCurrent = currentSlot() === s.id;
-          const t = TONE_STYLE[s.tone]!
-          return (
-            <div
-              key={s.id}
-              className="flex-1 rounded-2xl p-2 text-center"
-              style={{
-                background: isDone ? t.soft : isCurrent ? t.main : 'rgba(0,0,0,0.04)',
-                color: isDone ? t.deep : isCurrent ? t.on : 'rgba(0,0,0,0.4)',
-              }}
-            >
-              <div className="text-xl">{s.emoji}</div>
-              <div className="text-xs font-extrabold">{s.label}</div>
-              <div className="text-[10px] font-bold">
-                {slotSections.length === 0 ? '无' : isDone ? '✅ 已完成' : `${slotSections.length} 节`}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* 今日焦点（本地引擎，轻量无 AI） */}
-      <TodayFocusStrip />
-
-      {/* AI 今日排课建议 */}
-      <AiPlanCard progress={progress} />
 
       {done ? (
         <motion.div

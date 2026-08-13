@@ -1,8 +1,12 @@
 /**
  * 汉字真实笔顺数据层
  * ------------------------------------------------------------------
- * 数据源：hanzi-writer-data（Make Me a Hanzi 项目），由
- * `scripts/fetch-hanzi-strokes.mjs` 抓取到 public/data/hanzi-strokes.json。
+ * 数据源：hanzi-writer-data（Make Me a Hanzi 项目）。两路合并：
+ *   ① `scripts/fetch-hanzi-strokes.mjs` 从 CDN 抓取精编字（300 核心 + 500 常用）；
+ *   ② `scripts/gen-hanzi-strokes-expanded.mjs` 融合 luomor-web/hanzi-study 上游
+ *      dataWriter.js/dataWriter1.js（同源 Make Me a Hanzi），扩充至 1277 字全覆盖，
+ *      并补齐 radStrokes（部首笔画序号，字段 r）喂给「部首魔法」。
+ *   产物：public/data/hanzi-strokes.json。
  *
  * 坐标系约定（与 hanzi-writer 一致）：
  *   - 原始数据为 1024×1024 空间，y 轴向上（书法坐标）
@@ -17,13 +21,15 @@ export interface StrokeData {
   s: string[];
   /** 每笔的中线采样点 [[x,y], ...]（用于跟写判定与动画引导） */
   m: [number, number][][];
+  /** 部首笔画序号（可选，仅部分字有；用于「部首魔法」高亮部首笔画） */
+  r?: number[];
 }
 
 type StrokeTable = Record<string, StrokeData>;
 
 let tablePromise: Promise<StrokeTable> | null = null;
 
-/** 懒加载完整笔顺表（639KB JSON，仅进入写字环节时才拉取一次） */
+/** 懒加载完整笔顺表（融合后约 2.9MB 原始 / ~1.2MB gzip，仅进入写字环节时才拉取一次） */
 export function loadStrokeTable(): Promise<StrokeTable> {
   if (!tablePromise) {
     tablePromise = fetch(`${import.meta.env.BASE_URL}data/hanzi-strokes.json`)

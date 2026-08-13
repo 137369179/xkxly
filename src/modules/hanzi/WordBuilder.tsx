@@ -173,8 +173,14 @@ export function WordBuilder() {
           </div>
           <div className="flex gap-2">
             <button
+              onClick={() => speak(`组词：${userWord}。造句：${userSentence}`, { lang: 'zh-CN', rate: 0.8 })}
+              className="flex-1 rounded-xl bg-candy-green-deep py-3 text-sm font-extrabold text-white shadow-sm flex items-center justify-center gap-1 active:scale-95 transition-all"
+            >
+              🔊 朗读我的创作
+            </button>
+            <button
               onClick={handleDone}
-              className="flex-1 rounded-xl bg-candy-purple-deep py-3 text-sm font-extrabold text-white shadow-sm"
+              className="flex-1 rounded-xl bg-candy-purple-deep py-3 text-sm font-extrabold text-white shadow-sm active:scale-95 transition-all"
             >
               {tr('wordBuilder.nextChar')}
             </button>
