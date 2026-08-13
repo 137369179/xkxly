@@ -10,9 +10,9 @@ import { useTranslation, translate } from '@/i18n/useTranslation';
 import type { Progress } from '@/types';
 
 // 首页极简组件
-import HomeHeader from '@/components/home/HomeHeader';
-import { HomeHero } from '@/components/home/HomeHero';
-import ExploreMore from '@/components/home/ExploreMore';
+import HomeHeader from '@/modules/home/HomeHeader';
+import { HomeHero } from '@/modules/home/HomeHero';
+import ExploreMore from '@/modules/home/ExploreMore';
 import { CategorySheet } from '@/components/layout/CategorySheet';
 import type { NavCategory } from '@/data/nav';
 import { DailyChallenge } from '@/components/DailyChallenge';

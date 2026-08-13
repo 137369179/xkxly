@@ -10,7 +10,7 @@ import { Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { Modal } from '@/components/ui/Modal';
-import { FluffyLetterVisual } from '@/components/letters/FluffyLetterVisual';
+import { FluffyLetterVisual } from '@/modules/letters/FluffyLetterVisual';
 import { useTranslation } from '@/i18n/useTranslation';
 
 import { letterStoryTask } from '@/lib/ai/tasks';

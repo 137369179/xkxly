@@ -20,11 +20,11 @@ import { useStore } from '@/store/useStore';
 import { makeHanziQuestion } from '@/lib/hanziQuestions';
 import { useTranslation } from '@/i18n/useTranslation';
 import { liushuOf } from '@/lib/hanziEtymology';
-import { LiushuBadge } from '@/components/hanzi/LiushuBadge';
-import { FormationExplainer } from '@/components/hanzi/FormationExplainer';
-import { ComponentBreakdown } from '@/components/hanzi/ComponentBreakdown';
-import { AssemblyAnimation } from '@/components/hanzi/AssemblyAnimation';
-import { HanziFamilyTree } from '@/components/hanzi/HanziFamilyTree';
+import { LiushuBadge } from '@/modules/hanzi/LiushuBadge';
+import { FormationExplainer } from '@/modules/hanzi/FormationExplainer';
+import { ComponentBreakdown } from '@/modules/hanzi/ComponentBreakdown';
+import { AssemblyAnimation } from '@/modules/hanzi/AssemblyAnimation';
+import { HanziFamilyTree } from '@/modules/hanzi/HanziFamilyTree';
 import type { HanziEntry } from '@/data/hanziIndex';
 
 export function HanziLearn({ hanzi, onDone }: { hanzi: HanziEntry; onDone: () => void }) {

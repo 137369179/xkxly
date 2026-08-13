@@ -21,9 +21,9 @@ import { WordBuilder } from './WordBuilder';
 import { RadicalsMagic } from '@/components/RadicalsMagic';
 import { makeHanziMixedQuestion } from '@/lib/hanziQuestions';
 import { useTranslation } from '@/i18n/useTranslation';
-import { HanziVideoCard } from '@/components/hanzi/HanziVideoCard';
-import { HanziStrokeWriter } from '@/components/hanzi/HanziStrokeWriter';
-import { HanziQuizGame } from '@/components/hanzi/HanziQuizGame';
+import { HanziVideoCard } from '@/modules/hanzi/HanziVideoCard';
+import { HanziStrokeWriter } from '@/modules/hanzi/HanziStrokeWriter';
+import { HanziQuizGame } from '@/modules/hanzi/HanziQuizGame';
 
 type MainZone = 'trail' | 'library' | 'playground';
 type LibraryTab = 'level1' | 'level2' | 'level3' | 'h500' | 'radical' | 'evolve' | 'family';

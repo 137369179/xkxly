@@ -21,7 +21,7 @@ import { AiChat } from '@/components/ai/AiChat';
 import { useAiStream } from '@/lib/ai/useAi';
 import { companionChatTask, companionExplainTask } from '@/lib/ai/tasks';
 // S2 Companion 2.0 新增组件
-import { EmotionPop } from '@/components/companion/EmotionPop';
+import { EmotionPop } from '@/modules/companion/EmotionPop';
 import { StudyBuddyMode } from '@/modules/companion/StudyBuddyMode';
 import { DailyQuestBoard } from '@/modules/companion/DailyQuestBoard';
 import { ExplainFollowUp } from '@/modules/companion/ExplainFollowUp';
