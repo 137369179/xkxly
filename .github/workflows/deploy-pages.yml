@@ -1,0 +1,84 @@
+# 宝贝学习乐园 · GitHub Pages 自动部署
+# ============================================================
+# 触发：push 到 main（PR 合并到 main = 一次 push，自动覆盖，无需单独配 PR）
+# 流程：安装依赖 → 生产构建 → 瘦身 → 配置 Pages → 上传产物 → 部署
+#
+# 仓库级前置条件（仅需在 GitHub 网页完成一次，见文末「开启方法」）：
+#   Settings → Pages → Build and deployment → Source 选 "GitHub Actions"
+#
+# 关键技术说明：
+#   - vite.config.ts 已用 base: './'（相对路径），构建产物天然兼容
+#     https://<user>.github.io/<repo>/ 子路径，无需改动任何构建配置。
+#   - 项目为 hash 路由（src/lib/router.ts 用 location.hash），
+#     客户端切路由不向服务器发请求，因此无需 SPA fallback / 404.html。
+#   - GitHub Pages 站点软限制 1GB：本仓库 public/ 含约 2.1GB 的 GB 级媒体
+#     （hanzi-videos 564M / hanzi-voices 1.0G / hanzi-imgs 548M），
+#     默认在「瘦身」步骤排除，仅部署核心应用（约 200MB）。
+#     若确需全量部署媒体，删除「瘦身」步骤即可（注意可能超 1GB 软限制）。
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+# Pages 部署需要：id-token: write（OIDC 身份，供 deploy-pages 无 token 鉴权）
+#                pages: write（upload-pages-artifact 上传产物）
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一分支并发部署时取消旧运行，避免新旧产物互相覆盖
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 生产构建
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096   # 大仓构建防 OOM 中断
+        run: npm run build
+
+      - name: 瘦身（排除 GB 级媒体，避免超 Pages 1GB 软限制）
+        # hanzi-videos / hanzi-voices / hanzi-imgs 约 2.1GB 多媒体，
+        # 生产站点已由 Cloudflare CDN 托管；Pages 仅作核心应用预览/备份。
+        # 如需全量部署媒体，删除本步骤即可（注意可能超 1GB 软限制）。
+        run: |
+          rm -rf dist/hanzi-videos dist/hanzi-voices dist/hanzi-imgs
+          echo "瘦身后 dist 大小："
+          du -sh dist
+
+      - name: 配置 Pages
+        uses: actions/configure-pages@v5
+
+      - name: 上传 Pages 产物
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 部署到 Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
