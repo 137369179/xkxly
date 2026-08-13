@@ -934,7 +934,9 @@ export const useStore = create<StoreState>()(
               ? wh.dailyStreak
               : (wh.lastTrainDate === dateKey(Date.now() - 86400000) ? wh.dailyStreak + 1 : 1);
 
-            // totalEver/uniqueSkills 在加入错题本时增加，这里在错题被移出时不变
+            // totalEver：每次答错累加（对应「累计 N 次错题」徽章）；uniqueSkills：新错题入本时 +1
+            const isWrong = !correct;
+            const newlyAdded = !wasInWrongBook && !correct;
             const gained = correct ? (diff >= 3 ? 2 : 1) : 0;
 
             const next = {
@@ -946,6 +948,8 @@ export const useStore = create<StoreState>()(
               dailyLog: _bumpLog(p, { items: 1, ok: correct ? 1 : 0, stars: gained }),
               wrongHistory: {
                 ...wh,
+                totalEver: wh.totalEver + (isWrong ? 1 : 0),
+                uniqueSkills: wh.uniqueSkills + (newlyAdded ? 1 : 0),
                 maxCount: Math.max(wh.maxCount, newWrongBook.length),
                 dailyStreak,
                 lastTrainDate: today,

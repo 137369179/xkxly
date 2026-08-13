@@ -15,7 +15,7 @@
  * 设计依据：洪恩识字「错了不批评、卡住给提示」的儿童心理学原则，
  * 避免 6 岁孩子在连错后产生挫败感而放弃学习。
  */
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 /** 连续答错多少题后触发干预 */
 export const STRUGGLE_THRESHOLD = 3;
@@ -53,21 +53,23 @@ export function useStruggle(threshold: number = STRUGGLE_THRESHOLD) {
   const [wrongStreak, setWrongStreak] = useState(0);
   const [intervened, setIntervened] = useState(false);
 
+  const streakRef = useRef(0);
   const record = useCallback(
     (correct: boolean) => {
       if (correct) {
+        streakRef.current = 0;
         setWrongStreak(0);
         setIntervened(false);
         return;
       }
-      setWrongStreak((prev) => {
-        const next = prev + 1;
-        // 达到阈值且尚未干预过，标记为 struggling
-        if (next >= threshold && !intervened) {
-          setIntervened(true);
-        }
-        return next;
-      });
+      // 用 ref 镜像连错数，updater 保持纯函数（不在其中调用 setState），
+      // 避免 StrictMode 双调用导致重复触发干预；干预判定移到 updater 外。
+      const next = streakRef.current + 1;
+      streakRef.current = next;
+      setWrongStreak(next);
+      if (next >= threshold && !intervened) {
+        setIntervened(true);
+      }
     },
     [intervened, threshold],
   );

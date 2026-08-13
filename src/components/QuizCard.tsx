@@ -27,7 +27,7 @@ function optionText(o: { label?: string; emoji?: string; shapes?: string[] } | u
 
 export interface QuizCardProps {
   question: Question;
-  /** 每次作答回调（含重试的错误作答） */
+  /** 本题作答结果回调：每题仅触发一次（首次判定，无论对错）；重试的错误点击只做本地反馈，不再重复上报，避免 SRS/计分被放大 */
   onAnswer?: (correct: boolean) => void;
   /** 答对且用户点击「继续」后触发 */
   onNext?: () => void;
@@ -102,6 +102,8 @@ export function QuizCard({
   const stuckStartRef = useRef<number | null>(null);
   /** 本题作答起始时间，用于 DDA 反应时信号（识别纠结/走神） */
   const startedAt = useRef<number>(Date.now());
+  /** 本题是否已向父组件上报过结果：保证 onAnswer/recordAttempt/recordCombo 每题仅触发一次，防止错选多次放大 SRS/计分 */
+  const reportedRef = useRef(false);
   /** 用 ref 镜像最新 solved，供倒计时 interval 闭包读取（P2-7：避免闭包捕获旧 solved 恒为 false） */
   const solvedRef = useRef(false);
   useEffect(() => {
@@ -180,6 +182,7 @@ export function QuizCard({
     setFeedback({ kind: null, text: '' });
     explain.reset();
     startedAt.current = Date.now();
+    reportedRef.current = false;
     // Boss战：重置倒计时
     timeExpiredRef.current = false;
     if (timeLimitMs && timeLimitMs > 0) {
@@ -194,8 +197,11 @@ export function QuizCard({
             clearTimer();
             if (!timeExpiredRef.current && !solvedRef.current) {
               timeExpiredRef.current = true;
-              // 时间到自动判错
-              onAnswer?.(false);
+              // 时间到自动判错（仅上报一次，与手动作答共用 reportedRef）
+              if (!reportedRef.current) {
+                reportedRef.current = true;
+                onAnswer?.(false);
+              }
               setFeedback({ kind: 'wrong', text: translate('quiz.timeUp') });
             }
             return 0;
@@ -300,25 +306,29 @@ export function QuizCard({
       const praise = Math.random() < 0.5 ? '' : praiseByScene(skillToPraiseScene(question.skill));
       setFeedback({ kind: 'correct', text: praise });
       void speak(praise, { lang: 'zh-CN', rate: 0.9, module: 'praise' });
-      onAnswer?.(true);
-      // 自适应学习链：追踪答对，推动难度升级（同时写入 DDA 反应时/提示信号）
-      const cat = question.skill ? question.skill.split(':')[0] : null;
-      if (cat) recordAttempt(cat, { correct: true, ms, hintUsed });
-      // 全局连击：记录答对，触发阈值时额外庆祝
-      const combo = recordCombo(true);
-      if (combo.triggered && combo.level >= 0) {
-        const celeb = COMBO_THRESHOLDS[combo.level]!.celebration;
-        if (celeb === 'big') {
-          void celebrateBig();
-        } else if (celeb === 'medium') {
-          void celebrateStars(5);
-        } else {
-          void celebrateSmall();
+      // 每题仅上报一次：首次判定即上报父组件（SRS/计分/连击），后续点击只做本地反馈
+      if (!reportedRef.current) {
+        reportedRef.current = true;
+        onAnswer?.(true);
+        // 自适应学习链：追踪答对，推动难度升级（同时写入 DDA 反应时/提示信号）
+        const cat = question.skill ? question.skill.split(':')[0] : null;
+        if (cat) recordAttempt(cat, { correct: true, ms, hintUsed });
+        // 全局连击：记录答对，触发阈值时额外庆祝
+        const combo = recordCombo(true);
+        if (combo.triggered && combo.level >= 0) {
+          const celeb = COMBO_THRESHOLDS[combo.level]!.celebration;
+          if (celeb === 'big') {
+            void celebrateBig();
+          } else if (celeb === 'medium') {
+            void celebrateStars(5);
+          } else {
+            void celebrateSmall();
+          }
         }
-      }
-      // v6: 连续答对 3 题（且是 3 的倍数）时自动弹知识扩展
-      if (streak > 0 && streak % 3 === 0) {
-        setShowExtend(true);
+        // v6: 连续答对 3 题（且是 3 的倍数）时自动弹知识扩展
+        if (streak > 0 && streak % 3 === 0) {
+          setShowExtend(true);
+        }
       }
     } else {
       setWrongIds((w) => [...w, optId]);
@@ -333,12 +343,16 @@ export function QuizCard({
       const enc = encourageByScene(skillToEncourageScene(question.skill));
       setFeedback({ kind: 'wrong', text: enc });
       void speak(enc, { lang: 'zh-CN', rate: 0.9, module: 'praise' });
-      onAnswer?.(false);
-      // 自适应学习链：追踪答错，推动难度降级（同时写入 DDA 反应时/提示信号 + 错因类型）
-      const cat2 = question.skill ? question.skill.split(':')[0] : null;
-      if (cat2) recordAttempt(cat2, { correct: false, ms, hintUsed, errorType: question.kind || question.type || 'unknown' });
-      // 全局连击：答错则连击清零
-      recordCombo(false);
+      // 每题仅上报一次：首次错判即上报父组件，后续错选只做本地反馈（抖动/鼓励），不再放大 SRS/计分
+      if (!reportedRef.current) {
+        reportedRef.current = true;
+        onAnswer?.(false);
+        // 自适应学习链：追踪答错，推动难度降级（同时写入 DDA 反应时/提示信号 + 错因类型）
+        const cat2 = question.skill ? question.skill.split(':')[0] : null;
+        if (cat2) recordAttempt(cat2, { correct: false, ms, hintUsed, errorType: question.kind || question.type || 'unknown' });
+        // 全局连击：答错则连击清零
+        recordCombo(false);
+      }
     }
   };
 
