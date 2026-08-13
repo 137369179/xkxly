@@ -12,9 +12,11 @@ import { TONE_STYLE } from '@/lib/tones';
 import { motion } from 'motion/react';
 import { sfxTap } from '@/lib/sfx';
 import { FluffyIcon } from '@/components/ui/FluffyIcon';
+import { useTranslation } from '@/i18n/useTranslation';
 
 
 export function StudyPassport() {
+  const { t } = useTranslation();
   const progress = useProgress();
   const [page, setPage] = useState(0);
   const PER_PAGE = 6;
@@ -30,8 +32,8 @@ export function StudyPassport() {
     <Panel className="overflow-hidden">
       <PanelTitle
         iconType="medal"
-        title="羊毛毡荣誉成就护照"
-        subtitle={`已收集 ${ownedBadges.length} / ${BADGES.length} 个印章`}
+        title={t('studyPassport.passportTitle')}
+        subtitle={t('studyPassport.collected', { owned: ownedBadges.length, total: BADGES.length })}
         tone="purple"
       />
 
@@ -108,10 +110,10 @@ export function StudyPassport() {
           disabled={page === 0}
           onClick={() => { sfxTap(); setPage(p => p - 1); }}
         >
-          ◀️ 上一页
+          {t('studyPassport.prevPage')}
         </CandyButton>
         <span className="text-sm font-bold text-ink-soft">
-          第 {page + 1} / {totalPages} 页
+          {t('studyPassport.pageInfo', { page: page + 1, total: totalPages })}
         </span>
         <CandyButton
           tone="purple"
@@ -120,7 +122,7 @@ export function StudyPassport() {
           disabled={page >= totalPages - 1}
           onClick={() => { sfxTap(); setPage(p => p + 1); }}
         >
-          下一页 ▶️
+          {t('studyPassport.nextPage')}
         </CandyButton>
       </div>
     </Panel>

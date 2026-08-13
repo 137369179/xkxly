@@ -6,6 +6,7 @@ import { navigate } from '@/lib/router';
 import { sfxTap } from '@/lib/sfx';
 import { Panel } from '@/components/ui/Card';
 import { FluffyIcon } from '@/components/ui/FluffyIcon';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface ExploreMoreProps {
   /** 已在其他区域展示的模块 id，此处去重 */
@@ -18,6 +19,7 @@ interface ExploreMoreProps {
  * 折叠/展开动画，网格布局展示模块入口
  */
 export default function ExploreMore({ excludeIds }: ExploreMoreProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   const excludeSet = new Set(['home', ...(excludeIds ?? [])]);
@@ -35,9 +37,9 @@ export default function ExploreMore({ excludeIds }: ExploreMoreProps) {
       >
         <div className="flex items-center gap-2">
           <span className="text-xl">📂</span>
-          <span className="text-base font-extrabold text-ink">探索更多模块</span>
+          <span className="text-base font-extrabold text-ink">{t('exploreMore.title')}</span>
           <span className="rounded-full bg-candy-purple-soft px-2 py-0.5 text-[11px] font-extrabold text-candy-purple-deep">
-            {others.length} 个
+            {t('exploreMore.moduleCount', { n: others.length })}
           </span>
         </div>
         <motion.span animate={{ rotate: open ? 90 : 0 }} className="text-base font-black text-ink-soft">

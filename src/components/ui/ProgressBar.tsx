@@ -1,3 +1,5 @@
+import { useTranslation } from '@/i18n/useTranslation';
+
 interface ProgressBarProps {
   /** 当前进度值（0-100） */
   value: number;
@@ -55,6 +57,7 @@ export function ProgressBar({
   showLabel,
 }: ProgressBarProps) {
   // 兼容旧 API：tone → color，showLabel → showValue，height → size
+  const { t } = useTranslation();
   const resolvedColor: BarColor = (tone ?? color ?? 'blue') as BarColor;
   const resolvedShowValue = showLabel ?? showValue;
   const resolvedSize: keyof typeof sizeMap =
@@ -70,7 +73,7 @@ export function ProgressBar({
       aria-valuenow={safeValue}
       aria-valuemin={0}
       aria-valuemax={max}
-      aria-label={label || `进度：${percentage}%`}
+      aria-label={label || t('progressBar.progress', { percentage })}
     >
       {(label || resolvedShowValue) && (
         <div className="flex justify-between items-center mb-1 text-sm text-gray-600">

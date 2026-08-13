@@ -8,6 +8,7 @@ import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { cn, shuffle } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const PAIRS = [
   { id:'pair1', emoji:'🐱', label:'小猫' },
@@ -31,6 +32,7 @@ function createDeck(count:number):Card[] {
 }
 
 export function MemoryMatch() {
+  const { t } = useTranslation();
   const [difficulty, setDifficulty] = useState(4); // 4/6/8 pairs
   const [deck, setDeck] = useState<Card[]>(()=>createDeck(4));
   const [flipped, setFlipped] = useState<string[]>([]);
@@ -86,19 +88,19 @@ export function MemoryMatch() {
 
   return (
     <div className="card-candy p-4 sm:p-6">
-      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">🃏 翻牌记忆</h3>
+      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">{t('memoryMatch.title')}</h3>
       <div className="mb-4 flex justify-center gap-2">
         {[4,6,8].map(d => (
           <button key={d} onClick={()=>newGame(d)}
             className={cn('rounded-xl px-3 py-1.5 text-xs font-extrabold',
               difficulty===d ? 'bg-candy-purple-deep text-white' : 'bg-white text-ink-soft shadow-sm'
             )}>
-            {d===4?'🌱 4对':d===6?'🌿 6对':'🌳 8对'}
+            {d===4?t('memoryMatch.pairs',{count:4}):d===6?t('memoryMatch.pairs',{count:6}):t('memoryMatch.pairs',{count:8})}
           </button>
         ))}
       </div>
       <div className="flex justify-between mb-3 text-xs font-bold text-ink-soft">
-        <span>步数 {moves}</span><span>✅ {matched}/{difficulty}</span>
+        <span>{t('memoryMatch.moves', { count: moves })}</span><span>✅ {matched}/{difficulty}</span>
       </div>
       <div className={cn('grid gap-2', difficulty<=4?'grid-cols-4':difficulty===6?'grid-cols-4':'grid-cols-4')}>
         {deck.map(card => (
@@ -115,7 +117,7 @@ export function MemoryMatch() {
       {done && (
         <motion.div initial={{scale:0}} animate={{scale:1}} className="mt-4 text-center">
           <div className="text-4xl">🎉🏆🎉</div>
-          <p className="text-lg font-extrabold text-candy-purple-deep">全部找到！用了 {moves} 步</p>
+          <p className="text-lg font-extrabold text-candy-purple-deep">{t('memoryMatch.allFound', { count: moves })}</p>
           <CandyButton tone="purple" onClick={()=>newGame(Math.min(difficulty+2,8))} className="mt-2">下一关 →</CandyButton>
         </motion.div>
       )}

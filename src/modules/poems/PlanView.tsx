@@ -12,15 +12,17 @@ import { useProgress } from '@/store/useStore';
 import { buildPlan, stepLabel, type PoemPlan } from '@/lib/poemPlan';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const ORDER: Record<PoemPlan['priority'], number> = { high: 0, mid: 1, low: 2 };
-const PRI: Record<PoemPlan['priority'], { label: string; cls: string }> = {
-  high: { label: '高优先', cls: 'text-rose-600 bg-rose-50' },
-  mid: { label: '中优先', cls: 'text-amber-600 bg-amber-50' },
-  low: { label: '低优先', cls: 'text-emerald-700 bg-emerald-50' },
+const PRI: Record<PoemPlan['priority'], { labelKey: string; cls: string }> = {
+  high: { labelKey: 'planView.high', cls: 'text-rose-600 bg-rose-50' },
+  mid: { labelKey: 'planView.mid', cls: 'text-amber-600 bg-amber-50' },
+  low: { labelKey: 'planView.low', cls: 'text-emerald-700 bg-emerald-50' },
 };
 
 export default function PlanView({ onOpen }: { onOpen: (id: string, tab?: '原文' | '注解' | '格律' | '语境' | '研读') => void }) {
+  const { t } = useTranslation();
   const progress = useProgress();
 
   const plans = useMemo(() => {
@@ -45,11 +47,11 @@ export default function PlanView({ onOpen }: { onOpen: (id: string, tab?: '原�
 
   return (
     <div>
-      <PageHeader emoji="🗺️" title="我的复习计划" subtitle={`${plans.length} 首待复习 · 其中 ${highCount} 首高优先`} tone="purple" />
+      <PageHeader emoji="🗺️" title={t('planView.title')} subtitle={`${plans.length} 首待复习 · 其中 ${highCount} 首高优先`} tone="purple" />
 
       {plans.length === 0 ? (
         <Panel className="mt-4 text-center text-sm text-ink-soft">
-          还没有复习计划～去「诗库」读诗时点「✏️ 标难点」，或到「研读」做自测、背诵，系统就会自动按你的薄弱点生成复习路线。
+          {t('planView.empty')}
         </Panel>
       ) : (
         <div className="space-y-3">
@@ -67,7 +69,7 @@ export default function PlanView({ onOpen }: { onOpen: (id: string, tab?: '原�
               >
                 <div className="mb-2 flex items-center gap-2">
                   <h3 className="text-xl font-extrabold text-candy-pink-deep">{poem.title}</h3>
-                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-extrabold ${pri.cls}`}>{pri.label}</span>
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-extrabold ${pri.cls}`}>{t(pri.labelKey)}</span>
                   <span className="text-xs font-bold text-ink-soft">{poem.author}</span>
                 </div>
                 <p className="mb-2 text-xs font-bold text-ink-soft">{plan.note}</p>
@@ -90,8 +92,8 @@ export default function PlanView({ onOpen }: { onOpen: (id: string, tab?: '原�
                 </div>
 
                 <div className="mt-3 flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-ink-soft/70">建议关卡：第 {plan.nextStage}/4 关</span>
-                  <CandyButton tone="pink" size="sm" onClick={() => onOpen(plan.poemId, '研读')}>开始复习</CandyButton>
+                  <span className="text-[11px] font-bold text-ink-soft/70">{t('planView.suggestStage', { stage: plan.nextStage })}</span>
+                  <CandyButton tone="pink" size="sm" onClick={() => onOpen(plan.poemId, '研读')}>{t('planView.startReview')}</CandyButton>
                 </div>
               </motion.div>
             );

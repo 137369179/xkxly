@@ -3,6 +3,7 @@
  */
 
 import { useState, useRef } from 'react';
+import { useTranslation } from '@/i18n/useTranslation';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { useProgress } from '@/store/useStore';
@@ -11,6 +12,7 @@ import { sfxTap, sfxStar } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 
 export function PosterCard() {
+  const { t } = useTranslation();
   const progress = useProgress();
   const [posterUrl, setPosterUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -37,48 +39,48 @@ export function PosterCard() {
     const a = linkRef.current;
     if (a) {
       a.href = posterUrl;
-      a.download = `学习成就海报_${Date.now()}.png`;
+      a.download = `${t("posterCard.filePrefix")}_${Date.now()}.png`;
       a.click();
     }
   };
 
   return (
     <Panel>
-      <PanelTitle emoji="🖼️" title="成就海报" subtitle="生成宝贝的学习海报" tone="pink" />
+      <PanelTitle emoji="🖼️" title={t('posterCard.title')} subtitle={t('posterCard.subtitle')} tone="pink" />
       <div className="text-center">
         {!posterUrl ? (
           <div className="py-6">
             <div className="text-5xl">🏆</div>
             <p className="mt-2 text-sm font-bold text-ink-soft">
-              一键生成精美海报，记录宝贝的成长
+              {t('posterCard.description')}
             </p>
             <div className="mt-3 grid grid-cols-3 gap-2 text-xs font-bold">
               <div className="rounded-lg bg-candy-yellow-soft p-2">
                 <div className="text-lg font-black text-candy-yellow-deep">⭐ {progress.stars}</div>
-                <div className="text-ink-soft">星星</div>
+                <div className="text-ink-soft">{t('posterCard.stars')}</div>
               </div>
               <div className="rounded-lg bg-candy-orange-soft p-2">
                 <div className="text-lg font-black text-candy-orange-deep">🏅 {progress.badges.length}</div>
-                <div className="text-ink-soft">徽章</div>
+                <div className="text-ink-soft">{t('posterCard.badges')}</div>
               </div>
               <div className="rounded-lg bg-candy-green-soft p-2">
                 <div className="text-lg font-black text-candy-green-deep">🔥 {progress.streak}</div>
-                <div className="text-ink-soft">连续天数</div>
+                <div className="text-ink-soft">{t('posterCard.streakDays')}</div>
               </div>
             </div>
             <CandyButton tone="pink" size="lg" className="mt-4" onClick={generate} disabled={loading}>
-              {loading ? '⏳ 生成中...' : '🎨 生成海报'}
+              {loading ? t('posterCard.generating') : t('posterCard.generate')}
             </CandyButton>
           </div>
         ) : (
           <div className="py-4">
-            <img src={posterUrl} alt="学习成就海报" loading="lazy" decoding="async" className="mx-auto max-w-full rounded-2xl shadow-lg" />
+            <img src={posterUrl} alt={t('posterCard.alt')} loading="lazy" decoding="async" className="mx-auto max-w-full rounded-2xl shadow-lg" />
             <div className="mt-3 flex justify-center gap-2">
               <CandyButton tone="green" size="sm" onClick={download}>
-                📥 下载
+                {t('posterCard.download')}
               </CandyButton>
               <CandyButton tone="purple" variant="soft" size="sm" onClick={generate}>
-                🔄 重新生成
+                {t('posterCard.regenerate')}
               </CandyButton>
             </div>
             <a ref={linkRef} className="hidden" />

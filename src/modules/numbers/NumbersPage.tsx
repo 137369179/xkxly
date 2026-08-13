@@ -20,20 +20,22 @@ import { RabbitRunMath } from './RabbitRunMath';
 
 
 import { TenFrameMath } from './TenFrameMath';
+import { useTranslation } from '@/i18n/useTranslation';
 
 
 type TabId = 'wall' | 'math' | 'extra' | 'speed' | 'ladder' | 'run' | 'tenframe' | 'word' | 'count' | 'trace' | 'vertical' | 'shape' | 'clock' | 'measure' | 'skip' | 'fraction' | 'money';
 
 
 export default function NumbersPage() {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<TabId>('wall');
 
   return (
     <div>
       <PageHeader
         emoji="🔢"
-        title="数字王国"
-        subtitle="认数字 · 学算术 · 蒙氏十格阵凑十法"
+        title={t('numbersPage.title')}
+        subtitle={t('numbersPage.subtitle')}
         tone="yellow"
       />
 
@@ -43,24 +45,24 @@ export default function NumbersPage() {
         value={tab}
         onChange={setTab}
         items={[
-          { id: 'wall', label: '认数字', emoji: '💯' },
-          { id: 'tenframe', label: '凑十法', emoji: '🥕' },
+          { id: 'wall', label: t('numbersPage.tabWall'), emoji: '💯' },
+          { id: 'tenframe', label: t('numbersPage.tabTenframe'), emoji: '🥕' },
 
-          { id: 'math', label: '加减法', emoji: '➕' },
-          { id: 'extra', label: '进阶', emoji: '✖️' },
-          { id: 'speed', label: '速算', emoji: '⚡' },
-          { id: 'ladder', label: '阶梯', emoji: '🪜' },
-          { id: 'run', label: '小兔赛跑', emoji: '🐇' },
-          { id: 'vertical', label: '竖式', emoji: '📝' },
-          { id: 'shape', label: '图形', emoji: '📐' },
-          { id: 'clock', label: '时钟', emoji: '⏰' },
-          { id: 'measure', label: '测量', emoji: '📐' },
-          { id: 'skip', label: '跳数', emoji: '🔢' },
-          { id: 'fraction', label: '分数', emoji: '🍕' },
-          { id: 'money', label: '钱币', emoji: '💰' },
-          { id: 'word', label: '应用题', emoji: '📐' },
-          { id: 'count', label: '数一数', emoji: '🍎' },
-          { id: 'trace', label: '描红', emoji: '✍️' },
+          { id: 'math', label: t('numbersPage.tabMath'), emoji: '➕' },
+          { id: 'extra', label: t('numbersPage.tabExtra'), emoji: '✖️' },
+          { id: 'speed', label: t('numbersPage.tabSpeed'), emoji: '⚡' },
+          { id: 'ladder', label: t('numbersPage.tabLadder'), emoji: '🪜' },
+          { id: 'run', label: t('numbersPage.tabRun'), emoji: '🐇' },
+          { id: 'vertical', label: t('numbersPage.tabVertical'), emoji: '📝' },
+          { id: 'shape', label: t('numbersPage.tabShape'), emoji: '📐' },
+          { id: 'clock', label: t('numbersPage.tabClock'), emoji: '⏰' },
+          { id: 'measure', label: t('numbersPage.tabMeasure'), emoji: '📐' },
+          { id: 'skip', label: t('numbersPage.tabSkip'), emoji: '🔢' },
+          { id: 'fraction', label: t('numbersPage.tabFraction'), emoji: '🍕' },
+          { id: 'money', label: t('numbersPage.tabMoney'), emoji: '💰' },
+          { id: 'word', label: t('numbersPage.tabWord'), emoji: '📐' },
+          { id: 'count', label: t('numbersPage.tabCount'), emoji: '🍎' },
+          { id: 'trace', label: t('numbersPage.tabTrace'), emoji: '✍️' },
         ]}
       />
 

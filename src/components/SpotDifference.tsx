@@ -7,6 +7,7 @@ import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { cn } from '@/lib/utils';
 import { CandyButton } from '@/components/ui/Button';
+import { useTranslation } from '@/i18n/useTranslation';
 
 /** 用 emoji 组合做"图片"，每关6格，其中2-3格不同 */
 interface Scene { id: string; emoji: string; }
@@ -39,6 +40,7 @@ function genLevel(): Level {
 }
 
 export function SpotDifference() {
+  const { t } = useTranslation();
   const [level, setLevel] = useState<Level>(()=>genLevel());
   const [found, setFound] = useState<Set<number>>(new Set());
   const [wrong, setWrong] = useState<number | null>(null);
@@ -85,27 +87,27 @@ export function SpotDifference() {
 
   return (
     <div className="card-candy p-4 sm:p-6">
-      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">🔍 找不同</h3>
-      <p className="mb-3 text-center text-xs font-bold text-ink-soft">找出两幅图不同的地方</p>
+      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">{t('spotDifference.title')}</h3>
+      <p className="mb-3 text-center text-xs font-bold text-ink-soft">{t('spotDifference.subtitle')}</p>
       <div className="mb-4 flex justify-between text-xs font-bold text-ink-soft">
-        <span>找到 {found.size}/{level.diffCount}</span><span>得分 {score}</span>
+        <span>{t('spotDifference.found', { count: found.size, total: level.diffCount })}</span><span>{t('spotDifference.score', { count: score })}</span>
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <p className="mb-2 text-center text-xs font-extrabold text-candy-blue-deep">图 A</p>
+          <p className="mb-2 text-center text-xs font-extrabold text-candy-blue-deep">{t('spotDifference.imageA')}</p>
           <div className="grid grid-cols-3 gap-2">
             {level.left.map((s,i)=><Cell key={s.id} scene={s} pos={i} />)}
           </div>
         </div>
         <div>
-          <p className="mb-2 text-center text-xs font-extrabold text-candy-pink-deep">图 B</p>
+          <p className="mb-2 text-center text-xs font-extrabold text-candy-pink-deep">{t('spotDifference.imageB')}</p>
           <div className="grid grid-cols-3 gap-2">
             {level.right.map((s,i)=><Cell key={s.id} scene={s} pos={i} />)}
           </div>
         </div>
       </div>
       <CandyButton tone="blue" size="sm" className="mt-4 w-full" onClick={()=>{setLevel(genLevel());setFound(new Set());}}>
-        🔄 换一题
+        {t('spotDifference.next')}
       </CandyButton>
     </div>
   );

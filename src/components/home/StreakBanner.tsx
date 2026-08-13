@@ -3,12 +3,14 @@ import { useStreak } from '@/store/useStore';
 import { navigate } from '@/lib/router';
 import { sfxTap } from '@/lib/sfx';
 import { CandyButton } from '@/components/ui/Button';
+import { useTranslation } from '@/i18n/useTranslation';
 
 /**
  * 连续打卡展示：火焰动画 + 里程碑
  * 火焰随天数变化（1-2天🔥, 3-6天🔥🔥, 7+🔥🔥🔥）
  */
 export default function StreakBanner() {
+  const { t } = useTranslation();
   const streak = useStreak();
 
   // 火焰等级
@@ -18,16 +20,16 @@ export default function StreakBanner() {
   // 里程碑文案
   const milestone =
     streak === 0
-      ? '今天开始第一次学习吧！'
+      ? t('streakBanner.milestone0')
       : streak < 3
-        ? '坚持就是胜利，继续加油！'
+        ? t('streakBanner.milestone1')
         : streak < 7
-          ? '已经坚持好几天啦，太棒了！'
+          ? t('streakBanner.milestone2')
           : streak < 14
-            ? '一周以上！你是学习小能手！'
+            ? t('streakBanner.milestone3')
             : streak < 30
-              ? '两周以上！超级了不起！'
-              : '一个月以上！你是学习小英雄！';
+              ? t('streakBanner.milestone4')
+              : t('streakBanner.milestone5');
 
   // 下一个里程碑
   const nextMilestone =
@@ -67,19 +69,19 @@ export default function StreakBanner() {
             <span className="text-2xl font-extrabold tabular-nums text-candy-orange-deep">
               {streak}
             </span>
-            <span className="text-sm font-bold text-candy-orange-deep/70"> 天</span>
+            <span className="text-sm font-bold text-candy-orange-deep/70">{t('streakBanner.days')}</span>
           </div>
         </motion.div>
 
         {/* 文案区 */}
         <div className="min-w-0 flex-1">
           <h2 className="text-lg font-extrabold text-candy-orange-deep sm:text-xl">
-            连续打卡
+            {t('streakBanner.title')}
           </h2>
           <p className="mt-1 text-sm font-bold text-ink-soft">{milestone}</p>
           {daysToNext > 0 && (
             <p className="mt-1 text-xs font-bold text-candy-orange-deep/60">
-              再坚持 {daysToNext} 天到达 {nextMilestone} 天里程碑 🎯
+              {t('streakBanner.nextMilestone', { days: daysToNext, target: nextMilestone })}
             </p>
           )}
         </div>
@@ -95,7 +97,7 @@ export default function StreakBanner() {
             navigate('today');
           }}
         >
-          马上学习 →
+          {t('streakBanner.studyNow')}
         </CandyButton>
       </div>
     </motion.div>

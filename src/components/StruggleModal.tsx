@@ -8,6 +8,7 @@
  * 话语来自 pickStruggleMessage()，比单题答错的鼓励语更温和、更具引导性。
  */
 import { useEffect, useState } from 'react';
+import { useTranslation } from '@/i18n/useTranslation';
 import { motion } from 'motion/react';
 import { Modal } from '@/components/ui/Modal';
 import { CandyButton } from '@/components/ui/Button';
@@ -26,6 +27,7 @@ export interface StruggleModalProps {
 }
 
 export function StruggleModal({ open, wrongStreak, onContinue, onSkip }: StruggleModalProps) {
+  const { t } = useTranslation();
   // 弹窗打开时锁定一条话语，避免重渲染时换文案；同时语音朗读
   const [message, setMessage] = useState('');
   useEffect(() => {
@@ -45,20 +47,20 @@ export function StruggleModal({ open, wrongStreak, onContinue, onSkip }: Struggl
       >
         <div className="text-6xl">🤗</div>
         <h3 className="mt-3 text-2xl font-extrabold text-candy-purple-deep">
-          休息一下下
+          {t('struggleModal.restTitle')}
         </h3>
         <p className="mt-2 text-base font-bold text-ink-soft leading-relaxed">
           {message}
         </p>
         <p className="mt-1 text-xs font-bold text-ink-soft/70">
-          已经连续答错 {wrongStreak} 题啦
+          {t('struggleModal.wrongStreak', { count: wrongStreak })}
         </p>
         <div className="mt-5 flex flex-col gap-2">
           <CandyButton tone="green" size="lg" fullWidth onClick={onContinue}>
-            💪 继续加油
+            {t('struggleModal.continueBtn')}
           </CandyButton>
           <CandyButton tone="orange" size="md" fullWidth onClick={onSkip}>
-            ⏭️ 跳过这题
+            {t('struggleModal.skipBtn')}
           </CandyButton>
         </div>
       </motion.div>

@@ -4,16 +4,18 @@ import { TONE_STYLE, toneAt } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 import { LetterLearn } from '@/components/LetterLearn';
 import { CandyButton } from '@/components/ui/Button';
+import { useTranslation } from '@/i18n/useTranslation';
 
 /** 字母乐园 · 精学：选一个字母走完五步闭环 */
 export function LetterStudy() {
+  const { t } = useTranslation();
   const [upper, setUpper] = useState<string | null>(null);
 
   if (upper) {
     return (
       <div>
         <CandyButton tone="purple" variant="soft" size="sm" onClick={() => setUpper(null)}>
-          ← 换一个字母
+          {t('letterStudy.changeLetter')}
         </CandyButton>
         <div className="mt-3">
           <LetterLearn upper={upper} onDone={() => setUpper(null)} />
@@ -25,7 +27,7 @@ export function LetterStudy() {
   return (
     <div className="space-y-4">
       <p className="text-center text-base font-bold text-ink-soft">
-        选一个字母，跟着「玩 → 认 → 练 → 写 → 说」一步步学 ✨
+        {t('letterStudy.instruction')}
       </p>
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-4 md:grid-cols-5 lg:grid-cols-6">
         {LETTERS.map((item, i) => {

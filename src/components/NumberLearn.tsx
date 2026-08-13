@@ -5,12 +5,14 @@ import { TraceCanvas } from '@/components/TraceCanvas';
 import { CandyButton } from '@/components/ui/Button';
 import { makeCountQuestion, makeNumberQuestion } from '@/lib/questions';
 import { speak } from '@/lib/speech';
+import { useTranslation } from '@/i18n/useTranslation';
 
 /**
  * 数字四步学习闭环：认 → 数 → 写 → 说
  * 被「今日课程」与「数字王国 · 描红」复用。
  */
 export function NumberLearn({ nums, onDone }: { nums: string[]; onDone?: () => void }) {
+  const { t } = useTranslation();
   const first = Number(nums[0] ?? '0');
   const heardNumber = useStore((s) => s.heardNumber);
   const practice = useStore((s) => s.practice);
@@ -48,7 +50,7 @@ export function NumberLearn({ nums, onDone }: { nums: string[]; onDone?: () => v
               api.ready();
             }}
           >
-            🔊 听一听这些数字
+            {t('numberLearn.listenNumbers')}
           </CandyButton>
         </div>
       ),
@@ -83,7 +85,7 @@ export function NumberLearn({ nums, onDone }: { nums: string[]; onDone?: () => v
           <TraceCanvas
             char={String(first)}
             tone="yellow"
-            hint="用手指把数字描出来"
+            hint={t('numberLearn.traceHint')}
             onPass={() => {
               markTraced(`trace:${first}`);
               learnSkill(skill);
@@ -119,5 +121,5 @@ export function NumberLearn({ nums, onDone }: { nums: string[]; onDone?: () => v
     },
   ];
 
-  return <LearnFlow steps={steps} tone="yellow" onFinish={onDone} finishLabel="数字学会啦 🎉" />;
+  return <LearnFlow steps={steps} tone="yellow" onFinish={onDone} finishLabel={t('numberLearn.finish')} />;
 }

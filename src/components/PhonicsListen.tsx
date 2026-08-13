@@ -9,6 +9,7 @@ import { sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { getAllPhonicsRules } from '@/data/phonics';
 import { speak, stopSpeaking } from '@/lib/speech';
 import { shuffle } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface Question {
   rule: { letter: string; sound: string; examples: string[] };
@@ -31,6 +32,7 @@ function generateQ(): Question {
 }
 
 export function PhonicsListen() {
+  const { t } = useTranslation();
   const [q, setQ] = useState<Question>(generateQ);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | ''>('');
   const [score, setScore] = useState(0);
@@ -72,9 +74,9 @@ export function PhonicsListen() {
 
   return (
     <div className="card-candy p-4 sm:p-6">
-      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">👂 听力辨音</h3>
+      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">{t('phonicsListen.title')}</h3>
       <p className="mb-4 text-center text-xs font-bold text-ink-soft">
-        听发音，选出对应的字母或字母组合
+        {t('phonicsListen.subtitle')}
       </p>
 
       {/* 发音区 */}
@@ -83,7 +85,7 @@ export function PhonicsListen() {
           onClick={speakPhonics}
           className="mx-auto flex items-center gap-2 rounded-2xl bg-candy-purple-soft px-6 py-4 text-2xl font-extrabold text-candy-purple-deep shadow-sm transition-all hover:scale-105 active:scale-95"
         >
-          🔊 听发音
+          {t('phonicsListen.listenBtn')}
         </button>
         <AnimatePresence>
           {showSound && (
@@ -94,7 +96,7 @@ export function PhonicsListen() {
               className="mt-2"
             >
               <span className="inline-block rounded-lg bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
-                发音：/{q.rule.sound}/ &nbsp; 例：{q.rule.examples[0] || q.rule.letter}
+                {t('phonicsListen.soundInfo', { sound: q.rule.sound, example: q.rule.examples[0] || q.rule.letter })}
               </span>
             </motion.div>
           )}
@@ -130,11 +132,11 @@ export function PhonicsListen() {
           >
             {feedback === 'correct' ? (
               <span className="inline-block rounded-xl bg-candy-green-soft px-4 py-2 text-sm font-extrabold text-candy-green-deep">
-                ✅ 对了！/{q.rule.sound}/
+                {t('phonicsListen.correctFeedback', { sound: q.rule.sound })}
               </span>
             ) : (
               <span className="inline-block rounded-xl bg-candy-pink-soft px-4 py-2 text-sm font-extrabold text-candy-pink-deep">
-                ❌ 答案是 {q.options[q.correctIndex]} /{q.rule.sound}/
+                {t('phonicsListen.wrongFeedback', { answer: q.options[q.correctIndex] ?? '', sound: q.rule.sound })}
               </span>
             )}
           </motion.div>
@@ -142,7 +144,7 @@ export function PhonicsListen() {
       </AnimatePresence>
 
       <div className="mt-4 text-center text-xs font-bold text-ink-soft">
-        第 {round + 1} 题 · 得分 {score}
+        {t('phonicsListen.progress', { round: round + 1, score })}
       </div>
     </div>
   );

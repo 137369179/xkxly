@@ -8,6 +8,7 @@ import { CandyButton } from '@/components/ui/Button';
 import { sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { shuffle } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const COLORS = [
   { name: '红色', en: 'Red', hex: '#EF4444', emoji: '🔴', items: ['🍎苹果','🌹玫瑰','🚗消防车'] },
@@ -23,6 +24,7 @@ const COLORS = [
 ];
 
 function _ColorExplore() {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<'learn'|'quiz'>('learn');
   const [current, setCurrent] = useState(COLORS[0]!);
   const [options, setOptions] = useState(() => shuffle(COLORS).slice(0,4));
@@ -42,11 +44,11 @@ function _ColorExplore() {
       return;
     }
     if (color.name === current.name) {
-      sfxCorrect(); setFeedback(`✅ 对了！这就是${current.name}`); setScore(s=>s+1);
+      sfxCorrect(); setFeedback(t('colorExplore.rightFeedback', { name: current.name })); setScore(s=>s+1);
       void speak(`对了！${current.name}`, { lang:'zh-CN', rate:0.85, module:'praise' });
       setTimeout(() => { setCurrent(COLORS[Math.floor(Math.random()*COLORS.length)]!); setOptions(shuffle(COLORS).slice(0,4)); setFeedback(''); lockRef.current = false; }, 1000);
     } else {
-      sfxWrong(); setFeedback(`❌ 这是${color.name}哦`);
+      sfxWrong(); setFeedback(t('colorExplore.wrongFeedback', { name: color.name }));
       void speak(`这是${color.name}呀`, { lang:'zh-CN', rate:0.85, module:'praise' });
       setTimeout(() => { setFeedback(''); lockRef.current = false; }, 1200);
     }
@@ -87,7 +89,7 @@ function _ColorExplore() {
             <motion.div key={current.name} initial={{scale:0.8}} animate={{scale:1}} className="mx-auto inline-flex h-32 w-32 items-center justify-center rounded-[2rem] shadow-xl" style={{background:current.hex}}>
               <span className="text-6xl drop-shadow-md">{current.emoji}</span>
             </motion.div>
-            <p className="mt-2 text-lg font-extrabold text-ink">这是什么颜色？</p>
+            <p className="mt-2 text-lg font-extrabold text-ink">{t('colorExplore.question')}</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
             {options.map(c => (
@@ -97,7 +99,7 @@ function _ColorExplore() {
               </CandyButton>
             ))}
           </div>
-          <p className="mt-4 text-center text-xs font-bold text-ink-soft">得分 {score}</p>
+          <p className="mt-4 text-center text-xs font-bold text-ink-soft">{t('colorExplore.score', { n: score })}</p>
         </>
       )}
 

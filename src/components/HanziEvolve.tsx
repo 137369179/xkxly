@@ -10,6 +10,7 @@ import { HANZI_500 } from '@/data/hanzi500';
 import { speak } from '@/lib/speech';
 import { sfxTap } from '@/lib/sfx';
 import { motion } from 'motion/react';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface EvolveStage {
   name: string;
@@ -51,6 +52,7 @@ const ALL_HANZI = getAllHanzi();
 
 
 export function HanziEvolve({ char, onClose }: { char?: string; onClose?: () => void }) {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState(char ?? ALL_HANZI[0]?.c ?? '日');
   const [stageIdx, setStageIdx] = useState(4); // 默认楷书
 
@@ -64,7 +66,7 @@ export function HanziEvolve({ char, onClose }: { char?: string; onClose?: () => 
     <div className="space-y-4">
       {onClose && (
         <CandyButton tone="blue" variant="soft" size="sm" onClick={() => { sfxTap(); onClose(); }}>
-          ◀️ 返回
+          {t('common.back')}
         </CandyButton>
       )}
 
@@ -83,14 +85,14 @@ export function HanziEvolve({ char, onClose }: { char?: string; onClose?: () => 
             {data.p}
           </span>
           <CandyButton tone="blue" size="sm" onClick={() => speak(data.c, { rate: 0.6 })}>
-            🔊 读
+            {t('hanziEvolve.read')}
           </CandyButton>
         </div>
       </Panel>
 
       {/* 演变阶段选择 */}
       <Panel>
-        <h4 className="mb-2 text-sm font-extrabold text-ink">📜 字体演变</h4>
+        <h4 className="mb-2 text-sm font-extrabold text-ink">{t('hanziEvolve.fontEvolution')}</h4>
         <div className="flex flex-wrap gap-2">
           {EVOLVE_STAGES.map((s, i) => (
             <CandyButton
@@ -121,7 +123,12 @@ export function HanziEvolve({ char, onClose }: { char?: string; onClose?: () => 
 
       {/* 字源故事 */}
       <Panel>
-        <h4 className="mb-1 text-sm font-extrabold text-ink">📖 字源故事</h4>
+        <div className="flex items-center justify-between mb-1">
+          <h4 className="text-sm font-extrabold text-ink">{t('hanziEvolve.originStory')}</h4>
+          <CandyButton tone="purple" size="sm" variant="soft" onClick={() => speak(data.origin || `${data.c}字的演变故事`, { rate: 0.8 })}>
+            🔊 听故事
+          </CandyButton>
+        </div>
         <p className="text-sm font-bold leading-relaxed text-ink-soft">{data.origin}</p>
       </Panel>
 

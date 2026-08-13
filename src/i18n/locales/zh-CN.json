@@ -1084,7 +1084,13 @@
     "rephrase": "换个问法试试吧",
     "inputLabel": "输入你想问的问题",
     "sendLabel": "发送问题",
-    "askBtn": "问"
+    "askBtn": "问",
+    "switchPet": "🔄 换伙伴",
+    "nudge": "点一下这里，小智陪你玩～",
+    "moodSleeping": "睡觉中",
+    "moodExcited": "很兴奋",
+    "moodHappy": "心情不错",
+    "clickInteract": "{name}，{mood}，点击互动"
   },
   "actions": {
     "start": "开始",
@@ -3592,7 +3598,9 @@
     "wrong": "再找找看",
     "title": "🎨 颜色探索",
     "question": "这是什么颜色？",
-    "score": "得分 {n}"
+    "score": "得分 {n}",
+    "rightFeedback": "✅ 对了！这就是{name}",
+    "wrongFeedback": "❌ 这是{name}哦"
   },
   "dictation": {
     "done": "🎉 听写完成！",
@@ -3739,7 +3747,9 @@
     "all": "全部",
     "albumCount": "📚 {name} ×{count}",
     "noStickers": "还没有贴纸——做练习来赚取吧！",
-    "saveName": "我的贴纸作品"
+    "saveName": "我的贴纸作品",
+    "savePrefix": "我的贴纸作品",
+    "emptyAlbum": "还没有贴纸～去做练习赚贴纸吧！"
   },
   "strokeAnim": {
     "title": "笔画演示",
@@ -3927,7 +3937,8 @@
     "lastWeekMin": "上周(分)",
     "summaryMore": "🎉 本周比上周更努力，继续加油！",
     "summaryLess": "💪 本周稍少了，下周加把劲！",
-    "summarySame": "✨ 和上周持平，保持稳定！"
+    "summarySame": "✨ 和上周持平，保持稳定！",
+    "starsSuffix": "⭐"
   },
   "phonicsListen": {
     "title": "听力辨音",
@@ -4192,7 +4203,10 @@
     "generating": "⏳ 生成中...",
     "generatePoster": "🎨 生成海报",
     "download": "📥 下载",
-    "regenerate": "🔄 重新生成"
+    "regenerate": "🔄 重新生成",
+    "filePrefix": "学习成就海报",
+    "generate": "🎨 生成海报",
+    "alt": "学习成就海报"
   },
   "numberTrace": {
     "changeNumber": "← 换个数字",
@@ -4220,7 +4234,24 @@
     "money": "钱币",
     "word": "应用题",
     "count": "数一数",
-    "trace": "描红"
+    "trace": "描红",
+    "tabWall": "认数字",
+    "tabTenframe": "凑十法",
+    "tabMath": "加减法",
+    "tabExtra": "进阶",
+    "tabSpeed": "速算",
+    "tabLadder": "阶梯",
+    "tabRun": "小兔赛跑",
+    "tabVertical": "竖式",
+    "tabShape": "图形",
+    "tabClock": "时钟",
+    "tabMeasure": "测量",
+    "tabSkip": "跳数",
+    "tabFraction": "分数",
+    "tabMoney": "钱币",
+    "tabWord": "应用题",
+    "tabCount": "数一数",
+    "tabTrace": "描红"
   },
   "exploreMore": {
     "title": "探索更多模块",
@@ -4239,7 +4270,10 @@
     "breakBody": "看看窗外远一点的地方，数 20 下再回来，眼睛会舒服很多。",
     "limitSnooze": "再学 10 分钟",
     "breakContinue": "休息好了，继续学",
-    "breakHint": "提醒间隔可以在「家长中心 → 设置」里调整"
+    "breakHint": "提醒间隔可以在「家长中心 → 设置」里调整",
+    "limitBtn": "再学 10 分钟",
+    "breakBtn": "休息好了，继续学",
+    "settingsHint": "提醒间隔可以在「家长中心 → 设置」里调整"
   },
   "pwaInstallBanner": {
     "title": "安装《宝贝学习乐园》桌面版",
@@ -4280,7 +4314,10 @@
     "aiConfirmBtn": "好，换过去",
     "aiChose": "小智根据你最近的表现，选了「{name}」",
     "manualChose": "你自己选的难度",
-    "resetBtn": "交给小智（建议「{name}」）"
+    "resetBtn": "交给小智（建议「{name}」）",
+    "level1": "启蒙",
+    "level2": "进阶",
+    "level3": "挑战"
   },
   "homeHeader": {
     "stars": "星星",
@@ -4303,5 +4340,231 @@
     "prevPage": "上一页",
     "nextPage": "下一页",
     "pageInfo": "第 {page} / {total} 页"
+  },
+  "button": {
+    "confirmAgain": "再按一次确认"
+  },
+  "stars": {
+    "total": "星星总数: {count}"
+  },
+  "starRating": {
+    "rating": "评级：{rating} 星，共 {maxStars} 星",
+    "star": "{value} 星"
+  },
+  "progressBar": {
+    "progress": "进度：{percentage}%"
+  },
+  "tabs": {
+    "ariaLabel": "学习模块切换"
+  },
+  "kidsCalendar": {
+    "title": "最近 30 天",
+    "dayCount": "{count} 天学习",
+    "minutes": "{count} 分钟",
+    "today": "今天",
+    "learned": "学习了 {count} 分钟",
+    "notStudied": "没有学习",
+    "hoverHint": "鼠标移到圆点上看详情",
+    "legendNone": "未学习",
+    "legendShort": "1-9 分钟",
+    "legendMid": "10-19 分钟",
+    "legendLong": "20+ 分钟"
+  },
+  "dailyGoal": {
+    "title": "今日小目标",
+    "subtitle": "完成可领星星",
+    "allDone": "🏆 今日全部目标完成！宝贝太棒了！",
+    "practice": "完成 10 道练习题",
+    "newHanzi": "学习 3 个新汉字",
+    "readPoem": "朗读 1 首古诗",
+    "math": "答对 5 道数学题",
+    "stars": "获得 5 颗星星",
+    "time": "学习 15 分钟",
+    "pinyin": "练习 5 个拼音",
+    "word": "学 3 个英语单词"
+  },
+  "balanceScale": {
+    "title": "⚖️ 重量平衡",
+    "subtitle": "天平平衡吗？",
+    "balanced": "平衡",
+    "unbalanced": "不平衡",
+    "wrongFeedback": "❌ 左边{left}，右边{right}，{state}",
+    "progress": "第 {level} 关 · 得分 {score}"
+  },
+  "achievementWall": {
+    "unlockedCount": "{done} / {total} 已解锁",
+    "unlocked": "已解锁",
+    "gold": "金色",
+    "silver": "银色",
+    "bronze": "铜色"
+  },
+  "chainDashboard": {
+    "title": "🧬 自适应学习链"
+  },
+  "equipmentPanel": {
+    "hat": "帽子",
+    "cape": "披风",
+    "sword": "武器",
+    "shield": "盾牌",
+    "crown": "王冠",
+    "robe": "长袍"
+  },
+  "hanzi500Page": {
+    "title": "汉字字库",
+    "subtitle": "500 个常用汉字 · 按造字法分类",
+    "all": "全部",
+    "pictographic": "象形",
+    "indicative": "指事",
+    "associative": "会意",
+    "phonetic": "形声",
+    "back": "◀️ 返回",
+    "read": "🔊 读一读",
+    "evolution": "📜 字源演变",
+    "words": "📝 组词",
+    "example": "💬 例句",
+    "shown": "已显示 {shown} / {total} 字",
+    "loadMore": "滚动加载更多",
+    "strokeInfo": "{n}画 · {radical}部"
+  },
+  "phoneticFamilies": {
+    "title": "字族学习",
+    "subtitle": "同声旁的字读音相同或相近，一串一串记",
+    "tip1": "💡 发现规律：汉字里很多字「读音相同偏旁不同」，意思跟偏旁走、读音跟声旁走。",
+    "tip2": "学会一族，比一个一个背快多啦！",
+    "charsInfo": "{n} 个字 · 已学 {learned}",
+    "familyTip": "🔍 这一族都读「{key}」附近的音",
+    "familyDesc": "偏旁不同，意思就不同——{detail}",
+    "total": "共 {n} 个字族 · 点开一族开始探索",
+    "radicalSuffix": "{r}部"
+  },
+  "radicalBrowser": {
+    "title": "按部首学汉字",
+    "subtitle": "共 {n} 个部首",
+    "charCount": "{n}字",
+    "backRadical": "◀️ 返回部首",
+    "radicalDetail": "部首「{r}」· {n} 字",
+    "backList": "◀️ 返回列表",
+    "charInfo": "{r}部 · {strokes}画 · {tone}声 · Lv{level}",
+    "evolution": "字形演变：{e}",
+    "words": "组词：{w}",
+    "example": "例句：{s}",
+    "slowRead": "🔊 慢读",
+    "readExample": "📖 读例句"
+  },
+  "countingGame": {
+    "title": "数一数",
+    "range1": "9 以内",
+    "range2": "14 以内",
+    "range3": "20 以内",
+    "aiMode": "小智情景数数 {state}",
+    "aiReady": "小智已经想好 {n} 道新题啦",
+    "aiThinking": "小智正在编题目，先做一道普通题吧",
+    "aiOff": "让小智把数数编成小动物排队、水果装篮的故事",
+    "correct": "✅ 对了！",
+    "wrong": "❌ 答案是 {answer}"
+  },
+  "fractionLearn": {
+    "title": "分数认知",
+    "learn": "学习",
+    "quiz": "测验",
+    "explain": "把{f}分成 {slices} 份，取其中 1 份就是",
+    "question": "这个图形表示什么分数？",
+    "score": "得分 {n}",
+    "correct": "✅ 对了！",
+    "wrong": "❌ 答案是 {answer}",
+    "thinkAgain": "再想想"
+  },
+  "skipCounting": {
+    "title": "跳数",
+    "subtitle": "按规律跳着数",
+    "step": "每次跳 {n}",
+    "correct": "✅ 对了！",
+    "wrong": "❌ 再试试",
+    "step1": "1个1个数",
+    "step2": "2个2个数",
+    "step5": "5个5个数",
+    "step10": "10个10个数",
+    "question": "接下来该数几？",
+    "score": "得分 {n}",
+    "next": "➡️ 数下一个",
+    "restart": "从头开始"
+  },
+  "tenFrameMath": {
+    "title": "十格阵",
+    "subtitle": "凑十法启蒙",
+    "fill": "还差几个到 10？",
+    "correct": "✅ 对了！",
+    "wrong": "❌ 再想想",
+    "makeTen": "➕ 凑十法 (加法)",
+    "breakTen": "➖ 破十法 (减法)",
+    "step1Add": "✨ 第一步：借几凑十？(借 {n} 个)",
+    "step2Add": "🎉 第二步：算总数！(10 + {n})",
+    "nextAdd": "🚀 算得真棒！下一题 ➔",
+    "step1Sub": "✨ 第一步：破十！(10 减 {sub} 剩 {remain})",
+    "step2Sub": "🎉 第二步：加上余数！({n1} + {n2})",
+    "nextSub": "🚀 破十成功！下一题 ➔"
+  },
+  "wordProblems": {
+    "title": "应用题",
+    "subtitle": "生活中的数学",
+    "correct": "✅ 答对了！",
+    "wrong": "❌ 再想想",
+    "level1": "🌱 入门",
+    "level2": "🌿 进阶",
+    "level3": "🌳 挑战",
+    "done": "应用题挑战完成！",
+    "again": "🔄 再做一遍",
+    "changeDiff": "🔄 换难度",
+    "showResult": "🏁 看看成绩",
+    "nextQ": "➡️ 下一题",
+    "progress": "第 {n} / {total} 题"
+  },
+  "studyCalendar": {
+    "title": "学习日历",
+    "subtitle": "查看每天的学习情况",
+    "totalDays": "总学习天数",
+    "avgMinutes": "日均学习 {n} 分钟"
+  },
+  "sudokuEasy": {
+    "title": "数独",
+    "subtitle": "4×4 趣味数独",
+    "select": "选一个数字填入空格",
+    "correct": "✅ 对了！",
+    "wrong": "❌ 数字冲突"
+  },
+  "symmetryLearn": {
+    "title": "对称图形",
+    "subtitle": "探索对称之美",
+    "findAxis": "找出对称轴",
+    "correct": "✅ 正确！",
+    "wrong": "❌ 再试试"
+  },
+  "rhythmRepeat": {
+    "title": "节奏大师",
+    "subtitle": "跟节拍打出相同的节奏",
+    "listen": "🔊 听节奏",
+    "repeat": "🎵 打出节奏",
+    "correct": "✅ 对了！",
+    "wrong": "❌ 再来一遍"
+  },
+  "strokeAnimation": {
+    "title": "笔画动画",
+    "start": "点击开始演示",
+    "replay": "🔄 重播"
+  },
+  "vehicleExplore": {
+    "title": "交通工具",
+    "subtitle": "认识各种交通工具",
+    "land": "🚗 陆地",
+    "water": "🚢 水上",
+    "air": "✈️ 天空"
+  },
+  "weatherSeasons": {
+    "title": "天气与季节",
+    "subtitle": "春夏秋冬晴雨雪",
+    "spring": "🌸 春天",
+    "summer": "☀️ 夏天",
+    "autumn": "🍂 秋天",
+    "winter": "❄️ 冬天"
   }
 }

@@ -7,6 +7,7 @@ import { motion } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
+import { useTranslation } from '@/i18n/useTranslation';
 
 /** 简化版：在格子中从起点到终点画路径 */
 const LEVELS = [
@@ -19,6 +20,7 @@ const LEVELS = [
 type Pos = [number, number];
 
 export function ConnectMaze() {
+  const { t } = useTranslation();
   const [lvIdx, setLvIdx] = useState(0);
   const lv = LEVELS[lvIdx]!!
   const [path, setPath] = useState<Pos[]>([[0,0]]);
@@ -55,7 +57,7 @@ export function ConnectMaze() {
     setPath(newPath);
     if (isEnd(r,c)) {
       sfxCorrect();
-      setFeedback('🎉 通关了！你找到了出路！');
+      setFeedback(t('connectMaze.winFeedback'));
       setScore(s=>s+1);
       void speak('太棒了！你走出了迷宫！', { lang:'zh-CN', rate:0.85, module:'praise' });
       lockRef.current = true;
@@ -74,8 +76,8 @@ export function ConnectMaze() {
 
   return (
     <div className="card-candy p-4 sm:p-6">
-      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">🧶 连线迷宫</h3>
-      <p className="mb-3 text-center text-xs font-bold text-ink-soft">从 🏠 走到 🎁，不能穿过 🧱</p>
+      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">{t('connectMaze.title')}</h3>
+      <p className="mb-3 text-center text-xs font-bold text-ink-soft">{t('connectMaze.subtitle')}</p>
       <div className="mb-3 flex justify-center gap-2">
         {LEVELS.map((l,i) => (
           <button key={`l-${i}`} onClick={()=>{setLvIdx(i);setPath([[0,0]]);setFeedback('');}}
@@ -108,10 +110,10 @@ export function ConnectMaze() {
       </div>
       {feedback && <motion.div initial={{opacity:0}} animate={{opacity:1}} className="mb-3 text-center text-sm font-extrabold text-candy-green-deep">{feedback}</motion.div>}
       <div className="flex justify-center gap-2">
-        <CandyButton tone="green" size="sm" onClick={reset}>🔄 重来</CandyButton>
-        <CandyButton tone="blue" size="sm" onClick={()=>{setLvIdx((lvIdx+1)%LEVELS.length);setPath([[0,0]]);setFeedback('');}}>⏭️ 下一关</CandyButton>
+        <CandyButton tone="green" size="sm" onClick={reset}>{t('connectMaze.restart')}</CandyButton>
+        <CandyButton tone="blue" size="sm" onClick={()=>{setLvIdx((lvIdx+1)%LEVELS.length);setPath([[0,0]]);setFeedback('');}}>{t('connectMaze.nextLevel')}</CandyButton>
       </div>
-      <div className="mt-2 text-center text-xs font-bold text-ink-soft">得分 {score} · 路径 {path.length} 步</div>
+      <div className="mt-2 text-center text-xs font-bold text-ink-soft">{t('connectMaze.stats', { score, steps: path.length })}</div>
     </div>
   );
 }

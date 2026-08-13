@@ -12,8 +12,10 @@ import { useProgress } from '@/store/useStore';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { TONE_STYLE, toneAt } from '@/lib/tones';
+import { useTranslation } from '@/i18n/useTranslation';
 
 export default function TrainView({ onOpen }: { onOpen: (id: string, tab?: '原文' | '注解' | '格律' | '语境' | '研读') => void }) {
+  const { t } = useTranslation();
   const progress = useProgress();
   const [q, setQ] = useState('');
 
@@ -54,7 +56,7 @@ export default function TrainView({ onOpen }: { onOpen: (id: string, tab?: '原�
 
   return (
     <div>
-      <PageHeader emoji="🎯" title="训练中心" subtitle={`已标难点 ${markedIds.size} 首 · 已背诵 ${recitedIds.size} 首 · 待复习 ${dueCount} 个`} tone="pink" />
+      <PageHeader emoji="🎯" title={t('trainView.title')} subtitle={`已标难点 ${markedIds.size} 首 · 已背诵 ${recitedIds.size} 首 · 待复习 ${dueCount} 个`} tone="pink" />
 
       <Panel className="!py-4">
         <div className="relative">
@@ -62,7 +64,7 @@ export default function TrainView({ onOpen }: { onOpen: (id: string, tab?: '原�
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="想练哪首？搜诗名 / 作者 / 主题…"
+            placeholder={t('trainView.search')}
             className="tap-target w-full rounded-2xl border-2 border-candy-pink-soft bg-white/80 px-11 py-2.5 text-base font-bold text-ink outline-none placeholder:text-ink-soft/70 focus:border-candy-pink"
           />
         </div>
@@ -70,9 +72,9 @@ export default function TrainView({ onOpen }: { onOpen: (id: string, tab?: '原�
 
       {focusList.length > 0 && (
         <div className="mt-4 space-y-2.5">
-          <p className="text-sm font-extrabold text-ink-soft">我的训练重点</p>
+          <p className="text-sm font-extrabold text-ink-soft">{t('trainView.myFocus')}</p>
           {focusList.map((p, i) => {
-            const t = TONE_STYLE[toneAt(i)]!
+            const ts = TONE_STYLE[toneAt(i)]!
             const m = progress.poemMarks[p.id];
             const r = progress.poemRecite[p.id];
             return (
@@ -81,20 +83,20 @@ export default function TrainView({ onOpen }: { onOpen: (id: string, tab?: '原�
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onOpen(p.id, '研读')}
                 className="flex w-full items-center gap-3 rounded-2xl bg-white/80 p-3 text-left shadow-candy-sm"
-                style={{ background: t.soft }}
+                style={{ background: ts.soft }}
               >
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-lg font-extrabold" style={{ color: t.deep }}>{p.title}</p>
+                  <p className="truncate text-lg font-extrabold" style={{ color: ts.deep }}>{p.title}</p>
                   <p className="text-xs font-bold text-ink-soft">{p.author}·{p.dynasty}</p>
                   <div className="mt-1 flex flex-wrap gap-1.5">
                     {m && (m.chars.length > 0 || m.lines.length > 0) && (
                       <span className="rounded-full bg-candy-orange-soft px-2 py-0.5 text-[11px] font-bold text-candy-orange-deep">
-                        难点 {m.chars.length + m.lines.length}
+                        {t('trainView.difficult', { n: m.chars.length + m.lines.length })}
                       </span>
                     )}
                     {r && (
                       <span className="rounded-full bg-candy-green-soft px-2 py-0.5 text-[11px] font-bold text-candy-green-deep">
-                        背诵最佳 {r.best}·第{r.stage}关
+                        {t('trainView.bestRecite', { best: r.best, stage: r.stage })}
                       </span>
                     )}
                   </div>
@@ -112,16 +114,16 @@ export default function TrainView({ onOpen }: { onOpen: (id: string, tab?: '原�
       {lib.length > 0 && (
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {lib.map((p, i) => {
-            const t = TONE_STYLE[toneAt(i)]!
+            const ts = TONE_STYLE[toneAt(i)]!
             return (
               <motion.button
                 key={p.id}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => onOpen(p.id, '研读')}
                 className="flex min-h-[96px] flex-col items-center justify-center gap-1 rounded-[1.5rem] p-3 text-center shadow-candy-sm"
-                style={{ background: t.soft }}
+                style={{ background: ts.soft }}
               >
-                <span className="line-clamp-2 text-base font-extrabold" style={{ color: t.deep }}>{p.title}</span>
+                <span className="line-clamp-2 text-base font-extrabold" style={{ color: ts.deep }}>{p.title}</span>
                 <span className="text-xs font-bold text-ink-soft">{p.author}</span>
               </motion.button>
             );
@@ -131,7 +133,7 @@ export default function TrainView({ onOpen }: { onOpen: (id: string, tab?: '原�
 
       {focusList.length === 0 && !q && (
         <Panel className="mt-4 text-center text-sm text-ink-soft">
-          还没有训练记录～去「诗库」读诗时点「✏️ 标难点」，或到「研读」做自测、背诵，这里就会自动生成你的训练重点。
+          {t('trainView.empty')}
         </Panel>
       )}
     </div>

@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { useDailyLog } from '@/store/useStore';
+import { useTranslation } from '@/i18n/useTranslation';
 import { dateKey, dayStart } from '@/lib/dailyPlan';
 
 /**
  * 儿童化 30 天日历：圆点网格
- * 最近 30 天，每天一个圆点
+ * {t('kidsCalendar.title')}，每天一个圆点
  * 颜色 4 级（0分钟灰色小点, 1-9分钟浅黄, 10-19分钟黄色, 20+分钟橙色大点）
  * 今天高亮脉冲
  */
@@ -36,13 +37,14 @@ function weekdayLabel(d: Date): string {
 }
 
 export default function KidsCalendar() {
+  const { t } = useTranslation();
   const dailyLog = useDailyLog();
   const [hovered, setHovered] = useState<{ date: string; minutes: number } | null>(null);
 
   const today = dateKey();
   const todayStart = dayStart();
 
-  // 生成最近 30 天的数据
+  // 生成{t('kidsCalendar.title')}的数据
   const days = useMemo(() => {
     const arr: { date: string; minutes: number; isToday: boolean; weekday: string }[] = [];
     for (let i = 29; i >= 0; i--) {
@@ -66,15 +68,15 @@ export default function KidsCalendar() {
   const totalMinutes = days.reduce((s, d) => s + d.minutes, 0);
 
   return (
-    <div className="rounded-[2rem] border-4 border-white bg-gradient-to-br from-candy-blue-soft to-candy-green-soft p-5 shadow-pop sm:p-6">
+    <div className="rounded-[2.2rem] border-4 border-pink-200/90 bg-white/95 p-5 shadow-fluffy sm:p-6 backdrop-blur-xl">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-xl">📅</span>
-          <h2 className="text-lg font-extrabold text-candy-blue-deep">最近 30 天</h2>
+          <h2 className="text-lg font-extrabold text-candy-blue-deep">{t('kidsCalendar.title')}</h2>
         </div>
         <div className="flex items-center gap-3 text-xs font-bold text-ink-soft">
-          <span>📊 {activeDays} 天学习</span>
-          <span>⏱️ {totalMinutes} 分钟</span>
+          <span>📊 {t('kidsCalendar.dayCount', { count: activeDays })}</span>
+          <span>⏱️ {t('kidsCalendar.minutes', { count: totalMinutes })}</span>
         </div>
       </div>
 
@@ -121,27 +123,27 @@ export default function KidsCalendar() {
             animate={{ opacity: 1 }}
             className="text-xs font-bold text-ink-soft"
           >
-            {hovered.date === today ? '今天' : hovered.date.slice(5)} ·{' '}
-            {hovered.minutes > 0 ? `学习了 ${hovered.minutes} 分钟` : '没有学习'}
+            {hovered.date === today ? t('kidsCalendar.today') : hovered.date.slice(5)} ·{' '}
+            {hovered.minutes > 0 ? t('kidsCalendar.learned', { count: hovered.minutes }) : t('kidsCalendar.notStudied')}
           </motion.p>
         ) : (
-          <p className="text-xs font-bold text-ink-soft/50">鼠标移到圆点上看详情</p>
+          <p className="text-xs font-bold text-ink-soft/50">{t('kidsCalendar.hoverHint')}</p>
         )}
       </div>
 
       {/* 图例 */}
       <div className="mt-3 flex flex-wrap items-center justify-center gap-3 text-[10px] font-bold text-ink-soft/60">
         <span className="flex items-center gap-1">
-          <span className="h-2.5 w-2.5 rounded-full bg-gray-300" /> 未学习
+          <span className="h-2.5 w-2.5 rounded-full bg-gray-300" /> {t('kidsCalendar.legendNone')}
         </span>
         <span className="flex items-center gap-1">
-          <span className="h-3 w-3 rounded-full bg-yellow-200 border border-yellow-300" /> 1-9 分钟
+          <span className="h-3 w-3 rounded-full bg-yellow-200 border border-yellow-300" /> {t('kidsCalendar.legendShort')}
         </span>
         <span className="flex items-center gap-1">
-          <span className="h-3.5 w-3.5 rounded-full bg-yellow-400 border border-yellow-500" /> 10-19 分钟
+          <span className="h-3.5 w-3.5 rounded-full bg-yellow-400 border border-yellow-500" /> {t('kidsCalendar.legendMid')}
         </span>
         <span className="flex items-center gap-1">
-          <span className="h-4 w-4 rounded-full bg-orange-400 border border-orange-500" /> 20+ 分钟
+          <span className="h-4 w-4 rounded-full bg-orange-400 border border-orange-500" /> {t('kidsCalendar.legendLong')}
         </span>
       </div>
     </div>

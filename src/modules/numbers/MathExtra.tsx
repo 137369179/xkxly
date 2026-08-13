@@ -10,15 +10,16 @@ import { useStore } from '@/store/useStore';
 import { sfxTap } from '@/lib/sfx';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
 import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
+import { useTranslation } from '@/i18n/useTranslation';
 
 type SubTab = 'mul' | 'div' | 'shape' | 'time' | 'coin';
 
-const SUB_TABS: { id: SubTab; label: string; emoji: string }[] = [
-  { id: 'mul', label: '乘法', emoji: '✖️' },
-  { id: 'div', label: '除法', emoji: '➗' },
-  { id: 'shape', label: '认图形', emoji: '🔺' },
-  { id: 'time', label: '认钟表', emoji: '🕐' },
-  { id: 'coin', label: '认钱币', emoji: '🪙' },
+const SUB_TABS: { id: SubTab; labelKey: string; emoji: string }[] = [
+  { id: 'mul', labelKey: 'mathExtra.subTabs.mul', emoji: '✖️' },
+  { id: 'div', labelKey: 'mathExtra.subTabs.div', emoji: '➗' },
+  { id: 'shape', labelKey: 'mathExtra.subTabs.shape', emoji: '🔺' },
+  { id: 'time', labelKey: 'mathExtra.subTabs.time', emoji: '🕐' },
+  { id: 'coin', labelKey: 'mathExtra.subTabs.coin', emoji: '🪙' },
 ];
 
 const SKILL_MAP: Record<SubTab, string> = {
@@ -49,6 +50,7 @@ function makeQuestion(sub: SubTab, diff: Difficulty): Question {
 }
 
 export function MathExtra() {
+  const { t } = useTranslation();
   const [sub, setSub] = useState<SubTab>('mul');
   const [diff, setDiff, diffMeta] = useAdaptiveDifficultyState(CAT_OF[sub]);
   const [round, setRound] = useState(0);
@@ -82,15 +84,15 @@ export function MathExtra() {
     <div className="space-y-4">
       {/* 子分类 */}
       <div className="flex flex-wrap gap-2">
-        {SUB_TABS.map(t => (
+        {SUB_TABS.map((tb) => (
           <CandyButton
-            key={t.id}
-            tone={sub === t.id ? 'orange' : 'yellow'}
-            variant={sub === t.id ? 'solid' : 'soft'}
+            key={tb.id}
+            tone={sub === tb.id ? 'orange' : 'yellow'}
+            variant={sub === tb.id ? 'solid' : 'soft'}
             size="sm"
-            onClick={() => switchSub(t.id)}
+            onClick={() => switchSub(tb.id)}
           >
-            {t.emoji} {t.label}
+            {tb.emoji} {t(tb.labelKey)}
           </CandyButton>
         ))}
       </div>
@@ -106,7 +108,7 @@ export function MathExtra() {
               size="sm"
               onClick={() => switchDiff(d)}
             >
-              {d === 1 ? '启蒙' : d === 2 ? '进阶' : '挑战'}
+              {t(d === 1 ? 'mathExtra.difficulty.1' : d === 2 ? 'mathExtra.difficulty.2' : 'mathExtra.difficulty.3')}
             </CandyButton>
           ))}
         </div>
@@ -115,7 +117,7 @@ export function MathExtra() {
 
       {/* 答题 */}
       <Panel>
-        <PanelTitle emoji={SUB_TABS.find(t => t.id === sub)!.emoji} title={`${SUB_TABS.find(t => t.id === sub)!.label}练习`} subtitle="5 题一轮" tone="orange" />
+        <PanelTitle emoji={SUB_TABS.find((tb) => tb.id === sub)!.emoji} title={`${t(SUB_TABS.find((tb) => tb.id === sub)!.labelKey)}练习`} subtitle="5 题一轮" tone="orange" />
         <RoundRunner
           key={`${sub}-${diff}-${round}`}
           makeQuestion={make}

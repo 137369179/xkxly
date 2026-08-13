@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from '@/i18n/useTranslation';
 import { motion, AnimatePresence } from 'motion/react';
 import { Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
@@ -69,6 +70,7 @@ function getPetLevel(totalItems: number): number {
 }
 
 export function Companion() {
+  const { t } = useTranslation();
   // 核心加强 O：细粒度 selector，只订阅 dailyLog，星星/徽章变化不再触发重渲染
   const dailyLog = useDailyLog();
   const [petId, setPetId] = useState<string>(() => safeGetItem('companion-pet') || 'cat');
@@ -103,7 +105,7 @@ export function Companion() {
       clearTimeout(timer);
       timer = setTimeout(() => {
         setIsNudging(true);
-        setMessage('点一下这里，小智陪你玩～');
+        setMessage(t('companion.nudge'));
       }, 6000);
     };
 
@@ -139,7 +141,7 @@ export function Companion() {
         {/* 宠物头像 */}
         <button
           onClick={petClick}
-          aria-label={`${pet.name}，${mood === 'sleeping' ? '睡觉中' : mood === 'excited' ? '很兴奋' : '心情不错'}，点击互动`}
+          aria-label={t('companion.clickInteract', { name: pet.name, mood: mood === 'sleeping' ? t('companion.moodSleeping') : mood === 'excited' ? t('companion.moodExcited') : t('companion.moodHappy') })}
           className="relative grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-candy-yellow-soft text-4xl active:scale-95"
         >
           <motion.span
@@ -179,7 +181,7 @@ export function Companion() {
             onClick={() => setShowPicker(s => !s)}
             className="mt-1 text-[11px] font-bold text-ink-soft"
           >
-            🔄 换伙伴
+            {t('companion.switchPet')}
           </button>
         </div>
       </div>

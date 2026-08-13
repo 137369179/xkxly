@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { sfxTap, sfxCorrect } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
 import { CandyButton } from '@/components/ui/Button';
+import { useTranslation } from '@/i18n/useTranslation';
 
 type Grid = number[][];
 const SIZES = [3, 4];
@@ -50,6 +51,7 @@ function isSolved(g: Grid, s: number): boolean {
 }
 
 export function SlidingPuzzle() {
+  const { t } = useTranslation();
   const [size, setSize] = useState(3);
   const [grid, setGrid] = useState<Grid>(() => genGrid(3));
   const [moves, setMoves] = useState(0);
@@ -81,8 +83,8 @@ export function SlidingPuzzle() {
 
   return (
     <div className="card-candy p-4 sm:p-6">
-      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">🧩 拼图还原</h3>
-      <p className="mb-3 text-center text-xs font-bold text-ink-soft">把数字按 1,2,3... 顺序排好</p>
+      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">{t('slidingPuzzle.title')}</h3>
+      <p className="mb-3 text-center text-xs font-bold text-ink-soft">{t('slidingPuzzle.instruction')}</p>
       <div className="mb-3 flex justify-center gap-2">
         {SIZES.map(s => (
           <button key={s} onClick={()=>newGame(s)}
@@ -94,7 +96,7 @@ export function SlidingPuzzle() {
         ))}
       </div>
       <div className="mb-3 flex justify-between text-xs font-bold text-ink-soft">
-        <span>步数 {moves}</span>{done && <span className="text-candy-green-deep">🎉 完成！</span>}
+        <span>{t('slidingPuzzle.moves', { moves })}</span>{done && <span className="text-candy-green-deep">{t('slidingPuzzle.done')}</span>}
       </div>
       <div className="mx-auto" style={{ maxWidth: '320px' }}>
         <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${size}, 1fr)` }}>

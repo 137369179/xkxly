@@ -10,12 +10,7 @@
  */
 
 import type { AdaptiveDifficultyMeta } from '@/lib/adaptChain';
-
-const DEFAULT_LABELS: Record<1 | 2 | 3, string> = {
-  1: '启蒙',
-  2: '进阶',
-  3: '挑战',
-};
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface Props {
   meta: AdaptiveDifficultyMeta;
@@ -25,7 +20,8 @@ interface Props {
 }
 
 export function AdaptiveDifficultyHint({ meta, labels, className }: Props) {
-  const name = labels?.[meta.recommended] ?? DEFAULT_LABELS[meta.recommended];
+  const { t } = useTranslation();
+  const name = labels?.[meta.recommended] ?? t(`adaptiveDifficultyHint.level${meta.recommended}`);
 
   return (
     <p
@@ -34,30 +30,30 @@ export function AdaptiveDifficultyHint({ meta, labels, className }: Props) {
       {meta.auto && meta.pending ? (
         <>
           <span aria-hidden>✨</span>
-          <span>小智觉得你可以试试「{name}」了</span>
+          <span>{t('adaptiveDifficultyHint.aiSuggest', { name })}</span>
           <button
             type="button"
             onClick={meta.syncNow}
             className="rounded-full bg-white/70 px-2 py-0.5 font-bold text-ink-soft underline-offset-2 transition hover:bg-white hover:underline"
           >
-            好，换过去
+            {t('adaptiveDifficultyHint.aiConfirmBtn')}
           </button>
         </>
       ) : meta.auto ? (
         <>
           <span aria-hidden>🤖</span>
-          <span>小智根据你最近的表现，选了「{name}」</span>
+          <span>{t('adaptiveDifficultyHint.aiChose', { name })}</span>
         </>
       ) : (
         <>
           <span aria-hidden>✋</span>
-          <span>你自己选的难度</span>
+          <span>{t('adaptiveDifficultyHint.manualChose')}</span>
           <button
             type="button"
             onClick={meta.reset}
             className="rounded-full bg-white/70 px-2 py-0.5 font-bold text-ink-soft underline-offset-2 transition hover:bg-white hover:underline"
           >
-            交给小智（建议「{name}」）
+            {t('adaptiveDifficultyHint.resetBtn')}建议「{name}」）
           </button>
         </>
       )}

@@ -6,8 +6,10 @@ import { useState } from 'react';
 import { sfxTap, sfxWin, sfxWrong } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { CandyButton } from '@/components/ui/Button';
+import { useTranslation } from '@/i18n/useTranslation';
 
 export function RabbitRunMath() {
+  const { t } = useTranslation();
   const [step, setStep] = useState(0);
   const [num1, setNum1] = useState(3);
   const [num2, setNum2] = useState(2);
@@ -33,7 +35,7 @@ export function RabbitRunMath() {
       celebrateSmall();
       const newStep = step + 1;
       setStep(newStep);
-      setMsg('🎉 答对啦！小兔跨过了蘑菇障碍！');
+      setMsg(t('rabbitRunMath.correctMsg'));
       if (newStep >= targetStep) {
         celebrateBig();
       } else {
@@ -41,7 +43,7 @@ export function RabbitRunMath() {
       }
     } else {
       sfxWrong();
-      setMsg('再想想哦～加油！');
+      setMsg(t('rabbitRunMath.tryAgain'));
     }
   };
 
@@ -55,11 +57,11 @@ export function RabbitRunMath() {
     <div className="space-y-5 rounded-3xl border-4 border-amber-200 bg-amber-50/50 p-6 shadow-fluffy">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-xl font-black text-amber-900">🐇 3D 羊毛毡小兔障碍赛跑</h3>
-          <p className="text-sm font-bold text-amber-700">答对口算助小兔冲向终点大草莓！</p>
+          <h3 className="text-xl font-black text-amber-900">{t('rabbitRunMath.title')}</h3>
+          <p className="text-sm font-bold text-amber-700">{t('rabbitRunMath.subtitle')}</p>
         </div>
         <span className="rounded-full bg-amber-200 px-3 py-1 text-xs font-black text-amber-900">
-          进度: {step} / {targetStep} 关
+          {t('rabbitRunMath.progress', { step, target: targetStep })}
         </span>
       </div>
 
@@ -88,9 +90,9 @@ export function RabbitRunMath() {
       {isWin ? (
         <div className="space-y-4 text-center">
           <div className="text-6xl animate-bounce">🏆</div>
-          <h4 className="text-2xl font-black text-amber-900">恭喜！小兔跑赢赛跑吃到大草莓啦！</h4>
+          <h4 className="text-2xl font-black text-amber-900">{t('rabbitRunMath.winMsg')}</h4>
           <CandyButton tone="orange" size="lg" onClick={resetGame}>
-            再玩一次 🔄
+            {t('rabbitRunMath.resetBtn')}
           </CandyButton>
         </div>
       ) : (
@@ -108,7 +110,7 @@ export function RabbitRunMath() {
               className="w-24 rounded-2xl border-4 border-amber-300 bg-white px-3 py-2 text-center text-2xl font-black text-amber-900 outline-none"
             />
             <CandyButton tone="orange" size="md" onClick={checkAnswer}>
-              提交 🚀
+              {t('rabbitRunMath.submit')}
             </CandyButton>
           </div>
 

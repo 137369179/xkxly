@@ -4,6 +4,7 @@ import { EQUIPMENT } from '@/data/equipment';
 import { getOwnedEquipment, calcTotalBonus } from '@/data/equipment';
 import { cn } from '@/lib/utils';
 import { sfxTap } from '@/lib/sfx';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface EquipmentPanelProps {
   ownedFragments: string[];
@@ -22,6 +23,7 @@ const SLOT_LABELS: Record<string, { label: string; emoji: string }> = {
 };
 
 export function EquipmentPanel({ ownedFragments, ownedEquipment, equippedItems, onToggle }: EquipmentPanelProps) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const owned = getOwnedEquipment(ownedFragments);
   const bonus = calcTotalBonus(ownedFragments);
@@ -85,7 +87,7 @@ export function EquipmentPanel({ ownedFragments, ownedEquipment, equippedItems, 
                   >
                     <span className="text-3xl">{isOwned ? eq.emoji : '❓'}</span>
                     <span className="text-[11px] font-extrabold text-ink">{isOwned ? eq.name : '???'}</span>
-                    <span className="text-[9px] font-bold text-ink-soft">{slotInfo.emoji} {slotInfo.label}</span>
+                    <span className="text-[9px] font-bold text-ink-soft">{slotInfo.emoji} {t(`equipmentPanel.${eq.slot}`)}</span>
                     {isOwned && (
                       <span className="text-[9px] font-bold text-amber-600">
                         {eq.bonus.extraHp ? `❤️+${eq.bonus.extraHp} ` : ''}

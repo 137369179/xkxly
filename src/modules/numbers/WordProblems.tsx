@@ -11,17 +11,19 @@ import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { randomPraise, randomEncourage } from '@/lib/speech';
 import { getProblemsByLevel } from '@/data/wordProblems';
+import { useTranslation } from '@/i18n/useTranslation';
 
 
 type Level = 1 | 2 | 3;
 
-const LEVEL_INFO: Record<Level, { label: string; emoji: string; tone: 'green' | 'blue' | 'purple' }> = {
-  1: { label: '入门', emoji: '🌱', tone: 'green' },
-  2: { label: '进阶', emoji: '🌿', tone: 'blue' },
-  3: { label: '挑战', emoji: '🌳', tone: 'purple' },
+const LEVEL_INFO: Record<Level, { labelKey: string; emoji: string; tone: 'green' | 'blue' | 'purple' }> = {
+  1: { labelKey: 'wordProblems.level1', emoji: '🌱', tone: 'green' },
+  2: { labelKey: 'wordProblems.level2', emoji: '🌿', tone: 'blue' },
+  3: { labelKey: 'wordProblems.level3', emoji: '🌳', tone: 'purple' },
 };
 
 export function WordProblems() {
+  const { t } = useTranslation();
   const [level, setLevel] = useState<Level>(1);
   const [idx, setIdx] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
@@ -85,14 +87,14 @@ export function WordProblems() {
       <div className="space-y-4">
         <Panel className="text-center">
           <div className="text-6xl">{stars === 3 ? '🏆' : '🎉'}</div>
-          <p className="mt-3 text-xl font-extrabold text-ink">应用题挑战完成！</p>
+          <p className="mt-3 text-xl font-extrabold text-ink">{t('wordProblems.done')}</p>
           <p className="mt-1 text-base font-bold text-ink-soft">
             答对 {correctCount} / {problems.length} 题 · {'⭐'.repeat(stars)}
           </p>
           <div className="mt-4 flex justify-center gap-2">
-            <CandyButton tone="purple" size="sm" onClick={restart}>🔄 再做一遍</CandyButton>
+            <CandyButton tone="purple" size="sm" onClick={restart}>{t('wordProblems.again')}</CandyButton>
             <CandyButton tone="green" size="sm" onClick={() => changeLevel(level === 1 ? 2 : level === 2 ? 3 : 1)}>
-              {level < 3 ? `➡️ ${LEVEL_INFO[(level + 1) as Level].label}` : '🔄 换难度'}
+              {level < 3 ? `➡️ ${t(LEVEL_INFO[(level + 1) as Level].labelKey)}` : t('wordProblems.changeDiff')}
             </CandyButton>
           </div>
         </Panel>
@@ -104,7 +106,7 @@ export function WordProblems() {
 
   return (
     <div className="space-y-4">
-      <PageHeader emoji="📐" title="应用题" subtitle="生活中的数学问题" tone={info.tone} />
+      <PageHeader emoji="📐" title={t('wordProblems.title')} subtitle={t('wordProblems.subtitle')} tone={info.tone} />
 
       <div className="flex gap-2">
         {([1, 2, 3] as Level[]).map(l => (
@@ -115,7 +117,7 @@ export function WordProblems() {
             size="sm"
             onClick={() => changeLevel(l)}
           >
-            {LEVEL_INFO[l]!.emoji} {LEVEL_INFO[l]!.label}
+            {LEVEL_INFO[l]!.emoji} {t(LEVEL_INFO[l]!.labelKey)}
           </CandyButton>
         ))}
       </div>
@@ -170,13 +172,13 @@ export function WordProblems() {
 
         {picked !== null && (
           <CandyButton tone="green" size="lg" fullWidth onClick={next}>
-            {idx + 1 >= problems.length ? '🏁 看看成绩' : '➡️ 下一题'}
+            {idx + 1 >= problems.length ? t('wordProblems.showResult') : t('wordProblems.nextQ')}
           </CandyButton>
         )}
       </Panel>
 
       <p className="text-center text-sm font-bold text-ink-soft">
-        第 {idx + 1} / {problems.length} 题
+        {t('wordProblems.progress', { n: idx + 1, total: problems.length })}
       </p>
     </div>
   );

@@ -10,6 +10,7 @@ import { SUBJECTS } from '@/lib/srs';
 
 import { TONE_STYLE, type Tone } from '@/lib/tones';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface CategoryMeta {
   key: string;
@@ -91,6 +92,7 @@ function StreakBar({ slot }: { slot: ChainSlot }) {
 }
 
 export function ChainDashboard() {
+  const { t } = useTranslation();
   const [snapshot, setSnapshot] = useState(() => getChainSnapshot());
   const [confirmReset, setConfirmReset] = useState<string | null>(null);
 
@@ -121,7 +123,7 @@ export function ChainDashboard() {
   return (
     <div className="card-candy p-4 sm:p-6">
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-lg font-extrabold text-ink">🧬 自适应学习链</h3>
+        <h3 className="text-lg font-extrabold text-ink">{t('chainDashboard.title')}</h3>
         <div className="flex items-center gap-2">
           <span className="text-sm font-bold text-ink-soft">
             综合等级 {avgLv} / 5

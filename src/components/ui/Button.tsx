@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { TONE_STYLE, type Tone } from '@/lib/tones';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 import { sfxTap } from '@/lib/sfx';
 
 type Size = 'sm' | 'md' | 'lg' | 'xl';
@@ -57,7 +58,8 @@ export function CandyButton({
   disabled,
   ...rest
 }: CandyButtonProps) {
-  const t = TONE_STYLE[tone]!!
+  const { t: translate } = useTranslation();
+  const ts = TONE_STYLE[tone]!!
 
   // 二次确认状态：armed=true 表示已进入"待确认"态，等待第二次点击
   const [armed, setArmed] = useState(false);
@@ -72,15 +74,22 @@ export function CandyButton({
 
   const style =
     variant === 'solid'
-      ? { background: t.main, color: t.on, boxShadow: `0 5px 0 0 ${t.deep}` }
+      ? {
+          background: `linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0.04) 100%), ${ts.main}`,
+          color: ts.on,
+          boxShadow: `0 6px 0 0 ${ts.deep}, inset 0 2px 0 0 rgba(255,255,255,0.45)`,
+        }
       : variant === 'soft'
-        ? { background: t.soft, color: t.deep, boxShadow: `0 4px 0 0 ${t.main}33` }
-        : { background: 'transparent', color: t.deep, boxShadow: 'none' };
+        ? {
+            background: ts.soft,
+            color: ts.deep,
+            boxShadow: `0 4px 0 0 ${ts.main}44, inset 0 1.5px 0 0 rgba(255,255,255,0.7)`,
+          }
+        : { background: 'transparent', color: ts.deep, boxShadow: 'none' };
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (requireConfirm) {
       if (armed) {
-        // 第二次点击（确认）：执行真正的 onClick，复位待确认态
         if (confirmTimer.current) {
           clearTimeout(confirmTimer.current);
           confirmTimer.current = null;
@@ -90,7 +99,6 @@ export function CandyButton({
         onClick?.(e);
         return;
       }
-      // 第一次点击：进入待确认态，启动超时自动恢复
       setArmed(true);
       confirmTimer.current = setTimeout(() => {
         confirmTimer.current = null;
@@ -109,9 +117,9 @@ export function CandyButton({
       onClick={handleClick}
       style={style}
       className={cn(
-        'no-select relative inline-flex items-center justify-center gap-2 font-bold',
-        'transition-all duration-100 ease-out select-none',
-        'active:translate-y-[4px] active:shadow-none',
+        'no-select relative inline-flex items-center justify-center gap-2 font-black tracking-wide',
+        'transition-all duration-100 ease-out select-none border border-white/30',
+        'active:translate-y-[4px] active:shadow-none hover:brightness-105',
         'focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-candy-purple/60',
         'disabled:cursor-not-allowed disabled:opacity-45 disabled:active:translate-y-0',
         SIZE[size],
@@ -121,7 +129,7 @@ export function CandyButton({
       )}
     >
       {requireConfirm && armed ? (
-        <span className="whitespace-nowrap">再按一次确认</span>
+        <span className="whitespace-nowrap">{translate('button.confirmAgain')}</span>
       ) : (
         <>
           {icon}
@@ -142,7 +150,7 @@ export function IconButton({
   label,
   ...rest
 }: Omit<CandyButtonProps, 'size' | 'variant'> & { label: string }) {
-  const t = TONE_STYLE[tone]!!
+  const ts = TONE_STYLE[tone]!!;
   return (
     <button
       {...rest}
@@ -152,10 +160,14 @@ export function IconButton({
         if (!silent) sfxTap();
         onClick?.(e);
       }}
-      style={{ background: t.soft, color: t.deep, boxShadow: `0 4px 0 0 ${t.main}44` }}
+      style={{
+        background: ts.soft,
+        color: ts.deep,
+        boxShadow: `0 5px 0 0 ${ts.main}55, inset 0 2px 0 0 rgba(255,255,255,0.7)`,
+      }}
       className={cn(
-        'no-select grid h-12 w-12 place-items-center rounded-full text-xl font-bold',
-        'transition-all duration-100 active:translate-y-[3px] active:shadow-none',
+        'no-select grid h-12 w-12 place-items-center rounded-full text-xl font-black border-2 border-white/60',
+        'transition-all duration-100 active:translate-y-[4px] active:shadow-none hover:scale-105',
         'focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-candy-purple/60',
         className,
       )}

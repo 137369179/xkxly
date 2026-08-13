@@ -12,6 +12,7 @@
  *   5. 位置温和 —— 顶部 banner 而非中央 modal，不遮挡学习内容
  */
 import { useEffect, useState } from 'react';
+import { useTranslation } from '@/i18n/useTranslation';
 import { motion, AnimatePresence } from 'motion/react';
 import { onSwUpdate, type SwUpdateInfo } from '@/lib/sw';
 import { sfxTap } from '@/lib/sfx';
@@ -21,6 +22,7 @@ const SESSION_KEY = 'sw-update-notified';
 const AUTO_DISMISS_MS = 15_000;
 
 export function SwUpdateToast() {
+  const { t } = useTranslation();
   const [info, setInfo] = useState<SwUpdateInfo | null>(null);
 
   useEffect(() => {
@@ -67,9 +69,9 @@ export function SwUpdateToast() {
           <div className="flex items-center gap-3">
             <span className="text-2xl shrink-0" aria-hidden>🌱</span>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-black text-ink">应用已更新到最新版</p>
+              <p className="text-sm font-black text-ink">{t('swUpdateToast.title')}</p>
               <p className="text-xs font-semibold text-ink/60">
-                刷新一下就能用新版啦{info.clearedCaches > 0 ? `（已清理 ${info.clearedCaches} 项旧缓存）` : ''}
+                {t('swUpdateToast.body')}{info.clearedCaches > 0 ? t('swUpdateToast.cleared', { count: info.clearedCaches }) : ''}
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-2">
@@ -77,14 +79,14 @@ export function SwUpdateToast() {
                 onClick={handleRefresh}
                 className="min-h-[40px] rounded-xl bg-candy-green px-3 text-sm font-extrabold text-white shadow-sm transition active:translate-y-[2px]"
               >
-                立即刷新
+                {t('swUpdateToast.refreshNow')}
               </button>
               <button
                 onClick={handleDismiss}
-                aria-label="稍后再说"
+                aria-label={t('swUpdateToast.later')}
                 className="min-h-[40px] min-w-[40px] rounded-xl px-2 text-sm font-bold text-ink/40 transition hover:text-ink/70"
               >
-                稍后
+                {t('swUpdateToast.later')}
               </button>
             </div>
           </div>

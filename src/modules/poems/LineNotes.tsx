@@ -10,8 +10,10 @@ import { speak } from '@/lib/speech';
 import { moodOfPoem } from '@/lib/chant';
 import { sfxTap } from '@/lib/sfx';
 import { motion } from 'motion/react';
+import { useTranslation } from '@/i18n/useTranslation';
 
 export function LineNotes() {
+  const { t } = useTranslation();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const annotatedPoems = useMemo(() => {
@@ -31,17 +33,17 @@ export function LineNotes() {
           onClick={() => { sfxTap(); setSelectedId(null); }}
           className="rounded-full bg-candy-pink-soft px-4 py-1.5 text-sm font-bold text-candy-pink-deep"
         >
-          ◀️ 返回
+          {t('common.back')}
         </button>
 
         <Panel className="text-center">
           <h2 className="text-xl font-black text-ink">《{poem.title}》</h2>
           <p className="text-sm font-bold text-ink-soft">{poem.author}</p>
-          <button aria-label="🔊 朗读"
+          <button aria-label={t("lineNotes.read")}
             onClick={() => speak(poem.lines.join('\n'), { rate: 0.7, module: 'poem', moodKey: moodOfPoem(poem).key })}
             className="mt-2 rounded-full bg-candy-pink-soft px-3 py-1 text-xs font-bold text-candy-pink-deep"
           >
-            🔊 朗读
+            {t('lineNotes.read')}
           </button>
         </Panel>
 
@@ -97,11 +99,11 @@ export function LineNotes() {
 
   return (
     <div className="space-y-4">
-      <PageHeader emoji="📖" title="逐句串讲" subtitle="权威注释逐句解读" tone="pink" />
+      <PageHeader emoji="📖" title={t('lineNotes.title')} subtitle={t('lineNotes.subtitle')} tone="pink" />
 
       {annotatedPoems.length === 0 ? (
         <Panel className="text-center">
-          <p className="text-sm font-bold text-ink-soft">暂无串讲数据</p>
+          <p className="text-sm font-bold text-ink-soft">{t('lineNotes.empty')}</p>
         </Panel>
       ) : (
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">

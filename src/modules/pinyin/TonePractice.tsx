@@ -12,6 +12,7 @@ import { useStore } from '@/store/useStore';
 import { sfxTap, sfxCorrect, sfxWrong, sfxStar } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { randomPraise, randomEncourage, speak } from '@/lib/speech';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface ToneQuestion {
   base: string; // 如 "ma"
@@ -40,15 +41,16 @@ function makeQuestion(): ToneQuestion {
 }
 
 const TONE_OPTIONS = [
-  { tone: 1 as const, label: '̄', name: '一声', emoji: '➡️' },
-  { tone: 2 as const, label: '́', name: '二声', emoji: '↗️' },
-  { tone: 3 as const, label: '̌', name: '三声', emoji: '⤵️' },
-  { tone: 4 as const, label: '̀', name: '四声', emoji: '⬇️' },
+  { tone: 1 as const, label: '̄', nameKey: 'tonePractice.tone1', emoji: '➡️' },
+  { tone: 2 as const, label: '́', nameKey: 'tonePractice.tone2', emoji: '↗️' },
+  { tone: 3 as const, label: '̌', nameKey: 'tonePractice.tone3', emoji: '⤵️' },
+  { tone: 4 as const, label: '̀', nameKey: 'tonePractice.tone4', emoji: '⬇️' },
 ];
 
 const QUESTIONS_PER_ROUND = 10;
 
 export function TonePractice() {
+  const { t } = useTranslation();
   const [questions, setQuestions] = useState<ToneQuestion[]>(() =>
     Array.from({ length: QUESTIONS_PER_ROUND }, makeQuestion)
   );
@@ -117,12 +119,12 @@ export function TonePractice() {
       <div className="space-y-4">
         <Panel className="text-center">
           <div className="text-6xl">{stars === 3 ? '🏆' : '🎉'}</div>
-          <p className="mt-3 text-xl font-extrabold text-ink">声调练习完成！</p>
+          <p className="mt-3 text-xl font-extrabold text-ink">{t('tonePractice.done')}</p>
           <p className="mt-1 text-base font-bold text-ink-soft">
             答对 {correct} / {questions.length} · {'⭐'.repeat(stars)}
           </p>
           <CandyButton tone="blue" size="lg" fullWidth className="mt-4" onClick={restart}>
-            🔄 再来一轮
+            {t('tonePractice.again')}
           </CandyButton>
         </Panel>
       </div>
@@ -131,14 +133,14 @@ export function TonePractice() {
 
   return (
     <div className="space-y-4">
-      <PageHeader emoji="🎵" title="声调练习" subtitle="听一听，选正确声调" tone="blue" />
+      <PageHeader emoji="🎵" title={t('tonePractice.title')} subtitle={t('tonePractice.subtitle')} tone="blue" />
 
       <ProgressBar value={idx + 1} max={questions.length} tone="blue" />
 
       <Panel key={`tone-${idx}`} className="space-y-5 text-center">
         {/* 题目展示 */}
         <div>
-          <p className="text-sm font-bold text-ink-soft">听一听这个音节是第几声？</p>
+          <p className="text-sm font-bold text-ink-soft">{t('tonePractice.listenQuestion')}</p>
           <div className="my-4 text-6xl font-black text-candy-blue-deep">
             {picked !== null ? q.display : q.base}
           </div>
@@ -146,7 +148,7 @@ export function TonePractice() {
 
         {/* 播放按钮 */}
         <CandyButton tone="blue" variant="soft" size="sm" onClick={() => playSound(q.tone)}>
-          🔊 再听一遍
+          {t('tonePractice.listenAgain')}
         </CandyButton>
 
         {/* 声调选项 */}
@@ -175,7 +177,7 @@ export function TonePractice() {
                   )}
                 </span>
                 <span className="mt-1 text-xs font-bold text-ink-soft">
-                  {opt.emoji} {opt.name}
+                  {opt.emoji} {t(opt.nameKey)}
                 </span>
                 {show && isAnswer && <span className="text-xs">✅</span>}
                 {show && isPicked && !isAnswer && <span className="text-xs">❌</span>}
@@ -186,13 +188,13 @@ export function TonePractice() {
 
         {picked !== null && (
           <CandyButton tone="green" size="lg" fullWidth onClick={next}>
-            {idx + 1 >= questions.length ? '🏁 看成绩' : '➡️ 下一题'}
+            {idx + 1 >= questions.length ? t('tonePractice.showResult') : t('tonePractice.nextQ')}
           </CandyButton>
         )}
       </Panel>
 
       <p className="text-center text-sm font-bold text-ink-soft">
-        第 {idx + 1} / {questions.length} 题
+        {t('tonePractice.progress', { n: idx + 1, total: questions.length })}
       </p>
     </div>
   );

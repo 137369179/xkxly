@@ -12,6 +12,7 @@ import { moodOfPoem } from '@/lib/chant';
 import { sfxTap, sfxStar } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 import type { Poem } from '@/types';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface ReciteRecorderProps {
   poem: Poem;
@@ -20,6 +21,7 @@ interface ReciteRecorderProps {
 type Phase = 'idle' | 'recording' | 'recorded' | 'playing';
 
 export function ReciteRecorder({ poem }: ReciteRecorderProps) {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<Phase>('idle');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [duration, setDuration] = useState(0);
@@ -84,7 +86,7 @@ export function ReciteRecorder({ poem }: ReciteRecorderProps) {
         setDuration(Math.floor((Date.now() - startTimeRef.current) / 1000));
       }, 200);
     } catch (err) {
-      setError('无法访问麦克风，请检查权限设置');
+      setError(t('reciteRecorder.micError'));
       setPhase('idle');
     }
   };
@@ -127,7 +129,7 @@ export function ReciteRecorder({ poem }: ReciteRecorderProps) {
 
   return (
     <Panel>
-      <PanelTitle emoji="🎙️" title="录音背诵" subtitle="录下你的朗诵，和范读对比" tone="pink" />
+      <PanelTitle emoji="🎙️" title={t('reciteRecorder.title')} subtitle={t('reciteRecorder.subtitle')} tone="pink" />
 
       {/* 诗文展示 */}
       <div className="mb-4 rounded-2xl bg-candy-pink-soft p-3">
@@ -139,7 +141,7 @@ export function ReciteRecorder({ poem }: ReciteRecorderProps) {
       {/* 范读 */}
       <div className="mb-3 flex justify-center">
         <CandyButton tone="blue" variant="soft" size="sm" onClick={playOriginal}>
-          🔊 听范读
+          {t('reciteRecorder.listen')}
         </CandyButton>
       </div>
 
@@ -147,7 +149,7 @@ export function ReciteRecorder({ poem }: ReciteRecorderProps) {
       {phase === 'idle' && (
         <div className="text-center">
           <CandyButton tone="pink" size="lg" onClick={startRecording}>
-            🎙️ 开始录音
+            {t('reciteRecorder.start')}
           </CandyButton>
           {error && <p className="mt-2 text-sm font-bold text-candy-red-deep">{error}</p>}
         </div>
@@ -160,7 +162,7 @@ export function ReciteRecorder({ poem }: ReciteRecorderProps) {
             <span className="text-lg font-extrabold text-candy-red-deep">录音中… {formatTime(duration)}</span>
           </div>
           <CandyButton tone="pink" size="lg" onClick={stopRecording}>
-            ⏹️ 停止录音
+            {t('reciteRecorder.stop')}
           </CandyButton>
 
         </div>
@@ -168,7 +170,7 @@ export function ReciteRecorder({ poem }: ReciteRecorderProps) {
 
       {(phase === 'recorded' || phase === 'playing') && audioUrl && (
         <div className="space-y-3 text-center">
-          <p className="text-sm font-bold text-ink-soft">录音时长：{formatTime(duration)}</p>
+          <p className="text-sm font-bold text-ink-soft">{t('reciteRecorder.duration', { time: formatTime(duration) })}</p>
           <audio
             ref={audioRef}
             src={audioUrl}
@@ -177,17 +179,17 @@ export function ReciteRecorder({ poem }: ReciteRecorderProps) {
           />
           <div className="flex justify-center gap-2">
             <CandyButton tone="green" size="sm" onClick={playRecording}>
-              ▶️ 播放录音
+              {t('reciteRecorder.play')}
             </CandyButton>
             <CandyButton tone="blue" variant="soft" size="sm" onClick={playOriginal}>
-              🔊 听范读
+              {t('reciteRecorder.listen')}
             </CandyButton>
             <CandyButton tone="purple" variant="soft" size="sm" onClick={reset}>
-              🔄 重新录
+              {t('reciteRecorder.retry')}
             </CandyButton>
           </div>
           <CandyButton tone="green" size="lg" fullWidth onClick={() => { sfxStar(); celebrateSmall(); }}>
-            ✅ 我读完啦！
+            {t('reciteRecorder.done')}
           </CandyButton>
         </div>
       )}

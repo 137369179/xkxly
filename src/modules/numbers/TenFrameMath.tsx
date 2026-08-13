@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface TenFrameProblem {
   a: number; // 7
@@ -46,6 +47,7 @@ const SUB_PROBLEMS: SubProblem[] = [
 ];
 
 export function TenFrameMath() {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<'add' | 'sub'>('add');
   const [idx, setIdx] = useState(0);
   const [step, setStep] = useState<'initial' | 'action' | 'done'>('initial');
@@ -91,7 +93,7 @@ export function TenFrameMath() {
             mode === 'add' ? 'bg-orange-500 text-white shadow-sm' : 'bg-orange-100 text-orange-800'
           }`}
         >
-          ➕ 凑十法 (加法)
+          {t('tenFrameMath.makeTen')}
         </button>
         <button
           onClick={() => { setMode('sub'); setStep('initial'); }}
@@ -99,7 +101,7 @@ export function TenFrameMath() {
             mode === 'sub' ? 'bg-purple-500 text-white shadow-sm' : 'bg-purple-100 text-purple-800'
           }`}
         >
-          ➖ 破十法 (减法)
+          {t('tenFrameMath.breakTen')}
         </button>
       </div>
 
@@ -127,19 +129,19 @@ export function TenFrameMath() {
           <div className="flex justify-center gap-3">
             {step === 'initial' && (
               <CandyButton tone="purple" size="md" onClick={handleMakeTen}>
-                ✨ 第一步：借几凑十？(借 {addProb.makeTen} 个)
+                {t('tenFrameMath.step1Add', { n: addProb.makeTen })}
               </CandyButton>
             )}
 
             {step === 'action' && (
               <CandyButton tone="orange" size="md" onClick={handleComplete}>
-                🎉 第二步：算总数！(10 + {addProb.remain})
+                {t('tenFrameMath.step2Add', { n: addProb.remain })}
               </CandyButton>
             )}
 
             {step === 'done' && (
               <CandyButton tone="green" size="md" onClick={handleNext}>
-                🚀 算得真棒！下一题 ➔
+                {t('tenFrameMath.nextAdd')}
               </CandyButton>
             )}
           </div>
@@ -164,19 +166,19 @@ export function TenFrameMath() {
           <div className="flex justify-center gap-3">
             {step === 'initial' && (
               <CandyButton tone="purple" size="md" onClick={handleBreakTen}>
-                ✨ 第一步：破十！(10 减 {subProb.sub} 剩 {subProb.breakTen})
+                {t('tenFrameMath.step1Sub', { sub: subProb.sub, remain: subProb.breakTen })}
               </CandyButton>
             )}
 
             {step === 'action' && (
               <CandyButton tone="orange" size="md" onClick={handleComplete}>
-                🎉 第二步：加上余数！({subProb.breakTen} + {subProb.remain})
+                {t('tenFrameMath.step2Sub', { n1: subProb.breakTen, n2: subProb.remain })}
               </CandyButton>
             )}
 
             {step === 'done' && (
               <CandyButton tone="green" size="md" onClick={handleNext}>
-                🚀 破十成功！下一题 ➔
+                {t('tenFrameMath.nextSub')}
               </CandyButton>
             )}
           </div>

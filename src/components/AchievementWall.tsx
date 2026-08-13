@@ -7,6 +7,7 @@ import { Panel, PanelTitle } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { useProgress } from '@/store/useStore';
 import type { BadgeDef } from '@/types';
+import { useTranslation } from '@/i18n/useTranslation';
 
 /**
  * 成就墙
@@ -63,6 +64,7 @@ function fmtDate(ts: number | undefined): string {
 }
 
 export function AchievementWall() {
+  const { t: translate } = useTranslation();
   const progress = useProgress();
   const owned = useMemo(() => new Set(progress.badges), [progress.badges]);
 
@@ -88,7 +90,7 @@ export function AchievementWall() {
             <PanelTitle
               emoji={cfg.emoji}
               title={cfg.label}
-              subtitle={`${done} / ${list.length} 已解锁`}
+              subtitle={translate('achievementWall.unlockedCount', { done, total: list.length })}
               tone={cfg.tone}
             />
             <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 sm:gap-3 lg:grid-cols-6">
@@ -124,8 +126,9 @@ function Medal({
   meter?: [number, number];
   tier: Tier;
 }) {
+  const { t: translate } = useTranslation();
   const cfg = TIER_CONFIG[tier]!!
-  const t = TONE_STYLE[badge.tone ?? 'blue']!
+  const ts = TONE_STYLE[badge.tone ?? 'blue']!
   return (
     <motion.div
       initial={{ scale: 0.9, opacity: 0 }}
@@ -144,7 +147,7 @@ function Medal({
       <div
         className={cn('grid h-14 w-14 place-items-center rounded-full text-3xl', !unlocked && 'grayscale opacity-40')}
         style={{
-          background: unlocked ? t.soft : '#E6E2EE',
+          background: unlocked ? ts.soft : '#E6E2EE',
           border: unlocked ? `3px solid ${cfg.ring}` : '3px solid #CFC8DA',
         }}
       >
@@ -152,13 +155,13 @@ function Medal({
       </div>
       <span
         className="line-clamp-1 text-[11px] font-extrabold"
-        style={{ color: unlocked ? t.deep : '#8B7F96' }}
+        style={{ color: unlocked ? ts.deep : '#8B7F96' }}
       >
         {badge.name}
       </span>
       {unlocked ? (
         <span className="text-[10px] font-bold text-candy-green-deep">
-          ✅ {date || '已解锁'}
+          {date ? `✅ ${date}` : `✅ ${translate('achievementWall.unlocked')}`}
         </span>
       ) : meter ? (
         <div className="w-full">

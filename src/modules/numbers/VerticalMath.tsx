@@ -6,14 +6,15 @@ import { useState, useMemo } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap } from '@/lib/sfx';
+import { useTranslation } from '@/i18n/useTranslation';
 
 type Op = 'add' | 'sub' | 'mul' | 'div';
 
-const OPS: { id: Op; label: string; emoji: string }[] = [
-  { id: 'add', label: '加法', emoji: '➕' },
-  { id: 'sub', label: '减法', emoji: '➖' },
-  { id: 'mul', label: '乘法', emoji: '✖️' },
-  { id: 'div', label: '除法', emoji: '➗' },
+const OPS: { id: Op; labelKey: string; emoji: string }[] = [
+  { id: 'add', labelKey: 'verticalMath.op.add', emoji: '➕' },
+  { id: 'sub', labelKey: 'verticalMath.op.sub', emoji: '➖' },
+  { id: 'mul', labelKey: 'verticalMath.op.mul', emoji: '✖️' },
+  { id: 'div', labelKey: 'verticalMath.op.div', emoji: '➗' },
 ];
 
 function genNum(op: Op): [number, number] {
@@ -53,6 +54,7 @@ function calc(op: Op, a: number, b: number): number {
 const OP_SYMBOL: Record<Op, string> = { add: '+', sub: '−', mul: '×', div: '÷' };
 
 export function VerticalMath() {
+  const { t } = useTranslation();
   const [op, setOp] = useState<Op>('add');
   const [nums, setNums] = useState<[number, number]>(() => genNum('add'));
   const [showSteps, setShowSteps] = useState(false);
@@ -79,7 +81,7 @@ export function VerticalMath() {
         const ai = parseInt(aStr[aStr.length - 1 - i] ?? '0');
         const bi = parseInt(bStr[bStr.length - 1 - i] ?? '0');
         const ri = op === 'add' ? ai + bi : ai - bi;
-        arr.push(`个位${i === 0 ? '' : i === 1 ? '十' : '百'}：${ai} ${OP_SYMBOL[op]} ${bi} = ${ri}`);
+        arr.push(`${t(i === 0 ? 'verticalMath.placeOnes' : i === 1 ? 'verticalMath.placeTens' : 'verticalMath.placeHundreds')}：${ai} ${OP_SYMBOL[op]} ${bi} = ${ri}`);
       }
     } else if (op === 'mul') {
       const bStr = String(b);
@@ -87,10 +89,10 @@ export function VerticalMath() {
         const bi = parseInt(bStr[bStr.length - 1 - i]!);
         arr.push(`${a} × ${bi} = ${a * bi}`);
       }
-      arr.push(`相加 = ${result}`);
+      arr.push(`${t('verticalMath.sumLabel')} = ${result}`);
     } else {
       arr.push(`${a} ÷ ${b} = ${result}`);
-      arr.push(`验证：${result} × ${b} = ${result * b}`);
+      arr.push(`${t('verticalMath.verifyLabel')}：${result} × ${b} = ${result * b}`);
     }
     return arr;
   }, [op, a, b, result]);
@@ -102,7 +104,7 @@ export function VerticalMath() {
 
   return (
     <div className="space-y-4">
-      <PageHeader emoji="📝" title="竖式计算" subtitle="分步演示加减乘除" tone="blue" />
+      <PageHeader emoji="📝" title={t('verticalMath.title')} subtitle={t('verticalMath.subtitle')} tone="blue" />
 
       <div className="flex flex-wrap gap-2">
         {OPS.map(o => (
@@ -113,7 +115,7 @@ export function VerticalMath() {
             size="sm"
             onClick={() => newQuestion(o.id)}
           >
-            {o.emoji} {o.label}
+            {o.emoji} {t(o.labelKey)}
           </CandyButton>
         ))}
       </div>
@@ -137,10 +139,10 @@ export function VerticalMath() {
 
         <div className="mt-4 flex justify-center gap-2">
           <CandyButton tone="blue" size="sm" onClick={() => { sfxTap(); setShowSteps(s => !s); }}>
-            {showSteps ? '🙈 隐藏答案' : '👁️ 显示答案'}
+            {showSteps ? t('verticalMath.hideAnswer') : t('verticalMath.showAnswer')}
           </CandyButton>
           <CandyButton tone="green" size="sm" onClick={() => newQuestion()}>
-            🔄 换一题
+            {t('verticalMath.newQuestion')}
           </CandyButton>
         </div>
       </Panel>
@@ -148,7 +150,7 @@ export function VerticalMath() {
       {/* 分步讲解 */}
       {showSteps && (
         <Panel>
-          <h4 className="mb-2 text-sm font-extrabold text-ink">📋 计算步骤</h4>
+          <h4 className="mb-2 text-sm font-extrabold text-ink">{t('verticalMath.stepsTitle')}</h4>
           <div className="space-y-2">
             {steps.map((s, i) => (
               <div key={`s-${i}`} className="rounded-xl bg-candy-blue-soft p-2 text-sm font-bold text-candy-blue-deep">

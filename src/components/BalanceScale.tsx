@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
+import { useTranslation } from '@/i18n/useTranslation';
 const WEIGHTS = [1, 2, 3, 5, 10];
 
 interface Problem { left: number[]; right: number[]; }
@@ -48,6 +49,7 @@ function genProblem(level: number): Problem {
 }
 
 function _BalanceScale() {
+  const { t } = useTranslation();
   const [level, setLevel] = useState(1);
   const [problem, setProblem] = useState<Problem>(() => genProblem(1));
   const [feedback, setFeedback] = useState('');
@@ -69,7 +71,7 @@ function _BalanceScale() {
       void speak('对了！', { lang: 'zh-CN', rate: 0.85, module: 'praise' });
       setTilt(0);
     } else {
-      sfxWrong(); setFeedback(`❌ 左边${leftSum}，右边${rightSum}，${isBalanced ? '平衡' : '不平衡'}`);
+      sfxWrong(); setFeedback(t('balanceScale.wrongFeedback', { left: leftSum, right: rightSum, state: isBalanced ? t('balanceScale.balanced') : t('balanceScale.unbalanced') }));
       void speak('再想想', { lang: 'zh-CN', rate: 0.85, module: 'praise' });
       setTilt(leftSum > rightSum ? -8 : 8);
     }
@@ -86,8 +88,8 @@ function _BalanceScale() {
 
   return (
     <div className="card-candy p-4 sm:p-6">
-      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">⚖️ 重量平衡</h3>
-      <p className="mb-3 text-center text-xs font-bold text-ink-soft">天平平衡吗？</p>
+      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">{t('balanceScale.title')}</h3>
+      <p className="mb-3 text-center text-xs font-bold text-ink-soft">{t('balanceScale.subtitle')}</p>
 
       <div className="mb-4 flex justify-center" style={{ perspective: '400px' }}>
         <motion.div animate={{ rotate: tilt }} transition={{ type: 'spring' }} className="relative" style={{ width: '240px', height: '140px' }}>
@@ -118,12 +120,12 @@ function _BalanceScale() {
       </div>
 
       <div className="flex justify-center gap-4">
-        <CandyButton tone="green" size="lg" onClick={()=>answer(true)}>⚖️ 平衡</CandyButton>
-        <CandyButton tone="pink" size="lg" onClick={()=>answer(false)}>⬇️ 不平衡</CandyButton>
+        <CandyButton tone="green" size="lg" onClick={()=>answer(true)}>{t('balanceScale.balanced')}</CandyButton>
+        <CandyButton tone="pink" size="lg" onClick={()=>answer(false)}>{t('balanceScale.unbalanced')}</CandyButton>
       </div>
 
       <div className="mt-3 flex items-center justify-between">
-        <span className="text-xs font-bold text-ink-soft">第 {level} 关 · 得分 {score}</span>
+        <span className="text-xs font-bold text-ink-soft">{t('balanceScale.progress', { level, score })}</span>
       </div>
 
       <AnimatePresence>

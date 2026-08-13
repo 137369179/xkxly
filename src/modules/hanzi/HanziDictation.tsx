@@ -20,15 +20,18 @@ import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
 import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
 import type { Progress } from '@/types';
 import { sfxTap, sfxCorrect } from '@/lib/sfx';
+import { speak } from '@/lib/speech';
 import { celebrateBig } from '@/lib/celebrate';
 import { shuffle } from '@/lib/utils';
 import type { Question } from '@/types';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const ROUND = 6;
 
 type Phase = 'setup' | 'run' | 'done';
 
 export function HanziDictation() {
+  const { t } = useTranslation();
   const [level, setLevel, levelMeta] = useAdaptiveDifficultyState('hanzi');
   const [phase, setPhase] = useState<Phase>('setup');
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -114,19 +117,19 @@ export function HanziDictation() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <span className="text-sm font-extrabold text-ink-soft">
-            🎧 听写中 · 第 {idx + 1} / {questions.length} 题 · 已得 {score} 分
+            {t('hanziDictation.dictating', { idx: idx + 1, total: questions.length, score })}
           </span>
-          <button aria-label="✕ 退出"
+          <button aria-label={t("hanziDictation.exit")}
             onClick={() => { sfxTap(); setPhase('setup'); }}
             className="rounded-full bg-white/80 px-3 py-1 text-xs font-bold text-ink-soft"
           >
-            ✕ 退出
+            {t('hanziDictation.exit')}
           </button>
         </div>
         <QuizCard
           question={q}
-          meta={`听写 ${idx + 1}/${questions.length}`}
-          nextLabel={idx < questions.length - 1 ? '下一题' : '完成听写'}
+          meta={t('hanziDictation.dictateMeta', { idx: idx + 1, total: questions.length })}
+          nextLabel={idx < questions.length - 1 ? t('hanziDictation.next') : t('hanziDictation.finishDictation')}
           onAnswer={onAnswer}
           onNext={onNext}
         />
@@ -136,19 +139,38 @@ export function HanziDictation() {
 
   if (phase === 'done') {
     const perfect = score >= questions.length;
+    const stars = perfect ? 3 : score >= ROUND / 2 ? 2 : 1;
+    const praiseMsg = perfect
+      ? '太棒啦！你在听写测试中拿到了满分勋章！'
+      : score >= ROUND / 2
+      ? '真不错，完成了听写挑战！'
+      : '继续加油，多练几遍就能全对啦！';
+
     return (
-      <Panel className="text-center">
-        <div className="text-6xl">{perfect ? '🏆' : score >= ROUND / 2 ? '🎉' : '💪'}</div>
-        <p className="mt-3 text-xl font-extrabold text-ink">
-          {perfect ? '听写满分！太厉害了！' : `听写完成，答对 ${score} / ${questions.length} 题`}
+      <Panel className="text-center space-y-3">
+        <div className="text-6xl animate-bounce">{perfect ? '🏆' : score >= ROUND / 2 ? '🎉' : '💪'}</div>
+        <div className="flex justify-center gap-2 text-2xl">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <span key={i} className={i < stars ? 'text-amber-400' : 'text-gray-300'}>
+              ★
+            </span>
+          ))}
+        </div>
+        <p className="mt-2 text-xl font-extrabold text-ink">
+          {perfect ? t('hanziDictation.perfectTitle') : t('hanziDictation.doneTitle', { score, total: questions.length })}
         </p>
-        <p className="mt-1 text-sm font-bold text-ink-soft">
-          {perfect ? '每个字都听得准、认得清～' : '答错的字已经放进错题本，会安排复习哦'}
+        <p className="text-sm font-bold text-ink-soft">
+          {perfect ? t('hanziDictation.perfectDesc') : t('hanziDictation.doneDesc')}
         </p>
+        <div className="pt-2 flex justify-center">
+          <CandyButton tone="purple" variant="soft" size="sm" onClick={() => speak(praiseMsg, { lang: 'zh-CN' })}>
+            🔊 听语音评价
+          </CandyButton>
+        </div>
         <div className="mt-5 flex justify-center gap-3">
-          <CandyButton tone="green" size="lg" onClick={start}>再来一轮 🎧</CandyButton>
+          <CandyButton tone="green" size="lg" onClick={start}>{t('hanziDictation.againRound')}</CandyButton>
           <CandyButton tone="purple" variant="soft" size="lg" onClick={() => { sfxTap(); setPhase('setup'); }}>
-            换个阶段
+            {t('hanziDictation.changeLevel')}
           </CandyButton>
         </div>
       </Panel>
@@ -157,10 +179,10 @@ export function HanziDictation() {
 
   return (
     <div className="space-y-4">
-      <PageHeader emoji="🎧" title="汉字听写" subtitle="听词语，选出正确的字" tone="blue" />
+      <PageHeader emoji="🎧" title={t('hanziDictation.title')} subtitle={t('hanziDictation.subtitle')} tone="blue" />
 
       <Panel>
-        <p className="text-sm font-bold text-ink-soft">选择阶段（已学 {learnedCount} 字）</p>
+        <p className="text-sm font-bold text-ink-soft">{t('hanziDictation.selectLevel', { count: learnedCount })}</p>
         <div className="mt-3 flex gap-2">
           {([1, 2, 3] as const).map((l) => (
             <CandyButton
@@ -170,29 +192,29 @@ export function HanziDictation() {
               size="sm"
               onClick={() => { sfxTap(); setLevel(l); }}
             >
-              {l === 1 ? '🌱 启蒙' : l === 2 ? '🌿 常用' : '🌳 进阶'}
+              {t(l === 1 ? 'hanziDictation.level1' : l === 2 ? 'hanziDictation.level2' : 'hanziDictation.level3')}
             </CandyButton>
           ))}
         </div>
         <AdaptiveDifficultyHint
           meta={levelMeta}
-          labels={{ 1: '启蒙', 2: '常用', 3: '进阶' }}
+          labels={{ 1: t('hanziDictation.levelShort1'), 2: t('hanziDictation.levelShort2'), 3: t('hanziDictation.levelShort3') }}
           className="mt-2"
         />
       </Panel>
 
       <Panel>
-        <p className="text-sm font-bold text-ink-soft">📋 听写规则</p>
+        <p className="text-sm font-bold text-ink-soft">{t('hanziDictation.rulesTitle')}</p>
         <ul className="mt-2 space-y-1 text-sm font-semibold text-ink">
-          <li>1. 点播放，仔细听读的词语</li>
-          <li>2. 从字阵里选出你听到的那个字</li>
-          <li>3. 前半部分听音选字，后半部分形近字挑战</li>
-          <li>4. 优先考你「该复习」和「以前错过」的字</li>
+          <li>{t('hanziDictation.rule1')}</li>
+          <li>{t('hanziDictation.rule2')}</li>
+          <li>{t('hanziDictation.rule3')}</li>
+          <li>{t('hanziDictation.rule4')}</li>
         </ul>
       </Panel>
 
       <CandyButton tone="blue" size="lg" fullWidth onClick={start}>
-        ▶ 开始听写（一轮 {ROUND} 题）
+        {t('hanziDictation.start', { round: ROUND })}
       </CandyButton>
     </div>
   );

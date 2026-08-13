@@ -10,6 +10,7 @@ import { useProgress } from '@/store/useStore';
 import { STICKERS, ALBUMS } from '@/data/stickers';
 import type { StickerDef } from '@/types';
 import { celebrateSmall } from '@/lib/celebrate';
+import { useTranslation } from '@/i18n/useTranslation';
 import { motion } from 'motion/react';
 
 interface PlacedSticker {
@@ -28,6 +29,7 @@ const SCENES = [
 ];
 
 export function StickerScene() {
+  const { t } = useTranslation();
   const progress = useProgress();
   const ownedIds = new Set<string>(progress.stickers);
   const owned = STICKERS.filter(s => ownedIds.has(s.id));
@@ -43,7 +45,7 @@ export function StickerScene() {
     setPlaced(p => [...p, {
       id: `${sticker.id}-${Date.now()}`,
       sticker,
-      x: 50 + Math.random() * 30 - 15,  // 随机偏移，不要全部叠中间
+      x: 50 + Math.random() * 30 - 15,  // 随机偏移，不要{t('stickerScene.all')}叠中间
       y: 50 + Math.random() * 30 - 15,
     }]);
     sfxStar();
@@ -82,7 +84,7 @@ export function StickerScene() {
         const url = offscreen.toDataURL('image/png');
         const a = document.createElement('a');
         a.href = url;
-        a.download = `我的贴纸作品_${SCENES[sceneIdx]!.name}.png`;
+        a.download = `${t("stickerScene.savePrefix")}_${SCENES[sceneIdx]!.name}.png`;
         a.click();
         celebrateSmall();
         sfxStar();
@@ -100,7 +102,7 @@ export function StickerScene() {
 
   return (
     <div className="space-y-4">
-      <PageHeader emoji="🎨" title="贴纸场景" subtitle="选场景 → 贴贴纸 → 保存作品！" tone="pink" />
+      <PageHeader emoji="🎨" title={t('stickerScene.title')} subtitle={t('stickerScene.subtitle')} tone="pink" />
 
       {/* 场景选择 */}
       <div className="flex gap-2 flex-wrap justify-center">
@@ -134,7 +136,7 @@ export function StickerScene() {
             className="absolute cursor-grab active:cursor-grabbing select-none text-4xl"
             style={{ left: `${s.x}%`, top: `${s.y}%`, transform: 'translate(-50%, -50%)' }}
             onClick={(e) => { e.stopPropagation(); removeSticker(s.id); }}
-            title="拖拽移动 / 点击移除"
+            title={t('stickerScene.dragHint')}
           >
             {s.sticker.emoji}
           </motion.div>
@@ -142,7 +144,7 @@ export function StickerScene() {
         {placed.length === 0 && (
           <div className="flex h-full items-center justify-center text-center">
             <p className="text-lg font-extrabold text-white text-opacity-60 select-none">
-              👇 从下方选贴纸放到这里
+              {t('stickerScene.emptyHint')}
             </p>
           </div>
         )}
@@ -151,23 +153,23 @@ export function StickerScene() {
       {/* 画布操作 */}
       <div className="flex justify-center gap-2">
         <CandyButton tone="pink" variant="soft" size="sm" onClick={clearCanvas}>
-          🗑️ 清空
+          {t('stickerScene.clear')}
         </CandyButton>
         <CandyButton tone="pink" size="sm" onClick={saveScene} disabled={placed.length === 0}>
-          📸 保存作品
+          {t('stickerScene.saveWork')}
         </CandyButton>
       </div>
 
       {/* 贴纸选择区 */}
       <Panel>
         <h4 className="mb-2 text-sm font-extrabold text-ink">
-          🎨 我的贴纸 ({owned.length}/{STICKERS.length})
+          {t('stickerScene.myStickers', { owned: owned.length, total: STICKERS.length })}
         </h4>
 
         {/* 筛选 */}
         <div className="flex gap-1 flex-wrap mb-3">
           <CandyButton tone={albumFilter === 'all' ? 'pink' : 'purple'} variant={albumFilter === 'all' ? 'solid' : 'soft'} size="sm" onClick={() => { sfxTap(); setAlbumFilter('all'); }}>
-            全部
+            {t('stickerScene.all')}
           </CandyButton>
           {ALBUMS.map(albumName => {
             const count = owned.filter(s => s.album === albumName).length;
@@ -187,7 +189,7 @@ export function StickerScene() {
 
         {filteredStickers.length === 0 ? (
           <p className="text-center text-xs font-bold text-ink-soft py-3">
-            还没有贴纸～去做练习赚贴纸吧！
+            {t('stickerScene.emptyAlbum')}
           </p>
         ) : (
           <div className="grid grid-cols-6 sm:grid-cols-8 gap-2">

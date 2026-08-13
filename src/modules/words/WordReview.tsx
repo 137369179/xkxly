@@ -1,5 +1,5 @@
 /**
- * 单词分类复习 - 按主题/难度/掌握度
+ * 单词分类复习 - {t('wordReview.byTheme')}/难度/掌握度
  */
 
 import { useState, useMemo } from 'react';
@@ -12,10 +12,12 @@ import { sfxTap } from '@/lib/sfx';
 import { motion } from 'motion/react';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
 import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
+import { useTranslation } from '@/i18n/useTranslation';
 
 type Mode = 'browse' | 'flashcard';
 
 export function WordReview() {
+  const { t } = useTranslation();
   const progress = useProgress();
   const [mode, setMode] = useState<Mode>('browse');
   const [theme, setTheme] = useState(WORD_THEMES[0]!.id);
@@ -46,7 +48,7 @@ export function WordReview() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <CandyButton tone="blue" variant="soft" size="sm" onClick={() => { sfxTap(); setMode('browse'); }}>
-            ◀️ 返回
+            {t('wordReview.back')}
           </CandyButton>
           <span className="text-sm font-bold text-ink-soft">{flashIdx + 1} / {words.length}</span>
         </div>
@@ -70,19 +72,19 @@ export function WordReview() {
             </motion.div>
           )}
 
-          <p className="mt-4 text-xs font-bold text-ink-soft">👆 点击卡片翻面</p>
+          <p className="mt-4 text-xs font-bold text-ink-soft">{t('wordReview.tapHint')}</p>
         </motion.div>
 
         <div className="flex justify-center gap-3">
           <CandyButton tone="pink" size="sm" onClick={() => speak(current.word, { lang: 'en-US', rate: 0.7 })}>
-            🔊 朗读
+            {t('wordReview.speak')}
           </CandyButton>
           <CandyButton
             tone="blue"
             size="sm"
             onClick={() => { sfxTap(); setShowZh(false); setFlashIdx(i => (i + 1) % words.length); }}
           >
-            下一个 →
+            {t('wordReview.next')}
           </CandyButton>
         </div>
       </div>
@@ -91,17 +93,17 @@ export function WordReview() {
 
   return (
     <div className="space-y-4">
-      <PageHeader emoji="📚" title="单词复习" subtitle="分类浏览+卡片复习" tone="blue" />
+      <PageHeader emoji="📚" title={t('wordReview.title')} subtitle={t('wordReview.subtitle')} tone="blue" />
 
       <div className="flex gap-2">
         <CandyButton tone={filter === 'theme' ? 'blue' : 'purple'} variant={filter === 'theme' ? 'solid' : 'soft'} size="sm" onClick={() => { sfxTap(); setFilter('theme'); }}>
-          按主题
+          {t('wordReview.byTheme')}
         </CandyButton>
         <CandyButton tone={filter === 'level' ? 'blue' : 'purple'} variant={filter === 'level' ? 'solid' : 'soft'} size="sm" onClick={() => { sfxTap(); setFilter('level'); }}>
-          按难度
+          {t('wordReview.byLevel')}
         </CandyButton>
         <CandyButton tone={filter === 'weak' ? 'blue' : 'purple'} variant={filter === 'weak' ? 'solid' : 'soft'} size="sm" onClick={() => { sfxTap(); setFilter('weak'); }}>
-          薄弱词
+          {t('wordReview.weakWords')}
         </CandyButton>
       </div>
 
@@ -145,13 +147,13 @@ export function WordReview() {
 
       {words.length > 0 && (
         <CandyButton tone="orange" size="sm" onClick={() => { sfxTap(); setMode('flashcard'); setFlashIdx(0); setShowZh(false); }}>
-          🎴 开始卡片复习（{words.length}词）
+          {t('wordReview.startReview', { count: words.length })}
         </CandyButton>
       )}
 
       {words.length === 0 ? (
         <Panel className="text-center">
-          <p className="text-sm font-bold text-ink-soft">没有符合条件的单词</p>
+          <p className="text-sm font-bold text-ink-soft">{t('wordReview.empty')}</p>
         </Panel>
       ) : (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">

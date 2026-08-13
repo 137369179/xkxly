@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { cn, shuffle } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const YUNMU = [
   // 单韵母 (6)
@@ -29,6 +30,8 @@ const CATEGORIES = [
 type YMCategory = (typeof CATEGORIES)[number]['id'];
 
 export function PinyinGroup() {
+  const { t } = useTranslation();
+  const CAT_LABEL_KEY: Record<string, string> = {"单韵母": "pinyinGroup.single", "复韵母": "pinyinGroup.compound", "前鼻韵母": "pinyinGroup.frontNasal", "后鼻韵母": "pinyinGroup.backNasal"};
   const [items, setItems] = useState(() => shuffle(YUNMU).slice(0, 8));
   const [placed, setPlaced] = useState<Record<string, YMCategory>>({});
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
@@ -77,12 +80,12 @@ export function PinyinGroup() {
 
   return (
     <div className="card-candy p-4 sm:p-6">
-      <h3 className="mb-1 text-center text-lg font-extrabold text-ink">🎶 韵母分类</h3>
-      <p className="mb-4 text-center text-xs font-bold text-ink-soft">把韵母拖到正确的分类框里</p>
+      <h3 className="mb-1 text-center text-lg font-extrabold text-ink">{t('pinyinGroup.title')}</h3>
+      <p className="mb-4 text-center text-xs font-bold text-ink-soft">{t('pinyinGroup.subtitle')}</p>
 
       {/* 待分类区 */}
       <div className="mb-5">
-        <p className="mb-2 text-xs font-bold text-ink-soft">👇 待分类的韵母：</p>
+        <p className="mb-2 text-xs font-bold text-ink-soft">{t('pinyinGroup.pendingLabel')}</p>
         <div className="flex flex-wrap gap-2">
           {items.map(item => {
             if (placed[item.p]) return null;
@@ -106,7 +109,7 @@ export function PinyinGroup() {
         </div>
         {draggedItem && (
           <p className="mt-2 text-xs font-bold text-candy-purple-deep">
-            已选中「{draggedItem}」，点击下方分类框放入
+            {t('pinyinGroup.selectedHint', { p: draggedItem })}
           </p>
         )}
       </div>
@@ -122,7 +125,7 @@ export function PinyinGroup() {
               draggedItem ? `${cat.color} border-candy-purple-deep hover:scale-105` : `${cat.color} border-ink-muted/20`
             )}
           >
-            <div className="text-lg font-extrabold text-ink">{cat.emoji} {cat.label}</div>
+            <div className="text-lg font-extrabold text-ink">{cat.emoji} {t(CAT_LABEL_KEY[cat.label] || cat.label)}</div>
             <div className="mt-1 text-[10px] font-bold text-ink-soft">{cat.desc}</div>
             <div className="mt-1 text-[9px] font-medium text-ink-muted">💡 {cat.hint}</div>
             {/* 已放入的韵母 */}
@@ -141,11 +144,11 @@ export function PinyinGroup() {
           <motion.div initial={{ opacity:0, y:5 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }} className="mt-4 text-center">
             {feedback.correct ? (
               <span className="inline-block rounded-xl bg-candy-green-soft px-4 py-2 text-sm font-extrabold text-candy-green-deep">
-                ✅ {feedback.pinyin} 分对了！
+                {t('pinyinGroup.correct', { p: feedback.pinyin })}
               </span>
             ) : (
               <span className="inline-block rounded-xl bg-candy-pink-soft px-4 py-2 text-sm font-extrabold text-candy-pink-deep">
-                ❌ {feedback.pinyin} 不是这一类哦
+                {t('pinyinGroup.wrong', { p: feedback.pinyin })}
               </span>
             )}
           </motion.div>
@@ -153,7 +156,7 @@ export function PinyinGroup() {
       </AnimatePresence>
 
       <div className="mt-4 flex items-center justify-between">
-        <span className="text-xs font-bold text-ink-soft">得分 {score}</span>
+        <span className="text-xs font-bold text-ink-soft">{t('pinyinGroup.score', { n: score })}</span>
         <button onClick={reset} className="rounded-lg bg-white px-2 py-1 text-xs font-bold shadow-sm hover:bg-pink-50">🔄 换一批</button>
       </div>
     </div>

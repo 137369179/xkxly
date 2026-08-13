@@ -10,11 +10,12 @@ import { useStore } from '@/store/useStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
 import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
+import { useTranslation } from '@/i18n/useTranslation';
 
-const DIFFS: { id: Difficulty; label: string }[] = [
-  { id: 1, label: '9 以内' },
-  { id: 2, label: '14 以内' },
-  { id: 3, label: '20 以内' },
+const DIFFS: { id: Difficulty; labelKey: string }[] = [
+  { id: 1, labelKey: 'countingGame.range1' },
+  { id: 2, labelKey: 'countingGame.range2' },
+  { id: 3, labelKey: 'countingGame.range3' },
 ];
 
 const MAX_OF: Record<Difficulty, number> = { 1: 9, 2: 14, 3: 20 };
@@ -23,6 +24,7 @@ const MAX_OF: Record<Difficulty, number> = { 1: 9, 2: 14, 3: 20 };
 const POOL_TARGET = 2;
 
 export function CountingGame() {
+  const { t } = useTranslation();
   const recordCount = useStore((s) => s.recordCount);
   const aiOn = useSettingsStore((s) => s.settings.aiEnabled);
   const [diff, setDiff, diffMeta] = useAdaptiveDifficultyState('number');
@@ -118,11 +120,11 @@ export function CountingGame() {
                 fullWidth
                 onClick={() => setDiff(d.id)}
               >
-                {d.label}
+                {t(d.labelKey)}
               </CandyButton>
             ))}
           </div>
-          <AdaptiveDifficultyHint meta={diffMeta} labels={{ 1: '9 以内', 2: '14 以内', 3: '20 以内' }} />
+          <AdaptiveDifficultyHint meta={diffMeta} labels={{ 1: t('countingGame.range1'), 2: t('countingGame.range2'), 3: t('countingGame.range3') }} />
 
           {aiOn && (
             <button
@@ -137,14 +139,14 @@ export function CountingGame() {
               <AiAvatar size={30} mood={aiMode ? 'talking' : 'sleep'} />
               <span className="min-w-0 flex-1">
                 <span className="block text-base font-extrabold text-candy-pink-deep">
-                  小智情景数数 {aiMode ? '已开启' : '已关闭'}
+                  {t('countingGame.aiMode', { state: aiMode ? t('countingGame.on') : t('countingGame.off') })}
                 </span>
                 <span className="block text-xs text-ink-soft">
                   {aiMode
                     ? poolSize > 0
-                      ? `小智已经想好 ${poolSize} 道新题啦`
-                      : '小智正在编题目，先做一道普通题吧'
-                    : '让小智把数数编成小动物排队、水果装篮的故事'}
+                      ? t('countingGame.aiReady', { n: poolSize })
+                      : t('countingGame.aiThinking')
+                    : t('countingGame.aiOff')}
                 </span>
               </span>
               <span

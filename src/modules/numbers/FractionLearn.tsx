@@ -8,6 +8,7 @@ import { CandyButton } from '@/components/ui/Button';
 import { sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { cn, shuffle } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const FRACTIONS = [
   { frac: '1/2', num: 1, den: 2, emoji: '🍕', label: '二分之一', slices: 2 },
@@ -17,6 +18,7 @@ const FRACTIONS = [
 ];
 
 export function FractionLearn() {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<'learn'|'quiz'>('learn');
   const [current, setCurrent] = useState(0);
   const [feedback, setFeedback] = useState('');
@@ -43,10 +45,10 @@ export function FractionLearn() {
     if (lockRef.current) return;
     lockRef.current = true;
     if (opt.correct) {
-      sfxCorrect(); setScore(s=>s+1); setFeedback('✅ 对了！');
+      sfxCorrect(); setScore(s=>s+1); setFeedback(t('fractionLearn.correct'));
       void speak(`对了！${FRACTIONS[current]!.label}`, { lang:'zh-CN', rate:0.85, module:'praise' });
     } else {
-      sfxWrong(); setFeedback(`❌ 答案是 ${FRACTIONS[current]!.frac}`);
+      sfxWrong(); setFeedback(t('fractionLearn.wrong', { answer: FRACTIONS[current]!.frac }));
       void speak(`再想想`, { lang:'zh-CN', rate:0.85, module:'praise' });
     }
     setTimeout(() => { startQuiz(); setFeedback(''); lockRef.current = false; }, 1200);
@@ -69,10 +71,10 @@ export function FractionLearn() {
 
   return (
     <div className="card-candy p-4 sm:p-6">
-      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">🍕 分数认知</h3>
+      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">{t('fractionLearn.title')}</h3>
       <div className="mb-4 flex justify-center gap-2">
         <button onClick={()=>setMode('learn')} className={`rounded-xl px-4 py-1.5 text-sm font-extrabold ${mode==='learn'?'bg-candy-orange-deep text-white':'bg-white text-ink-soft shadow-sm'}`}>📖 认识分数</button>
-        <button aria-label="🎯 测验" onClick={()=>{setMode('quiz');startQuiz();}} className={`rounded-xl px-4 py-1.5 text-sm font-extrabold ${mode==='quiz'?'bg-candy-orange-deep text-white':'bg-white text-ink-soft shadow-sm'}`}>🎯 测验</button>
+        <button aria-label={t("fractionLearn.quiz")} onClick={()=>{setMode('quiz');startQuiz();}} className={`rounded-xl px-4 py-1.5 text-sm font-extrabold ${mode==='quiz'?'bg-candy-orange-deep text-white':'bg-white text-ink-soft shadow-sm'}`}>🎯 测验</button>
       </div>
 
       <div className="mb-4 flex justify-center gap-2">
@@ -94,13 +96,13 @@ export function FractionLearn() {
           </div>
           <p className="text-2xl font-extrabold text-candy-orange-deep">{f.frac}</p>
           <p className="text-sm font-bold text-ink-soft">{f.label}</p>
-          <p className="mt-2 text-xs text-ink-muted">把{f.emoji}分成 {f.slices} 份，取其中 1 份就是 {f.frac}</p>
+          <p className="mt-2 text-xs text-ink-muted">{t('fractionLearn.explain', { f: f.emoji, slices: f.slices })} {f.frac}</p>
         </div>
       )}
 
       {mode === 'quiz' && (
         <div className="text-center">
-          <p className="mb-3 text-sm font-bold text-ink">这个图形表示什么分数？</p>
+          <p className="mb-3 text-sm font-bold text-ink">{t('fractionLearn.question')}</p>
           <div className="mx-auto mb-4 relative h-32 w-32 rounded-full overflow-hidden shadow-lg ring-4 ring-candy-orange-soft">
             {Array.from({ length: f.slices }, (_, i) => (
               <Slice key={`slice-${i}`} idx={i} total={f.slices} highlight={i === 0} />
@@ -111,7 +113,7 @@ export function FractionLearn() {
               <CandyButton key={`o-${i}`} tone="orange" size="lg" onClick={()=>pick(o)}>{o.label}</CandyButton>
             ))}
           </div>
-          <div className="mt-3 text-xs font-bold text-ink-soft">得分 {score}</div>
+          <div className="mt-3 text-xs font-bold text-ink-soft">{t('fractionLearn.score', { n: score })}</div>
         </div>
       )}
 

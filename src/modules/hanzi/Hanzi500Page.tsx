@@ -10,13 +10,14 @@ import { StrokeAnimation } from '@/components/StrokeAnimation';
 import { speak } from '@/lib/speech';
 import { sfxTap } from '@/lib/sfx';
 import { useStore } from '@/store/useStore';
+import { useTranslation } from '@/i18n/useTranslation';
 
-const CATEGORIES: { id: HanziItem['category'] | 'all'; label: string; emoji: string }[] = [
-  { id: 'all', label: '全部', emoji: '📚' },
-  { id: '象形', label: '象形', emoji: '🌅' },
-  { id: '指事', label: '指事', emoji: '👉' },
-  { id: '会意', label: '会意', emoji: '🤝' },
-  { id: '形声', label: '形声', emoji: '🔊' },
+const CATEGORIES: { id: HanziItem['category'] | 'all'; labelKey: string; emoji: string }[] = [
+  { id: 'all', labelKey: 'hanzi500Page.all', emoji: '📚' },
+  { id: '象形', labelKey: 'hanzi500Page.pictographic', emoji: '🌅' },
+  { id: '指事', labelKey: 'hanzi500Page.indicative', emoji: '👉' },
+  { id: '会意', labelKey: 'hanzi500Page.associative', emoji: '🤝' },
+  { id: '形声', labelKey: 'hanzi500Page.phonetic', emoji: '🔊' },
 ];
 
 const CAT_COLOR: Record<string, string> = {
@@ -32,6 +33,7 @@ const CAT_COLOR: Record<string, string> = {
 const PAGE_SIZE = 80;
 
 export function Hanzi500Page() {
+  const { t } = useTranslation();
   const [cat, setCat] = useState<HanziItem['category'] | 'all'>('all');
   const [selected, setSelected] = useState<HanziItem | null>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -74,7 +76,7 @@ export function Hanzi500Page() {
     return (
       <div className="space-y-4">
         <CandyButton tone="blue" variant="soft" size="sm" onClick={() => { sfxTap(); setSelected(null); }}>
-          ◀️ 返回
+          {t('hanzi500Page.back')}
         </CandyButton>
 
         <Panel className="text-center">
@@ -87,11 +89,11 @@ export function Hanzi500Page() {
               {selected.category}
             </span>
             <span className="rounded-full bg-candy-green-soft px-3 py-1 text-sm font-bold text-candy-green-deep">
-              {selected.strokeCount}画 · {selected.radical}部
+              {t('hanzi500Page.strokeInfo', { n: selected.strokeCount, radical: selected.radical })}
             </span>
           </div>
           <CandyButton tone="blue" size="sm" className="mt-3" onClick={() => { speak(selected.char, { rate: 0.7 }); learnSkill(`hanzi:${selected.char}`); }}>
-            🔊 读一读
+            {t('hanzi500Page.read')}
           </CandyButton>
         </Panel>
 
@@ -99,12 +101,12 @@ export function Hanzi500Page() {
         <StrokeAnimation char={selected.char} autoPlay />
 
         <Panel>
-          <h4 className="mb-1 text-sm font-extrabold text-ink">📜 字源演变</h4>
+          <h4 className="mb-1 text-sm font-extrabold text-ink">{t('hanzi500Page.evolution')}</h4>
           <p className="text-sm font-bold text-ink-soft">{selected.originDesc}</p>
         </Panel>
 
         <Panel>
-          <h4 className="mb-1 text-sm font-extrabold text-ink">📝 组词</h4>
+          <h4 className="mb-1 text-sm font-extrabold text-ink">{t('hanzi500Page.words')}</h4>
           <div className="flex flex-wrap gap-2">
             {selected.words.map(w => (
               <span key={w} className="rounded-full bg-candy-yellow-soft px-3 py-1 text-sm font-bold text-candy-yellow-deep">
@@ -115,7 +117,7 @@ export function Hanzi500Page() {
         </Panel>
 
         <Panel>
-          <h4 className="mb-1 text-sm font-extrabold text-ink">💬 例句</h4>
+          <h4 className="mb-1 text-sm font-extrabold text-ink">{t('hanzi500Page.example')}</h4>
           <p className="text-sm font-bold text-ink-soft">{selected.sentence}</p>
         </Panel>
       </div>
@@ -124,10 +126,10 @@ export function Hanzi500Page() {
 
   return (
     <div className="space-y-4">
-      <PageHeader emoji="📚" title="汉字字库" subtitle={`${getExtendedHanzi500().length} 个常用字 · 按造字法分类`} tone="blue" />
+      <PageHeader emoji="📚" title={t('hanzi500Page.title')} subtitle={`${getExtendedHanzi500().length} 个常用字 · 按造字法分类`} tone="blue" />
 
       <div className="flex flex-wrap gap-2">
-        {CATEGORIES.map(c => (
+        {CATEGORIES.map((c) => (
           <CandyButton
             key={c.id}
             tone={cat === c.id ? 'blue' : 'purple'}
@@ -135,7 +137,7 @@ export function Hanzi500Page() {
             size="sm"
             onClick={() => { sfxTap(); setCat(c.id); }}
           >
-            {c.emoji} {c.label}
+            {c.emoji} {t(c.labelKey)}
           </CandyButton>
         ))}
       </div>
@@ -158,8 +160,8 @@ export function Hanzi500Page() {
       {hasMore && <div ref={sentinelRef} className="h-4" />}
 
       <p className="text-center text-xs font-bold text-ink-soft">
-        已显示 {visible.length} / {filtered.length} 字
-        {hasMore && <span className="ml-1 text-candy-purple">· 滚动加载更多</span>}
+        {t('hanzi500Page.shown', { shown: visible.length, total: filtered.length })}
+        {hasMore && <span className="ml-1 text-candy-purple">{t('hanzi500Page.loadMore')}</span>}
       </p>
     </div>
   );

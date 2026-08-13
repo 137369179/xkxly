@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 import { TONE_STYLE, type Tone } from '@/lib/tones';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 import { sfxTap } from '@/lib/sfx';
 
 export interface TabItem<T extends string> {
@@ -22,7 +23,8 @@ export function Tabs<T extends string>({
   tone?: Tone;
   layoutId?: string;
 }) {
-  const t = TONE_STYLE[tone]!!
+  const { t: translate } = useTranslation();
+  const ts = TONE_STYLE[tone]!!
 
   const handleKeyDown = (e: React.KeyboardEvent, currentIndex: number) => {
     let newIndex = currentIndex;
@@ -49,7 +51,7 @@ export function Tabs<T extends string>({
     <div
       className="scrollbar-none mb-5 flex gap-2 overflow-x-auto rounded-[1.4rem] bg-white/60 p-1.5 shadow-candy-sm"
       role="tablist"
-      aria-label="学习模块切换"
+      aria-label={translate('tabs.ariaLabel')}
     >
       {items.map((item, index) => {
         const active = item.id === value;
@@ -68,13 +70,13 @@ export function Tabs<T extends string>({
               'no-select relative min-h-[48px] flex-1 shrink-0 rounded-[1.1rem] px-4 text-[15px] font-extrabold whitespace-nowrap',
               'transition-colors duration-150',
             )}
-            style={{ color: active ? t.on : '#8B7F96' }}
+            style={{ color: active ? ts.on : '#8B7F96' }}
           >
             {active && (
               <motion.span
                 layoutId={layoutId}
                 className="absolute inset-0 rounded-[1.1rem]"
-                style={{ background: t.main, boxShadow: `0 4px 0 0 ${t.deep}` }}
+                style={{ background: ts.main, boxShadow: `0 4px 0 0 ${ts.deep}` }}
                 transition={{ type: 'spring', stiffness: 420, damping: 34 }}
               />
             )}

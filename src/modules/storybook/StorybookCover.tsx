@@ -3,6 +3,7 @@ import { TONE_STYLE } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 import { getTheme } from './constants';
 import type { SavedStorybook } from './types';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface StorybookCoverProps {
   book: SavedStorybook;
@@ -12,6 +13,7 @@ interface StorybookCoverProps {
 }
 
 export function StorybookCover({ book, onOpen, onDelete, onToggleFavorite }: StorybookCoverProps) {
+  const { t } = useTranslation();
   const preset = getTheme(book.theme);
   const tone = TONE_STYLE[preset.tone];
 
@@ -36,7 +38,7 @@ export function StorybookCover({ book, onOpen, onDelete, onToggleFavorite }: Sto
         {onToggleFavorite && (
           <button
             type="button"
-            aria-label={book.favorite ? '取消收藏' : '收藏'}
+            aria-label={book.favorite ? t('storybookCover.ariaLabelUnfavorite') : t('storybookCover.ariaLabelFavorite')}
             onClick={(e) => {
               e.stopPropagation();
               onToggleFavorite();
@@ -73,7 +75,7 @@ export function StorybookCover({ book, onOpen, onDelete, onToggleFavorite }: Sto
         <div className="flex items-center gap-1 text-xs text-gray-500">
           <span>{dateStr}</span>
           {book.readCount > 0 && (
-            <span className="ml-1">· 已读{book.readCount}次</span>
+            <span className="ml-1">{t('storybookCover.readCount', { n: book.readCount })}</span>
           )}
         </div>
       </div>

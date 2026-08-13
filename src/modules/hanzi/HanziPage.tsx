@@ -1,4 +1,4 @@
-import { memo, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { HANZI_LEVELS, getHanziByLevel, searchHanzi, nextHanzi } from '@/data/hanziIndex';
 import type { HanziEntry, HanziLevel } from '@/data/hanziIndex';
 import { PageHeader, Panel } from '@/components/ui/Card';
@@ -9,7 +9,6 @@ import { QuizCard } from '@/components/QuizCard';
 import { useProgress } from '@/store/useStore';
 import { sfxTap } from '@/lib/sfx';
 import { TONE_STYLE } from '@/lib/tones';
-import { cn } from '@/lib/utils';
 import type { Question } from '@/types';
 import { HanziLearn } from './HanziLearn';
 import { HanziWorksheet } from './HanziWorksheet';
@@ -22,21 +21,37 @@ import { WordBuilder } from './WordBuilder';
 import { RadicalsMagic } from '@/components/RadicalsMagic';
 import { makeHanziMixedQuestion } from '@/lib/hanziQuestions';
 import { useTranslation } from '@/i18n/useTranslation';
+import { HanziVideoCard } from '@/components/hanzi/HanziVideoCard';
+import { HanziStrokeWriter } from '@/components/hanzi/HanziStrokeWriter';
+import { HanziQuizGame } from '@/components/hanzi/HanziQuizGame';
 
-type Tab = 'level1' | 'level2' | 'level3' | 'worksheet' | 'radical' | 'h500' | 'evolve' | 'builder' | 'magic' | 'dictation' | 'family';
+type MainZone = 'trail' | 'library' | 'playground';
+type LibraryTab = 'level1' | 'level2' | 'level3' | 'h500' | 'radical' | 'evolve' | 'family';
+type PlaygroundTab = 'quizgame' | 'writer' | 'dictation' | 'builder' | 'magic' | 'worksheet';
 
-const TABS: TabItem<Tab>[] = [
+const MAIN_ZONES: TabItem<MainZone>[] = [
+  { id: 'trail', label: '今日闯关', emoji: '🌟' },
+  { id: 'library', label: '汉字宝库', emoji: '📚' },
+  { id: 'playground', label: '复习游乐场', emoji: '🎪' },
+];
+
+const LIBRARY_TABS: TabItem<LibraryTab>[] = [
   { id: 'level1', label: '启蒙', emoji: '🌱' },
   { id: 'level2', label: '常用', emoji: '🌿' },
   { id: 'level3', label: '进阶', emoji: '🌳' },
-  { id: 'dictation', label: '听写', emoji: '🎧' },
-  { id: 'family', label: '字族', emoji: '🧬' },
-  { id: 'worksheet', label: '字帖', emoji: '✍️' },
+  { id: 'h500', label: '500字', emoji: '📚' },
   { id: 'radical', label: '部首', emoji: '🔤' },
+  { id: 'evolve', label: '字源', emoji: '📜' },
+  { id: 'family', label: '字族', emoji: '🧬' },
+];
+
+const PLAYGROUND_TABS: TabItem<PlaygroundTab>[] = [
+  { id: 'quizgame', label: '听音识字', emoji: '🎧' },
+  { id: 'writer', label: '笔画描红', emoji: '✍️' },
+  { id: 'dictation', label: '听写测试', emoji: '📝' },
+  { id: 'builder', label: '组词造句', emoji: '✏️' },
   { id: 'magic', label: '部首魔法', emoji: '🪄' },
-  { id: 'h500', label: '字库', emoji: '📚' },
-  { id: 'evolve', label: '演变', emoji: '📜' },
-  { id: 'builder', label: '组词', emoji: '✏️' },
+  { id: 'worksheet', label: '字帖打印', emoji: '📄' },
 ];
 
 /** 从数组中随机取 n 个 */
@@ -50,7 +65,7 @@ function pickRandom<T>(arr: T[], n: number): T[] {
   return out;
 }
 
-/** 生成 3 道随机测试题（从当前阶段已学汉字中抽题，混合题型：认读/拼读/组词/听音/部首/形近字） */
+/** 生成 3 道随机测试题 */
 function buildQuiz(level: number, mastery: Record<string, { lv: number }>): Question[] {
   const pool = getHanziByLevel(level);
   const learned = pool.filter((h) => (mastery[`hanzi:${h.c}`]?.lv ?? 0) >= 1);
@@ -59,39 +74,7 @@ function buildQuiz(level: number, mastery: Record<string, { lv: number }>): Ques
   return targets.map((h) => makeHanziMixedQuestion(h, pool));
 }
 
-/** 单个汉字按钮 —— memo 化，只有 learned 状态变化时才重渲染 */
-const HanziCell = memo(function HanziCell({
-  hanzi,
-  learned,
-  toneStyle,
-  onClick,
-}: {
-  hanzi: HanziEntry;
-  learned: boolean;
-  toneStyle: { soft: string; deep: string };
-  onClick: (h: HanziEntry) => void;
-}) {
-  return (
-    <button
-      key={hanzi.c}
-      onClick={() => { sfxTap(); onClick(hanzi); }}
-      className={cn(
-        'flex flex-col items-center justify-center rounded-2xl p-3 transition-all active:translate-y-[2px]',
-        'min-h-[68px] shadow-candy-sm',
-      )}
-      style={{
-        background: learned ? toneStyle.soft : 'rgba(255,255,255,0.7)',
-        opacity: learned ? 1 : 0.85,
-      }}
-    >
-      <span className="text-3xl font-black text-ink">{hanzi.c}</span>
-      <span className="text-[10px] font-bold" style={{ color: toneStyle.deep }}>{hanzi.pd}</span>
-      {learned && <span className="text-xs">✓</span>}
-    </button>
-  );
-});
-
-/** 推荐学习卡片 —— 大字号 + 脉冲光圈动画，点击直接进入 HanziLearn */
+/** 推荐学习卡片 —— 大字号 + 脉冲光圈动画 */
 function RecommendCard({
   hanzi,
   levelInfo,
@@ -145,11 +128,10 @@ function RecommendCard({
   );
 }
 
-/** 小测验弹层 —— 3 道题，全对解锁下一批，否则提示再练练 */
+/** 小测验弹层 */
 function MiniQuiz({ questions, onClose }: { questions: Question[]; onClose: () => void }) {
   const { t } = useTranslation();
   const [idx, setIdx] = useState(0);
-  // 只记录每题第一次作答结果，判断是否一次答对
   const [firstTry, setFirstTry] = useState<boolean[]>([]);
   const [finished, setFinished] = useState(false);
 
@@ -174,7 +156,7 @@ function MiniQuiz({ questions, onClose }: { questions: Question[]; onClose: () =
     );
   }
 
-  const q = questions[idx]!!
+  const q = questions[idx];
   if (!q) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4">
@@ -217,18 +199,19 @@ function MiniQuiz({ questions, onClose }: { questions: Question[]; onClose: () =
 
 export default function HanziPage() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<Tab>('level1');
+  const [zone, setZone] = useState<MainZone>('trail');
+  const [libTab, setLibTab] = useState<LibraryTab>('level1');
+  const [playTab, setPlayTab] = useState<PlaygroundTab>('dictation');
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<HanziEntry | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
   const [quizQuestions, setQuizQuestions] = useState<Question[]>([]);
   const progress = useProgress();
 
-  // 三个「阶段字墙」Tab 才显示阶段面板/搜索/推荐/字格；其余为独立功能页
-  const isLevelTab = tab === 'level1' || tab === 'level2' || tab === 'level3';
-  const levelNum = tab === 'level2' ? 2 : tab === 'level3' ? 3 : 1;
+  const isLevelTab = zone === 'library' && (libTab === 'level1' || libTab === 'level2' || libTab === 'level3');
+  const levelNum = libTab === 'level2' ? 2 : libTab === 'level3' ? 3 : 1;
   const levelInfo = HANZI_LEVELS.find((l) => l.id === levelNum)!;
-  const tone = isLevelTab ? levelInfo.tone : 'green';
+  const tone = zone === 'trail' ? 'orange' : zone === 'playground' ? 'purple' : levelInfo.tone;
 
   const list = useMemo(() => {
     if (!isLevelTab) return [];
@@ -236,15 +219,28 @@ export default function HanziPage() {
     return getHanziByLevel(levelNum);
   }, [isLevelTab, levelNum, query]);
 
-  // 当前阶段已学汉字数（mastery 中 lv>=1）
   const learnedInLevel = useMemo(() => {
     return getHanziByLevel(levelNum).filter(
       (h) => (progress.mastery[`hanzi:${h.c}`]?.lv ?? 0) >= 1,
     ).length;
   }, [levelNum, progress.mastery]);
 
-  // 推荐下一个要学的汉字
+  const totalLearnedCount = useMemo(() => {
+    return Object.keys(progress.mastery).filter(
+      (k) => k.startsWith('hanzi:') && (progress.mastery[k]?.lv ?? 0) >= 1,
+    ).length;
+  }, [progress.mastery]);
+
   const recommended = useMemo(() => nextHanzi(progress.mastery), [progress.mastery]);
+
+  const startMiniQuiz = () => {
+    sfxTap();
+    const qs = buildQuiz(levelNum, progress.mastery);
+    if (qs.length) {
+      setQuizQuestions(qs);
+      setQuizOpen(true);
+    }
+  };
 
   if (selected) {
     return (
@@ -257,107 +253,188 @@ export default function HanziPage() {
     );
   }
 
-  const learnedCount = list.filter(
-    (h) => (progress.mastery[`hanzi:${h.c}`]?.lv ?? 0) >= 1,
-  ).length;
-
-  // 已学字数是 10 的倍数且 >0 时显示小测验入口（仅阶段字墙 Tab）
-  const showQuiz = isLevelTab && !query.trim() && learnedInLevel > 0 && learnedInLevel % 10 === 0;
-
   const recLevelInfo = recommended ? HANZI_LEVELS.find((l) => l.id === recommended.level)! : null;
 
   return (
     <div className="space-y-5">
       <PageHeader emoji="🔤" title={t('hanzi.pageTitle')} subtitle={t('hanzi.subtitle')} tone={tone} />
 
-      <Tabs items={TABS} value={tab} onChange={(v) => { setTab(v); setQuery(''); }} tone={tone} layoutId="hanzi-tabs" />
+      {/* 核心三区降维导向菜单 */}
+      <Tabs
+        items={MAIN_ZONES}
+        value={zone}
+        onChange={(v) => { setZone(v); setQuery(''); }}
+        tone={tone}
+        layoutId="hanzi-main-zones"
+      />
 
-      {tab === 'magic' && (
-        <RadicalsMagic />
-      )}
+      {/* 🌟 1. 今日闯关区 (Daily Trail) */}
+      {zone === 'trail' && (
+        <div className="space-y-4">
+          <Panel className="bg-candy-orange-soft/40">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-black text-ink">🗺️ 今日学习冒险之旅</h3>
+                <p className="text-xs font-bold text-ink-soft mt-0.5">循序渐进，每天轻松掌握 3-5 字</p>
+              </div>
+              <div className="text-right">
+                <span className="text-2xl font-black text-candy-orange-deep">{totalLearnedCount}</span>
+                <span className="text-xs font-bold text-ink-soft block">已累计解锁</span>
+              </div>
+            </div>
+          </Panel>
 
-      {isLevelTab && (
-        <Panel>
-          <div className="mb-3 flex items-center justify-between">
-            <span className="text-sm font-bold text-ink-soft">{levelInfo.emoji} {levelInfo.name} · {levelInfo.desc}</span>
-            <span className="text-sm font-bold" style={{ color: TONE_STYLE[tone]!.deep }}>{learnedCount}/{list.length}</span>
-          </div>
-          <ProgressBar value={learnedCount} max={list.length || 1} color={tone} />
-        </Panel>
-      )}
-
-
-      {isLevelTab && (
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={t('hanzi.searchPlaceholder')}
-          className="w-full rounded-2xl border-4 border-candy-purple-soft bg-white px-4 py-3 text-base font-bold text-ink outline-none placeholder:text-ink/30"
-        />
-      )}
-
-      {/* 推荐学习卡片（非搜索时显示） */}
-      {isLevelTab && !query.trim() && recommended && recLevelInfo && (
-        <RecommendCard
-          hanzi={recommended}
-          levelInfo={recLevelInfo}
-          onClick={() => setSelected(recommended)}
-        />
-      )}
-
-      {/* 全部学完庆祝卡片 */}
-      {isLevelTab && !query.trim() && !recommended && (
-        <div className="relative w-full overflow-hidden rounded-[1.5rem] bg-candy-yellow-soft p-5 text-center shadow-candy-sm">
-          <div className="text-5xl">🎉🏆🎉</div>
-          <p className="mt-2 text-lg font-extrabold text-ink">{t('hanzi.allDone')}</p>
-          <p className="mt-1 text-sm font-bold text-ink-soft">{t('hanzi.allDoneTip')}</p>
-        </div>
-      )}
-
-      {/* 每 10 字小测验入口 */}
-      {showQuiz && (
-        <CandyButton
-          tone="orange"
-          size="lg"
-          fullWidth
-          onClick={() => {
-            sfxTap();
-            const qs = buildQuiz(levelNum, progress.mastery);
-            if (qs.length) {
-              setQuizQuestions(qs);
-              setQuizOpen(true);
-            }
-          }}
-        >
-          📝 {t('hanzi.quizBtn', { count: learnedInLevel })}
-        </CandyButton>
-      )}
-
-      {isLevelTab && (
-        <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-8">
-          {list.map((h) => (
-            <HanziCell
-              key={h.c}
-              hanzi={h}
-              learned={(progress.mastery[`hanzi:${h.c}`]?.lv ?? 0) >= 1}
-              toneStyle={TONE_STYLE[tone]}
-              onClick={setSelected}
+          {/* 今日推荐学习关卡卡片 */}
+          {recommended && recLevelInfo ? (
+            <RecommendCard
+              hanzi={recommended}
+              levelInfo={recLevelInfo}
+              onClick={() => setSelected(recommended)}
             />
-          ))}
+          ) : (
+            <div className="relative w-full overflow-hidden rounded-[1.5rem] bg-candy-yellow-soft p-5 text-center shadow-candy-sm">
+              <div className="text-5xl">🎉🏆🎉</div>
+              <p className="mt-2 text-lg font-extrabold text-ink">{t('hanzi.allDone')}</p>
+              <p className="mt-1 text-sm font-bold text-ink-soft">{t('hanzi.allDoneTip')}</p>
+            </div>
+          )}
+
+          {/* 关卡线路图节点展示 (Adventure Trail Map) */}
+          <Panel>
+            <h4 className="text-sm font-extrabold text-ink mb-3">📍 闯关路线图</h4>
+            <div className="flex items-center justify-around gap-2 py-2">
+              <div
+                onClick={() => recommended && setSelected(recommended)}
+                className="flex flex-col items-center cursor-pointer group active:scale-95 transition-all"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-candy-orange-soft border-2 border-candy-orange-deep flex items-center justify-center text-2xl font-black text-candy-orange-deep shadow-candy-sm group-hover:scale-105">
+                  {recommended ? recommended.c : '⭐'}
+                </div>
+                <span className="text-xs font-bold text-ink mt-1">1. 核心字</span>
+                <span className="text-[10px] text-candy-orange-deep font-extrabold">当前关卡</span>
+              </div>
+
+              <div className="h-0.5 flex-1 bg-candy-orange-soft" />
+
+              <div
+                onClick={() => { setZone('playground'); setPlayTab('dictation'); }}
+                className="flex flex-col items-center cursor-pointer group active:scale-95 transition-all"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-candy-blue-soft border-2 border-candy-blue-deep flex items-center justify-center text-2xl font-black text-candy-blue-deep shadow-candy-sm group-hover:scale-105">
+                  🎧
+                </div>
+                <span className="text-xs font-bold text-ink mt-1">2. 听写复习</span>
+                <span className="text-[10px] text-ink-soft font-bold">巩固记忆</span>
+              </div>
+
+              <div className="h-0.5 flex-1 bg-candy-orange-soft" />
+
+              <div
+                onClick={() => { setZone('playground'); setPlayTab('builder'); }}
+                className="flex flex-col items-center cursor-pointer group active:scale-95 transition-all"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-candy-green-soft border-2 border-candy-green-deep flex items-center justify-center text-2xl font-black text-candy-green-deep shadow-candy-sm group-hover:scale-105">
+                  ✏️
+                </div>
+                <span className="text-xs font-bold text-ink mt-1">3. 组词游戏</span>
+                <span className="text-[10px] text-ink-soft font-bold">学以致用</span>
+              </div>
+            </div>
+          </Panel>
+
+          {/* 挑战小测验快捷按钮 */}
+          {totalLearnedCount >= 3 && (
+            <CandyButton tone="orange" size="lg" fullWidth onClick={startMiniQuiz}>
+              📝 随堂测验挑战（已学 {totalLearnedCount} 字）
+            </CandyButton>
+          )}
         </div>
       )}
 
-      {list.length === 0 && isLevelTab && (
-        <p className="py-8 text-center text-base font-bold text-ink-soft">{t('hanzi.notFound')}</p>
+      {/* 📚 2. 汉字宝库区 (Library & Exploration) */}
+      {zone === 'library' && (
+        <div className="space-y-4">
+          <Tabs
+            items={LIBRARY_TABS}
+            value={libTab}
+            onChange={(v) => { setLibTab(v); setQuery(''); }}
+            tone={tone}
+            layoutId="hanzi-library-tabs"
+          />
+
+          {isLevelTab && (
+            <Panel>
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-sm font-bold text-ink-soft">{levelInfo.emoji} {levelInfo.name} · {levelInfo.desc}</span>
+                <span className="text-sm font-bold" style={{ color: TONE_STYLE[tone]!.deep }}>{learnedInLevel}/{list.length}</span>
+              </div>
+              <ProgressBar value={learnedInLevel} max={list.length || 1} color={tone} />
+            </Panel>
+          )}
+
+          {isLevelTab && (
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={t('hanzi.searchPlaceholder')}
+              className="w-full rounded-2xl border-4 border-candy-purple-soft bg-white px-4 py-3 text-base font-bold text-ink outline-none placeholder:text-ink/30"
+            />
+          )}
+
+          {isLevelTab && (
+            <div className="grid grid-cols-4 gap-3 sm:grid-cols-6 lg:grid-cols-8">
+              {list.map((h) => (
+                <HanziVideoCard
+                  key={h.c}
+                  char={h.c}
+                  pinyin={h.pd}
+                  tone={h.tone}
+                  learned={(progress.mastery[`hanzi:${h.c}`]?.lv ?? 0) >= 1}
+                  onClick={() => setSelected(h)}
+                />
+              ))}
+            </div>
+          )}
+
+          {list.length === 0 && isLevelTab && (
+            <p className="py-8 text-center text-base font-bold text-ink-soft">{t('hanzi.notFound')}</p>
+          )}
+
+          {libTab === 'h500' && <Hanzi500Page />}
+          {libTab === 'radical' && <RadicalBrowser />}
+          {libTab === 'evolve' && <HanziEvolve />}
+          {libTab === 'family' && <PhoneticFamilies onLearn={setSelected} />}
+        </div>
       )}
 
-      {tab === 'worksheet' && <HanziWorksheet />}
-      {tab === 'radical' && <RadicalBrowser />}
-      {tab === 'h500' && <Hanzi500Page />}
-      {tab === 'evolve' && <HanziEvolve />}
-      {tab === 'builder' && <WordBuilder />}
-      {tab === 'dictation' && <HanziDictation />}
-      {tab === 'family' && <PhoneticFamilies onLearn={setSelected} />}
+      {/* 🎪 3. 复习游乐场区 (Playground & Review) */}
+      {zone === 'playground' && (
+        <div className="space-y-4">
+          <Tabs
+            items={PLAYGROUND_TABS}
+            value={playTab}
+            onChange={setPlayTab}
+            tone="purple"
+            layoutId="hanzi-playground-tabs"
+          />
+
+          {playTab === 'quizgame' && (
+            <HanziQuizGame
+              level={levelNum}
+              onSelectWriting={(h) => setSelected(h)}
+            />
+          )}
+          {playTab === 'writer' && (
+            <HanziStrokeWriter
+              hanzi={recommended || getHanziByLevel(1)[0]!}
+            />
+          )}
+          {playTab === 'dictation' && <HanziDictation />}
+          {playTab === 'builder' && <WordBuilder />}
+          {playTab === 'magic' && <RadicalsMagic />}
+          {playTab === 'worksheet' && <HanziWorksheet />}
+        </div>
+      )}
 
       {/* 小测验弹层 */}
       {quizOpen && quizQuestions.length > 0 && (
@@ -366,3 +443,5 @@ export default function HanziPage() {
     </div>
   );
 }
+
+

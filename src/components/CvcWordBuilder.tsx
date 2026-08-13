@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface CvcTarget {
   word: string;
@@ -30,6 +31,7 @@ const CVC_WORDS: CvcTarget[] = [
 ];
 
 export function CvcWordBuilder() {
+  const { t } = useTranslation();
   const [idx, setIdx] = useState(0);
   const current = CVC_WORDS[idx]!!
   const [userLetters, setUserLetters] = useState<string[]>([]);
@@ -72,13 +74,13 @@ export function CvcWordBuilder() {
     <div className="rounded-3xl border-2 border-pink-300 bg-gradient-to-r from-pink-50 via-purple-50 to-amber-50 p-5 text-center space-y-4 shadow-fluffy">
       <div className="flex items-center justify-between">
         <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-pink-700 shadow-sm">
-          🔤 自然拼读拖拽拼词 ({idx + 1} / {CVC_WORDS.length})
+          {t('cvcWordBuilder.badge', { current: idx + 1, total: CVC_WORDS.length })}
         </span>
         <span className="text-3xl">{current.emoji}</span>
       </div>
 
       <div className="text-xl font-black text-pink-900">
-        拼出单词：<span className="text-pink-600">{current.meaning}</span>
+        {t('cvcWordBuilder.spellPrompt')}<span className="text-pink-600">{current.meaning}</span>
       </div>
 
       {/* 用户拼词格子 */}
@@ -113,23 +115,23 @@ export function CvcWordBuilder() {
       {/* 按钮区域 */}
       <div className="flex justify-center gap-3 pt-2">
         <CandyButton tone="pink" variant="soft" size="sm" onClick={handleClear}>
-          🔄 清空重新拼
+          {t('cvcWordBuilder.clear')}
         </CandyButton>
         {feedback === 'correct' && (
           <CandyButton tone="orange" size="sm" onClick={handleNext}>
-            🚀 下一个单词 ➔
+            {t('cvcWordBuilder.nextWord')}
           </CandyButton>
         )}
       </div>
 
       {feedback === 'correct' && (
         <div className="text-sm font-black text-green-700 animate-bounce">
-          🎉 太棒了！拼对了！{current.word.toUpperCase()}！
+          {t('cvcWordBuilder.correctFeedback', { word: current.word.toUpperCase() })}
         </div>
       )}
       {feedback === 'wrong' && (
         <div className="text-sm font-black text-rose-700">
-          😅 顺序不太对，再试一次吧！
+          {t('cvcWordBuilder.wrongFeedback')}
         </div>
       )}
     </div>

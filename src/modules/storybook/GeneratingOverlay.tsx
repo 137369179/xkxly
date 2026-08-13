@@ -1,18 +1,19 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { AiAvatar } from '@/components/ai/AiAvatar';
 import { useEffect, useState } from 'react';
-
-const HINTS = [
-  '小智正在想故事…',
-  '正在给故事画画…',
-  '快好了快好了…',
-];
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface GeneratingOverlayProps {
   onCancel: () => void;
 }
 
 export function GeneratingOverlay({ onCancel }: GeneratingOverlayProps) {
+  const { t } = useTranslation();
+  const HINTS = [
+    t('generatingOverlay.hint1'),
+    t('generatingOverlay.hint2'),
+    t('generatingOverlay.hint3'),
+  ];
   const [hintIndex, setHintIndex] = useState(0);
 
   useEffect(() => {
@@ -72,7 +73,7 @@ export function GeneratingOverlay({ onCancel }: GeneratingOverlayProps) {
         onClick={onCancel}
         className="text-sm text-gray-400 underline"
       >
-        取消
+        {t('generatingOverlay.cancel')}
       </button>
     </motion.div>
   );

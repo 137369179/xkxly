@@ -1,4 +1,5 @@
 import { motion } from 'motion/react';
+import { useTranslation } from '@/i18n/useTranslation';
 import { useStars, useStreak, useBadgeCount } from '@/store/useStore';
 import { navigate } from '@/lib/router';
 import { sfxTap } from '@/lib/sfx';
@@ -8,6 +9,7 @@ import { sfxTap } from '@/lib/sfx';
  * 紧凑 56px 高，药丸式指标，点击跳转
  */
 export default function HomeHeader() {
+  const { t } = useTranslation();
   const stars = useStars();
   const streak = useStreak();
   const badgeCount = useBadgeCount();
@@ -16,21 +18,21 @@ export default function HomeHeader() {
     {
       icon: '⭐',
       value: stars,
-      label: '星星',
+      label: t('homeHeader.stars'),
       tone: { bg: 'bg-candy-yellow-soft', text: 'text-candy-yellow-deep' },
       onClick: () => navigate('rewards'),
     },
     {
       icon: '🔥',
       value: streak,
-      label: '连续打卡',
+      label: t('homeHeader.streak'),
       tone: { bg: 'bg-candy-orange-soft', text: 'text-candy-orange-deep' },
       onClick: () => navigate('today'),
     },
     {
       icon: '🏅',
       value: badgeCount,
-      label: '徽章',
+      label: t('homeHeader.badges'),
       tone: { bg: 'bg-candy-purple-soft', text: 'text-candy-purple-deep' },
       onClick: () => navigate('passport'),
     },

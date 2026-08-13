@@ -8,6 +8,7 @@ import { CandyButton } from '@/components/ui/Button';
 import { sfxTap } from '@/lib/sfx';
 import { motion } from 'motion/react';
 import { safeSetItem, safeRemoveItem, safeGetItem, safeParseJSON } from '@/lib/safeStorage';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface SpeedRecord {
   name: string;
@@ -41,6 +42,7 @@ export function addSpeedRecord(name: string, score: number, time: number, level:
 }
 
 export function SpeedRankings({ onClose }: { onClose?: () => void }) {
+  const { t } = useTranslation();
   const [records, setRecords] = useState<SpeedRecord[]>([]);
   const [level, setLevel] = useState<1 | 2 | 3>(1);
 
@@ -54,7 +56,7 @@ export function SpeedRankings({ onClose }: { onClose?: () => void }) {
     <div className="space-y-3">
       {onClose && (
         <CandyButton tone="purple" variant="soft" size="sm" onClick={() => { sfxTap(); onClose(); }}>
-          ◀️ 返回
+          {t('speedRankings.back')}
         </CandyButton>
       )}
 
@@ -75,8 +77,8 @@ export function SpeedRankings({ onClose }: { onClose?: () => void }) {
       {records.length === 0 ? (
         <Panel className="text-center">
           <div className="text-4xl">🏆</div>
-          <p className="mt-2 text-sm font-bold text-ink-soft">还没有 level {level} 的速算记录</p>
-          <p className="text-xs font-bold text-ink-soft">去速算挑战做一场就有了！</p>
+          <p className="mt-2 text-sm font-bold text-ink-soft">{t('speedRankings.empty', { level })}</p>
+          <p className="text-xs font-bold text-ink-soft">{t('speedRankings.emptyTip')}</p>
         </Panel>
       ) : (
         <div className="space-y-2">
@@ -117,7 +119,7 @@ export function SpeedRankings({ onClose }: { onClose?: () => void }) {
               setRecords([]);
             }}
           >
-            🗑️ 清除记录
+            {t('speedRankings.clear')}
           </CandyButton>
         </div>
       )}

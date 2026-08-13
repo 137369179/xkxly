@@ -8,15 +8,17 @@ import { CandyButton } from '@/components/ui/Button';
 import { sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { cn, shuffle } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const STEPS = [
-  { step: 1, label: '1个1个数', emoji: '1️⃣', color: 'bg-candy-blue-soft', max: 20 },
-  { step: 2, label: '2个2个数', emoji: '2️⃣', color: 'bg-candy-green-soft', max: 20 },
-  { step: 5, label: '5个5个数', emoji: '5️⃣', color: 'bg-candy-orange-soft', max: 50 },
-  { step: 10, label: '10个10个数', emoji: '🔟', color: 'bg-candy-pink-soft', max: 100 },
+  { step: 1, labelKey: 'skipCounting.step1', emoji: '1️⃣', color: 'bg-candy-blue-soft', max: 20 },
+  { step: 2, labelKey: 'skipCounting.step2', emoji: '2️⃣', color: 'bg-candy-green-soft', max: 20 },
+  { step: 5, labelKey: 'skipCounting.step5', emoji: '5️⃣', color: 'bg-candy-orange-soft', max: 50 },
+  { step: 10, labelKey: 'skipCounting.step10', emoji: '🔟', color: 'bg-candy-pink-soft', max: 100 },
 ];
 
 export function SkipCounting() {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<'learn' | 'quiz'>('learn');
   const [step, setStep] = useState(1);
   const [current, setCurrent] = useState(0);
@@ -49,12 +51,12 @@ export function SkipCounting() {
     const correct = quizStart + step;
     if (ans === correct) {
       sfxCorrect();
-      setFeedback('✅ 对了！');
+      setFeedback(t('skipCounting.correct'));
       setScore(s => s + 1);
       void speak(`对了！${quizStart}后面是${correct}`, { lang: 'zh-CN', rate: 0.85, module: 'praise' });
     } else {
       sfxWrong();
-      setFeedback(`❌ 答案是 ${correct}`);
+      setFeedback(t('skipCounting.wrong', { answer: correct }));
       void speak(`再想想，${quizStart}后面该数几呢？`, { lang: 'zh-CN', rate: 0.85, module: 'praise' });
     }
     setTimeout(() => { startQuiz(); setFeedback(''); lockRef.current = false; }, 1200);
@@ -70,14 +72,14 @@ export function SkipCounting() {
 
   return (
     <div className="card-candy p-4 sm:p-6">
-      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">🔢 跳数计数</h3>
+      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">{t('skipCounting.title')}数</h3>
       <div className="mb-3 flex flex-wrap justify-center gap-2">
         {STEPS.map(s => (
           <button key={s.step} onClick={() => { setStep(s.step); setCurrent(0); setMode('learn'); }}
             className={cn('rounded-xl px-3 py-1.5 text-xs font-extrabold',
               step === s.step ? 'bg-candy-purple-deep text-white' : 'bg-white text-ink-soft shadow-sm'
             )}>
-            {s.emoji} {s.label}
+            {s.emoji} {t(s.labelKey)}
           </button>
         ))}
       </div>
@@ -105,26 +107,26 @@ export function SkipCounting() {
             })}
           </div>
           <CandyButton tone="purple" size="lg" onClick={countNext}>
-            ➡️ 数下一个 ({current + step > cfg.max ? '从头开始' : current + step})
+            {t('skipCounting.next', { next: current + step > cfg.max ? t('skipCounting.restart') : current + step })}
           </CandyButton>
         </div>
       )}
 
       {mode === 'quiz' && (
         <div className="text-center">
-          <p className="mb-2 text-sm font-bold text-ink-soft">{cfg.emoji} {cfg.label}</p>
+          <p className="mb-2 text-sm font-bold text-ink-soft">{cfg.emoji} {t(cfg.labelKey)}</p>
           <div className="mb-4 flex items-center justify-center gap-3">
             <span className="rounded-xl bg-white px-4 py-2 text-2xl font-extrabold shadow-sm">{quizStart}</span>
             <span className="text-2xl">→</span>
             <span className="rounded-xl bg-candy-purple-soft px-4 py-2 text-2xl font-extrabold text-candy-purple-deep shadow-sm">?</span>
           </div>
-          <p className="mb-4 text-sm font-bold text-ink">接下来该数几？</p>
+          <p className="mb-4 text-sm font-bold text-ink">{t('skipCounting.question')}</p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {options.map(o => (
               <CandyButton key={o} tone="blue" size="lg" onClick={()=>pickAnswer(o)}>{o}</CandyButton>
             ))}
           </div>
-          <div className="mt-4 text-xs font-bold text-ink-soft">得分 {score}</div>
+          <div className="mt-4 text-xs font-bold text-ink-soft">{t('skipCounting.score', { n: score })}</div>
         </div>
       )}
 

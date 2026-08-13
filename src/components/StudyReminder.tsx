@@ -7,10 +7,12 @@ import { Panel, PanelTitle } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap } from '@/lib/sfx';
 import { safeSetItem, safeGetItem, safeParseJSON } from '@/lib/safeStorage';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const TIMES = ['16:00', '17:00', '18:00', '19:00', '20:00', '21:00'];
 
 export function StudyReminder() {
+  const { t } = useTranslation();
   const [enabled, setEnabled] = useState(false);
   const [time, setTime] = useState('17:00');
   const [status, setStatus] = useState('');
@@ -37,16 +39,16 @@ export function StudyReminder() {
   const requestPermission = async () => {
     sfxTap();
     if (!('Notification' in window)) {
-      setStatus('当前浏览器不支持通知');
+      setStatus(t('studyReminder.unsupported'));
       return;
     }
     const perm = await Notification.requestPermission();
     if (perm === 'granted') {
       setEnabled(true);
-      setStatus('✅ 已开启，将在每天 ' + time + ' 提醒学习');
+      setStatus(t('studyReminder.enabledAt', { time }));
       scheduleNotification(time);
     } else {
-      setStatus('❌ 通知权限被拒绝，请在浏览器设置中允许通知');
+      setStatus(t('studyReminder.denied'));
     }
   };
 
@@ -56,16 +58,16 @@ export function StudyReminder() {
       requestPermission();
     } else {
       setEnabled(false);
-      setStatus('已关闭提醒');
+      setStatus(t('studyReminder.disabled'));
     }
   };
 
-  const handleTimeChange = (t: string) => {
+  const handleTimeChange = (timeVal: string) => {
     sfxTap();
-    setTime(t);
+    setTime(timeVal);
     if (enabled) {
-      setStatus('✅ 已更新为每天 ' + t + ' 提醒');
-      scheduleNotification(t);
+      setStatus(t('studyReminder.updatedAt', { time: timeVal }));
+      scheduleNotification(timeVal);
     }
   };
 
@@ -78,7 +80,7 @@ export function StudyReminder() {
       if (now.getHours() === h && now.getMinutes() === m) {
         try {
           new Notification('🎯 宝贝学习乐园', {
-            body: '该学习啦！今天的课程等着你呢～',
+            body: t('studyReminder.notifyBody'),
             icon: '/icon.png',
           });
         } catch (e) {
@@ -93,10 +95,10 @@ export function StudyReminder() {
 
   return (
     <Panel>
-      <PanelTitle emoji="⏰" title="学习提醒" subtitle="每天定时提醒宝贝学习" tone="blue" />
+      <PanelTitle emoji="⏰" title={t('studyReminder.title')} subtitle={t('studyReminder.subtitle')} tone="blue" />
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-extrabold text-ink">每日提醒</span>
+          <span className="text-sm font-extrabold text-ink">{t('studyReminder.daily')}</span>
           <button
             onClick={handleToggle}
             className={`relative h-7 w-12 rounded-full transition-colors ${enabled ? 'bg-candy-green-deep' : 'bg-gray-300'}`}
@@ -109,7 +111,7 @@ export function StudyReminder() {
 
         {enabled && (
           <div>
-            <div className="mb-2 text-sm font-extrabold text-ink">提醒时间</div>
+            <div className="mb-2 text-sm font-extrabold text-ink">{t('studyReminder.time')}</div>
             <div className="flex flex-wrap gap-2">
               {TIMES.map(t => (
                 <CandyButton
@@ -132,7 +134,7 @@ export function StudyReminder() {
 
         {enabled && (
           <p className="text-xs font-bold text-ink-soft">
-            💡 提醒需要浏览器通知权限，且页面需保持打开状态
+            {t('studyReminder.permissionHint')}
           </p>
         )}
       </div>

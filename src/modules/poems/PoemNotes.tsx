@@ -10,8 +10,10 @@ import { useProgress, useStore } from '@/store/useStore';
 import { sfxTap, sfxStar } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 import { motion } from 'motion/react';
+import { useTranslation } from '@/i18n/useTranslation';
 
 export default function PoemNotes() {
+  const { t } = useTranslation();
   const progress = useProgress();
   const setPoemNote = useStore(s => s.setPoemNote);
   const [selectedPoemId, setSelectedPoemId] = useState<string | null>(null);
@@ -40,7 +42,7 @@ export default function PoemNotes() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <CandyButton tone="pink" variant="soft" size="sm" onClick={() => { sfxTap(); setSelectedPoemId(null); }}>
-            ◀️ 返回
+            {t('poemNotes.back')}
           </CandyButton>
           <span className="text-sm font-extrabold text-ink">🌸 {currentPoem.title}</span>
         </div>
@@ -53,18 +55,18 @@ export default function PoemNotes() {
         </Panel>
 
         <Panel>
-          <h4 className="mb-2 text-sm font-extrabold text-ink">📝 我的学习笔记</h4>
+          <h4 className="mb-2 text-sm font-extrabold text-ink">{t('poemNotes.myNotes')}</h4>
           <textarea
             value={noteText}
             onChange={e => setNoteText(e.target.value)}
-            placeholder="写下你对这首诗的理解、感受或喜欢的句子..."
+            placeholder={t('poemNotes.placeholder')}
             className="h-32 w-full resize-none rounded-2xl border-4 border-candy-pink-soft bg-white p-3 text-sm font-bold text-ink outline-none focus:border-candy-pink-deep"
             maxLength={500}
           />
           <div className="mt-2 flex items-center justify-between">
             <span className="text-xs font-bold text-ink-soft">{noteText.length}/500</span>
             <CandyButton tone="pink" size="sm" onClick={handleSave} disabled={!noteText.trim()}>
-              💾 保存
+              {t('poemNotes.save')}
             </CandyButton>
           </div>
         </Panel>
@@ -74,12 +76,12 @@ export default function PoemNotes() {
 
   return (
     <div className="space-y-4">
-      <PageHeader emoji="📝" title="古诗笔记" subtitle="记录学习心得" tone="pink" />
+      <PageHeader emoji="📝" title={t('poemNotes.title')} subtitle={t('poemNotes.subtitle')} tone="pink" />
 
       {notesPoems.length === 0 ? (
         <Panel className="text-center">
           <div className="text-4xl">📝</div>
-          <p className="mt-2 text-sm font-bold text-ink-soft">还没有笔记，去古诗详情页写第一条笔记吧！</p>
+          <p className="mt-2 text-sm font-bold text-ink-soft">{t('poemNotes.empty')}</p>
         </Panel>
       ) : (
         <div className="space-y-2">

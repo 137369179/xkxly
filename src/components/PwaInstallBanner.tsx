@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from '@/i18n/useTranslation';
 import { motion, AnimatePresence } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxWin } from '@/lib/sfx';
@@ -7,6 +8,7 @@ import { sfxTap, sfxWin } from '@/lib/sfx';
 type InstallPromptEvent = BeforeInstallPromptEvent & { type: 'beforeinstallprompt' };
 
 export function PwaInstallBanner() {
+  const { t } = useTranslation();
   const [deferredPrompt, setDeferredPrompt] = useState<InstallPromptEvent | null>(null);
   const [dismissed, setDismissed] = useState(false);
 
@@ -51,17 +53,17 @@ export function PwaInstallBanner() {
         <div className="flex items-center space-x-3">
           <img src="/icons/icon-192.png" alt="App Icon" decoding="async" className="h-10 w-10 rounded-2xl shadow-sm" />
           <div>
-            <h4 className="text-sm font-black text-ink">安装《宝贝学习乐园》桌面版</h4>
-            <p className="text-xs font-bold text-ink/60">一键安装到 iPad/桌面，支持离线秒开随时玩 🚀</p>
+            <h4 className="text-sm font-black text-ink">{t('pwaInstallBanner.title')}</h4>
+            <p className="text-xs font-bold text-ink/60">{t('pwaInstallBanner.subtitle')}</p>
           </div>
         </div>
         <div className="flex items-center space-x-2">
           <CandyButton tone="purple" size="sm" onClick={handleInstall}>
-            立即安装
+            {t('pwaInstallBanner.install')}
           </CandyButton>
           <button
             onClick={() => setDismissed(true)}
-            aria-label="关闭安装提示"
+            aria-label={t('pwaInstallBanner.close')}
             className="text-xs font-bold text-ink/40 hover:text-ink px-1"
           >
             ✕

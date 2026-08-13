@@ -1084,7 +1084,13 @@
     "rephrase": "Try asking in a different way",
     "inputLabel": "Type your question",
     "sendLabel": "Send question",
-    "askBtn": "Ask"
+    "askBtn": "Ask",
+    "switchPet": "🔄 Switch buddy",
+    "nudge": "Tap here, let's play!",
+    "moodSleeping": "sleeping",
+    "moodExcited": "excited",
+    "moodHappy": "in a good mood",
+    "clickInteract": "{name}, {mood}, tap to interact"
   },
   "actions": {
     "start": "Start",
@@ -3592,7 +3598,9 @@
     "wrong": "❌ This is {n}",
     "title": "🌈 Color Learning",
     "question": "What color is this?",
-    "score": "Score {n}"
+    "score": "Score {n}",
+    "rightFeedback": "✅ Right! This is {name}",
+    "wrongFeedback": "❌ This is {name}"
   },
   "dictation": {
     "done": "Dictation complete!",
@@ -3739,7 +3747,9 @@
     "all": "All",
     "albumCount": "📚 {name} ×{count}",
     "noStickers": "No stickers yet — do some practice to earn them!",
-    "saveName": "My Sticker Artwork"
+    "saveName": "My Sticker Artwork",
+    "savePrefix": "My sticker art",
+    "emptyAlbum": "No stickers yet — earn some by practicing!"
   },
   "strokeAnim": {
     "title": "Stroke Demo",
@@ -3927,7 +3937,8 @@
     "lastWeekMin": "Last Week (min)",
     "summaryMore": "🎉 More effort this week than last, keep it up!",
     "summaryLess": "💪 A bit less this week, push harder next week!",
-    "summarySame": "✨ Same as last week, keep steady!"
+    "summarySame": "✨ Same as last week, keep steady!",
+    "starsSuffix": "⭐"
   },
   "phonicsListen": {
     "title": "Listening & Sounds",
@@ -4192,7 +4203,10 @@
     "generating": "⏳ Generating...",
     "generatePoster": "🎨 Generate Poster",
     "download": "📥 Download",
-    "regenerate": "🔄 Regenerate"
+    "regenerate": "🔄 Regenerate",
+    "filePrefix": "Learning poster",
+    "generate": "🎨 Generate poster",
+    "alt": "Learning achievement poster"
   },
   "numberTrace": {
     "changeNumber": "← Change Number",
@@ -4220,7 +4234,24 @@
     "money": "Money",
     "word": "Word Problems",
     "count": "Counting",
-    "trace": "Tracing"
+    "trace": "Tracing",
+    "tabWall": "Numbers",
+    "tabTenframe": "Ten Frame",
+    "tabMath": "Add & Sub",
+    "tabExtra": "Advanced",
+    "tabSpeed": "Speed Math",
+    "tabLadder": "Ladder",
+    "tabRun": "Rabbit Run",
+    "tabVertical": "Column",
+    "tabShape": "Shapes",
+    "tabClock": "Clock",
+    "tabMeasure": "Measure",
+    "tabSkip": "Skip Count",
+    "tabFraction": "Fractions",
+    "tabMoney": "Money",
+    "tabWord": "Word Probs",
+    "tabCount": "Counting",
+    "tabTrace": "Tracing"
   },
   "exploreMore": {
     "title": "Explore More Modules",
@@ -4239,7 +4270,10 @@
     "breakBody": "Look out the window at something far away. Count to 20 and come back — your eyes will feel better.",
     "limitSnooze": "Study 10 More Minutes",
     "breakContinue": "I am rested, continue learning",
-    "breakHint": "Break reminder interval can be adjusted in Parent Center → Settings"
+    "breakHint": "Break reminder interval can be adjusted in Parent Center → Settings",
+    "limitBtn": "Study 10 more min",
+    "breakBtn": "Rested, keep learning",
+    "settingsHint": "Adjust interval in Parent Center → Settings"
   },
   "pwaInstallBanner": {
     "title": "Install Study Paradise Desktop App",
@@ -4280,7 +4314,10 @@
     "aiConfirmBtn": "Yes, switch",
     "aiChose": "Little Zhi chose \"{name}\" based on your recent progress",
     "manualChose": "You chose this difficulty yourself",
-    "resetBtn": "Let Little Zhi decide (suggests \"{name}\")"
+    "resetBtn": "Let Little Zhi decide (suggests \"{name}\")",
+    "level1": "Starter",
+    "level2": "Advanced",
+    "level3": "Challenge"
   },
   "homeHeader": {
     "stars": "Stars",
@@ -4303,5 +4340,231 @@
     "prevPage": "Previous",
     "nextPage": "Next",
     "pageInfo": "Page {page} of {total}"
+  },
+  "button": {
+    "confirmAgain": "Press again to confirm"
+  },
+  "stars": {
+    "total": "Total stars: {count}"
+  },
+  "starRating": {
+    "rating": "Rating: {rating} of {maxStars} stars",
+    "star": "{value} star"
+  },
+  "progressBar": {
+    "progress": "Progress: {percentage}%"
+  },
+  "tabs": {
+    "ariaLabel": "Switch learning module"
+  },
+  "kidsCalendar": {
+    "title": "Last 30 days",
+    "dayCount": "{count} days studied",
+    "minutes": "{count} minutes",
+    "today": "Today",
+    "learned": "Studied {count} minutes",
+    "notStudied": "No study",
+    "hoverHint": "Hover dots for details",
+    "legendNone": "No study",
+    "legendShort": "1-9 min",
+    "legendMid": "10-19 min",
+    "legendLong": "20+ min"
+  },
+  "dailyGoal": {
+    "title": "Today's Goals",
+    "subtitle": "Finish to earn stars",
+    "allDone": "🏆 All goals done today! Amazing!",
+    "practice": "Finish 10 practice questions",
+    "newHanzi": "Learn 3 new characters",
+    "readPoem": "Read 1 poem aloud",
+    "math": "Answer 5 math questions",
+    "stars": "Earn 5 stars",
+    "time": "Study 15 minutes",
+    "pinyin": "Practice 5 pinyin",
+    "word": "Learn 3 English words"
+  },
+  "balanceScale": {
+    "title": "⚖️ Balance Scale",
+    "subtitle": "Is it balanced?",
+    "balanced": "Balanced",
+    "unbalanced": "Not balanced",
+    "wrongFeedback": "❌ Left {left}, right {right}, {state}",
+    "progress": "Level {level} · Score {score}"
+  },
+  "achievementWall": {
+    "unlockedCount": "{done} / {total} unlocked",
+    "unlocked": "Unlocked",
+    "gold": "Gold",
+    "silver": "Silver",
+    "bronze": "Bronze"
+  },
+  "chainDashboard": {
+    "title": "🧬 Adaptive Learning Chains"
+  },
+  "equipmentPanel": {
+    "hat": "Hat",
+    "cape": "Cape",
+    "sword": "Weapon",
+    "shield": "Shield",
+    "crown": "Crown",
+    "robe": "Robe"
+  },
+  "hanzi500Page": {
+    "title": "Hanzi Library",
+    "subtitle": "500 common hanzi by formation",
+    "all": "All",
+    "pictographic": "Pictographic",
+    "indicative": "Indicative",
+    "associative": "Associative",
+    "phonetic": "Phonetic",
+    "back": "◀️ Back",
+    "read": "🔊 Read",
+    "evolution": "📜 Evolution",
+    "words": "📝 Words",
+    "example": "💬 Examples",
+    "shown": "Showing {shown} / {total}",
+    "loadMore": "Scroll to load more",
+    "strokeInfo": "{n} strokes · {radical} radical"
+  },
+  "phoneticFamilies": {
+    "title": "Phonetic Families",
+    "subtitle": "Chars sharing a sound part read alike",
+    "tip1": "💡 Many hanzi share a sound part — meaning follows the radical, sound follows the phonetic.",
+    "tip2": "Learn one family, remember many at once!",
+    "charsInfo": "{n} chars · {learned} learned",
+    "familyTip": "🔍 This family reads near 「{key}」",
+    "familyDesc": "Different radicals, different meanings — {detail}",
+    "total": "{n} families · tap to explore",
+    "radicalSuffix": "{r} radical"
+  },
+  "radicalBrowser": {
+    "title": "Learn by Radical",
+    "subtitle": "{n} radicals total",
+    "charCount": "{n} chars",
+    "backRadical": "◀️ Back to radicals",
+    "radicalDetail": "Radical「{r}」· {n} chars",
+    "backList": "◀️ Back to list",
+    "charInfo": "{r} · {strokes} strokes · tone {tone} · Lv{level}",
+    "evolution": "Evolution: {e}",
+    "words": "Words: {w}",
+    "example": "Example: {s}",
+    "slowRead": "🔊 Slow read",
+    "readExample": "📖 Read example"
+  },
+  "countingGame": {
+    "title": "Counting",
+    "range1": "Up to 9",
+    "range2": "Up to 14",
+    "range3": "Up to 20",
+    "aiMode": "AI story counting {state}",
+    "aiReady": "AI has {n} new questions ready",
+    "aiThinking": "AI is writing questions — try a normal one",
+    "aiOff": "Let AI turn counting into stories",
+    "correct": "✅ Correct!",
+    "wrong": "❌ Answer: {answer}"
+  },
+  "fractionLearn": {
+    "title": "Fractions",
+    "learn": "Learn",
+    "quiz": "Quiz",
+    "explain": "Split {f} into {slices} parts, take 1 part",
+    "question": "What fraction is this?",
+    "score": "Score {n}",
+    "correct": "✅ Correct!",
+    "wrong": "❌ Answer: {answer}",
+    "thinkAgain": "Think again"
+  },
+  "skipCounting": {
+    "title": "Skip Counting",
+    "subtitle": "Count by steps",
+    "step": "Step by {n}",
+    "correct": "✅ Correct!",
+    "wrong": "❌ Try again",
+    "step1": "Count by 1s",
+    "step2": "Count by 2s",
+    "step5": "Count by 5s",
+    "step10": "Count by 10s",
+    "question": "What comes next?",
+    "score": "Score {n}",
+    "next": "➡️ Next number",
+    "restart": "Start over"
+  },
+  "tenFrameMath": {
+    "title": "Ten Frame",
+    "subtitle": "Make ten",
+    "fill": "How many to make 10?",
+    "correct": "✅ Correct!",
+    "wrong": "❌ Think again",
+    "makeTen": "➕ Make Ten (Addition)",
+    "breakTen": "➖ Break Ten (Subtraction)",
+    "step1Add": "✨ Step 1: Borrow to make 10 (borrow {n})",
+    "step2Add": "🎉 Step 2: Calculate total! (10 + {n})",
+    "nextAdd": "🚀 Great! Next problem ➔",
+    "step1Sub": "✨ Step 1: Break ten! (10 minus {sub} = {remain})",
+    "step2Sub": "🎉 Step 2: Add the rest! ({n1} + {n2})",
+    "nextSub": "🚀 Success! Next problem ➔"
+  },
+  "wordProblems": {
+    "title": "Word Problems",
+    "subtitle": "Math in life",
+    "correct": "✅ Correct!",
+    "wrong": "❌ Think again",
+    "level1": "🌱 Easy",
+    "level2": "🌿 Medium",
+    "level3": "🌳 Hard",
+    "done": "Challenge complete!",
+    "again": "🔄 Try again",
+    "changeDiff": "🔄 Change difficulty",
+    "showResult": "🏁 See results",
+    "nextQ": "➡️ Next",
+    "progress": "Q {n} / {total}"
+  },
+  "studyCalendar": {
+    "title": "Study Calendar",
+    "subtitle": "Track your daily learning",
+    "totalDays": "Total study days",
+    "avgMinutes": "Avg {n} min/day"
+  },
+  "sudokuEasy": {
+    "title": "Sudoku",
+    "subtitle": "Fun 4×4 Sudoku",
+    "select": "Select a number to fill in",
+    "correct": "✅ Correct!",
+    "wrong": "❌ Number conflict"
+  },
+  "symmetryLearn": {
+    "title": "Symmetry",
+    "subtitle": "Explore the beauty of symmetry",
+    "findAxis": "Find the line of symmetry",
+    "correct": "✅ Correct!",
+    "wrong": "❌ Try again"
+  },
+  "rhythmRepeat": {
+    "title": "Rhythm Master",
+    "subtitle": "Repeat the beat",
+    "listen": "🔊 Listen",
+    "repeat": "🎵 Repeat",
+    "correct": "✅ Correct!",
+    "wrong": "❌ Try again"
+  },
+  "strokeAnimation": {
+    "title": "Stroke Animation",
+    "start": "Tap to start",
+    "replay": "🔄 Replay"
+  },
+  "vehicleExplore": {
+    "title": "Vehicles",
+    "subtitle": "Learn about transport",
+    "land": "🚗 Land",
+    "water": "🚢 Water",
+    "air": "✈️ Air"
+  },
+  "weatherSeasons": {
+    "title": "Weather & Seasons",
+    "subtitle": "Spring summer autumn winter",
+    "spring": "🌸 Spring",
+    "summer": "☀️ Summer",
+    "autumn": "🍂 Autumn",
+    "winter": "❄️ Winter"
   }
 }

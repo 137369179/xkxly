@@ -15,6 +15,7 @@ import { speak } from '@/lib/speech';
 import { sfxTap } from '@/lib/sfx';
 import { useMastery, useStore } from '@/store/useStore';
 import { TONE_STYLE } from '@/lib/tones';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface Family {
   /** 拼音（不带声调） */
@@ -23,6 +24,7 @@ interface Family {
 }
 
 export function PhoneticFamilies({ onLearn }: { onLearn?: (h: HanziEntry) => void }) {
+  const { t } = useTranslation();
   const mastery = useMastery();
   const learnSkill = useStore((s) => s.learnSkill);
   const [open, setOpen] = useState<string | null>(null);
@@ -49,15 +51,15 @@ export function PhoneticFamilies({ onLearn }: { onLearn?: (h: HanziEntry) => voi
     <div className="space-y-4">
       <PageHeader
         emoji="🧬"
-        title="字族学习"
-        subtitle="同声旁的字读音相同或相近，一串一串记"
+        title={t('phoneticFamilies.title')}
+        subtitle={t('phoneticFamilies.subtitle')}
         tone="purple"
       />
 
       <Panel>
         <p className="text-sm font-bold text-ink-soft">
-          💡 发现规律：汉字里很多字「读音相同偏旁不同」，意思跟偏旁走、读音跟声旁走。
-          学会一族，比一个一个背快多啦！
+          {t('phoneticFamilies.tip1')}
+          {t('phoneticFamilies.tip2')}
         </p>
       </Panel>
 
@@ -77,7 +79,7 @@ export function PhoneticFamilies({ onLearn }: { onLearn?: (h: HanziEntry) => voi
                   {f.key}
                 </span>
                 <span className="flex-1 text-sm font-bold text-ink-soft">
-                  {f.chars.length} 个字 · 已学 {learnedCount}
+                  {t('phoneticFamilies.charsInfo', { n: f.chars.length, learned: learnedCount })}
                 </span>
                 <span className="text-lg">{isOpen ? '🔼' : '🔽'}</span>
               </button>
@@ -104,7 +106,7 @@ export function PhoneticFamilies({ onLearn }: { onLearn?: (h: HanziEntry) => voi
                         >
                           <span className="text-3xl font-black text-ink">{h.c}</span>
                           <span className="text-xs font-bold text-candy-purple-deep">{h.pd}</span>
-                          <span className="text-[10px] font-bold text-ink-soft">{h.radical}部</span>
+                          <span className="text-[10px] font-bold text-ink-soft">{t('phoneticFamilies.radicalSuffix', { r: h.radical })}</span>
                           {learned && <span className="text-[10px]">✅</span>}
                         </button>
                       );
@@ -117,7 +119,7 @@ export function PhoneticFamilies({ onLearn }: { onLearn?: (h: HanziEntry) => voi
                   >
                     🔍 这一族都读「{f.key}」附近的音：{
                       f.chars.map((h) => `${h.c}(${h.pd})`).join('、')
-                    }。偏旁不同，意思就不同——{f.chars.slice(0, 3).map((h) => `「${h.c}」是${h.radical}部和${h.words[0]}`).join('，')}。
+                    }。偏旁不同，意思就不同——{f.chars.slice(0, 3).map((h) => `「${h.c}」是${t('phoneticFamilies.radicalSuffix', { r: h.radical })}和${h.words[0]}`).join('，')}。
                   </div>
                 </div>
               )}
@@ -127,7 +129,7 @@ export function PhoneticFamilies({ onLearn }: { onLearn?: (h: HanziEntry) => voi
       </div>
 
       <p className="text-center text-xs font-bold text-ink-soft">
-        共 {families.length} 个字族 · 点开一族开始探索
+        {t('phoneticFamilies.total', { n: families.length })}
       </p>
     </div>
   );

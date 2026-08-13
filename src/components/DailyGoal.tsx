@@ -4,6 +4,7 @@
  */
 
 import { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from '@/i18n/useTranslation';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { useProgress, useStore } from '@/store/useStore';
 import { dateKey } from '@/lib/dailyPlan';
@@ -15,21 +16,21 @@ import { safeGetItem, safeSetItem } from '@/lib/safeStorage';
 interface DailyGoal {
   id: string;
   emoji: string;
-  label: string;
+  labelKey: string;
   target: number;
   current: (p: ReturnType<typeof useProgress>) => number;
   reward: number;
 }
 
 const GOAL_POOL: DailyGoal[] = [
-  { id: 'practice', emoji: '✏️', label: '完成 10 道练习题', target: 10, current: p => p.dailyLog[dateKey()]?.items ?? 0, reward: 2 },
-  { id: 'new-hanzi', emoji: '🀄', label: '学习 3 个新汉字', target: 3, current: p => Object.keys(p.mastery).filter(k => k.startsWith('hanzi:') && p.mastery[k]!.lv >= 1).length % 100, reward: 2 },
-  { id: 'read-poem', emoji: '🌸', label: '朗读 1 首古诗', target: 1, current: p => p.poemsRead.filter(() => { const entry = p.dailyLog[dateKey()]; return entry; }).length > 0 ? 1 : 0, reward: 2 },
-  { id: 'math', emoji: '🔢', label: '答对 5 道数学题', target: 5, current: p => p.mathCorrect % 100, reward: 2 },
-  { id: 'stars', emoji: '⭐', label: '获得 5 颗星星', target: 5, current: p => p.dailyLog[dateKey()]?.stars ?? 0, reward: 3 },
-  { id: 'time', emoji: '⏰', label: '学习 15 分钟', target: 15, current: p => Math.floor((p.dailyLog[dateKey()]?.sec ?? 0) / 60), reward: 2 },
-  { id: 'pinyin', emoji: '📋', label: '练习 5 个拼音', target: 5, current: p => Object.keys(p.mastery).filter(k => k.startsWith('pinyin:') && p.mastery[k]!.lv >= 1).length % 63, reward: 2 },
-  { id: 'word', emoji: '🔤', label: '学 3 个英语单词', target: 3, current: p => Object.keys(p.mastery).filter(k => k.startsWith('word:') && p.mastery[k]!.lv >= 1).length % 74, reward: 2 },
+  { id: 'practice', emoji: '✏️', labelKey: 'dailyGoal.practice', target: 10, current: p => p.dailyLog[dateKey()]?.items ?? 0, reward: 2 },
+  { id: 'new-hanzi', emoji: '🀄', labelKey: 'dailyGoal.newHanzi', target: 3, current: p => Object.keys(p.mastery).filter(k => k.startsWith('hanzi:') && p.mastery[k]!.lv >= 1).length % 100, reward: 2 },
+  { id: 'read-poem', emoji: '🌸', labelKey: 'dailyGoal.readPoem', target: 1, current: p => p.poemsRead.filter(() => { const entry = p.dailyLog[dateKey()]; return entry; }).length > 0 ? 1 : 0, reward: 2 },
+  { id: 'math', emoji: '🔢', labelKey: 'dailyGoal.math', target: 5, current: p => p.mathCorrect % 100, reward: 2 },
+  { id: 'stars', emoji: '⭐', labelKey: 'dailyGoal.stars', target: 5, current: p => p.dailyLog[dateKey()]?.stars ?? 0, reward: 3 },
+  { id: 'time', emoji: '⏰', labelKey: 'dailyGoal.time', target: 15, current: p => Math.floor((p.dailyLog[dateKey()]?.sec ?? 0) / 60), reward: 2 },
+  { id: 'pinyin', emoji: '📋', labelKey: 'dailyGoal.pinyin', target: 5, current: p => Object.keys(p.mastery).filter(k => k.startsWith('pinyin:') && p.mastery[k]!.lv >= 1).length % 63, reward: 2 },
+  { id: 'word', emoji: '🔤', labelKey: 'dailyGoal.word', target: 3, current: p => Object.keys(p.mastery).filter(k => k.startsWith('word:') && p.mastery[k]!.lv >= 1).length % 74, reward: 2 },
 ];
 
 function pickGoals(dateStr: string): DailyGoal[] {
@@ -43,6 +44,7 @@ function pickGoals(dateStr: string): DailyGoal[] {
 }
 
 export function DailyGoal() {
+  const { t } = useTranslation();
   const progress = useProgress();
   const addStars = useStore(s => s.addStars);
   const today = dateKey();
@@ -73,7 +75,7 @@ export function DailyGoal() {
 
   return (
     <Panel>
-      <PanelTitle emoji="🎯" title="今日小目标" subtitle="完成可领星星" tone="orange" />
+      <PanelTitle emoji="🎯" title={t('dailyGoal.title')} subtitle={t('dailyGoal.subtitle')} tone="orange" />
       <div className="space-y-2">
         {goals.map(g => {
           const cur = g.current(progress);
@@ -106,7 +108,7 @@ export function DailyGoal() {
               <span className="text-xl">{g.emoji}</span>
               <div className="flex-1">
                 <div className={`text-sm font-extrabold ${claimedG ? 'text-ink-soft line-through' : 'text-ink'}`}>
-                  {g.label}
+                  {t(g.labelKey)}
                 </div>
                 <div className="mt-1 h-2 overflow-hidden rounded-full bg-gray-200">
                   <motion.div
@@ -131,7 +133,7 @@ export function DailyGoal() {
           animate={{ opacity: 1, scale: 1 }}
           className="mt-3 rounded-2xl bg-gradient-to-r from-candy-orange-soft to-candy-pink-soft p-3 text-center"
         >
-          <p className="text-base font-black text-ink">🏆 今日全部目标完成！宝贝太棒了！</p>
+          <p className="text-base font-black text-ink">{t('dailyGoal.allDone')}</p>
         </motion.div>
       )}
     </Panel>

@@ -6,10 +6,12 @@ import { useState, useMemo } from 'react';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { useProgress } from '@/store/useStore';
+import { useTranslation } from '@/i18n/useTranslation';
 
 type Period = 'day' | 'week' | 'month';
 
 export function Leaderboard() {
+  const { t } = useTranslation();
   const progress = useProgress();
   const [period, setPeriod] = useState<Period>('week');
 
@@ -53,7 +55,7 @@ export function Leaderboard() {
 
   return (
     <Panel>
-      <PanelTitle emoji="🏆" title="学习排行榜" subtitle="本地历史记录" tone="orange" />
+      <PanelTitle emoji="🏆" title={t('leaderboard.title')} subtitle={t('leaderboard.subtitle')} tone="orange" />
 
       <div className="mb-3 flex gap-2">
         {(['day', 'week', 'month'] as Period[]).map(p => (
@@ -64,7 +66,7 @@ export function Leaderboard() {
             size="sm"
             onClick={() => setPeriod(p)}
           >
-            {p === 'day' ? '今天' : p === 'week' ? '本周' : '本月'}
+            {p === 'day' ? t('leaderboard.today') : p === 'week' ? t('leaderboard.week') : t('leaderboard.month')}
           </CandyButton>
         ))}
       </div>
@@ -72,15 +74,15 @@ export function Leaderboard() {
       {/* 汇总 */}
       <div className="mb-3 grid grid-cols-4 gap-2">
         {[
-          { label: '学习天数', value: records.length, emoji: '📅' },
-          { label: '总时长', value: `${totals.minutes}分`, emoji: '⏰' },
-          { label: '总题数', value: totals.items, emoji: '✏️' },
-          { label: '总星星', value: totals.stars, emoji: '⭐' },
+          { labelKey: 'leaderboard.dayCount', value: records.length, emoji: '📅' },
+          { labelKey: 'leaderboard.totalTime', value: t('leaderboard.minutesValue', { count: totals.minutes }), emoji: '⏰' },
+          { labelKey: 'leaderboard.totalItems', value: totals.items, emoji: '✏️' },
+          { labelKey: 'leaderboard.totalStars', value: totals.stars, emoji: '⭐' },
         ].map(s => (
-          <div key={s.label} className="rounded-xl bg-candy-orange-soft p-2 text-center">
+          <div key={s.labelKey} className="rounded-xl bg-candy-orange-soft p-2 text-center">
             <div className="text-lg">{s.emoji}</div>
             <div className="text-base font-black text-candy-orange-deep">{s.value}</div>
-            <div className="text-[10px] font-bold text-ink-soft">{s.label}</div>
+            <div className="text-[10px] font-bold text-ink-soft">{t(s.labelKey)}</div>
           </div>
         ))}
       </div>
@@ -97,7 +99,7 @@ export function Leaderboard() {
 
       {/* 每日列表 */}
       {records.length === 0 ? (
-        <p className="py-4 text-center text-sm font-bold text-ink-soft">这个时间段还没有学习记录哦</p>
+        <p className="py-4 text-center text-sm font-bold text-ink-soft">{t('leaderboard.empty')}</p>
       ) : (
         <div className="space-y-1">
           {records.slice(0, 20).map((r, i) => (

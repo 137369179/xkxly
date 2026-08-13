@@ -5,11 +5,13 @@
  * 文案面向 5 岁孩子：不说"超时违规"，说"眼睛累啦，我们看看远处"。
  */
 import { AnimatePresence, motion } from 'motion/react';
+import { useTranslation } from '@/i18n/useTranslation';
 import { useStudyClock } from '@/store/studyClock';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap } from '@/lib/sfx';
 
 export function StudyGuard() {
+  const { t } = useTranslation();
   const { todaySec, overLimit, needBreak, snooze, takeBreak } = useStudyClock();
 
   const show = overLimit || needBreak;
@@ -36,12 +38,12 @@ export function StudyGuard() {
           >
             <div className="text-6xl">{kind === 'limit' ? '🌙' : '👀'}</div>
             <h2 className="mt-3 text-2xl font-extrabold text-ink">
-              {kind === 'limit' ? '今天学得够多啦' : '眼睛该休息一下'}
+              {kind === 'limit' ? t('studyGuard.limitTitle') : t('studyGuard.breakTitle')}
             </h2>
             <p className="mt-2 text-base font-medium leading-relaxed text-ink-soft">
               {kind === 'limit'
-                ? `今天已经学习 ${Math.round(todaySec / 60)} 分钟，去外面跑一跑、玩一玩吧！`
-                : '看看窗外远一点的地方，数 20 下再回来，眼睛会舒服很多。'}
+                ? t('studyGuard.limitBody', { minutes: Math.round(todaySec / 60) })
+                : t('studyGuard.breakBody')}
             </p>
 
             <div className="mt-5 flex flex-col gap-2.5">
@@ -53,11 +55,11 @@ export function StudyGuard() {
                   else takeBreak();
                 }}
               >
-                {kind === 'limit' ? '再学 10 分钟' : '休息好了，继续学'}
+                {kind === 'limit' ? t('studyGuard.limitBtn') : t('studyGuard.breakBtn')}
               </CandyButton>
               {kind === 'break' && (
                 <p className="text-xs font-bold text-ink-soft/80">
-                  提醒间隔可以在「家长中心 → 设置」里调整
+                  {t('studyGuard.settingsHint')}
                 </p>
               )}
             </div>

@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { getCombo, subscribeCombo } from '@/lib/combo';
 import { TONE_STYLE } from '@/lib/tones';
 import { speak } from '@/lib/speech';
+import { useTranslation } from '@/i18n/useTranslation';
 
 /**
  * 全局连击指示器：固定在顶部居中。
@@ -11,6 +12,7 @@ import { speak } from '@/lib/speech';
  * - 连击中断时温柔提示「差一点就连击啦」
  */
 export function ComboIndicator() {
+  const { t } = useTranslation();
   const count = useSyncExternalStore(subscribeCombo, getCombo, getCombo);
   const prevCountRef = useRef(count);
   const [hint, setHint] = useState(false);
@@ -69,7 +71,7 @@ export function ComboIndicator() {
                 {count}
               </motion.span>
               <span className="text-xs font-extrabold leading-none" style={{ color: orange.deep }}>
-                连击
+                {t('comboIndicator.label')}
               </span>
             </div>
           </motion.div>
@@ -87,7 +89,7 @@ export function ComboIndicator() {
             transition={{ duration: 0.3 }}
             className="fixed left-1/2 top-20 z-40 -translate-x-1/2 rounded-full bg-white/95 px-4 py-1.5 text-sm font-bold text-candy-orange shadow-candy-sm lg:top-5"
           >
-            差一点就连击啦 💪
+            {t('comboIndicator.hint')}
           </motion.div>
         )}
       </AnimatePresence>

@@ -8,6 +8,7 @@ import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const EMOJIS = ['🐱','🐶','🐰'];
 
@@ -31,6 +32,7 @@ function genBoard(): { grid: (string|null)[][]; solution: string[][] } {
 }
 
 export function MiniSudoku() {
+  const { t } = useTranslation();
   const [{ grid, solution }, setState] = useState(genBoard);
   const [selected, setSelected] = useState<[number,number] | null>(null);
   const [feedback, setFeedback] = useState('');
@@ -56,7 +58,7 @@ export function MiniSudoku() {
     setSelected(null);
     if (checkWin(newGrid)) {
       sfxCorrect();
-      setFeedback('🎉 全部正确！你真聪明！');
+      setFeedback(t('miniSudoku.win'));
       setScore(s=>s+1);
       void speak('太棒了！数独完成了！', { lang:'zh-CN', rate:0.85, module:'praise' });
       lockRef.current = true;
@@ -73,8 +75,8 @@ export function MiniSudoku() {
 
   return (
     <div className="card-candy p-4 sm:p-6">
-      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">🎯 幼儿数独</h3>
-      <p className="mb-3 text-center text-xs font-bold text-ink-soft">每行每列不能重复哦</p>
+      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">{t('miniSudoku.title')}</h3>
+      <p className="mb-3 text-center text-xs font-bold text-ink-soft">{t('miniSudoku.subtitle')}</p>
 
       <div className="mx-auto mb-4" style={{maxWidth:'240px'}}>
         <div className="grid grid-cols-3 gap-1.5">
@@ -102,8 +104,8 @@ export function MiniSudoku() {
         {!!feedback && <motion.div initial={{opacity:0,y:5}} animate={{opacity:1,y:0}} exit={{opacity:0}} className="mt-3 text-center text-sm font-extrabold text-candy-purple-deep">{feedback}</motion.div>}
       </AnimatePresence>
       <div className="mt-2 flex items-center justify-between">
-        <span className="text-xs font-bold text-ink-soft">得分 {score}</span>
-        <CandyButton tone="blue" size="sm" onClick={newGame}>🔄 新题</CandyButton>
+        <span className="text-xs font-bold text-ink-soft">{t('miniSudoku.score', { count: score })}</span>
+        <CandyButton tone="blue" size="sm" onClick={newGame}>{t('miniSudoku.newPuzzle')}</CandyButton>
       </div>
     </div>
   );

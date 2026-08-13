@@ -12,11 +12,13 @@ import { sfxTap, sfxStar } from '@/lib/sfx';
 import { useStore } from '@/store/useStore';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const UPPER_CHARS = LETTERS.map(l => l.upper);
 const LOWER_CHARS = LETTERS.map(l => l.lower);
 
 export function LetterTrace() {
+  const { t } = useTranslation();
   const [idx, setIdx] = useState(0);
   const [mode, setMode] = useState<'upper' | 'lower'>('upper');
   const [passed, setPassed] = useState<Set<string>>(new Set());
@@ -31,10 +33,10 @@ export function LetterTrace() {
       <div className="flex items-center justify-between">
         <div className="flex gap-1">
           <CandyButton tone={mode === 'upper' ? 'blue' : 'purple'} variant={mode === 'upper' ? 'solid' : 'soft'} size="sm" onClick={() => { sfxTap(); setMode('upper'); }}>
-            A-Z 大写
+            {t('letterTrace.upper')}
           </CandyButton>
           <CandyButton tone={mode === 'lower' ? 'blue' : 'purple'} variant={mode === 'lower' ? 'solid' : 'soft'} size="sm" onClick={() => { sfxTap(); setMode('lower'); }}>
-            a-z 小写
+            {t('letterTrace.lower')}
           </CandyButton>
         </div>
         <span className="text-xs font-bold text-ink-soft">{passed.size} / 26</span>
@@ -55,7 +57,7 @@ export function LetterTrace() {
       </Panel>
 
       <Panel>
-        <h4 className="mb-1 text-sm font-extrabold text-ink text-center">✍️ 用手指描一描</h4>
+        <h4 className="mb-1 text-sm font-extrabold text-ink text-center">{t('letterTrace.traceTip')}</h4>
         <TraceCanvas
           char={char}
           tone="blue"
@@ -96,7 +98,7 @@ export function LetterTrace() {
           ◀️
         </CandyButton>
         <CandyButton tone="orange" size="sm" onClick={() => { sfxTap(); setIdx(i => (i + 1) % chars.length); }}>
-          📝 下一个 →
+          {t('letterTrace.next')}
         </CandyButton>
       </div>
     </div>

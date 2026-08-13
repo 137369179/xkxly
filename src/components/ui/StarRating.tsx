@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface StarRatingProps {
   /** 当前星级（0-5，支持 0.5 步进） */
@@ -35,6 +36,7 @@ export function StarRating({
   showValue = false,
   className = '',
 }: StarRatingProps) {
+  const { t } = useTranslation();
   const [hoverRating, setHoverRating] = useState<number | null>(null);
 
   const handleClick = useCallback(
@@ -67,7 +69,7 @@ export function StarRating({
     <div
       className={`inline-flex items-center gap-1 ${className}`}
       role={interactive ? 'slider' : 'img'}
-      aria-label={`评级：${rating} 星，共 ${maxStars} 星`}
+      aria-label={t('starRating.rating', { rating, maxStars })}
       aria-valuenow={rating}
       aria-valuemin={0}
       aria-valuemax={maxStars}
@@ -89,7 +91,7 @@ export function StarRating({
               ${sizeMap[size]} transition-transform duration-150
               ${interactive ? 'cursor-pointer hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 rounded' : 'cursor-default'}
             `}
-            aria-label={`${starValue} 星`}
+            aria-label={t('starRating.star', { value: starValue })}
             style={{ color }}
           >
             {/* 实心星 */}

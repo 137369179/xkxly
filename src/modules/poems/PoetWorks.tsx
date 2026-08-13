@@ -7,6 +7,7 @@ import { POETS } from '@/data/poets';
 import POEMS, { type PoemIndex } from '@/data/poemsIndex';
 import { navigate } from '@/lib/router';
 import { sfxTap } from '@/lib/sfx';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const POET_LIST = Object.entries(POETS).map(([key, p]) => ({ key, ...p }));
 POET_LIST.sort((a, b) => {
@@ -16,6 +17,7 @@ POET_LIST.sort((a, b) => {
 });
 
 export function PoetWorks() {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState<string | null>(null);
   const poet = useMemo(() => selected ? POET_LIST.find(p => p.key === selected) : null, [selected]);
   const works = useMemo(() =>
@@ -29,9 +31,9 @@ export function PoetWorks() {
     <div className="space-y-4">
       {!selected ? (
         <div className="space-y-3">
-          <h3 className="text-center text-lg font-extrabold text-ink">📜 诗人作品集</h3>
+          <h3 className="text-center text-lg font-extrabold text-ink">{t('poetWorks.title')}</h3>
           <p className="text-center text-xs font-bold text-ink-soft">
-            点击诗人，浏览 TA 的全部诗作和生平故事
+            {t('poetWorks.tip')}
           </p>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
             {POET_LIST.map(p => (
@@ -53,7 +55,7 @@ export function PoetWorks() {
             onClick={() => setSelected(null)}
             className="text-sm font-bold text-ink-soft hover:text-ink"
           >
-            ← 返回诗人列表
+            {t('poetWorks.back')}
           </button>
           {poet && (
             <div className="card-candy p-4">
@@ -62,7 +64,7 @@ export function PoetWorks() {
               <p className="mt-2 text-xs font-medium text-ink-muted leading-relaxed">{poet.bio}</p>
               {poet.works && poet.works.length > 0 && (
                 <div className="mt-2">
-                  <span className="text-xs font-bold text-candy-pink-deep">代表作：</span>
+                  <span className="text-xs font-bold text-candy-pink-deep">{t('poetWorks.representative')}</span>
                   <span className="text-xs font-medium text-ink-soft">{poet.works.slice(0, 4).join('、')}</span>
                 </div>
               )}
@@ -78,7 +80,7 @@ export function PoetWorks() {
                 >
                   <div className="font-extrabold text-ink">{pi.title}</div>
                   <div className="mt-0.5 text-[10px] font-semibold text-ink-soft">
-                    {pi.dynasty} · {pi.genre} · 难度{pi.level}
+                    {pi.dynasty} · {pi.genre} · {t('poetWorks.level', { n: pi.level })}
                   </div>
                 </button>
               ))}

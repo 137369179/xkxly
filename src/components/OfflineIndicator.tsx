@@ -11,6 +11,7 @@
  *   4. 离线时返回 true，供调用方禁用依赖网络的入口
  */
 import { useEffect, useState } from 'react';
+import { useTranslation } from '@/i18n/useTranslation';
 import { motion, AnimatePresence } from 'motion/react';
 
 /** 订阅浏览器在线状态，离线时返回 true */
@@ -35,6 +36,7 @@ export function useOffline(): boolean {
 
 /** 离线徽章：在 TopBar 显示，离线时可见 */
 export function OfflineBadge() {
+  const { t } = useTranslation();
   const offline = useOffline();
   return (
     <AnimatePresence>
@@ -44,10 +46,10 @@ export function OfflineBadge() {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}
           className="flex items-center gap-1 rounded-full bg-candy-pink-soft px-2.5 py-1.5 text-xs font-extrabold text-candy-pink-deep border border-candy-pink/30"
-          title="当前处于离线模式，部分功能（如 AI 讲解）将不可用"
+          title={t('offlineIndicator.badgeTitle')}
         >
           <span>📶</span>
-          <span>离线</span>
+          <span>{t('offlineIndicator.badge')}</span>
         </motion.span>
       )}
     </AnimatePresence>
@@ -56,6 +58,7 @@ export function OfflineBadge() {
 
 /** 离线切换 Toast：网络状态变化时短暂提示，避免用户困惑 */
 export function OfflineToast() {
+  const { t } = useTranslation();
   const offline = useOffline();
   const [show, setShow] = useState(false);
 
@@ -78,7 +81,7 @@ export function OfflineToast() {
             background: offline ? '#FF6B9D' : '#4ECDC4',
           }}
         >
-          {offline ? '📶 网络断开了，进入离线模式' : '📶 网络已恢复'}
+          {offline ? t('offlineIndicator.toastDisconnected') : t('offlineIndicator.toastReconnected')}
         </motion.div>
       )}
     </AnimatePresence>

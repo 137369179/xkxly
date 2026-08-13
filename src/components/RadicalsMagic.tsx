@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface RadicalPair {
   r1: string;
@@ -29,11 +30,18 @@ const RADICAL_PAIRS: RadicalPair[] = [
   { r1: '女', r2: '子', res: '好', pinyin: 'hǎo', meaning: '女子怀抱幼儿，表示美好', emoji: '👍' },
   { r1: '亻(单人旁)', r2: '木(树木)', res: '休', pinyin: 'xiū', meaning: '人靠在树木边休息', emoji: '💤' },
   { r1: '口', r2: '鸟', res: '鸣', pinyin: 'míng', meaning: '鸟儿张口鸣叫', emoji: '🐦' },
+  { r1: '人', r2: '人', res: '从', pinyin: 'cóng', meaning: '一个人跟着一个人', emoji: '🚶' },
+  { r1: '从', r2: '人', res: '众', pinyin: 'zhòng', meaning: '许多许多的人聚合在一起', emoji: '👨‍👩‍👧‍👦' },
+  { r1: '火', r2: '火', res: '炎', pinyin: 'yán', meaning: '火光上升，非常炎热', emoji: '🔥' },
+  { r1: '木', r2: '林', res: '森', pinyin: 'sēn', meaning: '树木非常多，茂密幽深', emoji: '🌳' },
+  { r1: '口', r2: '口', res: '吅', pinyin: 'xuān', meaning: '大声惊呼叫喊', emoji: '🗣️' },
+  { r1: '山', r2: '山', res: '出', pinyin: 'chū', meaning: '山上有山，引申为出来', emoji: '⛰️' },
 ];
 
 export function RadicalsMagic() {
+  const { t } = useTranslation();
   const [idx, setIdx] = useState(0);
-  const current = RADICAL_PAIRS[idx]!!
+  const current = RADICAL_PAIRS[idx]!!;
   const [merged, setMerged] = useState(false);
 
   const handleMerge = () => {
@@ -52,23 +60,23 @@ export function RadicalsMagic() {
     <div className="rounded-3xl border-2 border-purple-300 bg-gradient-to-br from-purple-50 via-pink-50 to-amber-50 p-5 text-center space-y-4 shadow-fluffy">
       <div className="flex items-center justify-between">
         <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-purple-700 shadow-sm">
-          🏯 偏旁部首汉字魔法 ({idx + 1} / {RADICAL_PAIRS.length})
+          {t('radicalsMagic.badge', { current: idx + 1, total: RADICAL_PAIRS.length })}
         </span>
         <span className="text-3xl">{current.emoji}</span>
       </div>
 
       <h3 className="text-lg font-black text-purple-900">
-        点击魔法棒，把两个部首合体变成新汉字！
+        {t('radicalsMagic.instruction')}
       </h3>
 
       {/* 偏旁组合展现 */}
       <div className="flex items-center justify-center gap-3">
-        <div className="flex h-20 w-24 items-center justify-center rounded-2xl border-2 border-purple-200 bg-white text-xl font-black text-purple-900 shadow-sm">
-          {current.r1}
+        <div className="flex h-20 w-24 flex-col items-center justify-center rounded-2xl border-2 border-purple-200 bg-white p-1 text-base font-black text-purple-900 shadow-sm">
+          <span>{current.r1}</span>
         </div>
         <span className="text-3xl font-black text-purple-400">+</span>
-        <div className="flex h-20 w-24 items-center justify-center rounded-2xl border-2 border-purple-200 bg-white text-xl font-black text-purple-900 shadow-sm">
-          {current.r2}
+        <div className="flex h-20 w-24 flex-col items-center justify-center rounded-2xl border-2 border-purple-200 bg-white p-1 text-base font-black text-purple-900 shadow-sm">
+          <span>{current.r2}</span>
         </div>
         <span className="text-3xl font-black text-purple-400">=</span>
         <div className={`flex h-20 w-24 items-center justify-center rounded-2xl border-4 text-4xl font-black shadow-fluffy transition-all ${merged ? 'border-purple-500 bg-purple-500 text-white scale-110' : 'border-dashed border-purple-300 bg-white text-gray-300'}`}>
@@ -77,11 +85,19 @@ export function RadicalsMagic() {
       </div>
 
       {merged && (
-        <div className="rounded-2xl bg-white p-3 shadow-sm inline-block space-y-1">
-          <div className="text-xl font-black text-purple-900">
-            {current.res} <span className="text-sm font-extrabold text-pink-600">({current.pinyin})</span>
+        <div className="rounded-2xl bg-white p-4 shadow-sm inline-block space-y-2 max-w-sm">
+          <div className="flex items-center justify-center gap-3">
+            <span className="text-3xl font-black text-purple-900">{current.res}</span>
+            <span className="text-base font-extrabold text-pink-600">({current.pinyin})</span>
+            <button
+              onClick={() => speak(current.res, { lang: 'zh-CN', rate: 0.7 })}
+              className="rounded-full bg-purple-100 p-2 text-sm text-purple-700 hover:bg-purple-200 active:scale-95 transition-all"
+              aria-label="🔊"
+            >
+              🔊
+            </button>
           </div>
-          <p className="text-xs font-bold text-purple-700">💡 字义：{current.meaning}</p>
+          <p className="text-xs font-bold text-purple-700">{t('radicalsMagic.meaning', { meaning: current.meaning })}</p>
         </div>
       )}
 
@@ -89,11 +105,11 @@ export function RadicalsMagic() {
       <div className="flex justify-center gap-3 pt-2">
         {!merged ? (
           <CandyButton tone="purple" size="md" onClick={handleMerge}>
-            🪄 施展部首合成魔法
+            {t('radicalsMagic.mergeBtn')}
           </CandyButton>
         ) : (
           <CandyButton tone="orange" size="md" onClick={handleNext}>
-            🚀 下一组偏旁 ➔
+            {t('radicalsMagic.nextBtn')}
           </CandyButton>
         )}
       </div>

@@ -12,13 +12,12 @@ import { useTranslation } from '@/i18n/useTranslation';
 
 export function Sidebar({ active }: { active: RouteId }) {
   const { t: translate } = useTranslation();
-  // 核心加强 O：细粒度 selector，避免 useProgress() 全量订阅导致每次答题都重渲染
   const stars = useStars();
   const badgeCount = useBadgeCount();
   const streak = useStreak();
 
   return (
-    <aside className="hidden w-[248px] shrink-0 flex-col gap-3 p-5 lg:flex xl:w-[276px]">
+    <aside className="hidden w-[248px] shrink-0 flex-col gap-3 p-4 lg:flex xl:w-[276px] rounded-[2.2rem] border-4 border-pink-200/90 bg-white/95 shadow-fluffy">
       {/* Logo */}
       <button
         aria-label="返回首页"

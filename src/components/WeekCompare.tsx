@@ -3,6 +3,7 @@
  */
 
 import { useMemo } from 'react';
+import { useTranslation } from '@/i18n/useTranslation';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { useProgress } from '@/store/useStore';
 import { dateKey } from '@/lib/dailyPlan';
@@ -73,6 +74,7 @@ function RingChart({ value, max, label, color }: { value: number; max: number; l
 }
 
 export function WeekCompare() {
+  const { t } = useTranslation();
   const progress = useProgress();
 
   const thisWeek = useMemo(() => getWeekData(progress, 0), [progress]);
@@ -81,22 +83,22 @@ export function WeekCompare() {
   const maxMin = Math.max(thisWeek.minutes, lastWeek.minutes, 1);
 
   const metrics = [
-    { label: '学习天数', thisW: thisWeek.days, lastW: lastWeek.days, suffix: '天' },
-    { label: '学习时长', thisW: thisWeek.minutes, lastW: lastWeek.minutes, suffix: '分' },
-    { label: '练习题数', thisW: thisWeek.items, lastW: lastWeek.items, suffix: '题' },
-    { label: '正确题数', thisW: thisWeek.ok, lastW: lastWeek.ok, suffix: '题' },
-    { label: '获得星星', thisW: thisWeek.stars, lastW: lastWeek.stars, suffix: '⭐' },
+    { labelKey: 'weekCompare.daysLabel', thisW: thisWeek.days, lastW: lastWeek.days, suffixKey: 'weekCompare.daysSuffix' },
+    { labelKey: 'weekCompare.durationLabel', thisW: thisWeek.minutes, lastW: lastWeek.minutes, suffixKey: 'weekCompare.minutesSuffix' },
+    { labelKey: 'weekCompare.itemsLabel', thisW: thisWeek.items, lastW: lastWeek.items, suffixKey: 'weekCompare.questionsSuffix' },
+    { labelKey: 'weekCompare.correctLabel', thisW: thisWeek.ok, lastW: lastWeek.ok, suffixKey: 'weekCompare.questionsSuffix' },
+    { labelKey: 'weekCompare.starsLabel', thisW: thisWeek.stars, lastW: lastWeek.stars, suffixKey: 'weekCompare.starsSuffix' },
   ];
 
   return (
     <Panel>
-      <PanelTitle emoji="📊" title="本周 vs 上周" subtitle="学习数据对比" tone="blue" />
+      <PanelTitle emoji="📊" title={t('weekCompare.title')} subtitle={t('weekCompare.subtitle')} tone="blue" />
 
       {/* 环形图对比 */}
       <div className="mb-4 flex items-center justify-around">
-        <RingChart value={thisWeek.minutes} max={maxMin} label="本周(分)" color="#4ECDC4" />
+        <RingChart value={thisWeek.minutes} max={maxMin} label={t('weekCompare.thisWeekMin')} color="#4ECDC4" />
         <div className="text-2xl font-black text-ink-soft">VS</div>
-        <RingChart value={lastWeek.minutes} max={maxMin} label="上周(分)" color="#FF8B94" />
+        <RingChart value={lastWeek.minutes} max={maxMin} label={t('weekCompare.lastWeekMin')} color="#FF8B94" />
       </div>
 
       {/* 指标对比表 */}
@@ -104,14 +106,14 @@ export function WeekCompare() {
         {metrics.map(m => {
           const diff = m.thisW - m.lastW;
           return (
-            <div key={m.label} className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2">
-              <span className="text-sm font-bold text-ink-soft w-20">{m.label}</span>
+            <div key={m.labelKey} className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2">
+              <span className="text-sm font-bold text-ink-soft w-20">{t(m.labelKey)}</span>
               <div className="flex items-center gap-3">
                 <span className="text-sm font-extrabold text-candy-blue-deep w-12 text-right">{m.lastW}</span>
                 <span className="text-ink-soft">→</span>
                 <span className="text-sm font-extrabold text-candy-green-deep w-12 text-right">{m.thisW}</span>
                 <div className="w-16 text-right">
-                  <Trend value={diff} suffix={m.suffix} />
+                  <Trend value={diff} suffix={t(m.suffixKey)} />
                 </div>
               </div>
             </div>
@@ -123,10 +125,10 @@ export function WeekCompare() {
       <div className="mt-3 rounded-xl bg-candy-blue-soft p-3 text-center">
         <p className="text-sm font-bold text-ink">
           {thisWeek.minutes > lastWeek.minutes
-            ? '🎉 本周比上周更努力，继续加油！'
+            ? t('weekCompare.summaryMore')
             : thisWeek.minutes < lastWeek.minutes
-            ? '💪 本周稍少了，下周加把劲！'
-            : '✨ 和上周持平，保持稳定！'}
+            ? t('weekCompare.summaryLess')
+            : t('weekCompare.summarySame')}
         </p>
       </div>
     </Panel>

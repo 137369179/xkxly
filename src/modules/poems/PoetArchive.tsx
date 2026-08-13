@@ -10,8 +10,10 @@ import POEMS from '@/data/poems';
 import { speak } from '@/lib/speech';
 import { sfxTap } from '@/lib/sfx';
 import { motion } from 'motion/react';
+import { useTranslation } from '@/i18n/useTranslation';
 
 export default function PoetArchive() {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState<string | null>(null);
 
   // 按朝代分组
@@ -37,7 +39,7 @@ export default function PoetArchive() {
     return (
       <div className="space-y-4">
         <CandyButton tone="pink" variant="soft" size="sm" onClick={() => { sfxTap(); setSelected(null); }}>
-          ◀️ 返回
+          {t('poetArchive.back')}
         </CandyButton>
 
         {/* 头像区 */}
@@ -63,14 +65,14 @@ export default function PoetArchive() {
 
         {/* 生平 */}
         <Panel>
-          <h4 className="mb-1 text-sm font-extrabold text-ink">📖 生平</h4>
+          <h4 className="mb-1 text-sm font-extrabold text-ink">{t('poetArchive.bio')}</h4>
           <p className="text-sm font-bold leading-relaxed text-ink-soft">{poet.bio}</p>
         </Panel>
 
         {/* 大事年表 */}
         {poet.timeline.length > 0 && (
           <Panel>
-            <h4 className="mb-2 text-sm font-extrabold text-ink">⏳ 大事年表</h4>
+            <h4 className="mb-2 text-sm font-extrabold text-ink">{t('poetArchive.timeline')}</h4>
             <div className="space-y-2">
               {poet.timeline.map((t: { year: string; event: string }, i: number) => (
                 <div key={`item-${i}`} className="flex gap-3">
@@ -86,14 +88,14 @@ export default function PoetArchive() {
 
         {/* 艺术成就 */}
         <Panel>
-          <h4 className="mb-1 text-sm font-extrabold text-ink">🎨 艺术成就</h4>
+          <h4 className="mb-1 text-sm font-extrabold text-ink">{t('poetArchive.art')}</h4>
           <p className="text-sm font-bold leading-relaxed text-ink-soft">{poet.art}</p>
         </Panel>
 
         {/* 代表作 */}
         {poet.works.length > 0 && (
           <Panel>
-            <h4 className="mb-2 text-sm font-extrabold text-ink">📚 代表作</h4>
+            <h4 className="mb-2 text-sm font-extrabold text-ink">{t('poetArchive.works')}</h4>
             <div className="flex flex-wrap gap-2">
               {poet.works.map((w: string, i: number) => (
                 <span key={`item-${i}`} className="rounded-full bg-candy-blue-soft px-3 py-1 text-xs font-bold text-candy-blue-deep">
@@ -107,7 +109,7 @@ export default function PoetArchive() {
         {/* 本库收录诗作 */}
         {poetPoems.length > 0 && (
           <Panel>
-            <h4 className="mb-2 text-sm font-extrabold text-ink">🌸 本库收录（{poetPoems.length}首）</h4>
+            <h4 className="mb-2 text-sm font-extrabold text-ink">{t('poetArchive.count', { n: poetPoems.length })}</h4>
             <div className="space-y-1">
               {poetPoems.map((p: any) => (
                 <div key={p.id} className="rounded-lg bg-white/60 p-2">
@@ -122,7 +124,7 @@ export default function PoetArchive() {
         {/* 史料出处 */}
         {poet.sources.length > 0 && (
           <Panel>
-            <h4 className="mb-2 text-sm font-extrabold text-ink">📚 史料出处</h4>
+            <h4 className="mb-2 text-sm font-extrabold text-ink">{t('poetArchive.source')}</h4>
             <div className="space-y-1">
               {poet.sources.map((s: { title: string; note?: string }, i: number) => (
                 <div key={`item-${i}`} className="text-xs font-bold text-ink-soft">
@@ -143,11 +145,11 @@ export default function PoetArchive() {
 
   return (
     <div className="space-y-4">
-      <PageHeader emoji="📜" title="诗人档案" subtitle="了解诗人的一生" tone="pink" />
+      <PageHeader emoji="📜" title={t('poetArchive.title')} subtitle={t('poetArchive.subtitle')} tone="pink" />
 
       {dynasties.map(d => (
         <Panel key={d}>
-          <h4 className="mb-2 text-sm font-extrabold text-ink">{d}（{byDynasty[d]!.length}位）</h4>
+          <h4 className="mb-2 text-sm font-extrabold text-ink">{t('poetArchive.dynastyCount', { dynasty: d, n: byDynasty[d]!.length })}</h4>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {byDynasty[d]!.map(name => (
               <motion.button

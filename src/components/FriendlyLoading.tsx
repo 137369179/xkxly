@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from '@/i18n/useTranslation';
 import { motion } from 'motion/react';
 
 /**
@@ -16,12 +17,14 @@ export function FriendlyLoading({ message }: { message?: string }) {
   const pet = useMemo(() => PETS[Math.floor(Math.random() * PETS.length)], []);
   const [slow, setSlow] = useState(false);
 
+  const { t } = useTranslation();
+
   useEffect(() => {
     const timer = setTimeout(() => setSlow(true), 2000);
     return () => clearTimeout(timer);
   }, []);
 
-  const text = message ?? (slow ? '马上就好啦' : '正在准备中...');
+  const text = message ?? (slow ? t('friendlyLoading.almostReady') : t('friendlyLoading.preparing'));
 
   return (
     <div

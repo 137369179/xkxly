@@ -6,10 +6,12 @@ import { memo, useState, useRef } from 'react';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const COLORS = ['#EF4444','#F97316','#EAB308','#22C55E','#3B82F6','#8B5CF6','#EC4899','#000000'];
 
 function _MirrorDraw() {
+  const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [color, setColor] = useState(COLORS[0]);
   const [size, setSize] = useState(3);
@@ -51,8 +53,8 @@ function _MirrorDraw() {
 
   return (
     <div className="card-candy p-4 sm:p-6">
-      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">🪞 镜像画</h3>
-      <p className="mb-3 text-center text-xs font-bold text-ink-soft">左边画，右边自动镜像对称</p>
+      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">{t('mirrorDraw.title')}</h3>
+      <p className="mb-3 text-center text-xs font-bold text-ink-soft">{t('mirrorDraw.subtitle')}</p>
 
       <div className="mb-3 flex flex-wrap justify-center gap-2">
         {COLORS.map(c => (
@@ -63,7 +65,7 @@ function _MirrorDraw() {
       </div>
 
       <div className="mb-3 flex justify-center items-center gap-3">
-        <span className="text-xs font-bold text-ink-soft">笔粗</span>
+        <span className="text-xs font-bold text-ink-soft">{t('mirrorDraw.brushSize')}</span>
         {[2,3,5,8].map(s => (
           <button key={s} onClick={()=>{setSize(s);sfxTap();}}
             className={cn('rounded-lg px-2 py-1 text-xs font-extrabold', size===s?'bg-candy-purple-deep text-white':'bg-white shadow-sm')}>
@@ -86,7 +88,7 @@ function _MirrorDraw() {
       </div>
 
       <div className="mt-3 flex justify-center gap-2">
-        <CandyButton tone="purple" size="sm" onClick={clear}>🗑️ 清空</CandyButton>
+        <CandyButton tone="purple" size="sm" onClick={clear}>{t('mirrorDraw.clear')}</CandyButton>
       </div>
     </div>
   );

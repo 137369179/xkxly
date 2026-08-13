@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useTranslation } from '@/i18n/useTranslation';
 import { motion, AnimatePresence } from 'motion/react';
 import type { StoryBeat } from '@/data/adventureStory';
 import { CandyButton } from '@/components/ui/Button';
@@ -17,16 +18,17 @@ export function StoryUnlock({
   story?: StoryBeat;
   onContinue: () => void;
 }) {
+  const { t } = useTranslation();
   const open = !!story;
 
   // 弹出时播放音效 + 朗读旁白
   useEffect(() => {
     if (!story) return;
     sfxStar();
-    const t = setTimeout(() => {
+    const timer = setTimeout(() => {
       void speak(story.narrative, { lang: 'zh-CN', rate: 0.9, module: 'praise' });
     }, 350);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [story]);
 
   return (
@@ -60,7 +62,7 @@ export function StoryUnlock({
               transition={{ delay: 0.15 }}
               className="text-sm font-extrabold tracking-widest text-candy-orange"
             >
-              📖 剧情解锁
+              {t('storyUnlock.label')}
             </motion.p>
 
             {/* 大 emoji（带弹跳入场） */}
@@ -89,7 +91,7 @@ export function StoryUnlock({
               transition={{ delay: 0.2 }}
               className="text-2xl font-black text-rainbow sm:text-3xl"
             >
-              第 {story.levelId} 站：{story.title}
+              {t('storyUnlock.title', { levelId: story.levelId, title: story.title })}
             </motion.h3>
 
             {/* 旁白 */}
@@ -109,7 +111,7 @@ export function StoryUnlock({
               transition={{ delay: 0.4 }}
             >
               <CandyButton tone="orange" size="lg" className="mt-6" fullWidth onClick={onContinue}>
-                继续冒险 →
+                {t('storyUnlock.continueBtn')}
               </CandyButton>
             </motion.div>
           </motion.div>

@@ -8,6 +8,7 @@ import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { cn, shuffle } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface SequenceItem { display: string; value: string; }
 interface Puzzle {
@@ -29,6 +30,7 @@ const PUZZLES: Puzzle[] = [
 ];
 
 export function SequenceLogic() {
+  const { t } = useTranslation();
   const [idx, setIdx] = useState(0);
   const [shuffledOptions, setShuffledOptions] = useState(() => shuffle(PUZZLES[0]!.options));
   const [feedback, setFeedback] = useState('');
@@ -52,10 +54,10 @@ export function SequenceLogic() {
     lockRef.current = true;
     sfxTap();
     if (option === puzzle.answer) {
-      sfxCorrect(); setScore(s => s + 1); setFeedback('✅ 对了！好聪明！');
+      sfxCorrect(); setScore(s => s + 1); setFeedback(t('sequenceLogic.correctFeedback'));
       void speak('对了！', { lang: 'zh-CN', rate: 0.85, module: 'praise' });
     } else {
-      sfxWrong(); setFeedback(`❌ 答案是 ${puzzle.answer}`);
+      sfxWrong(); setFeedback(t('sequenceLogic.wrongFeedback', { answer: puzzle.answer }));
       void speak('再想想', { lang: 'zh-CN', rate: 0.85, module: 'praise' });
     }
     if (timerRef.current !== null) clearTimeout(timerRef.current);
@@ -64,8 +66,8 @@ export function SequenceLogic() {
 
   return (
     <div className="card-candy p-4 sm:p-6">
-      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">🔗 序列推理</h3>
-      <p className="mb-3 text-center text-xs font-bold text-ink-soft">找规律，填下一个</p>
+      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">{t('sequenceLogic.title')}</h3>
+      <p className="mb-3 text-center text-xs font-bold text-ink-soft">{t('sequenceLogic.subtitle')}</p>
 
       <div className="mb-4 flex justify-center gap-2">
         {puzzle.seq.map((item, i) => (
@@ -86,9 +88,9 @@ export function SequenceLogic() {
 
       <div className="flex items-center justify-between">
         <button onClick={() => setShowHint(h => !h)} className="text-xs font-bold text-candy-blue-deep">
-          {showHint ? `💡 ${puzzle.hint}` : '💡 提示'}
+          {showHint ? `💡 ${puzzle.hint}` : t('sequenceLogic.hintLabel')}
         </button>
-        <span className="text-xs font-bold text-ink-soft">第 {idx + 1}/{PUZZLES.length} 题 · 得分 {score}</span>
+        <span className="text-xs font-bold text-ink-soft">{t('sequenceLogic.progress', { current: idx + 1, total: PUZZLES.length, score })}</span>
       </div>
 
       <AnimatePresence>

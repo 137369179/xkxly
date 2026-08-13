@@ -3,6 +3,7 @@
  * 找物品和影子的对应关系
  */
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from '@/i18n/useTranslation';
 import { motion, AnimatePresence } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
@@ -22,6 +23,7 @@ const ITEMS = [
 // 简化：用 silhouette 滤镜模拟影子
 
 export function ShadowMatch() {
+  const { t } = useTranslation();
   const [items, setItems] = useState(() => shuffle(ITEMS).slice(0, 4));
   const [shadows, setShadows] = useState(() => shuffle(items));
   const [selectedItem, setSelectedItem] = useState<number | null>(null);
@@ -68,14 +70,14 @@ export function ShadowMatch() {
       sfxCorrect();
       setMatched(m => [...m, selectedItem]);
       setScore(s => s + 1);
-      setFeedback('✅ 配对成功！');
+      setFeedback(t('shadowMatch.matchSuccess'));
       setSelectedItem(null);
       if (matched.length + 1 >= items.length) {
         inactivityTimerRef.current = setTimeout(newItemSet, 1500);
       }
     } else {
       sfxWrong();
-      setFeedback('❌ 不匹配，再试试');
+      setFeedback(t('shadowMatch.matchWrong'));
       setSelectedItem(null);
     }
     inactivityTimerRef.current = setTimeout(() => setFeedback(''), 1000);
@@ -83,11 +85,11 @@ export function ShadowMatch() {
 
   return (
     <div className="card-candy p-4 sm:p-6">
-      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">🌟 影子配对</h3>
-      <p className="mb-3 text-center text-xs font-bold text-ink-soft">先选物品，再选它的影子</p>
+      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">{t('shadowMatch.title')}</h3>
+      <p className="mb-3 text-center text-xs font-bold text-ink-soft">{t('shadowMatch.subtitle')}</p>
 
       <div className="mb-4">
-        <p className="mb-2 text-center text-xs font-extrabold text-ink-soft">👆 物品</p>
+        <p className="mb-2 text-center text-xs font-extrabold text-ink-soft">{t('shadowMatch.itemsLabel')}</p>
         <div className="flex justify-center gap-3">
           {items.map((item, i) => (
             <button key={`item-${i}`} onClick={() => clickItem(i)} disabled={matched.includes(i)}
@@ -102,7 +104,7 @@ export function ShadowMatch() {
       </div>
 
       <div>
-        <p className="mb-2 text-center text-xs font-extrabold text-ink-soft">👤 影子</p>
+        <p className="mb-2 text-center text-xs font-extrabold text-ink-soft">{t('shadowMatch.shadowsLabel')}</p>
         <div className="flex justify-center gap-3">
           {shadows.map((shadow, i) => {
             const isMatched = matched.some(mi => items[mi]!.name === shadow.name);
@@ -124,8 +126,8 @@ export function ShadowMatch() {
       </AnimatePresence>
 
       <div className="mt-3 flex items-center justify-between">
-        <span className="text-xs font-bold text-ink-soft">配对 {matched.length}/{items.length} · 得分 {score}</span>
-        <CandyButton tone="blue" size="sm" onClick={newItemSet}>🔄 换一组</CandyButton>
+        <span className="text-xs font-bold text-ink-soft">{t('shadowMatch.pairProgress', { matched: matched.length, total: items.length, score })}</span>
+        <CandyButton tone="blue" size="sm" onClick={newItemSet}>{t('shadowMatch.newSet')}</CandyButton>
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import { type Tone } from '@/lib/tones';
 import { sfxTap } from '@/lib/sfx';
 import { announceStep } from '@/lib/speech';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 /**
  * 五步学习闭环外壳
@@ -54,6 +55,7 @@ const STEP_GUIDE: Record<string, string> = {
 };
 
 export function LearnFlow({ steps, tone = 'blue', onFinish, finishLabel = '完成这一课' }: LearnFlowProps) {
+  const { t } = useTranslation();
   const [idx, setIdx] = useState(0);
 
   const [readySet, setReadySet] = useState<Record<string, boolean>>({});
@@ -157,12 +159,12 @@ export function LearnFlow({ steps, tone = 'blue', onFinish, finishLabel = '完�
           onClick={next}
           disabled={!done}
         >
-          {isLast ? finishLabel : `下一步 · ${steps[idx + 1]?.label ?? ''}`}
+          {isLast ? (finishLabel === '完成这一课' ? t('learnFlow.finishLesson') : finishLabel) : t('learnFlow.nextStep', { step: steps[idx + 1]?.label ?? '' })}
         </CandyButton>
       </div>
       {!done && (
         <p className="-mt-2 text-center text-sm font-semibold text-ink/45">
-          先完成上面的小任务，就能继续啦～
+          {t('learnFlow.completeTaskFirst')}
         </p>
       )}
     </div>

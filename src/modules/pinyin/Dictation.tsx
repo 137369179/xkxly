@@ -13,6 +13,7 @@ import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { randomPraise, randomEncourage } from '@/lib/speech';
 import { useStore } from '@/store/useStore';
 import { shuffle } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const Q_COUNT = 20;
 
@@ -24,6 +25,7 @@ function makeQuestion(all: PinyinEntry[]): { correct: PinyinEntry; options: Piny
 }
 
 export function Dictation() {
+  const { t } = useTranslation();
   const all = useMemo(() => getAllPinyin(), []);
   const [questions, setQuestions] = useState(() => Array.from({ length: Q_COUNT }, () => makeQuestion(all)));
   const [idx, setIdx] = useState(0);
@@ -91,16 +93,16 @@ export function Dictation() {
     return (
       <Panel className="text-center">
         <div className="text-6xl">{stars === 3 ? '🏆' : stars === 2 ? '🎉' : '💪'}</div>
-        <p className="mt-3 text-xl font-extrabold text-ink">听写完成！</p>
+        <p className="mt-3 text-xl font-extrabold text-ink">{t('dictation.done')}</p>
         <p className="text-3xl font-black text-candy-purple-deep">{'⭐'.repeat(stars)}</p>
         <div className="mt-2 grid grid-cols-2 gap-3">
           <div className="rounded-xl bg-candy-green-soft p-2">
             <div className="text-xl font-extrabold text-candy-green-deep">{correct}</div>
-            <div className="text-xs font-bold text-ink-soft">答对</div>
+            <div className="text-xs font-bold text-ink-soft">{t('dictation.correct')}</div>
           </div>
           <div className="rounded-xl bg-candy-blue-soft p-2">
             <div className="text-xl font-extrabold text-candy-blue-deep">{rate}%</div>
-            <div className="text-xs font-bold text-ink-soft">正确率</div>
+            <div className="text-xs font-bold text-ink-soft">{t('dictation.accuracy')}</div>
           </div>
         </div>
         <CandyButton tone="purple" size="sm" className="mt-4" onClick={() => {
@@ -110,7 +112,7 @@ export function Dictation() {
           setCorrect(0);
           setPhase('playing');
         }}>
-          🔄 再来
+          {t('dictation.again')}
         </CandyButton>
       </Panel>
     );
@@ -118,7 +120,7 @@ export function Dictation() {
 
   return (
     <div className="space-y-4">
-      <PageHeader emoji="🎧" title="拼音听写" subtitle="听声音，选拼音" tone="purple" />
+      <PageHeader emoji="🎧" title={t('dictation.title')} subtitle={t('dictation.subtitle')} tone="purple" />
 
       <div className="flex items-center justify-between">
         <ProgressBar value={idx + 1} max={Q_COUNT} tone="purple" />
@@ -129,10 +131,10 @@ export function Dictation() {
 
       <Panel className="text-center">
         <div className="my-4 text-6xl">👂</div>
-        <p className="text-sm font-bold text-ink-soft">仔细听，选出正确的拼音</p>
+        <p className="text-sm font-bold text-ink-soft">{t('dictation.hint')}</p>
 
         <CandyButton tone="blue" size="lg" className="mt-3" onClick={playSound}>
-          🔊 再听一遍
+          {t('dictation.relisten')}
         </CandyButton>
 
         <div className="mt-4 grid grid-cols-2 gap-2">
@@ -162,7 +164,7 @@ export function Dictation() {
 
         {picked && !picked.includes(q.correct.p) && (
           <p className="mt-2 text-sm font-bold text-candy-red-deep">
-            正确答案：{q.correct.p}
+            {t('dictation.answer', { pinyin: q.correct.p })}
           </p>
         )}
       </Panel>
