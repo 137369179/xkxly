@@ -144,7 +144,7 @@ export default function GameCenterPage() {
                       sfxTap();
                       navigate(routeId);
                     }}
-                    className="no-select group flex items-center gap-3 rounded-[1.6rem] border-3 border-pink-200 bg-white p-4 text-left shadow-fluffy transition-all"
+                    className="no-select group flex items-center gap-3.5 rounded-[2rem] border-4 border-pink-200/90 bg-white/95 p-4 text-left shadow-fluffy transition-all"
                   >
                     <FluffyIcon type={routeId} size="lg" className="shrink-0" />
                     <div className="min-w-0 flex-1">

@@ -167,9 +167,9 @@ export function App() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen bg-gradient-to-br from-pink-100 via-white to-purple-100">
+      <div className="min-h-screen bg-gradient-to-br from-amber-50/80 via-purple-50/60 to-pink-50/80 selection:bg-pink-200">
         <TopBar />
-        <div className="flex">
+        <div className="mx-auto flex max-w-7xl items-start gap-4 px-2 sm:px-4 py-3 sm:py-6">
           <Sidebar active={route} />
           <main className="flex-1 min-w-0 pb-24 md:pb-8">
             <Page />

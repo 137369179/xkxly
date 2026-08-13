@@ -16,6 +16,7 @@ import { useStore } from '@/store/useStore';
 import { CatStudyHelpCard } from '@/components/pet/CatStudyHelpCard';
 import { CatVoiceChatModal } from '@/components/pet/CatVoiceChatModal';
 import { CatMiniGameModal } from '@/components/pet/CatMiniGameModal';
+import { RealisticCat3D } from '@/components/realistic-cat';
 
 
 
@@ -240,6 +241,7 @@ export default function CatHousePage() {
   const [showVoiceChatModal, setShowVoiceChatModal] = useState(false);
   const [showMiniGameModal, setShowMiniGameModal] = useState(false);
   const [envLighting, setEnvLighting] = useState<'sunlight' | 'nebula' | 'starry'>('nebula');
+  const [realisticMode, setRealisticMode] = useState(false);
 
   /** 场景氛围 → 主舞台 Panel 背景/边框组合 */
   const STAGE_THEME: Record<'sunlight' | 'nebula' | 'starry', { panel: string; frame: string; glow: string }> = {
@@ -286,6 +288,17 @@ export default function CatHousePage() {
     setTimeout(() => setCatAction('idle'), 1600);
   };
 
+  /** 羊毛毡动作 → 写实 3D 表情映射 */
+  const catActionToExpression = (act: typeof catAction): 'happy' | 'cute' | 'excited' | 'love' | 'sleepy' => {
+    switch (act) {
+      case 'dance': return 'excited';
+      case 'purr': return 'love';
+      case 'stretch': return 'cute';
+      case 'jump': return 'excited';
+      case 'roll': return 'happy';
+      default: return 'happy';
+    }
+  };
 
   const handleFeed = () => {
     if (fishCount >= 2) {
@@ -375,7 +388,52 @@ export default function CatHousePage() {
         </div>
 
 
-        {/* 统一羊毛毡风格猫咪主角舞台（按动作切换图片） */}
+        {/* 写实 / 羊毛毡 外观切换开关 */}
+        <div className="flex justify-center items-center gap-2 my-1 relative z-10">
+          <button
+            type="button"
+            onClick={() => { sfxTap(); setRealisticMode((v) => !v); }}
+            className={`rounded-full px-4 py-1.5 text-xs font-black transition-colors shadow-xs ${
+              realisticMode
+                ? 'bg-gradient-to-r from-orange-400 to-pink-400 text-white'
+                : 'bg-white/80 text-amber-700 border-2 border-amber-300'
+            }`}
+          >
+            {realisticMode ? t('pet.realisticOn') : t('pet.realisticOff')}
+          </button>
+        </div>
+
+        {realisticMode ? (
+          <div
+            className={`relative mx-auto my-4 h-56 w-56 cursor-pointer overflow-hidden rounded-3xl border-4 bg-white shadow-fluffy relative z-10 ${stageTheme.frame}`}
+            onClick={() => triggerMotion('jump', t('pet.motionJumpMsg'))}
+          >
+            <RealisticCat3D
+              size={220}
+              breed="british_shorthair"
+              expression={catActionToExpression(catAction)}
+              hat={equippedOutfits['hat']}
+              neck={equippedOutfits['neck']}
+              envLighting={envLighting}
+              autoRotate={false}
+              showControls={false}
+              className="h-full w-full"
+            />
+            {/* 当前等级徽章叠加 */}
+            <div className="badge-chip badge-chip--amber" style={{ top: '0.5rem', left: '0.5rem', right: 'auto' }}>
+              Lv.{catLevel} {t(EVOLVE_INFO[catLevel]?.title ?? '')} {EVOLVE_INFO[catLevel]?.emoji ?? '🐱'}
+            </div>
+            {/* 当前装扮角标叠加 */}
+            {(equippedOutfits['hat'] || equippedOutfits['neck'] || equippedOutfits['decor']) && (
+              <div className="badge-chip badge-chip--pink" style={{ top: '0.5rem', right: '0.5rem' }}>
+                {['hat', 'neck', 'decor'].map(type => equippedOutfits[type]).filter(Boolean).map(id => {
+                  const o = OUTFITS.find(x => x.id === id);
+                  return o ? o.emoji : '';
+                }).join(' ')}
+              </div>
+            )}
+          </div>
+        ) : (
         <motion.div
           key={catAction}
           initial={{ opacity: 0, scale: 0.85 }}
@@ -435,6 +493,7 @@ export default function CatHousePage() {
             ) : null;
           })()}
         </motion.div>
+        )}
 
         {/* 3D HDR 氛围场景模式选择 */}
         <div className={`flex justify-center items-center gap-2 my-2 text-xs font-black relative z-10 ${
