@@ -8,6 +8,7 @@ import { useStore } from '@/store/useStore';
 import { useAiStream } from '@/lib/ai/useAi';
 import { companionChatTask } from '@/lib/ai/tasks/companion';
 import type { HanziEntry } from '@/data/hanziIndex';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface HanziStrokeWriterProps {
   hanzi: HanziEntry;
@@ -16,6 +17,7 @@ interface HanziStrokeWriterProps {
 }
 
 export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWriterProps) {
+  const { t } = useTranslation();
   const addFish = useStore((s) => s.addFish);
   const [gridType, setGridType] = useState<'tian' | 'mi'>('tian');
   const [isAnimating, setIsAnimating] = useState(false);
@@ -140,7 +142,7 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-xs font-black px-3 py-1 bg-amber-200 text-amber-900 rounded-full">
-            {hanzi.radical} 部 · {hanzi.strokes} 画
+            {t('hanziStrokeWriter.radicalMeta', { radical: hanzi.radical, strokes: hanzi.strokes })}
           </span>
           <span className="text-xs font-bold text-amber-700">{hanzi.origin}</span>
         </div>
@@ -152,7 +154,7 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
             }}
             className="text-xs font-black px-2.5 py-1 bg-white border border-amber-300 text-amber-800 rounded-lg shadow-xs active:scale-95"
           >
-            {gridType === 'tian' ? '米字格' : '田字格'}
+            {gridType === 'tian' ? t('hanziStrokeWriter.miGrid') : t('hanziStrokeWriter.tianGrid')}
           </button>
           {onClose && (
             <button
@@ -233,14 +235,14 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
           disabled={isAnimating}
           className="px-4 py-2 bg-sky-400 hover:bg-sky-500 text-white font-black rounded-xl shadow-md active:scale-95 flex items-center gap-1.5 text-sm disabled:opacity-50"
         >
-          <span>🎬 笔画演示</span>
+          <span>{t('hanziStrokeWriter.playStrokes')}</span>
         </button>
 
         <button
           onClick={clearCanvas}
           className="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl active:scale-95 text-xs"
         >
-          🧹 重写
+          {t('hanziStrokeWriter.rewrite')}
         </button>
       </div>
 
@@ -253,7 +255,7 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
             className="w-full max-w-xs"
             onClick={handleVerifyWriting}
           >
-            ✨ 写的很棒！提交评分 ⭐
+            {t('hanziStrokeWriter.submit')}
           </CandyButton>
         ) : (
           <motion.div
@@ -272,7 +274,7 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
                 </motion.span>
               ))}
             </div>
-            <span className="text-xs font-black text-emerald-700">获得 3 颗星 + 2 条小鱼干！</span>
+            <span className="text-xs font-black text-emerald-700">{t('hanziStrokeWriter.reward')}</span>
           </motion.div>
         )}
       </div>
@@ -284,18 +286,18 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
             onClick={handleGenerateAiStory}
             className="w-full text-center text-xs font-black text-amber-700 hover:text-amber-900 bg-amber-100/80 hover:bg-amber-200/80 py-2 rounded-xl border border-amber-300 transition-all flex items-center justify-center gap-1.5"
           >
-            <span>🐱 让 AI 小智给【{hanzi.c}】编个汉字奇妙故事</span>
+            <span>{t('hanziStrokeWriter.aiStoryBtn', { char: hanzi.c })}</span>
           </button>
         ) : (
           <div className="bg-white/90 p-3 rounded-2xl border border-amber-300 text-xs font-bold text-amber-900 space-y-1.5 shadow-sm">
             <div className="flex items-center justify-between text-[11px] font-black text-amber-700">
-              <span>🐱 AI 小智汉字奇妙故事：</span>
+              <span>{t('hanziStrokeWriter.aiStoryTitle')}</span>
               <button onClick={() => setShowAiStory(false)} className="text-amber-500 hover:text-amber-800">
                 ✕
               </button>
             </div>
             <div className="text-slate-800 text-xs leading-relaxed animate-pulse">
-              {aiStoryText || '喵喵正在灵光一闪构思故事中...'}
+              {aiStoryText || t('hanziStrokeWriter.aiStoryLoading')}
             </div>
           </div>
         )}

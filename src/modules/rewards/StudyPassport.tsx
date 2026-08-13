@@ -8,6 +8,7 @@ import { PageHeader, Panel, PanelTitle } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { AchievementWall } from '@/components/AchievementWall';
 import type { BadgeDef } from '@/types';
+import { useTranslation } from '@/i18n/useTranslation';
 
 /**
  * 学习护照
@@ -27,42 +28,42 @@ interface PassportGroup {
 const PASSPORT_GROUPS: PassportGroup[] = [
   {
     key: 'letters',
-    label: '字母',
+    label: 'studyPassport.groupLetters',
     emoji: '🔤',
     tone: 'blue',
     milestones: ['letter-10', 'letter-all'],
   },
   {
     key: 'numbers',
-    label: '数字',
+    label: 'studyPassport.groupNumbers',
     emoji: '🔢',
     tone: 'yellow',
     milestones: ['number-20', 'number-all', 'math-20', 'math-100'],
   },
   {
     key: 'hanzi',
-    label: '汉字',
+    label: 'studyPassport.groupHanzi',
     emoji: '🀄',
     tone: 'green',
     milestones: ['hanzi-50', 'hanzi-150', 'hanzi-300'],
   },
   {
     key: 'pinyin',
-    label: '拼音',
+    label: 'studyPassport.groupPinyin',
     emoji: '📋',
     tone: 'blue',
     milestones: ['pinyin-30', 'pinyin-all'],
   },
   {
     key: 'poems',
-    label: '古诗',
+    label: 'studyPassport.groupPoems',
     emoji: '🌸',
     tone: 'pink',
     milestones: ['poem-1', 'poem-10', 'poem-50', 'poem-100', 'recite-10'],
   },
   {
     key: 'words',
-    label: '英语',
+    label: 'studyPassport.groupWords',
     emoji: '🌐',
     tone: 'purple',
     milestones: ['word-30', 'word-all', 'sentence-10'],
@@ -78,6 +79,7 @@ function fmtDate(ts: number | undefined): string {
 }
 
 export default function StudyPassport() {
+  const { t } = useTranslation();
   const progress = useProgress();
   const ownedBadges = useMemo(() => new Set(progress.badges), [progress.badges]);
 
@@ -95,8 +97,8 @@ export default function StudyPassport() {
     <div className="space-y-5">
       <PageHeader
         emoji="🛂"
-        title="学习护照"
-        subtitle={`已盖 ${stampedCount} / ${totalCount} 个章 · 继续加油！`}
+        title={t('studyPassport.title')}
+        subtitle={t('studyPassport.subtitle', { stamped: stampedCount, total: totalCount })}
         tone="purple"
       />
 
@@ -106,8 +108,8 @@ export default function StudyPassport() {
           <Panel key={group.key}>
             <PanelTitle
               emoji={group.emoji}
-              title={`${group.label}旅程`}
-              subtitle={`${groupDone} / ${group.milestones.length} 个章`}
+              title={t('studyPassport.journey', { label: t(group.label) })}
+              subtitle={t('studyPassport.stampCount', { done: groupDone, total: group.milestones.length })}
               tone={group.tone}
             />
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">

@@ -9,6 +9,7 @@ import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { getAudioContext } from '@/lib/audioContext';
 import { speak } from '@/lib/speech';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 type Beat = '🔴' | '🟡' | '🟢';
 const BEAT_EMOJI: Beat[] = ['🔴','🟡','🟢'];
@@ -38,6 +39,7 @@ function playDrum(type: Beat) {
 }
 
 export function RhythmRepeat({ onComplete }: { onComplete?: (correct: boolean, star: number) => void }) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<'listen' | 'play' | 'result'>('listen');
   const [patternIdx, setPatternIdx] = useState(0);
   const [displayBeat, setDisplayBeat] = useState<Beat | null>(null);
@@ -86,11 +88,11 @@ export function RhythmRepeat({ onComplete }: { onComplete?: (correct: boolean, s
     if (newUser.length === pattern.beats.length) {
       const correct = newUser.every((b, i) => b === pattern.beats[i]);
       if (correct) {
-        sfxCorrect(); setScore(s => s + 1); setFeedback('🎉 完美！节奏感很棒！');
+        sfxCorrect(); setScore(s => s + 1); setFeedback(`🎉 ${t('rhythmRepeat.perfect')}`);
         void speak('太棒了！', { lang:'zh-CN', rate:0.85, module:'praise' });
         onComplete?.(true, 2);
       } else {
-        sfxWrong(); setFeedback('❌ 节奏不对，再听一遍');
+        sfxWrong(); setFeedback(`❌ ${t('rhythmRepeat.wrongPattern')}`);
         void speak('再听一遍', { lang:'zh-CN', rate:0.85, module:'praise' });
         onComplete?.(false, 0);
       }
@@ -103,7 +105,7 @@ export function RhythmRepeat({ onComplete }: { onComplete?: (correct: boolean, s
 
   return (
     <div className="card-candy p-4 sm:p-6">
-      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">🥉 节奏模仿</h3>
+      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">🥉 {t('rhythmRepeat.learnTitle')}</h3>
       <div className="mb-3 flex justify-center gap-2">
         {PATTERNS.map((p, i) => (
           <button key={p.name} onClick={() => { setPatternIdx(i); setMode('listen'); setTimeout(playPattern, 100); }}
@@ -117,7 +119,7 @@ export function RhythmRepeat({ onComplete }: { onComplete?: (correct: boolean, s
 
       <div className="mb-4 text-center">
         <p className="mb-2 text-sm font-bold text-ink-soft">
-          {mode === 'listen' ? '🔊 听节奏…' : mode === 'play' ? '👆 按顺序敲出来！' : feedback}
+          {mode === 'listen' ? `🔊 ${t('rhythmRepeat.listen')}` : mode === 'play' ? `👆 ${t('rhythmRepeat.play')}` : feedback}
         </p>
         <div className="flex justify-center gap-2 min-h-[60px] items-center">
           {mode === 'listen' && displayBeat && (
@@ -150,17 +152,17 @@ export function RhythmRepeat({ onComplete }: { onComplete?: (correct: boolean, s
 
       {mode === 'listen' && (
         <div className="text-center">
-          <CandyButton tone="pink" size="lg" onClick={playPattern}>🔊 重新听</CandyButton>
+          <CandyButton tone="pink" size="lg" onClick={playPattern}>🔊 {t('rhythmRepeat.replay')}</CandyButton>
         </div>
       )}
 
       {mode === 'result' && (
         <div className="text-center">
-          <CandyButton tone="blue" size="lg" onClick={() => { setPatternIdx((patternIdx + 1) % PATTERNS.length); setTimeout(playPattern, 200); }}>⏭️ 下一关</CandyButton>
+          <CandyButton tone="blue" size="lg" onClick={() => { setPatternIdx((patternIdx + 1) % PATTERNS.length); setTimeout(playPattern, 200); }}>⏭️ {t('rhythmRepeat.nextLevel')}</CandyButton>
         </div>
       )}
 
-      <div className="mt-3 text-center text-xs font-bold text-ink-soft">得分 {score}</div>
+      <div className="mt-3 text-center text-xs font-bold text-ink-soft">{t('rhythmRepeat.score', { score })}</div>
     </div>
   );
 }

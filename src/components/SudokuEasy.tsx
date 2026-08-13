@@ -7,6 +7,7 @@ import { motion } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 type Cell = number; // 0 = empty
 type Board = Cell[]; // 16 cells
@@ -36,6 +37,7 @@ function isCorrect(board: Board, sol: Board): boolean {
 }
 
 export function SudokuEasy() {
+  const { t } = useTranslation();
   const [theme, setTheme] = useState<keyof typeof THEMES>('emoji');
   const [puzzleIdx, setPuzzleIdx] = useState(0);
   const [board, setBoard] = useState<Board>([...PUZZLES[0]!]);
@@ -79,7 +81,7 @@ export function SudokuEasy() {
 
   return (
     <div className="card-candy p-4 sm:p-6">
-      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">🎯 图形数独</h3>
+      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">🎯 {t('sudokuEasy.learnTitle')}</h3>
 
       <div className="mb-3 flex justify-center gap-2">
         {(Object.keys(THEMES) as (keyof typeof THEMES)[]).map(t => (
@@ -98,7 +100,7 @@ export function SudokuEasy() {
             className={cn('rounded-lg px-3 py-1 text-xs font-extrabold',
               puzzleIdx===i ? 'bg-candy-orange-deep text-white' : 'bg-white text-ink-soft shadow-sm'
             )}>
-            第{i+1}关
+            {t('sudokuEasy.levelN', { n: i + 1 })}
           </button>
         ))}
       </div>
@@ -140,12 +142,12 @@ export function SudokuEasy() {
 
       {done && (
         <div className="text-center">
-          <motion.p initial={{scale:0.5}} animate={{scale:1}} className="text-2xl font-extrabold text-candy-green-deep">🎉 完成了！</motion.p>
-          <CandyButton tone="purple" size="sm" className="mt-2" onClick={()=>newGame((puzzleIdx + 1) % PUZZLES.length)}>⏭️ 下一关</CandyButton>
+          <motion.p initial={{scale:0.5}} animate={{scale:1}} className="text-2xl font-extrabold text-candy-green-deep">🎉 {t('sudokuEasy.done')}</motion.p>
+          <CandyButton tone="purple" size="sm" className="mt-2" onClick={()=>newGame((puzzleIdx + 1) % PUZZLES.length)}>⏭️ {t('sudokuEasy.next')}</CandyButton>
         </div>
       )}
 
-      <p className="mt-2 text-center text-xs font-bold text-ink-soft">每行每列每种图案只能出现一次</p>
+      <p className="mt-2 text-center text-xs font-bold text-ink-soft">{t('sudokuEasy.rule')}</p>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useStore } from '@/store/useStore';
 import { useProfilesStore } from '@/store/useProfilesStore';
 import { sfxTap } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 import { StorybookCover } from './StorybookCover';
 import { StorybookReader } from './StorybookReader';
 import { THEMES } from './constants';
@@ -27,6 +28,7 @@ function recommendThemes(ageRange?: string): StorybookTheme[] {
 }
 
 export function StorybookShelf({ showFilters = false }: { showFilters?: boolean } = {}) {
+  const { t } = useTranslation();
   const storybooks = useStore((s) => s.progress.storybooks ?? EMPTY_STORYBOOKS);
   const removeStorybook = useStore((s) => s.removeStorybook);
   const incrementStorybookRead = useStore((s) => s.incrementStorybookRead);
@@ -69,7 +71,7 @@ export function StorybookShelf({ showFilters = false }: { showFilters?: boolean 
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <span className="text-6xl">📚</span>
         <p className="text-lg text-gray-400 font-bold">
-          还没有绘本，去创作第一本吧！
+          {t('storybookShelf.empty')}
         </p>
       </div>
     );
@@ -81,10 +83,10 @@ export function StorybookShelf({ showFilters = false }: { showFilters?: boolean 
       {showFilters && (
         <div className="mb-4 flex flex-wrap gap-2">
           <FilterChip active={filter === 'all'} onClick={() => setFilter('all')}>
-            ✨ 全部
+            ✨ {t('storybookShelf.all')}
           </FilterChip>
           <FilterChip active={filter === 'fav'} onClick={() => setFilter('fav')}>
-            ❤️ 收藏 {favCount > 0 && `(${favCount})`}
+            ❤️ {t('storybookShelf.fav')} {favCount > 0 && `(${favCount})`}
           </FilterChip>
           {THEMES.map((t) => (
             <FilterChip
@@ -104,7 +106,7 @@ export function StorybookShelf({ showFilters = false }: { showFilters?: boolean 
         <div className="flex flex-col items-center justify-center gap-2 py-14">
           <span className="text-5xl">{filter === 'fav' ? '🤍' : '🔍'}</span>
           <p className="text-sm font-bold text-gray-400">
-            {filter === 'fav' ? '还没有收藏的绘本，点绘本左上角 ❤️ 收藏吧！' : '这个分类还没有绘本哦～'}
+            {filter === 'fav' ? t('storybookShelf.favEmpty') : t('storybookShelf.catEmpty')}
           </p>
         </div>
       ) : (
@@ -135,7 +137,7 @@ export function StorybookShelf({ showFilters = false }: { showFilters?: boolean 
                 }}
               />
               {confirmDelete === book.id && (
-                <p className="text-xs text-red-400 text-center mt-1">再点一次删除</p>
+                <p className="text-xs text-red-400 text-center mt-1">{t('storybookShelf.deleteConfirm')}</p>
               )}
             </motion.div>
           ))}

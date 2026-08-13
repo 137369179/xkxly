@@ -8,6 +8,7 @@ import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { cn, shuffle } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const ITEMS = [
   { emoji: '🦋', label: '蝴蝶', symmetric: true, axes: 1 },
@@ -25,6 +26,7 @@ const ITEMS = [
 ];
 
 export function SymmetryLearn() {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<'learn'|'quiz'>('learn');
   const [current, setCurrent] = useState(0);
   const [options, setOptions] = useState<typeof ITEMS>([]);
@@ -48,10 +50,10 @@ export function SymmetryLearn() {
     sfxTap();
     const target = ITEMS[current]!!
     if (item.symmetric === target.symmetric) {
-      sfxCorrect(); setScore(s=>s+1); setFeedback('✅ 对了！');
+      sfxCorrect(); setScore(s=>s+1); setFeedback(t('symmetryLearn.correct'));
       void speak(`对了！`, { lang:'zh-CN', rate:0.85, module:'praise' });
     } else {
-      sfxWrong(); setFeedback('❌ 再看看');
+      sfxWrong(); setFeedback(t('symmetryLearn.wrong'));
       void speak('再想想', { lang:'zh-CN', rate:0.85, module:'praise' });
     }
     setTimeout(() => { setCurrent(ITEMS.indexOf(options[Math.floor(Math.random()*options.length)]!)); setOptions(shuffle(ITEMS).slice(0,4)); setFeedback(''); lockRef.current = false; }, 1200);
@@ -62,10 +64,10 @@ export function SymmetryLearn() {
     lockRef.current = true;
     const item = ITEMS[current]!!
     if ((yes && item.symmetric) || (!yes && !item.symmetric)) {
-      sfxCorrect(); setScore(s=>s+1); setFeedback(`✅ 对了！${item.label}${item.symmetric ? '是对称的' : '不是对称的'}`);
+      sfxCorrect(); setScore(s=>s+1); setFeedback(item.symmetric ? t('symmetryLearn.correctSym', { label: item.label }) : t('symmetryLearn.correctAsym', { label: item.label }));
       void speak(`对了！${item.label}${item.symmetric?'是对称图形':'不是对称图形'}`, { lang:'zh-CN', rate:0.85, module:'praise' });
     } else {
-      sfxWrong(); setFeedback(`❌ ${item.label}${item.symmetric ? '其实是对称的' : '不是对称的'}`);
+      sfxWrong(); setFeedback(item.symmetric ? t('symmetryLearn.wrongSym', { label: item.label }) : t('symmetryLearn.wrongAsym', { label: item.label }));
       void speak('再想想', { lang:'zh-CN', rate:0.85, module:'praise' });
     }
     setTimeout(() => { setCurrent(Math.floor(Math.random()*ITEMS.length)); setFeedback(''); lockRef.current = false; }, 1500);
@@ -75,10 +77,10 @@ export function SymmetryLearn() {
 
   return (
     <div className="card-candy p-4 sm:p-6">
-      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">🦋 对称认知</h3>
+      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">🦋 {t('symmetryLearn.learnTitle')}</h3>
       <div className="mb-4 flex justify-center gap-2">
-        <button onClick={()=>setMode('learn')} className={`rounded-xl px-4 py-1.5 text-sm font-extrabold ${mode==='learn'?'bg-candy-blue-deep text-white':'bg-white text-ink-soft shadow-sm'}`}>📖 认识对称</button>
-        <button aria-label="🎯 测验" onClick={()=>{setMode('quiz');startQuiz();setCurrent(Math.floor(Math.random()*ITEMS.length));}} className={`rounded-xl px-4 py-1.5 text-sm font-extrabold ${mode==='quiz'?'bg-candy-blue-deep text-white':'bg-white text-ink-soft shadow-sm'}`}>🎯 测验</button>
+        <button onClick={()=>setMode('learn')} className={`rounded-xl px-4 py-1.5 text-sm font-extrabold ${mode==='learn'?'bg-candy-blue-deep text-white':'bg-white text-ink-soft shadow-sm'}`}>📖 {t('symmetryLearn.learnMode')}</button>
+        <button aria-label={t('symmetryLearn.quizMode')} onClick={()=>{setMode('quiz');startQuiz();setCurrent(Math.floor(Math.random()*ITEMS.length));}} className={`rounded-xl px-4 py-1.5 text-sm font-extrabold ${mode==='quiz'?'bg-candy-blue-deep text-white':'bg-white text-ink-soft shadow-sm'}`}>🎯 {t('symmetryLearn.quizMode')}</button>
       </div>
 
       {mode === 'learn' && (
@@ -98,7 +100,7 @@ export function SymmetryLearn() {
             <span className="text-5xl">{item.emoji}</span>
           </motion.div>
           <p className="text-sm font-extrabold text-candy-blue-deep">
-            {item.symmetric ? `✅ ${item.label}是对称图形，有${item.axes}条对称轴` : `❌ ${item.label}不是对称图形`}
+            {item.symmetric ? t('symmetryLearn.hasAxis', { label: item.label, axes: item.axes }) : t('symmetryLearn.noAxis', { label: item.label })}
           </p>
         </div>
       )}
@@ -108,12 +110,12 @@ export function SymmetryLearn() {
           <motion.div key={current} initial={{scale:0.5}} animate={{scale:1}} className="mx-auto mb-4 flex h-32 w-32 items-center justify-center rounded-[2rem] bg-white shadow-lg">
             <span className="text-6xl">{item.emoji}</span>
           </motion.div>
-          <p className="mb-4 text-lg font-extrabold text-ink">它是对称图形吗？</p>
+          <p className="mb-4 text-lg font-extrabold text-ink">{t('symmetryLearn.quizPrompt')}</p>
           <div className="flex justify-center gap-4">
-            <CandyButton tone="green" size="lg" onClick={()=>pickYesNo(true)}>✅ 是对称</CandyButton>
-            <CandyButton tone="pink" size="lg" onClick={()=>pickYesNo(false)}>❌ 不对称</CandyButton>
+            <CandyButton tone="green" size="lg" onClick={()=>pickYesNo(true)}>✅ {t('symmetryLearn.symmetricBtn')}</CandyButton>
+            <CandyButton tone="pink" size="lg" onClick={()=>pickYesNo(false)}>❌ {t('symmetryLearn.asymmetricBtn')}</CandyButton>
           </div>
-          <div className="mt-3 text-xs font-bold text-ink-soft">得分 {score}</div>
+          <div className="mt-3 text-xs font-bold text-ink-soft">{t('symmetryLearn.score', { score })}</div>
         </div>
       )}
 

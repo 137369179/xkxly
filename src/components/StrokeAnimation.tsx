@@ -12,6 +12,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { sfxTap } from '@/lib/sfx';
 import { ensureStrokeData, medianLength, type StrokeData } from '@/lib/strokes';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface StrokeAnimationProps {
   char: string;
@@ -30,6 +31,7 @@ function medianToPath(m: [number, number][]): string {
 }
 
 export function StrokeAnimation({ char, autoPlay = true, strokeMs = 750 }: StrokeAnimationProps) {
+  const { t } = useTranslation();
   const [data, setData] = useState<StrokeData | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [current, setCurrent] = useState(-1); // 正在写的笔序；-1 = 未开始
@@ -95,14 +97,14 @@ export function StrokeAnimation({ char, autoPlay = true, strokeMs = 750 }: Strok
     <div className="flex flex-col items-center gap-3 rounded-2xl border border-indigo-200 bg-indigo-50/50 p-4 shadow-sm">
       <div className="flex w-full items-center justify-between">
         <span className="text-xs font-black text-indigo-700">
-          ✨ 笔顺演示{total > 0 && current >= 0 ? ` · 第 ${Math.min(current + 1, total)} / ${total} 笔` : ''}
+          {t('strokeAnimation.demoTitle')}{total > 0 && current >= 0 ? ` · ${t('strokeAnimation.strokeCount', { current: Math.min(current + 1, total), total })}` : ''}
         </span>
         <button
           onClick={() => { sfxTap(); play(); }}
           disabled={!total}
           className="text-xs font-bold text-indigo-600 underline disabled:opacity-40"
         >
-          {playing ? '书写中…' : done ? '再写一遍 🔄' : '▶ 播放'}
+          {playing ? t('strokeAnimation.writing') : done ? t('strokeAnimation.replayDone') : t('strokeAnimation.play')}
         </button>
       </div>
 
@@ -168,13 +170,13 @@ export function StrokeAnimation({ char, autoPlay = true, strokeMs = 750 }: Strok
       <p className="text-xs font-bold text-indigo-600">
         {total > 0
           ? done
-            ? `「${char}」共 ${total} 笔，你记住了吗？`
+            ? t('strokeAnimation.remember', { char, total })
             : playing
-              ? '看清楚每一笔的顺序哦～'
-              : '点击播放，看「' + char + '」怎么写'
+              ? t('strokeAnimation.watchOrder')
+              : t('strokeAnimation.clickToPlay', { char })
           : loaded
-            ? '这个字暂时没有笔顺数据，跟着字帖描一描吧'
-            : '笔顺数据加载中…'}
+            ? t('strokeAnimation.noData')
+            : t('strokeAnimation.loading')}
       </p>
     </div>
   );

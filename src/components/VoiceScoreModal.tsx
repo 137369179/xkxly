@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { poemScorer, type ScoreResult } from '@/lib/poemScorer';
 import { sfxTap, sfxWin } from '@/lib/sfx';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface VoiceScoreModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface VoiceScoreModalProps {
 }
 
 export function VoiceScoreModal({ isOpen, poemTitle, onClose }: VoiceScoreModalProps) {
+  const { t } = useTranslation();
   const [isRecording, setIsRecording] = useState(false);
   const [result, setResult] = useState<ScoreResult | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -88,7 +90,7 @@ export function VoiceScoreModal({ isOpen, poemTitle, onClose }: VoiceScoreModalP
               if (isRecording) poemScorer.stop();
               onClose();
             }}
-            aria-label="关闭背诵评分"
+            aria-label={t('voiceScoreModal.closeAria')}
             className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-black/5 text-lg font-bold text-ink/60 hover:bg-black/10"
           >
             ✕
@@ -96,13 +98,13 @@ export function VoiceScoreModal({ isOpen, poemTitle, onClose }: VoiceScoreModalP
 
           <div className="text-center space-y-3">
             <div className="inline-block rounded-full bg-candy-purple/20 px-4 py-1 text-xs font-black text-candy-purple">
-              🎙️ AI 古诗吟诵评测
+              {t('voiceScoreModal.badge')}
             </div>
             <h3 className="text-2xl font-black text-ink-main">
-              背诵《{poemTitle}》
+              {t('voiceScoreModal.reciteTitle', { title: poemTitle })}
             </h3>
             <p className="text-sm font-extrabold text-ink-soft">
-              对着麦克风大声朗诵，查看你的彩虹声波与乐园星级勋章！
+              {t('voiceScoreModal.desc')}
             </p>
           </div>
 
@@ -111,7 +113,7 @@ export function VoiceScoreModal({ isOpen, poemTitle, onClose }: VoiceScoreModalP
             <canvas ref={canvasRef} width={400} height={120} className="w-full h-full" />
             {!isRecording && !result && (
               <div className="absolute text-white/60 font-bold text-sm">
-                点击下方按钮开启录音吟诵
+                {t('voiceScoreModal.hint')}
               </div>
             )}
           </div>
@@ -121,11 +123,11 @@ export function VoiceScoreModal({ isOpen, poemTitle, onClose }: VoiceScoreModalP
             <div className="flex justify-center">
               {!isRecording ? (
                 <CandyButton tone="purple" size="lg" onClick={handleStartRecording}>
-                  🎙️ 开始朗诵背诵
+                  {t('voiceScoreModal.start')}
                 </CandyButton>
               ) : (
                 <CandyButton tone="pink" size="lg" className="animate-pulse" onClick={handleStopRecording}>
-                  ⏹ 结束吟诵并评分
+                  {t('voiceScoreModal.stop')}
                 </CandyButton>
               )}
             </div>
@@ -144,16 +146,16 @@ export function VoiceScoreModal({ isOpen, poemTitle, onClose }: VoiceScoreModalP
 
               <div className="grid grid-cols-2 gap-2 pt-2 text-xs font-bold text-ink/70">
                 <div className="rounded-xl bg-white p-2 border border-amber-200">
-                  📢 语音流畅度: {result.fluencyScore} 分
+                  {t('voiceScoreModal.fluency', { score: result.fluencyScore })}
                 </div>
                 <div className="rounded-xl bg-white p-2 border border-amber-200">
-                  🎵 声调起伏度: {result.pitchScore} 分
+                  {t('voiceScoreModal.pitch', { score: result.pitchScore })}
                 </div>
               </div>
 
               <div className="pt-2">
                 <CandyButton tone="purple" size="sm" onClick={handleStartRecording}>
-                  🔄 再背一次挑战满分
+                  {t('voiceScoreModal.retry')}
                 </CandyButton>
               </div>
             </motion.div>

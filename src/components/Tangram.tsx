@@ -8,6 +8,7 @@ import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxStar } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface Piece {
   id: string;
@@ -92,6 +93,7 @@ function PieceSvg({ piece, onDrag }: { piece: Piece; onDrag: (id: string, x: num
 }
 
 export function Tangram() {
+  const { t } = useTranslation();
   const [puzzleIdx, setPuzzleIdx] = useState(0);
   const [pieces, setPieces] = useState(INITIAL_PIECES);
   const [completed, setCompleted] = useState<Set<string>>(new Set());
@@ -126,7 +128,7 @@ export function Tangram() {
 
   return (
     <div className="space-y-4">
-      <PageHeader emoji="📐" title="七巧板" subtitle="拖动图形拼出图案" tone="blue" />
+      <PageHeader emoji="📐" title={t('tangram.title')} subtitle={t('tangram.subtitle')} tone="blue" />
 
       {/* 关卡选择 */}
       <div className="flex flex-wrap gap-2">
@@ -149,7 +151,7 @@ export function Tangram() {
 
       <Panel>
         <div className="mb-2 text-center text-sm font-bold text-ink-soft">
-          🎯 目标：拼一个{puzzle.emoji}「{puzzle.name}」— {puzzle.hint}
+          {t('tangram.goal', { emoji: puzzle.emoji, name: puzzle.name, hint: puzzle.hint })}
         </div>
 
         {/* SVG 画布 */}
@@ -182,19 +184,19 @@ export function Tangram() {
 
         <div className="mt-3 flex justify-center gap-2">
           <CandyButton tone="purple" variant="soft" size="sm" onClick={resetPieces}>
-            🔄 重置
+            🔄 {t('tangram.reset')}
           </CandyButton>
           <CandyButton tone="green" size="sm" onClick={checkComplete}>
-            ✅ 完成了！
+            ✅ {t('tangram.done')}
           </CandyButton>
           <CandyButton tone="blue" size="sm" onClick={nextPuzzle}>
-            ➡️ 下一个
+            ➡️ {t('tangram.next')}
           </CandyButton>
         </div>
       </Panel>
 
       <p className="text-center text-xs font-bold text-ink-soft">
-        💡 拖动彩色图形到轮廓位置，点按钮旋转方向。拼好后点「完成了」获得星星！
+        {t('tangram.tip')}
       </p>
     </div>
   );

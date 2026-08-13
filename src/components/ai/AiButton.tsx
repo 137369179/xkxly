@@ -6,10 +6,11 @@ import { AiAvatar } from './AiAvatar';
 import { TONE_STYLE, type Tone } from '@/lib/tones';
 import { sfxTap } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 export function AiButton({
   onClick,
-  children = '问问小智',
+  children,
   tone = 'purple',
   loading = false,
   disabled = false,
@@ -24,7 +25,8 @@ export function AiButton({
   size?: 'sm' | 'md';
   className?: string;
 }) {
-  const t = TONE_STYLE[tone]!!
+  const { t } = useTranslation();
+  const ts = TONE_STYLE[tone]!!
   const off = disabled || loading;
   return (
     <button
@@ -36,9 +38,9 @@ export function AiButton({
         onClick();
       }}
       style={{
-        background: t.main,
-        color: t.on,
-        boxShadow: off ? 'none' : `0 5px 0 0 ${t.deep}`,
+        background: ts.main,
+        color: ts.on,
+        boxShadow: off ? 'none' : `0 5px 0 0 ${ts.deep}`,
       }}
       className={cn(
         'no-select inline-flex items-center justify-center gap-2 font-extrabold',
@@ -51,7 +53,7 @@ export function AiButton({
       )}
     >
       <AiAvatar size={size === 'sm' ? 24 : 28} mood={loading ? 'thinking' : 'idle'} />
-      {loading ? '小智思考中…' : children}
+      {loading ? t('aiButton.thinking') : (children ?? t('aiButton.defaultLabel'))}
     </button>
   );
 }

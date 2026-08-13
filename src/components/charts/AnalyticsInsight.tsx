@@ -8,6 +8,7 @@
  */
 import { useMemo } from 'react';
 import { useProgress } from '@/store/useStore';
+import { useTranslation } from '@/i18n/useTranslation';
 import { cn } from '@/lib/utils';
 
 const WEEK_DAYS = ['日', '一', '二', '三', '四', '五', '六'];
@@ -25,6 +26,7 @@ function recentDays(n: number): string[] {
 }
 
 export function AnalyticsInsight() {
+  const { t } = useTranslation();
   const progress = useProgress();
 
   const stats = useMemo(() => {
@@ -94,28 +96,28 @@ export function AnalyticsInsight() {
     <div className="space-y-4">
       {/* 活跃度三卡 */}
       <div className="grid grid-cols-3 gap-2">
-        <ActiveCard label="近 7 天活跃" value={`${stats.active7} 天`} tone="bg-amber-50 text-amber-600 border-amber-200" />
-        <ActiveCard label="近 14 天活跃" value={`${stats.active14} 天`} tone="bg-pink-50 text-pink-600 border-pink-200" />
-        <ActiveCard label="近 30 天活跃" value={`${stats.active30} 天`} tone="bg-purple-50 text-purple-600 border-purple-200" />
+        <ActiveCard label={t('analyticsInsight.active7')} value={t('analyticsInsight.days', { count: stats.active7 })} tone="bg-amber-50 text-amber-600 border-amber-200" />
+        <ActiveCard label={t('analyticsInsight.active14')} value={t('analyticsInsight.days', { count: stats.active14 })} tone="bg-pink-50 text-pink-600 border-pink-200" />
+        <ActiveCard label={t('analyticsInsight.active30')} value={t('analyticsInsight.days', { count: stats.active30 })} tone="bg-purple-50 text-purple-600 border-purple-200" />
       </div>
 
       {/* 连续与偏好 */}
       <div className="grid grid-cols-2 gap-2">
         <div className="rounded-2xl border-2 border-orange-200 bg-orange-50/70 p-3 text-center">
           <div className="text-2xl font-black text-orange-500 tabular-nums">🔥 {stats.longest}</div>
-          <div className="mt-0.5 text-[11px] font-bold text-ink-soft">最长连续学习（天）</div>
+          <div className="mt-0.5 text-[11px] font-bold text-ink-soft">{t('analyticsInsight.longestStreak')}</div>
         </div>
         <div className="rounded-2xl border-2 border-blue-200 bg-blue-50/70 p-3 text-center">
           <div className="text-2xl font-black text-blue-500">📅 周{stats.favIdx >= 0 ? WEEK_DAYS[stats.favIdx] : '—'}</div>
-          <div className="mt-0.5 text-[11px] font-bold text-ink-soft">最投入的星期</div>
+          <div className="mt-0.5 text-[11px] font-bold text-ink-soft">{t('analyticsInsight.favWeekday')}</div>
         </div>
       </div>
 
       {/* AI 互动 */}
       <div>
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-sm font-extrabold text-candy-purple-deep">🤖 AI 小老师互动</span>
-          <span className="text-xs font-bold text-ink-soft">今日 {stats.aiToday} · 本周 {stats.aiWeek} · 累计 {stats.aiTotal}</span>
+          <span className="text-sm font-extrabold text-candy-purple-deep">{t('analyticsInsight.aiTitle')}</span>
+          <span className="text-xs font-bold text-ink-soft">{t('analyticsInsight.aiSummary', { today: stats.aiToday, week: stats.aiWeek, total: stats.aiTotal })}</span>
         </div>
         <div className="flex items-end gap-1.5 rounded-2xl bg-white/80 p-3">
           {stats.aiLast7.map((v, i) => {
@@ -126,7 +128,7 @@ export function AnalyticsInsight() {
                 <div
                   className={cn('w-full rounded-md', isToday ? 'bg-candy-purple-deep' : 'bg-candy-purple-soft')}
                   style={{ height: h }}
-                  title={`${v} 次`}
+                  title={t('analyticsInsight.aiCount', { count: v })}
                 />
                 <span className={cn('text-[9px] font-bold', isToday ? 'text-candy-purple-deep' : 'text-ink-soft')}>
                   {['一', '二', '三', '四', '五', '六', '日'][i]}
@@ -139,13 +141,13 @@ export function AnalyticsInsight() {
 
       {/* 总览 */}
       <div className="grid grid-cols-3 gap-2">
-        <ActiveCard label="累计练习" value={`${stats.totalItems} 题`} tone="bg-green-50 text-green-600 border-green-200" />
-        <ActiveCard label="累计时长" value={`${Math.round(stats.totalSec / 60)} 分`} tone="bg-cyan-50 text-cyan-600 border-cyan-200" />
-        <ActiveCard label="平均正确率" value={`${stats.accuracy}%`} tone="bg-yellow-50 text-yellow-600 border-yellow-200" />
+        <ActiveCard label={t('analyticsInsight.totalPractice')} value={t('analyticsInsight.questions', { count: stats.totalItems })} tone="bg-green-50 text-green-600 border-green-200" />
+        <ActiveCard label={t('analyticsInsight.totalDuration')} value={t('analyticsInsight.minutes', { count: Math.round(stats.totalSec / 60) })} tone="bg-cyan-50 text-cyan-600 border-cyan-200" />
+        <ActiveCard label={t('analyticsInsight.avgAccuracy')} value={`${stats.accuracy}%`} tone="bg-yellow-50 text-yellow-600 border-yellow-200" />
       </div>
 
       <p className="text-center text-[11px] font-bold text-ink-soft">
-        {todayActive ? '🎉 今天也在坚持学习，太棒啦！' : '💤 今天还没学习哦，来点亮小火苗吧～'}
+        {todayActive ? t('analyticsInsight.todayActiveTip') : t('analyticsInsight.todayIdleTip')}
       </p>
     </div>
   );

@@ -26,6 +26,7 @@ import { useStruggle } from '@/lib/struggle';
 import { StruggleModal } from '@/components/StruggleModal';
 import { cn } from '@/lib/utils';
 import { useRoute, navigate } from '@/lib/router';
+import { useTranslation } from '@/i18n/useTranslation';
 import {
   DailySummary,
   PoemActivity,
@@ -43,7 +44,7 @@ function SectionRunner({
   count,
   tone,
   onDone,
-  finishLabel = '完成这一节 →',
+  finishLabel,
 }: {
   gen: () => Question;
   record: (q: Question, correct: boolean) => void;
@@ -52,6 +53,7 @@ function SectionRunner({
   onDone: () => void;
   finishLabel?: string;
 }) {
+  const { t } = useTranslation();
   const [idx, setIdx] = useState(0);
   const [q, setQ] = useState<Question>(() => gen());
   // P1-5: 学习困难实时干预——连错 3 题弹鼓励 Modal，可选「继续」或「跳过」
@@ -70,7 +72,7 @@ function SectionRunner({
     <div className="space-y-3">
       <div className="flex items-center gap-3">
         <span className="shrink-0 text-sm font-extrabold text-ink-soft">
-          第 {idx + 1} / {count} 题
+          {t('today.questionProgress', { current: idx + 1, total: count })}
         </span>
         <ProgressBar value={idx} max={count} tone={tone} showLabel={false} />
       </div>
@@ -83,8 +85,8 @@ function SectionRunner({
           struggle.record(correct);
         }}
         onNext={next}
-        nextLabel={idx + 1 >= count ? finishLabel : '下一题'}
-        meta={`第 ${idx + 1} / ${count} 题`}
+        nextLabel={idx + 1 >= count ? finishLabel : t('today.nextQuestion')}
+        meta={t('today.questionProgress', { current: idx + 1, total: count })}
       />
       <StruggleModal
         open={struggle.isStruggling}
@@ -103,6 +105,7 @@ function SectionRunner({
  * 各节活动
  * ===================================================================== */
 function ReviewActivity({ refs, onDone }: { refs: string[]; onDone: () => void }) {
+  const { t } = useTranslation();
   const progress = useProgress();
   const practice = useStore((s) => s.practice);
   const iRef = useRef(0);
@@ -124,13 +127,14 @@ function ReviewActivity({ refs, onDone }: { refs: string[]; onDone: () => void }
       count={count}
       tone="orange"
       onDone={onDone}
-      finishLabel="复习完啦 →"
+      finishLabel={t('today.reviewDone')}
       record={(q, correct) => q.skill && practice(q.skill, correct, 1, q.difficulty)}
     />
   );
 }
 
 function QuizActivity({ todaySkills, onDone }: { todaySkills: string[]; onDone: () => void }) {
+  const { t } = useTranslation();
   const progress = useProgress();
   const practice = useStore((s) => s.practice);
 
@@ -154,7 +158,7 @@ function QuizActivity({ todaySkills, onDone }: { todaySkills: string[]; onDone: 
       count={6}
       tone="green"
       onDone={onDone}
-      finishLabel="挑战成功 →"
+      finishLabel={t('today.challengeDone')}
       record={(q, correct) => q.skill && practice(q.skill, correct, 1, q.difficulty)}
     />
   );
@@ -164,24 +168,25 @@ function QuizActivity({ todaySkills, onDone }: { todaySkills: string[]; onDone: 
  * 薄弱点专项深链（Phase 3-②）：从家长报告「去练习」进入，针对单一学科强化
  * ===================================================================== */
 const FOCUS_SUBJECTS: Record<string, string> = {
-  letter: '字母',
-  number: '数字',
-  math: '数学',
-  poem: '古诗',
-  hanzi: '汉字',
-  pinyin: '拼音',
-  word: '英语',
-  logic: '逻辑',
-  idiom: '成语',
-  sentence: '造句',
+  letter: 'today.subject.letter',
+  number: 'today.subject.number',
+  math: 'today.subject.math',
+  poem: 'today.subject.poem',
+  hanzi: 'today.subject.hanzi',
+  pinyin: 'today.subject.pinyin',
+  word: 'today.subject.word',
+  logic: 'today.subject.logic',
+  idiom: 'today.subject.idiom',
+  sentence: 'today.subject.sentence',
 };
 
 function FocusActivity({ subject, onDone }: { subject: string; onDone: () => void }) {
+  const { t } = useTranslation();
   const progress = useProgress();
   const practice = useStore((s) => s.practice);
   const iRef = useRef(0);
   const COUNT = 8;
-  const label = FOCUS_SUBJECTS[subject]! ?? subject;
+  const label = FOCUS_SUBJECTS[subject] ? t(FOCUS_SUBJECTS[subject]!) : subject;
 
   const gen = useCallback((): Question => {
     // 优先练该学科薄弱点(lv<3)与错题本，再退回到全部已接触知识点，无重复
@@ -202,13 +207,13 @@ function FocusActivity({ subject, onDone }: { subject: string; onDone: () => voi
 
   return (
     <div className="space-y-5">
-      <PageHeader emoji="🎯" title={`${label}专项练习`} subtitle="针对薄弱点强化巩固，练完更扎实～" tone="purple" />
+      <PageHeader emoji="🎯" title={t('today.focusTitle', { label })} subtitle={t('today.focusSubtitle')} tone="purple" />
       <SectionRunner
         gen={gen}
         count={COUNT}
         tone="purple"
         onDone={onDone}
-        finishLabel="专项练完啦 →"
+        finishLabel={t('today.focusDone')}
         record={(q, correct) => q.skill && practice(q.skill, correct, 1, q.difficulty)}
       />
     </div>
@@ -270,6 +275,7 @@ export default function TodayPage() {
   // —— Rules of Hooks 修复：所有 hook 必须无条件调用，置于任何条件 return 之前 ——
   // 普通分支与焦点学科分支（today/letter ↔ today）必须保持完全一致的 hook 顺序与数量，
   // 否则 <TodayPage/> 因 key 固定不卸载重挂载，会触发 "Rendered fewer hooks than expected" 白屏。
+  const { t } = useTranslation();
   const progress = useProgress();
   const { param } = useRoute();
   const setLessonStep = useStore((s) => s.setLessonStep);
@@ -316,23 +322,23 @@ export default function TodayPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader emoji="📅" title="今日课程" subtitle="跟着课程一步步学，每天进步一点点～" tone="purple" />
+      <PageHeader emoji="📅" title={t('today.title')} subtitle={t('today.subtitle')} tone="purple" />
 
       {/* 概览 */}
       <Panel className="!py-4 rounded-[2.2rem] border-4 border-pink-200/90 bg-white/95 shadow-fluffy">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="rounded-full bg-candy-purple-soft px-3.5 py-1.5 text-xs font-black text-candy-purple-deep">
-              ⏱️ 约 {plan.minutes} 分钟
+              ⏱️ {t('today.aboutMinutes', { count: plan.minutes ?? 15 })}
             </span>
             {(plan.dueCount ?? 0) > 0 && (
               <span className="rounded-full bg-candy-orange-soft px-3.5 py-1.5 text-xs font-black text-candy-orange-deep">
-                ✨ {plan.dueCount} 个待巩固
+                ✨ {t('today.toReview', { count: plan.dueCount ?? 0 })}
               </span>
             )}
           </div>
           <span className="text-xs font-black text-ink-soft">
-            已完成 {Math.min(step, plan.sections.length)} / {plan.sections.length} 节
+            {t('today.sectionsDone', { done: Math.min(step, plan.sections.length), total: plan.sections.length })}
           </span>
         </div>
         <div className="mt-3">
@@ -354,15 +360,15 @@ export default function TodayPage() {
             🎁
           </motion.div>
           <div className="mt-2 inline-block rounded-full bg-amber-400 px-4 py-1 text-xs font-black text-amber-950 shadow-sm">
-            金色大宝箱开启啦！
+            {t('today.chestOpened')}
           </div>
-          <h2 className="mt-3 text-3xl font-black text-pink-600 tracking-wide">今天课程全通关啦！</h2>
-          <p className="mt-2 text-base font-extrabold text-ink-soft">你真棒！获得 20 颗金星 🌟 与专属粉色羊毛毡勋章！</p>
+          <h2 className="mt-3 text-3xl font-black text-pink-600 tracking-wide">{t('today.allDone')}</h2>
+          <p className="mt-2 text-base font-extrabold text-ink-soft">{t('today.allDoneDesc')}</p>
           {/* AI 每日总结 */}
           <DailySummary progress={progress} plan={plan} />
           <div className="mt-6 flex gap-3">
             <CandyButton tone="pink" size="lg" fullWidth onClick={restart}>
-              🔄 重新探索探险路线
+              {t('today.restartRoute')}
             </CandyButton>
           </div>
         </motion.div>
@@ -372,7 +378,7 @@ export default function TodayPage() {
           {/* 关卡节点地图 */}
           <div className="relative space-y-4 rounded-[2.2rem] border-4 border-pink-200 bg-gradient-to-b from-pink-100/90 via-rose-50 to-purple-100/90 p-5 shadow-fluffy">
             <div className="mb-2 text-center text-xs font-black text-pink-600 uppercase tracking-widest">
-              🌟 每日金牌探险地图 🌟
+              {t('today.adventureMap')}
             </div>
 
             {plan.sections.map((sec, i) => {
@@ -410,7 +416,7 @@ export default function TodayPage() {
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-2">
                         <span className="rounded-full bg-pink-100 px-2 py-0.5 text-[10px] font-black text-pink-600">
-                          关卡 {i + 1}
+                          {t('today.levelN', { count: i + 1 })}
                         </span>
                         <span className="truncate text-base font-black text-ink">{sec.title}</span>
                       </span>
@@ -418,7 +424,7 @@ export default function TodayPage() {
                     </span>
                     {state === 'active' && (
                       <span className="shrink-0 rounded-full bg-pink-500 px-3 py-1 text-xs font-black text-white shadow-sm">
-                        开始闯关 🚀
+                        {t('today.startLevel')}
                       </span>
                     )}
                   </button>
@@ -431,12 +437,12 @@ export default function TodayPage() {
               <div className="flex items-center gap-3">
                 <span className="text-4xl animate-bounce-soft">🎁</span>
                 <div>
-                  <h4 className="text-base font-black text-amber-900">终点大宝箱</h4>
-                  <p className="text-xs font-bold text-amber-700">完成今天全部关卡即可拆开奖盒！</p>
+                  <h4 className="text-base font-black text-amber-900">{t('today.finalChest')}</h4>
+                  <p className="text-xs font-bold text-amber-700">{t('today.finalChestDesc')}</p>
                 </div>
               </div>
               <span className="rounded-full bg-amber-400 px-3 py-1 text-xs font-black text-amber-950 shadow-sm">
-                +20 颗金星 ⭐
+                {t('today.goldStars')}
               </span>
             </div>
           </div>

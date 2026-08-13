@@ -7,6 +7,7 @@ import { sfxTap } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 import { getHanziByLevel, type HanziEntry } from '@/data/hanziIndex';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface HanziQuizGameProps {
   level?: number;
@@ -15,6 +16,7 @@ interface HanziQuizGameProps {
 }
 
 export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps) {
+  const { t } = useTranslation();
   const addFish = useStore((s) => s.addFish);
   const practice = useStore((s) => s.practice);
 
@@ -95,9 +97,9 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
     return (
       <Panel className="text-center p-6 space-y-4 max-w-lg mx-auto border-4 border-candy-pink-deep">
         <div className="text-4xl">🏆</div>
-        <h3 className="text-2xl font-black text-candy-pink-deep">汉字听音识字关卡通关！</h3>
+        <h3 className="text-2xl font-black text-candy-pink-deep">{t('hanziQuizGame.completedTitle')}</h3>
         <p className="text-sm font-bold text-ink-soft">
-          太棒啦！你在本关卡中一共收集了 <span className="text-amber-500 font-extrabold text-lg">⭐ {totalStars}</span> 颗星！
+          {t('hanziQuizGame.completedDesc', { stars: totalStars })}
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
@@ -107,7 +109,7 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
               size="md"
               onClick={() => onSelectWriting(currentHanzi)}
             >
-              ✍️ 去手写练习【{currentHanzi.c}】字
+              ✍️ {t('hanziQuizGame.goWrite', { char: currentHanzi.c })}
             </CandyButton>
           )}
 
@@ -122,7 +124,7 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
               setIsCompleted(false);
             }}
           >
-            🔄 再闯一次关
+            🔄 {t('hanziQuizGame.again')}
           </CandyButton>
         </div>
       </Panel>
@@ -137,7 +139,7 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
       <div className="flex items-center justify-between bg-white/80 p-3 rounded-2xl border border-amber-200 shadow-xs">
         <div className="flex items-center gap-2">
           <span className="text-xs font-black px-3 py-1 bg-amber-100 text-amber-900 rounded-full">
-            第 {currentIndex + 1} / {pool.length} 题
+            {t('hanziQuizGame.progress', { current: currentIndex + 1, total: pool.length })}
           </span>
           {streak > 1 && (
             <motion.span
@@ -145,20 +147,20 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
               animate={{ scale: [1, 1.2, 1] }}
               className="text-xs font-black text-rose-600 bg-rose-100 px-2.5 py-0.5 rounded-full border border-rose-300"
             >
-              🔥 连胜 x{streak}
+              {t('hanziQuizGame.streak', { streak })}
             </motion.span>
           )}
         </div>
 
         <div className="text-xs font-extrabold text-amber-600">
-          ⭐ 积分: {totalStars}
+          {t('hanziQuizGame.score', { score: totalStars })}
         </div>
       </div>
 
       {/* 题目卡片：听音识字播报 */}
       <Panel className="text-center p-6 space-y-3 relative overflow-hidden">
         <div className="text-xs font-black text-amber-700 uppercase tracking-wider">
-          🎧 听音识字闯关
+          {t('hanziQuizGame.title')}
         </div>
 
         <div className="flex items-center justify-center gap-3">
@@ -176,13 +178,13 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
               {currentHanzi.p}
             </div>
             <div className="text-xs font-bold text-amber-700">
-              含义: {currentHanzi.origin}
+              {t('hanziQuizGame.meaning', { origin: currentHanzi.origin })}
             </div>
           </div>
         </div>
 
         <p className="text-xs font-bold text-amber-800/80">
-          点击喇叭再次播放发音，并在下方选出正确的汉字！
+          {t('hanziQuizGame.hint')}
         </p>
       </Panel>
 

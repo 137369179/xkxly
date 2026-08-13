@@ -13,6 +13,7 @@ import { useProgress } from '@/store/useStore';
 import { isDue } from '@/lib/srs';
 import { sfxTap } from '@/lib/sfx';
 import { navigate } from '@/lib/router';
+import { useTranslation } from '@/i18n/useTranslation';
 import {
   WrongTrendChart,
   WeaknessRadar,
@@ -25,12 +26,13 @@ import { WrongBookBadgeList } from './WrongBookBadgeList';
 type TabId = 'overview' | 'train' | 'badges';
 
 const TABS: { id: TabId; label: string; emoji: string }[] = [
-  { id: 'overview', label: '概览', emoji: '📊' },
-  { id: 'train', label: '训练', emoji: '🧠' },
-  { id: 'badges', label: '徽章', emoji: '🏅' },
+  { id: 'overview', label: 'wrongbook.tab.overview', emoji: '📊' },
+  { id: 'train', label: 'wrongbook.tab.train', emoji: '🧠' },
+  { id: 'badges', label: 'wrongbook.tab.badges', emoji: '🏅' },
 ];
 
 export default function WrongBookDashboard() {
+  const { t } = useTranslation();
   const progress = useProgress();
   const [tab, setTab] = useState<TabId>('overview');
 
@@ -47,7 +49,7 @@ export default function WrongBookDashboard() {
       {/* 标题 */}
       <div className="flex items-center gap-2">
         <span className="text-3xl">📝</span>
-        <h1 className="text-2xl font-black text-ink">错题本</h1>
+        <h1 className="text-2xl font-black text-ink">{t('wrongbook.title')}</h1>
       </div>
 
       {/* 顶部统计卡片 */}
@@ -64,7 +66,7 @@ export default function WrongBookDashboard() {
             <div className="flex items-center gap-2">
               <span className="text-2xl">⏰</span>
               <span className="text-sm font-extrabold text-candy-orange-deep">
-                有 {dueWrongCount} 个错题到了最佳复习时间！
+                {t('wrongbook.dueCount', { count: dueWrongCount })}
               </span>
             </div>
             <CandyButton
@@ -75,7 +77,7 @@ export default function WrongBookDashboard() {
                 setTab('train');
               }}
             >
-              立即复习
+              {t('wrongbook.reviewNow')}
             </CandyButton>
           </div>
         </motion.div>
@@ -83,21 +85,21 @@ export default function WrongBookDashboard() {
 
       {/* Tab 切换 */}
       <div className="flex gap-1 rounded-2xl bg-white/60 p-1">
-        {TABS.map((t) => (
+        {TABS.map((tb) => (
           <button
-            key={t.id}
+            key={tb.id}
             onClick={() => {
               sfxTap();
-              setTab(t.id);
+              setTab(tb.id);
             }}
             className={`flex-1 rounded-xl py-2 text-sm font-extrabold transition ${
-              tab === t.id
+              tab === tb.id
                 ? 'bg-white shadow-sm text-ink'
                 : 'text-ink-soft'
             }`}
           >
-            <span className="mr-1">{t.emoji}</span>
-            {t.label}
+            <span className="mr-1">{tb.emoji}</span>
+            {t(tb.label)}
           </button>
         ))}
       </div>
@@ -121,9 +123,9 @@ export default function WrongBookDashboard() {
       {progress.wrongBook.length === 0 && tab !== 'badges' && (
         <Panel className="text-center">
           <div className="text-5xl">🎉</div>
-          <h3 className="mt-2 text-lg font-extrabold text-ink">错题本空空如也！</h3>
+          <h3 className="mt-2 text-lg font-extrabold text-ink">{t('wrongbook.emptyTitle')}</h3>
           <p className="mt-1 text-sm font-bold text-ink-soft">
-            去学习积攒一些错题，再来这里消灭它们吧！
+            {t('wrongbook.emptyHint')}
           </p>
           <div className="mt-4">
             <CandyButton
@@ -135,7 +137,7 @@ export default function WrongBookDashboard() {
                 navigate('home');
               }}
             >
-              🏠 回首页学习
+              🏠 {t('wrongbook.backHome')}
             </CandyButton>
           </div>
         </Panel>

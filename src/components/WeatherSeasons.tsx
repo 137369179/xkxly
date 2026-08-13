@@ -6,6 +6,7 @@ import { memo, useState } from 'react';
 import { motion } from 'motion/react';
 import { speak } from '@/lib/speech';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const SEASONS = [
   { name:'春天', en:'Spring', emoji:'🌸', months:'3-5月', color:'bg-pink-100', desc:'万物复苏，花儿开了', weather:['晴天','小雨','多云'] },
@@ -24,15 +25,16 @@ const WEATHERS = [
 ];
 
 function _WeatherSeasons() {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<'season'|'weather'>('season');
   const [selected, setSelected] = useState(0);
 
   return (
     <div className="card-candy p-4 sm:p-6">
-      <h3 className="mb-1 text-center text-lg font-extrabold text-ink">🌤️ 天气与季节</h3>
+      <h3 className="mb-1 text-center text-lg font-extrabold text-ink">🌤️ {t('weatherSeasons.title')}</h3>
       <div className="mb-4 flex justify-center gap-2">
-        <button aria-label="🌸 四季" onClick={()=>setTab('season')} className={`rounded-xl px-4 py-1.5 text-sm font-extrabold ${tab==='season'?'bg-candy-orange-deep text-white':'bg-white text-ink-soft shadow-sm'}`}>🌸 四季</button>
-        <button onClick={()=>setTab('weather')} className={`rounded-xl px-4 py-1.5 text-sm font-extrabold ${tab==='weather'?'bg-candy-orange-deep text-white':'bg-white text-ink-soft shadow-sm'}`}>🌤️ 天气</button>
+        <button aria-label={t('weatherSeasons.seasonsTab')} onClick={()=>setTab('season')} className={`rounded-xl px-4 py-1.5 text-sm font-extrabold ${tab==='season'?'bg-candy-orange-deep text-white':'bg-white text-ink-soft shadow-sm'}`}>🌸 {t('weatherSeasons.seasonsTab')}</button>
+        <button onClick={()=>setTab('weather')} className={`rounded-xl px-4 py-1.5 text-sm font-extrabold ${tab==='weather'?'bg-candy-orange-deep text-white':'bg-white text-ink-soft shadow-sm'}`}>🌤️ {t('weatherSeasons.weatherTab')}</button>
       </div>
 
       {tab === 'season' && (

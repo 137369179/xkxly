@@ -1,5 +1,6 @@
 import { memo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface HanziVideoCardProps {
   char: string;
@@ -20,6 +21,7 @@ const HanziVideoCard = memo(function HanziVideoCard({
   learned = false,
   onClick,
 }: HanziVideoCardProps) {
+  const { t } = useTranslation();
   const [showVideo, setShowVideo] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   
@@ -103,7 +105,7 @@ const HanziVideoCard = memo(function HanziVideoCard({
             import('@/lib/speech').then(m => m.speak(char, { lang: 'zh-CN', rate: 0.7 }));
           }}
           className="absolute bottom-2 left-2 w-7 h-7 rounded-full bg-candy-blue-soft text-candy-blue-deep flex items-center justify-center text-xs font-bold hover:scale-105 transition-transform"
-          aria-label={`朗读${char}`}
+          aria-label={t('hanziVideoCard.readAria', { char })}
         >
           🔊
         </button>
@@ -112,7 +114,7 @@ const HanziVideoCard = memo(function HanziVideoCard({
         <button
           onClick={handlePlayVideo}
           className="absolute bottom-2 right-2 w-7 h-7 rounded-full bg-candy-purple-deep/90 flex items-center justify-center hover:bg-candy-purple-deep transition-colors"
-          aria-label={`播放${char}的教学视频`}
+          aria-label={t('hanziVideoCard.playAria', { char })}
         >
           <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
             <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
@@ -134,7 +136,7 @@ const HanziVideoCard = memo(function HanziVideoCard({
             <button
               onClick={handleCloseVideo}
               className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center hover:bg-black/70 transition-colors"
-              aria-label="关闭视频"
+              aria-label={t('hanziVideoCard.close')}
             >
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -149,7 +151,7 @@ const HanziVideoCard = memo(function HanziVideoCard({
               controls
               autoPlay
             >
-              您的浏览器不支持视频播放
+              {t('hanziVideoCard.videoUnsupported')}
             </video>
             
             {/* 视频信息 */}
@@ -160,7 +162,7 @@ const HanziVideoCard = memo(function HanziVideoCard({
                   <span className="text-lg font-bold text-candy-purple-deep">{pinyin}</span>
                 </div>
                 <div className="text-sm font-bold text-ink-soft">
-                  50秒教学视频
+                  {t('hanziVideoCard.videoDuration')}
                 </div>
               </div>
             </div>

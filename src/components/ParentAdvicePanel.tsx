@@ -6,6 +6,7 @@ import { motion } from 'motion/react';
 import { useProgress } from '@/store/useStore';
 import { generateAdvice } from '@/lib/parentAdvice';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const KIND_STYLE: Record<string, string> = {
   urgent: 'border-red-200 bg-red-50 text-red-900',
@@ -14,6 +15,7 @@ const KIND_STYLE: Record<string, string> = {
 };
 
 export function ParentAdvicePanel() {
+  const { t } = useTranslation();
   const p = useProgress();
   const advices = useMemo(() => generateAdvice(p), [
     p.stars, p.streak, p.mastery, p.dailyLog, p.badges,
@@ -24,9 +26,9 @@ export function ParentAdvicePanel() {
   return (
     <div className="card-candy p-4 sm:p-6">
       <h3 className="mb-3 flex items-center gap-2 text-lg font-extrabold text-ink">
-        💡 智能学习建议
+        {t('parentAdvicePanel.panelTitle')}
         <span className="text-xs font-bold text-ink-muted">
-          ({advices.length} 条)
+          ({t('parentAdvicePanel.adviceCount', { count: advices.length })})
         </span>
       </h3>
 

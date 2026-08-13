@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { cn, shuffle } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const JOBS = [
   { emoji: '👮', name: '警察', en: 'Police', tool: '🚔', uniform: '蓝色制服', desc: '保护大家安全' },
@@ -24,6 +25,7 @@ const JOBS = [
 
 
 export function JobExplore() {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<'learn' | 'quiz'>('learn');
   const [selected, setSelected] = useState(0);
   const [quizJob, setQuizJob] = useState(() => JOBS[Math.floor(Math.random() * JOBS.length)]!);
@@ -46,10 +48,10 @@ export function JobExplore() {
     lockRef.current = true;
     sfxTap();
     if (job.name === quizJob!.name) {
-      sfxCorrect(); setScore(s => s + 1); setFeedback(`✅ 对了！${quizJob!.name}${quizJob!.desc}`);
+      sfxCorrect(); setScore(s => s + 1); setFeedback(`✅ ${t('jobExplore.correct', { name: quizJob!.name, desc: quizJob!.desc })}`);
       void speak(`对了！${quizJob.name}`, { lang: 'zh-CN', rate: 0.85, module: 'praise' });
     } else {
-      sfxWrong(); setFeedback(`❌ 答案是${quizJob.name}`);
+      sfxWrong(); setFeedback(`❌ ${t('jobExplore.wrong', { name: quizJob.name })}`);
       void speak('再想想', { lang: 'zh-CN', rate: 0.85, module: 'praise' });
     }
     if (timerRef.current !== null) clearTimeout(timerRef.current);
@@ -58,10 +60,10 @@ export function JobExplore() {
 
   return (
     <div className="card-candy p-4 sm:p-6">
-      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">👮 职业认知</h3>
+      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">👮 {t('jobExplore.title')}</h3>
       <div className="mb-4 flex justify-center gap-2">
-        <button onClick={()=>setMode('learn')} className={cn('rounded-xl px-4 py-1.5 text-sm font-extrabold', mode==='learn'?'bg-candy-orange-deep text-white':'bg-white text-ink-soft shadow-sm')}>📖 认识职业</button>
-        <button onClick={()=>{setMode('quiz');nextQuiz();}} className={cn('rounded-xl px-4 py-1.5 text-sm font-extrabold', mode==='quiz'?'bg-candy-orange-deep text-white':'bg-white text-ink-soft shadow-sm')}>🎯 工具配对</button>
+        <button onClick={()=>setMode('learn')} className={cn('rounded-xl px-4 py-1.5 text-sm font-extrabold', mode==='learn'?'bg-candy-orange-deep text-white':'bg-white text-ink-soft shadow-sm')}>📖 {t('jobExplore.learnMode')}</button>
+        <button onClick={()=>{setMode('quiz');nextQuiz();}} className={cn('rounded-xl px-4 py-1.5 text-sm font-extrabold', mode==='quiz'?'bg-candy-orange-deep text-white':'bg-white text-ink-soft shadow-sm')}>🎯 {t('jobExplore.quizMode')}</button>
       </div>
 
       {mode === 'learn' && (
@@ -71,7 +73,7 @@ export function JobExplore() {
               <span className="text-5xl">{j.emoji}</span>
             </motion.div>
             <p className="text-xl font-extrabold text-ink">{j.name} <span className="text-sm font-bold text-ink-soft">{j.en}</span></p>
-            <p className="text-xs font-bold text-ink-soft">🔧 工具：{j.tool} · 👕 {j.uniform}</p>
+            <p className="text-xs font-bold text-ink-soft">🔧 {t('jobExplore.toolPrefix')}：{j.tool} · 👕 {j.uniform}</p>
             <p className="mt-1 text-xs text-ink-muted">{j.desc}</p>
           </div>
           <div className="grid grid-cols-5 gap-2">
@@ -90,7 +92,7 @@ export function JobExplore() {
 
       {mode === 'quiz' && (
         <div className="text-center">
-          <p className="mb-3 text-sm font-bold text-ink">这个工具是谁用的？</p>
+          <p className="mb-3 text-sm font-bold text-ink">{t('jobExplore.quizPrompt')}</p>
           <motion.div key={j.tool} initial={{scale:0.5}} animate={{scale:1}} className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-lg">
             <span className="text-5xl">{j.tool}</span>
           </motion.div>
@@ -103,7 +105,7 @@ export function JobExplore() {
               </button>
             ))}
           </div>
-          <div className="mt-3 text-xs font-bold text-ink-soft">得分 {score}</div>
+          <div className="mt-3 text-xs font-bold text-ink-soft">{t('jobExplore.score', { score })}</div>
         </div>
       )}
 

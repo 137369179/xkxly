@@ -6,6 +6,7 @@ import { memo, useState, useRef } from 'react';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const MONTHS = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
 const WEEKDAYS = ['日','一','二','三','四','五','六'];
@@ -19,6 +20,7 @@ function getFirstWeekday(year: number, month: number) {
 }
 
 function _CalendarLearn() {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<'view' | 'quiz'>('view');
   const [year] = useState(() => new Date().getFullYear());
   const [month, setMonth] = useState(() => new Date().getMonth());
@@ -56,47 +58,47 @@ function _CalendarLearn() {
     const correctWeekday = date.getDay();
     if (day === quizDay) {
       sfxCorrect(); setScore(s => s + 1);
-      setFeedback(`✅ ${month + 1}月${day}日是星期${WEEKDAYS[correctWeekday]}`);
+      setFeedback(`✅ ${t('calendarLearn.correct', { month: month + 1, day, weekday: WEEKDAYS[correctWeekday]! })}`);
       void speak(`对了！`, { lang: 'zh-CN', rate: 0.85, module: 'praise' });
       if (timerRef.current !== null) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => { timerRef.current = null; startQuiz(); setFeedback(''); }, 1500);
     } else {
-      sfxWrong(); setFeedback('❌ 点错日期了');
+      sfxWrong(); setFeedback(t('calendarLearn.wrong'));
     }
   };
 
   return (
     <div className="card-candy p-4 sm:p-6">
-      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">📅 日历认知</h3>
+      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">📅 {t('calendarLearn.title')}</h3>
 
       <div className="mb-3 flex justify-center gap-2">
-        <button onClick={()=>setMode('view')} className={cn('rounded-xl px-4 py-1.5 text-sm font-extrabold', mode==='view'?'bg-candy-blue-deep text-white':'bg-white text-ink-soft shadow-sm')}>📖 看日历</button>
-        <button onClick={()=>{setMode('quiz');startQuiz();}} className={cn('rounded-xl px-4 py-1.5 text-sm font-extrabold', mode==='quiz'?'bg-candy-blue-deep text-white':'bg-white text-ink-soft shadow-sm')}>🎯 找日期</button>
+        <button onClick={()=>setMode('view')} className={cn('rounded-xl px-4 py-1.5 text-sm font-extrabold', mode==='view'?'bg-candy-blue-deep text-white':'bg-white text-ink-soft shadow-sm')}>📖 {t('calendarLearn.viewMode')}</button>
+        <button onClick={()=>{setMode('quiz');startQuiz();}} className={cn('rounded-xl px-4 py-1.5 text-sm font-extrabold', mode==='quiz'?'bg-candy-blue-deep text-white':'bg-white text-ink-soft shadow-sm')}>🎯 {t('calendarLearn.quizMode')}</button>
       </div>
 
       <div className="mb-3 flex items-center justify-between">
         <button
           onClick={()=>setMonth(m => (m - 1 + 12) % 12)}
-          aria-label="上个月"
+          aria-label={t('calendarLearn.prevMonth')}
           className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-white px-3 text-lg font-extrabold shadow-sm transition active:translate-y-[2px]"
         >◀️</button>
-        <span className="text-lg font-extrabold text-ink">{MONTH_EMOJI[month]} {year}年{MONTHS[month]}</span>
+        <span className="text-lg font-extrabold text-ink">{MONTH_EMOJI[month]} {t('calendarLearn.yearMonth', { year, month: MONTHS[month]! })}</span>
         <button
           onClick={()=>setMonth(m => (m + 1) % 12)}
-          aria-label="下个月"
+          aria-label={t('calendarLearn.nextMonth')}
           className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-white px-3 text-lg font-extrabold shadow-sm transition active:translate-y-[2px]"
         >▶️</button>
       </div>
 
       {mode === 'quiz' && (
         <div className="mb-3 rounded-xl bg-candy-orange-soft/30 p-2 text-center">
-          <p className="text-sm font-extrabold text-candy-orange-deep">🎯 找到 {month + 1}月{quizDay}日，点击它！</p>
+          <p className="text-sm font-extrabold text-candy-orange-deep">🎯 {t('calendarLearn.findDay', { month: month + 1, day: quizDay })}</p>
         </div>
       )}
 
       <div className="mb-2 grid grid-cols-7 gap-1">
         {WEEKDAYS.map(w => (
-          <div key={w} className="text-center text-xs font-extrabold text-ink-soft">周{w}</div>
+          <div key={w} className="text-center text-xs font-extrabold text-ink-soft">{t('calendarLearn.weekday', { day: w })}</div>
         ))}
       </div>
       <div className="grid grid-cols-7 gap-1">
@@ -114,7 +116,7 @@ function _CalendarLearn() {
       </div>
 
       {feedback && <p className="mt-2 text-center text-sm font-extrabold text-ink-soft">{feedback}</p>}
-      {mode === 'quiz' && <p className="mt-1 text-center text-xs font-bold text-ink-soft">得分 {score}</p>}
+      {mode === 'quiz' && <p className="mt-1 text-center text-xs font-bold text-ink-soft">{t('calendarLearn.score', { score })}</p>}
     </div>
   );
 }

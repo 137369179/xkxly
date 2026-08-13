@@ -4,6 +4,7 @@
  */
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 export type AvatarMood = 'idle' | 'thinking' | 'talking' | 'sleep' | 'celebrating';
 
@@ -79,8 +80,9 @@ export function AiAvatar({
 
 /** 思考中的三点动画 */
 export function AiDots({ color = '#8B6BF0' }: { color?: string }) {
+  const { t } = useTranslation();
   return (
-    <span className="inline-flex items-center gap-1" aria-label="正在思考">
+    <span className="inline-flex items-center gap-1" aria-label={t('aiAvatar.thinkingAria')}>
       {[0, 1, 2].map((i) => (
         <motion.span
           key={`dot-${i}`}

@@ -2082,7 +2082,9 @@
     "listenWord": "🔊 Listen",
     "followReadWord": "Read along: {word}",
     "listenAgain": "🔊 Listen again",
-    "iCanRead": "✅ I can read it"
+    "iCanRead": "✅ I can read it",
+    "title": "Today's Lessons",
+    "nextQuestion": "Next question"
   },
   "vehicle": {
     "title": "3D Felt Vehicles & Jobs Explorer",
@@ -4339,7 +4341,17 @@
     "collected": "Collected {owned}/{total} stamps",
     "prevPage": "Previous",
     "nextPage": "Next",
-    "pageInfo": "Page {page} of {total}"
+    "pageInfo": "Page {page} of {total}",
+    "title": "Learning Passport",
+    "subtitle": "{stamped} / {total} stamps · Keep going!",
+    "journey": "{label} Journey",
+    "stampCount": "{done} / {total} stamps",
+    "groupLetters": "Letters",
+    "groupNumbers": "Numbers",
+    "groupHanzi": "Hanzi",
+    "groupPinyin": "Pinyin",
+    "groupPoems": "Poems",
+    "groupWords": "Words"
   },
   "button": {
     "confirmAgain": "Press again to confirm"
@@ -4523,34 +4535,78 @@
     "title": "Study Calendar",
     "subtitle": "Track your daily learning",
     "totalDays": "Total study days",
-    "avgMinutes": "Avg {n} min/day"
+    "avgMinutes": "Avg {n} min/day",
+    "yearTitle": "{year} Study Calendar",
+    "subtitleDetail": "{days} days · {hours}h{minutes}m total · {streak} day streak",
+    "less": "Less",
+    "more": "More",
+    "learnDays": "Days studied",
+    "totalDuration": "Total time",
+    "longestStreak": "Longest streak",
+    "minutesTooltip": "{date}: {count} min"
   },
   "sudokuEasy": {
     "title": "Sudoku",
     "subtitle": "Fun 4×4 Sudoku",
     "select": "Select a number to fill in",
     "correct": "✅ Correct!",
-    "wrong": "❌ Number conflict"
+    "wrong": "❌ Number conflict",
+    "learnTitle": "Picture Sudoku",
+    "levelN": "Level {n}",
+    "done": "Done!",
+    "next": "Next",
+    "rule": "Each row, column and shape appears only once",
+    "clear": "Clear"
   },
   "symmetryLearn": {
     "title": "Symmetry",
     "subtitle": "Explore the beauty of symmetry",
     "findAxis": "Find the line of symmetry",
-    "correct": "✅ Correct!",
-    "wrong": "❌ Try again"
+    "correct": "Correct!",
+    "wrong": "Try again",
+    "learnTitle": "Symmetry",
+    "learnMode": "Learn Symmetry",
+    "quizMode": "Quiz",
+    "quizPrompt": "Is it symmetric?",
+    "symmetricBtn": "Symmetric",
+    "asymmetricBtn": "Not symmetric",
+    "score": "Score {score}",
+    "correctSym": "Correct! {label} is symmetric",
+    "correctAsym": "Correct! {label} is not symmetric",
+    "wrongSym": "{label} is actually symmetric",
+    "wrongAsym": "{label} is not symmetric",
+    "hasAxis": "{label} is symmetric with {axes} axes",
+    "noAxis": "{label} is not symmetric"
   },
   "rhythmRepeat": {
     "title": "Rhythm Master",
     "subtitle": "Repeat the beat",
-    "listen": "🔊 Listen",
+    "listen": "Listen…",
     "repeat": "🎵 Repeat",
     "correct": "✅ Correct!",
-    "wrong": "❌ Try again"
+    "wrong": "❌ Try again",
+    "learnTitle": "Rhythm",
+    "play": "Tap the beats in order!",
+    "perfect": "Perfect! Great rhythm!",
+    "wrongPattern": "Not quite, listen again",
+    "replay": "Listen again",
+    "nextLevel": "Next level",
+    "score": "Score {score}"
   },
   "strokeAnimation": {
     "title": "Stroke Animation",
     "start": "Tap to start",
-    "replay": "🔄 Replay"
+    "replay": "🔄 Replay",
+    "demoTitle": "Stroke Order",
+    "strokeCount": "Stroke {current} / {total}",
+    "writing": "Writing…",
+    "replayDone": "Write again 🔄",
+    "play": "▶ Play",
+    "remember": "「{char}」 has {total} strokes, did you remember?",
+    "watchOrder": "Watch the order of each stroke～",
+    "clickToPlay": "Tap play to see how「{char}」is written",
+    "noData": "No stroke data for this character yet, trace the grid to practice",
+    "loading": "Loading stroke data…"
   },
   "vehicleExplore": {
     "title": "Vehicles",
@@ -4565,6 +4621,98 @@
     "spring": "🌸 Spring",
     "summer": "☀️ Summer",
     "autumn": "🍂 Autumn",
-    "winter": "❄️ Winter"
+    "winter": "❄️ Winter",
+    "seasonsTab": "Seasons",
+    "weatherTab": "Weather"
+  },
+  "jobExplore": {
+    "title": "Jobs",
+    "learnMode": "Learn Jobs",
+    "quizMode": "Tool Match",
+    "toolPrefix": "Tool",
+    "uniformPrefix": "Uniform",
+    "quizPrompt": "Whose tool is this?",
+    "score": "Score {score}",
+    "correct": "Correct! {name}{desc}",
+    "wrong": "The answer is {name}"
+  },
+  "calendarLearn": {
+    "title": "Calendar",
+    "viewMode": "View Calendar",
+    "quizMode": "Find Date",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "yearMonth": "{month} {year}",
+    "findDay": "Find {month} {day}, tap it!",
+    "weekday": "{day}",
+    "correct": "{month} {day} is a {weekday}",
+    "wrong": "Wrong date!",
+    "score": "Score {score}"
+  },
+  "voiceScoreModal": {
+    "closeAria": "Close recitation scoring",
+    "badge": "🎙️ AI Poem Recitation",
+    "reciteTitle": "Recite《{title}》",
+    "desc": "Read aloud into the mic to see your rainbow waveform and star badges!",
+    "hint": "Tap below to start recording",
+    "start": "🎙️ Start reciting",
+    "stop": "⏹ Stop & score",
+    "fluency": "📢 Fluency: {score} pts",
+    "pitch": "🎵 Intonation: {score} pts",
+    "retry": "🔄 Try again for full marks"
+  },
+  "aiButton": {
+    "defaultLabel": "Ask XiaoZhi",
+    "thinking": "XiaoZhi is thinking…"
+  },
+  "aiAvatar": {
+    "thinkingAria": "Thinking"
+  },
+  "storybookShelf": {
+    "empty": "No storybooks yet, go create your first one!",
+    "all": "✨ All",
+    "fav": "❤️ Favorites",
+    "favEmpty": "No favorites yet, tap ❤️ on a book cover!",
+    "catEmpty": "No storybooks in this category yet～",
+    "deleteConfirm": "Tap again to delete"
+  },
+  "nurseryPage": {
+    "title": "Nursery Rhymes",
+    "subtitle": "Sing along and learn",
+    "back": "◀️ Back",
+    "play": "🎵 Play",
+    "stop": "⏹️ Stop",
+    "moral": "💡 Lesson"
+  },
+  "hanziQuizGame": {
+    "title": "🎧 Listen & Pick",
+    "completedTitle": "Level Complete!",
+    "completedDesc": "Awesome! You collected ⭐ {stars} stars in this level!",
+    "goWrite": "✍️ Practice writing【{char}】",
+    "again": "🔄 Play again",
+    "progress": "Question {current} / {total}",
+    "streak": "🔥 Streak x{streak}",
+    "score": "⭐ Score: {score}",
+    "meaning": "Meaning: {origin}",
+    "hint": "Tap the speaker to replay, then pick the right character below!"
+  },
+  "hanziStrokeWriter": {
+    "miGrid": "Mi grid",
+    "tianGrid": "Tian grid",
+    "radicalMeta": "{radical} radical · {strokes} strokes",
+    "playStrokes": "🎬 Strokes",
+    "rewrite": "🧹 Redo",
+    "submit": "✨ Great job! Submit ⭐",
+    "reward": "Earned 3 stars + 2 fish treats!",
+    "aiStoryBtn": "🐱 Let XiaoZhi make a story for【{char}】",
+    "aiStoryTitle": "🐱 XiaoZhi story:",
+    "aiStoryLoading": "XiaoZhi is dreaming up a story..."
+  },
+  "hanziVideoCard": {
+    "readAria": "Read {char}",
+    "playAria": "Play {char} video",
+    "close": "Close video",
+    "videoUnsupported": "Your browser does not support video",
+    "videoDuration": "50s teaching video"
   }
 }

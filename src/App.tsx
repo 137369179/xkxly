@@ -17,6 +17,7 @@ import { useProfilesStore } from '@/store/useProfilesStore';
 import { OnboardingModal } from '@/components/OnboardingModal';
 import { setMuted } from '@/lib/sfx';
 import { stopSpeaking } from '@/lib/speech';
+import { useTranslation } from '@/i18n/useTranslation';
 import { AiVoiceModal } from '@/components/ai/AiVoiceModal';
 import { PwaInstallBanner } from '@/components/PwaInstallBanner';
 import { SwUpdateToast } from '@/components/SwUpdateToast';
@@ -132,6 +133,7 @@ function Page() {
 }
 
 export function App() {
+  const { t } = useTranslation();
   const { route } = useRoute();
   const sound = useSettingsStore((s) => s.settings.sound);
   const voiceModalOpen = useTtsStore((s) => s.voiceModalOpen);
@@ -154,14 +156,14 @@ export function App() {
   useEffect(() => {
     const st = useProfilesStore.getState();
     const meta = st.meta[st.activeProfileId];
-    const child = meta?.name && meta.name !== '宝贝' ? ` · ${meta.name}` : '';
+    const child = meta?.name && meta.name !== t('app.defaultProfileName') ? ` · ${meta.name}` : '';
     const item = NAV_MAP.get(route);
     if (route === 'home') {
-      document.title = `宝贝学习乐园 · AI 儿童成长学习乐园${child}`;
+      document.title = `${t('app.name')} · ${t('app.tagline')}${child}`;
     } else if (item) {
-      document.title = `🌈 ${item.label}${child} | 宝贝学习乐园`;
+      document.title = `🌈 ${item.label}${child} | ${t('app.name')}`;
     } else {
-      document.title = `宝贝学习乐园${child}`;
+      document.title = `${t('app.name')}${child}`;
     }
   }, [route]);
 

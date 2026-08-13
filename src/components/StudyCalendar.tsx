@@ -7,6 +7,7 @@ import { useMemo } from 'react';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { useProgress } from '@/store/useStore';
 import { dateKey } from '@/lib/dailyPlan';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface DayData {
   date: string;
@@ -62,6 +63,7 @@ function buildYearData(dailyLog: Record<string, { sec?: number; items?: number }
 }
 
 export function StudyCalendar() {
+  const { t } = useTranslation();
   const progress = useProgress();
   const weeks = useMemo(() => buildYearData(progress.dailyLog), [progress.dailyLog]);
 
@@ -96,16 +98,16 @@ export function StudyCalendar() {
 
   return (
     <Panel>
-      <PanelTitle emoji="📅" title={`${year}年学习日历`} subtitle={`已学习 ${stats.activeDays} 天 · 总时长 ${Math.floor(stats.totalMinutes / 60)}h${stats.totalMinutes % 60}m · 最长连续 ${stats.maxStreak} 天`} tone="green" />
+      <PanelTitle emoji="📅" title={t('studyCalendar.yearTitle', { year })} subtitle={t('studyCalendar.subtitleDetail', { days: stats.activeDays, hours: Math.floor(stats.totalMinutes / 60), minutes: stats.totalMinutes % 60, streak: stats.maxStreak })} tone="green" />
 
 
       {/* 图例 */}
       <div className="mb-3 flex items-center justify-end gap-1.5">
-        <span className="text-xs font-bold text-ink-soft">少</span>
+        <span className="text-xs font-bold text-ink-soft">{t('studyCalendar.less')}</span>
         {LEVEL_COLORS.map((c, i) => (
           <div key={`c-${i}`} className="h-3 w-3 rounded-sm" style={{ background: c }} />
         ))}
-        <span className="text-xs font-bold text-ink-soft">多</span>
+        <span className="text-xs font-bold text-ink-soft">{t('studyCalendar.more')}</span>
       </div>
 
       {/* 日历网格 */}
@@ -147,7 +149,7 @@ export function StudyCalendar() {
                         outline: isToday ? '2px solid #f59e0b' : 'none',
                         outlineOffset: '1px',
                       }}
-                      title={`${day.date}：${day.count} 分钟`}
+                      title={t('studyCalendar.minutesTooltip', { date: day.date, count: day.count })}
                     />
                   );
                 })}
@@ -161,15 +163,15 @@ export function StudyCalendar() {
       <div className="mt-4 grid grid-cols-3 gap-3 text-center">
         <div className="rounded-xl bg-candy-green-soft p-2">
           <div className="text-xl font-extrabold text-candy-green-deep">{stats.activeDays}</div>
-          <div className="text-xs font-bold text-ink-soft">学习天数</div>
+          <div className="text-xs font-bold text-ink-soft">{t('studyCalendar.learnDays')}</div>
         </div>
         <div className="rounded-xl bg-candy-blue-soft p-2">
           <div className="text-xl font-extrabold text-candy-blue-deep">{Math.floor(stats.totalMinutes / 60)}h{stats.totalMinutes % 60}m</div>
-          <div className="text-xs font-bold text-ink-soft">总时长</div>
+          <div className="text-xs font-bold text-ink-soft">{t('studyCalendar.totalDuration')}</div>
         </div>
         <div className="rounded-xl bg-candy-orange-soft p-2">
           <div className="text-xl font-extrabold text-candy-orange-deep">{stats.maxStreak}</div>
-          <div className="text-xs font-bold text-ink-soft">最长连续</div>
+          <div className="text-xs font-bold text-ink-soft">{t('studyCalendar.longestStreak')}</div>
         </div>
       </div>
     </Panel>

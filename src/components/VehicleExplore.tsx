@@ -6,6 +6,7 @@ import { memo, useState } from 'react';
 import { motion } from 'motion/react';
 import { speak } from '@/lib/speech';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const VEHICLES = [
   { emoji: '🚗', name: '小汽车', en: 'Car', zone: 'land', sound: '嘀嘀' },
@@ -27,23 +28,24 @@ const VEHICLES = [
 ];
 
 const ZONES = [
-  { id: 'land', name: '陆地', emoji: '🛣️', color: 'bg-green-200' },
-  { id: 'sky', name: '天空', emoji: '☁️', color: 'bg-sky-200' },
-  { id: 'sea', name: '海洋', emoji: '🌊', color: 'bg-blue-200' },
+  { id: 'land', name: '陆地', emoji: '🛣️', color: 'bg-green-200', labelKey: 'vehicleExplore.land' },
+  { id: 'sky', name: '天空', emoji: '☁️', color: 'bg-sky-200', labelKey: 'vehicleExplore.air' },
+  { id: 'sea', name: '海洋', emoji: '🌊', color: 'bg-blue-200', labelKey: 'vehicleExplore.water' },
 ];
 
 function _VehicleExplore() {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState(0);
   const v = VEHICLES[selected]!!
 
   return (
     <div className="card-candy p-4 sm:p-6">
-      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">🚗 交通工具</h3>
+      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">🚗 {t('vehicleExplore.title')}</h3>
       <div className="mb-4 flex justify-center gap-2">
         {ZONES.map(z => (
           <button key={z.id} onClick={()=>setSelected(VEHICLES.findIndex(v=>v.zone===z.id))}
             className={cn(z.color, 'rounded-xl px-4 py-1.5 text-sm font-extrabold shadow-sm')}>
-            {z.emoji} {z.name}
+            {z.emoji} {t(z.labelKey)}
           </button>
         ))}
       </div>

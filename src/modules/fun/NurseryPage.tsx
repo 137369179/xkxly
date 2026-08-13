@@ -10,6 +10,7 @@ import { speak, stopSpeaking } from '@/lib/speech';
 import { sfxTap } from '@/lib/sfx';
 import { motion } from 'motion/react';
 import { useStore } from '@/store/useStore';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const THEME_COLORS: Record<RhymeTheme, string> = {
   animals: '#FF6B6B',
@@ -20,6 +21,7 @@ const THEME_COLORS: Record<RhymeTheme, string> = {
 };
 
 export function NurseryPage() {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState<NurseryRhyme | null>(null);
   const [activeLine, setActiveLine] = useState(-1);
   const [playing, setPlaying] = useState(false);
@@ -68,7 +70,7 @@ export function NurseryPage() {
   if (!selected) {
     return (
       <div className="space-y-4">
-        <PageHeader emoji="🎵" title="儿歌乐园" subtitle="跟着唱，学知识" tone="pink" />
+        <PageHeader emoji="🎵" title={t('nurseryPage.title')} subtitle={t('nurseryPage.subtitle')} tone="pink" />
         {(Object.keys(THEME_LABEL) as RhymeTheme[]).map(theme => {
           const rhymes = byTheme[theme]!!
           if (!rhymes?.length) return null;
@@ -105,7 +107,7 @@ export function NurseryPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <CandyButton tone="pink" variant="soft" size="sm" onClick={() => { stop(); sfxTap(); setSelected(null); }}>
-          ◀️ 返回
+          ◀️ {t('nurseryPage.back')}
         </CandyButton>
         <span className="text-sm font-extrabold text-ink">{selected.emoji} {selected.title}</span>
       </div>
@@ -142,11 +144,11 @@ export function NurseryPage() {
       <div className="flex justify-center gap-2">
         {!playing ? (
           <CandyButton tone="pink" size="lg" onClick={() => playRhyme(selected)}>
-            🎵 播放儿歌
+            🎵 {t('nurseryPage.play')}
           </CandyButton>
         ) : (
           <CandyButton tone="orange" size="lg" onClick={stop}>
-            ⏹️ 停止
+            ⏹️ {t('nurseryPage.stop')}
           </CandyButton>
         )}
       </div>
@@ -154,7 +156,7 @@ export function NurseryPage() {
       {/* 教育寓意 */}
       <Panel>
         <div className="rounded-xl bg-candy-pink-soft p-3 text-center">
-          <p className="text-xs font-bold text-ink-soft">💡 教育寓意</p>
+          <p className="text-xs font-bold text-ink-soft">💡 {t('nurseryPage.moral')}</p>
           <p className="mt-1 text-sm font-extrabold text-ink">{selected.moral}</p>
         </div>
       </Panel>

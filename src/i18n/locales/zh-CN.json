@@ -2082,7 +2082,9 @@
     "listenWord": "🔊 听一听",
     "followReadWord": "跟读：{word}",
     "listenAgain": "🔊 再听一次",
-    "iCanRead": "✅ 我会读了"
+    "iCanRead": "✅ 我会读了",
+    "title": "今日课程",
+    "nextQuestion": "下一题"
   },
   "vehicle": {
     "title": "3D 羊毛毡交通工具与职业探索馆",
@@ -4339,7 +4341,17 @@
     "collected": "已收集 {owned}/{total} 个印章",
     "prevPage": "上一页",
     "nextPage": "下一页",
-    "pageInfo": "第 {page} / {total} 页"
+    "pageInfo": "第 {page} / {total} 页",
+    "title": "学习护照",
+    "subtitle": "已盖 {stamped} / {total} 个章 · 继续加油！",
+    "journey": "{label}旅程",
+    "stampCount": "{done} / {total} 个章",
+    "groupLetters": "字母",
+    "groupNumbers": "数字",
+    "groupHanzi": "汉字",
+    "groupPinyin": "拼音",
+    "groupPoems": "古诗",
+    "groupWords": "英语"
   },
   "button": {
     "confirmAgain": "再按一次确认"
@@ -4523,34 +4535,78 @@
     "title": "学习日历",
     "subtitle": "查看每天的学习情况",
     "totalDays": "总学习天数",
-    "avgMinutes": "日均学习 {n} 分钟"
+    "avgMinutes": "日均学习 {n} 分钟",
+    "yearTitle": "{year}年学习日历",
+    "subtitleDetail": "已学习 {days} 天 · 总时长 {hours}h{minutes}m · 最长连续 {streak} 天",
+    "less": "少",
+    "more": "多",
+    "learnDays": "学习天数",
+    "totalDuration": "总时长",
+    "longestStreak": "最长连续",
+    "minutesTooltip": "{date}：{count} 分钟"
   },
   "sudokuEasy": {
     "title": "数独",
     "subtitle": "4×4 趣味数独",
     "select": "选一个数字填入空格",
     "correct": "✅ 对了！",
-    "wrong": "❌ 数字冲突"
+    "wrong": "❌ 数字冲突",
+    "learnTitle": "图形数独",
+    "levelN": "第{n}关",
+    "done": "完成了！",
+    "next": "下一关",
+    "rule": "每行每列每种图案只能出现一次",
+    "clear": "清空"
   },
   "symmetryLearn": {
     "title": "对称图形",
     "subtitle": "探索对称之美",
     "findAxis": "找出对称轴",
-    "correct": "✅ 正确！",
-    "wrong": "❌ 再试试"
+    "correct": "对了！",
+    "wrong": "再看看",
+    "learnTitle": "对称认知",
+    "learnMode": "认识对称",
+    "quizMode": "测验",
+    "quizPrompt": "它是对称图形吗？",
+    "symmetricBtn": "是对称",
+    "asymmetricBtn": "不对称",
+    "score": "得分 {score}",
+    "correctSym": "对了！{label}是对称的",
+    "correctAsym": "对了！{label}不是对称的",
+    "wrongSym": "{label}其实是对称的",
+    "wrongAsym": "{label}不是对称的",
+    "hasAxis": "{label}是对称图形，有{axes}条对称轴",
+    "noAxis": "{label}不是对称图形"
   },
   "rhythmRepeat": {
     "title": "节奏大师",
     "subtitle": "跟节拍打出相同的节奏",
-    "listen": "🔊 听节奏",
+    "listen": "听节奏…",
     "repeat": "🎵 打出节奏",
     "correct": "✅ 对了！",
-    "wrong": "❌ 再来一遍"
+    "wrong": "❌ 再来一遍",
+    "learnTitle": "节奏模仿",
+    "play": "按顺序敲出来！",
+    "perfect": "完美！节奏感很棒！",
+    "wrongPattern": "节奏不对，再听一遍",
+    "replay": "重新听",
+    "nextLevel": "下一关",
+    "score": "得分 {score}"
   },
   "strokeAnimation": {
     "title": "笔画动画",
     "start": "点击开始演示",
-    "replay": "🔄 重播"
+    "replay": "🔄 重播",
+    "demoTitle": "笔顺演示",
+    "strokeCount": "第 {current} / {total} 笔",
+    "writing": "书写中…",
+    "replayDone": "再写一遍 🔄",
+    "play": "▶ 播放",
+    "remember": "「{char}」共 {total} 笔，你记住了吗？",
+    "watchOrder": "看清楚每一笔的顺序哦～",
+    "clickToPlay": "点击播放，看「{char}」怎么写",
+    "noData": "这个字暂时没有笔顺数据，跟着字帖描一描吧",
+    "loading": "笔顺数据加载中…"
   },
   "vehicleExplore": {
     "title": "交通工具",
@@ -4565,6 +4621,98 @@
     "spring": "🌸 春天",
     "summer": "☀️ 夏天",
     "autumn": "🍂 秋天",
-    "winter": "❄️ 冬天"
+    "winter": "❄️ 冬天",
+    "seasonsTab": "四季",
+    "weatherTab": "天气"
+  },
+  "jobExplore": {
+    "title": "职业认知",
+    "learnMode": "认识职业",
+    "quizMode": "工具配对",
+    "toolPrefix": "工具",
+    "uniformPrefix": "制服",
+    "quizPrompt": "这个工具是谁用的？",
+    "score": "得分 {score}",
+    "correct": "对了！{name}{desc}",
+    "wrong": "答案是 {name}"
+  },
+  "calendarLearn": {
+    "title": "日历认知",
+    "viewMode": "看日历",
+    "quizMode": "找日期",
+    "prevMonth": "上个月",
+    "nextMonth": "下个月",
+    "yearMonth": "{year}年{month}",
+    "findDay": "找到 {month}月{day}日，点击它！",
+    "weekday": "周{day}",
+    "correct": "{month}月{day}日是星期{weekday}",
+    "wrong": "点错日期了",
+    "score": "得分 {score}"
+  },
+  "voiceScoreModal": {
+    "closeAria": "关闭背诵评分",
+    "badge": "🎙️ AI 古诗吟诵评测",
+    "reciteTitle": "背诵《{title}》",
+    "desc": "对着麦克风大声朗诵，查看你的彩虹声波与乐园星级勋章！",
+    "hint": "点击下方按钮开启录音吟诵",
+    "start": "🎙️ 开始朗诵背诵",
+    "stop": "⏹ 结束吟诵并评分",
+    "fluency": "📢 语音流畅度: {score} 分",
+    "pitch": "🎵 声调起伏度: {score} 分",
+    "retry": "🔄 再背一次挑战满分"
+  },
+  "aiButton": {
+    "defaultLabel": "问问小智",
+    "thinking": "小智思考中…"
+  },
+  "aiAvatar": {
+    "thinkingAria": "正在思考"
+  },
+  "storybookShelf": {
+    "empty": "还没有绘本，去创作第一本吧！",
+    "all": "✨ 全部",
+    "fav": "❤️ 收藏",
+    "favEmpty": "还没有收藏的绘本，点绘本左上角 ❤️ 收藏吧！",
+    "catEmpty": "这个分类还没有绘本哦～",
+    "deleteConfirm": "再点一次删除"
+  },
+  "nurseryPage": {
+    "title": "儿歌乐园",
+    "subtitle": "跟着唱，学知识",
+    "back": "◀️ 返回",
+    "play": "🎵 播放儿歌",
+    "stop": "⏹️ 停止",
+    "moral": "💡 教育寓意"
+  },
+  "hanziQuizGame": {
+    "title": "🎧 听音识字闯关",
+    "completedTitle": "汉字听音识字关卡通关！",
+    "completedDesc": "太棒啦！你在本关卡中一共收集了 ⭐ {stars} 颗星！",
+    "goWrite": "✍️ 去手写练习【{char}】字",
+    "again": "🔄 再闯一次关",
+    "progress": "第 {current} / {total} 题",
+    "streak": "🔥 连胜 x{streak}",
+    "score": "⭐ 积分: {score}",
+    "meaning": "含义: {origin}",
+    "hint": "点击喇叭再次播放发音，并在下方选出正确的汉字！"
+  },
+  "hanziStrokeWriter": {
+    "miGrid": "米字格",
+    "tianGrid": "田字格",
+    "radicalMeta": "{radical} 部 · {strokes} 画",
+    "playStrokes": "🎬 笔画演示",
+    "rewrite": "🧹 重写",
+    "submit": "✨ 写的很棒！提交评分 ⭐",
+    "reward": "获得 3 颗星 + 2 条小鱼干！",
+    "aiStoryBtn": "🐱 让 AI 小智给【{char}】编个汉字奇妙故事",
+    "aiStoryTitle": "🐱 AI 小智汉字奇妙故事：",
+    "aiStoryLoading": "喵喵正在灵光一闪构思故事中..."
+  },
+  "hanziVideoCard": {
+    "readAria": "朗读{char}",
+    "playAria": "播放{char}的教学视频",
+    "close": "关闭视频",
+    "videoUnsupported": "您的浏览器不支持视频播放",
+    "videoDuration": "50秒教学视频"
   }
 }
