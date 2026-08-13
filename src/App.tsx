@@ -36,7 +36,7 @@ const AdventurePage = lazy(() => import('@/modules/adventure/AdventurePage'));
 const RewardsPage = lazy(() => import('@/modules/rewards/RewardsPage'));
 const StudyPassport = lazy(() => import('@/modules/rewards/StudyPassport'));
 const ParentPage = lazy(() => import('@/modules/parent/ParentPage'));
-const TtsTestPage = lazy(() => import('@/modules/tts-test/TtsTestPage'));
+const TtsTestPage = lazy(() => import('@/modules/parent/TtsTestPage'));
 const HanziPage = lazy(() => import('@/modules/hanzi/HanziPage'));
 const HanziListenPage = lazy(() => import('@/modules/hanzi/HanziListen'));
 const PinyinPage = lazy(() => import('@/modules/pinyin/PinyinPage'));
