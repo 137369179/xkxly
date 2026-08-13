@@ -18,6 +18,7 @@ import { Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { QuizCard } from '@/components/QuizCard';
+import { DailyGoal } from '@/components/DailyGoal';
 import { LetterLearn } from '@/components/LetterLearn';
 import { NumberLearn } from '@/components/NumberLearn';
 import { sfxTap, sfxStar } from '@/lib/sfx';
@@ -323,6 +324,9 @@ export default function TodayPage() {
   return (
     <div className="space-y-5">
       <PageHeader emoji="📅" title={t('today.title')} subtitle={t('today.subtitle')} tone="purple" />
+
+      {/* 每日小目标：完成领星星（独立于课程包，当天内稳定） */}
+      <DailyGoal />
 
       {/* 概览 */}
       <Panel className="!py-4 rounded-[2.2rem] border-4 border-pink-200/90 bg-white/95 shadow-fluffy">

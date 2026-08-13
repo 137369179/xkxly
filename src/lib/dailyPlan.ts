@@ -1,7 +1,7 @@
 import type { DailyPlan, LessonSection, Progress } from '@/types';
 import type { Tone } from '@/lib/tones';
 import { LETTERS } from '@/data/letters';
-import { POEM_INDEX } from '@/data/poemIndex';
+import POEMS from '@/data/poemsIndex';
 import { SKILL, dueSkills, isDue, weakSkills, subjectLabel } from '@/lib/srs';
 import { nextHanzi } from '@/data/hanziIndex';
 import { nextPinyin } from '@/data/pinyinIndex';
@@ -30,7 +30,7 @@ import { WORD_THEMES } from '@/data/words';
 const MINUTE = 60;
 
 /** 按难度预排序的古诗列表，避免每次 buildDailyPlan 重复排序 */
-const POEM_INDEX_SORTED = [...POEM_INDEX].sort((a, b) => a.level - b.level);
+const POEM_INDEX_SORTED = [...POEMS].sort((a, b) => a.level - b.level);
 
 export function dayStart(now = Date.now()): number {
   const d = new Date(now);
