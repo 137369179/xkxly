@@ -1,0 +1,305 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { motion } from 'motion/react';
+import { CandyButton } from '@/components/ui/Button';
+import { speak } from '@/lib/speech';
+import { sfxTap } from '@/lib/sfx';
+import { celebrateSmall } from '@/lib/celebrate';
+import { useStore } from '@/store/useStore';
+import { useAiStream } from '@/lib/ai/useAi';
+import { companionChatTask } from '@/lib/ai/tasks/companion';
+import type { HanziEntry } from '@/data/hanziIndex';
+
+interface HanziStrokeWriterProps {
+  hanzi: HanziEntry;
+  onComplete?: () => void;
+  onClose?: () => void;
+}
+
+export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWriterProps) {
+  const addFish = useStore((s) => s.addFish);
+  const [gridType, setGridType] = useState<'tian' | 'mi'>('tian');
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [strokeProgress, setStrokeProgress] = useState(0);
+  const [showAiStory, setShowAiStory] = useState(false);
+  const [, setWrittenStrokes] = useState<number>(0);
+  const [stars, setStars] = useState<number | null>(null);
+
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const lastPosRef = useRef<{ x: number; y: number } | null>(null);
+
+  const { text: aiStoryText, run: runAiStream } = useAiStream();
+
+  // 清空画布
+  const clearCanvas = () => {
+    const cvs = canvasRef.current;
+    if (!cvs) return;
+    const ctx = cvs.getContext('2d');
+    if (!ctx) return;
+    ctx.clearRect(0, 0, cvs.width, cvs.height);
+    setWrittenStrokes(0);
+    setStars(null);
+  };
+
+  useEffect(() => {
+    clearCanvas();
+    // 自动发音
+    speak(`${hanzi.c}，${hanzi.p}`);
+  }, [hanzi]);
+
+  // 模拟笔画动画播放
+  const handlePlayStrokes = () => {
+    if (isAnimating) return;
+    sfxTap();
+    setIsAnimating(true);
+    setStrokeProgress(0);
+    speak(`${hanzi.c}，按顺时针书写，共 ${hanzi.strokes} 画`);
+
+    const strokeCount = hanzi.strokes || 5;
+    let step = 0;
+    const timer = setInterval(() => {
+      step++;
+      setStrokeProgress(step);
+      if (step >= strokeCount) {
+        clearInterval(timer);
+        setIsAnimating(false);
+      }
+    }, 600);
+  };
+
+  // 画布绘图处理
+  const getCanvasPos = (e: React.MouseEvent | React.TouchEvent) => {
+    const cvs = canvasRef.current;
+    if (!cvs) return { x: 0, y: 0 };
+    const rect = cvs.getBoundingClientRect();
+    const clientX = 'touches' in e ? e.touches[0]!.clientX : (e as React.MouseEvent).clientX;
+    const clientY = 'touches' in e ? e.touches[0]!.clientY : (e as React.MouseEvent).clientY;
+    return {
+      x: (clientX - rect.left) * (cvs.width / rect.width),
+      y: (clientY - rect.top) * (cvs.height / rect.height),
+    };
+  };
+
+  const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
+    setIsDrawing(true);
+    const pos = getCanvasPos(e);
+    lastPosRef.current = pos;
+  };
+
+  const draw = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDrawing || !lastPosRef.current) return;
+    const cvs = canvasRef.current;
+    if (!cvs) return;
+    const ctx = cvs.getContext('2d');
+    if (!ctx) return;
+
+    const pos = getCanvasPos(e);
+    ctx.beginPath();
+    ctx.strokeStyle = '#2563eb'; // 宝石蓝
+    ctx.lineWidth = 12;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.moveTo(lastPosRef.current.x, lastPosRef.current.y);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+
+    lastPosRef.current = pos;
+  };
+
+  const stopDrawing = () => {
+    if (isDrawing) {
+      setIsDrawing(false);
+      lastPosRef.current = null;
+      setWrittenStrokes((prev) => prev + 1);
+    }
+  };
+
+  // 提交笔画书写验证
+  const handleVerifyWriting = () => {
+    sfxTap();
+    const earnedStars = 3;
+    setStars(earnedStars);
+    celebrateSmall();
+    addFish(2); // 奖励小鱼干
+    speak(`太棒啦！你写的【${hanzi.c}】字真规范！获得 3 颗星和 2 条小鱼干！`);
+    onComplete?.();
+  };
+
+  // AI 故事生成
+  const handleGenerateAiStory = () => {
+    sfxTap();
+    setShowAiStory(true);
+    runAiStream(
+      companionChatTask(`请用适合3-6岁孩子的童趣口吻，围绕汉字“${hanzi.c}”（拼音：${hanzi.p}，含义：${hanzi.origin}）编一段30字以内超可爱的微故事！`, [])
+    );
+  };
+
+  return (
+    <div className="w-full max-w-xl mx-auto bg-gradient-to-b from-amber-50 to-orange-50 rounded-3xl p-4 sm:p-6 border-4 border-amber-300 shadow-xl space-y-4">
+      {/* 头部信息与语音控制 */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-black px-3 py-1 bg-amber-200 text-amber-900 rounded-full">
+            {hanzi.radical} 部 · {hanzi.strokes} 画
+          </span>
+          <span className="text-xs font-bold text-amber-700">{hanzi.origin}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              sfxTap();
+              setGridType(gridType === 'tian' ? 'mi' : 'tian');
+            }}
+            className="text-xs font-black px-2.5 py-1 bg-white border border-amber-300 text-amber-800 rounded-lg shadow-xs active:scale-95"
+          >
+            {gridType === 'tian' ? '米字格' : '田字格'}
+          </button>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="text-amber-500 hover:text-amber-800 text-lg font-black px-2"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* 田字格 / 米字格 描红书写舞台 */}
+      <div className="relative w-64 h-64 mx-auto bg-white rounded-2xl border-4 border-red-400 shadow-inner flex items-center justify-center overflow-hidden touch-none">
+        {/* 田字格 / 米字格 红色虚线网格 */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100">
+          <line x1="50" y1="0" x2="50" y2="100" stroke="#fca5a5" strokeWidth="1" strokeDasharray="3 3" />
+          <line x1="0" y1="50" x2="100" y2="50" stroke="#fca5a5" strokeWidth="1" strokeDasharray="3 3" />
+          {gridType === 'mi' && (
+            <>
+              <line x1="0" y1="0" x2="100" y2="100" stroke="#fee2e2" strokeWidth="1" strokeDasharray="2 2" />
+              <line x1="100" y1="0" x2="0" y2="100" stroke="#fee2e2" strokeWidth="1" strokeDasharray="2 2" />
+            </>
+          )}
+        </svg>
+
+        {/* 汉字轮廓浅灰底字 */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
+          <span className="text-[120px] font-black text-slate-200/90 leading-none tracking-widest font-serif">
+            {hanzi.c}
+          </span>
+        </div>
+
+        {/* 笔画动画高亮字 */}
+        {isAnimating && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
+            <motion.span
+              key={strokeProgress}
+              initial={{ scale: 0.95, opacity: 0.4 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="text-[120px] font-black text-rose-500/80 leading-none tracking-widest font-serif"
+            >
+              {hanzi.c}
+            </motion.span>
+          </div>
+        )}
+
+        {/* 手写 Canvas 绘图层 */}
+        <canvas
+          ref={canvasRef}
+          width={256}
+          height={256}
+          onMouseDown={startDrawing}
+          onMouseMove={draw}
+          onMouseUp={stopDrawing}
+          onMouseLeave={stopDrawing}
+          onTouchStart={startDrawing}
+          onTouchMove={draw}
+          onTouchEnd={stopDrawing}
+          className="absolute inset-0 w-full h-full cursor-crosshair z-10"
+        />
+      </div>
+
+      {/* 拼音发音与操作栏 */}
+      <div className="flex items-center justify-center gap-3">
+        <button
+          onClick={() => {
+            sfxTap();
+            speak(`${hanzi.c}，${hanzi.p}`);
+          }}
+          className="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-amber-950 font-black rounded-xl shadow-md active:scale-95 flex items-center gap-1.5 text-sm"
+        >
+          <span>🔊 {hanzi.p}</span>
+        </button>
+
+        <button
+          onClick={handlePlayStrokes}
+          disabled={isAnimating}
+          className="px-4 py-2 bg-sky-400 hover:bg-sky-500 text-white font-black rounded-xl shadow-md active:scale-95 flex items-center gap-1.5 text-sm disabled:opacity-50"
+        >
+          <span>🎬 笔画演示</span>
+        </button>
+
+        <button
+          onClick={clearCanvas}
+          className="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl active:scale-95 text-xs"
+        >
+          🧹 重写
+        </button>
+      </div>
+
+      {/* 提交验证与星级结算 */}
+      <div className="flex flex-col items-center gap-2 pt-2 border-t border-amber-200">
+        {stars === null ? (
+          <CandyButton
+            tone="green"
+            size="md"
+            className="w-full max-w-xs"
+            onClick={handleVerifyWriting}
+          >
+            ✨ 写的很棒！提交评分 ⭐
+          </CandyButton>
+        ) : (
+          <motion.div
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            className="flex flex-col items-center gap-1 bg-white/80 p-3 rounded-2xl border border-emerald-300 w-full"
+          >
+            <div className="flex items-center gap-1 text-2xl">
+              {[1, 2, 3].map((s) => (
+                <motion.span
+                  key={s}
+                  animate={{ scale: [1, 1.3, 1] }}
+                  transition={{ delay: s * 0.15 }}
+                >
+                  ⭐
+                </motion.span>
+              ))}
+            </div>
+            <span className="text-xs font-black text-emerald-700">获得 3 颗星 + 2 条小鱼干！</span>
+          </motion.div>
+        )}
+      </div>
+
+      {/* AI 小智汉字微故事 */}
+      <div className="pt-2 border-t border-amber-200">
+        {!showAiStory ? (
+          <button
+            onClick={handleGenerateAiStory}
+            className="w-full text-center text-xs font-black text-amber-700 hover:text-amber-900 bg-amber-100/80 hover:bg-amber-200/80 py-2 rounded-xl border border-amber-300 transition-all flex items-center justify-center gap-1.5"
+          >
+            <span>🐱 让 AI 小智给【{hanzi.c}】编个汉字奇妙故事</span>
+          </button>
+        ) : (
+          <div className="bg-white/90 p-3 rounded-2xl border border-amber-300 text-xs font-bold text-amber-900 space-y-1.5 shadow-sm">
+            <div className="flex items-center justify-between text-[11px] font-black text-amber-700">
+              <span>🐱 AI 小智汉字奇妙故事：</span>
+              <button onClick={() => setShowAiStory(false)} className="text-amber-500 hover:text-amber-800">
+                ✕
+              </button>
+            </div>
+            <div className="text-slate-800 text-xs leading-relaxed animate-pulse">
+              {aiStoryText || '喵喵正在灵光一闪构思故事中...'}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
