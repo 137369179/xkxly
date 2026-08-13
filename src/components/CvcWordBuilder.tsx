@@ -33,7 +33,7 @@ const CVC_WORDS: CvcTarget[] = [
 export function CvcWordBuilder() {
   const { t } = useTranslation();
   const [idx, setIdx] = useState(0);
-  const current = CVC_WORDS[idx]!!
+  const current = CVC_WORDS[idx]!
   const [userLetters, setUserLetters] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | ''>('');
 

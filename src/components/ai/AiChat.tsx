@@ -41,7 +41,7 @@ export function AiChat({
   placeholder?: string;
   onDone?: () => void;
 }) {
-  const t = TONE_STYLE[tone]!!
+  const t = TONE_STYLE[tone]!
   const { t: translate } = useTranslation();
   const [turns, setTurns] = useState<ChatTurn[]>([]);
   const [input, setInput] = useState('');

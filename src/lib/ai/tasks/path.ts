@@ -20,7 +20,7 @@ import {
 /* ------------------------------------------------------------------ */
 
 function localNarrate(focus: FocusItem[]): string {
-  const top = focus[0]!!
+  const top = focus[0]!
   if (!top) return '今天先开心地玩一玩，明天再一起学习吧！';
   return `今天我们先练${top.label}，${top.reason}。练完就有小星星啦！`;
 }

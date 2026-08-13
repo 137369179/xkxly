@@ -18,7 +18,7 @@ export function BadgeUnlock() {
   const { t: tr } = useTranslation();
   const pending = useStore((s) => s.pendingBadges);
   const consume = useStore((s) => s.consumeBadge);
-  const currentId = pending[0]!!
+  const currentId = pending[0]!
   const badge = currentId ? BADGE_MAP.get(currentId) : undefined;
 
   useEffect(() => {

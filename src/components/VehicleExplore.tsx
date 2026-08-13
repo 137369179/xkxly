@@ -33,10 +33,10 @@ const ZONES = [
   { id: 'sea', name: '海洋', emoji: '🌊', color: 'bg-blue-200', labelKey: 'vehicleExplore.water' },
 ];
 
-function _VehicleExplore() {
+function VehicleExploreImpl() {
   const { t } = useTranslation();
   const [selected, setSelected] = useState(0);
-  const v = VEHICLES[selected]!!
+  const v = VEHICLES[selected]!
 
   return (
     <div className="card-candy p-4 sm:p-6">
@@ -71,4 +71,4 @@ function _VehicleExplore() {
   );
 }
 
-export const VehicleExplore = memo(_VehicleExplore);
+export const VehicleExplore = memo(VehicleExploreImpl);

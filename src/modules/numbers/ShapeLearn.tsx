@@ -39,7 +39,7 @@ export function ShapeLearn() {
   const [answered, setAnswered] = useState(false);
   const [picked, setPicked] = useState(-1);
 
-  const shape = SHAPES[idx]!!
+  const shape = SHAPES[idx]!
 
   // 出题：给一个物品名，选图形
   const quizItem = useMemo(() => {

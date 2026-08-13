@@ -28,7 +28,7 @@ export function SpellingTest() {
   const [done, setDone] = useState(false);
   const practice = useStore(s => s.practice);
 
-  const w = pool[idx]!!
+  const w = pool[idx]!
   const letters = w.word.split('');
 
   // 虚拟键盘字母池 = 单词字母 + 干扰字母
@@ -154,7 +154,7 @@ export function SpellingTest() {
           {letters.map((_, i) => {
             const ch = typed[i]! ?? '';
             const showAns = showResult && !isCorrect;
-            const correctCh = letters[i]!!
+            const correctCh = letters[i]!
             return (
               <div
                 key={`_-${i}`}

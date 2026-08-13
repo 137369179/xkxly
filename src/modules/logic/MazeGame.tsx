@@ -112,7 +112,7 @@ export function MazeGame() {
   const [complete, setComplete] = useState(false);
   const [moves, setMoves] = useState(0);
 
-  const lv = LEVELS[level]!!
+  const lv = LEVELS[level]!
 
   const resetLevel = useCallback((i: number) => {
     setLevel(i);

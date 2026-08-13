@@ -63,7 +63,7 @@ export function densifyMedian(median: [number, number][], step = 16): [number, n
   const out: [number, number][] = [median[0]!];
   for (let i = 1; i < median.length; i++) {
     const [x0, y0] = median[i - 1]!;
-    const [x1, y1] = median[i]!!;
+    const [x1, y1] = median[i]!;
     const dist = Math.hypot(x1 - x0, y1 - y0);
     const n = Math.max(1, Math.ceil(dist / step));
     for (let k = 1; k <= n; k++) {
@@ -77,7 +77,7 @@ export function densifyMedian(median: [number, number][], step = 16): [number, n
 export function medianLength(median: [number, number][]): number {
   let len = 0;
   for (let i = 1; i < median.length; i++) {
-    const a = median[i]!!;
+    const a = median[i]!;
     const b = median[i - 1]!;
     len += Math.hypot(a[0] - b[0], a[1] - b[1]);
   }

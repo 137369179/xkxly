@@ -115,7 +115,7 @@ export function generatePoemQuiz(poem: DeepPoem, opts: QuizOptions = {}): Questi
     const hanIdx = chars.map((c, i) => (/[一-龥]/.test(c.c) ? i : -1)).filter((i) => i >= 0);
     if (hanIdx.length >= 2) {
       const hideAt = hanIdx[1 + Math.floor(rand() * (hanIdx.length - 1))]!
-      const correct = chars[hideAt]!!.c;
+      const correct = chars[hideAt]!.c;
       const masked = chars.map((c, i) => (i === hideAt ? '（　）' : c.c)).join('');
       const poolChars = new Set<string>();
       others.forEach((p) =>

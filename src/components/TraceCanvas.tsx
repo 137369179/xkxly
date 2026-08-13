@@ -102,7 +102,7 @@ export interface TraceCanvasProps {
 
 export function TraceCanvas({ char, tone = 'blue', onPass, hint }: TraceCanvasProps) {
   const { t: tr } = useTranslation();
-  const t = TONE_STYLE[tone]!!
+  const t = TONE_STYLE[tone]!
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const masksRef = useRef<Masks | null>(null);
   const drawnRef = useRef<Uint8Array>(new Uint8Array(GRID * GRID));

@@ -49,13 +49,13 @@ export function MiniSudoku() {
 
   const checkWin = (g: (string|null)[][]) => {
     for (let r=0;r<3;r++) for (let c=0;c<3;c++) if (!g[r]![c]) return false;
-    return g.every((row,r) => row.every((cell,c) => cell === solution[r]!![c]));
+    return g.every((row,r) => row.every((cell,c) => cell === solution[r]![c]));
   };
 
   const fillCell = (emoji: string) => {
     if (!selected || lockRef.current) return;
     const [r,c] = selected;
-    if (grid[r]![c] !== null && grid[r]![c] === solution[r]!![c]) return; // pre-filled
+    if (grid[r]![c] !== null && grid[r]![c] === solution[r]![c]) return; // pre-filled
     sfxTap();
     const newGrid = grid.map(row=>[...row]) as (string|null)[][];
     newGrid[r]![c] = emoji;

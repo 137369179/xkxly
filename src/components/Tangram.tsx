@@ -98,7 +98,7 @@ export function Tangram() {
   const [pieces, setPieces] = useState(INITIAL_PIECES);
   const [completed, setCompleted] = useState<Set<string>>(new Set());
 
-  const puzzle = PUZZLES[puzzleIdx]!!
+  const puzzle = PUZZLES[puzzleIdx]!
 
   const handleDrag = useCallback((id: string, x: number, y: number) => {
     setPieces(prev => prev.map(p => p.id === id ? { ...p, x, y } : p));

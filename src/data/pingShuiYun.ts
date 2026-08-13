@@ -208,7 +208,7 @@ export function yunBuOf(c: string): PingShuiEntry | undefined {
 
 /** 取平声韵部简称（如「七阳」），非平声返回空串 */
 export function yunBuShort(c: string): string {
-  const e = PING_SHUI[c]!!
+  const e = PING_SHUI[c]!
   if (!e || e.tone !== '平') return '';
   return e.bu.replace(/^(上平|下平)/, '');
 }

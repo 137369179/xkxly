@@ -446,7 +446,7 @@ function RelatedModuleHint({ prefix, tone }: { prefix: string; tone: Tone }) {
     word: { route: 'words', label: '英语单词', emoji: '🌐' },
     poem: { route: 'poems', label: '古诗花园', emoji: '🌸' },
   };
-  const target = map[prefix]!!
+  const target = map[prefix]!
   if (!target) return null;
 
   return (

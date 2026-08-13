@@ -19,7 +19,7 @@ function getFirstWeekday(year: number, month: number) {
   return new Date(year, month, 1).getDay();
 }
 
-function _CalendarLearn() {
+function CalendarLearnImpl() {
   const { t } = useTranslation();
   const [mode, setMode] = useState<'view' | 'quiz'>('view');
   const [year] = useState(() => new Date().getFullYear());
@@ -126,4 +126,4 @@ function _CalendarLearn() {
   );
 }
 
-export const CalendarLearn = memo(_CalendarLearn);
+export const CalendarLearn = memo(CalendarLearnImpl);

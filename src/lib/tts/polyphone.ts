@@ -61,7 +61,7 @@ export interface PolyphoneFix {
  */
 export function correctChar(c: string, annotatedPinyin?: string): string {
   if (!c || !annotatedPinyin) return c;
-  const def = DEFAULT_READING[c]!!
+  const def = DEFAULT_READING[c]!
   if (!def) return c; // 非多音字（或无可用替代），引擎不会读错
   const p = norm(annotatedPinyin);
   if (!worthFixing(p, def)) return c;
@@ -81,7 +81,7 @@ export function polyphoneFixes(chars: { c: string; p?: string }[]): PolyphoneFix
     if (!def || !ch.p) return;
     const p = norm(ch.p);
     if (!worthFixing(p, def)) return;
-    const sub = SUB[p]!!
+    const sub = SUB[p]!
     if (!sub) return;
     out.push({ index, char: ch.c, from: def, to: p, sub });
   });

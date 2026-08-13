@@ -23,7 +23,7 @@ const COLORS = [
   { name: '黑色', en: 'Black', hex: '#1F2937', emoji: '⚫', items: ['🐼熊猫','🖤黑猫','🌑夜晚'] },
 ];
 
-function _ColorExplore() {
+function ColorExploreImpl() {
   const { t } = useTranslation();
   const [mode, setMode] = useState<'learn'|'quiz'>('learn');
   const [current, setCurrent] = useState(COLORS[0]!);
@@ -108,4 +108,4 @@ function _ColorExplore() {
   );
 }
 
-export const ColorExplore = memo(_ColorExplore);
+export const ColorExplore = memo(ColorExploreImpl);

@@ -110,7 +110,7 @@ export default function MusicCreatePage() {
     });
     const endT = setTimeout(() => setIsPlaying(false), prev + 200);
     timersRef.current.push(endT);
-  }, [recordedNotes]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [recordedNotes]);  
 
   // 清除
   const clearRecording = () => {

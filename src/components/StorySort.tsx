@@ -143,7 +143,7 @@ export function StorySort() {
         )}
         <div className="flex flex-col gap-2">
           {userOrder.map((idx, order) => {
-            const step = shuffled[idx]!!
+            const step = shuffled[idx]!
             const isCorrectPos = feedback === 'correct' || (feedback === 'wrong' && correctOrder[order] === idx);
             return (
               <motion.div

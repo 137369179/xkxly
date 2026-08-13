@@ -31,7 +31,7 @@ function pickTone(combo: SyllableCombo): string {
     u: ['ū', 'ú', 'ǔ', 'ù'],
     ü: ['ǖ', 'ǘ', 'ǚ', 'ǜ'],
   };
-  const tones = toneMap[lastChar]!!
+  const tones = toneMap[lastChar]!
   if (!tones) return base;
   return base.slice(0, -1) + tones[Math.floor(Math.random() * tones.length)];
 }

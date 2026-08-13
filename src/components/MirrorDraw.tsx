@@ -10,7 +10,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 
 const COLORS = ['#EF4444','#F97316','#EAB308','#22C55E','#3B82F6','#8B5CF6','#EC4899','#000000'];
 
-function _MirrorDraw() {
+function MirrorDrawImpl() {
   const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [color, setColor] = useState(COLORS[0]);
@@ -94,4 +94,4 @@ function _MirrorDraw() {
   );
 }
 
-export const MirrorDraw = memo(_MirrorDraw);
+export const MirrorDraw = memo(MirrorDrawImpl);

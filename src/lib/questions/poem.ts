@@ -95,7 +95,7 @@ export function makePoemFillQuestion(
   const line = sample(cand);
   const chars = [...line];
   const idx = randInt(0, chars.length - 1);
-  const blank = chars[idx]!!
+  const blank = chars[idx]!
   const shown = chars.map((c, i) => (i === idx ? '＿' : c)).join('');
   // 优化：先用 Set 去重（避免 distinct 后不足 3 个），再用随机索引抽取 3 个
   // （不全量 shuffle 数千字符池，O(k) 替代 O(n)）

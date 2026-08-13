@@ -75,10 +75,10 @@ export function TimeSequence() {
     setAnswer(newAns);
     void speak(card.label, { lang:'zh-CN', rate:0.8, module:'ai' });
 
-    if (newAns.length === SEQUENCES[seqIdx]!!.length) {
+    if (newAns.length === SEQUENCES[seqIdx]!.length) {
       lockRef.current = true;
-      const correct = SEQUENCES[seqIdx]!!.sort((a,b)=>a.order-b.order);
-      const isCorrect = newAns.every((c,i)=>c.id=== correct[i]!!.id);
+      const correct = SEQUENCES[seqIdx]!.sort((a,b)=>a.order-b.order);
+      const isCorrect = newAns.every((c,i)=>c.id=== correct[i]!.id);
       if (isCorrect) {
         sfxCorrect();
         setFeedback(t('timeseq.correct'));

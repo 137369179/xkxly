@@ -82,7 +82,7 @@ export function RiddleGame() {
     setPhase('playing');
   };
 
-  const current = pool[idx]!!
+  const current = pool[idx]!
 
   const handleReveal = (gotIt: boolean) => {
     sfxTap();

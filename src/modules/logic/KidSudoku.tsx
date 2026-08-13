@@ -42,10 +42,10 @@ function generateSolution(): string[][] {
   // 随机列交换
   for (let r = 0; r < 4; r++) {
     if (Math.random() < 0.5) {
-      const t = base[r]!![0]!; base[r]![0] = base[r]!![1]!; base[r]![1] = t;
+      const t = base[r]![0]!; base[r]![0] = base[r]![1]!; base[r]![1] = t;
     }
     if (Math.random() < 0.5) {
-      const t = base[r]!![2]!; base[r]![2] = base[r]!![3]!; base[r]![3] = t;
+      const t = base[r]![2]!; base[r]![2] = base[r]![3]!; base[r]![3] = t;
     }
   }
   return base;
@@ -124,7 +124,7 @@ export function KidSudoku() {
     setGrid(newGrid);
 
     // 冲突检测
-    const rowVals = newGrid[r]!!.filter(v => v !== '');
+    const rowVals = newGrid[r]!.filter(v => v !== '');
     const colVals = [newGrid[0]![c], newGrid[1]![c], newGrid[2]![c], newGrid[3]![c]].filter(v => v !== '');
     if (new Set(rowVals).size !== rowVals.length || new Set(colVals).size !== colVals.length) {
       sfxWrong();

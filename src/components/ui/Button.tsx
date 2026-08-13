@@ -59,7 +59,7 @@ export function CandyButton({
   ...rest
 }: CandyButtonProps) {
   const { t: translate } = useTranslation();
-  const ts = TONE_STYLE[tone]!!
+  const ts = TONE_STYLE[tone]!
 
   // 二次确认状态：armed=true 表示已进入"待确认"态，等待第二次点击
   const [armed, setArmed] = useState(false);
@@ -150,7 +150,7 @@ export function IconButton({
   label,
   ...rest
 }: Omit<CandyButtonProps, 'size' | 'variant'> & { label: string }) {
-  const ts = TONE_STYLE[tone]!!;
+  const ts = TONE_STYLE[tone]!;
   return (
     <button
       {...rest}

@@ -158,8 +158,8 @@ export function RealFeltCat3D({
   const schedule = useSafeTimeout();
   const inertiRef = useRef<number>(0);
 
-  const c = COLOR_SCHEMES[color]!!
-  const light = LIGHTING[envLighting]!!
+  const c = COLOR_SCHEMES[color]!
+  const light = LIGHTING[envLighting]!
 
   // ── 生命周期动画循环 ──
   // P1-5 修复：原实现在 rAF 里每帧调用 5+ 次 setState（呼吸/尾巴/瞳孔/眨眼/耳颤），

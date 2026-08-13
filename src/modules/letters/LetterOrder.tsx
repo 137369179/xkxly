@@ -46,7 +46,7 @@ export function LetterOrder() {
     const start = Math.floor(Math.random() * 22);
     const seq = ALPHABET.slice(start, start + 4);
     const missing = Math.floor(Math.random() * 4);
-    const correct = seq[missing]!!
+    const correct = seq[missing]!
     const wrongs = new Set<string>();
     while (wrongs.size < 3) {
       const w = ALPHABET[Math.floor(Math.random() * 26)]!

@@ -31,12 +31,12 @@ export function MilestoneCelebration() {
     if (queue.length > 0 && !hasFiredRef.current) {
       hasFiredRef.current = true;
       celebrateBig();
-      const m = queue[0]!!
+      const m = queue[0]!
       void speak(`🎉 ${m.title}！${m.subtitle}`, { rate: 0.85, module: 'praise' });
     }
   }, [queue]);
 
-  const current = queue[0]!!
+  const current = queue[0]!
   const handleClose = () => {
     if (!current) return;
     ackMilestone(current.id);

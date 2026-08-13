@@ -196,7 +196,7 @@ export function WordMatch() {
         {/* 英文列 */}
         <div className="space-y-2">
           {enOrder.map((pairIdx, displayIdx) => {
-            const p = pairs[pairIdx]!!
+            const p = pairs[pairIdx]!
             const isSel = selected?.side === 'en' && selected.idx === displayIdx;
             return (
               <motion.button
@@ -221,7 +221,7 @@ export function WordMatch() {
         {/* 中文列 */}
         <div className="space-y-2">
           {zhOrder.map((pairIdx, displayIdx) => {
-            const p = pairs[pairIdx]!!
+            const p = pairs[pairIdx]!
             const isSel = selected?.side === 'zh' && selected.idx === displayIdx;
             return (
               <motion.button

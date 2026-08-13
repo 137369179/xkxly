@@ -24,7 +24,7 @@ const WEATHERS = [
   { name:'雷阵雨', en:'Thunder', emoji:'⛈️', color:'bg-purple-200', tip:'轰隆隆打雷了' },
 ];
 
-function _WeatherSeasons() {
+function WeatherSeasonsImpl() {
   const { t } = useTranslation();
   const [tab, setTab] = useState<'season'|'weather'>('season');
   const [selected, setSelected] = useState(0);
@@ -81,4 +81,4 @@ function _WeatherSeasons() {
   );
 }
 
-export const WeatherSeasons = memo(_WeatherSeasons);
+export const WeatherSeasons = memo(WeatherSeasonsImpl);

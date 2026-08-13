@@ -176,7 +176,7 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
   let currentLine = words[0]! || '';
 
   for (let i = 1; i < words.length; i++) {
-    const word = words[i]!!
+    const word = words[i]!
     const width = ctx.measureText(currentLine + word).width;
     if (width < maxWidth) {
       currentLine += word;

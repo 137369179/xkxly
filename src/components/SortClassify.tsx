@@ -67,7 +67,7 @@ const ROUNDS: Round[] = [
 export function SortClassify() {
   const { t } = useTranslation();
   const [roundIdx, setRoundIdx] = useState(0);
-  const round = ROUNDS[roundIdx]!!
+  const round = ROUNDS[roundIdx]!
   const [items, setItems] = useState(() => shuffle(round.items));
   const [assigned, setAssigned] = useState<Record<string, string[]>>(() => {
     const obj: Record<string,string[]> = {};
@@ -88,7 +88,7 @@ export function SortClassify() {
   }, []);
 
   const startNew = (idx: number) => {
-    const r = ROUNDS[idx]!!
+    const r = ROUNDS[idx]!
     setRoundIdx(idx);
     setItems(shuffle(r.items));
     const obj: Record<string,string[]> = {};

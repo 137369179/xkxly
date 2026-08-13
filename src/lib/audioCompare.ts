@@ -85,7 +85,7 @@ function frameRms(samples: Float32Array, start: number, end: number): number {
   let s = 0;
   let n = 0;
   for (let i = start; i < end; i++) {
-    const v = samples[i]!!
+    const v = samples[i]!
     s += v * v;
     n++;
   }
@@ -174,15 +174,9 @@ export function analyzeEnvelope(samples: Float32Array, sampleRate: number, plan:
 
     let chars: RecChar[];
     let lineDurMs: number;
-    let lineFit = 0.5; // 中性
+    let lineFit: number; // 中性
 
     if (segmented && seg) {
-      chars = charTokens.map((t, k) => ({
-        c: t.c,
-        role: t.role,
-        durMs: seg[k] ?? 0,
-        rms: 0,
-      }));
       // 用整段采样估算各字 RMS（按 seg 比例切分）
       const total = seg.reduce((s, x) => s + x, 0) || 1;
       let acc = 0;

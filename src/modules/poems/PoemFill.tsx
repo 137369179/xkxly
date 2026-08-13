@@ -32,12 +32,12 @@ function makeQuestion(poem: (typeof POEMS)[number], tr: (key: string, params?: R
   if (lines.length < 2) return null;
 
   const lineIdx = Math.floor(Math.random() * lines.length);
-  const line = lines[lineIdx]!!
+  const line = lines[lineIdx]!
   const chars = [...line].filter(c => /[\u4e00-\u9fff]/.test(c));
   if (chars.length < 3) return null;
 
   const charIdx = Math.floor(Math.random() * chars.length);
-  const missing = chars[charIdx]!!
+  const missing = chars[charIdx]!
 
   // 从其他诗中取干扰字
   const distractors: string[] = [];
@@ -113,7 +113,7 @@ export function PoemFill() {
     );
   }
 
-  const q = questions[idx]!!
+  const q = questions[idx]!
 
   const renderLine = () => {
     const chars = [...q.line];

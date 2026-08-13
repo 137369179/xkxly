@@ -39,7 +39,7 @@ export function CodeBotPro() {
   const [failed, setFailed] = useState(false);
   const [repeatCount, setRepeatCount] = useState(3);
 
-  const level = LEVELS[levelIdx]!!
+  const level = LEVELS[levelIdx]!
 
   const reset = () => {
     setBlocks([]);

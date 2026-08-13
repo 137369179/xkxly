@@ -34,7 +34,7 @@ export function Dictation() {
   const [phase, setPhase] = useState<'playing' | 'result'>('playing');
   const practice = useStore(s => s.practice);
 
-  const q = questions[idx]!!
+  const q = questions[idx]!
 
   const playSound = () => {
     sfxTap();

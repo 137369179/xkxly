@@ -93,7 +93,7 @@ function PlanetDetail({ planet, onClose }: { planet: PlanetItem; onClose: () => 
   );
 }
 
-function _SpaceExplorer() {
+function SpaceExplorerImpl() {
   const { t: tr } = useTranslation();
   const [selected, setSelected] = useState<PlanetItem | null>(null);
   const [show3D, setShow3D] = useState(false);
@@ -193,4 +193,4 @@ function _SpaceExplorer() {
   );
 }
 
-export const SpaceExplorer = memo(_SpaceExplorer);
+export const SpaceExplorer = memo(SpaceExplorerImpl);

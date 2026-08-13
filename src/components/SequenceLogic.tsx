@@ -44,7 +44,7 @@ export function SequenceLogic() {
     if (timerRef.current) clearTimeout(timerRef.current);
   }, []);
 
-  const puzzle = PUZZLES[idx]!!
+  const puzzle = PUZZLES[idx]!
 
   const next = () => {
     const ni = (idx + 1) % PUZZLES.length;

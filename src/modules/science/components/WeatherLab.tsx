@@ -299,7 +299,7 @@ function SeasonMatchGame() {
 }
 
 // ── 主组件 ────────────────────────────────────────────────
-function _WeatherLab() {
+function WeatherLabImpl() {
   const { t } = useTranslation();
   const [tab, setTab] = useState<'generator' | 'match' | 'info'>('generator');
   const [selectedWeather, setSelectedWeather] = useState<WeatherType | null>(null);
@@ -428,4 +428,4 @@ function _WeatherLab() {
   );
 }
 
-export const WeatherLab = memo(_WeatherLab);
+export const WeatherLab = memo(WeatherLabImpl);

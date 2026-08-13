@@ -44,11 +44,11 @@ const MOOD_MSG_KEYS: Record<Mood, string[]> = {
 
 function getMood(progress: { dailyLog: Record<string, DailyStat> }): Mood {
   const today = new Date().toISOString().slice(0, 10);
-  const todayLog = progress.dailyLog?.[today]!;
+  const todayLog = progress.dailyLog?.[today];
   const lastLearn = Object.values(progress.dailyLog || {}).filter((d) => d.items > 0).pop();
 
-  if (todayLog?.items! > 0 && todayLog.items >= 10) return 'excited';
-  if (todayLog?.items! > 0) return 'happy';
+  if (todayLog && todayLog.items >= 10) return 'excited';
+  if (todayLog && todayLog.items > 0) return 'happy';
 
   // 检查多久没学
   if (lastLearn) {

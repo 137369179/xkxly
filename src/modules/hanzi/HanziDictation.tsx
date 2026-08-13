@@ -84,7 +84,7 @@ export function HanziDictation() {
   };
 
   const onAnswer = (correct: boolean) => {
-    const q = questions[idx]!!
+    const q = questions[idx]!
     if (!q) return;
     practice(q.skill, correct, 2, level);
     if (correct) setScore((s) => s + 1);
@@ -111,7 +111,7 @@ export function HanziDictation() {
   );
 
   if (phase === 'run' && questions.length) {
-    const q = questions[idx]!!
+    const q = questions[idx]!
     if (!q) return null;
     return (
       <div className="space-y-4">

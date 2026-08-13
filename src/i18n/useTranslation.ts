@@ -78,7 +78,7 @@ function interpolate(template: string, params?: Record<string, string | number>)
   if (!params) return template;
 
   return template.replace(/\{(\w+)\}/g, (match, key) => {
-    const value = params[key]!!
+    const value = params[key]!
     return value !== undefined ? String(value) : match;
   });
 }
@@ -136,7 +136,7 @@ export function useTranslation(): UseTranslationReturn {
 
   const t: TranslateFn = useCallback(
     (key: string, params?: Record<string, string | number>) => {
-      const translationData = translations[locale]!!
+      const translationData = translations[locale]!
       let template = getNestedValue(translationData, key);
       // 缺失键回退链：当前语言缺失 → 默认语言(zh-CN) → 原始键名。
       // 避免 en-US 等未覆盖键在 UI 露出原始 key 路径（如 common.home）。

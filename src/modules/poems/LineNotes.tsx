@@ -50,7 +50,7 @@ export function LineNotes() {
         {/* 逐句串讲 */}
         <div className="space-y-3">
           {lines.map((line, i) => {
-            const note = notes[i]!!
+            const note = notes[i]!
             if (!note) return null;
             return (
               <motion.div

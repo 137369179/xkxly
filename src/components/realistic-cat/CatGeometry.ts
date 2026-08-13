@@ -19,7 +19,7 @@ import { BREED_CONFIGS } from './types';
  * 返回一个包含所有身体部位的 Group，每个部位是独立的 Mesh 以支持独立动画
  */
 export function createCatGeometry(breed: CatBreed = 'british_shorthair'): THREE.Group {
-  const config = BREED_CONFIGS[breed]!!
+  const config = BREED_CONFIGS[breed]!
   const group = new THREE.Group();
   group.name = 'Cat_Root';
 

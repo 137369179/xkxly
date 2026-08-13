@@ -54,7 +54,7 @@ export function FractionLearn() {
     setTimeout(() => { startQuiz(); setFeedback(''); lockRef.current = false; }, 1200);
   };
 
-  const f = FRACTIONS[current]!!
+  const f = FRACTIONS[current]!
 
   // 可视化：圆形被分成 den 份，高亮 1 份
   const Slice = ({ idx, total, highlight }: { idx: number; total: number; highlight: boolean }) => {

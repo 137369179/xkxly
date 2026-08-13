@@ -99,8 +99,8 @@ export function dueSkills(p: Progress, now = Date.now(), limit = 999): string[] 
       const lvDiff = (a[1]!.lv ?? 0) - (b[1]!.lv ?? 0);
       if (lvDiff !== 0) return lvDiff;
       // 错误率：ng / (ok+ng)，越大越优先复习
-      const ra = a[1]!!.ng / Math.max(1, a[1]!.ok + a[1]!.ng);
-      const rb = b[1]!!.ng / Math.max(1, b[1]!.ok + b[1]!.ng);
+      const ra = a[1]!.ng / Math.max(1, a[1]!.ok + a[1]!.ng);
+      const rb = b[1]!.ng / Math.max(1, b[1]!.ok + b[1]!.ng);
       if (ra !== rb) return rb - ra;
       return (a[1]!.due ?? 0) - (b[1]!.due ?? 0);
     })

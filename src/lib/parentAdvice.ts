@@ -118,13 +118,11 @@ export function generateAdvice(p: Progress): ParentAdvice[] {
   const today = new Date();
   const weekAgo = new Date(today);
   weekAgo.setDate(weekAgo.getDate() - 7);
-  let weekStars = 0;
   let weekMinutes = 0;
   for (let d = new Date(weekAgo); d <= today; d.setDate(d.getDate() + 1)) {
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     const log = p.dailyLog[key];
     if (log) {
-      weekStars += log.stars ?? 0;
       weekMinutes += log.minutes ?? Math.round((log.sec ?? 0) / 60);
 
     }

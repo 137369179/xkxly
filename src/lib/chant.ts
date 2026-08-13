@@ -116,7 +116,7 @@ function pauseOf(ch: string, m: ChantModeInfo): number {
  * @param mode   范读 / 吟诵
  */
 export function analyzeChant(poem: DeepPoem, mode: ChantMode = 'fan'): ChantPlan {
-  const m = MODES[mode]!!
+  const m = MODES[mode]!
 
   const lines: ChantLine[] = poem.lines.map((line) => {
     const tokens: ChantToken[] = [];
@@ -217,7 +217,7 @@ export function scoreRecording(plan: ChantPlan, lineDurationsMs: number[]): Reco
   let n = 0;
 
   plan.lines.forEach((ln, i) => {
-    const user = lineDurationsMs[i]!!
+    const user = lineDurationsMs[i]!
     if (!user || user <= 0) return;
     n++;
     const ratio = user / ln.expectedMs;

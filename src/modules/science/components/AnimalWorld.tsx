@@ -245,7 +245,7 @@ function HabitatMap() {
   );
 }
 
-function _AnimalWorld() {
+function AnimalWorldImpl() {
   const { t: tr } = useTranslation();
   const [selected, setSelected] = useState<AnimalItem | null>(null);
   const [filter, setFilter] = useState<string | null>(null);
@@ -346,4 +346,4 @@ function _AnimalWorld() {
   );
 }
 
-export const AnimalWorld = memo(_AnimalWorld);
+export const AnimalWorld = memo(AnimalWorldImpl);

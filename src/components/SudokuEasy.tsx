@@ -44,9 +44,9 @@ export function SudokuEasy() {
   const [selected, setSelected] = useState<number | null>(null);
   const [done, setDone] = useState(false);
 
-  const puzzle = PUZZLES[puzzleIdx]!!
-  const solution = SOLUTIONS[puzzleIdx]!!
-  const items = THEMES[theme]!!.items;
+  const puzzle = PUZZLES[puzzleIdx]!
+  const solution = SOLUTIONS[puzzleIdx]!
+  const items = THEMES[theme]!.items;
 
   const newGame = (idx: number) => {
     setPuzzleIdx(idx);

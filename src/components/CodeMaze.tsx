@@ -39,7 +39,7 @@ export function CodeMaze() {
   const [won, setWon] = useState(false);
   const [failed, setFailed] = useState(false);
 
-  const level = LEVELS[levelIdx]!!
+  const level = LEVELS[levelIdx]!
 
   const reset = () => {
     setProgram([]);

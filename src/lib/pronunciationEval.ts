@@ -54,6 +54,7 @@ function normalize(text: string, lang: 'zh-CN' | 'en-US'): string {
   s = s.replace(/[\uFF01-\uFF5E]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xfee0));
   s = s.replace(/\u3000/g, ' '); // 全角空格
   // 去标点
+  // eslint-disable-next-line no-useless-escape -- 标点清洗正则，含引号/方括号的刻意转义
   s = s.replace(/[。！？；：，、""''（）【】《》〈〉「」『』.!?;:,\"'()\[\]{}<>]/g, '');
   if (lang === 'zh-CN') {
     // 中文去空格
@@ -100,7 +101,7 @@ function backtrackAlign(
       tmp.push({ ch: a[i - 1]!, index: i - 1, status: 'correct', heard: b[j - 1]! });
       i--;
       j--;
-    } else if (i > 0 && (j === 0 || dp[i - 1]![j]! <= dp[i]!![j - 1]!)) {
+    } else if (i > 0 && (j === 0 || dp[i - 1]![j]! <= dp[i]![j - 1]!)) {
       // 目标字在识别结果中缺失
       tmp.push({ ch: a[i - 1]!, index: i - 1, status: 'missing', heard: '' });
       i--;
@@ -127,7 +128,7 @@ function backtrackAlign(
       tmp2.push({ ch: a[ii - 1]!, index: ii - 1, status: 'correct', heard: b[jj - 1]! });
       ii--;
       jj--;
-    } else if (ii > 0 && jj > 0 && (dp[ii - 1]![jj - 1]! <= dp[ii - 1]![jj]! || dp[ii - 1]![jj - 1]! <= dp[ii]!![jj - 1]!)) {
+    } else if (ii > 0 && jj > 0 && (dp[ii - 1]![jj - 1]! <= dp[ii - 1]![jj]! || dp[ii - 1]![jj - 1]! <= dp[ii]![jj - 1]!)) {
       // 替换：目标字与识别字不同
       tmp2.push({ ch: a[ii - 1]!, index: ii - 1, status: 'wrong', heard: b[jj - 1]! });
       ii--;

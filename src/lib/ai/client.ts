@@ -311,7 +311,7 @@ export async function* chatStream(opts: ChatOptions): AsyncGenerator<AiChunk> {
   let lastError: AiError | undefined;
 
   for (let mi = 0; mi < chain.length; mi++) {
-    const model = chain[mi]!!
+    const model = chain[mi]!
 
     for (let attempt = 0; attempt <= RETRY_MAX; attempt++) {
       if (opts.signal?.aborted) {

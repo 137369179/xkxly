@@ -16,7 +16,7 @@ function genGrid(size: number): Grid {
   const arr = Array.from({ length: total - 1 }, (_, i) => i + 1);
   arr.push(0); // 空格
   // 随机打乱（通过有效移动确保可解）
-  let grid: Grid = [];
+  const grid: Grid = [];
   for (let i = 0; i < size; i++) grid.push(arr.slice(i * size, (i + 1) * size));
   for (let i = 0; i < 200; i++) {
     const [br, bc] = findBlank(grid, size);

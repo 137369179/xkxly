@@ -80,7 +80,7 @@ export function Karaoke() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
 
-  const song = SONGS[songIdx]!!
+  const song = SONGS[songIdx]!
 
   // 朗读歌词
   const speakLine = useCallback(async (idx: number, autoNext = true) => {

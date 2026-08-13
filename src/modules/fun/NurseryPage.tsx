@@ -72,10 +72,10 @@ export function NurseryPage() {
       <div className="space-y-4">
         <PageHeader emoji="🎵" title={t('nurseryPage.title')} subtitle={t('nurseryPage.subtitle')} tone="pink" />
         {(Object.keys(THEME_LABEL) as RhymeTheme[]).map(theme => {
-          const rhymes = byTheme[theme]!!
+          const rhymes = byTheme[theme]!
           if (!rhymes?.length) return null;
-          const tl = THEME_LABEL[theme]!!
-          const color = THEME_COLORS[theme]!!
+          const tl = THEME_LABEL[theme]!
+          const color = THEME_COLORS[theme]!
           return (
             <div key={theme}>
               <div className="mb-2 flex items-center gap-2">

@@ -105,7 +105,7 @@ export function FlyingFlowers() {
       void speak('已全部展示！', { lang:'zh-CN', rate:0.8, module:'ai' });
       return;
     }
-    const next = pool[nextIdx]!!
+    const next = pool[nextIdx]!
     setUsed(prev => [...prev, next]);
     setNextIdx(i => i + 1);
     setScore(s => s + 1);

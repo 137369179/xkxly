@@ -34,7 +34,7 @@ export function PanelTitle({
   tone?: Tone;
   right?: ReactNode;
 }) {
-  const t = TONE_STYLE[tone]!!
+  const t = TONE_STYLE[tone]!
   return (
     <header className="mb-5 flex items-center gap-3">
       {iconType ? (
@@ -76,7 +76,7 @@ export function PageHeader({
 }) {
 
   const tk: Tone = tone && (TONES as readonly string[]).includes(tone) ? (tone as Tone) : 'pink';
-  const t = TONE_STYLE[tk]!!
+  const t = TONE_STYLE[tk]!
   return (
     <div
       className="relative overflow-hidden rounded-[2.2rem] border-4 shadow-fluffy p-5 sm:p-7 mb-6"

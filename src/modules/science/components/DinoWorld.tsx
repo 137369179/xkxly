@@ -167,7 +167,7 @@ function DinoCompare() {
   );
 }
 
-function _DinoWorld() {
+function DinoWorldImpl() {
   const { t: tr } = useTranslation();
   const [selected, setSelected] = useState<DinoItem | null>(null);
   const [filter, setFilter] = useState<string | null>(null);
@@ -241,4 +241,4 @@ function _DinoWorld() {
   );
 }
 
-export const DinoWorld = memo(_DinoWorld);
+export const DinoWorld = memo(DinoWorldImpl);

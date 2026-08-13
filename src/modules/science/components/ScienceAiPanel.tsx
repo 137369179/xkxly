@@ -20,7 +20,7 @@ interface ScienceAiPanelProps {
   className?: string;
 }
 
-function _ScienceAiPanel({ topic, label, triggerLabel = '🤖 小智讲讲', className }: ScienceAiPanelProps) {
+function ScienceAiPanelImpl({ topic, label, triggerLabel = '🤖 小智讲讲', className }: ScienceAiPanelProps) {
   const { t: tr } = useTranslation();
   const defaultTrigger = triggerLabel || `🤖 ${tr('science.aiTrigger')}`;
   const task = useMemo(() => companionExplainTask(topic), [topic]);
@@ -95,4 +95,4 @@ function _ScienceAiPanel({ topic, label, triggerLabel = '🤖 小智讲讲', cla
   );
 }
 
-export const ScienceAiPanel = memo(_ScienceAiPanel);
+export const ScienceAiPanel = memo(ScienceAiPanelImpl);

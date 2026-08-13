@@ -25,7 +25,7 @@ export function LetterTrace() {
 
   const store = useStore();
   const chars = mode === 'upper' ? UPPER_CHARS : LOWER_CHARS;
-  const char = chars[idx]!!
+  const char = chars[idx]!
   const letter = LETTER_MAP.get(mode === 'upper' ? char : char.toUpperCase());
 
   return (

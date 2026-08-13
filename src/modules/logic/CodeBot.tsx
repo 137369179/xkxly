@@ -108,7 +108,7 @@ export function CodeBot() {
     return () => { aliveRef.current = false; };
   }, []);
 
-  const level = LEVELS[levelIdx]!!
+  const level = LEVELS[levelIdx]!
   const rows = level.grid.length;
   const cols = level.grid[0]!.length;
 

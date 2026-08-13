@@ -56,6 +56,15 @@ export default function WordsPage() {
     { id: 'body', label: tr('words.tab.body'), emoji: '👤' },
   ], [tr]);
 
+  const themeId = THEME_MAP[tab]! || 'animals';
+  const theme = WORD_THEMES.find((t) => t.id === themeId) ?? WORD_THEMES[0]!;
+  const tone = theme.tone;
+
+  const list = useMemo(() => {
+    if (query.trim()) return searchWords(query.trim());
+    return theme.words;
+  }, [theme, query]);
+
   if (tab === 'phonics') {
     return (
       <div className="space-y-5">
@@ -138,16 +147,6 @@ export default function WordsPage() {
       </div>
     );
   }
-
-  const themeId = THEME_MAP[tab]! || 'animals';
-  const theme = WORD_THEMES.find(t => t.id === themeId) ?? WORD_THEMES[0]!;
-  const tone = theme.tone;
-
-
-  const list = useMemo(() => {
-    if (query.trim()) return searchWords(query.trim());
-    return theme.words;
-  }, [theme, query]);
 
   if (selected) {
     return (
@@ -234,7 +233,7 @@ export default function WordsPage() {
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
         {list.map(w => {
           const learned = (progress.mastery[`word:${w.word}`]?.lv ?? 0) >= 1;
-          const t = TONE_STYLE[tone]!!
+          const t = TONE_STYLE[tone]!
           return (
             <button
               key={w.word}

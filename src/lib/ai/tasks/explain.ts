@@ -32,7 +32,7 @@ import { pick, type StreamTask } from './types';
 
 /** 本地兜底：按算式手工造一段「数苹果」式讲解 */
 function mathFallback(display: string, correct: string): string {
-  const m = display.match(/(\d+)\s*([+\-])\s*(\d+)/);
+  const m = display.match(/(\d+)\s*([+-])\s*(\d+)/);
   if (!m) return `没关系，我们再算一次。正确答案是 ${correct} 哦，下次一定行！`;
   const [, a, op, b] = m;
   if (op === '+') {

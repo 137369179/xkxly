@@ -63,6 +63,13 @@ jobs:
         run: npx tsc -b --force   # --force 强制全量类型检查，规避增量 tsbuildinfo 缓存造成的幽灵错误
         continue-on-error: true # 失败不阻断后续步骤，最终由 status 步骤统一判定
 
+      - name: ESLint 静态检查
+        id: lint
+        # rules-of-hooks 等规则设为 error，仅在存在 error 级问题时退出非 0；warning 不阻断 CI。
+        # 失败不阻断后续步骤，最终由 status 步骤统一判定。
+        run: npm run lint
+        continue-on-error: true
+
       - name: 全量单元测试（含 JUnit 报告）
         id: unittest
         run: npm run test:ci
@@ -147,6 +154,7 @@ jobs:
             const stuck = '${{ steps.stuck.outcome }}';
             const unittest = '${{ steps.unittest.outcome }}';
             const tsc = '${{ steps.tsc.outcome }}';
+            const lint = '${{ steps.lint.outcome }}';
             const build = '${{ steps.build.outcome }}';
             const smoke = '${{ steps.smoke.outcome }}';
 
@@ -158,6 +166,7 @@ jobs:
               `| 步骤 | 状态 |`,
               `|---|---|`,
               `| TypeScript 类型检查 | ${icon(tsc)} ${tsc} |`,
+              `| ESLint 静态检查 | ${icon(lint)} ${lint} |`,
               `| 全量单元测试 | ${icon(unittest)} ${unittest} |`,
               `| Stuck 日志专项测试 | ${icon(stuck)} ${stuck} |`,
               `| 生产构建 | ${icon(build)} ${build} |`,
@@ -198,6 +207,7 @@ jobs:
         run: |
           echo "=== CI 各步骤状态 ==="
           echo "类型检查:        ${{ steps.tsc.outcome }}"
+          echo "ESLint 静态检查: ${{ steps.lint.outcome }}"
           echo "全量单元测试:    ${{ steps.unittest.outcome }}"
           echo "Stuck 专项测试:  ${{ steps.stuck.outcome }}"
           echo "生产构建:        ${{ steps.build.outcome }}"
@@ -206,6 +216,7 @@ jobs:
 
           failed=""
           if [ "${{ steps.tsc.outcome }}" = "failure" ]; then failed="$failed tsc"; fi
+          if [ "${{ steps.lint.outcome }}" = "failure" ]; then failed="$failed lint"; fi
           if [ "${{ steps.unittest.outcome }}" = "failure" ]; then failed="$failed unittest"; fi
           if [ "${{ steps.stuck.outcome }}" = "failure" ]; then failed="$failed stuck"; fi
           if [ "${{ steps.build.outcome }}" = "failure" ]; then failed="$failed build"; fi
@@ -215,6 +226,7 @@ jobs:
             echo "::error::CI 失败，失败的步骤:$failed"
             echo "失败诊断："
             echo "  - 类型检查失败 → 检查 TypeScript 类型错误，运行 npx tsc -b 本地复现"
+            echo "  - ESLint 检查失败 → 运行 npm run lint 本地复现，修复 error 级问题（warning 不阻断）"
             echo "  - 全量测试失败 → 运行 npm run test:ci 本地复现，下载 unit-test-results artifact 查看 JUnit"
             echo "  - Stuck 测试失败 → 运行 npm run test:stuck 本地复现，下载 stuck-test-results artifact 查看 JUnit"
             echo "  - 构建失败 → 检查构建错误日志，运行 npm run build 本地复现"

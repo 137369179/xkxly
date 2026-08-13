@@ -267,7 +267,7 @@ export function ChantBar({ poem }: { poem: DeepPoem }) {
       {/* 期望节奏条 + 实际声波对照 */}
       <div className="space-y-2 rounded-2xl bg-white/70 p-3">
         {plan.lines.map((ln, i) => {
-          const rec = analyses[i]!!
+          const rec = analyses[i]!
           const chars = rec?.lines[0]!.chars ?? [];
           const maxChar = Math.max(...chars.map((c) => c.durMs), 1);
           return (

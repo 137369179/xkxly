@@ -60,7 +60,7 @@ export function LearnFlow({ steps, tone = 'blue', onFinish, finishLabel = 'å®Œæˆ
 
   const [readySet, setReadySet] = useState<Record<string, boolean>>({});
 
-  const step = steps[idx]!!
+  const step = steps[idx]!
   const isLast = idx === steps.length - 1;
   const done = !step?.gate || !!readySet[step.key];
 
@@ -87,7 +87,7 @@ export function LearnFlow({ steps, tone = 'blue', onFinish, finishLabel = 'å®Œæˆ
       firstRun.current = false;
       return;
     }
-    const label = steps[idx]!?.label;
+    const label = steps[idx]?.label;
     if (label && STEP_GUIDE[label]) {
       announceStep(STEP_GUIDE[label]);
     }

@@ -74,7 +74,7 @@ export default function PoetTimeline() {
             exit={{ opacity: 0 }}
           >
             {DYNASTY_ORDER.filter(d => poetsByDynasty[d]).map(dynasty => {
-              const poets = poetsByDynasty[dynasty]!!
+              const poets = poetsByDynasty[dynasty]!
               const color = DYNASTY_COLORS[dynasty]! || '#999';
               return (
                 <div key={dynasty} className="mb-4">

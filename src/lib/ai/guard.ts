@@ -147,6 +147,8 @@ export function guardInput(raw: string, maxLen = 200): GuardResult {
   if (typeof raw !== 'string') return { ok: false, text: '', reason: '内容是空的哦' };
   // 顺手清掉零宽字符与控制符，防止靠不可见字符绕过词表
   const text = raw
+    // 清洗零宽/控制字符，防止靠不可见字符绕过词表；刻意匹配控制区间
+    // eslint-disable-next-line no-control-regex
     .replace(/[\u0000-\u001f\u007f\u200b-\u200f\u2028\u2029\ufeff]/g, '')
     .trim()
     .replace(/\s+/g, ' ');
@@ -214,7 +216,7 @@ function balancedSlice(s: string): string | null {
   let esc = false;
 
   for (let i = start; i < s.length; i++) {
-    const c = s[i]!!
+    const c = s[i]!
     if (inStr) {
       if (esc) esc = false;
       else if (c === '\\') esc = true;

@@ -189,7 +189,7 @@ const RUSHENG = new Set(
 export function levelOf(pinyin: string): '平' | '仄' | '' {
   if (!pinyin) return '';
   for (const ch of pinyin) {
-    const t = TONE_MAP[ch]!!
+    const t = TONE_MAP[ch]!
     if (t !== undefined) return t <= 2 ? '平' : '仄';
   }
   return '平'; // 无声调（轻声/儿化等）按平处理
@@ -277,7 +277,7 @@ function detectFaults(cl: string[][], cidx: number[][], rhyme: boolean[]): Proso
   cl.forEach((line, i) => {
     if (line.length < 2) return;
     const tail = line[last(i)]!
-    const isRhyme = rhyme[i]!!
+    const isRhyme = rhyme[i]!
 
     if (isRhyme) {
       // 押韵句：尾字必平；平收句检查孤平 / 三平调
@@ -363,7 +363,7 @@ export function analyzeProsody(poem: DeepPoem): Prosody {
   const count = (idxs: number[]) => {
     const freq: Record<string, number> = {};
     idxs.forEach((i) => {
-      const b = bases[i]!!
+      const b = bases[i]!
       if (b) freq[b] = (freq[b] || 0) + 1;
     });
     let best = '';
@@ -381,7 +381,7 @@ export function analyzeProsody(poem: DeepPoem): Prosody {
   let driftLines: boolean[];
   let main: string;
   let mainBu = '';
-  let rhymeGroup = '';
+  let rhymeGroup: string;
   let rhymeBasis: Prosody['rhymeBasis'];
 
   if (isJinti) {
@@ -402,7 +402,7 @@ export function analyzeProsody(poem: DeepPoem): Prosody {
       if (i % 2 === 1) return true; // 偶句必押
       if (i === 0) {
         // 首句可入韵：平收即视为入韵（平水韵宽容，如「斜」与「家花」同麻韵）
-        const tail0 = grid[0]!!.filter((c) => c.level !== '').map((c) => c.level);
+        const tail0 = grid[0]!.filter((c) => c.level !== '').map((c) => c.level);
         return tail0.length ? tail0[tail0.length - 1] === '平' : false;
       }
       return false;
@@ -431,7 +431,7 @@ export function analyzeProsody(poem: DeepPoem): Prosody {
 
   // 对仗：律诗（八句）标注颔联（3-4句）、颈联（5-6句）
   const couplets: Couplet[] = [];
-  let note = '';
+  let note: string;
   if (poem.genre === '五言律诗' || poem.genre === '七言律诗') {
     couplets.push({ label: '颔联', lines: [2, 3] });
     couplets.push({ label: '颈联', lines: [4, 5] });
@@ -465,8 +465,8 @@ export function analyzeProsody(poem: DeepPoem): Prosody {
     const cidx = grid.map((row) => row.map((c, j) => (c.level !== '' ? j : -1)).filter((j) => j >= 0));
     const aligned = cl.length > 0 && cl.every((line) => line.length === genreLen);
 
-    const qi: '仄' | '平' = cl[0]!?.[1] === '平' ? '平' : '仄';
-    const ru = rhymingLines[0]!!
+    const qi: '仄' | '平' = cl[0]?.[1] === '平' ? '平' : '仄';
+    const ru = rhymingLines[0]!
 
     pattern = `${qi}起首句${ru ? '入韵' : '不入韵'}·${poem.genre}`;
 
@@ -477,7 +477,7 @@ export function analyzeProsody(poem: DeepPoem): Prosody {
         if (!isR) return;
         const bu = yunBuShort(rhymeFeet[i]!);
         if (bu && bu !== mainBu) {
-          const at = grid[i]!!.map((c, j) => (c.c === rhymeFeet[i]! ? j : -1)).filter((j) => j >= 0);
+          const at = grid[i]!.map((c, j) => (c.c === rhymeFeet[i]! ? j : -1)).filter((j) => j >= 0);
           luoyun.push({
             line: i,
             type: '失韵',

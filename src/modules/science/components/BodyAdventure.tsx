@@ -323,7 +323,7 @@ function SystemGrid({ onSelect }: { onSelect: (s: BodySystemItem) => void }) {
   );
 }
 
-function _BodyAdventure() {
+function BodyAdventureImpl() {
   const [selectedSystem, setSelectedSystem] = useState<BodySystemItem | null>(null);
   const { t: tr } = useTranslation();
 
@@ -389,4 +389,4 @@ function _BodyAdventure() {
   );
 }
 
-export const BodyAdventure = memo(_BodyAdventure);
+export const BodyAdventure = memo(BodyAdventureImpl);

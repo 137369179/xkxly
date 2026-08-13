@@ -92,7 +92,7 @@ export function recordCombo(correct: boolean): ComboResult {
   // 查找是否命中阈值
   let level = -1;
   for (let i = 0; i < COMBO_THRESHOLDS.length; i++) {
-    if (nextCount === COMBO_THRESHOLDS[i]!!.count) {
+    if (nextCount === COMBO_THRESHOLDS[i]!.count) {
       level = i;
       break;
     }

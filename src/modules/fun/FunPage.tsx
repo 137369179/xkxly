@@ -141,7 +141,7 @@ function Loading() {
 export default function FunPage() {
   const { t } = useTranslation();
   const [tab, setTab] = useState<TabId>('storybook');
-  const Component = TAB_MAP[tab]!!;
+  const Component = TAB_MAP[tab]!;
   const { tickTime } = useStore();
   const mountedRef = useRef(false);
 

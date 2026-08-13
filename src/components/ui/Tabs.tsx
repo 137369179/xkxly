@@ -24,7 +24,7 @@ export function Tabs<T extends string>({
   layoutId?: string;
 }) {
   const { t: translate } = useTranslation();
-  const ts = TONE_STYLE[tone]!!
+  const ts = TONE_STYLE[tone]!
 
   const handleKeyDown = (e: React.KeyboardEvent, currentIndex: number) => {
     let newIndex = currentIndex;

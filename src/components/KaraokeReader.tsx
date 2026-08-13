@@ -265,7 +265,7 @@ export function KaraokeReader({
         {sentenceLines.map((line, lineIdx) => {
           const isActive = currentLine === lineIdx;
           const isPast = currentLine > lineIdx || (currentLine < 0 && false);
-          const range = lineCharRanges[lineIdx]!!
+          const range = lineCharRanges[lineIdx]!
           return (
             <motion.div
               key={lineIdx}

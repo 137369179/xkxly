@@ -66,7 +66,7 @@ export function ShadowMatch() {
 
   const clickShadow = (sIdx: number) => {
     if (selectedItem === null || matched.includes(selectedItem)) return;
-    if (items[selectedItem]!.name === shadows[sIdx]!!.name) {
+    if (items[selectedItem]!.name === shadows[sIdx]!.name) {
       sfxCorrect();
       setMatched(m => [...m, selectedItem]);
       setScore(s => s + 1);

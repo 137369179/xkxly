@@ -48,7 +48,7 @@ function genProblem(level: number): Problem {
   return { left, right };
 }
 
-function _BalanceScale() {
+function BalanceScaleImpl() {
   const { t } = useTranslation();
   const [level, setLevel] = useState(1);
   const [problem, setProblem] = useState<Problem>(() => genProblem(1));
@@ -140,4 +140,4 @@ function _BalanceScale() {
   );
 }
 
-export const BalanceScale = memo(_BalanceScale);
+export const BalanceScale = memo(BalanceScaleImpl);

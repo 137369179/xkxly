@@ -85,7 +85,7 @@ export function ReciteRecorder({ poem }: ReciteRecorderProps) {
       timerRef.current = setInterval(() => {
         setDuration(Math.floor((Date.now() - startTimeRef.current) / 1000));
       }, 200);
-    } catch (err) {
+    } catch {
       setError(t('reciteRecorder.micError'));
       setPhase('idle');
     }

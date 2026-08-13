@@ -202,7 +202,7 @@ function suggestNew(p: Progress): FocusItem | null {
   }
 
   if (candidates.length === 0) return null;
-  const pick = candidates[0]!!;
+  const pick = candidates[0]!;
   return {
     skill: pick.skill,
     label: pick.label,
@@ -280,7 +280,7 @@ function buildCoach(p: Progress): CoachAdvice {
     if (count >= 3 && rate < 0.5) gaps.push(subjectLabel(key));
   }
 
-  let summary = '';
+  let summary: string;
   const avgMin = avgDailyMinutes(p);
   const aDays = activeDays7(p);
   const totalLearned = touchedCount(p);

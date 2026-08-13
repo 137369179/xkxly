@@ -36,12 +36,12 @@ export function WordReview() {
     const mastery = progress.mastery;
     return getAllWords().filter(w => {
       const key = `word:${w.word}`;
-      const m = mastery[key]!!
+      const m = mastery[key]!
       return !m || m.lv < 2;
     }).slice(0, 20);
   }, [filter, theme, level, progress.mastery]);
 
-  const current = words[flashIdx]!!
+  const current = words[flashIdx]!
 
   if (mode === 'flashcard' && current) {
     return (

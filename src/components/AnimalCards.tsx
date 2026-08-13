@@ -25,12 +25,12 @@ const ANIMALS = [
 
 const HABITATS = ['animal.habitatGrassland', 'animal.habitatForest', 'animal.habitatOcean', 'animal.habitatAntarctica', 'animal.habitatBamboo', 'animal.habitatPond', 'animal.habitatSky', 'animal.habitatGarden'];
 
-function _AnimalCards() {
+function AnimalCardsImpl() {
   const { t } = useTranslation();
 
   const [selected, setSelected] = useState(0);
   const [filter, setFilter] = useState<string | null>(null);
-  const a = ANIMALS[selected]!!
+  const a = ANIMALS[selected]!
 
   const filtered = filter ? ANIMALS.filter(an => an.habitat === filter || an.animalClass === filter) : ANIMALS;
 
@@ -94,4 +94,4 @@ function _AnimalCards() {
   );
 }
 
-export const AnimalCards = memo(_AnimalCards);
+export const AnimalCards = memo(AnimalCardsImpl);

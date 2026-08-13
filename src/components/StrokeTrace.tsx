@@ -79,7 +79,7 @@ export interface StrokeTraceProps {
 }
 
 export function StrokeTrace({ char, tone = 'green', onPass }: StrokeTraceProps) {
-  const t = TONE_STYLE[tone]!!
+  const t = TONE_STYLE[tone]!
   const { t: translate } = useTranslation();
   const [data, setData] = useState<StrokeData | null>(null);
   const [loaded, setLoaded] = useState(false);

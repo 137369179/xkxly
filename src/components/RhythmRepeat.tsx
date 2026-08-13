@@ -35,7 +35,9 @@ function playDrum(type: Beat) {
     gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
     osc.connect(gain); gain.connect(audioCtx.destination);
     osc.start(); osc.stop(audioCtx.currentTime + 0.2);
-  } catch {}
+  } catch {
+    void 0; // 音频调度异常可安全忽略
+  }
 }
 
 export function RhythmRepeat({ onComplete }: { onComplete?: (correct: boolean, star: number) => void }) {
@@ -49,7 +51,7 @@ export function RhythmRepeat({ onComplete }: { onComplete?: (correct: boolean, s
   const timerRef      = useRef<ReturnType<typeof setTimeout> | null>(null);
   const patternTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const pattern = PATTERNS[patternIdx]!!
+  const pattern = PATTERNS[patternIdx]!
 
   const playPattern = useCallback(() => {
     setMode('listen');

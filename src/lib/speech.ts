@@ -364,6 +364,8 @@ function runSpeak(
     if (voice) u.voice = voice;
 
     let finished = false;
+    // timeoutId 在下方 Promise 执行器闭包内赋值（兜底超时），属合法闭包重赋值
+    // eslint-disable-next-line prefer-const
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
     const finish = () => {
       if (finished) return;
@@ -516,7 +518,7 @@ export function speakChant(
       }
       if (cancelled) break;
       // 句末停顿：依据本句最后一个停顿片段（标点）时长，保留句读分明
-      const last = lines[i]!![lines[i]!.length - 1];
+      const last = lines[i]![lines[i]!.length - 1];
       const endMs = last && last.type === 'pause' ? last.ms : 220;
       if (endMs > 0 && i < lines.length - 1) await wait(endMs);
     }

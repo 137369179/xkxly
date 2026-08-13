@@ -275,6 +275,8 @@ export class KokoroEngine implements TtsEngine {
       resolveDone();
     };
 
+    // 返回对象的方法/取值器需捕获外层 player 实例；取值器(getter)无法用箭头函数捕获 this，必须保留别名
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     return {
       stop: stopInternal,

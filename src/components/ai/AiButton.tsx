@@ -26,7 +26,7 @@ export function AiButton({
   className?: string;
 }) {
   const { t } = useTranslation();
-  const ts = TONE_STYLE[tone]!!
+  const ts = TONE_STYLE[tone]!
   const off = disabled || loading;
   return (
     <button

@@ -53,7 +53,7 @@ export function AiPanel({
   compact?: boolean;
 }) {
   const { t: tr } = useTranslation();
-  const t = TONE_STYLE[tone]!!
+  const t = TONE_STYLE[tone]!
   const { status, text, fallback, task, run } = state;
   const [speaking, setSpeaking] = useState(false);
   /**

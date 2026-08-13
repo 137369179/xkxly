@@ -20,7 +20,7 @@ export default function PoetArchive() {
   const byDynasty = useMemo(() => {
     const groups: Record<string, string[]> = {};
     Object.keys(POETS).forEach(name => {
-      const d = POETS[name]!!.dynasty;
+      const d = POETS[name]!.dynasty;
       if (!groups[d]) groups[d] = [];
       groups[d]!.push(name);
     });

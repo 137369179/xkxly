@@ -86,7 +86,7 @@ export default function RealisticCatHousePage() {
   const [feedback, setFeedback] = useState(t('cat.welcome'));
   const [showAnimationPanel, setShowAnimationPanel] = useState(false);
 
-  const breedConfig = BREED_CONFIGS[selectedBreed]!!
+  const breedConfig = BREED_CONFIGS[selectedBreed]!
   const availableAnimations = getAnimationsForExpression(expression);
 
   /** 喂食 */
@@ -257,7 +257,7 @@ export default function RealisticCatHousePage() {
         <h3 className="text-sm font-black text-purple-900 mb-2">🐱 {t('cat.chooseBreed')}</h3>
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           {BREED_LIST.map((breed) => {
-            const config = BREED_CONFIGS[breed]!!
+            const config = BREED_CONFIGS[breed]!
             const isSelected = selectedBreed === breed;
             return (
               <button

@@ -35,7 +35,7 @@ function makeQuestion(): ToneQuestion {
   const base = BASE_SYLLABLES[Math.floor(Math.random() * BASE_SYLLABLES.length)]!
   const mainVowel = base.includes('a') ? 'a' : base.includes('o') ? 'o' : base.includes('e') ? 'e' : base.includes('i') ? 'i' : base.includes('u') ? 'u' : base.includes('ü') ? 'ü' : 'a';
   const tone = (Math.floor(Math.random() * 4) + 1) as 1 | 2 | 3 | 4;
-  const toned = TONE_VOWELS[mainVowel]!![tone - 1]!;
+  const toned = TONE_VOWELS[mainVowel]![tone - 1]!;
   const display = base.replace(mainVowel, toned);
   return { base, tone, display };
 }
@@ -60,7 +60,7 @@ export function TonePractice() {
   const [done, setDone] = useState(false);
   const practice = useStore(s => s.practice);
 
-  const q = questions[idx]!!
+  const q = questions[idx]!
 
   const playSound = (tone: number) => {
     // 用 TTS 模拟声调发音

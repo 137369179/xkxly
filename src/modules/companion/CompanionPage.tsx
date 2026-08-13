@@ -54,7 +54,7 @@ const QUICK_QUESTIONS = [
 
 /** 根据时段推荐最合适的主题（启发式，无外部依赖） */
 function recommendTopic(): CompanionTopic | null {
-  let targetCat = '';
+  let targetCat: string;
   const h = new Date().getHours();
   // 早上 → 语言类（古诗/拼音）；中午 → 科学类；下午 → 数学/认知；晚上 → 安全/情感
   if (h >= 6 && h < 11) targetCat = 'morning';

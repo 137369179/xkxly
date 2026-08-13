@@ -32,7 +32,7 @@ export function WordProblems() {
   const practice = useStore(s => s.practice);
 
   const problems = useMemo(() => getProblemsByLevel(level), [level]);
-  const p = problems[idx]!!
+  const p = problems[idx]!
 
   const handlePick = (val: number) => {
     if (picked !== null) return;
@@ -102,7 +102,7 @@ export function WordProblems() {
     );
   }
 
-  const info = LEVEL_INFO[level]!!
+  const info = LEVEL_INFO[level]!
 
   return (
     <div className="space-y-4">

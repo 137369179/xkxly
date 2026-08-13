@@ -94,7 +94,8 @@ export default function PoemsPage({ param }: { param?: string }) {
 
   const toggle = (set: Set<string>, setter: (s: Set<string>) => void, v: string) => {
     const n = new Set(set);
-    n.has(v) ? n.delete(v) : n.add(v);
+    if (n.has(v)) n.delete(v);
+    else n.add(v);
     setter(n);
   };
 

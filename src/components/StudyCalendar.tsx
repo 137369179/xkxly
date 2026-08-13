@@ -43,7 +43,7 @@ function buildYearData(dailyLog: Record<string, { sec?: number; items?: number }
   const d = new Date(start);
   while (d <= end) {
     const key = dateKey(d.getTime());
-    const entry = dailyLog[key]!!
+    const entry = dailyLog[key]!
     const sec = entry?.sec ?? 0;
     const minutes = Math.floor(sec / 60);
     days.push({ date: key, count: minutes, level: getLevel(minutes) });
