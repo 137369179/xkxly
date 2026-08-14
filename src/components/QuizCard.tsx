@@ -316,7 +316,7 @@ export function QuizCard({
         // 全局连击：记录答对，触发阈值时额外庆祝
         const combo = recordCombo(true);
         if (combo.triggered && combo.level >= 0) {
-          const celeb = COMBO_THRESHOLDS[combo.level]!.celebration;
+          const celeb = COMBO_THRESHOLDS[combo.level]?.celebration ?? 'small';
           if (celeb === 'big') {
             void celebrateBig();
           } else if (celeb === 'medium') {
@@ -429,7 +429,7 @@ export function QuizCard({
         {shuffledOptions.map((opt, i) => {
           const isWrong = wrongIds.includes(opt.id);
           const isRight = solved && opt.id === question.answerId;
-          const t = TONE_STYLE[toneAt(i)]!
+          const t = TONE_STYLE[toneAt(i)] ?? TONE_STYLE.pink;
           return (
             <motion.button
               key={opt.id}

@@ -3,7 +3,7 @@
  * 按 学习 / 游戏 / 故事 / 创意 / AI小老师 / 家长中心 分组展示全部模块。
  * 纯展示层，点击直接 navigate，不改动任何页面路由。
  */
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { sfxTap } from '@/lib/sfx';
 import { navigate, type RouteId } from '@/lib/router';
 import { navByCategory, NAV_CATEGORY_META, type NavCategory } from '@/data/nav';
@@ -49,8 +49,8 @@ export function CategorySheet({
 
         <div className="flex-1 space-y-5 overflow-y-auto px-4 pb-6">
           {groups.map((g) => {
-            const meta = NAV_CATEGORY_META.find((m) => m.key === g.key)!;
-            const tone = TONE_STYLE[meta.tone]!;
+            const meta = NAV_CATEGORY_META.find((m) => m.key === g.key) ?? NAV_CATEGORY_META[0]!;
+            const tone = TONE_STYLE[meta.tone] ?? TONE_STYLE.pink;
             return (
               <div key={g.key}>
                 <div className="mb-2 flex items-center gap-2">

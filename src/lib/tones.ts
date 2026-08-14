@@ -24,12 +24,12 @@ export const TONE_STYLE: Record<Tone, ToneStyle> = {
 
 /** 按索引循环取色，用于列表着色 */
 export function toneAt(i: number): Tone {
-  return TONES[i % TONES.length]!;
+  return TONES[Math.abs(i) % TONES.length] ?? 'pink';
 }
 
 /** 由字符串稳定映射到一个色调（同一个字母/汉字总是同色） */
 export function toneOf(key: string): Tone {
   let h = 0;
   for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
-  return TONES[h % TONES.length]!;
+  return TONES[h % TONES.length] ?? 'pink';
 }

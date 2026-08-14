@@ -19,7 +19,7 @@ export function Sidebar({ active }: { active: RouteId }) {
   const streak = useStreak();
 
   const renderItem = (item: NavItem) => {
-    const t = TONE_STYLE[item.tone]!;
+    const t = TONE_STYLE[item.tone] ?? TONE_STYLE.pink;
     const isActive = active === item.id;
     return (
       <button

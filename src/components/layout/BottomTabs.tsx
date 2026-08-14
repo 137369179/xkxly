@@ -15,7 +15,7 @@ export function BottomTabs({ active }: { active: RouteId }) {
     >
       <ul className="mx-auto flex max-w-2xl items-stretch justify-around px-1 py-1.5">
         {NAV_ITEMS.filter((it) => it.bottom).map((item) => {
-          const t = TONE_STYLE[item.tone]!
+          const t = TONE_STYLE[item.tone] ?? TONE_STYLE.pink;
           const isActive = active === item.id;
           return (
             <li key={item.id} className="flex-1">

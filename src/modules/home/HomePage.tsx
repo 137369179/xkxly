@@ -58,7 +58,7 @@ export default function HomePage() {
             { id: 'letters', name: '🔤 英语启蒙', desc: '26 字母大冒险 · Phonics 自然拼读', tone: 'pink' as const, tag: '双语启蒙' },
             { id: 'storybook', name: '📚 故事绘本', desc: '经典成语 · 寓言故事 · AI绘本', tone: 'purple' as const, tag: '听故事' },
           ].map((k) => {
-            const tk = TONE_STYLE[k.tone]!;
+            const tk = TONE_STYLE[k.tone] ?? TONE_STYLE.pink;
             return (
               <motion.button
                 key={k.id}
@@ -68,7 +68,7 @@ export default function HomePage() {
                   sfxTap();
                   navigate(k.id as RouteId);
                 }}
-                className="no-select text-left relative overflow-hidden rounded-[2.2rem] border-4 p-6 shadow-fluffy transition-all flex flex-col justify-between min-h-[160px]"
+                className="no-select text-left relative overflow-hidden rounded-[2.2rem] border-4 p-5 sm:p-6 shadow-fluffy transition-all flex flex-col justify-between min-h-[160px]"
                 style={{
                   borderColor: tk.soft,
                   background: `linear-gradient(135deg, ${tk.soft} 0%, #ffffff 80%)`,
@@ -76,16 +76,16 @@ export default function HomePage() {
               >
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-2xl font-black" style={{ color: tk.deep }}>
+                    <span className="text-xl sm:text-2xl font-black" style={{ color: tk.deep }}>
                       {k.name}
                     </span>
                     <span className="text-xs font-black px-3 py-1 rounded-full bg-white/90 shadow-sm" style={{ color: tk.deep }}>
                       {k.tag}
                     </span>
                   </div>
-                  <p className="text-sm font-bold text-ink-soft">{k.desc}</p>
+                  <p className="text-sm font-bold text-ink-soft leading-relaxed">{k.desc}</p>
                 </div>
-                <div className="mt-5 flex items-center justify-between">
+                <div className="mt-4 sm:mt-5 flex items-center justify-between">
                   <span className="text-sm font-black text-white px-4 py-2 rounded-2xl shadow-candy-sm flex items-center gap-1.5" style={{ background: tk.main }}>
                     🚀 马上开始
                   </span>

@@ -67,6 +67,15 @@ export function BossBattle({
 
   const makeRef = useRef(makeQuestion);
   makeRef.current = makeQuestion;
+  const bossShakeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const playerShakeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (bossShakeTimerRef.current) clearTimeout(bossShakeTimerRef.current);
+      if (playerShakeTimerRef.current) clearTimeout(playerShakeTimerRef.current);
+    };
+  }, []);
 
   // 检查并激活Boss技能
   useEffect(() => {
@@ -99,7 +108,8 @@ export function BossBattle({
     if (correct) {
       sfxCorrect();
       setBossShake(true);
-      setTimeout(() => setBossShake(false), 400);
+      if (bossShakeTimerRef.current) clearTimeout(bossShakeTimerRef.current);
+      bossShakeTimerRef.current = setTimeout(() => setBossShake(false), 400);
       setBossHp(hp => {
         const newHp = hp - 1;
         if (newHp <= 0) {
@@ -117,7 +127,8 @@ export function BossBattle({
 
       if (newWrongCount % boss.attackEvery === 0 || newWrongCount === 1) {
         setPlayerShake(true);
-        setTimeout(() => setPlayerShake(false), 400);
+        if (playerShakeTimerRef.current) clearTimeout(playerShakeTimerRef.current);
+        playerShakeTimerRef.current = setTimeout(() => setPlayerShake(false), 400);
         setPlayerHp(hp => {
           const newHp = Math.max(0, hp - damage);
           if (newHp <= 0) {

@@ -19,42 +19,43 @@
   --color-candy-pink: #ff75a0;
   --color-candy-pink-soft: #ffb8d2;
   --color-candy-pink-light: #fff0f6;
-  --color-candy-pink-deep: #e83e8c;
+  --color-candy-pink-deep: #d62575;
 
   --color-candy-blue: #70d6ff;
   --color-candy-blue-soft: #e0f7ff;
-  --color-candy-blue-deep: #2196c9;
+  --color-candy-blue-deep: #167aa9;
 
   --color-candy-yellow: #ffd166;
   --color-candy-yellow-soft: #fff4d6;
-  --color-candy-yellow-deep: #e5a516;
+  --color-candy-yellow-deep: #b47805;
 
   --color-candy-green: #6EE7B7;
   --color-candy-green-soft: #E6FFFA;
-  --color-candy-green-deep: #059669;
+  --color-candy-green-deep: #047857;
 
   --color-candy-purple: #c4b5fd;
   --color-candy-purple-soft: #f3e8ff;
-  --color-candy-purple-deep: #8b5cf6;
+  --color-candy-purple-deep: #7c3aed;
 
   --color-candy-orange: #ff9f5a;
   --color-candy-orange-soft: #ffe6d2;
+  --color-candy-orange-deep: #c2410c;
 
   --color-cream: #fff5f8;
-  --color-ink: #4a3b4e;
-  --color-ink-soft: #8a7791;
+  --color-ink: #3c2f40;
+  --color-ink-soft: #7a6682;
 
   /* —— 字体 —— */
   --font-round: 'Baloo 2', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
     system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-han: 'PingFang SC', 'Hiragino Sans GB', 'Songti SC', 'Noto Serif CJK SC',
+  --font-han: 'STKaiti', 'KaiTi', 'PingFang SC', 'Hiragino Sans GB', 'Songti SC', 'Noto Serif CJK SC',
     'Microsoft YaHei', serif;
 
-  /* —— 阴影：粉色毛绒软阴影 —— */
-  --shadow-candy: 0 8px 0 0 rgb(255 117 160 / 0.15), 0 14px 28px -6px rgb(255 117 160 / 0.35);
-  --shadow-candy-sm: 0 4px 0 0 rgb(255 117 160 / 0.12), 0 8px 20px -6px rgb(255 117 160 / 0.28);
-  --shadow-pop: 0 18px 44px -12px rgb(255 117 160 / 0.45);
-  --shadow-fluffy: 0 12px 36px 0 rgba(255, 117, 160, 0.3);
+  /* —— 阴影：双层柔和果冻毛绒软阴影 —— */
+  --shadow-candy: 0 4px 0 0 rgb(255 117 160 / 0.12), 0 10px 24px -4px rgb(255 117 160 / 0.25);
+  --shadow-candy-sm: 0 2px 0 0 rgb(255 117 160 / 0.10), 0 6px 16px -4px rgb(255 117 160 / 0.20);
+  --shadow-pop: 0 4px 12px -2px rgb(255 117 160 / 0.15), 0 16px 36px -8px rgb(255 117 160 / 0.32);
+  --shadow-fluffy: 0 4px 10px -2px rgba(255, 117, 160, 0.14), 0 12px 30px -6px rgba(255, 117, 160, 0.22);
 
   /* —— 动画 —— */
   --animate-float: float 4s ease-in-out infinite;
