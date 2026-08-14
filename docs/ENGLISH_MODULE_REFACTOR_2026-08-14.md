@@ -1,5 +1,10 @@
 # 宝贝学习乐园 — 英语模块重构方案（2026-08-14）
 
+> ✅ **执行状态：已完成（2026-08-14）** — 4 个阶段全部落地，4 次独立提交：
+> `ab4f6ba` Phase 0 数据归位 · `342c550` Phase 1 词库 303 词 · `a1c0627` Phase 2 学习闭环 · `f191dd5` Phase 3 课程体系
+> 验收：420 测试全绿 / ESLint 0 error / 生产构建通过。
+> 实际交付与方案的差异见文末「执行备注」。
+
 > 目标：把当前「74 词 + 15 个平铺 Tab」的玩具式英语模块，升级为**数据分层、分级课程、学习闭环**的专业幼儿英语学习体系。
 > 本方案分 4 个阶段，由低风险到高风险，每阶段独立可提交、可回滚，阶段间可随时暂停交付。
 
@@ -142,3 +147,31 @@
 - **Phase 3**：1 个工作日，收口课程体系
 
 每阶段结束提交一次、可回滚、可暂停。
+
+---
+
+## 执行备注（2026-08-14 落地结果）
+
+### 与方案的差异（均已按实情调整）
+
+| 项 | 方案 | 实际 |
+|---|---|---|
+| 0.1 phonics 合并 | 8 组 blends 并入 phonics.ts | **phonicsBlends.ts 实为零引用死代码**，直接删除；仅补缺失的 ph 组合 |
+| 0.3 组件归位 | 4 个组件迁移 | **FollowRead 为跨模块共享**（儿歌/家长页引用），保留在 components/；仅迁移 PhonicsListen/BodyParts/CvcWordBuilder |
+| 1.4 词库 | 300+ 词 | 303 词 / 18 主题（新增 12 主题：身体/动作/学校/天气/交通/衣物/果蔬/玩具/海洋动物/场所/日常用品/形容词） |
+| 2.2 题型扩展 | 3→6 在主入口 | 保留原 3 档难度契约（测试锁定），新 3 题型独立导出：makeWordListenQuestion/makeWordSpellQuestion/makeWordFamilyQuestion |
+| 3.2 Tab 重组 | 四大板块 | 已落地：📚课程(默认)/📖词库/🎯练习/🔁复习；课程页含 5 阶段卡片+当前阶段引导，词库页主题×学段筛选 |
+
+### 新增文件清单（7 个）
+- `src/lib/englishCurriculum.ts` — 5 阶段课程模型（完成判定/解锁/进度）
+- `src/data/wordFamilies.ts` — 38 个词族（短元音/长元音/进阶）
+- `src/data/sightWords.ts` — Dolch 高频词 179 词分 3 学段
+- `src/data/dialogues.ts` — 6 个情景对话（自 DialoguePage 迁出）
+- `src/lib/questions/sentence.ts` — 句子题出题器（3 题型）
+- `src/modules/words/WordFamilyGame.tsx` — 词族拼读游戏
+- `docs/ENGLISH_MODULE_REFACTOR_2026-08-14.md` — 本方案
+
+### 遗留建议（后续可选）
+- 词库配图：public/words/ 仅 25 张字母例词图，303 词多用 emoji，可逐步补实拍/插画
+- 音频资源：当前发音依赖 Web Speech API，可评估接入 TTS 音频缓存（见 docs/语音合成升级方案.md）
+- 词族题回退：词库尚未覆盖全部词族成员词（如 -at 族仅 cat 在库），词族迁移题对单成员族自动回退看中文选英文题
