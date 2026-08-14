@@ -13,6 +13,7 @@ import { motion } from 'motion/react';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
 import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
 import { useTranslation } from '@/i18n/useTranslation';
+import { dueSkills } from '@/lib/srs';
 
 type Mode = 'browse' | 'flashcard';
 
@@ -32,13 +33,17 @@ export function WordReview() {
       return themeEntry && w.level === level;
     });
     if (filter === 'level') return getWordsByLevel(level);
-    // weak: 掌握度低的
-    const mastery = progress.mastery;
-    return getAllWords().filter(w => {
-      const key = `word:${w.word}`;
-      const m = mastery[key]!
+    // weak: SRS 间隔复习——到期词（lv 低/错误率高/逾期久）优先，未到期未掌握词兜底
+    const due = dueSkills(progress, Date.now(), 999).filter((k) => k.startsWith('word:'));
+    const dueSet = new Set(due);
+    const byKey = new Map(getAllWords().map((w) => [`word:${w.word}`, w]));
+    const dueWords = due.map((k) => byKey.get(k)).filter((w): w is NonNullable<typeof w> => !!w);
+    const rest = getAllWords().filter((w) => {
+      if (dueSet.has(`word:${w.word}`)) return false;
+      const m = progress.mastery[`word:${w.word}`];
       return !m || m.lv < 2;
-    }).slice(0, 20);
+    });
+    return [...dueWords, ...rest].slice(0, 20);
   }, [filter, theme, level, progress.mastery]);
 
   const current = words[flashIdx]!

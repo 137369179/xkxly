@@ -19,11 +19,12 @@ import { WordReview } from './WordReview';
 import { PhonicsListen } from './PhonicsListen';
 import { BodyParts } from './BodyParts';
 import { CvcWordBuilder } from './CvcWordBuilder';
+import { WordFamilyGame } from './WordFamilyGame';
 import { lazy, Suspense } from 'react';
 
 const SentencePage = lazy(() => import('./SentencePage'));
 
-type Tab = 'animals' | 'colors' | 'numbers' | 'family' | 'food' | 'nature' | 'phonics' | 'sentences' | 'spell' | 'dialogue' | 'match' | 'review' | 'listen' | 'body' | 'builder';
+type Tab = 'animals' | 'colors' | 'numbers' | 'family' | 'food' | 'nature' | 'phonics' | 'sentences' | 'spell' | 'dialogue' | 'match' | 'review' | 'listen' | 'body' | 'builder' | 'wordfamily';
 
 const THEME_MAP: Record<string, string> = {
   animals: 'animals', colors: 'colors', numbers: 'numbers',
@@ -54,6 +55,7 @@ export default function WordsPage() {
     { id: 'review', label: tr('words.tab.review'), emoji: '📚' },
     { id: 'listen', label: tr('words.tab.listen'), emoji: '👂' },
     { id: 'builder', label: tr('words.tab.builder'), emoji: '🔤' },
+    { id: 'wordfamily', label: tr('words.tab.wordFamily'), emoji: '🔗' },
     { id: 'body', label: tr('words.tab.body'), emoji: '👤' },
   ], [tr]);
 
@@ -156,6 +158,16 @@ export default function WordsPage() {
           {tr('words.backToList')}
         </button>
         <WordLearn word={selected} onDone={() => setSelected(null)} />
+      </div>
+    );
+  }
+
+  if (tab === 'wordfamily') {
+    return (
+      <div className="space-y-5">
+        <PageHeader iconType="town" title={tr('words.wordFamilyPageTitle')} subtitle={tr('words.wordFamilyPageSub')} tone="purple" />
+        <Tabs items={TABS} value={tab} onChange={setTab} tone="purple" layoutId="words-tabs" />
+        <WordFamilyGame />
       </div>
     );
   }

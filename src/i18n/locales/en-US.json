@@ -2181,6 +2181,8 @@
     "activity": "🎯 Fun Activities"
   },
   "words": {
+    "wordFamilyPageTitle": "Word Family Park",
+    "wordFamilyPageSub": "Master word families, read new words",
     "searchPlaceholder": "Search words…",
     "noWordsFound": "No words found～",
     "levelLabel": "Level {l}",
@@ -2221,7 +2223,8 @@
       "match": "Match",
       "review": "Review",
       "listen": "Listen",
-      "builder": "CVC Builder",
+      "wordFamily": "Word Family",
+    "builder": "CVC Builder",
       "body": "Body"
     },
     "backToList": "← Back to words",
@@ -2274,6 +2277,24 @@
     "readSent": "🔊 Read sentence",
     "iReadDone": "I read it! 🎉",
     "finishLabel": "Learning done! 🎉"
+  },
+  "wordFamily": {
+    "title": "Word Families",
+    "subtitle": "Read words in the same family",
+    "lv1": "Short Vowels",
+    "lv2": "Long Vowels",
+    "lv3": "Advanced",
+    "hint": "{pattern} sounds like {sound}",
+    "question": "Which word belongs to {target}?",
+    "correct": "Correct!",
+    "wrong": "Not quite, the answer is {target}",
+    "listenWord": "Listen",
+    "next": "Next",
+    "result": "Results",
+    "doneTitle": "Family Challenge Done!",
+    "doneDesc": "{ok} of {total} correct {stars}",
+    "again": "Play Again",
+    "back": "Back"
   },
   "riddle": {
     "pageTitle": "Riddle Time",

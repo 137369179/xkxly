@@ -10,6 +10,7 @@ import { CandyButton } from '@/components/ui/Button';
 import { Tabs, type TabItem } from '@/components/ui/Tabs';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useStore } from '@/store/useStore';
+import { SpeechEvalButton } from '@/components/SpeechEvalButton';
 import { speak } from '@/lib/speech';
 import { sfxTap, sfxWin } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
@@ -215,7 +216,7 @@ export default function SentencePage() {
                     ))}
                   </div>
                   <p className="mt-1 text-sm font-bold text-ink-soft">{s.zh}</p>
-                  <div className="mt-2 flex gap-2">
+                  <div className="mt-2 flex flex-wrap gap-2">
                     <CandyButton
                       tone="blue"
                       variant="soft"
@@ -224,18 +225,16 @@ export default function SentencePage() {
                     >
                       🔊 {tr('sentencePage.read')}
                     </CandyButton>
-                    <CandyButton
-                      tone="green"
-                      variant="soft"
-                      size="sm"
-                      onClick={() => {
+                    <SpeechEvalButton
+                      targetText={s.en}
+                      lang="en-US"
+                      className="min-w-[120px]"
+                      onPass={() => {
                         learnSkill(`sentence:${s.id}`);
                         sfxWin();
                         celebrateSmall();
                       }}
-                    >
-                      ✅ {tr('sentencePage.learned')}
-                    </CandyButton>
+                    />
                   </div>
                 </div>
               </div>

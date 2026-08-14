@@ -2181,6 +2181,8 @@
     "activity": "🎯 适合活动"
   },
   "words": {
+    "wordFamilyPageTitle": "词族拼读乐园",
+    "wordFamilyPageSub": "掌握词族，见词能读",
     "searchPlaceholder": "搜索单词…",
     "noWordsFound": "没有找到单词～",
     "levelLabel": "第 {l} 级",
@@ -2221,7 +2223,8 @@
       "match": "连连看",
       "review": "复习",
       "listen": "辨音",
-      "builder": "CVC拼词",
+      "wordFamily": "词族拼读",
+    "builder": "CVC拼词",
       "body": "身体"
     },
     "backToList": "← 返回单词列表",
@@ -2274,6 +2277,24 @@
     "readSent": "🔊 读句子",
     "iReadDone": "我读好啦 🎉",
     "finishLabel": "完成学习 🎉"
+  },
+  "wordFamily": {
+    "title": "词族拼读",
+    "subtitle": "同一词族一起读，见词能读",
+    "lv1": "短元音",
+    "lv2": "长元音",
+    "lv3": "进阶",
+    "hint": "{pattern} 发 {sound} 的音",
+    "question": "哪个词属于「{target}」家族？",
+    "correct": "答对了！",
+    "wrong": "不对哦，答案是 {target}",
+    "listenWord": "点读单词",
+    "next": "下一题",
+    "result": "看成绩",
+    "doneTitle": "词族挑战完成！",
+    "doneDesc": "答对 {ok} 题，共 {total} 题 {stars}",
+    "again": "再玩一次",
+    "back": "返回"
   },
   "riddle": {
     "pageTitle": "谜语猜猜",

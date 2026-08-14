@@ -18,6 +18,10 @@ import {
   makeSimilarHanziQuestion,
   makePinyinQuestion,
   makeWordQuestion,
+  makeWordListenQuestion,
+  makeWordSpellQuestion,
+  makeWordFamilyQuestion,
+  makeSentenceQuestion,
   makeMixedQuestion,
   makeDailyMixedQuestion,
   makePoemQuestion,
@@ -28,6 +32,7 @@ import {
 } from './questions';
 import POEMS from '@/data/poems';
 import type { Question } from '@/types';
+import { getAllWords } from '@/data/wordIndex';
 
 /** 通用断言：每个题目必须有 2-4 个选项，且正确答案在选项中 */
 function expectValidQuestion(q: Question | null) {
@@ -303,6 +308,79 @@ describe('questions · 拆分模块 · word.ts · makeWordQuestion()', () => {
     const q = makeWordQuestion(3);
     expectValidQuestion(q);
     expect(q!.kind).toBe('word-en');
+  });
+
+  it('makeWordQuestion 支持 mastery 弱词优先（SRS 接入）', () => {
+    // 构造掌握度：除 cat 外全部满级 → 必须抽到 cat
+    const all = getAllWords();
+    const mastery: Record<string, { lv: number }> = {};
+    for (const w of all) {
+      if (w.word === 'cat') continue;
+      mastery[`word:${w.word}`] = { lv: 5 };
+    }
+    for (let i = 0; i < 20; i++) {
+      const q = makeWordQuestion(1, undefined, mastery);
+      expect(q!.skill).toBe('word:cat');
+    }
+  });
+
+  it('听音选词题 makeWordListenQuestion', () => {
+    for (let i = 0; i < 5; i++) {
+      const q = makeWordListenQuestion();
+      expectValidQuestion(q);
+      expect(q!.kind).toBe('word-listen');
+      expect(q!.speak).toBeTruthy();
+      expect(q!.display).toBe('🔊');
+    }
+  });
+
+  it('拼写选择题 makeWordSpellQuestion', () => {
+    for (let i = 0; i < 5; i++) {
+      const q = makeWordSpellQuestion();
+      expectValidQuestion(q);
+      expect(q!.kind).toBe('word-spell');
+      expect(q!.options.length).toBe(4);
+    }
+  });
+
+  it('词族迁移题 makeWordFamilyQuestion 或回退', () => {
+    for (let i = 0; i < 10; i++) {
+      const q = makeWordFamilyQuestion();
+      expectValidQuestion(q);
+      expect(['word-family', 'word-en']).toContain(q!.kind);
+    }
+  });
+});
+
+describe('questions · 拆分模块 · sentence.ts · makeSentenceQuestion()', () => {
+  it('难度 1 看英文选中文', () => {
+    const q = makeSentenceQuestion(1);
+    expectValidQuestion(q);
+    expect(q!.kind).toBe('sentence-zh');
+    expect(q!.skill).toMatch(/^sentence:s\d+$/);
+  });
+
+  it('难度 2 听音选中文', () => {
+    const q = makeSentenceQuestion(2);
+    expectValidQuestion(q);
+    expect(q!.kind).toBe('sentence-listen');
+    expect(q!.speak).toBeTruthy();
+  });
+
+  it('难度 3 缺词填空（答案在选项中）', () => {
+    for (let i = 0; i < 10; i++) {
+      const q = makeSentenceQuestion(3);
+      expectValidQuestion(q);
+      expect(q!.kind).toBe('sentence-fill');
+      // 答案 id 存在且选项含下划线展示
+      expect(q!.display).toContain('______');
+    }
+  });
+
+  it('forceId 强制指定句子', () => {
+    const q = makeSentenceQuestion(2, 's1');
+    expectValidQuestion(q);
+    expect(q!.skill).toBe('sentence:s1');
   });
 });
 

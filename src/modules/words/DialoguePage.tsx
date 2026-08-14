@@ -11,6 +11,7 @@ import { sfxTap, sfxCorrect, sfxWrong, sfxStar } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 import { randomPraise, randomEncourage } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
+import { SpeechEvalButton } from '@/components/SpeechEvalButton';
 
 import { DIALOGUES, type Dialogue } from '@/data/dialogues';
 
@@ -202,15 +203,20 @@ export function DialoguePage() {
             </div>
           )}
 
-          {/* 跟读模式：听原声+我读好了 */}
+          {/* 跟读模式：听原声 + 发音评测（SpeechEvalButton 评分通过才算读好） */}
           {mode === 'repeat' && (
-            <div className="flex flex-wrap justify-center gap-2">
-              <CandyButton tone="blue" size="sm" onClick={() => speak(currentLine.en, { lang: 'en-US', rate: 0.7 })}>
-                {t('words.listenOriginal')}
-              </CandyButton>
-              <CandyButton tone="green" size="sm" onClick={nextLine} disabled={lineIdx + 1 >= selected.lines.length}>
-                {lineIdx + 1 >= selected.lines.length ? t('words.complete') : t('words.iRead')}
-              </CandyButton>
+            <div className="space-y-2">
+              <div className="flex justify-center gap-2">
+                <CandyButton tone="blue" size="sm" onClick={() => speak(currentLine.en, { lang: 'en-US', rate: 0.7 })}>
+                  {t('words.listenOriginal')}
+                </CandyButton>
+              </div>
+              <SpeechEvalButton
+                targetText={currentLine.en}
+                lang="en-US"
+                onPass={() => nextLine()}
+                className="w-full"
+              />
             </div>
           )}
 

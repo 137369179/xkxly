@@ -37,7 +37,8 @@ import { makeLetterQuestion } from './letter';
 import { makePoemQuestion, makePoemFillQuestion } from './poem';
 import { makeCategoryQuestion, makeOppositeQuestion, makeSimilarHanziQuestion } from './concept';
 import { makePinyinQuestion } from './pinyin';
-import { makeWordQuestion } from './word';
+import { makeWordQuestion, makeWordListenQuestion, makeWordSpellQuestion, makeWordFamilyQuestion, type MasteryMap } from './word';
+import { makeSentenceQuestion } from './sentence';
 import { makeMixedQuestion } from './mixed';
 import { wrongReason } from './wrongReason';
 import type { Difficulty } from './_shared';
@@ -71,6 +72,11 @@ export {
   // pinyin / word / mixed / wrongReason
   makePinyinQuestion,
   makeWordQuestion,
+  makeWordListenQuestion,
+  makeWordSpellQuestion,
+  makeWordFamilyQuestion,
+  type MasteryMap,
+  makeSentenceQuestion,
   makeMixedQuestion,
   wrongReason,
 };
@@ -122,8 +128,11 @@ export function questionForSkill(skill: string, difficulty: Difficulty = 1): Que
       // 知识点孤岛修复：pinyin:a → 生成顺口溜/示例字/类型识别题
       return makePinyinQuestion(difficulty, val);
     case 'word':
-      // 知识点孤岛修复：word:cat → 生成看图选词/看英文选中文/看中文选英文题
+      // 知识点孤岛修复：word:cat → 生成看图选词/看英文选中文/看中文选英文题（支持 mastery 弱词优先）
       return makeWordQuestion(difficulty, val);
+    case 'sentence':
+      // sentence:s1 → 句子题：看英文选中文/听音选中文/缺词填空
+      return makeSentenceQuestion(difficulty, val);
     case 'poem':
       return makePoemQuestion(POEMS, difficulty, val);
     default:
