@@ -1,4 +1,4 @@
-import { WORD_THEMES, type WordEntry, type WordTheme } from './words';
+import { WORD_THEMES, gradeOf, type WordEntry, type WordTheme } from './words';
 
 export { WORD_THEMES } from './words';
 export type { WordEntry, WordTheme } from './words';
@@ -60,4 +60,31 @@ export function getWordsByLevel(level: 1 | 2 | 3): WordEntry[] {
  */
 export function getWordCount(): number {
   return getAllWords().length;
+}
+
+/**
+ * 按学段获取单词（缺省 grade 按 level 推断）
+ */
+export function getWordsByGrade(grade: 1 | 2 | 3): WordEntry[] {
+  return getAllWords().filter((w) => gradeOf(w) === grade);
+}
+
+/**
+ * 按词族获取单词（family 字段匹配）
+ */
+export function getWordsByFamily(family: string): WordEntry[] {
+  const lower = family.toLowerCase().trim();
+  return getAllWords().filter((w) => w.family?.toLowerCase() === lower);
+}
+
+/**
+ * 获取全部高频词（Dolch，按学段）
+ */
+export { getAllSightWords, getSightWordsByGrade, getSightWordCount } from './sightWords';
+
+/**
+ * 按主题 id 获取主题（含单词数据）
+ */
+export function getThemeById(themeId: string): WordTheme | undefined {
+  return WORD_THEMES.find((t) => t.id === themeId);
 }

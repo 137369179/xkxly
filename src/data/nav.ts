@@ -23,7 +23,7 @@ export const NAV_ITEMS: NavItem[] = [
   { id: 'hanzi', label: '汉字识字', short: '汉字', emoji: '🀄', imageIcon: '/icons/hanzi.jpg', tone: 'green', desc: '300 字 · 玩认练写说' },
   { id: 'hanzi-listen', label: '听音识字', short: '听音', emoji: '👂', imageIcon: '/icons/hanzi.jpg', tone: 'green', desc: '听读音 · 点选正确汉字' },
   { id: 'pinyin', label: '拼音学习', short: '拼音', emoji: '📋', imageIcon: '/icons/pinyin.jpg', tone: 'blue', desc: '声母韵母 · 拼读' },
-  { id: 'words', label: '英语单词', short: '英语', emoji: '🔤', imageIcon: '/icons/storybook.jpg', tone: 'pink', desc: '74 词 · Phonics' },
+  { id: 'words', label: '英语单词', short: '英语', emoji: '🔤', imageIcon: '/icons/storybook.jpg', tone: 'pink', desc: '300+ 词 · 18 主题' },
   { id: 'logic', label: '逻辑挑战', short: '逻辑', emoji: '🧩', imageIcon: '/icons/logic.jpg', tone: 'green', desc: '找规律 · 动脑筋' },
   { id: 'fun', label: '趣味乐园', short: '趣味', emoji: '🎮', imageIcon: '/icons/storybook.jpg', tone: 'purple', desc: '对战 · 听力 · 创意' },
   { id: 'idioms', label: '成语故事', short: '成语', emoji: '🏯', imageIcon: '/icons/storybook.jpg', tone: 'purple', desc: '60 个成语故事' },
@@ -42,22 +42,14 @@ export const NAV_ITEMS: NavItem[] = [
   { id: 'wrongbook', label: '错题本', short: '错题', emoji: '📝', tone: 'orange', desc: 'AI 自适应复习 · 消灭错题' },
   { id: 'gamecenter', label: '游戏中心', short: '游戏', emoji: '🎮', imageIcon: '/icons/fun.jpg', tone: 'purple', desc: '闯关 · 对战 · 脑力 · 创意' },
   { id: 'story', label: '故事馆', short: '故事', emoji: '📚', imageIcon: '/icons/felt_storybook.jpg', tone: 'pink', desc: '绘本 · 儿歌 · 成语 · 古诗' },
-  { id: 'growth', label: '成长博物馆', short: '成长', emoji: '🏆', imageIcon: '/icons/felt_album.jpg', tone: 'green', desc: '徽章墙 · 等级 · 成长树' },
+  { id: 'growth', label: '成长荣誉馆', short: '荣誉', emoji: '🏆', imageIcon: '/icons/felt_album.jpg', tone: 'green', desc: '成长树 · 勋章荣誉 · 贴纸百宝箱', bottom: true },
   { id: 'content', label: 'AI 内容站', short: '内容', emoji: '📡', imageIcon: '/icons/felt_storybook.jpg', tone: 'purple', desc: 'AI 生成 · 故事谜语科普' },
 
   { id: 'research', label: '研究乐园', short: '研究', emoji: '🔬', imageIcon: '/icons/storybook.jpg', tone: 'blue', desc: '选题探索 · 记录发现' },
 
-  { id: 'adventure', label: '闯关冒险', short: '闯关', emoji: '🚀', imageIcon: '/icons/icon-192.png', tone: 'purple', desc: '闯关拿星星徽章', bottom: true },
+  { id: 'adventure', label: '闯关冒险', short: '闯关', emoji: '🚀', imageIcon: '/icons/icon-192.png', tone: 'purple', desc: '闯关拿星星徽章' },
 
-
-
-
-
-
-
-
-
-  { id: 'rewards', label: '奖励中心', short: '奖励', emoji: '🎁', imageIcon: '/icons/parent.jpg', tone: 'pink', desc: '贴纸册 · 徽章墙', bottom: true },
+  { id: 'rewards', label: '奖励中心', short: '奖励', emoji: '🎁', imageIcon: '/icons/parent.jpg', tone: 'pink', desc: '贴纸册 · 徽章墙' },
   { id: 'passport', label: '学习护照', short: '护照', emoji: '🛂', imageIcon: '/icons/crown.jpg', tone: 'purple', desc: '盖章里程碑 · 成就墙' },
   { id: 'parent', label: '家长中心', short: '家长', emoji: '👨‍👩‍👧', imageIcon: '/icons/parent.jpg', tone: 'green', desc: '报告 · 设置 · 护眼' },
 ];

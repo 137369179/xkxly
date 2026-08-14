@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { WORD_THEMES, searchWords, getWordCount } from '@/data/wordIndex';
+import { WORD_THEMES, searchWords, getWordCount, getSightWordsByGrade } from '@/data/wordIndex';
 import type { WordEntry } from '@/data/wordIndex';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { Tabs, type TabItem } from '@/components/ui/Tabs';
@@ -34,6 +34,7 @@ export default function WordsPage() {
   const [tab, setTab] = useState<Tab>('animals');
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<WordEntry | null>(null);
+  const [sightGrade, setSightGrade] = useState<1 | 2 | 3>(1);
   const progress = useProgress();
   const { t: tr } = useTranslation();
   // 标签的 i18n 必须在组件内随语言刷新（原模块级 translate() 会在首屏固化语言，
@@ -196,8 +197,19 @@ export default function WordsPage() {
             <p className="text-xs font-bold text-pink-600">
               {tr('words.sightWordsDesc')}
             </p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {[1, 2, 3].map((g) => (
+                <button
+                  key={g}
+                  onClick={() => { sfxTap(); setSightGrade(g as 1 | 2 | 3); }}
+                  className={`no-select rounded-full px-3 py-1 text-xs font-extrabold transition-transform hover:scale-105 active:scale-95 ${sightGrade === g ? 'bg-pink-500 text-white' : 'bg-white text-pink-700 border border-pink-200'}`}
+                >
+                  {tr('words.sightGrade' + g)}
+                </button>
+              ))}
+            </div>
             <div className="mt-2 flex flex-wrap justify-center sm:justify-start gap-1.5">
-              {['THE', 'IS', 'AND', 'YOU', 'CAN', 'SEE', 'MY', 'LIKE'].map((w) => (
+              {getSightWordsByGrade(sightGrade).slice(0, 12).map((w) => (
                 <button
                   key={w}
                   onClick={() => {
@@ -206,7 +218,7 @@ export default function WordsPage() {
                   }}
                   className="no-select rounded-xl bg-white px-3 py-1 text-xs font-extrabold text-pink-700 shadow-sm border border-pink-200 hover:scale-105 active:scale-95 transition-transform"
                 >
-                  {w} 🔊
+                  {w.toUpperCase()} 🔊
                 </button>
               ))}
             </div>

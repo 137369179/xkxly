@@ -91,12 +91,12 @@ export const SUBJECTS: Record<SubjectId, SubjectDef> = {
   word: {
     id: 'word', label: '英语', emoji: '💬', tone: 'pink',
     nodes: [
-      { emoji: '🐱', label: '基础词', expectedCount: 40 },
+      { emoji: '🐱', label: '基础词', expectedCount: 240 },
       { emoji: '📖', label: '句子', expectedCount: 20 },
-      { emoji: '🗣️', label: '对话', expectedCount: 14 },
+      { emoji: '🗣️', label: '对话', expectedCount: 12 },
     ],
     skillPrefixes: ['word:'],
-    desc: '74 词 · Phonics',
+    desc: '300+ 词 · 18 主题',
   },
   logic: {
     id: 'logic', label: '逻辑', emoji: '🧩', tone: 'purple',
