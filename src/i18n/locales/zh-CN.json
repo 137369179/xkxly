@@ -4027,6 +4027,7 @@
   "phonicsListen": {
     "title": "听力辨音",
     "subtitle": "听发音，选出对应的字母或字母组合",
+    "start": "开始挑战",
     "listenBtn": "听发音",
     "soundInfo": "发音：/{sound}/ &nbsp; 例：{example}",
     "correctFeedback": "对了！/{sound}/",

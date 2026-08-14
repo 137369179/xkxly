@@ -4027,6 +4027,7 @@
   "phonicsListen": {
     "title": "Listening & Sounds",
     "subtitle": "Listen and pick the matching letter or letter team",
+    "start": "Start",
     "listenBtn": "Listen",
     "soundInfo": "Sound: /{sound}/ &nbsp; e.g. {example}",
     "correctFeedback": "Correct! /{sound}/",

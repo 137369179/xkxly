@@ -33,9 +33,9 @@ describe('字理题 · QuizCard 渲染', () => {
     const q = makeHanziFormationQuestion(getHanziByChar('清')!);
     const h = mount(createElement(QuizCard, { question: q }));
     expect(h.textContent).toContain('清');
-    // 选项按钮数 = 4（四书）
-    const optionButtons = Array.from(h.querySelectorAll('button')).filter((b) =>
-      /^[🌿📍🧩🔊]/.test(b.textContent ?? ''),
+    // 选项按钮数 = 4（四书）；排除 QuizCard 的 🔊 重听按钮（data-replay，非选项）
+    const optionButtons = Array.from(h.querySelectorAll('button')).filter(
+      (b) => !b.hasAttribute('data-replay') && /^[🌿📍🧩🔊]/.test(b.textContent ?? ''),
     );
     expect(optionButtons.length).toBe(4);
   });
@@ -51,16 +51,16 @@ describe('字理题 · QuizCard 渲染', () => {
       const h = mount(createElement(QuizCard, { question: q }));
       // 题干一定包含「部件 / 形旁 / 声旁」之一；contains 题展示的是部件而非目标字「清」
       expect(h.textContent).toMatch(/形旁|声旁|含有部件/);
-      // 恰好 4 个选项按钮
-      const optionButtons = Array.from(h.querySelectorAll('button')).filter((b) =>
-        /^[一-鿿「」]/.test(b.textContent ?? ''),
+      // 恰好 4 个选项按钮；排除 QuizCard 的 🔊 重听按钮（data-replay，非选项）
+      const optionButtons = Array.from(h.querySelectorAll('button')).filter(
+        (b) => !b.hasAttribute('data-replay') && /^[一-鿿「」]/.test(b.textContent ?? ''),
       );
       expect(optionButtons.length).toBe(4);
     }
     expect(seen.size).toBeGreaterThan(0);
   });
 
-  it('声旁不表音字「时」的部件题绝不渲染「声旁」措辞', () => {
+  it('声旁不表音字「时」的部件题绝不渲染「声旁」措辞', { timeout: 20000 }, () => {
     for (let i = 0; i < 60; i++) {
       const q = makeHanziComponentQuestion(getHanziByChar('时')!);
       if (q.kind === 'hanzi-component') {

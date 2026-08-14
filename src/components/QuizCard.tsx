@@ -369,6 +369,24 @@ export function QuizCard({
       {/* 题干 */}
       <h3 className="text-center text-xl font-extrabold text-ink sm:text-2xl">{question.prompt}</h3>
 
+      {/* 听音类题目：提供手动重听按钮（与 autoSpeak 自动朗读互补，对所有听音游戏可复用） */}
+      {question.speak && (
+        <div className="mt-2 flex justify-center">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              void speak(question.speak!, { lang: question.speakLang ?? 'zh-CN', module: 'quiz' });
+            }}
+            className="flex items-center gap-1.5 rounded-full bg-candy-purple-soft px-4 py-1.5 text-sm font-extrabold text-candy-purple-deep shadow-candy-sm transition active:translate-y-[1px]"
+            aria-label={translate('quiz.listenAgainBtn')}
+            data-replay="audio"
+          >
+            🔊 {translate('quiz.listenAgainBtn')}
+          </button>
+        </div>
+      )}
+
       {/* 大号展示区 */}
       {question.display && (
         <div className="mt-5 mb-1 text-center">
