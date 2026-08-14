@@ -78,7 +78,7 @@ export default function IdiomsPage() {
 
   const nextGuess = () => {
     const pool = quizPoolRef.current;
-    const i = pool[Math.floor(Math.random() * pool.length)]!;
+    const i = pool[Math.floor(Math.random() * pool.length)] ?? IDIOMS[0]!;
     setQuiz(i);
     setChosen(null);
     askedAtRef.current = Date.now();

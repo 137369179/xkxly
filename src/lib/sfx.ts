@@ -110,18 +110,31 @@ const CORRECT_VARIANTS: ToneSpec[][] = [
   ],
 ];
 
-/** 答对：从变种池随机抽一个上行和弦琶音播放 */
-export function sfxCorrect(): void {
-  const variant = CORRECT_VARIANTS[Math.floor(Math.random() * CORRECT_VARIANTS.length)]!
-  playTones(variant);
+/** 触感震动辅助（移动端/平板设备支持时触发轻微触感） */
+function haptic(pattern: number | number[]): void {
+  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+    try {
+      navigator.vibrate(pattern);
+    } catch {
+      // 忽略部分浏览器对震动策略的安全限制
+    }
+  }
 }
 
-/** 答错：柔和的下行二音（不吓人，不打击信心） */
+/** 答对：从变种池随机抽一个上行和弦琶音播放并触发轻触感 */
+export function sfxCorrect(): void {
+  const variant = CORRECT_VARIANTS[Math.floor(Math.random() * CORRECT_VARIANTS.length)] ?? CORRECT_VARIANTS[0]!;
+  playTones(variant);
+  haptic(40);
+}
+
+/** 答错：柔和的下行二音（不吓人，不打击信心）并触发双短震 */
 export function sfxWrong(): void {
   playTones([
     { freq: 392, at: 0, dur: 0.14, type: 'sine', gain: 0.12 },
     { freq: 311.13, at: 0.11, dur: 0.2, type: 'sine', gain: 0.11 },
   ]);
+  haptic([30, 40, 30]);
 }
 
 /** 获得星星 */
@@ -131,6 +144,7 @@ export function sfxStar(): void {
     { freq: 1567.98, at: 0.07, dur: 0.1, type: 'sine', gain: 0.12 },
     { freq: 2093, at: 0.14, dur: 0.22, type: 'sine', gain: 0.1 },
   ]);
+  haptic(50);
 }
 
 /** 通关 / 解锁徽章：欢快的小旋律 */
@@ -143,6 +157,7 @@ export function sfxWin(): void {
     { freq: 783.99, at: 0.54, dur: 0.12, type: 'sine', gain: 0.12 },
     { freq: 1046.5, at: 0.64, dur: 0.34, type: 'sine', gain: 0.16 },
   ]);
+  haptic([60, 50, 60, 50, 80]);
 }
 
 /** 翻牌 */
