@@ -14,6 +14,8 @@ export interface QuizSessionRunnerProps {
   title?: string;
   onFinish?: (result: QuizSessionResult) => void;
   onExit?: () => void;
+  /** 每题作答后回调（correct + 本题 Question），供消费方做专属逻辑 */
+  onAnswer?: (correct: boolean, question: Question) => void;
 }
 
 export function QuizSessionRunner({
@@ -24,12 +26,14 @@ export function QuizSessionRunner({
   title = '智能小挑战',
   onFinish,
   onExit,
+  onAnswer,
 }: QuizSessionRunnerProps) {
   const session = useQuizSession({
     genQuestion,
     totalCount: count,
     timeLimitSec,
     onComplete: onFinish,
+    onAnswer,
   });
 
   const progressPct = timeLimitSec

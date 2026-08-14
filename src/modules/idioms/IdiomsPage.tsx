@@ -2,26 +2,26 @@
  * 成语故事屋 · 看故事学成语 + 猜成语游戏 + AI 讲故事 + AI 造句
  */
 
-import { useState, useMemo, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useState, useMemo, useRef } from 'react';
+import { motion } from 'motion/react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { Tabs, type TabItem } from '@/components/ui/Tabs';
 import { AiPanel } from '@/components/ai/AiPanel';
 import { useStore } from '@/store/useStore';
 import { speak } from '@/lib/speech';
-import { sfxTap, sfxWin, sfxWrong, sfxStar } from '@/lib/sfx';
-import { celebrateSmall } from '@/lib/celebrate';
+import { sfxTap, sfxWin, sfxStar } from '@/lib/sfx';
 import { IDIOMS, getIdiomsByLevel, type Idiom } from '@/data/idioms';
 import { IdiomChain } from './IdiomChain';
-import { cn, shuffle } from '@/lib/utils';
+import { shuffle } from '@/lib/utils';
 import { useAiStream, useAiTask } from '@/lib/ai/useAi';
 import { idiomStoryTask, idiomSentenceTask, type IdiomSentenceData } from '@/lib/ai/tasks/idiom';
 import { TONE_STYLE } from '@/lib/tones';
 import { useTranslation } from '@/i18n/useTranslation';
-import { recordAttempt } from '@/lib/adaptChain';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
 import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
+import { QuizSessionRunner } from '@/components/QuizSessionRunner';
+import type { Question } from '@/types';
 
 type Tab = 'library' | 'guess' | 'chain';
 
@@ -38,21 +38,9 @@ export default function IdiomsPage() {
   const [level, setLevel, levelMeta] = useAdaptiveDifficultyState('idiom');
   const [selected, setSelected] = useState<Idiom | null>(null);
   const learnSkill = useStore(s => s.learnSkill);
-  const practice = useStore(s => s.practice);
 
-  // 猜成语
-  const [quiz, setQuiz] = useState<Idiom | null>(null);
-  const [chosen, setChosen] = useState<string | null>(null);
-  const [ok, setOk] = useState(0);
-  const [ng, setNg] = useState(0);
-  const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // 组件卸载时清理定时器
-  useEffect(() => {
-    return () => {
-      if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
-    };
-  }, []);
+  // 猜成语：用统一 QuizSessionRunner 驱动（出题循环/进度/连对/结算由 Runner 托管）
+  const [guessStarted, setGuessStarted] = useState(false);
 
   const list = useMemo(() => getIdiomsByLevel(level), [level]);
 
@@ -64,51 +52,33 @@ export default function IdiomsPage() {
   const quizPoolRef = useRef<Idiom[]>(IDIOMS);
   quizPoolRef.current = list.length >= 4 ? list : IDIOMS;
 
-  /** 本题出现的时刻，用来给自适应引擎提供反应时信号 */
-  const askedAtRef = useRef(0);
+  /** 由当前难度池构造一道「看释义猜成语」题目（Question 契约对接 QuizCard） */
+  const genIdiomQuestion = (): Question | null => {
+    const pool = quizPoolRef.current;
+    if (!pool.length) return null;
+    const chosen = pool[Math.floor(Math.random() * pool.length)]!;
+    const samePool = pool.filter(i => i.word !== chosen.word);
+    const wrongs = shuffle(
+      samePool.length >= 3 ? samePool : IDIOMS.filter(i => i.word !== chosen.word),
+    ).slice(0, 3);
+    const options = shuffle([chosen, ...wrongs]).map(i => ({ id: i.word, label: i.word }));
+    return {
+      id: `idiom-${chosen.id}`,
+      kind: 'idiom-guess',
+      prompt: chosen.meaning,
+      display: chosen.emoji,
+      options,
+      answerId: chosen.word,
+      skill: `idiom:${chosen.id}`,
+      difficulty: level as 1 | 2 | 3,
+    };
+  };
 
   const startGuess = () => {
     sfxTap();
-    setOk(0);
-    setNg(0);
     // 开一局是安全边界：把小智的最新建议应用上来
     levelMeta.syncNow();
-    nextGuess();
-  };
-
-  const nextGuess = () => {
-    const pool = quizPoolRef.current;
-    const i = pool[Math.floor(Math.random() * pool.length)] ?? IDIOMS[0]!;
-    setQuiz(i);
-    setChosen(null);
-    askedAtRef.current = Date.now();
-  };
-
-  const handleGuess = (opt: string) => {
-    if (chosen || !quiz) return;
-    setChosen(opt);
-    const correct = opt === quiz.word;
-    const skill = `idiom:${quiz.id}`;
-    // 喂给自适应引擎：对错 + 反应时（这个模块不走 QuizCard，得自己记）
-    recordAttempt('idiom', {
-      correct,
-      ms: askedAtRef.current ? Date.now() - askedAtRef.current : 0,
-      hintUsed: false,
-      ...(correct ? {} : { errorType: 'idiom-guess' }),
-    });
-    if (correct) {
-      sfxWin();
-      celebrateSmall();
-      setOk(o => o + 1);
-      learnSkill(skill);
-    } else {
-      sfxWrong();
-      setNg(n => n + 1);
-      // 答错记录到错题本，便于后续复习（透传难度，启用难度感知回退）
-      practice(skill, false, 0, level);
-    }
-    if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
-    nextTimerRef.current = setTimeout(() => nextGuess(), 1500);
+    setGuessStarted(true);
   };
 
   if (tab === 'chain') {
@@ -122,7 +92,7 @@ export default function IdiomsPage() {
   }
 
   if (tab === 'guess') {
-    if (!quiz) {
+    if (!guessStarted) {
       return (
         <div className="space-y-5">
           <PageHeader emoji="🎯" title={t('idioms.guessTitle')} subtitle={t('idioms.guessSubtitle')} tone="orange" />
@@ -140,60 +110,28 @@ export default function IdiomsPage() {
       );
     }
 
-    // 干扰项也从同难度池里取，选项之间难度一致才是公平的题
-    const samePool = quizPoolRef.current.filter(i => i.word !== quiz.word);
-    const wrongs = shuffle(samePool.length >= 3 ? samePool : IDIOMS.filter(i => i.word !== quiz.word)).slice(0, 3);
-    const options = shuffle([quiz, ...wrongs]).map(i => i.word);
-
     return (
       <div className="space-y-5">
-        <PageHeader emoji="🎯" title={t('idioms.guessTitle')} subtitle={t('idioms.progress', { ok, ng })} tone="orange" />
+        <PageHeader emoji="🎯" title={t('idioms.guessTitle')} subtitle={t('idioms.guessSubtitle')} tone="orange" />
         <Tabs items={TABS} value={tab} onChange={setTab} tone="orange" layoutId="idiom-tabs" />
-        <Panel className="text-center">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={quiz.id}
-              initial={{ y: 10, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -10, opacity: 0 }}
-            >
-              <div className="text-6xl">{quiz.emoji}</div>
-              <p className="mt-3 text-lg font-extrabold text-ink">{quiz.meaning}</p>
-            </motion.div>
-          </AnimatePresence>
-
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            {options.map(opt => {
-              const isAnswer = opt === quiz.word;
-              const isChosen = opt === chosen;
-              return (
-                <CandyButton
-                  key={opt}
-                  tone={isChosen ? (isAnswer ? 'green' : 'orange') : 'purple'}
-                  variant={isChosen ? 'solid' : 'soft'}
-                  size="lg"
-                  fullWidth
-                  onClick={() => handleGuess(opt)}
-                >
-                  {opt}
-                </CandyButton>
-              );
-            })}
-          </div>
-
-          {chosen && (
-            <p className={cn('mt-3 text-sm font-bold', chosen === quiz.word ? 'text-candy-green-deep' : 'text-candy-orange-deep')}>
-              {chosen === quiz.word ? t('idioms.correct') : t('idioms.answerIs', { answer: quiz.word })}
-            </p>
-          )}
-        </Panel>
+        <QuizSessionRunner
+          genQuestion={genIdiomQuestion}
+          count={8}
+          title={t('idioms.guessTitle')}
+          tone="orange"
+          onAnswer={(correct, q) => {
+            // 答对即标记该成语为「已掌握」（保留原猜成语的专属行为）
+            if (correct) learnSkill(q.skill);
+          }}
+          onExit={() => setGuessStarted(false)}
+        />
       </div>
     );
   }
 
   // Library tab
   if (selected) {
-    return <IdiomDetail idiom={selected} onBack={() => setSelected(null)} onLearn={() => { learnSkill(`idiom:${selected.id}`); sfxWin(); celebrateSmall(); }} />;
+    return <IdiomDetail idiom={selected} onBack={() => setSelected(null)} onLearn={() => { learnSkill(`idiom:${selected.id}`); sfxWin(); }} />;
   }
 
   return (

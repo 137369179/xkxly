@@ -15,6 +15,8 @@ export interface QuizSessionOptions {
   onComplete?: (result: QuizSessionResult) => void;
   /** 是否自动记录答题进度到 Store */
   autoRecord?: boolean;
+  /** 每题作答后回调（correct + 本题 Question），供消费方做专属逻辑（如标记掌握/额外计分） */
+  onAnswer?: (correct: boolean, question: Question) => void;
 }
 
 export interface QuizSessionResult {
@@ -31,6 +33,7 @@ export function useQuizSession({
   timeLimitSec,
   onComplete,
   autoRecord = true,
+  onAnswer,
 }: QuizSessionOptions) {
   const practice = useStore((s) => s.practice);
   const addStars = useStore((s) => s.addStars);
@@ -92,6 +95,9 @@ export function useQuizSession({
         practice(current.skill, correct, 1, (current.difficulty ?? 1) as 1 | 2 | 3);
       }
 
+      // 单题专属回调（消费方做标记掌握/额外计分等）
+      onAnswer?.(correct, current);
+
       const nextIdx = index + 1;
       setIndex(nextIdx);
 
@@ -116,7 +122,7 @@ export function useQuizSession({
         }
       }
     },
-    [isDone, current, score, combo, maxCombo, autoRecord, index, timeLimitSec, totalCount, genQuestion, practice, addStars, onComplete],
+    [isDone, current, score, combo, maxCombo, autoRecord, index, timeLimitSec, totalCount, genQuestion, practice, addStars, onComplete, onAnswer],
   );
 
   // 重新开始
