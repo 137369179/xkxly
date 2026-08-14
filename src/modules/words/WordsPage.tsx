@@ -1,15 +1,18 @@
 import { useMemo, useState } from 'react';
+import { lazy, Suspense } from 'react';
 import { WORD_THEMES, searchWords, getWordCount, getSightWordsByGrade } from '@/data/wordIndex';
 import type { WordEntry } from '@/data/wordIndex';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { Tabs, type TabItem } from '@/components/ui/Tabs';
 import { ProgressBar } from '@/components/ui/ProgressBar';
+import { CandyButton } from '@/components/ui/Button';
 import { useProgress } from '@/store/useStore';
 import { sfxTap } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 
 import { TONE_STYLE } from '@/lib/tones';
 import { useTranslation } from '@/i18n/useTranslation';
+import { ENGLISH_STAGES, currentStage, stageOverview, type EnglishStage } from '@/lib/englishCurriculum';
 import { WordLearn } from './WordLearn';
 import { PhonicsPage } from './PhonicsPage';
 import { SpellingTest } from './SpellingTest';
@@ -20,137 +23,173 @@ import { PhonicsListen } from './PhonicsListen';
 import { BodyParts } from './BodyParts';
 import { CvcWordBuilder } from './CvcWordBuilder';
 import { WordFamilyGame } from './WordFamilyGame';
-import { lazy, Suspense } from 'react';
 
 const SentencePage = lazy(() => import('./SentencePage'));
 
-type Tab = 'animals' | 'colors' | 'numbers' | 'family' | 'food' | 'nature' | 'phonics' | 'sentences' | 'spell' | 'dialogue' | 'match' | 'review' | 'listen' | 'body' | 'builder' | 'wordfamily';
+type MainTab = 'course' | 'words' | 'practice' | 'review';
+type PracticeTab = 'phonics' | 'sentences' | 'spell' | 'dialogue' | 'match' | 'listen' | 'builder' | 'wordfamily' | 'body';
+type GradeFilter = 'all' | 1 | 2 | 3;
 
-const THEME_MAP: Record<string, string> = {
-  animals: 'animals', colors: 'colors', numbers: 'numbers',
-  family: 'family', food: 'food', nature: 'nature',
+/** 练习板块功能清单 */
+const PRACTICE_ITEMS: { id: PracticeTab; emoji: string; labelKey: string; descKey: string }[] = [
+  { id: 'phonics', emoji: '🔤', labelKey: 'words.tab.phonics', descKey: 'words.practicePhonicsDesc' },
+  { id: 'spell', emoji: '✏️', labelKey: 'words.tab.spell', descKey: 'words.practiceSpellDesc' },
+  { id: 'dialogue', emoji: '💬', labelKey: 'words.tab.dialogue', descKey: 'words.practiceDialogueDesc' },
+  { id: 'sentences', emoji: '🗣️', labelKey: 'words.tab.sentences', descKey: 'words.practiceSentenceDesc' },
+  { id: 'match', emoji: '🔗', labelKey: 'words.tab.match', descKey: 'words.practiceMatchDesc' },
+  { id: 'listen', emoji: '👂', labelKey: 'words.tab.listen', descKey: 'words.practiceListenDesc' },
+  { id: 'builder', emoji: '🧱', labelKey: 'words.tab.builder', descKey: 'words.practiceBuilderDesc' },
+  { id: 'wordfamily', emoji: '🔗', labelKey: 'words.tab.wordFamily', descKey: 'words.practiceFamilyDesc' },
+  { id: 'body', emoji: '👤', labelKey: 'words.tab.body', descKey: 'words.practiceBodyDesc' },
+];
+
+/** 阶段 → 练习入口映射（课程页的「开始学习」跳转） */
+const STAGE_ACTIONS: Record<EnglishStage, { main: MainTab; practice?: PracticeTab }> = {
+  1: { main: 'words' },
+  2: { main: 'practice', practice: 'phonics' },
+  3: { main: 'words' },
+  4: { main: 'practice', practice: 'sentences' },
+  5: { main: 'practice', practice: 'dialogue' },
 };
 
 export default function WordsPage() {
-  const [tab, setTab] = useState<Tab>('animals');
+  const [mainTab, setMainTab] = useState<MainTab>('course');
+  const [practiceTab, setPracticeTab] = useState<PracticeTab>('phonics');
   const [query, setQuery] = useState('');
+  const [themeId, setThemeId] = useState('animals');
+  const [gradeFilter, setGradeFilter] = useState<GradeFilter>('all');
   const [selected, setSelected] = useState<WordEntry | null>(null);
   const [sightGrade, setSightGrade] = useState<1 | 2 | 3>(1);
   const progress = useProgress();
   const { t: tr } = useTranslation();
-  // 标签的 i18n 必须在组件内随语言刷新（原模块级 translate() 会在首屏固化语言，
-  // 切换语言后标签不变）；useMemo 仅在语言变化时重算。
-  const TABS: TabItem<Tab>[] = useMemo(() => [
-    { id: 'animals', label: tr('words.tab.animals'), emoji: '🐱' },
-    { id: 'colors', label: tr('words.tab.colors'), emoji: '🌈' },
-    { id: 'numbers', label: tr('words.tab.numbers'), emoji: '🔢' },
-    { id: 'family', label: tr('words.tab.family'), emoji: '👨‍👩‍👧' },
-    { id: 'food', label: tr('words.tab.food'), emoji: '🍎' },
-    { id: 'nature', label: tr('words.tab.nature'), emoji: '🌳' },
-    { id: 'phonics', label: tr('words.tab.phonics'), emoji: '🔤' },
-    { id: 'sentences', label: tr('words.tab.sentences'), emoji: '🗣️' },
-    { id: 'spell', label: tr('words.tab.spell'), emoji: '✏️' },
-    { id: 'dialogue', label: tr('words.tab.dialogue'), emoji: '💬' },
-    { id: 'match', label: tr('words.tab.match'), emoji: '🔗' },
-    { id: 'review', label: tr('words.tab.review'), emoji: '📚' },
-    { id: 'listen', label: tr('words.tab.listen'), emoji: '👂' },
-    { id: 'builder', label: tr('words.tab.builder'), emoji: '🔤' },
-    { id: 'wordfamily', label: tr('words.tab.wordFamily'), emoji: '🔗' },
-    { id: 'body', label: tr('words.tab.body'), emoji: '👤' },
+
+  const MAIN_TABS: TabItem<MainTab>[] = useMemo(() => [
+    { id: 'course', label: tr('words.tab.course'), emoji: '📚' },
+    { id: 'words', label: tr('words.tab.words'), emoji: '📖' },
+    { id: 'practice', label: tr('words.tab.practice'), emoji: '🎯' },
+    { id: 'review', label: tr('words.tab.review'), emoji: '🔁' },
   ], [tr]);
 
-  const themeId = THEME_MAP[tab]! || 'animals';
   const theme = WORD_THEMES.find((t) => t.id === themeId) ?? WORD_THEMES[0]!;
   const tone = theme.tone;
 
   const list = useMemo(() => {
     if (query.trim()) return searchWords(query.trim());
-    return theme.words;
-  }, [theme, query]);
+    let words = theme.words;
+    if (gradeFilter !== 'all') words = words.filter((w) => (w.grade ?? w.level) === gradeFilter);
+    return words;
+  }, [theme, query, gradeFilter]);
 
-  if (tab === 'phonics') {
+  /** 课程页：开始某阶段 */
+  const goStage = (stage: EnglishStage) => {
+    sfxTap();
+    const act = STAGE_ACTIONS[stage];
+    setMainTab(act.main);
+    if (act.practice) setPracticeTab(act.practice);
+  };
+
+  /* ============ 课程板块 ============ */
+  if (mainTab === 'course') {
+    const cur = currentStage(progress);
+    const overview = stageOverview(progress);
     return (
       <div className="space-y-5">
-        <PageHeader iconType="town" title={tr('words.phonicsTitle')} subtitle={tr('words.phonicsSubtitle')} tone="purple" />
-        <Tabs items={TABS} value={tab} onChange={setTab} tone="purple" layoutId="words-tabs" />
-        <PhonicsPage />
+        <PageHeader iconType="town" title={tr('words.courseTitle')} subtitle={tr('words.courseSubtitle')} tone="purple" />
+        <Tabs items={MAIN_TABS} value={mainTab} onChange={setMainTab} tone="purple" layoutId="words-main-tabs" />
+
+        {/* 当前阶段横幅 */}
+        <Panel className="border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50">
+          <div className="flex items-center gap-4">
+            <span className="text-5xl">{ENGLISH_STAGES[cur - 1]!.emoji}</span>
+            <div className="flex-1">
+              <p className="text-xs font-bold text-ink-soft">{tr('words.courseNowOn')}</p>
+              <p className="text-lg font-black text-ink">{ENGLISH_STAGES[cur - 1]!.name} · {tr('words.courseStage')} {cur}/5</p>
+              <p className="text-sm font-bold text-ink-soft">{ENGLISH_STAGES[cur - 1]!.desc}</p>
+            </div>
+            <CandyButton tone="purple" size="sm" onClick={() => goStage(cur)}>
+              {tr('words.courseStart')}
+            </CandyButton>
+          </div>
+        </Panel>
+
+        {/* 5 阶段卡片 */}
+        <div className="space-y-3">
+          {overview.map(({ def, done, unlocked, completed }) => {
+            const isCurrent = def.stage === cur;
+            return (
+              <button
+                key={def.stage}
+                onClick={() => unlocked && goStage(def.stage)}
+                disabled={!unlocked}
+                className={`w-full rounded-2xl border-4 p-3 text-left transition-all active:translate-y-[1px] ${
+                  completed ? 'border-candy-green-soft bg-candy-green-soft/40'
+                  : isCurrent ? 'border-purple-300 bg-white shadow-md'
+                  : unlocked ? 'border-purple-100 bg-white'
+                  : 'border-gray-100 bg-gray-50 opacity-60'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">{unlocked ? def.emoji : '🔒'}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <p className="text-base font-extrabold text-ink">
+                        {tr('words.courseStage')} {def.stage} · {def.name}
+                        {completed && <span className="ml-2 text-xs text-candy-green-deep">✅ {tr('words.courseDone')}</span>}
+                        {isCurrent && !completed && <span className="ml-2 rounded-full bg-purple-500 px-2 py-0.5 text-[10px] font-black text-white">{tr('words.courseNow')}</span>}
+                      </p>
+                      <span className="text-xs font-bold text-ink-soft">{done}/{def.targetCount}</span>
+                    </div>
+                    <p className="mt-0.5 text-xs font-bold text-ink-soft">{def.desc} · {tr('words.courseGoal')}：{def.goal}</p>
+                    <ProgressBar value={done} max={def.targetCount || 1} tone={def.tone} className="mt-2" />
+                    {!unlocked && <p className="mt-1 text-[11px] font-bold text-ink/50">{def.unlockHint}</p>}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
     );
   }
 
-  if (tab === 'listen') {
-
+  /* ============ 练习板块 ============ */
+  if (mainTab === 'practice') {
+    const practiceTabs: TabItem<PracticeTab>[] = PRACTICE_ITEMS.map((it) => ({
+      id: it.id, label: tr(it.labelKey), emoji: it.emoji,
+    }));
     return (
       <div className="space-y-5">
-        <PageHeader emoji="👂" title={tr('words.listenTitle')} subtitle={tr('words.listenSubtitle')} tone="blue" />
-        <Tabs items={TABS} value={tab} onChange={setTab} tone="blue" layoutId="words-tabs" />
-        <PhonicsListen />
+        <PageHeader emoji="🎯" title={tr('words.practiceTitle')} subtitle={tr('words.practiceSubtitle')} tone="pink" />
+        <Tabs items={MAIN_TABS} value={mainTab} onChange={setMainTab} tone="pink" layoutId="words-main-tabs" />
+
+        {practiceTab === 'phonics' && <><Tabs items={practiceTabs} value={practiceTab} onChange={setPracticeTab} tone="purple" layoutId="words-practice-tabs" /><PhonicsPage /></>}
+        {practiceTab === 'spell' && <><Tabs items={practiceTabs} value={practiceTab} onChange={setPracticeTab} tone="pink" layoutId="words-practice-tabs" /><SpellingTest /></>}
+        {practiceTab === 'dialogue' && <><Tabs items={practiceTabs} value={practiceTab} onChange={setPracticeTab} tone="pink" layoutId="words-practice-tabs" /><DialoguePage /></>}
+        {practiceTab === 'sentences' && (
+          <><Tabs items={practiceTabs} value={practiceTab} onChange={setPracticeTab} tone="blue" layoutId="words-practice-tabs" />
+            <Suspense fallback={<div className="py-8 text-center text-sm font-bold text-ink-soft">加载中…</div>}><SentencePage /></Suspense></>
+        )}
+        {practiceTab === 'match' && <><Tabs items={practiceTabs} value={practiceTab} onChange={setPracticeTab} tone="green" layoutId="words-practice-tabs" /><WordMatch /></>}
+        {practiceTab === 'listen' && <><Tabs items={practiceTabs} value={practiceTab} onChange={setPracticeTab} tone="blue" layoutId="words-practice-tabs" /><PhonicsListen /></>}
+        {practiceTab === 'builder' && <><Tabs items={practiceTabs} value={practiceTab} onChange={setPracticeTab} tone="pink" layoutId="words-practice-tabs" /><CvcWordBuilder /></>}
+        {practiceTab === 'wordfamily' && <><Tabs items={practiceTabs} value={practiceTab} onChange={setPracticeTab} tone="purple" layoutId="words-practice-tabs" /><WordFamilyGame /></>}
+        {practiceTab === 'body' && <><Tabs items={practiceTabs} value={practiceTab} onChange={setPracticeTab} tone="blue" layoutId="words-practice-tabs" /><BodyParts /></>}
       </div>
     );
   }
 
-  if (tab === 'body') {
+  /* ============ 复习板块 ============ */
+  if (mainTab === 'review') {
     return (
       <div className="space-y-5">
-        <PageHeader emoji="👤" title={tr('words.bodyTitle')} subtitle={tr('words.bodySubtitle')} tone="blue" />
-        <Tabs items={TABS} value={tab} onChange={setTab} tone="blue" layoutId="words-tabs" />
-        <BodyParts />
-      </div>
-    );
-  }
-
-
-
-  if (tab === 'spell') {
-    return (
-      <div className="space-y-5">
-        <PageHeader emoji="✏️" title={tr('words.spellTitle')} subtitle={tr('words.spellSubtitle')} tone="pink" />
-        <Tabs items={TABS} value={tab} onChange={setTab} tone="pink" layoutId="words-tabs" />
-        <SpellingTest />
-      </div>
-    );
-  }
-
-  if (tab === 'dialogue') {
-    return (
-      <div className="space-y-5">
-        <PageHeader emoji="💬" title={tr('words.dialogueTitle')} subtitle={tr('words.dialogueSubtitle')} tone="pink" />
-        <Tabs items={TABS} value={tab} onChange={setTab} tone="pink" layoutId="words-tabs" />
-        <DialoguePage />
-      </div>
-    );
-  }
-
-  if (tab === 'sentences') {
-    return (
-      <div className="space-y-5">
-        <PageHeader emoji="🗣️" title={tr('words.sentencesTitle')} subtitle={tr('words.sentencesSubtitle')} tone="blue" />
-        <Tabs items={TABS} value={tab} onChange={setTab} tone="blue" layoutId="words-tabs" />
-        <Suspense fallback={<div className="py-8 text-center text-sm font-bold text-ink-soft">加载中…</div>}>
-          <SentencePage />
-        </Suspense>
-      </div>
-    );
-  }
-
-  if (tab === 'match') {
-    return (
-      <div className="space-y-5">
-        <Tabs items={TABS} value={tab} onChange={setTab} tone="green" layoutId="words-tabs" />
-        <WordMatch />
-      </div>
-    );
-  }
-
-  if (tab === 'review') {
-    return (
-      <div className="space-y-5">
-        <Tabs items={TABS} value={tab} onChange={setTab} tone="green" layoutId="words-tabs" />
+        <PageHeader emoji="🔁" title={tr('words.tab.review')} subtitle={tr('words.reviewSubtitle')} tone="green" />
+        <Tabs items={MAIN_TABS} value={mainTab} onChange={setMainTab} tone="green" layoutId="words-main-tabs" />
         <WordReview />
       </div>
     );
   }
 
+  /* ============ 词库板块 ============ */
   if (selected) {
     return (
       <div className="space-y-5">
@@ -162,34 +201,13 @@ export default function WordsPage() {
     );
   }
 
-  if (tab === 'wordfamily') {
-    return (
-      <div className="space-y-5">
-        <PageHeader iconType="town" title={tr('words.wordFamilyPageTitle')} subtitle={tr('words.wordFamilyPageSub')} tone="purple" />
-        <Tabs items={TABS} value={tab} onChange={setTab} tone="purple" layoutId="words-tabs" />
-        <WordFamilyGame />
-      </div>
-    );
-  }
-
-  if (tab === 'builder') {
-    return (
-      <div className="space-y-5">
-        <PageHeader iconType="town" title={tr('words.builderTitle')} subtitle={tr('words.builderSubtitle')} tone="pink" />
-        <Tabs items={TABS} value={tab} onChange={(v) => setTab(v as Tab)} tone="pink" />
-
-
-        <CvcWordBuilder />
-      </div>
-    );
-  }
-
-
   const learnedCount = list.filter(w => (progress.mastery[`word:${w.word}`]?.lv ?? 0) >= 1).length;
 
   return (
     <div className="space-y-5">
-      <PageHeader iconType="town" title={tr('words.builderTitle')} subtitle={tr('words.homeSubtitle', { count: getWordCount() })} tone={tone} />
+      <PageHeader iconType="town" title={tr('words.wordsTitle')} subtitle={tr('words.homeSubtitle', { count: getWordCount() })} tone={tone} />
+      <Tabs items={MAIN_TABS} value={mainTab} onChange={setMainTab} tone="blue" layoutId="words-main-tabs" />
+
       {/* 3D 羊毛毡 Sight Words 魔法高频词宝盒 */}
       <Panel className="border-2 border-pink-300 bg-gradient-to-r from-pink-50 via-purple-50 to-rose-50">
         <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -238,6 +256,30 @@ export default function WordsPage() {
         </div>
       </Panel>
 
+      {/* 主题 + 学段筛选 */}
+      <div className="flex flex-wrap gap-1.5">
+        {WORD_THEMES.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => { sfxTap(); setThemeId(t.id); }}
+            className={`no-select rounded-full px-3 py-1 text-xs font-extrabold transition-transform hover:scale-105 ${themeId === t.id ? 'bg-blue-500 text-white' : 'bg-white text-ink-soft border border-blue-200'}`}
+          >
+            {t.emoji} {t.name}
+          </button>
+        ))}
+      </div>
+      <div className="flex gap-1.5">
+        {(['all', 1, 2, 3] as GradeFilter[]).map((g) => (
+          <button
+            key={g}
+            onClick={() => { sfxTap(); setGradeFilter(g); }}
+            className={`no-select rounded-full px-3 py-1 text-xs font-extrabold ${gradeFilter === g ? 'bg-candy-orange-soft text-candy-orange-deep' : 'bg-white text-ink-soft border border-orange-200'}`}
+          >
+            {g === 'all' ? tr('words.gradeAll') : tr('words.grade' + g)}
+          </button>
+        ))}
+      </div>
+
       <Panel>
         <div className="mb-3 flex items-center justify-between">
           <span className="text-sm font-bold text-ink-soft">{theme.emoji} {theme.name} · {theme.desc}</span>
@@ -245,7 +287,6 @@ export default function WordsPage() {
         </div>
         <ProgressBar value={learnedCount} max={list.length || 1} tone={tone} />
       </Panel>
-
 
       <input
         value={query}

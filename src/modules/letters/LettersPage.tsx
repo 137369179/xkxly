@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { navigate } from '@/lib/router';
+import { useProgress } from '@/store/useStore';
+import { masteredCount } from '@/lib/englishCurriculum';
 import { useTranslation } from '@/i18n/useTranslation';
 import { PageHeader } from '@/components/ui/Card';
 import { Tabs } from '@/components/ui/Tabs';
@@ -11,8 +14,11 @@ import { LetterOrder } from './LetterOrder';
 type TabId = 'wall' | 'match' | 'study' | 'trace' | 'order';
 
 export default function LettersPage() {
-  const { t } = useTranslation();
   const [tab, setTab] = useState<TabId>('wall');
+  const progress = useProgress();
+  const { t } = useTranslation();
+  const lettersDone = masteredCount(progress, 'letter:');
+  const unlockedPhonics = lettersDone >= 8;
 
   return (
     <div>
@@ -22,6 +28,22 @@ export default function LettersPage() {
         subtitle={t('letters.subtitle')}
         tone="blue"
       />
+
+      {unlockedPhonics && (
+        <button
+          onClick={() => navigate('words')}
+          className="w-full rounded-2xl border-4 border-purple-300 bg-gradient-to-r from-purple-50 to-pink-50 p-3 text-left transition-all hover:bg-purple-100 active:translate-y-[1px]"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">🎉</span>
+            <div className="flex-1">
+              <p className="text-sm font-black text-purple-900">{t('letters.phonicsUnlockTitle')}</p>
+              <p className="text-xs font-bold text-purple-600">{t('letters.phonicsUnlockDesc', { n: lettersDone })}</p>
+            </div>
+            <span className="text-xl">→</span>
+          </div>
+        </button>
+      )}
 
       <Tabs<TabId>
         tone="blue"

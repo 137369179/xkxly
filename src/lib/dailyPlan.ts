@@ -3,9 +3,10 @@ import type { Tone } from '@/lib/tones';
 import { LETTERS } from '@/data/letters';
 import POEMS from '@/data/poemsIndex';
 import { SKILL, dueSkills, isDue, weakSkills, subjectLabel } from '@/lib/srs';
+import { currentStage, type EnglishStage } from '@/lib/englishCurriculum';
 import { nextHanzi } from '@/data/hanziIndex';
 import { nextPinyin } from '@/data/pinyinIndex';
-import { WORD_THEMES } from '@/data/words';
+import { WORD_THEMES, type WordEntry } from '@/data/words';
 
 /**
  * 每日课程包引擎
@@ -91,13 +92,37 @@ function gateNote(category: string, avgLv: number): string | undefined {
   const label = subjectLabel(category);
   return `⚠️ ${label}基础还不够牢（掌握度 ${Math.round(avgLv * 20)}%），先巩固再学新字效果更好哦～`;
 }
-export function nextWord(mastery: Record<string, { lv: number }>): { word: string; zh: string; emoji: string } | null {
+/**
+ * 按课程阶段推荐下一个新单词：
+ *   Stage 1（字母启蒙）→ 不推荐单词（由 nextLetter 负责）
+ *   Stage 2（自然拼读）→ 优先推荐启蒙学段（grade 1）词
+ *   Stage 3（高频词）  → 优先推荐一年级/二年级（grade 2-3）词
+ *   Stage 4+          → 任意未掌握词兜底
+ */
+export function nextWord(
+  mastery: Record<string, { lv: number }>,
+  stage: EnglishStage = 3,
+): { word: string; zh: string; emoji: string } | null {
+  if (stage === 1) return null;
+  const gradeOk = (w: WordEntry): boolean => {
+    const g = w.grade ?? w.level;
+    if (stage === 2) return g === 1;
+    if (stage === 3) return g === 2 || g === 3;
+    return true;
+  };
+  // 先按学段过滤
   for (const theme of WORD_THEMES) {
     for (const w of theme.words) {
-      const m = mastery[`word:${w.word}`]!
-      if (!m || m.lv < 1) {
-        return { word: w.word, zh: w.zh, emoji: w.emoji };
-      }
+      if (!gradeOk(w)) continue;
+      const m = mastery[`word:${w.word}`];
+      if (!m || m.lv < 1) return { word: w.word, zh: w.zh, emoji: w.emoji };
+    }
+  }
+  // 学段内学完 → 任意未掌握兜底
+  for (const theme of WORD_THEMES) {
+    for (const w of theme.words) {
+      const m = mastery[`word:${w.word}`];
+      if (!m || m.lv < 1) return { word: w.word, zh: w.zh, emoji: w.emoji };
     }
   }
   return null;
@@ -257,7 +282,7 @@ export function buildDailyPlan(p: Progress, now = Date.now()): DailyPlan {
   }
 
   /** —— 7. 英语拓展（按主题推进） —— */
-  const recWord = nextWord(p.mastery);
+  const recWord = nextWord(p.mastery, currentStage(p));
   if (recWord && !learnedBefore(p, `word:${recWord.word}`, start)) {
     const wordAvg = categoryAvgLv(p, 'word', start);
     const gateSub = gateNote('word', wordAvg);
