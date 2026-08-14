@@ -134,13 +134,13 @@ export function WordReview() {
                 size="sm"
                 onClick={() => { sfxTap(); setLevel(l as 1 | 2 | 3); }}
               >
-                Level {l}
+                {t('words.levelLabel', { l })}
               </CandyButton>
             ))}
           </div>
           <AdaptiveDifficultyHint
             meta={levelMeta}
-            labels={{ 1: 'Level 1', 2: 'Level 2', 3: 'Level 3' }}
+            labels={{ 1: t('words.levelLabel', { l: 1 }), 2: t('words.levelLabel', { l: 2 }), 3: t('words.levelLabel', { l: 3 }) }}
           />
         </div>
       )}

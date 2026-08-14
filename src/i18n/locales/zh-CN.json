@@ -2181,6 +2181,9 @@
     "activity": "🎯 适合活动"
   },
   "words": {
+    "searchPlaceholder": "搜索单词…",
+    "noWordsFound": "没有找到单词～",
+    "levelLabel": "第 {l} 级",
     "dialoguePageTitle": "情景对话",
     "dialogueSubtitle": "日常英语对话练习",
     "lineCount": "{count}句",

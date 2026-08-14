@@ -2181,6 +2181,9 @@
     "activity": "🎯 Fun Activities"
   },
   "words": {
+    "searchPlaceholder": "Search words…",
+    "noWordsFound": "No words found～",
+    "levelLabel": "Level {l}",
     "dialoguePageTitle": "Dialogue Practice",
     "dialogueSubtitle": "Everyday English dialogue",
     "lineCount": "{count} lines",

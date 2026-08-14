@@ -16,9 +16,9 @@ import { SpellingTest } from './SpellingTest';
 import { DialoguePage } from './DialoguePage';
 import { WordMatch } from './WordMatch';
 import { WordReview } from './WordReview';
-import { PhonicsListen } from '@/components/PhonicsListen';
-import { BodyParts } from '@/components/BodyParts';
-import { CvcWordBuilder } from '@/components/CvcWordBuilder';
+import { PhonicsListen } from './PhonicsListen';
+import { BodyParts } from './BodyParts';
+import { CvcWordBuilder } from './CvcWordBuilder';
 import { lazy, Suspense } from 'react';
 
 const SentencePage = lazy(() => import('./SentencePage'));
@@ -226,7 +226,7 @@ export default function WordsPage() {
       <input
         value={query}
         onChange={e => setQuery(e.target.value)}
-        placeholder="Search words…"
+        placeholder={tr('words.searchPlaceholder')}
         className="w-full rounded-2xl border-4 border-candy-blue-soft bg-white px-4 py-3 text-base font-bold text-ink outline-none placeholder:text-ink/30"
       />
 
@@ -251,7 +251,7 @@ export default function WordsPage() {
       </div>
 
       {list.length === 0 && (
-        <p className="py-8 text-center text-base font-bold text-ink-soft">No words found～</p>
+        <p className="py-8 text-center text-base font-bold text-ink-soft">{tr('words.noWordsFound')}</p>
       )}
     </div>
   );

@@ -17,6 +17,19 @@ export interface WordEntry {
   sentenceZh: string;
   /** emoji 或图片描述 */
   emoji: string;
+  /** 学段 1=学前启蒙 2=一年级 3=二年级（可选，缺省时按 level 推断） */
+  grade?: 1 | 2 | 3;
+  /** 词族 id（如 'at' / 'an' / 'ake'，用于拼读迁移练习，可选） */
+  family?: string;
+  /** 重音音节标记（多音节词，如 tiger → 'tig'，可选） */
+  stressed?: string;
+}
+
+/**
+ * 推断学段：显式 grade 优先，否则按 level 映射（1→1 学前 / 2→2 一年级 / 3→3 二年级）
+ */
+export function gradeOf(word: Pick<WordEntry, 'grade' | 'level'>): 1 | 2 | 3 {
+  return word.grade ?? (word.level as 1 | 2 | 3);
 }
 
 export interface WordTheme {

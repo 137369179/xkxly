@@ -48,6 +48,7 @@ export const COMBO_SOUNDS: PhonicsRule[] = [
   { letter: 'sh', sound: '/ʃ/', phonetic: '/ʃ/', examples: ['fish', 'she', 'ship'], rule: 'sh 组合发 /ʃ/，像"嘘"安静的声音', level: 2 },
   { letter: 'ch', sound: '/tʃ/', phonetic: '/tʃ/', examples: ['chair', 'chick', 'cheese'], rule: 'ch 组合发 /tʃ/，像打喷嚏的声音', level: 2 },
   { letter: 'th', sound: '/θ/', phonetic: '/θ/', examples: ['three', 'think', 'bath'], rule: 'th 组合发 /θ/，舌尖伸出牙齿间', level: 2 },
+  { letter: 'ph', sound: '/f/', phonetic: '/f/', examples: ['phone', 'photo', 'dolphin'], rule: 'ph 组合发 /f/，上齿轻触下唇吹气', level: 2 },
   { letter: 'ck', sound: '/k/', phonetic: '/k/', examples: ['duck', 'back', 'sock'], rule: 'ck 组合发 /k/，通常在短词末尾出现', level: 2 },
   { letter: 'ng', sound: '/ŋ/', phonetic: '/ŋ/', examples: ['king', 'ring', 'sing'], rule: 'ng 组合发 /ŋ/，鼻音，舌根抵软腭', level: 2 },
   { letter: 'ai', sound: '/eɪ/', phonetic: '/eɪ/', examples: ['rain', 'tail', 'snail'], rule: 'ai 组合发 /eɪ/，像字母 A 的名字', level: 2 },

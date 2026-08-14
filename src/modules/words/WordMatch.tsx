@@ -2,7 +2,7 @@
  * 英语单词连连看 - 英文↔中文连线游戏
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { getWordsByLevel } from '@/data/wordIndex';
@@ -51,7 +51,7 @@ export function WordMatch() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const practice = useStore(s => s.practice);
 
-  const start = (d: DiffEntry) => {
+  const start = useCallback((d: DiffEntry) => {
     sfxTap();
     const pool = getWordsByLevel(d.level);
     const picked = shuffle(pool).slice(0, d.pairs);
@@ -66,17 +66,19 @@ export function WordMatch() {
     setPhase('playing');
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => setTime(t => t + 1), 1000);
-  };
+  }, []);
 
   /** 按档位 id 开一局（找不到就退回最简单那档） */
-  const startById = (id: 1 | 2 | 3) => start(DIFFS.find(d => d.id === id) ?? DIFFS[0]!);
+  const startById = useCallback((id: 1 | 2 | 3) => {
+    const fallbackDiff = DIFFS[0] ?? { id: 1, label: 'wordMatch.easy', pairs: 6, level: 1 };
+    start(DIFFS.find(d => d.id === id) ?? fallbackDiff);
+  }, [start]);
 
   useEffect(() => {
     // 开局用小智推荐的档位（而不是恒定最简单那档）
     startById(diff);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-    // intentional: only start on mount, diff change triggers remount via key
-  }, []);
+  }, [diff, startById]);
 
   const allMatched = pairs.length > 0 && pairs.every(p => p.matched);
   useEffect(() => {
@@ -91,7 +93,7 @@ export function WordMatch() {
   const handleClick = (side: Side, idx: number) => {
     if (phase !== 'playing') return;
     const pairIdx = side === 'en' ? enOrder[idx] : zhOrder[idx];
-    if (pairs[pairIdx!]?.matched) return;
+    if (pairIdx === undefined || pairs[pairIdx]?.matched) return;
     sfxTap();
 
     if (!selected) {
@@ -108,7 +110,7 @@ export function WordMatch() {
     const enIdx = selected.side === 'en' ? enOrder[selected.idx] : enOrder[idx];
     const zhIdx = selected.side === 'zh' ? zhOrder[selected.idx] : zhOrder[idx];
 
-    if (enIdx === zhIdx) {
+    if (enIdx !== undefined && zhIdx !== undefined && enIdx === zhIdx) {
       // 匹配成功
       sfxCorrect();
       celebrateSmall();
@@ -117,7 +119,10 @@ export function WordMatch() {
       const gain = 10 + (newCombo - 1) * 2;
       setScore(s => s + gain);
       setPairs(prev => prev.map((p, i) => i === enIdx ? { ...p, matched: true } : p));
-      practice(`word:${pairs[enIdx!]!.word.word}`, true, 0, diff);
+      const targetPair = pairs[enIdx];
+      if (targetPair) {
+        practice(`word:${targetPair.word.word}`, true, 0, diff);
+      }
     } else {
       sfxWrong();
       setCombo(0);
@@ -188,7 +193,7 @@ export function WordMatch() {
         </div>
         <AdaptiveDifficultyHint
           meta={diffMeta}
-          labels={{ 1: '简单', 2: '中等', 3: '挑战' }}
+          labels={{ 1: tr('wordMatch.easy'), 2: tr('wordMatch.medium'), 3: tr('wordMatch.hard') }}
         />
       </div>
 
@@ -196,7 +201,8 @@ export function WordMatch() {
         {/* 英文列 */}
         <div className="space-y-2">
           {enOrder.map((pairIdx, displayIdx) => {
-            const p = pairs[pairIdx]!
+            const p = pairs[pairIdx];
+            if (!p) return null;
             const isSel = selected?.side === 'en' && selected.idx === displayIdx;
             return (
               <motion.button
@@ -221,7 +227,8 @@ export function WordMatch() {
         {/* 中文列 */}
         <div className="space-y-2">
           {zhOrder.map((pairIdx, displayIdx) => {
-            const p = pairs[pairIdx]!
+            const p = pairs[pairIdx];
+            if (!p) return null;
             const isSel = selected?.side === 'zh' && selected.idx === displayIdx;
             return (
               <motion.button
