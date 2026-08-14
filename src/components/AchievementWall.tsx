@@ -82,8 +82,8 @@ export function AchievementWall() {
   return (
     <div className="space-y-5">
       {tierOrder.map((tier) => {
-        const cfg = TIER_CONFIG[tier]!
-        const list = grouped[tier]!
+        const cfg = TIER_CONFIG[tier] ?? TIER_CONFIG.bronze;
+        const list = grouped[tier] ?? [];
         const done = list.filter((b) => owned.has(b.id)).length;
         return (
           <Panel key={tier}>
@@ -127,8 +127,8 @@ function Medal({
   tier: Tier;
 }) {
   const { t: translate } = useTranslation();
-  const cfg = TIER_CONFIG[tier]!
-  const ts = TONE_STYLE[badge.tone ?? 'blue']!
+  const cfg = TIER_CONFIG[tier] ?? TIER_CONFIG.bronze;
+  const ts = TONE_STYLE[badge.tone ?? 'blue'] ?? TONE_STYLE.blue;
   return (
     <motion.div
       initial={{ scale: 0.9, opacity: 0 }}

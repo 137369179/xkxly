@@ -26,7 +26,7 @@ const COLORS = [
 function ColorExploreImpl() {
   const { t } = useTranslation();
   const [mode, setMode] = useState<'learn'|'quiz'>('learn');
-  const [current, setCurrent] = useState(COLORS[0]!);
+  const [current, setCurrent] = useState(() => COLORS[0] ?? { name: '红色', en: 'Red', hex: '#EF4444', emoji: '🔴', items: ['🍎苹果','🌹玫瑰','🚗消防车'] });
   const [options, setOptions] = useState(() => shuffle(COLORS).slice(0,4));
   const [feedback, setFeedback] = useState('');
   const [score, setScore] = useState(0);
@@ -35,18 +35,24 @@ function ColorExploreImpl() {
   const selectMode = (m: 'learn'|'quiz') => { setMode(m); setFeedback(''); };
 
   const pickColor = (color: typeof COLORS[0]) => {
-    if (lockRef.current) return;
+    if (!color || lockRef.current) return;
     lockRef.current = true;
     if (mode === 'learn') {
       setCurrent(color);
       void speak(color.name, { lang:'zh-CN', rate:0.8, module:'ai' });
-      setTimeout(() => lockRef.current = false, 600);
+      setTimeout(() => { lockRef.current = false; }, 600);
       return;
     }
     if (color.name === current.name) {
       sfxCorrect(); setFeedback(t('colorExplore.rightFeedback', { name: current.name })); setScore(s=>s+1);
       void speak(`对了！${current.name}`, { lang:'zh-CN', rate:0.85, module:'praise' });
-      setTimeout(() => { setCurrent(COLORS[Math.floor(Math.random()*COLORS.length)]!); setOptions(shuffle(COLORS).slice(0,4)); setFeedback(''); lockRef.current = false; }, 1000);
+      setTimeout(() => {
+        const nextColor = COLORS[Math.floor(Math.random() * COLORS.length)] ?? COLORS[0]!;
+        setCurrent(nextColor);
+        setOptions(shuffle(COLORS).slice(0,4));
+        setFeedback('');
+        lockRef.current = false;
+      }, 1000);
     } else {
       sfxWrong(); setFeedback(t('colorExplore.wrongFeedback', { name: color.name }));
       void speak(`这是${color.name}呀`, { lang:'zh-CN', rate:0.85, module:'praise' });

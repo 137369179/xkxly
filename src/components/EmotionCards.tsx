@@ -33,7 +33,7 @@ const SCENARIOS = [
 export function EmotionCards() {
   const { t } = useTranslation();
   const [mode, setMode] = useState<'learn' | 'quiz'>('learn');
-  const [scenario, setScenario] = useState(() => SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)]!);
+  const [scenario, setScenario] = useState(() => SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)] ?? SCENARIOS[0]!);
   const [options, setOptions] = useState(() => shuffle(EMOTIONS).slice(0, 4));
   const [feedback, setFeedback] = useState('');
   const [score, setScore] = useState(0);
@@ -46,17 +46,16 @@ export function EmotionCards() {
   }, []);
 
   const nextQuiz = () => {
-    const sc = SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)]!
+    const sc = SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)] ?? SCENARIOS[0]!;
     setScenario(sc);
-    const corr = EMOTIONS.find(e => e.emoji === sc.emotion) || EMOTIONS[0]!;
+    const corr = EMOTIONS.find(e => e.emoji === sc.emotion) ?? EMOTIONS[0]!;
     const others = shuffle(EMOTIONS.filter(e => e.emoji !== sc.emotion)).slice(0, 3);
     setOptions(shuffle([corr, ...others]));
     setFeedback('');
   };
 
-
   const nextScenario = () => {
-    setScenario(SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)]!);
+    setScenario(SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)] ?? SCENARIOS[0]!);
     setOptions(shuffle(EMOTIONS).slice(0, 4));
     setFeedback('');
   };

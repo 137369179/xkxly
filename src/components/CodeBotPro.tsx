@@ -32,14 +32,14 @@ export function CodeBotPro() {
   const { t: tr } = useTranslation();
   const [levelIdx, setLevelIdx] = useState(0);
   const [blocks, setBlocks] = useState<Block[]>([]);
-  const [robot, setRobot] = useState<[number, number]>(LEVELS[0]!.start);
+  const [robot, setRobot] = useState<[number, number]>(() => LEVELS[0]?.start ?? [0, 0]);
   const [collected, setCollected] = useState<[number, number][]>([]);
   const [running, setRunning] = useState(false);
   const [won, setWon] = useState(false);
   const [failed, setFailed] = useState(false);
   const [repeatCount, setRepeatCount] = useState(3);
 
-  const level = LEVELS[levelIdx]!
+  const level = LEVELS[levelIdx] ?? LEVELS[0]!;
 
   const reset = () => {
     setBlocks([]);
@@ -53,7 +53,7 @@ export function CodeBotPro() {
   const newLevel = (idx: number) => {
     setLevelIdx(idx);
     setBlocks([]);
-    setRobot(LEVELS[idx]!.start);
+    setRobot(LEVELS[idx]?.start ?? [0, 0]);
     setCollected([]);
     setWon(false);
     setFailed(false);

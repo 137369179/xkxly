@@ -50,10 +50,13 @@ function CalendarLearnImpl() {
     setFeedback('');
   };
 
+  const prevMonth = () => setMonth(m => (m - 1 + 12) % 12);
+  const nextMonth = () => setMonth(m => (m + 1) % 12);
+
   const clickDay = (day: number) => {
     if (mode === 'view') {
       const date = new Date(year, month, day);
-      const weekday = WEEKDAYS[date.getDay()]!
+      const weekday = WEEKDAYS[date.getDay()] ?? '日';
       void speak(`${month + 1}月${day}日，星期${weekday}`, { lang: 'zh-CN', rate: 0.8, module: 'ai' });
       return;
     }
@@ -63,7 +66,8 @@ function CalendarLearnImpl() {
     const correctWeekday = date.getDay();
     if (day === quizDay) {
       sfxCorrect(); setScore(s => s + 1);
-      setFeedback(`✅ ${t('calendarLearn.correct', { month: month + 1, day, weekday: WEEKDAYS[correctWeekday]! })}`);
+      const weekdayName = WEEKDAYS[correctWeekday] ?? '日';
+      setFeedback(`✅ ${t('calendarLearn.correct', { month: month + 1, day, weekday: weekdayName })}`);
       void speak(`对了！`, { lang: 'zh-CN', rate: 0.85, module: 'praise' });
       if (timerRef.current !== null) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => { timerRef.current = null; startQuiz(); setFeedback(''); }, 1500);
@@ -78,18 +82,18 @@ function CalendarLearnImpl() {
 
       <div className="mb-3 flex justify-center gap-2">
         <button onClick={()=>setMode('view')} className={cn('rounded-xl px-4 py-1.5 text-sm font-extrabold', mode==='view'?'bg-candy-blue-deep text-white':'bg-white text-ink-soft shadow-sm')}>📖 {t('calendarLearn.viewMode')}</button>
-        <button onClick={()=>{setMode('quiz');startQuiz();}} className={cn('rounded-xl px-4 py-1.5 text-sm font-extrabold', mode==='quiz'?'bg-candy-blue-deep text-white':'bg-white text-ink-soft shadow-sm')}>🎯 {t('calendarLearn.quizMode')}</button>
+        <button onClick={()=>{ setMode('quiz'); startQuiz(); }} className={cn('rounded-xl px-4 py-1.5 text-sm font-extrabold', mode==='quiz'?'bg-candy-purple-deep text-white':'bg-white text-ink-soft shadow-sm')}>❓ {t('calendarLearn.quizMode')}</button>
       </div>
 
       <div className="mb-3 flex items-center justify-between">
         <button
-          onClick={()=>setMonth(m => (m - 1 + 12) % 12)}
+          onClick={prevMonth}
           aria-label={t('calendarLearn.prevMonth')}
           className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-white px-3 text-lg font-extrabold shadow-sm transition active:translate-y-[2px]"
         >◀️</button>
-        <span className="text-lg font-extrabold text-ink">{MONTH_EMOJI[month]} {t('calendarLearn.yearMonth', { year, month: MONTHS[month]! })}</span>
+        <span className="text-lg font-extrabold text-ink">{MONTH_EMOJI[month] ?? '📅'} {t('calendarLearn.yearMonth', { year, month: MONTHS[month] ?? (month + 1) })}</span>
         <button
-          onClick={()=>setMonth(m => (m + 1) % 12)}
+          onClick={nextMonth}
           aria-label={t('calendarLearn.nextMonth')}
           className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-white px-3 text-lg font-extrabold shadow-sm transition active:translate-y-[2px]"
         >▶️</button>

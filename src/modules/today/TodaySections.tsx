@@ -100,7 +100,7 @@ import { WORD_THEMES } from '@/data/words';
 import { speakSequence, speak } from '@/lib/speech';
 import { useStore } from '@/store/useStore';
 import POEMS from '@/data/poems';
-import { makePoemQuestion } from '@/lib/questions';
+import { makePoemQuestion, makeMathQuestion } from '@/lib/questions';
 
 /* —— 古诗学习活动 —— */
 export function PoemActivity({ poemId, onDone }: { poemId: string; onDone: () => void }) {
@@ -191,7 +191,7 @@ export function PoemActivity({ poemId, onDone }: { poemId: string; onDone: () =>
       gate: true,
       render: (api: FlowStepApi) => (
         <QuizCard
-          question={makePoemQuestion(POEMS, 1, poem.id) ?? makePoemQuestion(POEMS, 1)!}
+          question={makePoemQuestion(POEMS, 1, poem.id) ?? makePoemQuestion(POEMS, 1) ?? makeMathQuestion(1)}
           autoSpeak={false}
           onAnswer={(correct) => {
             readPoem(poem.id);

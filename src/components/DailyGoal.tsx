@@ -24,13 +24,13 @@ interface DailyGoal {
 
 const GOAL_POOL: DailyGoal[] = [
   { id: 'practice', emoji: '✏️', labelKey: 'dailyGoal.practice', target: 10, current: p => p.dailyLog[dateKey()]?.items ?? 0, reward: 2 },
-  { id: 'new-hanzi', emoji: '🀄', labelKey: 'dailyGoal.newHanzi', target: 3, current: p => Object.keys(p.mastery).filter(k => k.startsWith('hanzi:') && p.mastery[k]!.lv >= 1 && p.mastery[k]!.firstSeen === dateKey()).length, reward: 2 },
+  { id: 'new-hanzi', emoji: '🀄', labelKey: 'dailyGoal.newHanzi', target: 3, current: p => Object.keys(p.mastery).filter(k => k.startsWith('hanzi:') && (p.mastery[k]?.lv ?? 0) >= 1 && p.mastery[k]?.firstSeen === dateKey()).length, reward: 2 },
   { id: 'read-poem', emoji: '🌸', labelKey: 'dailyGoal.readPoem', target: 1, current: p => p.poemsRead.filter(() => { const entry = p.dailyLog[dateKey()]; return entry; }).length > 0 ? 1 : 0, reward: 2 },
   { id: 'math', emoji: '🔢', labelKey: 'dailyGoal.math', target: 5, current: p => { const t = p.dailyLog[dateKey()]; const start = t?.startMathCorrect ?? p.mathCorrect; return Math.max(0, p.mathCorrect - start); }, reward: 2 },
   { id: 'stars', emoji: '⭐', labelKey: 'dailyGoal.stars', target: 5, current: p => p.dailyLog[dateKey()]?.stars ?? 0, reward: 3 },
   { id: 'time', emoji: '⏰', labelKey: 'dailyGoal.time', target: 15, current: p => Math.floor((p.dailyLog[dateKey()]?.sec ?? 0) / 60), reward: 2 },
-  { id: 'pinyin', emoji: '📋', labelKey: 'dailyGoal.pinyin', target: 5, current: p => Object.keys(p.mastery).filter(k => k.startsWith('pinyin:') && p.mastery[k]!.lv >= 1 && p.mastery[k]!.firstSeen === dateKey()).length, reward: 2 },
-  { id: 'word', emoji: '🔤', labelKey: 'dailyGoal.word', target: 3, current: p => Object.keys(p.mastery).filter(k => k.startsWith('word:') && p.mastery[k]!.lv >= 1 && p.mastery[k]!.firstSeen === dateKey()).length, reward: 2 },
+  { id: 'pinyin', emoji: '📋', labelKey: 'dailyGoal.pinyin', target: 5, current: p => Object.keys(p.mastery).filter(k => k.startsWith('pinyin:') && (p.mastery[k]?.lv ?? 0) >= 1 && p.mastery[k]?.firstSeen === dateKey()).length, reward: 2 },
+  { id: 'word', emoji: '🔤', labelKey: 'dailyGoal.word', target: 3, current: p => Object.keys(p.mastery).filter(k => k.startsWith('word:') && (p.mastery[k]?.lv ?? 0) >= 1 && p.mastery[k]?.firstSeen === dateKey()).length, reward: 2 },
 ];
 
 function pickGoals(dateStr: string): DailyGoal[] {

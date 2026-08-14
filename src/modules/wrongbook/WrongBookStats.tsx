@@ -14,9 +14,9 @@ import { SUBJECTS } from '@/lib/srs';
 /* ------------------------------------------------------------------ */
 /* 工具                                                                */
 /* ------------------------------------------------------------------ */
-function recentDays(n: number): string[] {
+function recentDays(n: number, anchorKey?: string): string[] {
   const out: string[] = [];
-  const now = Date.now();
+  const now = anchorKey ? new Date(anchorKey).getTime() : Date.now();
   for (let i = n - 1; i >= 0; i--) {
     const d = new Date(now - i * 86400000);
     out.push(
@@ -33,7 +33,7 @@ export function WrongTrendChart() {
   const { t: tr } = useTranslation();
   const progress = useProgress();
   const today = dateKey();
-  const days = useMemo(() => recentDays(7), [today]);
+  const days = useMemo(() => recentDays(7, today), [today]);
 
   const data = useMemo(() => {
     return days.map((d) => {

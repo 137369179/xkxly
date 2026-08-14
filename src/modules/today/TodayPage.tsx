@@ -115,7 +115,8 @@ function ReviewActivity({ refs, onDone }: { refs: string[]; onDone: () => void }
   const gen = useCallback((): Question => {
     const skill = refs[iRef.current % refs.length] ?? 'math:add';
     iRef.current += 1;
-    const d = rampDifficulty(progress, skill.split(':')[0]!) as Difficulty;
+    const cat = skill.split(':')[0] ?? 'math';
+    const d = rampDifficulty(progress, cat) as Difficulty;
     const q = questionForSkill(skill, d) ?? makeMathQuestion(d);
     // P1-3: 标注出题难度，供 SRS 难度感知复习
     if (q) q.difficulty = d;
@@ -187,7 +188,8 @@ function FocusActivity({ subject, onDone }: { subject: string; onDone: () => voi
   const practice = useStore((s) => s.practice);
   const iRef = useRef(0);
   const COUNT = 8;
-  const label = FOCUS_SUBJECTS[subject] ? t(FOCUS_SUBJECTS[subject]!) : subject;
+  const focusKey = FOCUS_SUBJECTS[subject];
+  const label = focusKey ? t(focusKey) : subject;
 
   const gen = useCallback((): Question => {
     // 优先练该学科薄弱点(lv<3)与错题本，再退回到全部已接触知识点，无重复
@@ -199,8 +201,9 @@ function FocusActivity({ subject, onDone }: { subject: string; onDone: () => voi
     const pool = Array.from(new Set([...weak, ...wrong, ...all]));
     const skill = pool.length ? pool[iRef.current % pool.length] : `${subject}:${subject}`;
     iRef.current += 1;
+    const targetSkill = skill ?? `${subject}:${subject}`;
     const d = rampDifficulty(progress, subject) as Difficulty;
-    const q = questionForSkill(skill!, d) ?? makeDailyMixedQuestion([], d, { weakSkills: weak.slice(0, 1) });
+    const q = questionForSkill(targetSkill, d) ?? makeDailyMixedQuestion([], d, { weakSkills: weak.slice(0, 1) });
     // P1-3: 标注出题难度，供 SRS 难度感知复习
     if (q) q.difficulty = d;
     return q;
@@ -285,6 +288,7 @@ export default function TodayPage() {
   const today = dateKey();
   // 课程包按「天」稳定生成：当天内不随进度变化重排
   // intentional: plan is stable per day, ignore progress changes to avoid daily plan regeneration
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const plan = useMemo(() => buildDailyPlan(progress, Date.now()), [today]);
 
   const done = !!progress.dailyLog[today]?.lesson;

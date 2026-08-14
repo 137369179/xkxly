@@ -7,7 +7,7 @@
  * 4. 学科技能树：语文喵 📖、数学喵 🧮、英语喵 🔤、科学喵 🦕
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PageHeader } from '@/components/ui/Card';
 import { useStore } from '@/store/useStore';
 import { CatStudyHelpCard } from '@/modules/pet/CatStudyHelpCard';
@@ -35,7 +35,7 @@ const TOY_SPEAK: Record<CatAction, string> = {
   dance: '', stretch: '', idle: '',
 };
 
-export default function CatHousePage() {
+export default function CatHousePage({ initialRealisticMode = false }: { initialRealisticMode?: boolean }) {
   const { t } = useTranslation();
   const fishCount = useStore((s) => s.progress.fishCount ?? 10);
   const catAffection = useStore((s) => s.progress.catAffection ?? 20);
@@ -69,7 +69,14 @@ export default function CatHousePage() {
   const [showVoiceChatModal, setShowVoiceChatModal] = useState(false);
   const [showMiniGameModal, setShowMiniGameModal] = useState(false);
   const [envLighting, setEnvLighting] = useState<'sunlight' | 'nebula' | 'starry'>('nebula');
-  const [realisticMode, setRealisticMode] = useState(false);
+  const [realisticMode, setRealisticMode] = useState(initialRealisticMode);
+  const motionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (motionTimerRef.current) clearTimeout(motionTimerRef.current);
+    };
+  }, []);
 
   /** 拼音已解锁技能点数（用于徽章判定） */
   const pinyinMasteryCount = Object.keys(mastery).filter((k) => k.startsWith('pinyin:')).length;
@@ -84,7 +91,8 @@ export default function CatHousePage() {
     setCatAction(act);
     setFeedback(msg);
     speak(msg, { lang: 'zh-CN' });
-    setTimeout(() => setCatAction('idle'), 1600);
+    if (motionTimerRef.current) clearTimeout(motionTimerRef.current);
+    motionTimerRef.current = setTimeout(() => setCatAction('idle'), 1600);
   };
   const motionMsg: Record<CatAction, string> = {
     dance: t('pet.motionDanceMsg'), stretch: t('pet.motionStretchMsg'), roll: t('pet.motionRollMsg'),

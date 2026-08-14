@@ -77,7 +77,7 @@ export function GrowthTree() {
   const { t } = useTranslation();
   const progress = useProgress();
   const season = useMemo(() => getSeason(), []);
-  const s = SEASON_STYLE[season]!
+  const s = SEASON_STYLE[season] ?? SEASON_STYLE.spring;
   const [picked, setPicked] = useState<string | null>(null);
 
   // 统计：总题数、完成课数、连续天数
@@ -248,7 +248,7 @@ export function GrowthTree() {
 
         {/* 果实 —— 每颗对应一个已掌握的知识点，可点击复习 */}
         {fruitPositions.map((p, i) => {
-          const item = masteredFruits[i]!
+          const item = masteredFruits[i];
           if (!item) return null;
           return (
             <motion.button

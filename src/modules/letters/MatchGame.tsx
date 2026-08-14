@@ -6,7 +6,7 @@ import { cn, sampleMany, shuffle } from '@/lib/utils';
 import { sfxCorrect, sfxFlip, sfxWrong } from '@/lib/sfx';
 import { celebrateBig, celebrateSmall } from '@/lib/celebrate';
 import { randomPraise, speak, speakLetter } from '@/lib/speech';
-import { useStore, useProgress } from '@/store/useStore';
+import { useStore } from '@/store/useStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
@@ -53,7 +53,6 @@ export function MatchGame() {
   const wonMatchGame = useStore((s) => s.wonMatchGame);
   const practice = useStore((s) => s.practice);
   const aiOn = useSettingsStore((s) => s.settings.aiEnabled);
-  const progress = useProgress();
   const [aiMode, setAiMode] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [round, setRound] = useState<RoundState>(makeRound);
@@ -68,6 +67,7 @@ export function MatchGame() {
     if (aiMode && aiOn) {
       // AI 模式：让小智推荐字母
       setAiLoading(true);
+      const progress = useStore.getState().progress;
       const learned = progress.lettersHeard;
       const unlearned = LETTERS.map((l) => l.upper).filter((u) => !learned.includes(u));
       const weak = weakSkills(progress, 6)
@@ -87,7 +87,7 @@ export function MatchGame() {
     setWrongPair([]);
     setWon(false);
     setMistakes(0);
-  }, [aiMode, aiOn, progress]);
+  }, [aiMode, aiOn]);
 
 
   // Switch AI mode or AI enabled change: regenerate round

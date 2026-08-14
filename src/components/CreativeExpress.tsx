@@ -84,11 +84,11 @@ export function CreativeExpress() {
   const [userText, setUserText] = useState('');
 
   const describeTask = useMemo(
-    () => selectedPic !== null ? makeDescribeTask(PICTURES[selectedPic]!.emoji, PICTURES[selectedPic]!.label) : null,
+    () => (selectedPic !== null && PICTURES[selectedPic]) ? makeDescribeTask(PICTURES[selectedPic].emoji, PICTURES[selectedPic].label) : null,
     [selectedPic]
   );
   const storyTask = useMemo(
-    () => selectedTheme !== null ? makeStoryTask(STORY_THEMES[selectedTheme]!) : null,
+    () => (selectedTheme !== null && STORY_THEMES[selectedTheme]) ? makeStoryTask(STORY_THEMES[selectedTheme]) : null,
     [selectedTheme]
   );
 
@@ -138,11 +138,11 @@ export function CreativeExpress() {
             ))}
           </div>
 
-          {selectedPic !== null && (
+          {selectedPic !== null && PICTURES[selectedPic] && (
             <div className="space-y-2">
               <div className="rounded-2xl bg-candy-pink-soft p-4 text-center">
-                <div className="text-5xl">{PICTURES[selectedPic]!.emoji}</div>
-                <div className="mt-1 text-sm font-bold text-candy-pink-deep">{PICTURES[selectedPic]!.label}</div>
+                <div className="text-5xl">{PICTURES[selectedPic].emoji}</div>
+                <div className="mt-1 text-sm font-bold text-candy-pink-deep">{PICTURES[selectedPic].label}</div>
               </div>
               <AiPanel state={describeStream} title={t('creative.aiSay')} tone="pink" />
               <textarea
@@ -208,11 +208,11 @@ export function CreativeExpress() {
               </button>
             ))}
           </div>
-          {selectedImitate !== null && (
+          {selectedImitate !== null && IMITATE_EXAMPLES[selectedImitate] && (
             <div className="space-y-2">
               <div className="rounded-2xl bg-candy-pink-soft p-3">
-                <div className="text-sm font-bold text-ink">{t('creative.example', { text: IMITATE_EXAMPLES[selectedImitate]!.example })}</div>
-                <div className="text-sm font-bold text-candy-pink-deep">{t('creative.copyWrite', { text: IMITATE_EXAMPLES[selectedImitate]!.prompt })}</div>
+                <div className="text-sm font-bold text-ink">{t('creative.example', { text: IMITATE_EXAMPLES[selectedImitate].example })}</div>
+                <div className="text-sm font-bold text-candy-pink-deep">{t('creative.copyWrite', { text: IMITATE_EXAMPLES[selectedImitate].prompt })}</div>
               </div>
               <textarea
                 value={userText}

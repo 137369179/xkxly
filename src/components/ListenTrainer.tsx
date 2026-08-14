@@ -51,7 +51,7 @@ interface ListenQuestion {
 function makeQuestion(type: ListenType): ListenQuestion {
   if (type === 'number') {
     const nums = shuffle(NUMBER_POOL).slice(0, 4);
-    const answer = nums[Math.floor(Math.random() * nums.length)]!
+    const answer = nums[Math.floor(Math.random() * nums.length)] ?? nums[0] ?? 1;
     return {
       type,
       spoken: String(answer),
@@ -61,7 +61,7 @@ function makeQuestion(type: ListenType): ListenQuestion {
   }
   if (type === 'letter') {
     const letters = shuffle(LETTER_POOL).slice(0, 4);
-    const answer = letters[Math.floor(Math.random() * letters.length)]!
+    const answer = letters[Math.floor(Math.random() * letters.length)] ?? letters[0] ?? 'A';
     return {
       type,
       spoken: answer,
@@ -71,7 +71,7 @@ function makeQuestion(type: ListenType): ListenQuestion {
   }
   if (type === 'word') {
     const words = shuffle(WORD_POOL).slice(0, 4);
-    const answer = words[Math.floor(Math.random() * words.length)]!
+    const answer = words[Math.floor(Math.random() * words.length)] ?? words[0] ?? { word: '苹果', emoji: '🍎' };
     return {
       type,
       spoken: answer.word,
@@ -81,7 +81,7 @@ function makeQuestion(type: ListenType): ListenQuestion {
   }
   // sentence
   const sentences = shuffle(SENTENCE_POOL).slice(0, 3);
-  const answer = sentences[Math.floor(Math.random() * sentences.length)]!
+  const answer = sentences[Math.floor(Math.random() * sentences.length)] ?? sentences[0] ?? '小猫在院子里玩球';
   return {
     type,
     spoken: answer,

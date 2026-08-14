@@ -2,6 +2,7 @@ import { useState, lazy, Suspense, useEffect, useRef } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { CandyButton } from '@/components/ui/Button';
 import { useStore } from '@/store/useStore';
+import { cn } from '@/lib/utils';
 
 /* ── 全部子组件懒加载，FunPage chunk 仅含框架 ~5KB ── */
 const ParentChildPK = lazy(() => import('./ParentChildPK').then(m => ({ default: m.ParentChildPK })));
@@ -130,6 +131,45 @@ const TAB_MAP: Record<TabId, React.LazyExoticComponent<React.ComponentType>> = {
   job: JobExplore,
 };
 
+interface GameCategory {
+  id: string;
+  label: string;
+  emoji: string;
+  tone: 'purple' | 'blue' | 'green' | 'orange';
+  tabs: TabId[];
+}
+
+const CATEGORIES: GameCategory[] = [
+  {
+    id: 'battle',
+    label: '对战互动',
+    emoji: '⚔️',
+    tone: 'purple',
+    tabs: ['parentpk', 'pk', 'whack', 'listen', 'creative', 'riddle', 'storybook'],
+  },
+  {
+    id: 'puzzle',
+    label: '益智解谜',
+    emoji: '🧩',
+    tone: 'blue',
+    tabs: ['tangram', 'puzzle', 'sudoku', 'sudoku2', 'maze2', 'spot', 'memory', 'pair', 'storysort', 'sort'],
+  },
+  {
+    id: 'cognition',
+    label: '生活百科',
+    emoji: '🌱',
+    tone: 'green',
+    tabs: ['animal', 'vehicle', 'job', 'weather', 'calendar', 'time', 'position', 'color', 'emotion', 'shadow', 'symmetry'],
+  },
+  {
+    id: 'logic',
+    label: '思维编程',
+    emoji: '🤖',
+    tone: 'orange',
+    tabs: ['codebot', 'codemaze', 'sequence', 'balance', 'mirror', 'rhythm'],
+  },
+];
+
 function Loading() {
   return (
     <div className="flex items-center justify-center py-12">
@@ -140,8 +180,9 @@ function Loading() {
 
 export default function FunPage() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<TabId>('storybook');
-  const Component = TAB_MAP[tab]!;
+  const [activeCategory, setActiveCategory] = useState<string>('battle');
+  const [tab, setTab] = useState<TabId>('parentpk');
+  const Component = TAB_MAP[tab] ?? TAB_MAP.parentpk;
   const { tickTime } = useStore();
   const mountedRef = useRef(false);
 
@@ -152,29 +193,69 @@ export default function FunPage() {
     tickTime(10);
   }, [tickTime]);
 
+  const handleCategoryChange = (cat: GameCategory) => {
+    setActiveCategory(cat.id);
+    const firstTab = cat.tabs[0];
+    if (firstTab && !cat.tabs.includes(tab)) {
+      setTab(firstTab);
+    }
+  };
+
   const handleTabChange = (id: TabId) => {
     setTab(id);
     tickTime(3);
   };
 
+  const currentCategory = CATEGORIES.find((c) => c.id === activeCategory) ?? CATEGORIES[0]!;
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        {TABS.map((tabItem) => (
-          <CandyButton
-            key={tabItem.id}
-            tone={tab === tabItem.id ? 'purple' : 'blue'}
-            variant={tab === tabItem.id ? 'solid' : 'soft'}
-            size="sm"
-            onClick={() => handleTabChange(tabItem.id)}
-          >
-            {tabItem.emoji} {t(`fun.tab.${tabItem.id}`)}
-          </CandyButton>
-        ))}
+      {/* 一级主题分类栏 */}
+      <div className="flex gap-2 rounded-2xl bg-white/80 p-1.5 shadow-sm border border-purple-100">
+        {CATEGORIES.map((cat) => {
+          const active = activeCategory === cat.id;
+          return (
+            <button
+              key={cat.id}
+              onClick={() => handleCategoryChange(cat)}
+              className={cn(
+                'no-select flex-1 rounded-xl py-2 text-center text-xs sm:text-sm font-black transition-all',
+                active
+                  ? 'bg-candy-purple text-white shadow-sm scale-[1.02]'
+                  : 'text-ink-soft hover:text-ink hover:bg-black/5',
+              )}
+            >
+              {cat.emoji} {cat.label}
+            </button>
+          );
+        })}
       </div>
+
+      {/* 二级游戏小标签 */}
+      <div className="flex flex-wrap gap-2 rounded-2xl bg-purple-50/50 p-2.5 border border-purple-100">
+        {currentCategory.tabs.map((tabId) => {
+          const tabItem = TABS.find((t) => t.id === tabId);
+          if (!tabItem) return null;
+          const active = tab === tabId;
+          return (
+            <CandyButton
+              key={tabId}
+              tone={active ? currentCategory.tone : 'blue'}
+              variant={active ? 'solid' : 'soft'}
+              size="sm"
+              onClick={() => handleTabChange(tabId)}
+            >
+              {tabItem.emoji} {t(`fun.tab.${tabId}`) || tabItem.label}
+            </CandyButton>
+          );
+        })}
+      </div>
+
+      {/* 游戏主体展示 */}
       <Suspense fallback={<Loading />}>
         <Component />
       </Suspense>
     </div>
   );
 }
+

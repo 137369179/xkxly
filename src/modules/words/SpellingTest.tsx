@@ -28,16 +28,16 @@ export function SpellingTest() {
   const [done, setDone] = useState(false);
   const practice = useStore(s => s.practice);
 
-  const w = pool[idx]!
-  const letters = w.word.split('');
+  const w = pool[idx];
+  const letters = useMemo(() => (w ? w.word.split('') : []), [w]);
 
   // 虚拟键盘字母池 = 单词字母 + 干扰字母
   const keyboard = useMemo(() => {
-    if (!w) return [];
+    if (!w || letters.length === 0) return [];
     const extras = 'abcdefghijklmnopqrstuvwxyz'.split('').filter(l => !w.word.includes(l));
     const distractors = shuffle(extras).slice(0, Math.max(2, 8 - letters.length));
     return shuffle([...letters, ...distractors]);
-  }, [w]);
+  }, [w, letters]);
 
   useEffect(() => {
     if (!w) return;
@@ -63,7 +63,7 @@ export function SpellingTest() {
   };
 
   const handleSubmit = () => {
-    if (typed.length !== letters.length) return;
+    if (!w || typed.length !== letters.length) return;
     const answer = typed.join('').toLowerCase();
     const correct = answer === w.word.toLowerCase();
     setShowResult(true);
@@ -152,9 +152,9 @@ export function SpellingTest() {
         {/* 拼写格 */}
         <div className="flex justify-center gap-2">
           {letters.map((_, i) => {
-            const ch = typed[i]! ?? '';
+            const ch = typed[i] ?? '';
+            const correctCh = letters[i] ?? '';
             const showAns = showResult && !isCorrect;
-            const correctCh = letters[i]!
             return (
               <div
                 key={`_-${i}`}

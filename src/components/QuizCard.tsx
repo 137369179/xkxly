@@ -7,7 +7,7 @@ import { sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { celebrateBig, celebrateSmall, celebrateStars } from '@/lib/celebrate';
 import { recordCombo, COMBO_THRESHOLDS } from '@/lib/combo';
 import { recordAttempt } from '@/lib/adaptChain';
-import { useProgress } from '@/store/useStore';
+import { useMastery } from '@/store/useStore';
 import { useTranslation } from '@/i18n/useTranslation';
 import { errorAnalyzer, WEAKNESS_LABEL } from '@/lib/ai/smart-practice';
 import { speak, stopSpeaking, praiseByScene, encourageByScene, skillToPraiseScene, skillToEncourageScene } from '@/lib/speech';
@@ -89,11 +89,11 @@ export function QuizCard({
   const cardRef = useRef<HTMLDivElement>(null);
   const explain = useAiStream();
   /** 读取全局掌握度，用于跨题薄弱诊断（区别于单题 wrongReason） */
-  const p = useProgress();
+  const mastery = useMastery();
   const skillDiag = useMemo(() => {
     if (!question.skill) return null;
-    return errorAnalyzer.diagnoseSkill(question.skill, p.mastery[question.skill]);
-  }, [question.skill, p.mastery]);
+    return errorAnalyzer.diagnoseSkill(question.skill, mastery[question.skill]);
+  }, [question.skill, mastery]);
   /** 抖动动画的复位定时器：不清理的话，快速连点会在卸载后触发 setState */
   const shakeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** 超时干预定时器 */

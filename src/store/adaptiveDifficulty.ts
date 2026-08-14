@@ -13,8 +13,7 @@ export { type AdaptiveDifficultyMeta } from '@/lib/adaptChain';
 
 /** 读取某类难度链槽位（非响应式快照，用于非渲染期） */
 export function useChainSlot(cat: string) {
-  const p = useProgress();
-  return useMemo(() => getSlot(cat), [cat, p.stars]);
+  return useMemo(() => getSlot(cat), [cat]);
 }
 
 /** 某类学科的"小智建议难度"（响应式跟随 DDA 推荐） */

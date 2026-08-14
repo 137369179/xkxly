@@ -11,9 +11,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { Panel } from '@/components/ui/Card';
 import { QuizCard } from '@/components/QuizCard';
-import { useStore, useProgress } from '@/store/useStore';
+import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { questionForSkill, makeMathQuestion } from '@/lib/questions';
-import { sfxTap, sfxStar, sfxWrong } from '@/lib/sfx';
+import { sfxTap, sfxStar, sfxWrong, sfxCorrect } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { isDue, skillLabel, subjectLabel, subjectEmoji, weakSkills } from '@/lib/srs';
 import { useAiTask } from '@/lib/ai/useAi';
@@ -42,7 +43,7 @@ function pickNextSkill(
   if (due.length > 0) {
     // 到期中选等级最低的；同档内错因薄弱题型优先
     due.sort((a, b) => weakBoost(b) - weakBoost(a) || (mastery[a]?.lv ?? 0) - (mastery[b]?.lv ?? 0));
-    return due[0]!;
+    return due[0] ?? null;
   }
 
   // 第二优先级：错误率最高的错题；同档内错因薄弱题型优先
@@ -80,7 +81,13 @@ function weakBoost(skill: string): number {
 /* ------------------------------------------------------------------ */
 export function AdaptiveTrainer() {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
+  const { wrongBook, mastery, wrongHistory } = useStore(
+    useShallow((s) => ({
+      wrongBook: s.progress.wrongBook,
+      mastery: s.progress.mastery,
+      wrongHistory: s.progress.wrongHistory,
+    }))
+  );
   const practiceWrong = useStore((s) => s.practiceWrong);
   const updateWrongHistory = useStore((s) => s.updateWrongHistory);
 
@@ -98,112 +105,110 @@ export function AdaptiveTrainer() {
   const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // AI 分析
-  const aiAnalyze = useAiTask(() => wrongAnalyzeTask(progress), false);
+  const aiAnalyze = useAiTask(() => wrongAnalyzeTask(useStore.getState().progress), false);
 
   useEffect(() => () => {
     if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
+    if (timerRef.current) clearInterval(timerRef.current);
   }, []);
 
-  const nextQuestion = useCallback(() => {
-    if (progress.wrongBook.length === 0) {
-      setDone(true);
-      setActive(false);
-      return;
-    }
-    const skill = pickNextSkill(progress.wrongBook, progress.mastery);
-    if (!skill) {
-      setDone(true);
-      setActive(false);
-      return;
-    }
-    const m = progress.mastery[skill];
-    const lv = m?.lv ?? 0;
-    // 基线：这个知识点自己的掌握度（比学科级历史正确率精确）
-    const base = (lv <= 1 ? 1 : lv <= 3 ? 2 : 3) as 1 | 2 | 3;
-    // 再叠加当下状态：答得慢 / 一直看提示 / 刚连错，都先降一档缓一缓
-    const cat = skill.split(':')[0] ?? skill;
-    const diff = applyRecentSignals(cat, base);
-    setDifficulty(diff);
-    const q = genFromSkill(skill, diff);
-    setCurrent(q);
-  }, [progress.wrongBook, progress.mastery]);
+  // 调度下一题
+  const nextQuestion = useCallback(
+    (prevSkill?: string) => {
+      // 过滤掉刚练完的那道题（避免连续两次同一题，除非错题本只有一题）
+      const candidates = wrongBook.filter((s) => s !== prevSkill);
+      const pool = candidates.length > 0 ? candidates : wrongBook;
+      const skill = pickNextSkill(pool, mastery);
+      if (!skill) {
+        setDone(true);
+        setActive(false);
+        return;
+      }
+      const cat = skill.split(':')[0] ?? skill;
+      const m = mastery[skill];
+      const base = (m?.lv ?? 0) <= 1 ? 1 : (m?.lv ?? 0) <= 3 ? 2 : 3;
+      const diff = applyRecentSignals(cat, base as 1 | 2 | 3);
+      setDifficulty(diff);
+      const q = genFromSkill(skill, diff);
+      setCurrent(q);
+      setShowAiAnalysis(false);
+    },
+    [wrongBook, mastery],
+  );
 
-  const start = () => {
+  // 开始挑战
+  const startChallenge = () => {
     sfxTap();
     setActive(true);
     setDone(false);
+    setTimeLeft(CHALLENGE_SEC);
     setScore({ ok: 0, ng: 0 });
     setStreak(0);
     setBestStreak(0);
-    setTimeLeft(CHALLENGE_SEC);
     nextQuestion();
+
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setTimeLeft((t) => {
+        if (t <= 1) {
+          if (timerRef.current) clearInterval(timerRef.current);
+          setDone(true);
+          setActive(false);
+          sfxStar();
+          celebrateBig();
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
   };
 
-  // 倒计时：updater 保持纯函数，仅更新数值
-  useEffect(() => {
-    if (!active) return;
-    timerRef.current = setInterval(() => {
-      setTimeLeft((t) => (t > 0 ? t - 1 : 0));
-    }, 1000);
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [active]);
-
-  // 时间到：在副作用中统一处理结束与庆祝（移出 setState updater，
-  // 避免 StrictMode 下 updater 双调用导致重复 clearInterval/celebrateBig）
-  useEffect(() => {
-    if (active && timeLeft === 0) {
-      if (timerRef.current) clearInterval(timerRef.current);
-      setActive(false);
-      setDone(true);
-      celebrateBig();
-    }
-  }, [active, timeLeft]);
-
+  // 答题处理
   const handleAnswer = (correct: boolean) => {
-    const skill = current?.skill;
-    if (!skill) return;
+    if (!current?.skill) return;
+    const skill = current.skill;
 
     if (correct) {
-      sfxStar();
+      sfxCorrect();
       celebrateSmall();
       setScore((s) => ({ ...s, ok: s.ok + 1 }));
       setStreak((s) => s + 1);
-      // 连续答对 3 题升难度
-      setDifficulty((d) => {
-        if (streak + 1 >= 3 && d < 3) return Math.min(3, d + 1) as 1 | 2 | 3;
-        return d;
-      });
+
+      // 自适应升档
+      if (streak + 1 >= 3 && difficulty < 3) {
+        setDifficulty((d) => Math.min(3, d + 1) as 1 | 2 | 3);
+      }
     } else {
       sfxWrong();
       setScore((s) => ({ ...s, ng: s.ng + 1 }));
       setStreak(0);
-      // 答错降难度
-      setDifficulty((d) => Math.max(1, d - 1) as 1 | 2 | 3);
+
+      // 自适应降档
+      if (difficulty > 1) {
+        setDifficulty((d) => Math.max(1, d - 1) as 1 | 2 | 3);
+      }
     }
 
     // 调用 practiceWrong（带难度感知）
     practiceWrong(skill, correct, difficulty);
 
     if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
-    nextTimerRef.current = setTimeout(() => nextQuestion(), 300);
+    nextTimerRef.current = setTimeout(() => nextQuestion(skill), 300);
   };
 
-  // 连对数变化时的副作用集中在 effect 中处理（不放在 setState updater 内），
-  // 避免 StrictMode 双调用 updater 触发重复写入/重复庆祝
+  // 连对数变化时的副作用
   useEffect(() => {
-    const best = progress.wrongHistory?.bestStreak ?? 0;
+    const best = wrongHistory?.bestStreak ?? 0;
     if (streak > best) updateWrongHistory({ bestStreak: streak });
     setBestStreak((b) => Math.max(b, streak));
-  }, [streak]);
+  }, [streak, wrongHistory?.bestStreak, updateWrongHistory]);
 
   const handleAiAnalyze = () => {
     sfxTap();
     setShowAiAnalysis(true);
     aiAnalyze.run();
     // 增加 AI 分析计数
-    const count = (progress.wrongHistory?.aiAnalyzeCount ?? 0) + 1;
+    const count = (wrongHistory?.aiAnalyzeCount ?? 0) + 1;
     updateWrongHistory({ aiAnalyzeCount: count });
   };
 
@@ -211,8 +216,8 @@ export function AdaptiveTrainer() {
   const currentInfo = useMemo(() => {
     if (!current?.skill) return null;
     const skill = current.skill;
-    const m = progress.mastery[skill];
-    const cat = skill.split(':')[0]!;
+    const m = mastery[skill];
+    const cat = skill.split(':')[0] ?? '';
     return {
       skill,
       subject: subjectLabel(cat),
@@ -223,12 +228,12 @@ export function AdaptiveTrainer() {
       lastError: m?.last ? new Date(m.last).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }) : '—',
       skillName: skillLabel(skill),
     };
-  }, [current, progress.mastery, difficulty]);
+  }, [current, mastery, difficulty]);
 
   // 错因驱动内容（P1-3）：统计错题本覆盖的薄弱题型总数，供家长/孩子一眼看到「小智在针对练什么」
   const weakSummary = useMemo(() => {
     const cats = new Set(
-      progress.wrongBook.map((s) => s.split(':')[0]).filter(Boolean) as string[],
+      wrongBook.map((s: string) => s.split(':')[0]).filter(Boolean) as string[],
     );
     let totalTypes = 0;
     let topCount = 0;
@@ -238,7 +243,7 @@ export function AdaptiveTrainer() {
       for (const w of ws) if (w.count > topCount) topCount = w.count;
     }
     return { totalTypes, topCount };
-  }, [progress.wrongBook]);
+  }, [wrongBook]);
 
   if (!active && !done) {
     return (
@@ -247,18 +252,18 @@ export function AdaptiveTrainer() {
           <div className="text-5xl">🧠</div>
           <h3 className="mt-2 text-lg font-extrabold text-ink">{tr('wrongbook.adaptiveTitle')}</h3>
           <p className="mt-1 text-sm font-bold text-ink-soft">
-            {progress.wrongBook.length > 0
-              ? tr('wrongbook.pendingDesc', { count: progress.wrongBook.length })
+            {wrongBook.length > 0
+              ? tr('wrongbook.pendingDesc', { count: wrongBook.length })
               : tr('wrongbook.emptyDesc')}
           </p>
-          {progress.wrongBook.length > 0 && (
+          {wrongBook.length > 0 && (
             <div className="mt-3 flex flex-wrap justify-center gap-2 text-xs">
               {(() => {
-                const due = progress.wrongBook.filter((s) => {
-                  const m = progress.mastery[s];
+                const due = wrongBook.filter((s) => {
+                  const m = mastery[s];
                   return m && isDue(m);
                 }).length;
-                const weak = weakSkills(progress, 5).filter((w) => progress.wrongBook.includes(w.skill)).length;
+                const weak = weakSkills({ mastery } as unknown as import('@/types').Progress, 5).filter((w) => wrongBook.includes(w.skill)).length;
                 return (
                   <>
                     {due > 0 && (
@@ -286,12 +291,12 @@ export function AdaptiveTrainer() {
               tone="purple"
               size="lg"
               fullWidth
-              disabled={progress.wrongBook.length === 0}
-              onClick={start}
+              disabled={wrongBook.length === 0}
+              onClick={startChallenge}
             >
               🚀 {tr('wrongbook.startTraining')}
             </CandyButton>
-            {progress.wrongBook.length > 0 && (
+            {wrongBook.length > 0 && (
               <CandyButton
                 tone="blue"
                 size="md"
@@ -347,7 +352,7 @@ export function AdaptiveTrainer() {
           </div>
           <p className="mt-3 text-sm font-bold text-ink-soft">{tr('common.accuracy')} {acc}%</p>
           <div className="mt-4 flex flex-col gap-2">
-            <CandyButton tone="purple" size="lg" fullWidth onClick={start}>
+            <CandyButton tone="purple" size="lg" fullWidth onClick={startChallenge}>
               {tr('common.retryOnce')}
             </CandyButton>
             <CandyButton tone="blue" size="md" fullWidth onClick={handleAiAnalyze}>

@@ -374,7 +374,7 @@ export default function HanziPage() {
             <Panel>
               <div className="mb-3 flex items-center justify-between">
                 <span className="text-sm font-bold text-ink-soft">{levelInfo.emoji} {levelInfo.name} · {levelInfo.desc}</span>
-                <span className="text-sm font-bold" style={{ color: TONE_STYLE[tone]!.deep }}>{learnedInLevel}/{list.length}</span>
+                <span className="text-sm font-bold" style={{ color: (TONE_STYLE[tone] ?? TONE_STYLE.purple).deep }}>{learnedInLevel}/{list.length}</span>
               </div>
               <ProgressBar value={learnedInLevel} max={list.length || 1} color={tone} />
             </Panel>

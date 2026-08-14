@@ -7,7 +7,7 @@ import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect, sfxWrong, sfxStar } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
-import { randomPraise, randomEncourage } from '@/lib/speech';
+import { randomPraise } from '@/lib/speech';
 import { shuffle } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
 
@@ -82,7 +82,7 @@ export function RiddleGame() {
     setPhase('playing');
   };
 
-  const current = pool[idx]!
+  const current = pool[idx] ?? pool[0] ?? RIDDLES[0]!;
 
   const handleReveal = (gotIt: boolean) => {
     sfxTap();
@@ -93,7 +93,6 @@ export function RiddleGame() {
       setCorrect(c => c + 1);
     } else {
       sfxWrong();
-      randomEncourage();
     }
     setRevealed(true);
     if (revealTimerRef.current) clearTimeout(revealTimerRef.current);
@@ -104,7 +103,8 @@ export function RiddleGame() {
         setRevealed(false);
       } else {
         setPhase('result');
-        if (correct + (gotIt ? 1 : 0) >= pool.length * 0.8) {
+        const finalCorrect = correct + (gotIt ? 1 : 0);
+        if (finalCorrect >= pool.length * 0.8) {
           sfxStar();
           celebrateBig();
         }

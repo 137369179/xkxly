@@ -33,13 +33,13 @@ export function CodeMaze() {
   const { t: tr } = useTranslation();
   const [levelIdx, setLevelIdx] = useState(0);
   const [program, setProgram] = useState<Cmd[]>([]);
-  const [robot, setRobot] = useState<[number, number]>(LEVELS[0]!.start);
+  const [robot, setRobot] = useState<[number, number]>(() => LEVELS[0]?.start ?? [0, 0]);
   const [collected, setCollected] = useState<[number, number][]>([]);
   const [running, setRunning] = useState(false);
   const [won, setWon] = useState(false);
   const [failed, setFailed] = useState(false);
 
-  const level = LEVELS[levelIdx]!
+  const level = LEVELS[levelIdx] ?? LEVELS[0]!;
 
   const reset = () => {
     setProgram([]);
@@ -53,7 +53,7 @@ export function CodeMaze() {
   const newLevel = (idx: number) => {
     setLevelIdx(idx);
     setProgram([]);
-    setRobot(LEVELS[idx]!.start);
+    setRobot(LEVELS[idx]?.start ?? [0, 0]);
     setCollected([]);
     setWon(false);
     setFailed(false);

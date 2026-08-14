@@ -31,7 +31,8 @@ function genProblem(level: number): Problem {
   if (correct) {
     let r = target;
     while (r > 0) {
-      const w = Math.min(WEIGHTS[Math.floor(Math.random() * WEIGHTS.length)]!, r);
+      const randomWeight = WEIGHTS[Math.floor(Math.random() * WEIGHTS.length)] ?? 1;
+      const w = Math.max(1, Math.min(randomWeight, r));
       right.push(w);
       r -= w;
     }
@@ -40,7 +41,8 @@ function genProblem(level: number): Problem {
     const newTarget = target + (Math.random() > 0.5 ? diff : -diff);
     let r = Math.max(1, newTarget);
     while (r > 0) {
-      const w = Math.min(WEIGHTS[Math.floor(Math.random() * WEIGHTS.length)]!, r);
+      const randomWeight = WEIGHTS[Math.floor(Math.random() * WEIGHTS.length)] ?? 1;
+      const w = Math.max(1, Math.min(randomWeight, r));
       right.push(w);
       r -= w;
     }

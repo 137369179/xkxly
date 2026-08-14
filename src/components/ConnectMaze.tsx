@@ -22,8 +22,8 @@ type Pos = [number, number];
 export function ConnectMaze() {
   const { t } = useTranslation();
   const [lvIdx, setLvIdx] = useState(0);
-  const lv = LEVELS[lvIdx]!
-  const [path, setPath] = useState<Pos[]>([[0,0]]);
+  const lv = LEVELS[lvIdx] ?? LEVELS[0]!;
+  const [path, setPath] = useState<Pos[]>(() => [lv.start as Pos]);
   const [feedback, setFeedback] = useState('');
   const [score, setScore] = useState(0);
   const lockRef = useRef(false);
@@ -39,7 +39,6 @@ export function ConnectMaze() {
   const isEnd = (r:number,c:number) => r===lv.end[0]&&c===lv.end[1];
   const inPath = (r:number,c:number) => path.some(([pr,pc])=>pr===r&&pc===c);
 
-
   const canMove = (from:Pos, to:Pos) => {
     const dr = Math.abs(from[0]-to[0]);
     const dc = Math.abs(from[1]-to[1]);
@@ -49,13 +48,13 @@ export function ConnectMaze() {
   const handleCell = (r:number, c:number) => {
     if (lockRef.current) return;
     if (isWall(r,c)) return;
-    if (isStart(r,c) && path.length > 1) { setPath([[0,0]]); return; }
+    if (isStart(r,c) && path.length > 1) { setPath([lv.start as Pos]); return; }
     if (inPath(r,c)) {
       const idx = path.findIndex(([pr,pc])=>pr===r&&pc===c);
       setPath(path.slice(0, idx+1));
       return;
     }
-    const last = path[path.length-1]!
+    const last = (path[path.length-1] ?? lv.start) as Pos;
     if (!canMove(last, [r,c])) { sfxWrong(); return; }
     sfxTap();
     const newPath = [...path, [r,c] as Pos];

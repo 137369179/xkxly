@@ -20,6 +20,8 @@ export default defineConfig(({ mode }) => ({
     dedupe: ['react', 'react-dom', 'scheduler', 'three'],
   },
   server: {
+    host: true,
+    allowedHosts: true,
     // 开发态把 AI 请求转给 BFF，密钥始终留在服务端、不进 bundle
     proxy: {
       '/api/ai': {
@@ -59,6 +61,7 @@ export default defineConfig(({ mode }) => ({
             if (id.includes('motion') || id.includes('framer-motion')) return 'vendor-motion';
             // opencc-js 繁简转换字典约 1MB，仅繁体模式按需加载，独立 chunk 不进首屏
             if (id.includes('opencc-js')) return 'vendor-opencc';
+            if (id.includes('pinyin-pro')) return 'vendor-pinyin';
             // three 系 3D 引擎只在写实猫页使用（lazy 加载），独立 chunk 避免进首屏。
             // ⚠️ 必须整族并入同一 chunk：three 内部（core + examples/jsm）与
             // three-stdlib / @react-three / three-mesh-bvh / troika-* / camera-controls
@@ -74,6 +77,21 @@ export default defineConfig(({ mode }) => ({
             // 用精确路径匹配，避免误吞 @use-gesture/react、suspend-react 等含 "react" 字样的包。
             if (/(?:^|[\\/])node_modules[\\/](?:react|react-dom|react-reconciler|scheduler)[\\/]/.test(id)) return 'vendor-react';
             return 'vendor';
+          }
+          // 静态大型语料库分包（按需加载，避免首屏主 chunk 过大）
+          if (id.includes('/src/data/') || id.includes('\\src\\data\\')) {
+            if (id.includes('hanzi') || id.includes('hanziSentences') || id.includes('hanzi500') || id.includes('hanziEtymology')) {
+              return 'data-hanzi';
+            }
+            if (id.includes('animals') || id.includes('dinosaurs') || id.includes('humanBody') || id.includes('space')) {
+              return 'data-encyclopedia';
+            }
+            if (id.includes('poem') || id.includes('poets') || id.includes('allusionSources') || id.includes('pingShuiYun')) {
+              return 'data-poems';
+            }
+            if (id.includes('idioms') || id.includes('words') || id.includes('pinyin') || id.includes('phonics')) {
+              return 'data-languages';
+            }
           }
         },
       },

@@ -28,7 +28,8 @@ function makeQuestion(): Question {
     (d) => makeLogicQuestion('mixed', d as Difficulty),
   ];
   const idx = Math.floor(Math.random() * makers.length);
-  return makers[idx]!(1 + Math.floor(Math.random() * 2));
+  const maker = makers[idx] ?? makers[0]!;
+  return maker(1 + Math.floor(Math.random() * 2));
 }
 
 export function DualPK() {

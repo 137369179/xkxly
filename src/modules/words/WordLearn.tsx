@@ -18,8 +18,13 @@ import type { WordEntry } from '@/data/wordIndex';
 import type { Question } from '@/types';
 
 function pick<T>(arr: T[], n: number): T[] {
-  const copy = [...arr]; const out: T[] = [];
-  for (let i = 0; i < n && copy.length; i++) out.push(copy.splice(Math.floor(Math.random() * copy.length), 1)[0]!);
+  const copy = [...arr];
+  const out: T[] = [];
+  for (let i = 0; i < n && copy.length; i++) {
+    const idx = Math.floor(Math.random() * copy.length);
+    const item = copy.splice(idx, 1)[0];
+    if (item !== undefined) out.push(item);
+  }
   return out;
 }
 
@@ -35,7 +40,7 @@ export function WordLearn({ word, onDone }: { word: WordEntry; onDone: () => voi
 
   function makeQuestion(): Question {
     const types = ['emoji', 'zh', 'word'] as const;
-    const type = types[Math.floor(Math.random() * types.length)]!
+    const type = types[Math.floor(Math.random() * types.length)] ?? 'emoji';
     const pool = WORD_POOL.filter(w => w.word !== word.word);
     const distractors = pick(pool, 3);
 

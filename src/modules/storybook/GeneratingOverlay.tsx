@@ -21,7 +21,7 @@ export function GeneratingOverlay({ onCancel }: GeneratingOverlayProps) {
       setHintIndex((i) => (i + 1) % HINTS.length);
     }, 2000);
     return () => clearInterval(timer);
-  }, []);
+  }, [HINTS.length]);
 
   return (
     <motion.div

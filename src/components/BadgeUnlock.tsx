@@ -18,7 +18,7 @@ export function BadgeUnlock() {
   const { t: tr } = useTranslation();
   const pending = useStore((s) => s.pendingBadges);
   const consume = useStore((s) => s.consumeBadge);
-  const currentId = pending[0]!
+  const currentId = pending[0];
   const badge = currentId ? BADGE_MAP.get(currentId) : undefined;
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export function BadgeUnlock() {
   const praise = useAiStream(badge ? praiseTask(`获得${badge.name}徽章：${badge.desc}`) : undefined);
 
   if (!badge) return null;
-  const t = TONE_STYLE[badge.tone]!
+  const t = TONE_STYLE[badge.tone] ?? TONE_STYLE.yellow;
 
   return (
     <Modal open onClose={consume} className="max-w-md text-center">
