@@ -32,14 +32,10 @@ import { fileURLToPath } from 'node:url';
 const CORE_JPG = [
   'certificate_bg.jpg', // root
   'hero_banner.jpg', // root
-  'icons/apple.jpg',
   'icons/letters.jpg',
   'icons/words.jpg',
   'icons/fun.jpg',
   'icons/adventure.jpg',
-  'icons/star.jpg',
-  'icons/heart.jpg',
-  'icons/crown.jpg',
 ];
 
 /** 扫描目录下（递归）匹配某扩展名的文件，返回相对 public 的 url 路径 */

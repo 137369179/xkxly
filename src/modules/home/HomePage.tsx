@@ -97,6 +97,45 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 2.5 模块封面墙 · 系统化封面一览（栅格插画层，与矢量字形网格分工） */}
+      <section className="space-y-3">
+        <div className="flex items-center gap-2 px-1">
+          <span className="text-2xl">🖼️</span>
+          <h2 className="text-xl font-black text-rainbow">模块封面 · 系统一览</h2>
+        </div>
+        <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 sm:gap-4">
+          {NAV_ITEMS.filter((n) => n.imageIcon?.includes('/icons/cover-')).map((m) => {
+            const tk = TONE_STYLE[m.tone] ?? TONE_STYLE.pink;
+            return (
+              <motion.button
+                key={m.id}
+                onClick={() => {
+                  sfxTap();
+                  navigate(m.id);
+                }}
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                className="no-select group relative flex flex-col overflow-hidden rounded-[1.4rem] border-2 border-white/80 bg-white shadow-candy-sm"
+                style={{ boxShadow: `0 6px 18px ${tk.soft}` }}
+              >
+                <img
+                  src={m.imageIcon}
+                  alt={m.label}
+                  loading="lazy"
+                  className="aspect-square w-full object-cover"
+                />
+                <span
+                  className="px-2 py-1.5 text-center text-[11px] font-black leading-tight"
+                  style={{ color: tk.deep }}
+                >
+                  {m.label}
+                </span>
+              </motion.button>
+            );
+          })}
+        </div>
+      </section>
+
       {/* 3. 小智伙伴与每日挑战 (Companion & Daily Challenge) */}
       <section className="space-y-4">
         <motion.button
