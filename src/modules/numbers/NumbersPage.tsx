@@ -1,90 +1,184 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { PageHeader } from '@/components/ui/Card';
-import { Tabs } from '@/components/ui/Tabs';
-import { NumberWall } from './NumberWall';
-import { MathQuiz } from './MathQuiz';
-import { CountingGame } from './CountingGame';
-import { NumberTrace } from './NumberTrace';
-import { MathExtra } from './MathExtra';
-import { SpeedMath } from './SpeedMath';
-import { WordProblems } from './WordProblems';
-import { MathLadder } from './MathLadder';
-import { VerticalMath } from './VerticalMath';
-import { ShapeLearn } from './ShapeLearn';
-import { ClockTrainer } from './ClockTrainer';
-import { MeasureCompare } from './MeasureCompare';
-import { SkipCounting } from './SkipCounting';
-import { FractionLearn } from './FractionLearn';
-import { MoneyLearn } from './MoneyLearn';
-import { RabbitRunMath } from './RabbitRunMath';
-
-
-import { TenFrameMath } from './TenFrameMath';
 import { useTranslation } from '@/i18n/useTranslation';
+import { sfxTap } from '@/lib/sfx';
 
+// ── 子组件全部懒加载以实现极优的首屏性能 ──
+const NumberWall = lazy(() => import('./NumberWall').then((m) => ({ default: m.NumberWall })));
+const TenFrameMath = lazy(() => import('./TenFrameMath').then((m) => ({ default: m.TenFrameMath })));
+const CountingGame = lazy(() => import('./CountingGame').then((m) => ({ default: m.CountingGame })));
+const NumberTrace = lazy(() => import('./NumberTrace').then((m) => ({ default: m.NumberTrace })));
+const SkipCounting = lazy(() => import('./SkipCounting').then((m) => ({ default: m.SkipCounting })));
 
-type TabId = 'wall' | 'math' | 'extra' | 'speed' | 'ladder' | 'run' | 'tenframe' | 'word' | 'count' | 'trace' | 'vertical' | 'shape' | 'clock' | 'measure' | 'skip' | 'fraction' | 'money';
+const MathQuiz = lazy(() => import('./MathQuiz').then((m) => ({ default: m.MathQuiz })));
+const MathExtra = lazy(() => import('./MathExtra').then((m) => ({ default: m.MathExtra })));
+const VerticalMath = lazy(() => import('./VerticalMath').then((m) => ({ default: m.VerticalMath })));
+const MathLadder = lazy(() => import('./MathLadder').then((m) => ({ default: m.MathLadder })));
+const RabbitRunMath = lazy(() => import('./RabbitRunMath').then((m) => ({ default: m.RabbitRunMath })));
 
+const SpeedMath = lazy(() => import('./SpeedMath').then((m) => ({ default: m.SpeedMath })));
+const WordProblems = lazy(() => import('./WordProblems').then((m) => ({ default: m.WordProblems })));
+
+const ShapeLearn = lazy(() => import('./ShapeLearn').then((m) => ({ default: m.ShapeLearn })));
+const ClockTrainer = lazy(() => import('./ClockTrainer').then((m) => ({ default: m.ClockTrainer })));
+const MeasureCompare = lazy(() => import('./MeasureCompare').then((m) => ({ default: m.MeasureCompare })));
+const FractionLearn = lazy(() => import('./FractionLearn').then((m) => ({ default: m.FractionLearn })));
+const MoneyLearn = lazy(() => import('./MoneyLearn').then((m) => ({ default: m.MoneyLearn })));
+
+type MathCategory = 'sensory' | 'arithmetic' | 'practice' | 'geometry';
+
+interface SubTab {
+  id: string;
+  label: string;
+  emoji: string;
+}
+
+const CATEGORIES: { id: MathCategory; label: string; emoji: string; desc: string; subTabs: SubTab[] }[] = [
+  {
+    id: 'sensory',
+    label: '数感启蒙',
+    emoji: '🔢',
+    desc: '认数字 · 十格阵 · 数数 · 描红',
+    subTabs: [
+      { id: 'wall', label: '数字墙', emoji: '💯' },
+      { id: 'tenframe', label: '十格阵', emoji: '🥕' },
+      { id: 'count', label: '数数乐', emoji: '🍎' },
+      { id: 'trace', label: '数字描红', emoji: '✍️' },
+      { id: 'skip', label: '跳数规律', emoji: '🐇' },
+    ],
+  },
+  {
+    id: 'arithmetic',
+    label: '算术工坊',
+    emoji: '➕',
+    desc: '加减乘除 · 竖式进位 · 趣味爬梯',
+    subTabs: [
+      { id: 'math', label: '加减法', emoji: '➕' },
+      { id: 'extra', label: '乘除进阶', emoji: '✖️' },
+      { id: 'vertical', label: '竖式进位', emoji: '📝' },
+      { id: 'ladder', label: '算术梯', emoji: '🪜' },
+      { id: 'run', label: '玉兔快跑', emoji: '🐇' },
+    ],
+  },
+  {
+    id: 'practice',
+    label: '口算应用',
+    emoji: '⚡',
+    desc: '极速口算挑战 · 图文应用题',
+    subTabs: [
+      { id: 'speed', label: '极速口算', emoji: '⚡' },
+      { id: 'word', label: '图文应用题', emoji: '📖' },
+    ],
+  },
+  {
+    id: 'geometry',
+    label: '几何度量',
+    emoji: '📐',
+    desc: '形状 · 时钟 · 测量 · 分数 · 钱币',
+    subTabs: [
+      { id: 'shape', label: '形状认知', emoji: '📐' },
+      { id: 'clock', label: '认识时钟', emoji: '⏰' },
+      { id: 'measure', label: '比较测量', emoji: '📏' },
+      { id: 'fraction', label: '披萨分数', emoji: '🍕' },
+      { id: 'money', label: '认识钱币', emoji: '💰' },
+    ],
+  },
+];
 
 export default function NumbersPage() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<TabId>('wall');
+  const [activeCategory, setActiveCategory] = useState<MathCategory>('sensory');
+  const [activeSubTab, setActiveSubTab] = useState<string>('wall');
+
+  const currentCategory = CATEGORIES.find((c) => c.id === activeCategory)!;
+
+  const handleSelectCategory = (cat: MathCategory) => {
+    sfxTap();
+    setActiveCategory(cat);
+    const catMeta = CATEGORIES.find((c) => c.id === cat)!;
+    setActiveSubTab(catMeta.subTabs[0]!.id);
+  };
+
+  const handleSelectSubTab = (subId: string) => {
+    sfxTap();
+    setActiveSubTab(subId);
+  };
 
   return (
-    <div>
+    <div className="space-y-5">
       <PageHeader
         emoji="🔢"
-        title={t('numbersPage.title')}
-        subtitle={t('numbersPage.subtitle')}
+        title={t('numbersPage.title') || '数字王国'}
+        subtitle={t('numbersPage.subtitle') || '数感启蒙 · 算术工坊 · 口算应用 · 几何度量'}
         tone="yellow"
       />
 
-      <Tabs<TabId>
-        tone="yellow"
-        layoutId="numbers-tabs"
-        value={tab}
-        onChange={setTab}
-        items={[
-          { id: 'wall', label: t('numbersPage.tabWall'), emoji: '💯' },
-          { id: 'tenframe', label: t('numbersPage.tabTenframe'), emoji: '🥕' },
+      {/* 👑 一级大分类导航卡片 */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        {CATEGORIES.map((cat) => {
+          const isAct = cat.id === activeCategory;
+          return (
+            <button
+              key={cat.id}
+              onClick={() => handleSelectCategory(cat.id)}
+              className={`group relative flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all text-center ${
+                isAct
+                  ? 'border-candy-yellow-deep bg-gradient-to-b from-yellow-50 to-amber-100/70 shadow-candy-sm scale-[1.02]'
+                  : 'border-yellow-200/70 bg-white/90 hover:border-yellow-300 hover:bg-yellow-50/50'
+              }`}
+            >
+              <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">{cat.emoji}</span>
+              <span className={`text-base font-black ${isAct ? 'text-amber-900' : 'text-ink'}`}>{cat.label}</span>
+              <span className="text-[11px] font-semibold text-ink-soft line-clamp-1 mt-0.5">{cat.desc}</span>
+            </button>
+          );
+        })}
+      </div>
 
-          { id: 'math', label: t('numbersPage.tabMath'), emoji: '➕' },
-          { id: 'extra', label: t('numbersPage.tabExtra'), emoji: '✖️' },
-          { id: 'speed', label: t('numbersPage.tabSpeed'), emoji: '⚡' },
-          { id: 'ladder', label: t('numbersPage.tabLadder'), emoji: '🪜' },
-          { id: 'run', label: t('numbersPage.tabRun'), emoji: '🐇' },
-          { id: 'vertical', label: t('numbersPage.tabVertical'), emoji: '📝' },
-          { id: 'shape', label: t('numbersPage.tabShape'), emoji: '📐' },
-          { id: 'clock', label: t('numbersPage.tabClock'), emoji: '⏰' },
-          { id: 'measure', label: t('numbersPage.tabMeasure'), emoji: '📐' },
-          { id: 'skip', label: t('numbersPage.tabSkip'), emoji: '🔢' },
-          { id: 'fraction', label: t('numbersPage.tabFraction'), emoji: '🍕' },
-          { id: 'money', label: t('numbersPage.tabMoney'), emoji: '💰' },
-          { id: 'word', label: t('numbersPage.tabWord'), emoji: '📐' },
-          { id: 'count', label: t('numbersPage.tabCount'), emoji: '🍎' },
-          { id: 'trace', label: t('numbersPage.tabTrace'), emoji: '✍️' },
-        ]}
-      />
+      {/* 🏷️ 二级功能标签栏 */}
+      <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 rounded-2xl bg-amber-100/50 border border-amber-200/80">
+        {currentCategory.subTabs.map((sub) => {
+          const isSubAct = sub.id === activeSubTab;
+          return (
+            <button
+              key={sub.id}
+              onClick={() => handleSelectSubTab(sub.id)}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-black transition-all ${
+                isSubAct
+                  ? 'bg-candy-yellow-deep text-white shadow-candy-sm scale-105'
+                  : 'bg-white/80 text-ink-soft hover:bg-white hover:text-ink'
+              }`}
+            >
+              <span>{sub.emoji}</span>
+              <span>{sub.label}</span>
+            </button>
+          );
+        })}
+      </div>
 
-      {tab === 'wall' && <NumberWall />}
-      {tab === 'tenframe' && <TenFrameMath />}
-      {tab === 'math' && <MathQuiz />}
+      {/* 🚀 主体内容区域（带友好 Loading） */}
+      <Suspense fallback={<div className="py-16 text-center text-3xl animate-bounce">🔢</div>}>
+        {activeSubTab === 'wall' && <NumberWall />}
+        {activeSubTab === 'tenframe' && <TenFrameMath />}
+        {activeSubTab === 'count' && <CountingGame />}
+        {activeSubTab === 'trace' && <NumberTrace />}
+        {activeSubTab === 'skip' && <SkipCounting />}
 
-      {tab === 'extra' && <MathExtra />}
-      {tab === 'speed' && <SpeedMath />}
-      {tab === 'ladder' && <MathLadder />}
-      {tab === 'run' && <RabbitRunMath />}
-      {tab === 'word' && <WordProblems />}
-      {tab === 'count' && <CountingGame />}
-      {tab === 'trace' && <NumberTrace />}
-      {tab === 'vertical' && <VerticalMath />}
-      {tab === 'shape' && <ShapeLearn />}
-      {tab === 'clock' && <ClockTrainer />}
-      {tab === 'measure' && <MeasureCompare />}
-      {tab === 'skip' && <SkipCounting />}
-      {tab === 'fraction' && <FractionLearn />}
-      {tab === 'money' && <MoneyLearn />}
+        {activeSubTab === 'math' && <MathQuiz />}
+        {activeSubTab === 'extra' && <MathExtra />}
+        {activeSubTab === 'vertical' && <VerticalMath />}
+        {activeSubTab === 'ladder' && <MathLadder />}
+        {activeSubTab === 'run' && <RabbitRunMath />}
 
+        {activeSubTab === 'speed' && <SpeedMath />}
+        {activeSubTab === 'word' && <WordProblems />}
+
+        {activeSubTab === 'shape' && <ShapeLearn />}
+        {activeSubTab === 'clock' && <ClockTrainer />}
+        {activeSubTab === 'measure' && <MeasureCompare />}
+        {activeSubTab === 'fraction' && <FractionLearn />}
+        {activeSubTab === 'money' && <MoneyLearn />}
+      </Suspense>
     </div>
   );
 }

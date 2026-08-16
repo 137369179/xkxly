@@ -1,0 +1,27 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- 宝贝学习乐园 App 吉祥物：圆脸猫 + 星星。单一矢量真相源，供 PWA 多尺寸生成复用。 -->
+  <g id="logo">
+    <!-- 耳朵 -->
+    <path d="M150 165 L118 72 L214 128 Z" fill="#FF6FA5" />
+    <path d="M362 165 L394 72 L298 128 Z" fill="#FF6FA5" />
+    <!-- 内耳 -->
+    <path d="M165 150 L142 98 L206 132 Z" fill="#FFC2DA" />
+    <path d="M347 150 L370 98 L306 132 Z" fill="#FFC2DA" />
+    <!-- 脸 -->
+    <circle cx="256" cy="272" r="152" fill="#FF8FB8" />
+    <!-- 眼睛 -->
+    <circle cx="206" cy="256" r="17" fill="#FFFFFF" />
+    <circle cx="306" cy="256" r="17" fill="#FFFFFF" />
+    <!-- 腮红 -->
+    <circle cx="172" cy="300" r="21" fill="#FF9CB8" opacity="0.7" />
+    <circle cx="340" cy="300" r="21" fill="#FF9CB8" opacity="0.7" />
+    <!-- 鼻子 -->
+    <path d="M256 286 L245 300 L267 300 Z" fill="#FF6FA5" />
+    <!-- 微笑 -->
+    <path d="M236 302 Q256 324 276 302" stroke="#FFFFFF" stroke-width="10" fill="none" stroke-linecap="round" />
+    <!-- 星星（右上角，呼应品牌） -->
+    <path d="M396 104 l13 28 30 4 -22 21 5 30 -26 -15 -26 15 5 -30 -22 -21 30 -4 Z" fill="#FFC93C" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round" />
+    <!-- 玩具光泽 -->
+    <ellipse cx="202" cy="214" rx="26" ry="14" fill="#FFFFFF" opacity="0.5" transform="rotate(-28 202 214)" />
+  </g>
+</svg>

@@ -9,6 +9,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import type { Locale } from '@/i18n/config';
 import { ProfileSwitcher } from './ProfileSwitcher';
 import { CategorySheet } from './CategorySheet';
+import { SoundMuteToggle } from '@/components/SoundMuteToggle';
 
 export function TopBar() {
   const stars = useStars();
@@ -63,6 +64,9 @@ export function TopBar() {
             <span>🌐</span>
             <span>{localeLabel[locale] ?? '简'}</span>
           </button>
+
+          {/* 全局大喇叭静音开关 */}
+          <SoundMuteToggle />
 
           {/* 分类浏览入口 */}
           <button

@@ -1,14 +1,16 @@
 /**
- * 字母排序 🅰️ (O7)
- * 26字母 ABC 顺序排列练习
+ * 字母排序 🅰️ (LetterOrder)
+ * 26字母 ABC 顺序排列与填空练习 · 彩虹小火车主题
  */
 import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
+import { Panel } from '@/components/ui/Card';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
-import { speak } from '@/lib/speech';
+import { playLetterVoice, speak } from '@/lib/speech';
 import { cn, shuffle } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useStore } from '@/store/useStore';
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
@@ -16,6 +18,7 @@ type Mode = 'learn' | 'order' | 'fill';
 
 export function LetterOrder() {
   const { t: tr } = useTranslation();
+  const addStars = useStore((s) => s.addStars);
   const [mode, setMode] = useState<Mode>('learn');
   const [current, setCurrent] = useState(0);
   const [letters, setLetters] = useState<string[]>([]);
@@ -23,11 +26,15 @@ export function LetterOrder() {
   const [feedback, setFeedback] = useState('');
   const [score, setScore] = useState(0);
   const lockRef = useRef(false);
+  const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // learn: 逐个认识字母顺序
   const goLearn = (i: number) => {
+    sfxTap();
     setCurrent(i);
-    speak(ALPHABET[i]!, { lang: 'en-US', rate: 0.7, module: 'ai' });
+    void playLetterVoice(ALPHABET[i]!).catch(() => {
+      void speak(ALPHABET[i]!, { lang: 'en-US', rate: 0.6 });
+    });
   };
 
   // order: 把打乱的5个字母排ABC顺序
@@ -46,14 +53,14 @@ export function LetterOrder() {
     const start = Math.floor(Math.random() * 22);
     const seq = ALPHABET.slice(start, start + 4);
     const missing = Math.floor(Math.random() * 4);
-    const correct = seq[missing]!
+    const correct = seq[missing]!;
     const wrongs = new Set<string>();
     while (wrongs.size < 3) {
-      const w = ALPHABET[Math.floor(Math.random() * 26)]!
+      const w = ALPHABET[Math.floor(Math.random() * 26)]!;
       if (w !== correct) wrongs.add(w);
     }
-    setFillQ({ seq: seq.map((c, i) => i === missing ? '?' : c), missing });
-    setFillOptions(shuffle([correct, ...wrongs]));
+    setFillQ({ seq: seq.map((c, i) => (i === missing ? '?' : c)), missing });
+    setFillOptions(shuffle([correct, ...Array.from(wrongs)]));
     setFeedback('');
   }, []);
 
@@ -63,61 +70,155 @@ export function LetterOrder() {
       if (answer.includes(letter)) return;
       const newAns = [...answer, letter];
       setAnswer(newAns);
-      void speak(letter, { lang: 'en-US', rate: 0.7, module: 'ai' });
+      void playLetterVoice(letter).catch(() => {
+        void speak(letter, { lang: 'en-US', rate: 0.6 });
+      });
+
       if (newAns.length === letters.length) {
         const correctSeq = [...letters].sort((a, b) => ALPHABET.indexOf(a) - ALPHABET.indexOf(b));
         const isCorrect = newAns.every((c, i) => c === correctSeq[i]!);
         if (isCorrect) {
-          sfxCorrect(); setFeedback(tr('letterOrder.perfect')); setScore(s => s + 1);
+          sfxCorrect();
+          setFeedback(`🎉 ${tr('letterOrder.perfect')}`);
+          setScore((s) => s + 1);
+          addStars(1);
           void speak('Great job! ABC order is correct!', { lang: 'en-US', rate: 0.8, module: 'praise' });
         } else {
-          sfxWrong(); setFeedback(`❌ ${tr('letterOrder.correctSeq', { seq: correctSeq.join(' → ') })}`);
+          sfxWrong();
+          setFeedback(`❌ ${tr('letterOrder.correctSeq', { seq: correctSeq.join(' → ') })}`);
         }
-        setTimeout(() => { startOrder(); setFeedback(''); }, 1500);
+        if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
+        nextTimerRef.current = setTimeout(() => {
+          startOrder();
+          setFeedback('');
+        }, 1600);
       }
     }
+  };
+
+  // 撤销选中的字母
+  const undoLetter = (letter: string) => {
+    sfxTap();
+    setAnswer((ans) => ans.filter((x) => x !== letter));
+    setFeedback('');
   };
 
   const pickFill = (letter: string) => {
     if (lockRef.current) return;
     lockRef.current = true;
     const sortedOpts = [...fillOptions].sort((a, b) => ALPHABET.indexOf(a) - ALPHABET.indexOf(b));
-    const expected = sortedOpts.find(o => {
+    const expected = sortedOpts.find((o) => {
       const testSeq = [...fillQ.seq];
       testSeq[fillQ.missing] = o;
       return testSeq.every((c, i) => i === 0 || ALPHABET.indexOf(c) > ALPHABET.indexOf(testSeq[i - 1]!));
     });
 
     if (letter === expected) {
-      sfxCorrect(); setFeedback(tr('letterOrder.correct')); setScore(s => s + 1);
-      void speak(letter, { lang: 'en-US', rate: 0.7, module: 'praise' });
+      sfxCorrect();
+      setFeedback(`🎉 ${tr('letterOrder.correct')}`);
+      setScore((s) => s + 1);
+      addStars(1);
+      void playLetterVoice(letter).catch(() => {
+        void speak(letter, { lang: 'en-US', rate: 0.7, module: 'praise' });
+      });
     } else {
-      sfxWrong(); setFeedback(`❌ ${tr('letterOrder.wrongExp', { expected: expected ?? '' })}`);
+      sfxWrong();
+      setFeedback(`❌ ${tr('letterOrder.wrongExp', { expected: expected ?? '' })}`);
     }
-    setTimeout(() => { startFill(); setFeedback(''); lockRef.current = false; }, 1200);
+    if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
+    nextTimerRef.current = setTimeout(() => {
+      startFill();
+      setFeedback('');
+      lockRef.current = false;
+    }, 1300);
   };
 
   return (
-    <div className="card-candy p-4 sm:p-6">
-      <h3 className="mb-2 text-center text-lg font-extrabold text-ink">🅰️ {tr('letterOrder.title')}</h3>
-      <div className="mb-4 flex justify-center gap-2">
-        <button onClick={()=>setMode('learn')} className={`rounded-xl px-3 py-1.5 text-xs font-extrabold ${mode==='learn'?'bg-candy-pink-deep text-white':'bg-white text-ink-soft shadow-sm'}`}>{tr('letterOrder.learn')}</button>
-        <button onClick={()=>{setMode('order');startOrder();}} className={`rounded-xl px-3 py-1.5 text-xs font-extrabold ${mode==='order'?'bg-candy-pink-deep text-white':'bg-white text-ink-soft shadow-sm'}`}>{tr('letterOrder.sort')}</button>
-        <button onClick={()=>{setMode('fill');startFill();}} className={`rounded-xl px-3 py-1.5 text-xs font-extrabold ${mode==='fill'?'bg-candy-pink-deep text-white':'bg-white text-ink-soft shadow-sm'}`}>{tr('letterOrder.fill')}</button>
+    <Panel className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-2xl">🚂</span>
+          <div>
+            <h3 className="text-lg font-extrabold text-ink">{tr('letterOrder.title')}</h3>
+            <p className="text-xs font-bold text-ink-soft">按 26 字母 ABC 顺序开动小火车</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 rounded-full bg-candy-yellow-soft px-3 py-1 text-xs font-black text-candy-orange-deep shadow-xs">
+          <span>⭐ 积分: {score}</span>
+        </div>
+      </div>
+
+      {/* 模式选择 */}
+      <div className="flex justify-center gap-2 rounded-2xl bg-pink-50/80 p-1.5 border border-pink-100">
+        <button
+          onClick={() => {
+            sfxTap();
+            setMode('learn');
+          }}
+          className={cn(
+            'flex-1 rounded-xl py-2 text-xs font-black transition active:scale-95',
+            mode === 'learn' ? 'bg-candy-pink-deep text-white shadow-sm' : 'text-ink-soft hover:bg-white/60'
+          )}
+        >
+          📖 {tr('letterOrder.learn')}
+        </button>
+        <button
+          onClick={() => {
+            sfxTap();
+            setMode('order');
+            startOrder();
+          }}
+          className={cn(
+            'flex-1 rounded-xl py-2 text-xs font-black transition active:scale-95',
+            mode === 'order' ? 'bg-candy-pink-deep text-white shadow-sm' : 'text-ink-soft hover:bg-white/60'
+          )}
+        >
+          🚂 {tr('letterOrder.sort')}
+        </button>
+        <button
+          onClick={() => {
+            sfxTap();
+            setMode('fill');
+            startFill();
+          }}
+          className={cn(
+            'flex-1 rounded-xl py-2 text-xs font-black transition active:scale-95',
+            mode === 'fill' ? 'bg-candy-pink-deep text-white shadow-sm' : 'text-ink-soft hover:bg-white/60'
+          )}
+        >
+          🎯 {tr('letterOrder.fill')}
+        </button>
       </div>
 
       {mode === 'learn' && (
-        <div className="text-center">
-          <motion.div key={current} initial={{scale:0.5}} animate={{scale:1}} className="mx-auto mb-4 flex h-28 w-28 items-center justify-center rounded-[2rem] bg-candy-pink-soft text-6xl font-extrabold text-candy-pink-deep shadow-lg">
+        <div className="text-center space-y-4 py-2">
+          <motion.div
+            key={current}
+            initial={{ scale: 0.6, rotate: -10 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 18 }}
+            className="mx-auto flex h-32 w-32 items-center justify-center rounded-[2.2rem] border-4 border-white bg-gradient-to-br from-candy-pink-soft to-pink-200 text-6xl font-black text-candy-pink-deep shadow-pop cursor-pointer active:scale-95 transition"
+            onClick={() => goLearn(current)}
+          >
             {ALPHABET[current]}
           </motion.div>
-          <p className="mb-3 text-sm font-bold text-ink-soft">{tr('letterOrder.progress', { current: current + 1 })}</p>
-          <div className="grid grid-cols-7 gap-1 sm:grid-cols-9">
+
+          <p className="text-sm font-bold text-ink-soft">
+            {tr('letterOrder.progress', { current: current + 1 })} / 26 · 点击大字母听纯正发音 🔊
+          </p>
+
+          <div className="grid grid-cols-6 gap-1.5 sm:grid-cols-9 md:grid-cols-13">
             {ALPHABET.map((l, i) => (
-              <button key={`l-${i}`} onClick={()=>goLearn(i)}
-                className={cn('rounded-lg py-2 text-sm font-extrabold shadow-sm transition-all hover:scale-105',
-                  current===i ? 'bg-candy-pink-deep text-white' : 'bg-white text-ink-soft'
-                )}>
+              <button
+                key={`l-${i}`}
+                onClick={() => goLearn(i)}
+                className={cn(
+                  'rounded-xl py-2 text-sm font-black transition-all active:scale-95',
+                  current === i
+                    ? 'bg-candy-pink-deep text-white shadow-md scale-105 ring-2 ring-pink-300'
+                    : 'bg-white text-ink border border-pink-100 hover:bg-pink-50'
+                )}
+              >
                 {l}
               </button>
             ))}
@@ -126,56 +227,110 @@ export function LetterOrder() {
       )}
 
       {mode === 'order' && (
-        <div className="text-center">
-          <p className="mb-3 text-sm font-bold text-ink">{tr('letterOrder.instruction')}</p>
-          <div className="mb-4 flex justify-center gap-2">
-            {answer.map((l, i) => (
-              <motion.span key={`${l}-${i}`} initial={{scale:0}} animate={{scale:1}}
-                className="flex h-12 w-12 items-center justify-center rounded-xl bg-candy-green-soft text-2xl font-extrabold text-candy-green-deep shadow-sm">
-                {l}
-              </motion.span>
-            ))}
-            {answer.length < letters.length && <span className="flex h-12 w-12 items-center justify-center rounded-xl border-2 border-dashed border-ink-muted/30 text-2xl">?</span>}
+        <div className="text-center space-y-4 py-2">
+          <p className="text-sm font-extrabold text-ink">{tr('letterOrder.instruction')}</p>
+
+          {/* 小火车轨道与车厢槽位 */}
+          <div className="relative rounded-2xl bg-gradient-to-r from-amber-100/60 to-orange-100/60 p-4 border border-amber-200/80">
+            <div className="flex justify-center items-center gap-2 flex-wrap">
+              <span className="text-3xl">🚂</span>
+              {letters.map((_, i) => {
+                const filledLetter = answer[i];
+                return (
+                  <motion.div
+                    key={`slot-${i}`}
+                    initial={{ scale: 0.8 }}
+                    animate={{ scale: 1 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => filledLetter && undoLetter(filledLetter)}
+                    className={cn(
+                      'flex h-14 w-14 items-center justify-center rounded-2xl text-2xl font-black shadow-fluffy transition-all cursor-pointer',
+                      filledLetter
+                        ? 'bg-gradient-to-b from-candy-green-soft to-green-100 text-candy-green-deep border-2 border-green-300'
+                        : 'border-2 border-dashed border-pink-200 bg-white/70 text-ink-soft/40'
+                    )}
+                  >
+                    {filledLetter ?? (i + 1)}
+                  </motion.div>
+                );
+              })}
+            </div>
+            {answer.length > 0 && (
+              <p className="text-[11px] font-bold text-amber-800/80 mt-2">💡 提示：点击已上车的字母可撤回</p>
+            )}
           </div>
-          <div className="flex justify-center gap-2">
-            {letters.filter(l => !answer.includes(l)).map(l => (
-              <button key={l} onClick={()=>pickLetter(l)}
-                className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-2xl font-extrabold shadow-sm transition-all hover:scale-105 active:scale-95">
-                {l}
-              </button>
-            ))}
+
+          {/* 候选卡片 */}
+          <div className="flex justify-center gap-2 flex-wrap pt-1">
+            {letters
+              .filter((l) => !answer.includes(l))
+              .map((l) => (
+                <motion.button
+                  key={l}
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.92 }}
+                  onClick={() => pickLetter(l)}
+                  className="flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-pink-200 bg-white text-2xl font-black text-candy-pink-deep shadow-pop transition-all hover:bg-pink-50"
+                >
+                  {l}
+                </motion.button>
+              ))}
           </div>
+
           {answer.length === letters.length && (
-            <button onClick={startOrder} className="mt-4 rounded-xl bg-candy-blue-deep px-4 py-2 text-sm font-extrabold text-white shadow-sm">🔄 {tr('letterOrder.again')}</button>
+            <div className="pt-2">
+              <CandyButton tone="blue" size="md" onClick={startOrder}>
+                🔄 {tr('letterOrder.again')}
+              </CandyButton>
+            </div>
           )}
-          <div className="mt-3 text-xs font-bold text-ink-soft">{tr('letterOrder.score', { score })}</div>
         </div>
       )}
 
       {mode === 'fill' && (
-        <div className="text-center">
-          <p className="mb-3 text-sm font-bold text-ink">{tr('letterOrder.missingLetter')}</p>
-          <div className="mb-4 flex justify-center gap-2">
+        <div className="text-center space-y-4 py-2">
+          <p className="text-sm font-extrabold text-ink">{tr('letterOrder.missingLetter')}</p>
+
+          <div className="flex justify-center gap-2">
             {fillQ.seq.map((c, i) => (
-              <span key={`c-${i}`} className={cn('flex h-14 w-14 items-center justify-center rounded-xl text-3xl font-extrabold shadow-sm',
-                c === '?' ? 'bg-candy-pink-soft text-candy-pink-deep' : 'bg-white text-ink'
-              )}>
+              <motion.span
+                key={`c-${i}`}
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
+                className={cn(
+                  'flex h-16 w-16 items-center justify-center rounded-2xl text-3xl font-black shadow-fluffy transition-all',
+                  c === '?'
+                    ? 'border-3 border-candy-pink-deep bg-candy-pink-soft text-candy-pink-deep animate-pulse'
+                    : 'border-2 border-white bg-white text-ink'
+                )}
+              >
                 {c}
-              </span>
+              </motion.span>
             ))}
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {fillOptions.map(o => (
-              <CandyButton key={o} tone="pink" size="lg" onClick={()=>pickFill(o)}>{o}</CandyButton>
+
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 pt-2">
+            {fillOptions.map((o) => (
+              <CandyButton key={o} tone="pink" size="lg" onClick={() => pickFill(o)}>
+                {o}
+              </CandyButton>
             ))}
           </div>
-          <div className="mt-3 text-xs font-bold text-ink-soft">{tr('letterOrder.score', { score })}</div>
         </div>
       )}
 
       <AnimatePresence>
-        {!!feedback && <motion.div initial={{opacity:0,y:5}} animate={{opacity:1,y:0}} exit={{opacity:0}} className="mt-3 text-center text-sm font-extrabold text-ink-soft">{feedback}</motion.div>}
+        {!!feedback && (
+          <motion.div
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="rounded-2xl bg-white/90 p-2.5 text-center text-sm font-black text-ink shadow-xs"
+          >
+            {feedback}
+          </motion.div>
+        )}
       </AnimatePresence>
-    </div>
+    </Panel>
   );
 }

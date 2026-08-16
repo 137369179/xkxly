@@ -206,7 +206,6 @@ export function applyPractice(
     mastery: { ...p.mastery, [skill]: m },
     wrongBook,
     stars: p.stars + gained,
-    fishCount: (p.fishCount ?? 0) + (correct ? 1 : 0),
     dailyLog: bumpLog(p, { items: 1, ok: correct ? 1 : 0, stars: gained }),
   }, { wrongCount: wrongBook.length, wrongNew, wrongCleared });
 }

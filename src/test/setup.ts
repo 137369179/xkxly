@@ -9,8 +9,20 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 // 而测试断言大多基于中文 —— 统一固定为 zh-CN
 Object.defineProperty(navigator, 'language', { value: 'zh-CN', configurable: true });
 
-// jsdom 不实现的 API 补丁
+// Mock localStorage for tests
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: vi.fn((key: string) => store[key] || null),
+    setItem: vi.fn((key: string, value: string) => { store[key] = String(value); }),
+    removeItem: vi.fn((key: string) => { delete store[key]; }),
+    clear: vi.fn(() => { store = {}; }),
+  };
+})();
+
 if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+  
   if (!window.matchMedia) {
     window.matchMedia = vi.fn().mockImplementation((query: string) => ({
       matches: false,

@@ -142,6 +142,9 @@ export interface TtsSettings {
   modulePresets: TtsModulePresets;
   /** 家长保存的专属场景槽位（P7 / P9·④ 多套）；空数组表示尚未保存 */
   customScenes: TtsCustomScene[];
+  /* —— 微软超拟真 Neural 真人音色配置 —— */
+  /** Edge 超拟真 Neural 音色 (如 zh-CN-XiaoxiaoNeural / zh-CN-YunxiNeural / en-US-AnaNeural) */
+  edgeVoice: string;
   /* —— 神经网络引擎配置 —— */
   /** Kokoro 模型地址（ONNX 目录 URL，需自托管到可访问的 CDN/R2） */
   kokoroModelUrl: string;

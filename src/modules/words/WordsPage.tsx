@@ -14,16 +14,16 @@ import { TONE_STYLE } from '@/lib/tones';
 import { useTranslation } from '@/i18n/useTranslation';
 import { ENGLISH_STAGES, currentStage, stageOverview, type EnglishStage } from '@/lib/englishCurriculum';
 import { WordLearn } from './WordLearn';
-import { PhonicsPage } from './PhonicsPage';
-import { SpellingTest } from './SpellingTest';
-import { DialoguePage } from './DialoguePage';
-import { WordMatch } from './WordMatch';
-import { WordReview } from './WordReview';
-import { PhonicsListen } from './PhonicsListen';
-import { BodyParts } from './BodyParts';
-import { CvcWordBuilder } from './CvcWordBuilder';
-import { WordFamilyGame } from './WordFamilyGame';
 
+const PhonicsPage = lazy(() => import('./PhonicsPage').then((m) => ({ default: m.PhonicsPage })));
+const SpellingTest = lazy(() => import('./SpellingTest').then((m) => ({ default: m.SpellingTest })));
+const DialoguePage = lazy(() => import('./DialoguePage').then((m) => ({ default: m.DialoguePage })));
+const WordMatch = lazy(() => import('./WordMatch').then((m) => ({ default: m.WordMatch })));
+const WordReview = lazy(() => import('./WordReview').then((m) => ({ default: m.WordReview })));
+const PhonicsListen = lazy(() => import('./PhonicsListen').then((m) => ({ default: m.PhonicsListen })));
+const BodyParts = lazy(() => import('./BodyParts').then((m) => ({ default: m.BodyParts })));
+const CvcWordBuilder = lazy(() => import('./CvcWordBuilder').then((m) => ({ default: m.CvcWordBuilder })));
+const WordFamilyGame = lazy(() => import('./WordFamilyGame').then((m) => ({ default: m.WordFamilyGame })));
 const SentencePage = lazy(() => import('./SentencePage'));
 
 type MainTab = 'course' | 'words' | 'practice' | 'review';
@@ -161,19 +161,19 @@ export default function WordsPage() {
       <div className="space-y-5">
         <PageHeader emoji="🎯" title={tr('words.practiceTitle')} subtitle={tr('words.practiceSubtitle')} tone="pink" />
         <Tabs items={MAIN_TABS} value={mainTab} onChange={setMainTab} tone="pink" layoutId="words-main-tabs" />
+        <Tabs items={practiceTabs} value={practiceTab} onChange={setPracticeTab} tone="purple" layoutId="words-practice-tabs" />
 
-        {practiceTab === 'phonics' && <><Tabs items={practiceTabs} value={practiceTab} onChange={setPracticeTab} tone="purple" layoutId="words-practice-tabs" /><PhonicsPage /></>}
-        {practiceTab === 'spell' && <><Tabs items={practiceTabs} value={practiceTab} onChange={setPracticeTab} tone="pink" layoutId="words-practice-tabs" /><SpellingTest /></>}
-        {practiceTab === 'dialogue' && <><Tabs items={practiceTabs} value={practiceTab} onChange={setPracticeTab} tone="pink" layoutId="words-practice-tabs" /><DialoguePage /></>}
-        {practiceTab === 'sentences' && (
-          <><Tabs items={practiceTabs} value={practiceTab} onChange={setPracticeTab} tone="blue" layoutId="words-practice-tabs" />
-            <Suspense fallback={<div className="py-8 text-center text-sm font-bold text-ink-soft">加载中…</div>}><SentencePage /></Suspense></>
-        )}
-        {practiceTab === 'match' && <><Tabs items={practiceTabs} value={practiceTab} onChange={setPracticeTab} tone="green" layoutId="words-practice-tabs" /><WordMatch /></>}
-        {practiceTab === 'listen' && <><Tabs items={practiceTabs} value={practiceTab} onChange={setPracticeTab} tone="blue" layoutId="words-practice-tabs" /><PhonicsListen /></>}
-        {practiceTab === 'builder' && <><Tabs items={practiceTabs} value={practiceTab} onChange={setPracticeTab} tone="pink" layoutId="words-practice-tabs" /><CvcWordBuilder /></>}
-        {practiceTab === 'wordfamily' && <><Tabs items={practiceTabs} value={practiceTab} onChange={setPracticeTab} tone="purple" layoutId="words-practice-tabs" /><WordFamilyGame /></>}
-        {practiceTab === 'body' && <><Tabs items={practiceTabs} value={practiceTab} onChange={setPracticeTab} tone="blue" layoutId="words-practice-tabs" /><BodyParts /></>}
+        <Suspense fallback={<div className="py-12 text-center text-3xl animate-bounce">🔤</div>}>
+          {practiceTab === 'phonics' && <PhonicsPage />}
+          {practiceTab === 'spell' && <SpellingTest />}
+          {practiceTab === 'dialogue' && <DialoguePage />}
+          {practiceTab === 'sentences' && <SentencePage />}
+          {practiceTab === 'match' && <WordMatch />}
+          {practiceTab === 'listen' && <PhonicsListen />}
+          {practiceTab === 'builder' && <CvcWordBuilder />}
+          {practiceTab === 'wordfamily' && <WordFamilyGame />}
+          {practiceTab === 'body' && <BodyParts />}
+        </Suspense>
       </div>
     );
   }
@@ -184,7 +184,9 @@ export default function WordsPage() {
       <div className="space-y-5">
         <PageHeader emoji="🔁" title={tr('words.tab.review')} subtitle={tr('words.reviewSubtitle')} tone="green" />
         <Tabs items={MAIN_TABS} value={mainTab} onChange={setMainTab} tone="green" layoutId="words-main-tabs" />
-        <WordReview />
+        <Suspense fallback={<div className="py-12 text-center text-3xl animate-bounce">🔁</div>}>
+          <WordReview />
+        </Suspense>
       </div>
     );
   }

@@ -1945,7 +1945,13 @@
     "trailMapNode": "「{char}」 {state}",
     "trailMapLegendLearned": "Learned",
     "trailMapLegendCurrent": "Up next",
-    "trailMapLegendLocked": "Locked"
+    "trailMapLegendLocked": "Locked",
+    "trailMapStageProgress": "Stage learned {done} / {total}",
+    "trailMapStageLocked": "Learn all characters in the previous stage to unlock this one!",
+    "trailMapChapter": "Level {n}",
+    "trailMapChapterLocked": "Clear the previous level",
+    "trailMapChapterDone": "Cleared",
+    "trailMapLegendAvailable": "Available"
   },
   "timeseq": {
     "title": "⏰ Time Order",
@@ -2181,7 +2187,7 @@
     "activity": "🎯 Fun Activities"
   },
   "words": {
-        "courseTitle": "English Course",
+    "courseTitle": "English Course",
     "courseSubtitle": "5 steps: Letters → Phonics → Sight Words → Sentences → Dialogue",
     "courseStage": "Stage {n}",
     "courseNowOn": "Current Stage",
@@ -2252,7 +2258,7 @@
       "review": "Review",
       "listen": "Listen",
       "wordFamily": "Word Family",
-    "builder": "CVC Builder",
+      "builder": "CVC Builder",
       "body": "Body"
     },
     "backToList": "← Back to words",
@@ -2604,8 +2610,8 @@
     ]
   },
   "letters": {
-      "phonicsUnlockTitle": "Great job on letters! Unlock Phonics now",
-      "phonicsUnlockDesc": "{n} letters mastered. Word reading awaits!",
+    "phonicsUnlockTitle": "Great job on letters! Unlock Phonics now",
+    "phonicsUnlockDesc": "{n} letters mastered. Word reading awaits!",
     "title": "Phonics Sound Garden",
     "subtitle": "Learn Letter Sounds & example sentences with the 3D felt pronunciation tree～",
     "tabWall": "Phonics Sound Tree",

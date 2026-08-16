@@ -12,11 +12,6 @@ const ListenTrainer = lazy(() => import('@/components/ListenTrainer').then(m => 
 const DualPK = lazy(() => import('@/components/DualPK').then(m => ({ default: m.DualPK })));
 const RiddleGame = lazy(() => import('@/components/RiddleGame').then(m => ({ default: m.RiddleGame })));
 const Tangram = lazy(() => import('@/components/Tangram').then(m => ({ default: m.Tangram })));
-const NurseryPage = lazy(() => import('./NurseryPage').then(m => ({ default: m.default })));
-const PoemFill = lazy(() => import('@/modules/poems/PoemFill').then(m => ({ default: m.PoemFill })));
-const AllusionBrowser = lazy(() => import('@/modules/poems/AllusionBrowser').then(m => ({ default: m.AllusionBrowser })));
-const LineNotes = lazy(() => import('@/modules/poems/LineNotes').then(m => ({ default: m.LineNotes })));
-const Karaoke = lazy(() => import('@/modules/songs/Karaoke').then(m => ({ default: m.Karaoke })));
 const WhackAMole = lazy(() => import('./WhackAMole').then(m => ({ default: m.WhackAMole })));
 const StorySort = lazy(() => import('@/components/StorySort').then(m => ({ default: m.StorySort })));
 const ColorExplore = lazy(() => import('@/components/ColorExplore').then(m => ({ default: m.ColorExplore })));
@@ -53,11 +48,6 @@ const TABS = [
   { id: 'pk', label: '双人对战', emoji: '🏆' },
   { id: 'riddle', label: '谜语猜猜', emoji: '🧩' },
   { id: 'tangram', label: '七巧板', emoji: '📐' },
-  { id: 'nursery', label: '儿歌', emoji: '🎵' },
-  { id: 'fill', label: '古诗填字', emoji: '🌸' },
-  { id: 'allusion', label: '典故', emoji: '📚' },
-  { id: 'notes', label: '串讲', emoji: '📖' },
-  { id: 'karaoke', label: '跟唱', emoji: '🎤' },
   { id: 'whack', label: '打地鼠', emoji: '🔨' },
   { id: 'storysort', label: '排序', emoji: '📖' },
   { id: 'color', label: '颜色', emoji: '🌈' },
@@ -97,11 +87,6 @@ const TAB_MAP: Record<TabId, React.LazyExoticComponent<React.ComponentType>> = {
   pk: DualPK,
   riddle: RiddleGame,
   tangram: Tangram,
-  nursery: NurseryPage,
-  fill: PoemFill,
-  allusion: AllusionBrowser,
-  notes: LineNotes,
-  karaoke: Karaoke,
   whack: WhackAMole,
   storysort: StorySort,
   color: ColorExplore,

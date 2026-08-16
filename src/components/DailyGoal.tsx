@@ -51,7 +51,13 @@ export function DailyGoal() {
   const goals = useMemo(() => pickGoals(today), [today]);
   const [claimed, setClaimed] = useState<Set<string>>(() => {
     const saved = safeGetItem(`goals-${dateKey()}`);
-    return saved ? new Set(JSON.parse(saved)) : new Set();
+    if (!saved) return new Set();
+    try {
+      const arr = JSON.parse(saved);
+      return Array.isArray(arr) ? new Set(arr) : new Set();
+    } catch {
+      return new Set();
+    }
   });
 
   useEffect(() => {

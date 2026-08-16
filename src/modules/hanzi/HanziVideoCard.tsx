@@ -1,6 +1,7 @@
-import { memo, useRef, useState } from 'react';
+import { memo, useRef, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
+import { offlineCache } from '@/lib/offlineCache';
 
 interface HanziVideoCardProps {
   char: string;
@@ -23,6 +24,8 @@ const HanziVideoCard = memo(function HanziVideoCard({
 }: HanziVideoCardProps) {
   const { t } = useTranslation();
   const [showVideo, setShowVideo] = useState(false);
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
+  const [isOffline, setIsOffline] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   
   // 声调颜色映射
@@ -34,9 +37,33 @@ const HanziVideoCard = memo(function HanziVideoCard({
   };
   const toneColor = toneColors[tone as keyof typeof toneColors] || '#666';
   
+  // 监听网络状态
+  useEffect(() => {
+    const updateOnlineStatus = () => setIsOffline(!navigator.onLine);
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    
+    // 初始检测
+    setIsOffline(!navigator.onLine);
+    
+    return () => {
+      window.removeEventListener('online', updateOnlineStatus);
+      window.removeEventListener('offline', updateOnlineStatus);
+    };
+  }, []);
+  
   // 处理点击播放视频
-  const handlePlayVideo = (e: React.MouseEvent) => {
+  const handlePlayVideo = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    if (!videoSrc) {
+      // 尝试从缓存加载
+      const cachedUrl = await offlineCache.getVideoBlobUrl(`${char}-教学`);
+      if (cachedUrl) {
+        setVideoSrc(cachedUrl);
+      }
+    }
+    
     setShowVideo(true);
   };
   
@@ -144,15 +171,26 @@ const HanziVideoCard = memo(function HanziVideoCard({
             </button>
             
             {/* 视频播放器 */}
-            <video
-              ref={videoRef}
-              src={`/hanzi-videos/${char}-教学.mp4`}
-              className="w-full aspect-video"
-              controls
-              autoPlay
-            >
-              {t('hanziVideoCard.videoUnsupported')}
-            </video>
+            <div className="relative">
+              {isOffline && !videoSrc && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50 rounded-t-2xl">
+                  <div className="text-center text-white">
+                    <div className="text-3xl mb-2">📡</div>
+                    <p className="text-sm font-bold">离线模式</p>
+                    <p className="text-xs opacity-80">已学习的内容可在离线时观看</p>
+                  </div>
+                </div>
+              )}
+              <video
+                ref={videoRef}
+                src={videoSrc || `/hanzi-videos/${char}-教学.mp4`}
+                className="w-full aspect-video"
+                controls
+                autoPlay
+              >
+                {t('hanziVideoCard.videoUnsupported')}
+              </video>
+            </div>
             
             {/* 视频信息 */}
             <div className="p-4 bg-gradient-to-r from-candy-purple-soft to-candy-blue-soft">

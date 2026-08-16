@@ -21,11 +21,11 @@ import { WordBuilder } from './WordBuilder';
 import { RadicalsMagic } from '@/components/RadicalsMagic';
 import { makeHanziMixedQuestion } from '@/lib/hanziQuestions';
 import { useTranslation } from '@/i18n/useTranslation';
-import { HanziVideoCard } from '@/modules/hanzi/HanziVideoCard';
 import { HanziStrokeWriter } from '@/modules/hanzi/HanziStrokeWriter';
 import { HanziQuizGame } from '@/modules/hanzi/HanziQuizGame';
 import { HanziFlashReview } from '@/modules/hanzi/HanziFlashReview';
 import { HanziTrailMap } from '@/modules/hanzi/HanziTrailMap';
+import { VirtualHanziGrid } from '@/components/VirtualHanziGrid';
 
 type MainZone = 'trail' | 'library' | 'playground';
 type LibraryTab = 'level1' | 'level2' | 'level3' | 'h500' | 'radical' | 'evolve' | 'family';
@@ -389,19 +389,16 @@ export default function HanziPage() {
             />
           )}
 
-          {isLevelTab && (
-            <div className="grid grid-cols-4 gap-3 sm:grid-cols-6 lg:grid-cols-8">
-              {list.map((h) => (
-                <HanziVideoCard
-                  key={h.c}
-                  char={h.c}
-                  pinyin={h.pd}
-                  tone={h.tone}
-                  learned={(progress.mastery[`hanzi:${h.c}`]?.lv ?? 0) >= 1}
-                  onClick={() => setSelected(h)}
-                />
-              ))}
-            </div>
+          {isLevelTab && list.length > 0 && (
+            <VirtualHanziGrid
+              data={list}
+              learnedMap={Object.fromEntries(
+                Object.entries(progress.mastery)
+                  .filter(([k, v]) => k.startsWith('hanzi:') && v.lv >= 1)
+                  .map(([k]) => [k.replace('hanzi:', ''), true])
+              )}
+              onCardClick={setSelected}
+            />
           )}
 
           {list.length === 0 && isLevelTab && (

@@ -5,11 +5,12 @@ import { QuizCard } from '@/components/QuizCard';
 import { TraceCanvas } from '@/components/TraceCanvas';
 import { CandyButton } from '@/components/ui/Button';
 import { makeLetterQuestion } from '@/lib/questions';
-import { speak, speakLetter } from '@/lib/speech';
+import { speak, speakLetter, speakPhonics, playWordVoice } from '@/lib/speech';
 import { AiPanel } from '@/components/ai';
 import { useAiStream } from '@/lib/ai/useAi';
 import { letterStoryTask } from '@/lib/ai/tasks';
 import { useTranslation } from '@/i18n/useTranslation';
+import { sfxTap } from '@/lib/sfx';
 
 /**
  * 字母五步学习闭环：玩 → 认 → 练 → 写 → 说
@@ -22,6 +23,7 @@ export function LetterLearn({ upper, onDone }: { upper: string; onDone?: () => v
   const practice = useStore((s) => s.practice);
   const learnSkill = useStore((s) => s.learnSkill);
   const markTraced = useStore((s) => s.markTraced);
+  const addStars = useStore((s) => s.addStars);
   const skill = `letter:${upper}`;
 
   // 顺口溜：26 个字母各生成一次，之后长期走本地缓存，不重复等待
@@ -56,16 +58,39 @@ export function LetterLearn({ upper, onDone }: { upper: string; onDone?: () => v
       // gate: 必须点击"听一听，我认识它啦"按钮触发 api.ready() 后才能解锁"认"步骤
       gate: true,
       render: (api) => (
-        <div className="flex flex-col items-center gap-4 py-2">
-          <div className="grid h-40 w-40 place-items-center rounded-[2rem] bg-candy-blue-soft">
-            <span className="text-7xl font-extrabold text-candy-blue-deep">
+        <div className="flex flex-col items-center gap-3 py-2 text-center">
+          <div className="relative grid h-36 w-36 sm:h-40 sm:w-40 place-items-center rounded-[2.2rem] border-4 border-white bg-gradient-to-br from-candy-blue-soft to-blue-100 shadow-pop">
+            <span className="text-6xl sm:text-7xl font-black text-candy-blue-deep">
               {item.upper}
               <span className="opacity-70">{item.lower}</span>
             </span>
+            <span className="absolute bottom-2 rounded-full bg-white/90 px-2 py-0.5 text-xs font-black text-blue-700 shadow-xs">
+              {item.phonicsSound}
+            </span>
           </div>
-          <div className="text-5xl">{item.emoji}</div>
-          <div className="text-2xl font-extrabold text-candy-blue-deep">{item.word}</div>
-          <p className="text-base font-bold text-ink-soft">{item.zh}</p>
+
+          <div className="flex items-center justify-center gap-2">
+            <img
+              src={item.iconSrc}
+              alt={item.word}
+              className="h-10 w-10 rounded-full border-2 border-white bg-white object-cover shadow-sm"
+            />
+            <span className="text-2xl font-black text-candy-blue-deep">{item.word}</span>
+            <span className="text-sm font-bold text-ink-soft">({item.zh})</span>
+          </div>
+
+          <div className="w-full rounded-2xl bg-amber-50 border border-amber-200 p-2.5 text-xs font-extrabold text-amber-800 flex items-center justify-between">
+            <span>🎶 拼读助记：{item.phonicsRhyme}</span>
+            <button
+              onClick={() => {
+                sfxTap();
+                void speakPhonics(item.phonicsRhyme, item.upper);
+              }}
+              className="rounded-lg bg-amber-200 px-2 py-1 text-xs font-black text-amber-900 shadow-xs hover:bg-amber-300"
+            >
+              🔊 播放
+            </button>
+          </div>
 
           <AiPanel state={story} tone="blue" title={tr('letters.aiStoryTitle')} className="w-full" compact />
 
@@ -74,14 +99,16 @@ export function LetterLearn({ upper, onDone }: { upper: string; onDone?: () => v
             size="lg"
             fullWidth
             onClick={() => {
+              sfxTap();
               heardLetter(upper);
               learnSkill(skill);
+              addStars(1);
               void speakLetter(upper);
-              void speak(item.word, { lang: 'en-US', rate: 0.7, module: 'letter' });
+              void playWordVoice(upper);
               api.ready();
             }}
           >
-            {tr('letters.listenAndKnow')}
+            {tr('letters.listenAndKnow')} ✨
           </CandyButton>
         </div>
       ),
@@ -98,6 +125,7 @@ export function LetterLearn({ upper, onDone }: { upper: string; onDone?: () => v
           onAnswer={(correct) => {
             if (correct) {
               practice(skill, true);
+              addStars(1);
               api.ready();
             } else {
               practice(skill, false);
@@ -118,6 +146,7 @@ export function LetterLearn({ upper, onDone }: { upper: string; onDone?: () => v
           onAnswer={(correct) => {
             if (correct) {
               practice(skill, true);
+              addStars(1);
               api.ready();
             } else {
               practice(skill, false);
@@ -140,6 +169,7 @@ export function LetterLearn({ upper, onDone }: { upper: string; onDone?: () => v
             onPass={() => {
               markTraced(`trace:${upper}`);
               learnSkill(skill);
+              addStars(1);
               api.ready();
             }}
           />
@@ -151,29 +181,49 @@ export function LetterLearn({ upper, onDone }: { upper: string; onDone?: () => v
       label: '说',
       emoji: '🗣️',
       render: (api) => (
-        <div className="flex flex-col items-center gap-4 py-3">
-          <div className="text-3xl font-extrabold text-candy-blue-deep">{item.word}</div>
-          <p className="text-center text-base font-bold text-ink-soft">
-            {tr('letters.readAlong')}<span className="text-candy-blue-deep">{item.word}</span>
+        <div className="flex flex-col items-center gap-4 py-3 text-center">
+          <div className="text-3xl font-black text-candy-blue-deep">{item.word}</div>
+          <p className="text-base font-bold text-ink-soft">
+            {tr('letters.readAlong')}<span className="font-extrabold text-candy-blue-deep">{item.word}</span>
           </p>
-          <CandyButton
-            tone="blue"
-            size="lg"
-            fullWidth
-            onClick={() => void speak(item.word, { lang: 'en-US', rate: 0.7, module: 'letter' })}
-          >
-            {tr('common.listen')}
-          </CandyButton>
+
+          <div className="flex gap-2 w-full">
+            <CandyButton
+              tone="blue"
+              size="lg"
+              fullWidth
+              onClick={() => {
+                sfxTap();
+                void speak(item.word, { lang: 'en-US', rate: 0.7, module: 'letter' });
+              }}
+            >
+              🔊 {tr('common.listen')}
+            </CandyButton>
+            <CandyButton
+              tone="orange"
+              size="lg"
+              variant="soft"
+              fullWidth
+              onClick={() => {
+                sfxTap();
+                void speakPhonics(item.phonicsRhyme);
+              }}
+            >
+              🎶 拼读音
+            </CandyButton>
+          </div>
+
           <CandyButton
             tone="green"
             size="lg"
             fullWidth
             onClick={() => {
               learnSkill(skill);
+              addStars(2);
               api.ready();
             }}
           >
-            {tr('pinyin.readDone2')}
+            {tr('pinyin.readDone2')} 🎉
           </CandyButton>
         </div>
       ),

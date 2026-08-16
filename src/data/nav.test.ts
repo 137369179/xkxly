@@ -45,4 +45,10 @@ describe('C6 研究模式路由四件套', () => {
     const item = NAV_ITEMS.find((n) => n.id === 'discoveries');
     expect(item?.bottom).toBeFalsy(); // 画廊不是底部 Tab 导航
   });
+
+  it('NAV_ITEMS 中的全部 emoji 唯一且无重复', () => {
+    const emojis = NAV_ITEMS.map((n) => n.emoji);
+    const unique = new Set(emojis);
+    expect(unique.size).toBe(emojis.length);
+  });
 });

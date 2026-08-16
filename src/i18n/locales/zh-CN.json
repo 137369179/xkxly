@@ -1945,7 +1945,13 @@
     "trailMapNode": "「{char}」{state}",
     "trailMapLegendLearned": "已学会",
     "trailMapLegendCurrent": "当前要学",
-    "trailMapLegendLocked": "待解锁"
+    "trailMapLegendLocked": "待解锁",
+    "trailMapStageProgress": "本阶段已学 {done} / {total} 字",
+    "trailMapStageLocked": "学完前一阶段的全部汉字，才能解锁这一阶段哦～",
+    "trailMapChapter": "第 {n} 关",
+    "trailMapChapterLocked": "通关上一关解锁",
+    "trailMapChapterDone": "已通关",
+    "trailMapLegendAvailable": "本关可学"
   },
   "timeseq": {
     "title": "⏰ 时间顺序",
@@ -2181,7 +2187,7 @@
     "activity": "🎯 适合活动"
   },
   "words": {
-        "courseTitle": "英语课程",
+    "courseTitle": "英语课程",
     "courseSubtitle": "五步进阶：字母 → 拼读 → 高频词 → 句子 → 对话",
     "courseStage": "第 {n} 阶段",
     "courseNowOn": "当前阶段",
@@ -2252,7 +2258,7 @@
       "review": "复习",
       "listen": "辨音",
       "wordFamily": "词族拼读",
-    "builder": "CVC拼词",
+      "builder": "CVC拼词",
       "body": "身体"
     },
     "backToList": "← 返回单词列表",
@@ -2604,8 +2610,8 @@
     ]
   },
   "letters": {
-      "phonicsUnlockTitle": "字母学得不错！去解锁自然拼读吧",
-      "phonicsUnlockDesc": "已掌握 {n} 个字母，单词拼读在等着你",
+    "phonicsUnlockTitle": "字母学得不错！去解锁自然拼读吧",
+    "phonicsUnlockDesc": "已掌握 {n} 个字母，单词拼读在等着你",
     "title": "Phonics 自然拼读乐园",
     "subtitle": "跟着 3D 羊毛毡发音树学 Letter Sound 字母发音与例句～",
     "tabWall": "Phonics 字母发音树",

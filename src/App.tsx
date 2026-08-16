@@ -21,6 +21,9 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { AiVoiceModal } from '@/components/ai/AiVoiceModal';
 import { PwaInstallBanner } from '@/components/PwaInstallBanner';
 import { SwUpdateToast } from '@/components/SwUpdateToast';
+import { BackupRestorePanel, useBackupDetection } from '@/components/BackupRestorePanel';
+import { startAutoBackup } from '@/lib/autoBackup';
+import { useStore } from '@/store/useStore';
 const CatCompanion = lazy(() =>
   import('@/modules/companion/CatCompanion').then((m) => ({ default: m.CatCompanion })) as Promise<{ default: React.ComponentType<any> }>
 );
@@ -140,6 +143,26 @@ export function App() {
   const closeVoiceModal = useTtsStore((s) => s.closeVoiceModal);
   const onboarded = useProfilesStore((s) => s.onboarded);
   const completeOnboarding = useProfilesStore((s) => s.completeOnboarding);
+  
+  // P0-2: 备份恢复检测
+  const { showRestorePanel, handleRestoreComplete } = useBackupDetection();
+  
+  // P0-2: 自动备份定时器
+  useEffect(() => {
+    const cleanup = startAutoBackup(() => {
+      const { progress } = useStore.getState();
+      // 尝试创建备份（简单实现）
+      try {
+        localStorage.setItem('bb_backup_last', JSON.stringify({
+          timestamp: Date.now(),
+          progress
+        }));
+      } catch (e) {
+        console.warn('[Backup] 自动备份失败:', e);
+      }
+    });
+    return cleanup;
+  }, []);
 
   useEffect(() => {
     // 静音开关同步到音效模块；Service Worker 注册统一由 main.tsx 的 registerSW() 完成
@@ -188,6 +211,9 @@ export function App() {
         <OfflineToast />
         <PwaInstallBanner />
         <SwUpdateToast />
+        {showRestorePanel && (
+          <BackupRestorePanel onRestoreComplete={handleRestoreComplete} />
+        )}
         <AiVoiceModal isOpen={voiceModalOpen} onClose={closeVoiceModal} />
         {!onboarded && (
           <OnboardingModal

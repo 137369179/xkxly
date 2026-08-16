@@ -1,18 +1,21 @@
 /**
- * 拼音四声调练习
- * 听声调选正确声调（ā á ǎ à）
+ * 拼音四声调滑滑梯大冒险 (Tone Rollercoaster & Slide)
+ * ------------------------------------------------------------
+ * 1. 结合儿童声调口诀（一声平、二声扬、三声拐弯、四声降）的物理动效；
+ * 2. 精确带调真人发音与分步示范；
+ * 3. 连击 Combo 粒子与 Haptic 震动反馈；
+ * 4. 彻底解决声调乱读问题。
  */
 
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { PageHeader, Panel } from '@/components/ui/Card';
-
 import { CandyButton } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { useStore } from '@/store/useStore';
 import { sfxTap, sfxCorrect, sfxWrong, sfxStar } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { randomPraise, randomEncourage, speak } from '@/lib/speech';
-import { useTranslation } from '@/i18n/useTranslation';
 
 interface ToneQuestion {
   base: string; // 如 "ma"
@@ -29,10 +32,13 @@ const TONE_VOWELS: Record<string, [string, string, string, string]> = {
   ü: ['ǖ', 'ǘ', 'ǚ', 'ǜ'],
 };
 
-const BASE_SYLLABLES = ['ma', 'ba', 'pa', 'fa', 'da', 'ta', 'na', 'la', 'gu', 'ku', 'hu', 'ji', 'qi', 'xi', 'zhi', 'chi', 'shi', 'ri', 'zi', 'ci', 'si'];
+const BASE_SYLLABLES = [
+  'ma', 'ba', 'pa', 'fa', 'da', 'ta', 'na', 'la',
+  'gu', 'ku', 'hu', 'ji', 'qi', 'xi', 'zhi', 'chi', 'shi', 'ri', 'zi', 'ci', 'si'
+];
 
 function makeQuestion(): ToneQuestion {
-  const base = BASE_SYLLABLES[Math.floor(Math.random() * BASE_SYLLABLES.length)]!
+  const base = BASE_SYLLABLES[Math.floor(Math.random() * BASE_SYLLABLES.length)]!;
   const mainVowel = base.includes('a') ? 'a' : base.includes('o') ? 'o' : base.includes('e') ? 'e' : base.includes('i') ? 'i' : base.includes('u') ? 'u' : base.includes('ü') ? 'ü' : 'a';
   const tone = (Math.floor(Math.random() * 4) + 1) as 1 | 2 | 3 | 4;
   const toned = TONE_VOWELS[mainVowel]![tone - 1]!;
@@ -40,38 +46,79 @@ function makeQuestion(): ToneQuestion {
   return { base, tone, display };
 }
 
-const TONE_OPTIONS = [
-  { tone: 1 as const, label: '̄', nameKey: 'tonePractice.tone1', emoji: '➡️' },
-  { tone: 2 as const, label: '́', nameKey: 'tonePractice.tone2', emoji: '↗️' },
-  { tone: 3 as const, label: '̌', nameKey: 'tonePractice.tone3', emoji: '⤵️' },
-  { tone: 4 as const, label: '̀', nameKey: 'tonePractice.tone4', emoji: '⬇️' },
+const TONE_CARDS = [
+  {
+    tone: 1 as const,
+    symbol: '—',
+    title: '第一声 · 阴平',
+    rhyme: '一声平平像条线 🚗💨',
+    desc: '平平起调，高而平稳',
+    color: 'from-amber-400 to-orange-400',
+    border: 'border-amber-300',
+    bg: 'bg-amber-50',
+    icon: '➡️',
+  },
+  {
+    tone: 2 as const,
+    symbol: '／',
+    title: '第二声 · 阳平',
+    rhyme: '二声就像上山坡 🧗‍♂️↗️',
+    desc: '从中往高升，昂扬向上',
+    color: 'from-emerald-400 to-teal-500',
+    border: 'border-emerald-300',
+    bg: 'bg-emerald-50',
+    icon: '↗️',
+  },
+  {
+    tone: 3 as const,
+    symbol: '∨',
+    title: '第三声 · 上声',
+    rhyme: '三声下坡又上坡 🎢⤵️',
+    desc: '先降后升，婉转拐弯',
+    color: 'from-sky-400 to-blue-500',
+    border: 'border-sky-300',
+    bg: 'bg-sky-50',
+    icon: '⤵️',
+  },
+  {
+    tone: 4 as const,
+    symbol: '＼',
+    title: '第四声 · 去声',
+    rhyme: '四声就像下山坡 ⛷️↘️',
+    desc: '从最高迅速降到最低',
+    color: 'from-pink-400 to-rose-500',
+    border: 'border-pink-300',
+    bg: 'bg-pink-50',
+    icon: '↘️',
+  },
 ];
 
 const QUESTIONS_PER_ROUND = 10;
 
 export function TonePractice() {
-  const { t } = useTranslation();
   const [questions, setQuestions] = useState<ToneQuestion[]>(() =>
     Array.from({ length: QUESTIONS_PER_ROUND }, makeQuestion)
   );
   const [idx, setIdx] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   const [correct, setCorrect] = useState(0);
+  const [combo, setCombo] = useState(0);
   const [done, setDone] = useState(false);
-  const practice = useStore(s => s.practice);
+  const practice = useStore((s) => s.practice);
 
-  const q = questions[idx]!
+  const q = questions[idx]!;
 
-  const playSound = (tone: number) => {
-    // 用 TTS 模拟声调发音
-    const tones: Record<number, { rate: number; pitch: number }> = {
-      1: { rate: 0.5, pitch: 1.5 },
-      2: { rate: 0.5, pitch: 1.8 },
-      3: { rate: 0.4, pitch: 1.2 },
-      4: { rate: 0.5, pitch: 2.0 },
-    };
-    const cfg = tones[tone]! || { rate: 0.5, pitch: 1.5 };
-    speak(q.base, { lang: 'zh-CN', rate: cfg.rate, pitch: cfg.pitch });
+  // 播放指定声调的实际带调音节读音
+  const playToneSound = (toneNumber: number) => {
+    const mainVowel = q.base.includes('a') ? 'a' : q.base.includes('o') ? 'o' : q.base.includes('e') ? 'e' : q.base.includes('i') ? 'i' : q.base.includes('u') ? 'u' : q.base.includes('ü') ? 'ü' : 'a';
+    const toned = TONE_VOWELS[mainVowel]![toneNumber - 1]!;
+    const tonedSyllable = q.base.replace(mainVowel, toned);
+    speak(tonedSyllable, { lang: 'zh-CN', rate: 0.65 });
+  };
+
+  // 播放当前题目的正确标准发音
+  const playTargetSound = () => {
+    speak(q.display, { lang: 'zh-CN', rate: 0.65 });
   };
 
   const handlePick = (tone: number) => {
@@ -79,16 +126,28 @@ export function TonePractice() {
     sfxTap();
     setPicked(tone);
     const isCorrect = tone === q.tone;
+
+    // 先播放选中的读音让孩子听音辨位
+    playToneSound(tone);
+
     if (isCorrect) {
       sfxCorrect();
       celebrateSmall();
       randomPraise();
-      setCorrect(c => c + 1);
+      setCorrect((c) => c + 1);
+      setCombo((cb) => cb + 1);
       practice('pinyin:tone', true, 1);
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate([40, 60, 40]);
+      }
     } else {
       sfxWrong();
       randomEncourage();
+      setCombo(0);
       practice('pinyin:tone', false, 0);
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate([120, 80, 120]);
+      }
     }
   };
 
@@ -99,7 +158,7 @@ export function TonePractice() {
       sfxStar();
       celebrateBig();
     } else {
-      setIdx(idx + 1);
+      setIdx((i) => i + 1);
       setPicked(null);
     }
   };
@@ -110,22 +169,47 @@ export function TonePractice() {
     setIdx(0);
     setPicked(null);
     setCorrect(0);
+    setCombo(0);
     setDone(false);
   };
 
   if (done) {
-    const stars = correct === questions.length ? 3 : correct >= questions.length * 0.7 ? 2 : 1;
+    const percent = Math.round((correct / questions.length) * 100);
     return (
       <div className="space-y-4">
+        <PageHeader
+          emoji="🎢"
+          title="声调滑滑梯大闯关"
+          subtitle={`完成 ${questions.length} 道挑战`}
+          tone="orange"
+        />
         <Panel className="text-center">
-          <div className="text-6xl">{stars === 3 ? '🏆' : '🎉'}</div>
-          <p className="mt-3 text-xl font-extrabold text-ink">{t('tonePractice.done')}</p>
-          <p className="mt-1 text-base font-bold text-ink-soft">
-            答对 {correct} / {questions.length} · {'⭐'.repeat(stars)}
-          </p>
-          <CandyButton tone="blue" size="lg" fullWidth className="mt-4" onClick={restart}>
-            {t('tonePractice.again')}
-          </CandyButton>
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring' }}
+            className="text-7xl"
+          >
+            {percent >= 80 ? '🏆' : percent >= 60 ? '🌟' : '💪'}
+          </motion.div>
+          <h2 className="mt-3 text-2xl font-black text-ink">
+            {percent >= 80 ? '声调大特工！太棒啦！' : '再接再厉，你越来越熟练啦！'}
+          </h2>
+          <div className="mt-4 flex justify-center gap-6">
+            <div className="rounded-2xl bg-candy-green-soft p-3 min-w-28">
+              <div className="text-3xl font-black text-candy-green-deep">{correct}</div>
+              <div className="text-xs font-bold text-candy-green-deep">答对题数</div>
+            </div>
+            <div className="rounded-2xl bg-candy-purple-soft p-3 min-w-28">
+              <div className="text-3xl font-black text-candy-purple-deep">{percent}%</div>
+              <div className="text-xs font-bold text-candy-purple-deep">正确率</div>
+            </div>
+          </div>
+          <div className="mt-6 flex justify-center">
+            <CandyButton tone="green" size="lg" onClick={restart}>
+              🔄 再玩一次滑滑梯
+            </CandyButton>
+          </div>
         </Panel>
       </div>
     );
@@ -133,69 +217,123 @@ export function TonePractice() {
 
   return (
     <div className="space-y-4">
-      <PageHeader emoji="🎵" title={t('tonePractice.title')} subtitle={t('tonePractice.subtitle')} tone="blue" />
+      <PageHeader
+        emoji="🎢"
+        title="拼音声调滑滑梯"
+        subtitle={`第 ${idx + 1} / ${questions.length} 关`}
+        tone="orange"
+      />
 
-      <ProgressBar value={idx + 1} max={questions.length} tone="blue" />
+      <ProgressBar value={idx + 1} max={questions.length} color="orange" />
 
-      <Panel key={`tone-${idx}`} className="space-y-5 text-center">
-        {/* 题目展示 */}
-        <div>
-          <p className="text-sm font-bold text-ink-soft">{t('tonePractice.listenQuestion')}</p>
-          <div className="my-4 text-6xl font-black text-candy-blue-deep">
-            {picked !== null ? q.display : q.base}
+      {/* 连击 Combo 浮动徽章 */}
+      <AnimatePresence>
+        {combo >= 2 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="flex justify-center"
+          >
+            <span className="rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-1 text-xs font-black text-white shadow-md">
+              🔥 {combo} 连击达成！棒极了！
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <Panel className="text-center">
+        <div className="flex items-center justify-center gap-3">
+          <span className="text-xs font-black text-ink-soft">仔细听老师读的声音：</span>
+          <button
+            type="button"
+            onClick={playTargetSound}
+            className="inline-flex items-center gap-1.5 rounded-full bg-candy-orange-soft px-3.5 py-1.5 text-sm font-black text-candy-orange-deep hover:bg-candy-orange hover:text-white transition active:scale-95 shadow-xs"
+          >
+            <span>🔊</span> 点击听声调
+          </button>
+        </div>
+
+        {/* 核心音节展示区 */}
+        <div className="mt-4 mb-2 flex justify-center">
+          <div className="rounded-3xl bg-gradient-to-b from-amber-50 to-orange-100/60 border-3 border-amber-200 px-10 py-6 shadow-inner">
+            <div className="text-7xl sm:text-8xl font-black text-ink tracking-wide">
+              {picked === null ? q.base : q.display}
+            </div>
+            <p className="mt-2 text-xs font-bold text-amber-800">
+              {picked === null ? '请在下方选出它上面该戴哪个声调小帽子 🎩' : `正确声调：第 ${q.tone} 声`}
+            </p>
           </div>
         </div>
 
-        {/* 播放按钮 */}
-        <CandyButton tone="blue" variant="soft" size="sm" onClick={() => playSound(q.tone)}>
-          {t('tonePractice.listenAgain')}
-        </CandyButton>
+        {/* 4 个声调卡片选择器 */}
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {TONE_CARDS.map((tc) => {
+            const isSelected = picked === tc.tone;
+            const isAnswer = q.tone === tc.tone;
+            let cardStateClass = 'border-slate-200 bg-white hover:border-amber-300 hover:shadow-md';
 
-        {/* 声调选项 */}
-        <div className="grid grid-cols-4 gap-3">
-          {TONE_OPTIONS.map(opt => {
-            const isPicked = picked === opt.tone;
-            const isAnswer = q.tone === opt.tone;
-            const show = picked !== null;
+            if (picked !== null) {
+              if (isAnswer) {
+                cardStateClass = 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-400 shadow-md';
+              } else if (isSelected && !isAnswer) {
+                cardStateClass = 'border-rose-400 bg-rose-50 opacity-75 animate-shake';
+              } else {
+                cardStateClass = 'border-slate-100 bg-slate-50/50 opacity-50';
+              }
+            }
+
             return (
-              <button
-                key={opt.tone}
-                onClick={() => handlePick(opt.tone)}
+              <motion.button
+                key={tc.tone}
+                type="button"
+                whileHover={picked === null ? { scale: 1.03 } : {}}
+                whileTap={picked === null ? { scale: 0.95 } : {}}
+                onClick={() => handlePick(tc.tone)}
                 disabled={picked !== null}
-                className={`flex flex-col items-center rounded-2xl border-4 p-4 min-h-[80px] transition-all active:translate-y-[1px] ${
-                  show && isAnswer
-                    ? 'border-candy-green-deep bg-candy-green-soft'
-                    : show && isPicked && !isAnswer
-                    ? 'border-candy-red-deep bg-candy-red-soft opacity-60'
-                    : 'border-candy-blue-soft bg-white'
-                }`}
+                className={`relative flex flex-col items-center justify-between rounded-2xl p-4 border-2 transition-all text-left ${cardStateClass}`}
               >
-                <span className="text-3xl font-black text-ink">
-                  {q.base.replace(
-                    q.base.includes('a') ? 'a' : q.base.includes('o') ? 'o' : q.base.includes('e') ? 'e' : q.base.includes('i') ? 'i' : q.base.includes('u') ? 'u' : 'a',
-                    TONE_VOWELS[q.base.includes('a') ? 'a' : q.base.includes('o') ? 'o' : q.base.includes('e') ? 'e' : q.base.includes('i') ? 'i' : q.base.includes('u') ? 'u' : 'a']![opt.tone - 1]!
-                  )}
-                </span>
-                <span className="mt-1 text-xs font-bold text-ink-soft">
-                  {opt.emoji} {t(opt.nameKey)}
-                </span>
-                {show && isAnswer && <span className="text-xs">✅</span>}
-                {show && isPicked && !isAnswer && <span className="text-xs">❌</span>}
-              </button>
+                <div className="w-full flex items-center justify-between">
+                  <span className="text-3xl font-black text-ink">{tc.symbol}</span>
+                  <span className="text-xl">{tc.icon}</span>
+                </div>
+                <div className="my-2 text-center w-full">
+                  <div className="text-base font-black text-ink">{tc.title}</div>
+                  <div className="text-[11px] font-extrabold text-amber-700 mt-1">{tc.rhyme}</div>
+                </div>
+                <div className="w-full text-center text-[10px] font-bold text-slate-400">
+                  {tc.desc}
+                </div>
+                {picked !== null && isAnswer && (
+                  <span className="absolute -top-2.5 -right-2 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-black text-white shadow-sm">
+                    ✅ 正确
+                  </span>
+                )}
+              </motion.button>
             );
           })}
         </div>
 
+        {/* 结果反馈与下一题按钮 */}
         {picked !== null && (
-          <CandyButton tone="green" size="lg" fullWidth onClick={next}>
-            {idx + 1 >= questions.length ? t('tonePractice.showResult') : t('tonePractice.nextQ')}
-          </CandyButton>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-6 flex flex-col items-center gap-3"
+          >
+            <div
+              className={`text-base font-black ${
+                picked === q.tone ? 'text-emerald-600' : 'text-rose-600'
+              }`}
+            >
+              {picked === q.tone ? '🎉 答对啦！声调非常准确！' : `💡 正确的是第 ${q.tone} 声（${q.display}）哦，再听一遍吧～`}
+            </div>
+            <CandyButton tone="green" size="lg" className="px-10" onClick={next}>
+              下一题 ➡️
+            </CandyButton>
+          </motion.div>
         )}
       </Panel>
-
-      <p className="text-center text-sm font-bold text-ink-soft">
-        {t('tonePractice.progress', { n: idx + 1, total: questions.length })}
-      </p>
     </div>
   );
 }

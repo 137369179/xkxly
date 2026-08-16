@@ -57,5 +57,11 @@ export function makeNumberOptions(correct: number, count: number, min = 0, max =
   while (set.size < count && fill <= max) {
     set.add(fill++);
   }
+  let step = 1;
+  while (set.size < count) {
+    set.add(correct + step);
+    if (set.size < count && correct - step >= 0) set.add(correct - step);
+    step++;
+  }
   return shuffle([...set]);
 }

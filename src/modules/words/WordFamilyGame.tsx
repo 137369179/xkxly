@@ -28,20 +28,22 @@ export function WordFamilyGame() {
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
   const [chosen, setChosen] = useState<string | null>(null);
-  const [target, setTarget] = useState('');
+
+  // 派生当前目标词
+  const target = useMemo(() => {
+    if (!fam || fam.words.length === 0) return '';
+    return fam.words[round % fam.words.length]!;
+  }, [fam, round]);
 
   // 生成当前轮：目标词 + 3 个异族干扰词
   const options = useMemo(() => {
-    if (!fam) return [];
-    const targets = fam.words;
-    const targetWord = targets[round % targets.length]!;
-    setTarget(targetWord);
+    if (!fam || !target) return [];
     const others = sampleMany(
       WORD_FAMILIES.filter((f) => f.id !== fam.id).flatMap((f) => f.words),
       3,
     );
-    return shuffle([targetWord, ...others]);
-  }, [fam, round]);
+    return shuffle([target, ...others]);
+  }, [fam, target]);
 
   const pick = (w: string) => {
     if (chosen) return;

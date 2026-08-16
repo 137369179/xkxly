@@ -1,27 +1,34 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { navigate } from '@/lib/router';
 import { useProgress } from '@/store/useStore';
 import { masteredCount } from '@/lib/englishCurriculum';
 import { useTranslation } from '@/i18n/useTranslation';
 import { PageHeader } from '@/components/ui/Card';
 import { Tabs } from '@/components/ui/Tabs';
-import { LetterWall } from './LetterWall';
-import { MatchGame } from './MatchGame';
-import { LetterStudy } from './LetterStudy';
-import { LetterTrace } from './LetterTrace';
-import { LetterOrder } from './LetterOrder';
+import { sfxTap } from '@/lib/sfx';
+import { cn } from '@/lib/utils';
 
-type TabId = 'wall' | 'match' | 'study' | 'trace' | 'order';
+// 按需懒加载子模块
+const LetterWall = lazy(() => import('./LetterWall').then((m) => ({ default: m.LetterWall })));
+const LetterStudy = lazy(() => import('./LetterStudy').then((m) => ({ default: m.LetterStudy })));
+const LetterTrace = lazy(() => import('./LetterTrace').then((m) => ({ default: m.LetterTrace })));
+const LetterOrder = lazy(() => import('./LetterOrder').then((m) => ({ default: m.LetterOrder })));
+const MatchGame = lazy(() => import('./MatchGame').then((m) => ({ default: m.MatchGame })));
+const LetterPopGame = lazy(() => import('./LetterPopGame').then((m) => ({ default: m.LetterPopGame })));
+
+type TabId = 'wall' | 'study' | 'trace' | 'order' | 'arcade';
+type ArcadeMode = 'pop' | 'match';
 
 export default function LettersPage() {
   const [tab, setTab] = useState<TabId>('wall');
+  const [arcadeMode, setArcadeMode] = useState<ArcadeMode>('pop');
   const progress = useProgress();
   const { t } = useTranslation();
   const lettersDone = masteredCount(progress, 'letter:');
   const unlockedPhonics = lettersDone >= 8;
 
   return (
-    <div>
+    <div className="space-y-4">
       <PageHeader
         iconType="phonics"
         title={t('letters.title')}
@@ -32,15 +39,17 @@ export default function LettersPage() {
       {unlockedPhonics && (
         <button
           onClick={() => navigate('words')}
-          className="w-full rounded-2xl border-4 border-purple-300 bg-gradient-to-r from-purple-50 to-pink-50 p-3 text-left transition-all hover:bg-purple-100 active:translate-y-[1px]"
+          className="w-full rounded-2xl border-3 border-purple-300 bg-gradient-to-r from-purple-50 via-pink-50 to-amber-50 p-3 text-left shadow-md transition-all hover:scale-[1.01] active:scale-[0.99]"
         >
           <div className="flex items-center gap-3">
-            <span className="text-3xl">🎉</span>
-            <div className="flex-1">
+            <span className="text-3xl animate-bounce">🎉</span>
+            <div className="flex-1 min-w-0">
               <p className="text-sm font-black text-purple-900">{t('letters.phonicsUnlockTitle')}</p>
-              <p className="text-xs font-bold text-purple-600">{t('letters.phonicsUnlockDesc', { n: lettersDone })}</p>
+              <p className="text-xs font-bold text-purple-600 truncate">{t('letters.phonicsUnlockDesc', { n: lettersDone })}</p>
             </div>
-            <span className="text-xl">→</span>
+            <span className="rounded-full bg-purple-200/80 px-2.5 py-1 text-xs font-black text-purple-800">
+              去拼读 ➔
+            </span>
           </div>
         </button>
       )}
@@ -52,19 +61,59 @@ export default function LettersPage() {
         onChange={setTab}
         items={[
           { id: 'wall', label: t('letters.tabWall'), emoji: '🌳' },
-          { id: 'match', label: t('letters.tabMatch'), emoji: '🧩' },
           { id: 'study', label: t('letters.tabStudy'), emoji: '🎯' },
           { id: 'trace', label: t('letters.tabTrace'), emoji: '✍️' },
           { id: 'order', label: t('letters.tabOrder'), emoji: '🅰️' },
+          { id: 'arcade', label: '字母游乐场', emoji: '🎮' },
         ]}
       />
 
+      <Suspense
+        fallback={
+          <div className="grid min-h-[300px] place-items-center">
+            <div className="flex items-center gap-2 text-sm font-bold text-sky-700">
+              <span className="inline-block animate-spin text-2xl">⏳</span>
+              <span>正在加载字母乐园...</span>
+            </div>
+          </div>
+        }
+      >
+        {tab === 'wall' && <LetterWall />}
+        {tab === 'study' && <LetterStudy />}
+        {tab === 'trace' && <LetterTrace />}
+        {tab === 'order' && <LetterOrder />}
+        {tab === 'arcade' && (
+          <div className="space-y-4">
+            {/* 游乐场二级切换 */}
+            <div className="flex justify-center gap-2">
+              <button
+                onClick={() => { sfxTap(); setArcadeMode('pop'); }}
+                className={cn(
+                  'flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-black transition active:scale-95 shadow-sm',
+                  arcadeMode === 'pop'
+                    ? 'bg-candy-blue-deep text-white ring-2 ring-blue-300'
+                    : 'bg-white text-ink-soft hover:bg-blue-50 border border-blue-100'
+                )}
+              >
+                <span>🎈 听音戳气球</span>
+              </button>
+              <button
+                onClick={() => { sfxTap(); setArcadeMode('match'); }}
+                className={cn(
+                  'flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-black transition active:scale-95 shadow-sm',
+                  arcadeMode === 'match'
+                    ? 'bg-candy-purple-deep text-white ring-2 ring-purple-300'
+                    : 'bg-white text-ink-soft hover:bg-purple-50 border border-purple-100'
+                )}
+              >
+                <span>🧩 大小写配对</span>
+              </button>
+            </div>
 
-      {tab === 'wall' && <LetterWall />}
-      {tab === 'match' && <MatchGame />}
-      {tab === 'study' && <LetterStudy />}
-      {tab === 'trace' && <LetterTrace />}
-      {tab === 'order' && <LetterOrder />}
+            {arcadeMode === 'pop' ? <LetterPopGame /> : <MatchGame />}
+          </div>
+        )}
+      </Suspense>
     </div>
   );
 }

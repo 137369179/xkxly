@@ -3,9 +3,9 @@ import { AnimatePresence, motion } from 'motion/react';
 import { LETTERS, type LetterItem } from '@/data/letters';
 import { TONE_STYLE, toneOf } from '@/lib/tones';
 import { cn, sampleMany, shuffle } from '@/lib/utils';
-import { sfxCorrect, sfxFlip, sfxWrong } from '@/lib/sfx';
+import { sfxCorrect, sfxFlip, sfxWrong, sfxWin } from '@/lib/sfx';
 import { celebrateBig, celebrateSmall } from '@/lib/celebrate';
-import { randomPraise, speak, speakLetter } from '@/lib/speech';
+import { randomPraise, speak, playLetterVoice, playWordVoice } from '@/lib/speech';
 import { useStore } from '@/store/useStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { Panel } from '@/components/ui/Card';
@@ -52,6 +52,7 @@ export function MatchGame() {
   const { t: tr } = useTranslation();
   const wonMatchGame = useStore((s) => s.wonMatchGame);
   const practice = useStore((s) => s.practice);
+  const addStars = useStore((s) => s.addStars);
   const aiOn = useSettingsStore((s) => s.settings.aiEnabled);
   const [aiMode, setAiMode] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -61,6 +62,7 @@ export function MatchGame() {
   const [wrongPair, setWrongPair] = useState<string[]>([]);
   const [won, setWon] = useState(false);
   const [mistakes, setMistakes] = useState(0);
+  const [combo, setCombo] = useState(0);
   const wrongTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const reset = useCallback(() => {
@@ -87,23 +89,25 @@ export function MatchGame() {
     setWrongPair([]);
     setWon(false);
     setMistakes(0);
+    setCombo(0);
   }, [aiMode, aiOn]);
-
 
   // Switch AI mode or AI enabled change: regenerate round
   useEffect(() => {
     reset();
-  }, [aiMode, aiOn]); // intentional: reset when AI config changes
+  }, [aiMode, aiOn]);
 
   // 全部配对成功
   useEffect(() => {
     if (matched.length === PAIRS_PER_ROUND && !won) {
       setWon(true);
       celebrateBig();
+      sfxWin();
       wonMatchGame();
-      void speak(`太厉害了！全部配对成功！`, { rate: 0.85, module: 'praise' });
+      addStars(3);
+      void speak(`太棒了！26字母大小写全部配对成功！`, { rate: 0.85, module: 'praise' });
     }
-  }, [matched.length, won, wonMatchGame]);
+  }, [matched.length, won, wonMatchGame, addStars]);
 
   useEffect(() => {
     return () => {
@@ -115,7 +119,9 @@ export function MatchGame() {
     if (matched.includes(item.upper)) return;
     sfxFlip();
     setPickedUpper(item.upper);
-    void speakLetter(item.upper);
+    void playLetterVoice(item.upper).catch(() => {
+      void speak(item.upper, { lang: 'en-US', rate: 0.7 });
+    });
   };
 
   const pickLower = (item: LetterItem) => {
@@ -129,16 +135,20 @@ export function MatchGame() {
     if (pickedUpper === item.upper) {
       sfxCorrect();
       celebrateSmall();
+      setCombo((c) => c + 1);
       setMatched((m) => [...m, item.upper]);
       setPickedUpper(null);
-      // 记录答对：大小写配对成功说明该字母掌握度+1
+      // 记录掌握度
       practice(`letter:${item.upper}`, true);
-      void speak(randomPraise(), { rate: 0.95, module: 'praise' });
+      void playWordVoice(item.upper).catch(() => {
+        void speak(randomPraise(), { rate: 0.95, module: 'praise' });
+      });
     } else {
       sfxWrong();
+      setCombo(0);
       setMistakes((m) => m + 1);
       setWrongPair([pickedUpper, item.upper]);
-      // 记录答错：两个字母都计入错题本，便于后续复习
+      // 记录答错
       practice(`letter:${pickedUpper}`, false);
       practice(`letter:${item.upper}`, false);
       if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
@@ -163,6 +173,20 @@ export function MatchGame() {
           </span>
         </div>
         <ProgressBar value={matched.length} max={PAIRS_PER_ROUND} tone="green" />
+
+        {/* 连击 Combo 飘字提示 */}
+        <AnimatePresence>
+          {combo >= 2 && (
+            <motion.div
+              initial={{ scale: 0, y: 10, rotate: -6 }}
+              animate={{ scale: 1.1, y: 0, rotate: 0 }}
+              exit={{ scale: 0, opacity: 0 }}
+              className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3.5 py-1 text-xs font-black text-white shadow-md"
+            >
+              <span>🔥 连对 Combo x{combo}!</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {aiOn && (
           <button

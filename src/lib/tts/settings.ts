@@ -18,9 +18,10 @@ import type { TtsCustomScene, TtsModuleKey, TtsModulePreset, TtsModulePresets, T
 const SETTINGS_KEY = 'bb_tts_settings_v1';
 
 export const DEFAULT_SETTINGS: TtsSettings = {
-  engine: 'webspeech',
+  engine: 'edge', // 默认开启微软超拟真 Neural 真人音色（天籁真人声），遇断网自动秒级降级 WebSpeech / 本地离线音频
+  edgeVoice: 'zh-CN-XiaoxiaoNeural',
   rate: 0.8,
-  pitch: 1.1,
+  pitch: 1.05,
   volume: 1,
   emotion: 'plain',
   voiceURI: '',
@@ -37,6 +38,15 @@ export const DEFAULT_SETTINGS: TtsSettings = {
   kokoroDtype: 'q4f16',
   device: 'webgpu',
 };
+
+/** 微软超拟真 Neural 真人音色列表（业界天花板级儿童与少儿教育音色） */
+export const EDGE_NEURAL_VOICES: { id: string; name: string; desc: string; lang: 'zh' | 'en'; tag: string }[] = [
+  { id: 'zh-CN-XiaoxiaoNeural', name: '晓晓老师', desc: '温柔亲切·少儿名师女声', lang: 'zh', tag: '推荐·故事/古诗' },
+  { id: 'zh-CN-YunxiNeural', name: '云希弟弟', desc: '清脆活泼·同龄男孩童声', lang: 'zh', tag: '推荐·游戏/互动' },
+  { id: 'zh-CN-YunjianNeural', name: '云健哥哥', desc: '阳光帅气·大哥哥青年男声', lang: 'zh', tag: '百科/探险' },
+  { id: 'zh-CN-XiaoyiNeural', name: '晓伊姐姐', desc: '生动甜美·可爱知心姐姐', lang: 'zh', tag: '儿歌/日常' },
+  { id: 'en-US-AnaNeural', name: 'Ana 安娜', desc: '纯正甜美·美式少儿英文童声', lang: 'en', tag: '英语首选' },
+];
 
 /** 神经网络引擎可选音色（中文为主，适配儿童内容）。首字符 z=中文，a=英文。 */
 export const NEURAL_VOICES: { id: string; name: string; lang: 'zh' | 'en' }[] = [

@@ -14,6 +14,7 @@ import { sfxTap, sfxCorrect } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useStore, useProgress } from '@/store/useStore';
+import { ColorExplore } from '@/components/ColorExplore';
 
 /* ---------- Type definitions ---------- */
 
@@ -229,6 +230,8 @@ export default function ArtPage() {
     setCanvasColor(css);
   };
 
+  const [activeTab, setActiveTab] = useState<'explore' | 'mixer' | 'canvas'>('explore');
+
   return (
     <div className="space-y-5">
       <PageHeader
@@ -238,108 +241,149 @@ export default function ArtPage() {
         tone="pink"
       />
 
-      {/* 调色进度条 */}
-      <Panel className="border-2 border-pink-200 bg-white space-y-2">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-black text-pink-900">🎨 已掌握 {masteredArt}/{COLOR_MIXES.length} 种调色</span>
-          <span className="text-xs font-bold text-pink-500">{Math.round((masteredArt / COLOR_MIXES.length) * 100)}%</span>
+      {/* 顶部三合一导航 Tab */}
+      <div className="flex justify-center gap-2">
+        <button
+          onClick={() => { sfxTap(); setActiveTab('explore'); }}
+          className={`rounded-2xl px-4 py-2 text-sm font-black transition-all ${
+            activeTab === 'explore'
+              ? 'bg-candy-pink-deep text-white shadow-candy-sm scale-105'
+              : 'bg-white text-ink-soft hover:bg-pink-50'
+          }`}
+        >
+          🌈 基础色彩认知
+        </button>
+        <button
+          onClick={() => { sfxTap(); setActiveTab('mixer'); }}
+          className={`rounded-2xl px-4 py-2 text-sm font-black transition-all ${
+            activeTab === 'mixer'
+              ? 'bg-candy-pink-deep text-white shadow-candy-sm scale-105'
+              : 'bg-white text-ink-soft hover:bg-pink-50'
+          }`}
+        >
+          🔮 魔法调色盘
+        </button>
+        <button
+          onClick={() => { sfxTap(); setActiveTab('canvas'); }}
+          className={`rounded-2xl px-4 py-2 text-sm font-black transition-all ${
+            activeTab === 'canvas'
+              ? 'bg-candy-pink-deep text-white shadow-candy-sm scale-105'
+              : 'bg-white text-ink-soft hover:bg-pink-50'
+          }`}
+        >
+          🎨 自由画板
+        </button>
+      </div>
+
+      {activeTab === 'explore' && <ColorExplore />}
+
+      {activeTab === 'mixer' && (
+        <div className="space-y-4">
+          {/* 调色进度条 */}
+          <Panel className="border-2 border-pink-200 bg-white space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-black text-pink-900">🎨 已掌握 {masteredArt}/{COLOR_MIXES.length} 种调色</span>
+              <span className="text-xs font-bold text-pink-500">{Math.round((masteredArt / COLOR_MIXES.length) * 100)}%</span>
+            </div>
+            <ProgressBar value={masteredArt} max={COLOR_MIXES.length} color="pink" size="md" />
+          </Panel>
+
+          {/* 魔法调色盘 */}
+          <Panel className="border-2 border-pink-300 bg-gradient-to-br from-pink-50 via-purple-50 to-amber-50 text-center space-y-4">
+            <h3 className="text-lg font-black text-pink-900">{t('art.mixerTitle')}</h3>
+            <p className="text-xs font-bold text-pink-600">
+              {t('art.mixerHint')}
+            </p>
+
+            {/* 选中的颜色 */}
+            <div className="flex items-center justify-center gap-3">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-dashed border-pink-300 bg-white text-sm font-black text-pink-900 shadow-sm">
+                {selectedColors[0] ? t('art.colors.' + selectedColors[0]) : t('art.pickColor1')}
+              </div>
+              <span className="text-2xl font-black text-pink-400">+</span>
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-dashed border-pink-300 bg-white text-sm font-black text-pink-900 shadow-sm">
+                {selectedColors[1] ? t('art.colors.' + selectedColors[1]) : t('art.pickColor2')}
+              </div>
+              <span className="text-2xl font-black text-pink-400">=</span>
+              <div className={`flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-pink-400 text-2xl font-black shadow-fluffy ${mixedResult ? mixedResult.resBg + ' text-white' : 'bg-white text-gray-400'}`}>
+                {mixedResult ? mixedResult.emoji : '?'}
+              </div>
+            </div>
+
+            {/* 混合结果展示 */}
+            {mixedResult && (
+              <div className="rounded-2xl bg-white p-3 shadow-sm inline-block">
+                <span className="text-base font-black text-ink">{t('art.results.' + mixedResult.res)}</span>
+                <span className="ml-2 text-sm font-extrabold text-pink-600">({RES_EN[mixedResult.res]})</span>
+              </div>
+            )}
+
+            {/* 基础颜色备选按钮 */}
+            <div className="flex flex-wrap justify-center gap-2 pt-2">
+              {COLOR_CODES.map(c => (
+                <button
+                  key={c}
+                  onClick={() => handlePickColor(c)}
+                  className="rounded-2xl border-2 border-pink-200 bg-white px-3 py-2.5 text-sm font-black text-ink shadow-sm hover:scale-105 active:scale-95 transition-transform"
+                >
+                  {t('art.colors.' + c)}
+                </button>
+              ))}
+            </div>
+
+            <div className="pt-2">
+              <CandyButton tone="pink" variant="soft" size="sm" onClick={handleReset}>
+                {t('art.resetMixer')}
+              </CandyButton>
+            </div>
+          </Panel>
         </div>
-        <ProgressBar value={masteredArt} max={COLOR_MIXES.length} color="pink" size="md" />
-      </Panel>
+      )}
 
-      {/* 魔法调色盘 */}
-      <Panel className="border-2 border-pink-300 bg-gradient-to-br from-pink-50 via-purple-50 to-amber-50 text-center space-y-4">
-        <h3 className="text-lg font-black text-pink-900">{t('art.mixerTitle')}</h3>
-        <p className="text-xs font-bold text-pink-600">
-          {t('art.mixerHint')}
-        </p>
-
-        {/* 选中的颜色 */}
-        <div className="flex items-center justify-center gap-3">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-dashed border-pink-300 bg-white text-sm font-black text-pink-900 shadow-sm">
-            {selectedColors[0] ? t('art.colors.' + selectedColors[0]) : t('art.pickColor1')}
+      {activeTab === 'canvas' && (
+        <Panel className="border-2 border-purple-300 bg-gradient-to-br from-purple-50 to-blue-50 space-y-4">
+          <div className="text-center">
+            <h3 className="text-lg font-black text-purple-900">{t('art.canvasTitle')}</h3>
+            <p className="text-xs font-bold text-purple-600 mt-1">{t('art.canvasHint')}</p>
           </div>
-          <span className="text-2xl font-black text-pink-400">+</span>
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-dashed border-pink-300 bg-white text-sm font-black text-pink-900 shadow-sm">
-            {selectedColors[1] ? t('art.colors.' + selectedColors[1]) : t('art.pickColor2')}
+
+          {/* 颜色选择器 */}
+          <div className="flex flex-wrap justify-center gap-2">
+            {CANVAS_COLORS.map(c => (
+              <button
+                key={c.css}
+                onClick={() => handlePickCanvasColor(c.css)}
+                className={`h-8 w-8 rounded-full border-2 shadow-sm transition-transform hover:scale-110 active:scale-95 ${
+                  canvasColor === c.css ? 'border-gray-800 ring-2 ring-gray-400' : 'border-white'
+                }`}
+                style={{ backgroundColor: c.css }}
+                aria-label={c.name}
+              />
+            ))}
           </div>
-          <span className="text-2xl font-black text-pink-400">=</span>
-          <div className={`flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-pink-400 text-2xl font-black shadow-fluffy ${mixedResult ? mixedResult.resBg + ' text-white' : 'bg-white text-gray-400'}`}>
-            {mixedResult ? mixedResult.emoji : '?'}
-          </div>
-        </div>
 
-        {/* 混合结果展示 */}
-        {mixedResult && (
-          <div className="rounded-2xl bg-white p-3 shadow-sm inline-block">
-            <span className="text-base font-black text-ink">{t('art.results.' + mixedResult.res)}</span>
-            <span className="ml-2 text-sm font-extrabold text-pink-600">({RES_EN[mixedResult.res]})</span>
-          </div>
-        )}
-
-        {/* 基础颜色备选按钮 */}
-        <div className="flex flex-wrap justify-center gap-2 pt-2">
-          {COLOR_CODES.map(c => (
-            <button
-              key={c}
-              onClick={() => handlePickColor(c)}
-              className="rounded-2xl border-2 border-pink-200 bg-white px-3 py-2.5 text-sm font-black text-ink shadow-sm hover:scale-105 active:scale-95 transition-transform"
-            >
-              {t('art.colors.' + c)}
-            </button>
-          ))}
-        </div>
-
-        <div className="pt-2">
-          <CandyButton tone="pink" variant="soft" size="sm" onClick={handleReset}>
-            {t('art.resetMixer')}
-          </CandyButton>
-        </div>
-      </Panel>
-
-      {/* 自由画板 */}
-      <Panel className="border-2 border-purple-300 bg-gradient-to-br from-purple-50 to-blue-50 space-y-4">
-        <div className="text-center">
-          <h3 className="text-lg font-black text-purple-900">{t('art.canvasTitle')}</h3>
-          <p className="text-xs font-bold text-purple-600 mt-1">{t('art.canvasHint')}</p>
-        </div>
-
-        {/* 颜色选择器 */}
-        <div className="flex flex-wrap justify-center gap-2">
-          {CANVAS_COLORS.map(c => (
-            <button
-              key={c.css}
-              onClick={() => handlePickCanvasColor(c.css)}
-              className={`h-8 w-8 rounded-full border-2 shadow-sm transition-transform hover:scale-110 active:scale-95 ${
-                canvasColor === c.css ? 'border-gray-800 ring-2 ring-gray-400' : 'border-white'
-              }`}
-              style={{ backgroundColor: c.css }}
-              aria-label={c.name}
+          {/* Canvas 画板 */}
+          <div className="flex justify-center">
+            <canvas
+              ref={canvasRef}
+              width={CANVAS_SIZE}
+              height={CANVAS_SIZE}
+              onPointerDown={handleCanvasDown}
+              onPointerMove={handleCanvasMove}
+              onPointerUp={handleCanvasUp}
+              onPointerLeave={handleCanvasUp}
+              className="touch-none rounded-2xl border-4 border-purple-300 bg-white shadow-fluffy cursor-crosshair"
             />
-          ))}
-        </div>
+          </div>
 
-        {/* Canvas 画板 */}
-        <div className="flex justify-center">
-          <canvas
-            ref={canvasRef}
-            width={CANVAS_SIZE}
-            height={CANVAS_SIZE}
-            onPointerDown={handleCanvasDown}
-            onPointerMove={handleCanvasMove}
-            onPointerUp={handleCanvasUp}
-            onPointerLeave={handleCanvasUp}
-            className="touch-none rounded-2xl border-4 border-purple-300 bg-white shadow-fluffy cursor-crosshair"
-          />
-        </div>
-
-        {/* 清除按钮 */}
-        <div className="flex justify-center">
-          <CandyButton tone="purple" variant="soft" size="sm" onClick={handleClearCanvas}>
-            {t('art.clearCanvas')}
-          </CandyButton>
-        </div>
-      </Panel>
+          {/* 清除按钮 */}
+          <div className="flex justify-center">
+            <CandyButton tone="purple" variant="soft" size="sm" onClick={handleClearCanvas}>
+              {t('art.clearCanvas')}
+            </CandyButton>
+          </div>
+        </Panel>
+      )}
     </div>
   );
 }

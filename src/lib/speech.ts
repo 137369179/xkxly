@@ -9,12 +9,26 @@
 
 import type { ChantSegment } from './chant';
 import { isSingleHanziVoice, playHanziVoice } from './hanziAudio';
+import { playLetterVoice, playPhonicsVoice, playWordVoice } from './letterAudio';
+import { playMultiChannelRealVoice, stopRealVoice } from './tts/realVoice';
+import { playEdgeNeuralVoice, stopEdgeNeuralAudio } from './tts/edgeNeuralTts';
+import { pinyinToSpoken } from './pinyinAudio';
 import { applyUserPrefs, getSettings } from './tts/settings';
 import { correctText } from './tts/polyphone';
 import { buildNeuralSegments } from './tts/neuralCurve';
 import { tts } from './tts/manager';
 import type { SpeakLang } from '@/types';
 
+export {
+  playLetterVoice,
+  playPhonicsVoice,
+  playWordVoice,
+  playEdgeNeuralVoice,
+  stopEdgeNeuralAudio,
+  playMultiChannelRealVoice,
+  stopRealVoice,
+  pinyinToSpoken,
+};
 export type { SpeakLang };
 
 /* ------------------------------------------------------------------ */
@@ -95,12 +109,12 @@ if (synth) void loadVoices();
  * 与老式拼接式音色（Ting-Ting 等）自然度差了整整一代，
  * 但 getVoices() 的默认顺序并不会把它们排在前面 —— 必须主动识别。
  */
-function pickVoice(lang: SpeakLang, preferURI?: string): SpeechSynthesisVoice | undefined {
+function pickVoice(lang: SpeakLang, preferURI?: string, teacher?: string): SpeechSynthesisVoice | undefined {
   if (!voicesCache.length) voicesCache = synth?.getVoices() ?? [];
   const list = voicesCache;
   if (!list.length) return undefined;
 
-  // 用户显式指定的音色最优先（跨语言也尊重，除非该音色已不存在）
+  // 用户显式指定的音色最优先
   if (preferURI) {
     const chosen = list.find((v) => v.voiceURI === preferURI);
     if (chosen) return chosen;
@@ -110,7 +124,27 @@ function pickVoice(lang: SpeakLang, preferURI?: string): SpeechSynthesisVoice | 
   const candidates = list.filter((v) => v.lang?.toLowerCase().startsWith(prefix));
   if (!candidates.length) return undefined;
 
-  // 一代音质差距：优先挑神经网络 / 增强 / Siri 音色
+  const currentTeacher = teacher || (typeof localStorage !== 'undefined' ? localStorage.getItem('baby_park_selected_teacher') : null) || 'tiantian';
+
+  if (lang === 'zh-CN') {
+    if (currentTeacher === 'yunxi') {
+      // 阳光少年男声
+      const boyVoice = candidates.find((v) => {
+        const n = v.name.toLowerCase();
+        return n.includes('yunxi') || n.includes('yunjian') || n.includes('kangkang') || n.includes('male') || n.includes('男');
+      });
+      if (boyVoice) return boyVoice;
+    } else if (currentTeacher === 'xiaoxiao') {
+      // 活泼少儿女声
+      const girlVoice = candidates.find((v) => {
+        const n = v.name.toLowerCase();
+        return n.includes('xiaoxiao') || n.includes('yaoyao') || n.includes('sinji') || n.includes('siri');
+      });
+      if (girlVoice) return girlVoice;
+    }
+  }
+
+  // 默认优先挑神经网络 / 增强 / Siri 音色
   const NEURAL = ['natural', 'neural', 'siri', 'online', 'enhanced', 'premium', '晓', '云'];
   const neural = candidates.find((v) => {
     const n = v.name.toLowerCase();
@@ -184,6 +218,20 @@ function moduleToPriority(module?: string): SpeakPriority {
   return 'general';
 }
 
+/** 默认中文语速（按声优） */
+function defaultZhRate(teacher: string): number {
+  if (teacher === 'xiaoxiao') return 0.92;
+  if (teacher === 'yunxi') return 0.90;
+  return 0.88;
+}
+
+/** 默认中文音调（按声优） */
+function defaultZhPitch(teacher: string): number {
+  if (teacher === 'xiaoxiao') return 1.25;
+  if (teacher === 'yunxi') return 0.95;
+  return 1.05;
+}
+
 interface QueueItem {
   text: string;
   options: SpeakOptions;
@@ -215,6 +263,8 @@ export function stopSpeaking(): void {
   }
   currentPriority = null;
   currentUtterance = null;
+  stopRealVoice();
+  stopEdgeNeuralAudio();
   if (synth) {
     try {
       synth.cancel();
@@ -382,15 +432,88 @@ function runSpeak(
   };
 
   return new Promise<void>((resolve) => {
-    // 神经网络朗读：中文且家长开启了 Kokoro 引擎 → 走本地模型推理（自然度更高）。
-    // 英文（字母/单词）仍用系统语音，保证清脆跟读；模型加载失败由管理器内部降级系统语音。
-    const useKokoro = lang === 'zh-CN' && getSettings().engine === 'kokoro';
+    // 系统语音回退兜底处理函数
+    const fallbackToWebSpeech = () => {
+      if (!synth) {
+        onEnd?.();
+        cleanup();
+        resolve();
+        return;
+      }
+      try {
+        synth.cancel();
+      } catch {
+        /* noop */
+      }
+      const corrected = getSettings().polyphone ? correctText(text) : text;
+      const u = new SpeechSynthesisUtterance(corrected);
+      const teacher = (typeof localStorage !== 'undefined' ? localStorage.getItem('baby_park_selected_teacher') : null) || 'tiantian';
+      const voice = pickVoice(lang, getSettings().voiceURI, teacher);
+      if (voice) u.voice = voice;
+      u.lang = lang;
+      
+      const baseRate = rate ?? (lang === 'zh-CN' ? defaultZhRate(teacher) : 0.82);
+      const basePitch = pitch ?? (lang === 'zh-CN' ? defaultZhPitch(teacher) : 1.12);
+
+      const prefs = applyUserPrefs({ rate: baseRate, pitch: basePitch, volume, lang, module: options.module });
+      u.rate = prefs.rate ?? baseRate;
+      u.pitch = prefs.pitch ?? basePitch;
+      u.volume = prefs.volume ?? volume;
+      let finished = false;
+      const finish = () => {
+        if (finished) return;
+        finished = true;
+        currentUtterance = null;
+        onEnd?.();
+        cleanup();
+        resolve();
+      };
+      u.onstart = () => onStart?.();
+      u.onend = finish;
+      u.onerror = finish;
+      currentUtterance = u;
+      try {
+        synth.resume();
+      } catch {
+        /* noop */
+      }
+      synth.speak(u);
+      const est = Math.max(2500, text.length * 450 + 2000);
+      setTimeout(() => {
+        if (!finished) finish();
+      }, est);
+    };
+
+    // 1. 全域多通道真人语音路径（默认首选：有道少儿名师真人录音 + 微软 Neural 晓晓/云希 + 百度少儿真人流）
+    const settings = getSettings();
+    const useRealVoice = settings.engine === 'edge' || settings.engine === 'webspeech' || !settings.engine;
+    if (useRealVoice) {
+      const base = rate ?? 0.85;
+      const prefs = applyUserPrefs({ rate: base, pitch, volume, lang, module: options.module });
+
+      playMultiChannelRealVoice(text, {
+        lang: lang as 'zh-CN' | 'en-US',
+        volume: prefs.volume ?? volume,
+        onStart,
+        onEnd: () => {
+          onEnd?.();
+          cleanup();
+          resolve();
+        },
+      }).catch((err) => {
+        // 多通道失败时静默平滑降级至系统 WebSpeech
+        if (import.meta.env.DEV) console.warn('[speech] 真人语音多通道降级到系统语音:', err);
+        fallbackToWebSpeech();
+      });
+      return;
+    }
+
+    // 2. 神经网络本地推理朗读：中文且家长开启了 Kokoro 引擎
+    const useKokoro = lang === 'zh-CN' && settings.engine === 'kokoro';
     if (useKokoro) {
       const base = rate ?? 0.78;
       const prefs = applyUserPrefs({ rate: base, pitch, volume, lang, module: options.module });
       const rateOut = prefs.rate ?? base;
-      // 情感化语速曲线（P9 · ②）：把整段切成句子，按模块/情绪算出每句速度与停顿，
-      // 交给 Kokoro 分段生成拼接，古诗/故事因此抑扬顿挫、句末拖腔。
       const segments = buildNeuralSegments(text, options.module, options.moodKey);
       tts
         .play(text, {
@@ -406,76 +529,13 @@ function runSpeak(
           resolve();
         })
         .catch(() => {
-          // 理论上管理器已降级系统语音；此处兜底保证 Promise 必然 resolve
-          onEnd?.();
-          cleanup();
-          resolve();
+          fallbackToWebSpeech();
         });
       return;
     }
 
-    // 系统语音路径：synth 必须可用（speak 入口已检查，这里收窄类型供 TS）
-    if (!synth) {
-      onEnd?.();
-      cleanup();
-      resolve();
-      return;
-    }
-
-    // 打断上一条（同优先级或更高优先级抢播时）
-    try {
-      synth.cancel();
-    } catch {
-      /* noop */
-    }
-
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = lang;
-    // 幼儿跟读：中文更慢一点。再叠加家长中心的全局偏好（倍率调制，
-    // 保留各调用点手调的相对差异，不做粗暴覆盖）
-    const base = rate ?? (lang === 'zh-CN' ? 0.78 : 0.82);
-    const prefs = applyUserPrefs({ rate: base, pitch, volume, lang, module: options.module });
-    u.rate = prefs.rate ?? base;
-    u.pitch = prefs.pitch ?? pitch;
-    u.volume = prefs.volume ?? volume;
-
-    const voice = pickVoice(lang, prefs.voiceURI);
-    if (voice) u.voice = voice;
-
-    let finished = false;
-    // timeoutId 在下方 Promise 执行器闭包内赋值（兜底超时），属合法闭包重赋值
-    // eslint-disable-next-line prefer-const
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    const finish = () => {
-      if (finished) return;
-      finished = true;
-      if (timeoutId) clearTimeout(timeoutId);
-      if (currentUtterance === u) currentUtterance = null;
-      onEnd?.();
-      cleanup();
-      resolve();
-    };
-
-    u.onstart = () => onStart?.();
-    u.onend = finish;
-    u.onerror = finish;
-
-    currentUtterance = u;
-
-    // Chrome 的经典 bug：长时间闲置后 speak 无声，先 resume 一下
-    try {
-      synth.resume();
-    } catch {
-      /* noop */
-    }
-    synth.speak(u);
-
-    // 兜底超时：按字数估算最长时长，避免 Promise 永久挂起
-    const est = Math.max(2500, text.length * 420 + 2000);
-    timeoutId = setTimeout(() => {
-      // 无论 utterance 状态如何，超时即强制收尾（某些 WebView 不回调 onend/onerror）
-      if (!finished) finish();
-    }, est);
+    // 3. 系统 Web Speech API 原生模式
+    fallbackToWebSpeech();
   });
 }
 
@@ -527,9 +587,27 @@ export function speakSequence(
   };
 }
 
-/** 朗读单个英文字母（字母名称，如 A 读作 "ay"） */
-export function speakLetter(letter: string): Promise<void> {
-  return speak(letter.toUpperCase(), { lang: 'en-US', rate: 0.6, pitch: 1.2, module: 'letter' });
+/** 朗读单个英文字母（优先使用本地离线高保真标准音频） */
+export async function speakLetter(letter: string): Promise<void> {
+  try {
+    await playLetterVoice(letter);
+  } catch {
+    return speak(letter.toUpperCase(), { lang: 'en-US', rate: 0.6, pitch: 1.2, module: 'letter' });
+  }
+}
+
+/** 朗读自然拼读音或童谣助记（优先使用本地离线高保真标准音频） */
+export async function speakPhonics(text: string, letterChar?: string): Promise<void> {
+  const match = letterChar ?? text.match(/^[A-Za-z]/)?.[0];
+  if (match) {
+    try {
+      await playPhonicsVoice(match);
+      return;
+    } catch {
+      /* 降级走系统 TTS */
+    }
+  }
+  return speak(text, { lang: 'en-US', rate: 0.72, pitch: 1.1, module: 'phonics' });
 }
 
 /** 朗读数字（中文） */
