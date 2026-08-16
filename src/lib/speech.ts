@@ -325,6 +325,11 @@ export function speak(text: string, options: SpeakOptions = {}): Promise<void> {
     return Promise.resolve();
   }
 
+  // 拼音符号转中文发音：如果传入的是拼音（如 "b", "zh", "ai", "bā"），自动转为标准代表字发音
+  if (lang === 'zh-CN') {
+    text = pinyinToSpoken(text);
+  }
+
   // 日常词库纠音（P9 · ①）：自由文本（故事/讲解/跟读）无逐字拼音，引擎易把
   // 「银行/重新/音乐」等高频多音词读错。开启纠音时整词替换成同音词送进 TTS。
   // 古诗走 correctChars（单字+拼音），不在此处理，避免双重替换。
@@ -608,6 +613,11 @@ export async function speakPhonics(text: string, letterChar?: string): Promise<v
     }
   }
   return speak(text, { lang: 'en-US', rate: 0.72, pitch: 1.1, module: 'phonics' });
+}
+
+/** 朗读单个拼音声母/韵母/音节（权威普通话教学发音） */
+export function speakPinyin(symbol: string, options: SpeakOptions = {}): Promise<void> {
+  return speak(pinyinToSpoken(symbol), { lang: 'zh-CN', rate: 0.7, pitch: 1.15, module: 'pinyin', ...options });
 }
 
 /** 朗读数字（中文） */
