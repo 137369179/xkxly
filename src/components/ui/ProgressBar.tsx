@@ -31,7 +31,7 @@ const colorMap = {
   yellow: 'bg-yellow-500',
   red: 'bg-red-500',
   purple: 'bg-purple-500',
-  pink: 'bg-pink-500',
+  pink: 'bg-gradient-to-r from-[#FF6B96] to-[#FF9EBA]',
   orange: 'bg-orange-500',
 };
 
@@ -82,7 +82,7 @@ export function ProgressBar({
         </div>
       )}
       <div
-        className={`w-full bg-gray-200 rounded-full overflow-hidden ${sizeMap[resolvedSize]}`}
+        className={`w-full bg-[#F0E4E8] rounded-full overflow-hidden ${sizeMap[resolvedSize]}`}
         role="presentation"
       >
         <div

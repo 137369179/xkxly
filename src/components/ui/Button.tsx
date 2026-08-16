@@ -117,7 +117,7 @@ export function CandyButton({
       onClick={handleClick}
       style={style}
       className={cn(
-        'no-select relative inline-flex items-center justify-center gap-2 font-black tracking-wide',
+        'no-select jelly-shine relative inline-flex items-center justify-center gap-2 font-black tracking-wide',
         'transition-all duration-100 ease-out select-none border border-white/30',
         'active:translate-y-[4px] active:shadow-none hover:brightness-105',
         'focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-candy-purple/60',

@@ -75,7 +75,7 @@ export function Tabs<T extends string>({
             {active && (
               <motion.span
                 layoutId={layoutId}
-                className="absolute inset-0 rounded-[1.1rem]"
+                className="jelly-shine absolute inset-0 rounded-[1.1rem]"
                 style={{ background: ts.main, boxShadow: `0 4px 0 0 ${ts.deep}` }}
                 transition={{ type: 'spring', stiffness: 420, damping: 34 }}
               />
