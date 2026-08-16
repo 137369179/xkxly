@@ -356,7 +356,8 @@ function mediaRateLimited(ip, bucket, limit) {
 
 const MEDIA_RATE_LIMITS = {
   image: Number(process.env.AI_IMAGE_RATE_LIMIT_PER_MIN || 8),
-  video: Number(process.env.AI_VIDEO_RATE_LIMIT_PER_MIN || 2),
+  // 实测上游视频免费档 RPM=1（多次 429），本地桶必须 ≤1，否则两个用户同时请求就被上游打回
+  video: Number(process.env.AI_VIDEO_RATE_LIMIT_PER_MIN || 1),
   videopoll: Number(process.env.AI_VIDEO_POLL_RATE_LIMIT_PER_MIN || 30),
 };
 
@@ -709,6 +710,10 @@ async function handleImage(req, res) {
   if (r.abort) return sendJson(res, 504, { error: { code: 'timeout', message: '图片生成超时' } });
   if (r.err) {
     pushLog({ at: Date.now(), scene: 'image', model: IMAGE_MODEL, ms: Date.now() - started, ok: false, status: r.err.status, errCode: r.err.body?.error?.code || String(r.err.status) });
+    // 上游 429（实测视频免费档 1RPM）→ 透传 rate_limited，客户端可给出"稍等再试"提示
+    if (r.err.status === 429) {
+      return sendJson(res, 429, { error: { code: 'rate_limited', message: '生成太频繁，请稍等一分钟再试' } });
+    }
     return sendJson(res, r.err.status >= 500 ? 502 : 400, r.err.body || { error: { code: 'upstream_error' } });
   }
   const parsed = parseImageResponse(await r.resp.json());
@@ -745,6 +750,9 @@ async function handleVideoCreate(req, res) {
   if (r.abort) return sendJson(res, 504, { error: { code: 'timeout', message: '视频任务创建超时' } });
   if (r.err) {
     pushLog({ at: Date.now(), scene: 'video', model: VIDEO_MODEL, ms: Date.now() - started, ok: false, status: r.err.status, errCode: r.err.body?.error?.code || String(r.err.status) });
+    if (r.err.status === 429) {
+      return sendJson(res, 429, { error: { code: 'rate_limited', message: '生成太频繁，请稍等一分钟再试' } });
+    }
     return sendJson(res, r.err.status >= 500 ? 502 : 400, r.err.body || { error: { code: 'upstream_error' } });
   }
   const data = await r.resp.json();
@@ -786,6 +794,9 @@ async function handleVideoStatus(req, res) {
   if (r.abort) return sendJson(res, 504, { error: { code: 'timeout', message: '视频状态查询超时' } });
   if (r.err) {
     pushLog({ at: Date.now(), scene: 'videopoll', model: VIDEO_MODEL, ms: Date.now() - started, ok: false, status: r.err.status, errCode: r.err.body?.error?.code || String(r.err.status) });
+    if (r.err.status === 429) {
+      return sendJson(res, 429, { error: { code: 'rate_limited', message: '查询太频繁，请稍后再试' } });
+    }
     return sendJson(res, r.err.status >= 500 ? 502 : 400, r.err.body || { error: { code: 'upstream_error' } });
   }
   const s = normalizeVideoStatus(await r.resp.json());

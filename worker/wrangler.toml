@@ -24,9 +24,9 @@ AI_ALLOW_ORIGIN = "https://xkxly.ccwu.cc"
 # 全站默认模型（2026-08-16 切换为 Agnes 2.5 Flash）
 VITE_AI_DEFAULT_MODEL = "agnes-2.5-flash"
 AI_RATE_LIMIT_PER_MIN = "30"
-# 媒体生成独立限流（免费档实测：图片 1K≈20RPM / 视频≈1RPM，本地桶留余量）
+# 媒体生成独立限流（实测 2026-08-16：图片 1K≈20RPM / 视频免费档硬限制 1RPM）
 AI_IMAGE_RATE_LIMIT_PER_MIN = "8"
-AI_VIDEO_RATE_LIMIT_PER_MIN = "2"
+AI_VIDEO_RATE_LIMIT_PER_MIN = "1"
 AI_VIDEO_POLL_RATE_LIMIT_PER_MIN = "30"
 
 # 密钥（wrangler secret put，不写进本文件）：

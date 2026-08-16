@@ -56,8 +56,9 @@ const INJECTION_PATTERNS = [
 
 /* ======================================================================
  * P2-3 AI 内容中心：云端生成内容（故事 / 谜语 / 科普）
- * 生成走 STEPFUN（step-3.7-flash），输出校验 + 儿童安全黑名单过滤，
- * 持久化到 CONTENT_KV；列表按类型前缀扫描 KV。
+ * 2026-08-16 升级：从 STEPFUN step-3.7-flash 统一切到 Agnes agnes-2.5-flash
+ *（与全站默认模型一致；显式关闭 thinking，JSON 输出更快更省）。
+ * 输出校验 + 儿童安全黑名单过滤，持久化到 CONTENT_KV；列表按类型前缀扫描 KV。
  * ==================================================================== */
 const CONTENT_TYPES = ['story', 'riddle', 'science', 'explainer'];
 
@@ -94,8 +95,8 @@ function extractJson(raw) {
 }
 
 async function handleContentGenerate(request, env, cors) {
-  if (!env.STEPFUN_API_KEY) {
-    return json({ error: { code: 'no_key', message: '服务端未配置 STEPFUN_API_KEY' } }, cors, 500);
+  if (!env.AGNES_API_KEY) {
+    return json({ error: { code: 'no_key', message: '服务端未配置 AGNES_API_KEY' } }, cors, 500);
   }
   // B1 裁决（2026-08-12）：内容生成走独立限速桶 'content'，不共享 /api/ai/* 聊天配额，
   // 避免研究模式的 AI 知识卡把聊天请求挤爆；需重新部署后生效。
@@ -123,21 +124,23 @@ async function handleContentGenerate(request, env, cors) {
   ];
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), FIRST_BYTE_TIMEOUT_MS);
+  const contentBase = (env.AGNES_BASE_URL || DEFAULT_BASE).replace(/\/$/, '');
   let upstream;
   try {
-    upstream = await fetch(`${STEPFUN_BASE}/chat/completions`, {
+    // 2026-08-16 升级：内容生成统一切 Agnes（全站默认模型族）；
+    // enable_thinking:false 显式关闭思考链，JSON 输出实测更快更稳
+    upstream = await fetch(`${contentBase}/chat/completions`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.STEPFUN_API_KEY}` },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.AGNES_API_KEY}` },
       body: JSON.stringify({
-        model: 'step-3.7-flash',
+        model: 'agnes-2.5-flash',
         messages,
         temperature: 0.9,
-        // ⚠️ step-3.7-flash 是推理模型，思考链（reasoning_content）会吃掉大量 completion
-        // token，max_tokens 给足（同 config.ts 对 Agnes 系模型的告诫），否则正文被截断为空。
         max_tokens: 1600,
         stream: false,
         // OpenAI 兼容的 json_object 模式：强制模型输出合法 JSON（内容里需含 "JSON" 字样，prompt 已满足）
         response_format: { type: 'json_object' },
+        chat_template_kwargs: { enable_thinking: false },
       }),
       signal: ac.signal,
     });
@@ -593,11 +596,49 @@ async function mediaGate(request, env, cors, bucket, limitEnv) {
 }
 
 function defaultMediaLimit(bucket) {
-  // 免费档实测：图片 1K≈20RPM / 视频≈1RPM —— 本地桶取上游的 1/2 左右，给多用户留余量
+  // 免费档实测（2026-08-16 多次实测）：图片 1K≈20RPM / 视频≈1RPM（上游硬限制）
+  // 本地桶 ≤ 上游实际能力，否则两个用户同时请求就被上游 429 打回。
+  // 视频桶取 1：与上游 RPM=1 一致；image 留余量 8。
   if (bucket === 'image') return 8;
-  if (bucket === 'video') return 2;
+  if (bucket === 'video') return 1;
   if (bucket === 'videopoll') return 30;
   return 10;
+}
+
+/**
+ * 媒体上游错误统一映射：429 上游限流 → rate_limited（透传，客户端可重试提示）；
+ * 其余 4xx → invalid_request / 5xx → upstream。
+ * @param {Response} upstream
+ * @param {object} cors
+ * @returns {Promise<Response>}
+ */
+async function mediaUpstreamError(upstream, cors) {
+  let detail = '';
+  try {
+    detail = (await upstream.text()).slice(0, 400);
+  } catch {
+    /* noop */
+  }
+  // 实测上游限流返回 HTTP 429 + code: rate_limit_exceeded（视频免费档 1RPM）
+  if (upstream.status === 429) {
+    return json(
+      { error: { code: 'rate_limited', message: '生成太频繁，请稍等一分钟再试' } },
+      cors,
+      429,
+    );
+  }
+  if (upstream.status === 401 || upstream.status === 403) {
+    return json(
+      { error: { code: 'unauthorized', message: '上游密钥无效或无权访问' } },
+      cors,
+      502,
+    );
+  }
+  return json(
+    { error: { code: 'upstream', status: upstream.status, detail } },
+    cors,
+    upstream.status >= 500 ? 502 : 400,
+  );
 }
 
 async function handleImage(request, env, cors) {
@@ -634,13 +675,7 @@ async function handleImage(request, env, cors) {
   clearTimeout(timer);
 
   if (!upstream.ok) {
-    let detail = '';
-    try {
-      detail = (await upstream.text()).slice(0, 400);
-    } catch {
-      /* noop */
-    }
-    return json({ error: { code: 'upstream', status: upstream.status, detail } }, cors, upstream.status >= 500 ? 502 : 400);
+    return mediaUpstreamError(upstream, cors);
   }
 
   const data = await upstream.json();
@@ -685,13 +720,7 @@ async function handleVideoCreate(request, env, cors) {
   clearTimeout(timer);
 
   if (!upstream.ok) {
-    let detail = '';
-    try {
-      detail = (await upstream.text()).slice(0, 400);
-    } catch {
-      /* noop */
-    }
-    return json({ error: { code: 'upstream', status: upstream.status, detail } }, cors, upstream.status >= 500 ? 502 : 400);
+    return mediaUpstreamError(upstream, cors);
   }
 
   const data = await upstream.json();
@@ -746,13 +775,7 @@ async function handleVideoStatus(request, env, cors) {
   clearTimeout(timer);
 
   if (!upstream.ok) {
-    let detail = '';
-    try {
-      detail = (await upstream.text()).slice(0, 400);
-    } catch {
-      /* noop */
-    }
-    return json({ error: { code: 'upstream', status: upstream.status, detail } }, cors, upstream.status >= 500 ? 502 : 400);
+    return mediaUpstreamError(upstream, cors);
   }
 
   const data = await upstream.json();
