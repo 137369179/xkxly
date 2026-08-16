@@ -11,7 +11,7 @@ export function BottomTabs({ active }: { active: RouteId }) {
   const { t: translate } = useTranslation();
   return (
     <nav
-      className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t-4 border-pink-200/90 bg-white/95 backdrop-blur-xl lg:hidden shadow-fluffy rounded-t-[2.2rem]"
+      className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t-4 border-pink-200/90 bg-white/95 backdrop-blur-xl lg:hidden shadow-jelly rounded-t-[2.2rem]"
     >
       <ul className="mx-auto flex max-w-2xl items-stretch justify-around px-1 py-1.5">
         {NAV_ITEMS.filter((it) => it.bottom).map((item) => {
@@ -34,7 +34,7 @@ export function BottomTabs({ active }: { active: RouteId }) {
                 {isActive && (
                   <motion.span
                     layoutId="tab-pill"
-                    className="absolute inset-x-1 inset-y-0.5 -z-10 rounded-2xl border-2 border-pink-300 shadow-sm"
+                    className="jelly-shine absolute inset-x-1 inset-y-0.5 -z-10 rounded-2xl border-2 border-pink-300 shadow-sm"
                     style={{ background: t.soft }}
                     transition={{ type: 'spring', stiffness: 400, damping: 28 }}
                   />

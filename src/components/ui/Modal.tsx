@@ -87,7 +87,7 @@ export function Modal({
             exit={{ scale: 0.9, y: 10, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 340, damping: 26 }}
             className={cn(
-              'relative z-10 w-full max-w-lg rounded-[2rem] border-4 border-white bg-cream p-6 shadow-pop sm:p-8',
+              'jelly-shine relative z-10 w-full max-w-lg rounded-[2rem] border-4 border-white bg-white/85 p-6 shadow-jelly-lg backdrop-blur-2xl sm:p-8',
               className,
             )}
           >

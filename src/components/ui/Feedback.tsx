@@ -43,7 +43,7 @@ export function BigPraise({ show, text, emoji = '🌟' }: { show: boolean; text:
           role="status"
           aria-live="assertive"
         >
-          <div className="rounded-[2rem] border-4 border-white bg-white/92 px-9 py-7 text-center shadow-pop backdrop-blur">
+          <div className="jelly-shine rounded-[2rem] border-4 border-white bg-white/92 px-9 py-7 text-center shadow-jelly-lg backdrop-blur">
             <div className="mb-1 text-6xl">{emoji}</div>
             <div className="text-2xl font-extrabold text-rainbow">{text}</div>
           </div>
