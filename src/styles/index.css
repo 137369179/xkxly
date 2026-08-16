@@ -12,38 +12,45 @@
 }
 
 /* ============================================================
-   宝贝学习乐园 · 6岁小女孩专属粉色毛绒绒软绵绵设计系统
+   宝贝学习乐园 · 果冻粉（jelly/pastel pink）儿童设计系统
+   2026-08-16 全站果冻粉化：candy-* token 映射至果冻粉家族
+   主色 #FF6B96 · 浅粉 #FFB6C9 · 柔底 #FFF0F4 · 深 #E05A80
    ============================================================ */
 @theme {
-  /* —— 软绵绵草莓水蜜桃粉主色板 —— */
-  --color-candy-pink: #ff75a0;
-  --color-candy-pink-soft: #ffb8d2;
-  --color-candy-pink-light: #fff0f6;
-  --color-candy-pink-deep: #d62575;
+  /* —— 果冻粉主色板（jelly pink）—— */
+  --color-candy-pink: #ff6b96;
+  --color-candy-pink-soft: #ffb6c9;
+  --color-candy-pink-light: #fff0f4;
+  --color-candy-pink-deep: #e05a80;
 
-  --color-candy-blue: #70d6ff;
-  --color-candy-blue-soft: #e0f7ff;
+  --color-candy-blue: #a8d8f0;
+  --color-candy-blue-soft: #f2f6fd;
   --color-candy-blue-deep: #167aa9;
 
-  --color-candy-yellow: #ffd166;
+  --color-candy-yellow: #ffe5a8;
   --color-candy-yellow-soft: #fff4d6;
   --color-candy-yellow-deep: #b47805;
 
-  --color-candy-green: #6EE7B7;
-  --color-candy-green-soft: #E6FFFA;
+  --color-candy-green: #b8f0d8;
+  --color-candy-green-soft: #f0faf4;
   --color-candy-green-deep: #047857;
 
-  --color-candy-purple: #c4b5fd;
-  --color-candy-purple-soft: #f3e8ff;
+  --color-candy-purple: #d9c6f5;
+  --color-candy-purple-soft: #f8f4fd;
   --color-candy-purple-deep: #7c3aed;
 
-  --color-candy-orange: #ff9f5a;
-  --color-candy-orange-soft: #ffe6d2;
+  --color-candy-orange: #ffc9a8;
+  --color-candy-orange-soft: #fff3ec;
   --color-candy-orange-deep: #c2410c;
 
-  --color-cream: #fff5f8;
-  --color-ink: #3c2f40;
-  --color-ink-soft: #7a6682;
+  /* 果冻粉红（强调/错误语义）——修复 35 处 TS 引用但 token 缺失的 bug */
+  --color-candy-red: #ff5c7a;
+  --color-candy-red-deep: #c2254a;
+  --color-candy-red-soft: #ffe9ee;
+
+  --color-cream: #fff9fa;
+  --color-ink: #5c2e3d;
+  --color-ink-soft: #8a7a7e;
 
   /* —— 字体 —— */
   --font-round: 'Baloo 2', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
@@ -51,11 +58,11 @@
   --font-han: 'STKaiti', 'KaiTi', 'PingFang SC', 'Hiragino Sans GB', 'Songti SC', 'Noto Serif CJK SC',
     'Microsoft YaHei', serif;
 
-  /* —— 阴影：双层柔和果冻毛绒软阴影 —— */
-  --shadow-candy: 0 4px 0 0 rgb(255 117 160 / 0.12), 0 10px 24px -4px rgb(255 117 160 / 0.25);
-  --shadow-candy-sm: 0 2px 0 0 rgb(255 117 160 / 0.10), 0 6px 16px -4px rgb(255 117 160 / 0.20);
-  --shadow-pop: 0 4px 12px -2px rgb(255 117 160 / 0.15), 0 16px 36px -8px rgb(255 117 160 / 0.32);
-  --shadow-fluffy: 0 4px 10px -2px rgba(255, 117, 160, 0.14), 0 12px 30px -6px rgba(255, 117, 160, 0.22);
+  /* —— 阴影：果冻粉双层柔和软阴影 —— */
+  --shadow-candy: 0 4px 0 0 rgb(255 107 150 / 0.12), 0 10px 24px -4px rgb(255 107 150 / 0.25);
+  --shadow-candy-sm: 0 2px 0 0 rgb(255 107 150 / 0.10), 0 6px 16px -4px rgb(255 107 150 / 0.20);
+  --shadow-pop: 0 4px 12px -2px rgb(255 107 150 / 0.15), 0 16px 36px -8px rgb(255 107 150 / 0.32);
+  --shadow-fluffy: 0 4px 10px -2px rgba(255, 107, 150, 0.14), 0 12px 30px -6px rgba(255, 107, 150, 0.22);
 
   /* —— 动画 —— */
   --animate-float: float 4s ease-in-out infinite;
@@ -174,13 +181,13 @@
     margin: 0;
     font-family: var(--font-round);
     color: var(--color-ink);
-    background-color: #FFF0F5;
+    background-color: #FFF9FA;
     background-image:
-      radial-gradient(circle at 10% 10%, rgb(255 184 210 / 0.35), transparent 45%),
-      radial-gradient(circle at 90% 15%, rgb(255 209 102 / 0.25), transparent 45%),
-      radial-gradient(circle at 15% 85%, rgb(196 181 253 / 0.3), transparent 45%),
-      radial-gradient(circle at 85% 85%, rgb(255 117 160 / 0.25), transparent 45%),
-      radial-gradient(circle at 50% 50%, rgb(255 240 246 / 0.6), transparent 70%);
+      radial-gradient(circle at 10% 10%, rgb(255 182 201 / 0.4), transparent 45%),
+      radial-gradient(circle at 90% 15%, rgb(255 229 168 / 0.3), transparent 45%),
+      radial-gradient(circle at 15% 85%, rgb(217 198 245 / 0.35), transparent 45%),
+      radial-gradient(circle at 85% 85%, rgb(255 107 150 / 0.28), transparent 45%),
+      radial-gradient(circle at 50% 50%, rgb(255 249 250 / 0.6), transparent 70%);
     background-attachment: scroll;
     min-height: 100dvh;
     overscroll-behavior-y: none;
@@ -228,13 +235,13 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #ffb8d2;
+    background: #ffb6c9;
     border-radius: 999px;
     border: 2px solid transparent;
     background-clip: padding-box;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #ff75a0;
+    background: #ff6b96;
     background-clip: padding-box;
   }
 }
@@ -259,19 +266,19 @@
   /* iOS Safari 必须带 -webkit- 前缀，否则毛玻璃在 iPhone/iPad 上完全失效 */
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  border: 3px solid rgb(255 220 235 / 0.9);
+  border: 3px solid rgb(255 209 225 / 0.9);
   box-shadow: var(--shadow-fluffy);
 }
 
 @utility text-rainbow {
   background-image: linear-gradient(
     100deg,
-    #ff75a0 0%,
+    #ff6b96 0%,
     #ff9f5a 25%,
     #ffd166 45%,
     #6ee7b7 65%,
-    #70d6ff 85%,
-    #c4b5fd 100%
+    #a8d8f0 85%,
+    #d9c6f5 100%
   );
   background-clip: text;
   -webkit-background-clip: text;
