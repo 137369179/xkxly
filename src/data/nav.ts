@@ -60,7 +60,7 @@ export const NAV_MAP = new Map(NAV_ITEMS.map((n) => [n.id, n]));
  * 品类模型（规格四：导航按品类重组 —— 学习 / 游戏 / 故事 / 创意 / AI小老师 / 家长中心）
  * 纯数据映射，不改动任何页面路由，零回归。标签走 i18n(categories.*)，emoji/tone 在代码侧。
  * ===================================================================== */
-export type NavCategory = 'home' | 'learn' | 'game' | 'story' | 'create' | 'ai' | 'parent' | 'growth' | 'research';
+export type NavCategory = 'home' | 'learn' | 'game' | 'story' | 'create' | 'ai' | 'parent' | 'growth' | 'research' | 'design';
 
 export const NAV_CATEGORY_META: { key: NavCategory; emoji: string; tone: NavItem['tone'] }[] = [
   { key: 'learn', emoji: '📚', tone: 'blue' },
@@ -108,6 +108,7 @@ export const NAV_CATEGORY_MAP: Record<RouteId, NavCategory> = {
   content: 'ai',
   research: 'research',
   discoveries: 'research',
+  design: 'research',
   adventure: 'game',
   rewards: 'parent',
   passport: 'parent',
