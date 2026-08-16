@@ -4,6 +4,8 @@
  * 让孩子 3 秒内理解「这是什么」：主标题 + 副标题 + 双 CTA（开始今天的学习 / 和 AI 小老师聊聊）
  * + 拟人化 AI 角色 + 个性化问候（用孩子名字与年龄）。
  * 底部一张紧凑「今日学习」状态卡，复用 buildDailyPlan 的真实课程数。
+ * 2026-08-16 果冻粉化：背景升级为 AI 主视觉插画（hero_jelly.png），叠加果冻粉遮罩保证可读性，
+ * 并套用 jelly-shine 高光 + shadow-jelly Q 弹阴影。图缺失时深粉渐变兜底。
  */
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
@@ -31,7 +33,15 @@ export function HomeHero() {
   const greeting = name ? t('home.heroGreeting', { name }) : t('onboarding.welcome');
 
   return (
-    <section className="relative overflow-hidden rounded-[2rem] border-4 border-white bg-gradient-to-br from-candy-purple via-candy-blue to-candy-pink p-5 shadow-pop sm:p-7">
+    <section className="jelly-shine relative overflow-hidden rounded-[2rem] border-4 border-white bg-gradient-to-br from-candy-pink-deep to-candy-pink shadow-jelly p-5 sm:p-7">
+      {/* 主视觉背景图（果冻粉 Key Visual，图缺失时深粉渐变兜底） */}
+      <div
+        className="absolute inset-0 bg-cover"
+        style={{ backgroundImage: "url('/hero_jelly.png')", backgroundPosition: 'center 38%' }}
+      />
+      {/* 左深右浅果冻粉遮罩：保证白字在插画上清晰可读 */}
+      <div className="absolute inset-0 bg-gradient-to-r from-candy-pink-deep/60 via-candy-pink/30 to-transparent" />
+
       {/* 背景装饰泡泡 */}
       <motion.span
         className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/20"
@@ -44,7 +54,7 @@ export function HomeHero() {
         transition={{ repeat: Infinity, duration: 5, delay: 0.6 }}
       />
 
-      <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center">
+      <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center">
         {/* 左：文案 + CTA */}
         <div className="min-w-0 flex-1">
           <motion.p
@@ -123,7 +133,7 @@ export function HomeHero() {
           sfxTap();
           navigate('today');
         }}
-        className="mt-5 flex w-full items-center gap-3 rounded-2xl bg-white/95 px-4 py-3 text-left shadow-sm"
+        className="relative z-10 mt-5 flex w-full items-center gap-3 rounded-2xl bg-white/95 px-4 py-3 text-left shadow-sm"
       >
         <span className="text-3xl">{lessonDone ? '🎉' : '📅'}</span>
         <span className="min-w-0 flex-1">
