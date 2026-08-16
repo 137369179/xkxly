@@ -285,7 +285,7 @@
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border: 3px solid rgb(255 209 225 / 0.9);
-  box-shadow: var(--shadow-fluffy);
+  box-shadow: var(--shadow-jelly);
 }
 
 /* 果冻玻璃卡（设计方案 02 Glass）：白底 60% + blur 16px + 内发光粉边 */
