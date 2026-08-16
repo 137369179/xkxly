@@ -17,6 +17,11 @@ dist
 # 日志与临时文件
 *.log
 .vite
+undefined.*
+*-state.json
+.media-*.json
+.media-*.log
+.video-*.log
 
 # 编辑器临时文件
 *.swp
