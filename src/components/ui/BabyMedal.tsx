@@ -15,7 +15,7 @@ export const BabyMedal: React.FC<BabyMedalProps> = ({ id, size = 64, className =
     height={size}
     viewBox="0 0 96 96"
     fill="none"
-    className={`${className} ${!unlocked ? 'grayscale opacity-50' : ''}`}
+    className={`${className} ${!unlocked ? 'grayscale opacity-50' : ''} drop-shadow-[0_3px_0_rgba(255,107,150,0.25)]`}
     xmlns="http://www.w3.org/2000/svg"
   >
     {MEDAL_GLYPHS[id] ?? MEDAL_GLYPHS.scholar}

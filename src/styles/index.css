@@ -324,6 +324,31 @@
   }
 }
 
+/* 果冻输入框（设计方案 03 ⑤）：玻璃底 + 粉描边 + 聚焦主色发光
+ * 供页面内联输入框统一引用（输入框样式散落各页面，提供规范类由后续页面接入） */
+@utility input-jelly {
+  background: rgb(255 255 255 / 0.7);
+  border: 2px solid #ffb6c9;
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-candy-sm);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  &:focus {
+    outline: none;
+    border-color: #ff6b96;
+    box-shadow:
+      0 0 0 3px rgb(255 107 150 / 0.18),
+      var(--shadow-jelly);
+  }
+
+  &:active {
+    transform: scale(0.99);
+  }
+}
+
 @utility text-rainbow {
   background-image: linear-gradient(
     100deg,

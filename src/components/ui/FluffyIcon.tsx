@@ -59,7 +59,7 @@ const SIZE_MAP = {
 export const FluffyIcon: React.FC<FluffyIconProps> = ({ type, size = 'md', className }) => (
   <div
     className={cn(
-      'relative overflow-hidden shrink-0 transform hover:scale-105 transition-transform duration-300',
+      'jelly-shine relative overflow-hidden shrink-0 transform hover:scale-105 transition-transform duration-300',
       SIZE_MAP[size],
       className
     )}
