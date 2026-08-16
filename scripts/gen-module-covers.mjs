@@ -65,7 +65,7 @@ const COVERS = [
       <path d="M196 214 H316 M196 238 H316" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>`,
   },
   {
-    id: 'songs', tone: 'pink',
+    id: 'songs', tone: 'yellow',
     motif: `
       <path d="M206 256 L206 176 Q274 164 296 194 L296 214" stroke="{deep}" stroke-width="13" fill="none" stroke-linecap="round"/>
       <path d="M300 214 L300 168 Q356 160 372 184 L372 200" stroke="{main}" stroke-width="11" fill="none" stroke-linecap="round"/>
@@ -81,7 +81,7 @@ const COVERS = [
       <path d="M256 200 l8 20 20 8 -20 8 -8 20 -8 -20 -20 -8 20 -8 Z" fill="{deep}"/>`,
   },
   {
-    id: 'music', tone: 'pink',
+    id: 'music', tone: 'yellow',
     motif: `
       <rect x="156" y="230" width="200" height="72" rx="14" fill="{deep}"/>
       <rect x="186" y="230" width="11" height="52" fill="#FFFFFF"/>
@@ -125,7 +125,7 @@ const COVERS = [
       <circle cx="308" cy="288" r="21" fill="#FFFFFF"/><circle cx="308" cy="288" r="9" fill="{deep}"/>`,
   },
   {
-    id: 'festivals', tone: 'pink',
+    id: 'festivals', tone: 'yellow',
     motif: `
       <rect x="246" y="168" width="20" height="14" rx="4" fill="{deep}"/>
       <ellipse cx="256" cy="238" rx="58" ry="66" fill="{main}"/>
