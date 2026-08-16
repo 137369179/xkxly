@@ -15,11 +15,22 @@ import {
   guardMessages,
   redactPII,
   redactSSEChunk,
+  buildImageBody,
+  buildVideoBody,
+  validateVideoId,
+  parseImageResponse,
+  normalizeVideoStatus,
+  IMAGE_MODEL,
+  VIDEO_MODEL,
 } from '../shared/aiProxyCore.mjs';
 
 const DEFAULT_BASE = 'https://api.agnes-ai.cn/v1';
 const STEPFUN_BASE = 'https://api.stepfun.com/v1';
 const FIRST_BYTE_TIMEOUT_MS = 25_000;
+// 图片生成可能耗时数秒到数十秒（文档建议客户端 60–360s 超时）
+const IMAGE_TIMEOUT_MS = 120_000;
+// 视频任务创建 / 轮询：异步任务，单次交互很快
+const VIDEO_TIMEOUT_MS = 30_000;
 // 仅允许预设模型，避免客户端透传高价/未授权模型造成费用滥用。
 // 凭证驱动：step-* 走 STEPFUN_API_KEY，agnes-* 走 AGNES_API_KEY（未配时上游必失败）。
 const ALLOWED_MODELS = ['step-3.7-flash', 'step-3.5-flash', 'agnes-2.5-flash', 'agnes-2.0-flash', 'agnes-2.5-pro', 'agnes-2.5-pro-alpha'];
@@ -209,9 +220,11 @@ const SECURITY_HEADERS = {
   // - cdn.jsdelivr.net + huggingface/hf.co + 'wasm-unsafe-eval' + worker-src blob:：
   //   Kokoro 神经语音引擎（可选高级 TTS）运行时懒加载 kokoro.web.js 与 ONNX 模型，
   //   并在 blob Worker 里跑 WASM。缺任意一项，家长中心里开启神经引擎后会静默失败。
+  // - platform-outputs.agnes-ai.space + cos-platform-outputs.agnes-ai.cn：
+  //   Agnes 媒体生成（图片/视频）的输出域，前端用 <img>/<video> 展示生成结果，必须放行。
   // - 前端只调同源 /api，故 connect-src 不需要上游 api.agnes-ai.cn（那是 worker 侧服务端请求，CSP 管不到）。
   'Content-Security-Policy':
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://static.cloudflareinsights.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://static.cloudflareinsights.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; media-src 'self' blob:; worker-src 'self' blob:; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://static.cloudflareinsights.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://platform-outputs.agnes-ai.space; connect-src 'self' https://static.cloudflareinsights.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; media-src 'self' blob: https://platform-outputs.agnes-ai.space https://cos-platform-outputs.agnes-ai.cn; worker-src 'self' blob:; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
   'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
@@ -289,7 +302,8 @@ export default {
     const allow = env.AI_ALLOW_ORIGIN || '*';
     // AI 接口（携带付费密钥）使用严格 CORS：未配置具体域名时拒绝跨域，杜绝盗刷。
     // 内容生成同样消耗付费模型，纳入严格 CORS；内容列表只读 KV，保持宽松。
-    const strict = url.pathname.startsWith('/api/ai/') || url.pathname.startsWith('/api/content/generate');
+    const strict =
+      url.pathname.startsWith('/api/ai/') || url.pathname.startsWith('/api/content/generate');
     const cors = corsFor(allow, request.headers.get('Origin'), strict);
 
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
@@ -298,7 +312,9 @@ export default {
       return json(
         {
           ok: true,
-          model: env.VITE_AI_DEFAULT_MODEL || 'step-3.7-flash',
+          model: env.VITE_AI_DEFAULT_MODEL || 'agnes-2.5-flash',
+          imageModel: IMAGE_MODEL,
+          videoModel: VIDEO_MODEL,
           runtime: 'workers',
           corsOrigin: allow,
           rateLimitPerMin: Number(env.AI_RATE_LIMIT_PER_MIN) || 0,
@@ -309,6 +325,17 @@ export default {
 
     if (url.pathname.startsWith('/api/ai/chat') && request.method === 'POST') {
       return handleChat(request, env, cors);
+    }
+
+    // Agnes 媒体生成：图片（同步） / 视频（异步任务创建 + 状态轮询）
+    if (url.pathname.startsWith('/api/ai/image') && request.method === 'POST') {
+      return handleImage(request, env, cors);
+    }
+    if (url.pathname.startsWith('/api/ai/video/status') && request.method === 'GET') {
+      return handleVideoStatus(request, env, cors);
+    }
+    if (url.pathname.startsWith('/api/ai/video') && request.method === 'POST') {
+      return handleVideoCreate(request, env, cors);
     }
 
     /* ---------- 前端监控上报端点 ----------
@@ -526,4 +553,220 @@ async function handleChat(request, env, cors) {
       'X-Accel-Buffering': 'no',
     },
   });
+}
+
+/* ======================================================================
+ * Agnes 媒体生成（图片 / 视频）——P4-1 接入
+ * 生产与 dev 行为一致（共享逻辑在 aiProxyCore.mjs）。
+ * 安全要点：
+ *   - 模型名写死（客户端不可透传），杜绝盗用高价模型；
+ *   - 媒体 prompt 过儿童黑名单（validateMediaPrompt 内建）；
+ *   - 独立限流桶（image / video / videopoll），不与聊天共享配额；
+ *   - 图生图/关键帧输入 URL 仅允许 https 公共 URL 或 data:image Base64。
+ * ==================================================================== */
+
+/** 读取并解析 JSON 请求体（带大小上限，媒体请求体可比聊天大——图生图可能带 Data URI） */
+async function readJsonBody(request, maxBytes = 9 * 1024 * 1024) {
+  const cl = Number(request.headers.get('Content-Length')) || 0;
+  if (cl > maxBytes) return { error: { code: 'payload_too_large', message: '请求体过大' } };
+  try {
+    return { payload: await request.json() };
+  } catch {
+    return { error: { code: 'bad_json', message: '请求体不是合法 JSON' } };
+  }
+}
+
+/** 媒体端点统一前置：密钥预检 + 严格 CORS 已在 fetch 路由层处理；此处做限流与公共校验 */
+async function mediaGate(request, env, cors, bucket, limitEnv) {
+  if (!env.AGNES_API_KEY) {
+    return json(
+      { error: { code: 'no_key', message: '服务端未配置 AGNES_API_KEY（wrangler secret put）' } },
+      cors,
+      500,
+    );
+  }
+  const limit = Number(env[limitEnv]) || defaultMediaLimit(bucket);
+  if (await rateLimited(request, limit, bucket)) {
+    return json({ error: { code: 'rate_limited', message: '生成太频繁，稍后再试' } }, cors, 429);
+  }
+  return null;
+}
+
+function defaultMediaLimit(bucket) {
+  // 免费档实测：图片 1K≈20RPM / 视频≈1RPM —— 本地桶取上游的 1/2 左右，给多用户留余量
+  if (bucket === 'image') return 8;
+  if (bucket === 'video') return 2;
+  if (bucket === 'videopoll') return 30;
+  return 10;
+}
+
+async function handleImage(request, env, cors) {
+  const gate = await mediaGate(request, env, cors, 'image', 'AI_IMAGE_RATE_LIMIT_PER_MIN');
+  if (gate) return gate;
+
+  const { payload, error } = await readJsonBody(request);
+  if (error) return json({ error }, cors, 400);
+
+  const built = buildImageBody(payload);
+  if (!built.ok) {
+    return json({ error: { code: built.code, message: built.message } }, cors, built.code === 'refused' ? 400 : 400);
+  }
+
+  const base = (env.AGNES_BASE_URL || DEFAULT_BASE).replace(/\/$/, '');
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), IMAGE_TIMEOUT_MS);
+  let upstream;
+  try {
+    upstream = await fetch(`${base}/images/generations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.AGNES_API_KEY}` },
+      body: JSON.stringify(built.body),
+      signal: ac.signal,
+    });
+  } catch (e) {
+    clearTimeout(timer);
+    return json(
+      { error: { code: e.name === 'AbortError' ? 'timeout' : 'upstream_error', message: '图片生成超时或上游不可用' } },
+      cors,
+      e.name === 'AbortError' ? 504 : 502,
+    );
+  }
+  clearTimeout(timer);
+
+  if (!upstream.ok) {
+    let detail = '';
+    try {
+      detail = (await upstream.text()).slice(0, 400);
+    } catch {
+      /* noop */
+    }
+    return json({ error: { code: 'upstream', status: upstream.status, detail } }, cors, upstream.status >= 500 ? 502 : 400);
+  }
+
+  const data = await upstream.json();
+  const parsed = parseImageResponse(data);
+  if (!parsed.ok) {
+    return json({ error: { code: 'parse_failed', message: '图片生成返回异常，请重试' } }, cors, 502);
+  }
+  return json({ ok: true, url: parsed.url, created: parsed.created, model: IMAGE_MODEL }, cors);
+}
+
+async function handleVideoCreate(request, env, cors) {
+  const gate = await mediaGate(request, env, cors, 'video', 'AI_VIDEO_RATE_LIMIT_PER_MIN');
+  if (gate) return gate;
+
+  const { payload, error } = await readJsonBody(request, 9 * 1024 * 1024);
+  if (error) return json({ error }, cors, 400);
+
+  const built = buildVideoBody(payload);
+  if (!built.ok) {
+    return json({ error: { code: built.code, message: built.message } }, cors, 400);
+  }
+
+  const base = (env.AGNES_BASE_URL || DEFAULT_BASE).replace(/\/$/, '');
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), VIDEO_TIMEOUT_MS);
+  let upstream;
+  try {
+    upstream = await fetch(`${base}/videos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.AGNES_API_KEY}` },
+      body: JSON.stringify(built.body),
+      signal: ac.signal,
+    });
+  } catch (e) {
+    clearTimeout(timer);
+    return json(
+      { error: { code: e.name === 'AbortError' ? 'timeout' : 'upstream_error', message: '视频任务创建失败' } },
+      cors,
+      e.name === 'AbortError' ? 504 : 502,
+    );
+  }
+  clearTimeout(timer);
+
+  if (!upstream.ok) {
+    let detail = '';
+    try {
+      detail = (await upstream.text()).slice(0, 400);
+    } catch {
+      /* noop */
+    }
+    return json({ error: { code: 'upstream', status: upstream.status, detail } }, cors, upstream.status >= 500 ? 502 : 400);
+  }
+
+  const data = await upstream.json();
+  // 创建即返回任务句柄；video_id 推荐用于轮询（文档 + 实测）
+  const videoId = data?.video_id || data?.task_id || data?.id;
+  if (!videoId) {
+    return json({ error: { code: 'parse_failed', message: '视频任务创建返回异常' } }, cors, 502);
+  }
+  return json(
+    {
+      ok: true,
+      video_id: videoId,
+      status: data?.status || 'queued',
+      progress: Number(data?.progress) || 0,
+      seconds: data?.seconds,
+      size: data?.size,
+      model: VIDEO_MODEL,
+    },
+    cors,
+  );
+}
+
+async function handleVideoStatus(request, env, cors) {
+  const gate = await mediaGate(request, env, cors, 'videopoll', 'AI_VIDEO_POLL_RATE_LIMIT_PER_MIN');
+  if (gate) return gate;
+
+  const v = validateVideoId(new URL(request.url).searchParams.get('video_id'));
+  if (!v.ok) {
+    return json({ error: { code: 'invalid_request', message: 'video_id 缺失或非法' } }, cors, 400);
+  }
+
+  // ⚠️ 实测：轮询端点是根路径 /agnesapi（不是 /v1 下）；完成时 URL 在顶层 url 字段
+  const base = (env.AGNES_BASE_URL || DEFAULT_BASE).replace(/\/$/, '');
+  const origin = new URL(base).origin;
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), VIDEO_TIMEOUT_MS);
+  let upstream;
+  try {
+    upstream = await fetch(`${origin}/agnesapi?video_id=${encodeURIComponent(v.id)}`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${env.AGNES_API_KEY}` },
+      signal: ac.signal,
+    });
+  } catch (e) {
+    clearTimeout(timer);
+    return json(
+      { error: { code: e.name === 'AbortError' ? 'timeout' : 'upstream_error', message: '视频状态查询失败' } },
+      cors,
+      e.name === 'AbortError' ? 504 : 502,
+    );
+  }
+  clearTimeout(timer);
+
+  if (!upstream.ok) {
+    let detail = '';
+    try {
+      detail = (await upstream.text()).slice(0, 400);
+    } catch {
+      /* noop */
+    }
+    return json({ error: { code: 'upstream', status: upstream.status, detail } }, cors, upstream.status >= 500 ? 502 : 400);
+  }
+
+  const data = await upstream.json();
+  const s = normalizeVideoStatus(data);
+  return json(
+    {
+      ok: true,
+      status: s.status,
+      progress: s.progress,
+      url: s.url || null,
+      seconds: s.seconds,
+      size: s.size,
+      error: s.error || null,
+    },
+    cors,
+  );
 }

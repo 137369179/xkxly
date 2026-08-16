@@ -31,6 +31,13 @@ import {
   guardMessages,
   redactPII,
   redactSSEChunk,
+  buildImageBody,
+  buildVideoBody,
+  validateVideoId,
+  parseImageResponse,
+  normalizeVideoStatus,
+  IMAGE_MODEL,
+  VIDEO_MODEL,
 } from '../shared/aiProxyCore.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -94,6 +101,9 @@ const INJECTION_PATTERNS = [
 const PORT = Number(process.env.AI_PROXY_PORT || 8787);
 const MAX_CONCURRENCY = Number(process.env.AI_MAX_CONCURRENCY || 10);
 const TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || 90000);
+// 媒体端点专用超时：图片同步生成可能数十秒（文档建议 60–360s）
+const IMAGE_TIMEOUT_MS = Number(process.env.AI_IMAGE_TIMEOUT_MS || 120000);
+const VIDEO_TIMEOUT_MS = Number(process.env.AI_VIDEO_TIMEOUT_MS || 30000);
 const RATE_LIMIT = Number(process.env.AI_RATE_LIMIT_PER_MIN || 30);
 const DIST = path.resolve(ROOT, 'dist');
 const DIST_SEP = DIST + path.sep;
@@ -186,7 +196,8 @@ const CORS = {
 
 // Security headers for children's app
 const SECURITY_HEADERS = {
-  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://api.agnes-ai.cn; media-src 'self' blob:; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+  // 与 worker/index.mjs 的 CSP 保持同步；媒体输出域见 worker 注释
+  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://platform-outputs.agnes-ai.space; connect-src 'self' https://api.agnes-ai.cn; media-src 'self' blob: https://platform-outputs.agnes-ai.space https://cos-platform-outputs.agnes-ai.cn; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
   'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
@@ -329,6 +340,26 @@ function rateLimited(ip) {
   return arr.length > RATE_LIMIT;
 }
 
+/* 媒体端点独立限流桶（与生产 Worker 的 image/video/videopoll 分桶行为一致）：
+ * 图片免费档实测 ≈20RPM、视频 ≈1RPM，不能与聊天共享 30/min 配额，
+ * 否则一个孩子连点图片就能把视频/聊天配额挤爆。 */
+const mediaRateBuckets = new Map(); // `${bucket}:${ip}` -> number[]
+
+function mediaRateLimited(ip, bucket, limit) {
+  const now = Date.now();
+  const key = `${bucket}:${ip}`;
+  const arr = (mediaRateBuckets.get(key) || []).filter((t) => now - t < 60_000);
+  arr.push(now);
+  mediaRateBuckets.set(key, arr);
+  return arr.length > limit;
+}
+
+const MEDIA_RATE_LIMITS = {
+  image: Number(process.env.AI_IMAGE_RATE_LIMIT_PER_MIN || 8),
+  video: Number(process.env.AI_VIDEO_RATE_LIMIT_PER_MIN || 2),
+  videopoll: Number(process.env.AI_VIDEO_POLL_RATE_LIMIT_PER_MIN || 30),
+};
+
 // 定时清理过期桶，避免内存随请求量无限增长
 const purgeTimer = setInterval(() => {
   const now = Date.now();
@@ -336,6 +367,11 @@ const purgeTimer = setInterval(() => {
     const kept = arr.filter((t) => now - t < 60_000);
     if (kept.length) rateBuckets.set(ip, kept);
     else rateBuckets.delete(ip);
+  }
+  for (const [key, arr] of mediaRateBuckets) {
+    const kept = arr.filter((t) => now - t < 60_000);
+    if (kept.length) mediaRateBuckets.set(key, kept);
+    else mediaRateBuckets.delete(key);
   }
 }, 5 * 60_000);
 if (typeof purgeTimer.unref === 'function') purgeTimer.unref();
@@ -589,6 +625,182 @@ async function handleChat(req, res) {
   }
 }
 
+/* ======================================================================
+ * Agnes 媒体生成（图片 / 视频）——与生产 Worker 行为一致（共享逻辑 aiProxyCore.mjs）
+ * ====================================================================== */
+
+/** 媒体端点通用前置：密钥预检 + 独立限流桶 */
+function mediaGate(req, res, bucket) {
+  if (!API_KEY) {
+    return sendJson(res, 500, {
+      error: { code: 'no_key', message: '服务端未配置 AGNES_API_KEY（.env.local）' },
+    });
+  }
+  const limit = MEDIA_RATE_LIMITS[bucket] || 10;
+  if (mediaRateLimited(ipOf(req), bucket, limit)) {
+    return sendJson(res, 429, { error: { code: 'rate_limited', message: '生成太频繁，稍后再试' } });
+  }
+  return null;
+}
+
+/** 上游请求统一封装：AbortController + 超时 + 客户端断开中止 + 错误分类 */
+async function upstreamFetch(url, options, timeoutMs, started, scene, model, req, res) {
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), timeoutMs);
+  req.on('close', () => ac.abort());
+  req.on('error', () => ac.abort());
+  res.on('error', () => {
+    try {
+      ac.abort();
+    } catch {
+      /* noop */
+    }
+  });
+  try {
+    const resp = await fetch(url, { ...options, signal: ac.signal });
+    if (resp.ok) return { resp };
+    const text = await resp.text();
+    return {
+      err: {
+        status: resp.status,
+        body: (() => {
+          try {
+            return JSON.parse(text);
+          } catch {
+            return { error: { code: 'upstream_error', message: text.slice(0, 300) } };
+          }
+        })(),
+      },
+    };
+  } catch (err) {
+    const aborted = err?.name === 'AbortError';
+    pushLog({
+      at: Date.now(), scene, model, ms: Date.now() - started, ok: false,
+      status: 0, errCode: aborted ? 'timeout' : 'network_error',
+    });
+    return { abort: aborted };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function handleImage(req, res) {
+  const started = Date.now();
+  const gate = mediaGate(req, res, 'image');
+  if (gate) return;
+  let payload;
+  try {
+    payload = JSON.parse(await readBody(req, 9 * 1024 * 1024)); // 图生图可能带 Data URI
+  } catch {
+    return sendJson(res, 400, { error: { code: 'bad_json', message: '请求体不是合法 JSON 或过大' } });
+  }
+  const built = buildImageBody(payload);
+  if (!built.ok) {
+    return sendJson(res, built.code === 'refused' ? 400 : 400, { error: { code: built.code, message: built.message } });
+  }
+  await acquire();
+  const r = await upstreamFetch(`${BASE_URL}/images/generations`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(built.body),
+  }, IMAGE_TIMEOUT_MS, started, 'image', IMAGE_MODEL, req, res);
+  release();
+
+  if (r.abort) return sendJson(res, 504, { error: { code: 'timeout', message: '图片生成超时' } });
+  if (r.err) {
+    pushLog({ at: Date.now(), scene: 'image', model: IMAGE_MODEL, ms: Date.now() - started, ok: false, status: r.err.status, errCode: r.err.body?.error?.code || String(r.err.status) });
+    return sendJson(res, r.err.status >= 500 ? 502 : 400, r.err.body || { error: { code: 'upstream_error' } });
+  }
+  const parsed = parseImageResponse(await r.resp.json());
+  if (!parsed.ok) {
+    pushLog({ at: Date.now(), scene: 'image', model: IMAGE_MODEL, ms: Date.now() - started, ok: false, status: 502, errCode: 'parse_failed' });
+    return sendJson(res, 502, { error: { code: 'parse_failed', message: '图片生成返回异常' } });
+  }
+  pushLog({ at: Date.now(), scene: 'image', model: IMAGE_MODEL, ms: Date.now() - started, ok: true, status: 200 });
+  return sendJson(res, 200, { ok: true, url: parsed.url, created: parsed.created, model: IMAGE_MODEL });
+}
+
+async function handleVideoCreate(req, res) {
+  const started = Date.now();
+  const gate = mediaGate(req, res, 'video');
+  if (gate) return;
+  let payload;
+  try {
+    payload = JSON.parse(await readBody(req, 9 * 1024 * 1024));
+  } catch {
+    return sendJson(res, 400, { error: { code: 'bad_json', message: '请求体不是合法 JSON 或过大' } });
+  }
+  const built = buildVideoBody(payload);
+  if (!built.ok) {
+    return sendJson(res, 400, { error: { code: built.code, message: built.message } });
+  }
+  await acquire();
+  const r = await upstreamFetch(`${BASE_URL}/videos`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(built.body),
+  }, VIDEO_TIMEOUT_MS, started, 'video', VIDEO_MODEL, req, res);
+  release();
+
+  if (r.abort) return sendJson(res, 504, { error: { code: 'timeout', message: '视频任务创建超时' } });
+  if (r.err) {
+    pushLog({ at: Date.now(), scene: 'video', model: VIDEO_MODEL, ms: Date.now() - started, ok: false, status: r.err.status, errCode: r.err.body?.error?.code || String(r.err.status) });
+    return sendJson(res, r.err.status >= 500 ? 502 : 400, r.err.body || { error: { code: 'upstream_error' } });
+  }
+  const data = await r.resp.json();
+  const videoId = data?.video_id || data?.task_id || data?.id;
+  if (!videoId) {
+    pushLog({ at: Date.now(), scene: 'video', model: VIDEO_MODEL, ms: Date.now() - started, ok: false, status: 502, errCode: 'parse_failed' });
+    return sendJson(res, 502, { error: { code: 'parse_failed', message: '视频任务创建返回异常' } });
+  }
+  pushLog({ at: Date.now(), scene: 'video', model: VIDEO_MODEL, ms: Date.now() - started, ok: true, status: 200 });
+  return sendJson(res, 200, {
+    ok: true,
+    video_id: videoId,
+    status: data?.status || 'queued',
+    progress: Number(data?.progress) || 0,
+    seconds: data?.seconds,
+    size: data?.size,
+    model: VIDEO_MODEL,
+  });
+}
+
+async function handleVideoStatus(req, res) {
+  const started = Date.now();
+  const gate = mediaGate(req, res, 'videopoll');
+  if (gate) return;
+  const u = new URL(req.url, 'http://localhost');
+  const v = validateVideoId(u.searchParams.get('video_id'));
+  if (!v.ok) {
+    return sendJson(res, 400, { error: { code: 'invalid_request', message: 'video_id 缺失或非法' } });
+  }
+  await acquire();
+  // ⚠️ 实测：轮询端点是根路径 /agnesapi（不在 /v1 下）；完成时 URL 在顶层 url 字段
+  const origin = new URL(BASE_URL).origin;
+  const r = await upstreamFetch(`${origin}/agnesapi?video_id=${encodeURIComponent(v.id)}`, {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${API_KEY}` },
+  }, VIDEO_TIMEOUT_MS, started, 'videopoll', VIDEO_MODEL, req, res);
+  release();
+
+  if (r.abort) return sendJson(res, 504, { error: { code: 'timeout', message: '视频状态查询超时' } });
+  if (r.err) {
+    pushLog({ at: Date.now(), scene: 'videopoll', model: VIDEO_MODEL, ms: Date.now() - started, ok: false, status: r.err.status, errCode: r.err.body?.error?.code || String(r.err.status) });
+    return sendJson(res, r.err.status >= 500 ? 502 : 400, r.err.body || { error: { code: 'upstream_error' } });
+  }
+  const s = normalizeVideoStatus(await r.resp.json());
+  pushLog({ at: Date.now(), scene: 'videopoll', model: VIDEO_MODEL, ms: Date.now() - started, ok: true, status: 200 });
+  return sendJson(res, 200, {
+    ok: true,
+    status: s.status,
+    progress: s.progress,
+    url: s.url || null,
+    seconds: s.seconds,
+    size: s.size,
+    error: s.error || null,
+  });
+}
+
 /* ------------------------------------------------------------------ */
 /* 静态资源（生产模式）                                                 */
 /* ------------------------------------------------------------------ */
@@ -657,10 +869,16 @@ const server = http.createServer(async (req, res) => {
 
   if (url.startsWith('/api/ai/chat') && req.method === 'POST') return handleChat(req, res);
 
+  if (url.startsWith('/api/ai/image') && req.method === 'POST') return handleImage(req, res);
+  if (url.startsWith('/api/ai/video/status') && req.method === 'GET') return handleVideoStatus(req, res);
+  if (url.startsWith('/api/ai/video') && req.method === 'POST') return handleVideoCreate(req, res);
+
   if (url.startsWith('/api/ai/health')) {
     return sendJson(res, 200, {
       ok: true,
-      model: process.env.VITE_AI_DEFAULT_MODEL || 'step-3.7-flash',
+      model: process.env.VITE_AI_DEFAULT_MODEL || 'agnes-2.5-flash',
+      imageModel: IMAGE_MODEL,
+      videoModel: VIDEO_MODEL,
       running,
       queued: waiting.length,
       calls: logs.length,

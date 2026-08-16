@@ -151,3 +151,76 @@ export interface AiLogEntry {
   reasoningTokens?: number;
   errCode?: string;
 }
+
+/* ======================================================================
+ * 媒体生成（图片 / 视频）——Agnes Media（P4-1 接入）
+ * ==================================================================== */
+
+/** 图片生成请求（文生图 / 图生图） */
+export interface ImageGenOptions {
+  prompt: string;
+  /** 输出档位：1K / 2K / 3K / 4K（或兼容 1024x768 精确写法），默认 1K */
+  size?: string;
+  /** 宽高比：1:1 / 3:4 / 4:3 / 16:9 / 9:16 / 2:3 / 3:2 / 21:9，默认 1:1 */
+  ratio?: string;
+  /** 图生图/多图合成：输入图片 URL 或 Data URI（最多 4 张） */
+  image?: string[];
+  signal?: AbortSignal;
+}
+
+/** 图片生成结果 */
+export interface ImageGenResult {
+  ok: boolean;
+  /** 图片 URL（https 或 data:image base64） */
+  url?: string;
+  model?: string;
+  error?: AiError;
+  /** 耗时毫秒 */
+  ms?: number;
+}
+
+/** 视频生成请求（文生视频 / 图生视频 / 关键帧动画） */
+export interface VideoGenOptions {
+  prompt: string;
+  /** 图生视频：单张输入图片 URL */
+  image?: string;
+  /** 关键帧动画：2-8 张输入图片 URL 数组 */
+  keyframes?: string[];
+  /** 帧数：自动对齐 8n+1 且 ≤441，默认 121（约 5s@24fps） */
+  numFrames?: number;
+  /** 帧率 1-60，默认 24 */
+  frameRate?: number;
+  /** 反向提示词（可选） */
+  negativePrompt?: string;
+  /** 固定随机种子（可选，可复现） */
+  seed?: number;
+  signal?: AbortSignal;
+}
+
+/** 视频任务（创建后轮询句柄） */
+export interface VideoTask {
+  ok: boolean;
+  videoId?: string;
+  status?: string;
+  progress?: number;
+  seconds?: string;
+  size?: string;
+  model?: string;
+  error?: AiError;
+  /** 耗时毫秒 */
+  ms?: number;
+}
+
+/** 视频状态（轮询结果） */
+export interface VideoStatus {
+  ok: boolean;
+  status?: string;
+  progress?: number;
+  /** 完成后的视频 URL（顶层 url 字段，实测） */
+  url?: string;
+  seconds?: string;
+  size?: string;
+  error?: AiError;
+  /** 耗时毫秒 */
+  ms?: number;
+}

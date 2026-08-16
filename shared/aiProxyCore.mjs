@@ -165,3 +165,253 @@ export function redactSSEChunk(text) {
   });
   return redactPII(out);
 }
+
+/* ======================================================================
+ * 媒体生成共享逻辑（图片 / 视频）——凭证无关纯逻辑，Worker 与 Node 双端复用。
+ * 依据 Agnes 官方文档 + 本仓库实测（2026-08-16）：
+ *   - 图片：POST /v1/images/generations，模型 agnes-image-2.1-flash
+ *            size 档位 1K/2K/3K/4K（或兼容 1024x768），ratio 白名单，
+ *            response_format 必须放 extra_body（放顶层会被上游忽略/报错）。
+ *   - 视频：POST /v1/videos 创建异步任务，模型 agnes-video-v2.0；
+ *            轮询 GET {origin}/agnesapi?video_id=xxx（注意是根路径，非 /v1 下）；
+ *            实测完成时视频 URL 在响应顶层 url 字段（文档示例的 metadata.url 为空），
+ *            旧版 GET /v1/videos/<task_id> 能查状态但拿不到 url —— 生产必须走 /agnesapi。
+ * 设计边界：
+ *   - 模型名固定写死（客户端不可透传），防盗用高价/未授权模型。
+ *   - 客户端只能传白名单参数，其余字段一律丢弃。
+ *   - 鉴权、限流、超时、CORS、密钥持有仍由各运行时负责，本模块不碰。
+ * ==================================================================== */
+
+/** 图片生成固定模型（实测 /v1/models 返回 agnes-image-2.1-flash） */
+export const IMAGE_MODEL = 'agnes-image-2.1-flash';
+/** 视频生成固定模型 */
+export const VIDEO_MODEL = 'agnes-video-v2.0';
+
+/** 图片 size 档位白名单（1K/2K/3K/4K 推荐，兼容历史精确尺寸写法） */
+const IMAGE_SIZE_ALLOWED = ['1K', '2K', '3K', '4K', '1024x768', '1024x1024', '768x1024'];
+/** 图片 ratio 白名单（文档支持值） */
+const IMAGE_RATIO_ALLOWED = ['1:1', '3:4', '4:3', '16:9', '9:16', '2:3', '3:2', '21:9'];
+/** 视频模式白名单 */
+const VIDEO_MODE_ALLOWED = ['ti2vid', 'keyframes'];
+/** 视频帧率范围（文档 1–60） */
+const VIDEO_FRAME_RATE_MAX = 60;
+const VIDEO_FRAME_RATE_MIN = 1;
+/** 视频帧数上限（文档 ≤441，8n+1 规则） */
+const VIDEO_FRAMES_MAX = 441;
+
+/**
+ * 把请求的帧数对齐到 8n+1 规则（就近取整，上限夹紧）。
+ * 例：121 → 121；120 → 121；125 → 129；442 → 441。
+ * @param {unknown} n
+ * @returns {number}
+ */
+export function normalizeVideoFrames(n) {
+  const raw = Math.floor(Number(n));
+  if (!Number.isFinite(raw) || raw <= 0) return 121; // 默认约 5s@24fps
+  const clamped = Math.min(raw, VIDEO_FRAMES_MAX);
+  return Math.max(1, Math.round((clamped - 1) / 8) * 8 + 1);
+}
+
+/**
+ * 媒体 prompt 儿童安全黑名单（图片/视频是视觉生成，比文本更严：
+ * 命中即拒，防止生成不适宜儿童的视觉内容）。
+ * 覆盖：暴力血腥、色情裸露、恐怖、自伤、烟酒毒品、武器、政治等。
+ */
+export const MEDIA_PROMPT_BLOCKLIST = [
+  /(杀人|自杀|自残|割腕|跳楼)/,
+  /(血腥|内脏|断肢|尸体|骷髅|流血|虐杀)/,
+  /(色情|裸体|裸[体|女]|性爱|性感|露点|内衣|泳装|蕾丝|透视装)/,
+  /(毒品|吸毒|注射|大麻|冰毒|海洛因)/,
+  /(香烟|抽烟|雪茄|酗酒|醉酒)/,
+  /(恐怖|惊悚|鬼|僵尸|幽灵|血手印)/,
+  /(手枪|步枪|机枪|炸弹|炸药|AK|狙击)/,
+  /(政治|国旗|党|游行|抗议|暴动)/,
+  /(纹身|舌钉|唇钉)/,
+];
+
+/** 媒体 prompt 校验：长度 + 黑名单。返回 {ok} 或 {ok:false, code, message} */
+export function validateMediaPrompt(prompt) {
+  if (typeof prompt !== 'string' || !prompt.trim()) {
+    return { ok: false, code: 'invalid_request', message: 'prompt 不能为空' };
+  }
+  if (prompt.length > 800) {
+    return { ok: false, code: 'invalid_request', message: 'prompt 最多 800 字符' };
+  }
+  if (MEDIA_PROMPT_BLOCKLIST.some((re) => re.test(prompt))) {
+    return { ok: false, code: 'refused', message: '这个内容不太合适，我们换个主题吧～' };
+  }
+  return { ok: true, prompt: prompt.trim() };
+}
+
+/**
+ * 校验图生图/图生视频的输入图片 URL：只允许公共 HTTPS URL 或 Data URI Base64。
+ * 防 file:// / ftp:// 等协议、防空白、防超长（Data URI 可能很大，给 8MB 上限）。
+ * @param {unknown} url
+ * @returns {{ok:true,url:string}|{ok:false,code:string,message:string}}
+ */
+export function validateMediaImageUrl(url) {
+  if (typeof url !== 'string' || !url.trim()) {
+    return { ok: false, code: 'invalid_request', message: 'image 必须是非空字符串' };
+  }
+  const s = url.trim();
+  const isHttps = /^https:\/\//i.test(s);
+  const isDataUri = /^data:image\/(png|jpeg|jpg|webp|gif);base64,/i.test(s);
+  if (!isHttps && !isDataUri) {
+    return { ok: false, code: 'invalid_request', message: 'image 必须是 https:// 公共 URL 或 data:image/*;base64 Data URI' };
+  }
+  if (isDataUri && s.length > 8 * 1024 * 1024) {
+    return { ok: false, code: 'invalid_request', message: 'image Data URI 过大（上限 8MB）' };
+  }
+  return { ok: true, url: s };
+}
+
+/**
+ * 成型图片生成上游请求体（白名单字段，模型固定）。
+ * @param {object} payload 客户端请求体
+ * @returns {{ok:true,body:object}|{ok:false,code:string,message:string}}
+ */
+export function buildImageBody(payload) {
+  const p = validateMediaPrompt(payload?.prompt);
+  if (!p.ok) return p;
+
+  let size = String(payload.size || '1K');
+  if (!IMAGE_SIZE_ALLOWED.includes(size)) size = '1K';
+
+  let ratio = String(payload.ratio || '1:1');
+  if (!IMAGE_RATIO_ALLOWED.includes(ratio)) ratio = '1:1';
+
+  const body = {
+    model: IMAGE_MODEL,
+    prompt: p.prompt,
+    size,
+    ratio,
+    extra_body: { response_format: 'url' }, // ⚠️ 必须在 extra_body，放顶层无效
+  };
+
+  // 图生图/多图合成：extra_body.image 数组
+  if (payload.image !== undefined) {
+    const imgs = Array.isArray(payload.image) ? payload.image : [payload.image];
+    if (imgs.length > 4) {
+      return { ok: false, code: 'invalid_request', message: 'image 最多 4 张' };
+    }
+    const urls = [];
+    for (const u of imgs) {
+      const v = validateMediaImageUrl(u);
+      if (!v.ok) return v;
+      urls.push(v.url);
+    }
+    if (urls.length) body.extra_body.image = urls;
+  }
+
+  return { ok: true, body };
+}
+
+/**
+ * 成型视频生成上游请求体（异步任务创建）。
+ * @param {object} payload 客户端请求体
+ * @returns {{ok:true,body:object}|{ok:false,code:string,message:string}}
+ */
+export function buildVideoBody(payload) {
+  const p = validateMediaPrompt(payload?.prompt);
+  if (!p.ok) return p;
+
+  const body = {
+    model: VIDEO_MODEL,
+    prompt: p.prompt,
+  };
+
+  // 帧率夹紧 [1,60]，默认 24
+  const fr = Math.floor(Number(payload.frame_rate));
+  body.frame_rate = Number.isFinite(fr) ? Math.min(VIDEO_FRAME_RATE_MAX, Math.max(VIDEO_FRAME_RATE_MIN, fr)) : 24;
+
+  // 帧数：8n+1 对齐 + ≤441；不传默认 121（约 5s@24fps）
+  if (payload.num_frames !== undefined) body.num_frames = normalizeVideoFrames(payload.num_frames);
+
+  // 模式白名单：ti2vid（默认）/ keyframes
+  if (payload.mode !== undefined && VIDEO_MODE_ALLOWED.includes(String(payload.mode))) {
+    body.mode = String(payload.mode);
+  }
+
+  // 图生视频：单图 URL（顶层 image）
+  if (payload.image !== undefined) {
+    const v = validateMediaImageUrl(payload.image);
+    if (!v.ok) return v;
+    body.image = v.url;
+  }
+
+  // 关键帧动画：extra_body.image 数组 + extra_body.mode
+  if (payload.keyframes !== undefined) {
+    const kf = Array.isArray(payload.keyframes) ? payload.keyframes : [payload.keyframes];
+    if (kf.length < 2) {
+      return { ok: false, code: 'invalid_request', message: 'keyframes 至少 2 张' };
+    }
+    if (kf.length > 8) {
+      return { ok: false, code: 'invalid_request', message: 'keyframes 最多 8 张' };
+    }
+    const urls = [];
+    for (const u of kf) {
+      const v = validateMediaImageUrl(u);
+      if (!v.ok) return v;
+      urls.push(v.url);
+    }
+    body.extra_body = { ...(body.extra_body || {}), image: urls, mode: 'keyframes' };
+  }
+
+  // 反向提示词（可选，白名单直通 + 长度限制）
+  if (typeof payload.negative_prompt === 'string' && payload.negative_prompt.trim()) {
+    body.negative_prompt = payload.negative_prompt.trim().slice(0, 500);
+  }
+  // 固定种子（可选，用于可复现结果）
+  if (Number.isFinite(Number(payload.seed))) body.seed = Math.floor(Number(payload.seed));
+
+  return { ok: true, body };
+}
+
+/**
+ * 校验视频状态轮询的 video_id（防路径/查询注入）。
+ * 实测 video_id 形如 video_<base64url>，可能含 - _ = 等字符。
+ * @param {unknown} id
+ * @returns {{ok:true,id:string}|{ok:false,code:string}}
+ */
+export function validateVideoId(id) {
+  if (typeof id !== 'string' || !id.trim()) return { ok: false, code: 'invalid_request' };
+  const s = id.trim();
+  if (s.length > 200) return { ok: false, code: 'invalid_request' };
+  if (!/^[A-Za-z0-9_\-=:]+$/.test(s)) return { ok: false, code: 'invalid_request' };
+  return { ok: true, id: s };
+}
+
+/**
+ * 从图片生成上游响应中提取图片 URL（兼容 url / b64_json）。
+ * @param {object} data 上游 JSON
+ * @returns {{ok:true,url:string,created?:number}|{ok:false,code:string}}
+ */
+export function parseImageResponse(data) {
+  const first = data?.data?.[0];
+  const url = typeof first?.url === 'string' && first.url ? first.url : null;
+  if (url) return { ok: true, url, created: data.created };
+  const b64 = typeof first?.b64_json === 'string' && first.b64_json ? first.b64_json : null;
+  if (b64) return { ok: true, url: `data:image/png;base64,${b64}`, created: data.created };
+  return { ok: false, code: 'parse_failed' };
+}
+
+/**
+ * 归一化视频状态响应（实测：完成时 URL 在顶层 url 字段；metadata.url 为空。
+ * 双保险：顶层 url 优先，metadata.url 兜底）。
+ * @param {object} d 上游轮询/创建响应
+ * @returns {{status:string,progress:number,url?:string,seconds?:string,size?:string,error?:object|null,raw:object}}
+ */
+export function normalizeVideoStatus(d) {
+  const raw = (d && typeof d === 'object') ? d : {};
+  const status = String(raw.status || 'unknown');
+  const url = typeof raw.url === 'string' && raw.url ? raw.url : raw.metadata?.url || undefined;
+  return {
+    status,
+    progress: Number(raw.progress) || 0,
+    url,
+    seconds: raw.seconds,
+    size: raw.size,
+    error: raw.error ?? null,
+    raw,
+  };
+}

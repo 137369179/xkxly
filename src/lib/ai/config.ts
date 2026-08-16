@@ -4,9 +4,12 @@
  */
 import type { AiScene } from './types';
 
-/** 全站默认模型（可由 .env 的 VITE_AI_DEFAULT_MODEL 覆盖） */
+/**
+ * 全站默认模型（可由 .env 的 VITE_AI_DEFAULT_MODEL 覆盖）。
+ * 2026-08-16 起切换为 Agnes 2.5 Flash（用户指定默认，BFF 已配 AGNES_API_KEY）。
+ */
 export const DEFAULT_MODEL: string =
-  (import.meta.env.VITE_AI_DEFAULT_MODEL as string | undefined) || 'step-3.7-flash';
+  (import.meta.env.VITE_AI_DEFAULT_MODEL as string | undefined) || 'agnes-2.5-flash';
 
 /** BFF 代理地址。生产同源部署时留空，走相对路径 */
 export const PROXY_URL: string =
@@ -23,13 +26,13 @@ export interface ModelInfo {
 
 /** 实测可用的文本模型（包含 StepFun 阶跃星辰、讯飞 MaaS Qwen3.6-35B-A3B、DeepSeek 与 Agnes） */
 export const MODELS: ModelInfo[] = [
-  { id: 'step-3.7-flash', label: 'StepFun 3.7 闪电', speed: 1, note: '阶跃星辰旗舰高速模型，全站默认' },
+  { id: 'agnes-2.5-flash', label: 'Agnes 2.5 闪电', speed: 1, note: '全站默认（用户指定）' },
+  { id: 'step-3.7-flash', label: 'StepFun 3.7 闪电', speed: 1, note: '阶跃星辰旗舰高速模型' },
   { id: 'step-3.5-flash', label: 'StepFun 3.5 闪电', speed: 1, note: '阶跃星辰高速模型' },
   { id: 'xopqwen36v35b', label: 'Qwen3.6-35B-A3B', speed: 1, note: '讯飞星辰 MaaS 超级旗舰模型' },
   { id: 'deepseek-v4-flash', label: 'DeepSeek V4', speed: 1, note: 'DeepSeek 旗舰高速模型' },
   { id: 'deepseek-chat', label: 'DeepSeek Chat', speed: 1, note: '通用高速对话模型' },
   { id: 'deepseek-reasoner', label: 'DeepSeek Reasoner', speed: 2, note: '深度思考推理模型' },
-  { id: 'agnes-2.5-flash', label: 'Agnes 2.5 闪电', speed: 2, note: '质量与速度平衡' },
   { id: 'agnes-2.5-pro', label: 'Agnes 2.5 深思', speed: 3, note: '适合学情分析等长文' },
 ];
 
