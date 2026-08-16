@@ -219,7 +219,7 @@ export default function PoemsPage({ param }: { param?: string }) {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={t('poem.searchPlaceholder')}
-                  className="tap-target w-full rounded-2xl border-2 border-candy-pink-soft bg-white/80 px-11 py-2.5 text-base font-bold text-ink outline-none placeholder:text-ink-soft/70 focus:border-candy-pink focus-visible:outline-4 focus-visible:outline-candy-pink/40"
+                  className="tap-target input-jelly w-full px-11 py-2.5 text-base font-bold text-ink outline-none placeholder:text-ink-soft/70 focus-visible:outline-4 focus-visible:outline-candy-pink/40"
                 />
               </div>
               <div className="flex flex-wrap gap-2.5">

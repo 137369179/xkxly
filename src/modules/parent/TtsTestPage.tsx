@@ -451,7 +451,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 const inputCls =
-  'w-full rounded-xl border-2 border-candy-pink-soft bg-white/80 px-3 py-2 text-base font-bold text-ink outline-none focus:border-candy-pink';
+  'input-jelly w-full px-3 py-2 text-base font-bold text-ink outline-none';
 
 function Chip({ active, onClick, children }: { active?: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
