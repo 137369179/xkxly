@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { BADGES } from '@/data/badges';
 import { TONE_STYLE, type Tone } from '@/lib/tones';
@@ -129,6 +129,7 @@ function Medal({
   const { t: translate } = useTranslation();
   const cfg = TIER_CONFIG[tier] ?? TIER_CONFIG.bronze;
   const ts = TONE_STYLE[badge.tone ?? 'blue'] ?? TONE_STYLE.blue;
+  const [imgOk, setImgOk] = useState(true);
   return (
     <motion.div
       initial={{ scale: 0.9, opacity: 0 }}
@@ -143,7 +144,7 @@ function Medal({
       }}
       title={badge.desc}
     >
-      {/* 奖牌图标 */}
+      {/* 奖牌图标：优先展示勋章图片，失败回退 emoji */}
       <div
         className={cn('grid h-14 w-14 place-items-center rounded-full text-3xl', !unlocked && 'grayscale opacity-40')}
         style={{
@@ -151,7 +152,16 @@ function Medal({
           border: unlocked ? `3px solid ${cfg.ring}` : '3px solid #CFC8DA',
         }}
       >
-        {badge.emoji}
+        {badge.image && imgOk ? (
+          <img
+            src={badge.image}
+            alt={badge.name}
+            className="h-full w-full rounded-full object-cover"
+            onError={() => setImgOk(false)}
+          />
+        ) : (
+          badge.emoji
+        )}
       </div>
       <span
         className="line-clamp-1 text-[11px] font-extrabold"

@@ -343,6 +343,8 @@ export interface BadgeDef {
   desc: string;
   emoji: string;
   tone: Tone;
+  /** 勋章配套图片资源（如 /medals/<id>.png），用于解锁弹窗与成就墙展示 */
+  image?: string;
   meter?: (p: Progress) => [number, number];
   check: (p: Progress) => boolean;
 }

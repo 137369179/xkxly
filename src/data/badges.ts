@@ -1,9 +1,11 @@
 import { dateKey } from '@/lib/dailyPlan';
 import type { BadgeDef, Progress } from '@/types';
+import { MEDALS } from '@/data/medals';
 
 const totalLevels = 18;
 
 export const BADGES: BadgeDef[] = [
+  ...MEDALS,
   {
     id: 'first-step',
     name: '启程小星',
