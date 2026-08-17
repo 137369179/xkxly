@@ -103,7 +103,7 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
 
     const pos = getCanvasPos(e);
     ctx.beginPath();
-    ctx.strokeStyle = '#2563eb'; // 宝石蓝
+    ctx.strokeStyle = '#e05a80'; // 果冻粉深粉笔迹
     ctx.lineWidth = 12;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
@@ -159,14 +159,14 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto bg-gradient-to-b from-amber-50 to-orange-50 rounded-3xl p-4 sm:p-6 border-4 border-amber-300 shadow-xl space-y-4">
+    <div className="w-full max-w-xl mx-auto bg-gradient-to-b from-candy-pink-light to-candy-pink-soft rounded-3xl p-4 sm:p-6 border-4 border-candy-pink-soft shadow-jelly space-y-4 jelly-shine">
       {/* 头部信息与语音控制 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-black px-3 py-1 bg-amber-200 text-amber-900 rounded-full">
+          <span className="text-xs font-black px-3 py-1 bg-candy-pink-soft text-candy-pink-deep rounded-full">
             {t('hanziStrokeWriter.radicalMeta', { radical: hanzi.radical, strokes: hanzi.strokes })}
           </span>
-          <span className="text-xs font-bold text-amber-700">{hanzi.origin}</span>
+          <span className="text-xs font-bold text-candy-pink-deep">{hanzi.origin}</span>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -174,14 +174,14 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
               sfxTap();
               setGridType(gridType === 'tian' ? 'mi' : 'tian');
             }}
-            className="text-xs font-black px-2.5 py-1 bg-white border border-amber-300 text-amber-800 rounded-lg shadow-xs active:scale-95"
+            className="text-xs font-black px-2.5 py-1 bg-white border border-candy-pink-soft text-candy-pink-deep rounded-lg shadow-xs active:scale-95"
           >
             {gridType === 'tian' ? t('hanziStrokeWriter.miGrid') : t('hanziStrokeWriter.tianGrid')}
           </button>
           {onClose && (
             <button
               onClick={onClose}
-              className="text-amber-500 hover:text-amber-800 text-lg font-black px-2"
+              className="text-candy-pink-deep hover:text-candy-red text-lg font-black px-2"
             >
               ✕
             </button>
@@ -190,15 +190,15 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
       </div>
 
       {/* 田字格 / 米字格 描红书写舞台 */}
-      <div className="relative w-64 h-64 mx-auto bg-white rounded-2xl border-4 border-red-400 shadow-inner flex items-center justify-center overflow-hidden touch-none">
-        {/* 田字格 / 米字格 红色虚线网格 */}
+      <div className="relative w-64 h-64 mx-auto bg-candy-pink-light rounded-2xl border-4 border-candy-red shadow-inner flex items-center justify-center overflow-hidden touch-none">
+        {/* 田字格 / 米字格 红色虚线网格（果冻红保持田字格语义） */}
         <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100">
-          <line x1="50" y1="0" x2="50" y2="100" stroke="#fca5a5" strokeWidth="1" strokeDasharray="3 3" />
-          <line x1="0" y1="50" x2="100" y2="50" stroke="#fca5a5" strokeWidth="1" strokeDasharray="3 3" />
+          <line x1="50" y1="0" x2="50" y2="100" stroke="#ffb6c9" strokeWidth="1" strokeDasharray="3 3" />
+          <line x1="0" y1="50" x2="100" y2="50" stroke="#ffb6c9" strokeWidth="1" strokeDasharray="3 3" />
           {gridType === 'mi' && (
             <>
-              <line x1="0" y1="0" x2="100" y2="100" stroke="#fee2e2" strokeWidth="1" strokeDasharray="2 2" />
-              <line x1="100" y1="0" x2="0" y2="100" stroke="#fee2e2" strokeWidth="1" strokeDasharray="2 2" />
+              <line x1="0" y1="0" x2="100" y2="100" stroke="#ffe9ee" strokeWidth="1" strokeDasharray="2 2" />
+              <line x1="100" y1="0" x2="0" y2="100" stroke="#ffe9ee" strokeWidth="1" strokeDasharray="2 2" />
             </>
           )}
         </svg>
@@ -217,7 +217,7 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
               key={strokeProgress}
               initial={{ scale: 0.95, opacity: 0.4 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="text-[120px] font-black text-rose-500/80 leading-none tracking-widest font-serif"
+              className="text-[120px] font-black text-candy-red/80 leading-none tracking-widest font-serif"
             >
               {hanzi.c}
             </motion.span>
@@ -247,7 +247,7 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
             sfxTap();
             speak(`${hanzi.c}，${hanzi.p}`);
           }}
-          className="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-amber-950 font-black rounded-xl shadow-md active:scale-95 flex items-center gap-1.5 text-sm"
+          className="px-4 py-2 bg-candy-pink hover:bg-candy-pink-deep text-white font-black rounded-xl shadow-jelly active:scale-95 flex items-center gap-1.5 text-sm"
         >
           <span>🔊 {hanzi.p}</span>
         </button>
@@ -255,21 +255,21 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
         <button
           onClick={handlePlayStrokes}
           disabled={isAnimating}
-          className="px-4 py-2 bg-sky-400 hover:bg-sky-500 text-white font-black rounded-xl shadow-md active:scale-95 flex items-center gap-1.5 text-sm disabled:opacity-50"
+          className="px-4 py-2 bg-candy-blue hover:bg-candy-blue-deep text-white font-black rounded-xl shadow-jelly active:scale-95 flex items-center gap-1.5 text-sm disabled:opacity-50"
         >
           <span>{t('hanziStrokeWriter.playStrokes')}</span>
         </button>
 
         <button
           onClick={clearCanvas}
-          className="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl active:scale-95 text-xs"
+          className="px-3 py-2 bg-white border border-candy-pink-soft hover:bg-candy-pink-light text-candy-pink-deep font-bold rounded-xl active:scale-95 text-xs"
         >
           {t('hanziStrokeWriter.rewrite')}
         </button>
       </div>
 
       {/* 提交验证与星级结算 */}
-      <div className="flex flex-col items-center gap-2 pt-2 border-t border-amber-200">
+      <div className="flex flex-col items-center gap-2 pt-2 border-t border-candy-pink-soft">
         {stars === null ? (
           <CandyButton
             tone="green"
@@ -284,7 +284,7 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
           <motion.div
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
-            className="flex flex-col items-center gap-1 bg-white/80 p-3 rounded-2xl border border-emerald-300 w-full"
+            className="flex flex-col items-center gap-1 bg-white/80 p-3 rounded-2xl border border-candy-green w-full"
           >
             <div className="flex items-center gap-1 text-2xl">
               {[1, 2, 3].map((s) => (
@@ -298,25 +298,25 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
                 </motion.span>
               ))}
             </div>
-            <span className="text-xs font-black text-emerald-700">{t('hanziStrokeWriter.reward')}</span>
+            <span className="text-xs font-black text-candy-green-deep">{t('hanziStrokeWriter.reward')}</span>
           </motion.div>
         )}
       </div>
 
       {/* AI 小智汉字微故事 */}
-      <div className="pt-2 border-t border-amber-200">
+      <div className="pt-2 border-t border-candy-pink-soft">
         {!showAiStory ? (
           <button
             onClick={handleGenerateAiStory}
-            className="w-full text-center text-xs font-black text-amber-700 hover:text-amber-900 bg-amber-100/80 hover:bg-amber-200/80 py-2 rounded-xl border border-amber-300 transition-all flex items-center justify-center gap-1.5"
+            className="w-full text-center text-xs font-black text-candy-pink-deep hover:text-candy-red bg-candy-pink-soft/80 hover:bg-candy-pink-light border border-candy-pink-soft transition-all flex items-center justify-center gap-1.5"
           >
             <span>{t('hanziStrokeWriter.aiStoryBtn', { char: hanzi.c })}</span>
           </button>
         ) : (
-          <div className="bg-white/90 p-3 rounded-2xl border border-amber-300 text-xs font-bold text-amber-900 space-y-1.5 shadow-sm">
-            <div className="flex items-center justify-between text-[11px] font-black text-amber-700">
+          <div className="bg-white/90 p-3 rounded-2xl border border-candy-pink-soft text-xs font-bold text-candy-pink-deep space-y-1.5 shadow-sm">
+            <div className="flex items-center justify-between text-[11px] font-black text-candy-pink-deep">
               <span>{t('hanziStrokeWriter.aiStoryTitle')}</span>
-              <button onClick={() => setShowAiStory(false)} className="text-amber-500 hover:text-amber-800">
+              <button onClick={() => setShowAiStory(false)} className="text-candy-pink-deep hover:text-candy-red">
                 ✕
               </button>
             </div>
