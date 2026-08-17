@@ -65,6 +65,7 @@ const GrowthMuseumPage = lazy(() => import('@/modules/growth/GrowthMuseumPage'))
 const ContentStationPage = lazy(() => import('@/modules/content/ContentStationPage'));
 const ResearchModePage = lazy(() => import('@/modules/research/ResearchModePage'));
 const DiscoveryGallery = lazy(() => import('@/modules/research/DiscoveryGallery'));
+const DesignSystemPage = lazy(() => import('@/modules/design/DesignSystemPage'));
 
 function Page() {
   const { route, param } = useRoute();
@@ -114,6 +115,7 @@ function Page() {
       case 'content': return <ContentStationPage />;
       case 'research': return <ResearchModePage />;
       case 'discoveries': return <DiscoveryGallery />;
+      case 'design': return <DesignSystemPage />;
       default: return <HomePage />;
     }
   }, [route]);
@@ -192,7 +194,7 @@ export function App() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen bg-gradient-to-br from-amber-50/80 via-purple-50/60 to-pink-50/80 selection:bg-pink-200">
+      <div className="min-h-screen bg-gradient-to-br from-[#FFF0F4] via-[#FFE4EF] to-[#F2EAFD] selection:bg-pink-200">
         <TopBar />
         <div className="mx-auto flex max-w-7xl items-start gap-4 px-2 sm:px-4 py-3 sm:py-6">
           <Sidebar active={route} />
