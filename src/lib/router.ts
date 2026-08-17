@@ -45,6 +45,7 @@ export const ROUTES = [
   'research',
   'discoveries',
   'design',
+  'achievement',
 ] as const;
 
 export type RouteId = (typeof ROUTES)[number];

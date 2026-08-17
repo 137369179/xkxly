@@ -74,7 +74,7 @@ const ROUTE_CATEGORY = {
   songs: 'story', science: 'learn', music: 'create', art: 'create', safety: 'learn',
   geography: 'learn', vehicles: 'game', festivals: 'learn', plants: 'learn',
   cat_house: 'create', realistic_cat: 'create', storybook: 'story', wrongbook: 'ai',
-  gamecenter: 'game', story: 'story', growth: 'growth', content: 'ai',
+  gamecenter: 'game', story: 'story', growth: 'growth', content: 'ai', achievement: 'growth',
 };
 // 预渲染路由（不含 home：根 URL 已是独立页）
 const ROUTES = Object.keys(ROUTE_CATEGORY);
@@ -82,7 +82,7 @@ const ROUTES = Object.keys(ROUTE_CATEGORY);
 // 无 NavItem 的路由（如 PIN 门禁内的家长诊断页）提供预渲染标题，
 // 否则 label 回退为 route id，永远匹配不到页面 <title> → 被判定 SKIP。
 // 预渲染无头 Chrome 的活跃语言为 en-US，故 label 取英文标题以匹配。
-const ROUTE_LABEL = { ttstest: '🎙 Voice Engine Diagnostic' };
+const ROUTE_LABEL = { ttstest: '🎙 Voice Engine Diagnostic', achievement: '🏆 宝贝成就中心' };
 
 /* ---------- 3. CDP ---------- */
 function launchChrome() {

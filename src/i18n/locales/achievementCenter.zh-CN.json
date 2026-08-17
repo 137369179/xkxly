@@ -1,0 +1,15 @@
+{
+  "achievementCenter": {
+    "title": "宝贝成就中心",
+    "subtitle": "已收集 {done}/{total} 枚专属勋章",
+    "statCollected": "已收集勋章",
+    "statStars": "累计星星",
+    "tabAll": "全部",
+    "tabAchievement": "成就",
+    "tabMilestone": "里程碑",
+    "tabBehavior": "行为激励",
+    "unlocked": "已解锁",
+    "notStarted": "未开始",
+    "progress": "收集进度"
+  }
+}

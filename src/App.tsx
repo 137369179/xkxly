@@ -66,6 +66,7 @@ const ContentStationPage = lazy(() => import('@/modules/content/ContentStationPa
 const ResearchModePage = lazy(() => import('@/modules/research/ResearchModePage'));
 const DiscoveryGallery = lazy(() => import('@/modules/research/DiscoveryGallery'));
 const DesignSystemPage = lazy(() => import('@/modules/design/DesignSystemPage'));
+const AchievementCenter = lazy(() => import('@/modules/achievement/AchievementCenter'));
 
 function Page() {
   const { route, param } = useRoute();
@@ -116,6 +117,7 @@ function Page() {
       case 'research': return <ResearchModePage />;
       case 'discoveries': return <DiscoveryGallery />;
       case 'design': return <DesignSystemPage />;
+      case 'achievement': return <AchievementCenter />;
       default: return <HomePage />;
     }
   }, [route]);
