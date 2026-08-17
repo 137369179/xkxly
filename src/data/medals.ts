@@ -52,8 +52,37 @@ const chatRounds = (p: Progress) =>
     .filter(([k]) => k.startsWith('chatCount_'))
     .reduce((s, [, v]) => s + (typeof v === 'number' ? v : 0), 0);
 
+const pinyinMastered = (p: Progress) =>
+  Object.keys(p.mastery).filter((k) => k.startsWith('pinyin:')).length;
+
+const bossDefeated = (p: Progress) =>
+  Object.values(p.bossRecords ?? {}).filter((r) => r.defeated).length;
+
+/** 每日任务最长连续完成天数（当天至少完成一项即计为完成） */
+const dailyQuestStreak = (p: Progress) => {
+  const dailyQuests = p.dailyQuests ?? {};
+  const dates = Object.keys(dailyQuests)
+    .filter((d) => (dailyQuests[d] ?? []).some((q) => q.completed))
+    .sort();
+  if (!dates.length) return 0;
+  let best = 1;
+  let cur = 1;
+  for (let i = 1; i < dates.length; i++) {
+    const curDate = dates[i];
+    const prevDate = dates[i - 1];
+    if (!curDate || !prevDate) continue;
+    const diff = Math.round(
+      (new Date(curDate).getTime() - new Date(prevDate).getTime()) / 86_400_000,
+    );
+    if (diff === 1) cur++;
+    else if (diff > 1) cur = 1;
+    if (cur > best) best = cur;
+  }
+  return best;
+};
+
 /* ------------------------------------------------------------------ */
-/* 勋章清单（12 枚：成就 4 + 里程碑 4 + 行为激励 4）                      */
+/* 勋章清单（16 枚：成就 6 + 里程碑 5 + 行为激励 5）                      */
 /* ------------------------------------------------------------------ */
 export const MEDALS: MedalDef[] = [
   /* ===================== 成就类：技能掌握 ===================== */
@@ -105,6 +134,30 @@ export const MEDALS: MedalDef[] = [
     check: (p) => (p.mathCorrect ?? 0) >= 100,
     meter: (p) => [Math.min(p.mathCorrect ?? 0, 100), 100],
   },
+  {
+    id: 'medal-pinyin-master',
+    name: '拼音小能手',
+    desc: '掌握 20 个拼音',
+    emoji: '🗣️',
+    tone: 'blue',
+    category: 'achievement',
+    image: '/medals/medal-pinyin-master.png',
+    reward: { type: 'stars', amount: 15 },
+    check: (p) => pinyinMastered(p) >= 20,
+    meter: (p) => [Math.min(pinyinMastered(p), 20), 20],
+  },
+  {
+    id: 'medal-adventure-hero',
+    name: '闯关小勇士',
+    desc: '击败 3 个冒险 Boss',
+    emoji: '🚀',
+    tone: 'purple',
+    category: 'achievement',
+    image: '/medals/medal-adventure-hero.png',
+    reward: { type: 'stars', amount: 15 },
+    check: (p) => bossDefeated(p) >= 3,
+    meter: (p) => [Math.min(bossDefeated(p), 3), 3],
+  },
 
   /* ===================== 里程碑类：累计 / 连续 ===================== */
   {
@@ -155,6 +208,18 @@ export const MEDALS: MedalDef[] = [
     check: (p) => (p.researchStats?.sessionsCompleted ?? 0) >= 5,
     meter: (p) => [Math.min(p.researchStats?.sessionsCompleted ?? 0, 5), 5],
   },
+  {
+    id: 'medal-cat-friend',
+    name: '猫咪好伙伴',
+    desc: '猫咪进化到学童猫',
+    emoji: '🐱',
+    tone: 'pink',
+    category: 'milestone',
+    image: '/medals/medal-cat-friend.png',
+    reward: { type: 'catAffection', amount: 20 },
+    check: (p) => (p.catLevel ?? 1) >= 2,
+    meter: (p) => [Math.min(p.catLevel ?? 1, 2), 2],
+  },
 
   /* ===================== 行为激励类：日常行为 ===================== */
   {
@@ -204,6 +269,18 @@ export const MEDALS: MedalDef[] = [
     reward: { type: 'stars', amount: 10 },
     check: (p) => (p.creativeCount ?? 0) >= 5,
     meter: (p) => [Math.min(p.creativeCount ?? 0, 5), 5],
+  },
+  {
+    id: 'medal-daily-champion',
+    name: '每日小标兵',
+    desc: '连续完成每日任务 7 天',
+    emoji: '🏅',
+    tone: 'green',
+    category: 'behavior',
+    image: '/medals/medal-daily-champion.png',
+    reward: { type: 'stars', amount: 10 },
+    check: (p) => dailyQuestStreak(p) >= 7,
+    meter: (p) => [Math.min(dailyQuestStreak(p), 7), 7],
   },
 ];
 
