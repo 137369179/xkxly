@@ -100,7 +100,7 @@ export default function SciencePage() {
         {TABS.map(tb => (
           <button
             key={tb.id}
-            onClick={() => { sfxTap(); setTab(tb.id); }}
+            aria-label={t(tb.labelKey)} onClick={() => { sfxTap(); setTab(tb.id); }}
             className={cn(
               'flex min-h-[48px] flex-1 items-center justify-center gap-1.5 rounded-[1rem] px-4 py-2.5 text-sm font-extrabold transition-all whitespace-nowrap',
               tab === tb.id ? tb.activeColor : cn('bg-white/50', tb.color, 'hover:bg-white')

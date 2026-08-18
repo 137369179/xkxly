@@ -20,6 +20,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
   const [errorMsg, setErrorMsg] = useState('');
   const supported = isSpeechRecogSupported();
   const activeStreamRef = useRef<boolean>(false);
+  const abortRef = useRef<AbortController | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const scheduleFocus = useSafeTimeout();
@@ -77,6 +78,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
     }, 400);
     return () => {
       clearTimeout(autoTimer);
+      abortRef.current?.abort();
       speechRecog.stop();
       stopSpeaking();
       setStatus('idle');
@@ -138,6 +140,9 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
   const handleSendToAi = async (question: string) => {
     setStatus('thinking');
     activeStreamRef.current = true;
+    abortRef.current?.abort();
+    const ac = new AbortController();
+    abortRef.current = ac;
     let fullText = '';
     try {
       const generator = chatStream({
@@ -146,6 +151,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
           { role: 'system', content: '你是一个面向5岁小朋友的智慧好朋友小智。回答要极为亲切、活泼、充满童趣，使用极其简单通俗的语言，控制在3句话以内，尽量多用比喻。' },
           { role: 'user', content: question },
         ],
+        signal: ac.signal,
       });
       for await (const chunk of generator) {
         if (!activeStreamRef.current) break;
@@ -165,6 +171,8 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
         setStatus('idle');
       }
     } catch (err) {
+      // 主动取消（关闭弹窗/重新提问）不算失败，静默退出即可
+      if (ac.signal.aborted) return;
       if (import.meta.env.DEV) console.error('AI Voice error:', err);
       setStatus('idle');
       const fallback = '小智刚刚走神啦，宝贝再问我一次好不好呀？';
@@ -196,7 +204,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
           className="relative z-10 w-full max-w-md overflow-hidden rounded-3xl bg-white p-6 shadow-2xl border-4 border-candy-yellow text-center"
         >
           <button
-            onClick={() => { activeStreamRef.current = false; onClose(); }}
+            onClick={() => { activeStreamRef.current = false; abortRef.current?.abort(); onClose(); }}
             aria-label="关闭语音对话"
             className="absolute top-4 right-4 grid h-10 w-10 place-items-center rounded-full bg-cream-dark text-ink-soft hover:bg-candy-yellow transition-colors font-bold text-xl"
           >

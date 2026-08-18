@@ -31,8 +31,8 @@ export function Sidebar({ active }: { active: RouteId }) {
       const items = [...NAV_ITEMS];
       if (items[idx]) {
         sfxTap();
-        navigate(items[idx]!.id);
-        announceToScreenReader(`${translate(`nav.${items[idx]!.id}.label`) || items[idx]!.label}，已切换`);
+        navigate(items[idx]?.id ?? 'home');
+        const label = translate(`nav.${items[idx]?.id}.label`) || items[idx]?.label || ""; announceToScreenReader(`${label}，已切换`);
       }
     },
   });
@@ -43,7 +43,7 @@ export function Sidebar({ active }: { active: RouteId }) {
     return (
       <button
         key={item.id}
-        ref={(el) => { btnRefs.current.set(item.id, el!); }}
+        ref={(el) => { btnRefs.current.set(item.id, el); }}
         onClick={() => {
           sfxTap();
           navigate(item.id);

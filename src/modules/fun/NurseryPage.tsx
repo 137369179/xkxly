@@ -34,7 +34,7 @@ export function NurseryPage() {
     const map: Record<string, NurseryRhyme[]> = {};
     for (const r of NURSERY_RHYMES) {
       if (!map[r.theme]) map[r.theme] = [];
-      map[r.theme]!.push(r);
+      const arr = map[r.theme]; if (arr) arr.push(r);
     }
     return map;
   }, []);
@@ -51,7 +51,7 @@ export function NurseryPage() {
       if (stopRef.current) break;
       setActiveLine(i);
       await new Promise<void>(resolve => {
-        speak(rhyme.lyrics[i]!, { rate: 0.85, onEnd: () => resolve() });
+        const line = rhyme.lyrics[i]; if (line) speak(line, { rate: 0.85, onEnd: () => resolve() });
       });
       if (stopRef.current) break;
       await new Promise(r => setTimeout(r, 300));
@@ -71,11 +71,11 @@ export function NurseryPage() {
     return (
       <div className="space-y-4">
         <PageHeader emoji="🎵" title={t('nurseryPage.title')} subtitle={t('nurseryPage.subtitle')} tone="pink" />
-        {(Object.keys(THEME_LABEL) as RhymeTheme[]).map(theme => {
-          const rhymes = byTheme[theme]!
+        {(Object.keys(THEME_LABEL) as RhymeTheme[]).map((theme) => {
+          const rhymes = byTheme[theme] ?? [];
           if (!rhymes?.length) return null;
-          const tl = THEME_LABEL[theme]!
-          const color = THEME_COLORS[theme]!
+          const tl = THEME_LABEL[theme] ?? { emoji: '🎵', label: theme };
+          const color = THEME_COLORS[theme] ?? '#ff5c7a';
           return (
             <div key={theme}>
               <div className="mb-2 flex items-center gap-2">
@@ -106,7 +106,7 @@ export function NurseryPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <CandyButton tone="pink" variant="soft" size="sm" onClick={() => { stop(); sfxTap(); setSelected(null); }}>
+        <CandyButton tone="pink" variant="soft" size="sm" aria-label="返回儿歌列表" onClick={() => { stop(); sfxTap(); setSelected(null); }}>
           ◀️ {t('nurseryPage.back')}
         </CandyButton>
         <span className="text-sm font-extrabold text-ink">{selected.emoji} {selected.title}</span>

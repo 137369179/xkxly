@@ -51,10 +51,13 @@ export function StoryBook() {
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
 
   const activeStreamRef = useRef(false);
+  const abortRef = useRef<AbortController | null>(null);
 
-  // 页面切换时停止音频
+  // 页面切换时停止音频并中断进行中的 AI 流
   useEffect(() => {
     return () => {
+      activeStreamRef.current = false;
+      abortRef.current?.abort();
       stopSpeaking();
     };
   }, []);
@@ -92,8 +95,11 @@ export function StoryBook() {
     activeStreamRef.current = true;
 
     try {
+      abortRef.current?.abort();
+      const ac = new AbortController();
+      abortRef.current = ac;
       const task = storybookTask(character, theme, userPrompt.trim());
-      const generator = chatStream(task);
+      const generator = chatStream({ ...task, signal: ac.signal });
       let rawJson = '';
 
       for await (const chunk of generator) {

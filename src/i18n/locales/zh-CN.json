@@ -1403,7 +1403,21 @@
     },
     "emptyTitle": "错题本空空如也！",
     "emptyHint": "去学习积攒一些错题，再来这里消灭它们吧！",
-    "backHome": "回首页学习"
+    "backHome": "回首页学习",
+    "wrongBookTrainer": {
+      "title": "⏱️ 60秒速战",
+      "desc": "在60秒内尽可能多答对错题！",
+      "doneTitle": "挑战结束！",
+      "ok": "正确",
+      "ng": "错误",
+      "bestStreak": "最佳连对",
+      "accuracy": "正确率 {percent}%",
+      "streak": "连对 x{count}",
+      "start": "开始挑战",
+      "pendingDesc": "错题本有 {count} 个待巩固，60秒速战开始！",
+      "emptyDesc": "错题本还是空的，去学习积累错题再来挑战吧！",
+      "again": "再玩一次"
+    }
   },
   "training": {
     "banner": "专项训练"
@@ -4845,5 +4859,14 @@
     "readAria": "朗读「{char}」",
     "forgot": "😕 忘记了",
     "remember": "😄 记住了"
+  },
+  "achievementCenter": {
+    "title": "宝贝成就中心",
+    "subtitle": "收集勋章，见证成长的每一步",
+    "statCollected": "已收集勋章",
+    "statStars": "累计星星",
+    "progress": "勋章收集进度",
+    "unlocked": "已解锁",
+    "notStarted": "未开始"
   }
 }

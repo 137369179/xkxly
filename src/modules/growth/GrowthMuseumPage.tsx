@@ -17,6 +17,7 @@ import { FriendlyLoading } from '@/components/FriendlyLoading';
 import { navigate } from '@/lib/router';
 import { useTranslation } from '@/i18n/useTranslation';
 import { FluffyIcon } from '@/components/ui/FluffyIcon';
+import { BadgeCollection } from '@/modules/rewards/BadgeCollection';
 
 const GrowthTree = lazy(() =>
   import('@/components/GrowthTree').then((m) => ({ default: m.GrowthTree })),
@@ -99,7 +100,7 @@ export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?:
       {/* 数据总览 */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {statCards.map((c) => {
-          const tone = TONE_STYLE[c.tone]!;
+          const tone = TONE_STYLE[c.tone] ?? TONE_STYLE.purple;
           return (
             <motion.div
               key={c.label}
@@ -126,7 +127,7 @@ export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?:
           { id: 'stickers' as const, label: `🎁 星愿百宝箱 (${ownedStickers.size}贴纸)`, emoji: '🎁', tone: 'pink' as Tone },
         ].map((item) => {
           const active = tab === item.id;
-          const toneStyle = TONE_STYLE[item.tone]!;
+          const toneStyle = TONE_STYLE[item.tone] ?? TONE_STYLE.purple;
           return (
             <button
               key={item.id}
@@ -248,58 +249,8 @@ export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?:
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="space-y-6"
           >
-            <Panel>
-              <PanelTitle
-                emoji="🏅"
-                title={t('growth.badgeWall')}
-                subtitle={`${ownedBadges.size} / ${BADGES.length} ${ownedBadges.size === BADGES.length ? t('growth.allDone') : ''}`}
-                tone="purple"
-              />
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {BADGES.map((badge, i) => {
-                  const has = ownedBadges.has(badge.id);
-                  const tone = TONE_STYLE[(badge.tone ?? 'blue') as Tone];
-                  const meter = badge.meter?.(p);
-                  const pct = meter ? Math.min(100, Math.round((meter[0] / meter[1]) * 100)) : 0;
-                  return (
-                    <motion.div
-                      key={badge.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: Math.min(i * 0.03, 0.6) }}
-                      className={cn(
-                        'rounded-2xl border-2 p-3.5 text-center transition-all',
-                        has ? 'shadow-fluffy border-candy-purple/40 bg-white' : 'opacity-70 grayscale bg-gray-50 border-gray-200',
-                      )}
-                      style={{
-                        borderColor: has ? tone.main : '#f0dde2',
-                        background: has ? tone.soft : '#fbf6f7',
-                      }}
-                    >
-                      <div className={cn('text-3xl', has && 'animate-bounce-soft')}>{badge.emoji}</div>
-                      <div className="mt-1.5 truncate text-sm font-extrabold" style={{ color: has ? tone.deep : '#cda6b0' }}>
-                        {badge.name}
-                      </div>
-                      <div className="mt-0.5 line-clamp-2 text-[11px] font-semibold text-ink-soft">{badge.desc}</div>
-                      {has ? (
-                        <div className="mt-2 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-extrabold text-emerald-700">
-                          已达成 ✨
-                        </div>
-                      ) : meter ? (
-                        <div className="mt-2 space-y-1">
-                          <ProgressBar value={pct} max={100} tone={badge.tone as Tone} showLabel={false} />
-                          <div className="text-[10px] font-bold text-ink-soft">
-                            进度：{meter[0]}/{meter[1]}
-                          </div>
-                        </div>
-                      ) : null}
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </Panel>
+            <BadgeCollection />
           </motion.div>
         )}
 
@@ -340,7 +291,7 @@ export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?:
               <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
                 {ALBUMS.map((a) => {
                   const stk = albumStickers(a)[0];
-                  const t = TONE_STYLE[(stk?.id ? STICKER_MAP.get(stk.id)?.tone : undefined) ?? 'blue']!;
+                  const t = TONE_STYLE[(stk?.id ? STICKER_MAP.get(stk.id)?.tone : undefined) ?? 'blue'] ?? TONE_STYLE.purple;
                   const active = a === album;
                   return (
                     <button
@@ -361,7 +312,7 @@ export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?:
               <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
                 {stickerItems.map((s) => {
                   const got = ownedStickers.has(s.id);
-                  const toneStyle = TONE_STYLE[s.tone ?? 'blue']!;
+                  const toneStyle = TONE_STYLE[s.tone ?? 'blue'] ?? TONE_STYLE.purple;
                   return (
                     <motion.button
                       key={s.id}

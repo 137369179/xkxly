@@ -21,9 +21,10 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
 import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
 import { QuizSessionRunner } from '@/components/QuizSessionRunner';
+import { AllusionBrowser } from '@/modules/poems/AllusionBrowser';
 import type { Question } from '@/types';
 
-type Tab = 'library' | 'guess' | 'chain';
+type Tab = 'library' | 'guess' | 'chain' | 'allusion';
 
 export default function IdiomsPage() {
   const { t } = useTranslation();
@@ -33,6 +34,7 @@ export default function IdiomsPage() {
     { id: 'library', label: t('idioms.library'), emoji: '📖' },
     { id: 'guess', label: t('idioms.guess'), emoji: '🎯' },
     { id: 'chain', label: t('idioms.chain'), emoji: '🐉' },
+    { id: 'allusion', label: t('allusionBrowser.title'), emoji: '📚' },
   ], [t]);
   const [tab, setTab] = useState<Tab>('library');
   const [level, setLevel, levelMeta] = useAdaptiveDifficultyState('idiom');
@@ -56,7 +58,7 @@ export default function IdiomsPage() {
   const genIdiomQuestion = (): Question | null => {
     const pool = quizPoolRef.current;
     if (!pool.length) return null;
-    const chosen = pool[Math.floor(Math.random() * pool.length)]!;
+    const chosen = pool[Math.floor(Math.random() * pool.length)] ?? pool[0];
     const samePool = pool.filter(i => i.word !== chosen.word);
     const wrongs = shuffle(
       samePool.length >= 3 ? samePool : IDIOMS.filter(i => i.word !== chosen.word),
@@ -130,6 +132,16 @@ export default function IdiomsPage() {
   }
 
   // Library tab
+  if (tab === 'allusion') {
+    return (
+      <div className="space-y-5">
+        <PageHeader emoji="📚" title={t('allusionBrowser.title')} subtitle={t('allusionBrowser.subtitle')} tone="purple" />
+        <Tabs items={TABS} value={tab} onChange={setTab} tone="purple" layoutId="idiom-tabs" />
+        <AllusionBrowser />
+      </div>
+    );
+  }
+
   if (selected) {
     return <IdiomDetail idiom={selected} onBack={() => setSelected(null)} onLearn={() => { learnSkill(`idiom:${selected.id}`); sfxWin(); }} />;
   }

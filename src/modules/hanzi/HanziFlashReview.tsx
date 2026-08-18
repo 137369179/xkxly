@@ -21,6 +21,7 @@ import { speak } from '@/lib/speech';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useSwipe } from '@/lib/useSwipe';
 
 export function HanziFlashReview() {
   const { t } = useTranslation();
@@ -54,6 +55,19 @@ export function HanziFlashReview() {
   }, [progress]);
 
   const current = queue[idx];
+
+  const cardRef = useSwipe<HTMLDivElement>({
+    onSwipeRight: () => {
+      if (flipped) return;
+      sfxTap();
+      if (idx > 0) setIdx((i) => i - 1);
+    },
+    onSwipeLeft: () => {
+      if (flipped) return;
+      sfxTap();
+      next();
+    },
+  });
 
   const next = () => {
     setFlipped(false);
@@ -131,6 +145,7 @@ export function HanziFlashReview() {
 
       {/* 闪卡主体 */}
       <motion.div
+        ref={cardRef}
         className="relative h-72 w-full cursor-pointer select-none [perspective:1200px]"
         onClick={() => {
           if (!flipped) {

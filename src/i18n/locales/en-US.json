@@ -1403,7 +1403,21 @@
     },
     "emptyTitle": "No wrong answers yet!",
     "emptyHint": "Go learn some new things, then come back to review!",
-    "backHome": "Back to Home"
+    "backHome": "Back to Home",
+    "wrongBookTrainer": {
+      "title": "⏱️ 60s Speed Challenge",
+      "desc": "Answer as many wrong-book questions as you can in 60 seconds!",
+      "doneTitle": "Challenge Complete!",
+      "ok": "Correct",
+      "ng": "Wrong",
+      "bestStreak": "Best Streak",
+      "accuracy": "{percent}% Accuracy",
+      "streak": "Streak x{count}",
+      "start": "Start",
+      "pendingDesc": "错题本有 {count} 个待巩固，60秒速战开始！",
+      "emptyDesc": "错题本还是空的，去学习积累错题再来挑战吧！",
+      "again": "再玩一次"
+    }
   },
   "training": {
     "banner": "Focus Training"
@@ -4845,5 +4859,14 @@
     "readAria": "Read \"{char}\"",
     "forgot": "😕 Forgot",
     "remember": "😄 Remember"
+  },
+  "achievementCenter": {
+    "title": "Achievement Center",
+    "subtitle": "Collect badges, witness every step of growth",
+    "statCollected": "Badges Collected",
+    "statStars": "Total Stars",
+    "progress": "Badge Progress",
+    "unlocked": "Unlocked",
+    "notStarted": "Not Started"
   }
 }

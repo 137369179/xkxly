@@ -21,6 +21,7 @@ import {
   WrongBookStatCards,
 } from './WrongBookStats';
 import { AdaptiveTrainer } from './AdaptiveTrainer';
+import { WrongBookTrainer } from '@/modules/rewards/WrongBookTrainer';
 import { WrongBookBadgeList } from './WrongBookBadgeList';
 import { clusterWrongBook, type WrongCluster } from '@/lib/wrongCluster';
 import { openTraining, skillToTarget } from '@/lib/skillRouting';
@@ -38,6 +39,7 @@ export default function WrongBookDashboard() {
   const { t } = useTranslation();
   const progress = useProgress();
   const [tab, setTab] = useState<TabId>('overview');
+  const [trainMode, setTrainMode] = useState<'adaptive' | 'speed'>('adaptive');
 
   // 到期错题提醒
   const dueWrongCount = useMemo(() => {
@@ -117,7 +119,37 @@ export default function WrongBookDashboard() {
           transition={{ duration: 0.2 }}
         >
           {tab === 'overview' && <OverviewTab />}
-          {tab === 'train' && <AdaptiveTrainer />}
+          {tab === 'train' && (
+            <div className="space-y-4">
+              <p className="text-sm font-bold text-ink-soft text-center">
+                选择训练模式：
+              </p>
+              <div className="flex gap-2 justify-center">
+                <button
+                  onClick={() => setTrainMode('adaptive')}
+                  className={`rounded-xl px-4 py-2 text-sm font-extrabold transition ${
+                    trainMode === 'adaptive'
+                      ? 'bg-candy-purple text-white shadow-sm'
+                      : 'bg-candy-purple-soft text-candy-purple-deep hover:bg-candy-purple/30'
+                  }`}
+                >
+                  🧠 自适应训练
+                </button>
+                <button
+                  onClick={() => setTrainMode('speed')}
+                  className={`rounded-xl px-4 py-2 text-sm font-extrabold transition ${
+                    trainMode === 'speed'
+                      ? 'bg-candy-orange text-white shadow-sm'
+                      : 'bg-candy-orange-soft text-candy-orange-deep hover:bg-candy-orange/30'
+                  }`}
+                >
+                  ⏱️ 60秒速战
+                </button>
+              </div>
+              {trainMode === 'adaptive' && <AdaptiveTrainer />}
+              {trainMode === 'speed' && <WrongBookTrainer />}
+            </div>
+          )}
           {tab === 'badges' && <WrongBookBadgeList />}
           {tab === 'causes' && <CausesTab />}
         </motion.div>

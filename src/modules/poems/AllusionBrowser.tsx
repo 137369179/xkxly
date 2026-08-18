@@ -5,7 +5,7 @@
 import { useState, useMemo } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { ALLUSION_SOURCES } from '@/data/allusionSources';
-import POEMS from '@/data/poems';
+import POEMS, { type PoemIndex } from '@/data/poems';
 import { sfxTap } from '@/lib/sfx';
 import { motion } from 'motion/react';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -17,7 +17,7 @@ export function AllusionBrowser() {
   // 找出引用该典故的诗
   const relatedPoems = useMemo(() => {
     if (!selected) return [];
-    return POEMS.filter((p: any) => p.lines.join('\n').includes(selected) || (p.title?.includes(selected) ?? false));
+    return POEMS.filter((p: PoemIndex) => p.lines.join('\n').includes(selected) || (p.title?.includes(selected) ?? false));
   }, [selected]);
 
 
@@ -27,7 +27,7 @@ export function AllusionBrowser() {
     return (
       <div className="space-y-4">
         <button
-          onClick={() => { sfxTap(); setSelected(null); }}
+          aria-label="返回典故列表" onClick={() => { sfxTap(); setSelected(null); }}
           className="rounded-full bg-candy-purple-soft px-4 py-1.5 text-sm font-bold text-candy-purple-deep"
         >
           {t('common.back')}
@@ -91,7 +91,7 @@ export function AllusionBrowser() {
           >
             <div className="text-lg font-black text-candy-purple-deep">{term}</div>
             <div className="mt-1 truncate text-[10px] font-bold text-ink-soft">
-              {ALLUSION_SOURCES[term]!.source}
+              {ALLUSION_SOURCES[term]?.source ?? ''}
             </div>
           </motion.button>
         ))}
