@@ -13,7 +13,7 @@ import { ScienceAiPanel } from './ScienceAiPanel';
 import { useTranslation } from '@/i18n/useTranslation';
 
 // ── 天气类型 ──────────────────────────────────────────────
-interface WeatherType {
+export interface WeatherType {
   id: string;
   nameZh: string;
   nameEn: string;
@@ -25,7 +25,7 @@ interface WeatherType {
   color: string;
 }
 
-const WEATHERS: WeatherType[] = [
+export const WEATHERS: WeatherType[] = [
   { id: 'sunny', nameZh: '晴天', nameEn: 'Sunny', emoji: '☀️', desc: '太阳公公出来了，天空蓝蓝的！', formation: '天空中没有云遮挡，阳光直接照到地面', activity: '适合出去玩、晒太阳', gear: ['遮阳帽', '防晒霜'], color: 'bg-yellow-100' },
   { id: 'cloudy', nameZh: '多云', nameEn: 'Cloudy', emoji: '⛅', desc: '云朵遮住了太阳，天有点灰灰的', formation: '水汽在天上聚成云，遮住了太阳', activity: '适合散步', gear: ['薄外套'], color: 'bg-gray-100' },
   { id: 'rainy', nameZh: '下雨', nameEn: 'Rainy', emoji: '🌧️', desc: '云里的水滴太重了，掉下来变成雨', formation: '云里的水滴越聚越多，太重就掉下来', activity: '适合在室内看书', gear: ['雨伞', '雨鞋'], color: 'bg-blue-100' },
@@ -35,7 +35,7 @@ const WEATHERS: WeatherType[] = [
 ];
 
 // ── 天气元素 ──────────────────────────────────────────────
-const ELEMENTS = [
+export const ELEMENTS = [
   { id: 'sun', emoji: '☀️', name: '太阳' },
   { id: 'cloud', emoji: '☁️', name: '云' },
   { id: 'water', emoji: '💧', name: '水' },
@@ -44,23 +44,23 @@ const ELEMENTS = [
 ];
 
 // 组合规则
-const COMBOS: Record<string, { weather: WeatherType; message: string }> = {
+export const COMBOS: Record<string, { weather: WeatherType; message: string }> = {
   'sun': { weather: WEATHERS[0]!, message: '太阳出来了，是晴天！' },
-  'sun+cloud': { weather: WEATHERS[1]!, message: '太阳加云朵，多云啦！' },
+  'cloud+sun': { weather: WEATHERS[1]!, message: '太阳加云朵，多云啦！' },
   'cloud+water': { weather: WEATHERS[2]!, message: '云加水，下雨啦！' },
   'cloud+water+wind': { weather: WEATHERS[3]!, message: '云加水加风，暴风雨来了！' },
   'cloud+cold': { weather: WEATHERS[4]!, message: '云加冷气，下雪啦！' },
   'sun+water': { weather: WEATHERS[5]!, message: '太阳加水，彩虹出现！' },
 };
 
-function getCombo(elements: string[]): { weather: WeatherType; message: string } | null {
+export function getCombo(elements: string[]): { weather: WeatherType; message: string } | null {
   const sorted = [...elements].sort();
   const key = sorted.join('+');
   return COMBOS[key] || null;
 }
 
 // ── 季节数据 ──────────────────────────────────────────────
-const SEASONS = [
+export const SEASONS = [
   { id: 'spring', name: '春天', emoji: '🌸', months: '3-5月', color: 'bg-pink-100', phenomena: ['花开', '小雨', '燕子回来'] },
   { id: 'summer', name: '夏天', emoji: '☀️', months: '6-8月', color: 'bg-yellow-100', phenomena: ['游泳', '冰淇淋', '雷阵雨'] },
   { id: 'autumn', name: '秋天', emoji: '🍂', months: '9-11月', color: 'bg-orange-100', phenomena: ['落叶', '丰收', '凉爽'] },
@@ -68,7 +68,7 @@ const SEASONS = [
 ];
 
 // 季节配对游戏选项
-const SEASON_ITEMS = [
+export const SEASON_ITEMS = [
   { id: '花开', season: 'spring', emoji: '🌷' },
   { id: '游泳', season: 'summer', emoji: '🏊' },
   { id: '落叶', season: 'autumn', emoji: '🍂' },
