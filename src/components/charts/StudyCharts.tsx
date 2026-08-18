@@ -64,23 +64,23 @@ export function StudyTimeChart() {
                 width={w}
                 height={h}
                 rx={0.5}
-                fill={today ? '#f59e0b' : '#60a5fa'}
+                fill={today ? '#e5ac2e' : '#55aee0'}
                 opacity={d.sec > 0 ? 0.85 : 0.2}
               />
               {d.sec > 0 && (
-                <text x={x + w / 2} y={y - 0.8} fontSize={2.2} textAnchor="middle" fill="#374151" fontWeight="bold">
+                <text x={x + w / 2} y={y - 0.8} fontSize={2.2} textAnchor="middle" fill="#5b3f49" fontWeight="bold">
                   {Math.round(d.sec / 60)}
                 </text>
               )}
               {(i % 2 === 0 || today) && (
-                <text x={x + w / 2} y={39} fontSize={2} textAnchor="middle" fill="#9ca3af">
+                <text x={x + w / 2} y={39} fontSize={2} textAnchor="middle" fill="#cda6b0">
                   {d.date.slice(5)}
                 </text>
               )}
             </g>
           );
         })}
-        <line x1={0} y1={36} x2={100} y2={36} stroke="#e5e7eb" strokeWidth={0.3} />
+        <line x1={0} y1={36} x2={100} y2={36} stroke="#f0dde2" strokeWidth={0.3} />
       </svg>
     </div>
   );
@@ -130,7 +130,7 @@ export function MasteryRadar() {
               return `${cx + Math.cos(angle) * r * ratio},${cy + Math.sin(angle) * r * ratio}`;
             }).join(' ')}
             fill="none"
-            stroke="#e5e7eb"
+            stroke="#f0dde2"
             strokeWidth={0.3}
           />
         ))}
@@ -144,13 +144,13 @@ export function MasteryRadar() {
               y1={cy}
               x2={cx + Math.cos(angle) * r}
               y2={cy + Math.sin(angle) * r}
-              stroke="#e5e7eb"
+              stroke="#f0dde2"
               strokeWidth={0.3}
             />
           );
         })}
         {/* 数据多边形 */}
-        <polygon points={polygonPoints} fill="rgba(96,165,250,0.25)" stroke="#3b82f6" strokeWidth={0.6} />
+        <polygon points={polygonPoints} fill="rgba(85,174,224,0.25)" stroke="#2e93c9" strokeWidth={0.6} />
         {/* 维度标签 */}
         {RADAR_DIMS.map((dim, i) => {
           const angle = i * angleStep - Math.PI / 2;
@@ -173,9 +173,9 @@ export function MasteryRadar() {
                 y={cy + Math.sin(angle) * labelR + 3.5}
                 fontSize={2.2}
                 textAnchor="middle"
-                fill="#9ca3af"
+                fill="#cda6b0"
               >
-                {Math.round(values[i]!)}%
+                {Math.round(values[i] ?? 0)}%
               </text>
             </g>
           );
@@ -251,10 +251,10 @@ export function WrongDistribution() {
             );
           })}
           <circle cx={cx} cy={cy} r={14} fill="#fff" />
-          <text x={cx} y={cy - 1} fontSize={5} textAnchor="middle" fill="#374151" fontWeight="bold">
+          <text x={cx} y={cy - 1} fontSize={5} textAnchor="middle" fill="#5b3f49" fontWeight="bold">
             {progress.wrongBook.length}
           </text>
-          <text x={cx} y={cy + 4} fontSize={2.5} textAnchor="middle" fill="#9ca3af">
+          <text x={cx} y={cy + 4} fontSize={2.5} textAnchor="middle" fill="#cda6b0">
             {tr('charts.wrongCount')}
           </text>
         </svg>
@@ -300,7 +300,7 @@ export function StudyHeatmap() {
     return w;
   }, [progress.dailyLog]);
 
-  const levelColors = ['#e5e7eb', '#bbf7d0', '#4ade80', '#16a34a', '#15803d'];
+  const levelColors = ['#f0dde2', '#b8f0d8', '#5fd68b', '#33a863', '#047857'];
 
   return (
     <div className="space-y-2">

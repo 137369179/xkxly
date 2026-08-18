@@ -14,6 +14,7 @@ export function NumberTrace() {
   const [n, setN] = useState<number | null>(null);
   const markTraced = useStore((s) => s.markTraced);
   const heardNumber = useStore((s) => s.heardNumber);
+  const practice = useStore((s) => s.practice);
   const ts = TONE_STYLE.yellow;
 
   if (n !== null) {
@@ -46,7 +47,7 @@ export function NumberTrace() {
             fullWidth
             onClick={() => {
               heardNumber(n);
-              void speak(toChineseNumber(n), { rate: 0.7, module: 'number' });
+              speak(toChineseNumber(n), { rate: 0.7, module: 'number' }).catch(() => {});
             }}
           >
             {t('numberTrace.listen')}
@@ -55,7 +56,10 @@ export function NumberTrace() {
             char={String(n)}
             tone="yellow"
             hint={t('numberTrace.canvasHint')}
-            onPass={() => markTraced(`trace:${n}`)}
+            onPass={() => {
+              markTraced(`trace:${n}`);
+              practice(`math:trace:${n}`, true);
+            }}
           />
         </div>
       </div>

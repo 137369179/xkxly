@@ -112,7 +112,7 @@ export function AiChat({
             </div>
             <div className="flex items-start gap-2">
               <AiAvatar size={30} />
-              <span className="max-w-[85%] whitespace-pre-wrap rounded-[1.1rem] rounded-tl-md bg-white px-4 py-2.5 text-base leading-relaxed font-medium text-[#3B3355] shadow-sm">
+              <span className="max-w-[85%] whitespace-pre-wrap rounded-[1.1rem] rounded-tl-md bg-white px-4 py-2.5 text-base leading-relaxed font-medium text-[#5c2e3d] shadow-sm">
                 {x.a}
               </span>
             </div>
@@ -194,7 +194,7 @@ export function AiChat({
         </button>
       </div>
 
-      {tip && <p className="text-sm font-bold text-[#E0742B]">{tip}</p>}
+      {tip && <p className="text-sm font-bold text-[#c2410c]">{tip}</p>}
     </div>
   );
 }

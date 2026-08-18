@@ -89,8 +89,15 @@ export default function HomePage() {
               >
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-xl sm:text-2xl font-black" style={{ color: tk.deep }}>
-                      {k.name}
+                    <span className="flex items-center gap-2 text-xl sm:text-2xl font-black" style={{ color: tk.deep }}>
+                      {k.id === 'storybook' && (
+                        <img
+                          src="/icons/jelly-storybook.jpg"
+                          alt=""
+                          className="h-8 w-8 rounded-full object-cover shadow-candy-sm"
+                        />
+                      )}
+                      {k.id === 'storybook' ? k.name.replace(/^\S+\s*/, '') : k.name}
                     </span>
                     <span className="text-xs font-black px-3 py-1 rounded-full bg-white/90 shadow-sm" style={{ color: tk.deep }}>
                       {k.tag}
@@ -113,7 +120,11 @@ export default function HomePage() {
       {/* 2.5 模块封面墙 · 专题百科一览（精选拓展专题，不与核心4大学科重复） */}
       <section className="space-y-3">
         <div className="flex items-center gap-2 px-1">
-          <span className="text-2xl">🖼️</span>
+          <img
+            src="/icons/jelly-canvas.jpg"
+            alt=""
+            className="h-8 w-8 rounded-full object-cover shadow-candy-sm"
+          />
           <h2 className="text-xl font-black text-rainbow">探索专题 · 知识画卷</h2>
         </div>
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 sm:gap-4">

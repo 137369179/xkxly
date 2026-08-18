@@ -39,7 +39,7 @@ export function CodeMaze() {
   const [won, setWon] = useState(false);
   const [failed, setFailed] = useState(false);
 
-  const level = LEVELS[levelIdx] ?? LEVELS[0]!;
+  const level = LEVELS[levelIdx] ?? { grid: 5, start: [0, 0], end: [4, 4], walls: [], stars: [], maxCommands: 10 };
 
   const reset = () => {
     setProgram([]);
@@ -146,7 +146,7 @@ export function CodeMaze() {
               const isEnd = level.end[0] === r && level.end[1] === c;
               const isStar = level.stars.some(([sr, sc]) => sr === r && sc === c);
               const isCollected = collected.some(([cr, cc]) => cr === r && cc === c);
-              const isRobot = robot[0]! === r && robot[1] === c;
+              const isRobot = robot[0] === r && robot[1] === c;
               return (
                 <div key={`cell-${i}`} className={cn('flex items-center justify-center', isWall && 'bg-gray-700')}
                   style={{ width: cellSize, height: cellSize }}>

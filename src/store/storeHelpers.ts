@@ -7,6 +7,7 @@ import type { StateStorage } from 'zustand/middleware';
 import { safeGetItem, safeSetItem, safeRemoveItem } from '@/lib/safeStorage';
 import { review } from '@/lib/srs';
 import { findNewBadges } from '@/data/badges';
+import { MEDAL_MAP, applyMedalReward } from '@/data/medals';
 import { masteryRate, touchedCount, masteredCount } from '@/lib/srs';
 import { dateKey } from '@/lib/dailyPlan';
 
@@ -115,6 +116,9 @@ export function applyProgress<S extends StoreLike>(
   const newDates: Record<string, number> = { ...next.badgeDates };
   for (const id of fresh) {
     if (newDates[id] === undefined) newDates[id] = now;
+    // 勋章：解锁时自动发放其绑定的奖励（星星/小鱼干/猫咪资源），仅发放一次
+    const medal = MEDAL_MAP.get(id);
+    if (medal?.reward) applyMedalReward(next, medal.reward);
   }
   return {
     progress: { ...next, badges: [...next.badges, ...fresh], badgeDates: newDates },

@@ -113,12 +113,12 @@ export function TonePractice() {
     const mainVowel = q.base.includes('a') ? 'a' : q.base.includes('o') ? 'o' : q.base.includes('e') ? 'e' : q.base.includes('i') ? 'i' : q.base.includes('u') ? 'u' : q.base.includes('ü') ? 'ü' : 'a';
     const toned = TONE_VOWELS[mainVowel]![toneNumber - 1]!;
     const tonedSyllable = q.base.replace(mainVowel, toned);
-    speak(tonedSyllable, { lang: 'zh-CN', rate: 0.65 });
+    void speak(tonedSyllable, { lang: 'zh-CN', rate: 0.65 }).catch(() => {});
   };
 
   // 播放当前题目的正确标准发音
   const playTargetSound = () => {
-    speak(q.display, { lang: 'zh-CN', rate: 0.65 });
+    void speak(q.display, { lang: 'zh-CN', rate: 0.65 }).catch(() => {});
   };
 
   const handlePick = (tone: number) => {

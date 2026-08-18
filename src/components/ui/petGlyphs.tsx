@@ -26,7 +26,7 @@ export const PET_GLYPHS: Record<string, React.ReactNode> = {
     <>
       <path d="M14 26 L22 10 L28 20 Z" fill="#FF9CC4" />
       <path d="M50 26 L42 10 L36 20 Z" fill="#FF9CC4" />
-      <path d="M32 56 C32 56 11 41 11 27 C11 19 18 14 25 17 C30 19 32 23 32 23 C32 23 34 19 39 17 C46 14 53 19 53 27 C53 41 32 56 32 56 Z" fill="#FF6FA5" />
+      <path d="M32 56 C32 56 11 41 11 27 C11 19 18 14 25 17 C30 19 32 23 32 23 C32 23 34 19 39 17 C46 14 53 19 53 27 C53 41 32 56 32 56 Z" fill="#ff6b96" />
       <Face cx={32} cy={34} gap={5} dot={2.6} cheekTone="pink" />
       <Glint cx={21} cy={25} rx={4} ry={2} />
     </>
@@ -34,8 +34,8 @@ export const PET_GLYPHS: Record<string, React.ReactNode> = {
   // 3. 猫咪头香皂泡泡 / 洗澡
   cat_bath: (
     <>
-      <ellipse cx="32" cy="48" rx="26" ry="8" fill="#DDF2FD" />
-      <path d="M18 24 L24 12 L30 22 H34 L40 12 L46 24 C50 28 50 42 32 44 C14 42 14 28 18 24 Z" fill="#4FC3F7" />
+      <ellipse cx="32" cy="48" rx="26" ry="8" fill="#dcecfa" />
+      <path d="M18 24 L24 12 L30 22 H34 L40 12 L46 24 C50 28 50 42 32 44 C14 42 14 28 18 24 Z" fill="#55aee0" />
       <circle cx="44" cy="16" r="6" fill="#E6F6FE" stroke="#7FD3F5" strokeWidth={1.5} />
       <circle cx="20" cy="14" r="4.5" fill="#E6F6FE" stroke="#7FD3F5" strokeWidth={1.5} />
       <circle cx="48" cy="28" r="3.5" fill="#E6F6FE" stroke="#7FD3F5" strokeWidth={1.5} />
@@ -47,7 +47,7 @@ export const PET_GLYPHS: Record<string, React.ReactNode> = {
   cat_comb: (
     <>
       <rect x="28" y="38" width="8" height="20" rx="4" fill="#FFE0EF" />
-      <path d="M20 20 C20 12 44 12 44 20 C48 26 48 36 32 38 C16 36 16 26 20 20 Z" fill="#FF6FA5" />
+      <path d="M20 20 C20 12 44 12 44 20 C48 26 48 36 32 38 C16 36 16 26 20 20 Z" fill="#ff6b96" />
       <circle cx="32" cy="28" r="5" fill="#FFFFFF" opacity={0.92} />
       <circle cx="24" cy="20" r="2.5" fill="#FFFFFF" opacity={0.92} />
       <circle cx="32" cy="18" r="2.5" fill="#FFFFFF" opacity={0.92} />
@@ -59,11 +59,11 @@ export const PET_GLYPHS: Record<string, React.ReactNode> = {
   cat_pawpet: (
     <>
       <path d="M16 48 C16 34 22 28 32 28 C42 28 48 34 48 48 C48 56 16 56 16 48 Z" fill="#FFE0EF" />
-      <ellipse cx="32" cy="44" rx="8" ry="6" fill="#FF6FA5" />
-      <circle cx="22" cy="34" r="3.5" fill="#FF6FA5" />
-      <circle cx="28" cy="30" r="3.5" fill="#FF6FA5" />
-      <circle cx="36" cy="30" r="3.5" fill="#FF6FA5" />
-      <circle cx="42" cy="34" r="3.5" fill="#FF6FA5" />
+      <ellipse cx="32" cy="44" rx="8" ry="6" fill="#ff6b96" />
+      <circle cx="22" cy="34" r="3.5" fill="#ff6b96" />
+      <circle cx="28" cy="30" r="3.5" fill="#ff6b96" />
+      <circle cx="36" cy="30" r="3.5" fill="#ff6b96" />
+      <circle cx="42" cy="34" r="3.5" fill="#ff6b96" />
       <path d="M22 16 L24 20 L28 22 L24 24 L22 28 L20 24 L16 22 L20 20 Z" fill="#FFC93C" />
       <path d="M42 12 L43.5 15 L46.5 16.5 L43.5 18 L42 21 L40.5 18 L37.5 16.5 L40.5 15 Z" fill="#FFC93C" />
     </>
@@ -72,8 +72,8 @@ export const PET_GLYPHS: Record<string, React.ReactNode> = {
   cat_gift: (
     <>
       <path d="M16 22 L22 10 L28 20 H36 L42 10 L48 22 Z" fill="#E0CCFF" />
-      <rect x="12" y="20" width="40" height="10" rx="3" fill="#A78BFA" />
-      <rect x="16" y="30" width="32" height="26" rx="6" fill="#A78BFA" />
+      <rect x="12" y="20" width="40" height="10" rx="3" fill="#8b6ef0" />
+      <rect x="16" y="30" width="32" height="26" rx="6" fill="#8b6ef0" />
       <rect x="29" y="20" width="6" height="36" fill="#FF9CC4" />
       <circle cx="32" cy="25" r="4" fill="#FFC93C" />
       <Face cx={32} cy={43} gap={5} dot={2.6} cheek={false} />
@@ -85,7 +85,7 @@ export const PET_GLYPHS: Record<string, React.ReactNode> = {
     <>
       <path d="M12 48 L10 22 L22 34 L32 14 L42 34 L54 22 L52 48 Z" fill="#FFC93C" strokeLinejoin="round" />
       <rect x="10" y="44" width="44" height="8" rx="4" fill="#FFE0A3" />
-      <path d="M32 26 L36 32 L32 38 L28 32 Z" fill="#FF6FA5" />
+      <path d="M32 26 L36 32 L32 38 L28 32 Z" fill="#ff6b96" />
       <circle cx="16" cy="22" r="3" fill="#FF9CC4" />
       <circle cx="48" cy="22" r="3" fill="#FF9CC4" />
       <Face cx={32} cy={40} gap={5} dot={2.4} cheek={false} />
@@ -95,9 +95,9 @@ export const PET_GLYPHS: Record<string, React.ReactNode> = {
   // 8. 猫耳眼镜
   cat_glasses: (
     <>
-      <path d="M10 24 L16 16 L22 24 H30 C30 36 10 36 10 24 Z" fill="#FFE0EF" stroke="#FF6FA5" strokeWidth={3} strokeLinejoin="round" />
-      <path d="M34 24 H42 L48 16 L54 24 C54 36 34 36 34 24 Z" fill="#FFE0EF" stroke="#FF6FA5" strokeWidth={3} strokeLinejoin="round" />
-      <path d="M30 26 H34" stroke="#FF6FA5" strokeWidth={3} strokeLinecap="round" />
+      <path d="M10 24 L16 16 L22 24 H30 C30 36 10 36 10 24 Z" fill="#FFE0EF" stroke="#ff6b96" strokeWidth={3} strokeLinejoin="round" />
+      <path d="M34 24 H42 L48 16 L54 24 C54 36 34 36 34 24 Z" fill="#FFE0EF" stroke="#ff6b96" strokeWidth={3} strokeLinejoin="round" />
+      <path d="M30 26 H34" stroke="#ff6b96" strokeWidth={3} strokeLinecap="round" />
       <path d="M14 26 L22 22" stroke="#FFFFFF" strokeWidth={2} strokeLinecap="round" />
       <path d="M38 26 L46 22" stroke="#FFFFFF" strokeWidth={2} strokeLinecap="round" />
     </>
@@ -105,8 +105,8 @@ export const PET_GLYPHS: Record<string, React.ReactNode> = {
   // 9. 猫耳蝴蝶结
   cat_bow: (
     <>
-      <path d="M32 32 L12 18 C8 26 8 38 12 46 Z" fill="#FF6FA5" strokeLinejoin="round" />
-      <path d="M32 32 L52 18 C56 26 56 38 52 46 Z" fill="#FF6FA5" strokeLinejoin="round" />
+      <path d="M32 32 L12 18 C8 26 8 38 12 46 Z" fill="#ff6b96" strokeLinejoin="round" />
+      <path d="M32 32 L52 18 C56 26 56 38 52 46 Z" fill="#ff6b96" strokeLinejoin="round" />
       <circle cx="32" cy="32" r="7" fill="#FFC93C" />
       <Face cx={32} cy={32} gap={3.4} dot={1.8} cheek={false} />
       <Glint cx={20} cy={26} rx={3.5} ry={1.8} />
@@ -115,8 +115,8 @@ export const PET_GLYPHS: Record<string, React.ReactNode> = {
   // 10. 猫爪印领结
   cat_tie: (
     <>
-      <polygon points="26,14 38,14 36,22 28,22" fill="#4FC3F7" />
-      <polygon points="28,22 36,22 40,48 32,56 24,48" fill="#4FC3F7" />
+      <polygon points="26,14 38,14 36,22 28,22" fill="#55aee0" />
+      <polygon points="28,22 36,22 40,48 32,56 24,48" fill="#55aee0" />
       <ellipse cx="32" cy="36" rx="3" ry="2.5" fill="#FFFFFF" />
       <circle cx="29" cy="32" r="1" fill="#FFFFFF" />
       <circle cx="32" cy="31" r="1" fill="#FFFFFF" />
@@ -137,11 +137,11 @@ export const PET_GLYPHS: Record<string, React.ReactNode> = {
   // 12. 羽毛逗猫棒
   cat_wand: (
     <>
-      <path d="M12 52 L36 28" stroke="#4FC3F7" strokeWidth={4} strokeLinecap="round" />
+      <path d="M12 52 L36 28" stroke="#55aee0" strokeWidth={4} strokeLinecap="round" />
       <circle cx="38" cy="26" r="5" fill="#FFC93C" />
       <Face cx={38} cy={26} gap={3} dot={1.7} cheek={false} />
-      <path d="M42 22 C52 14 56 8 58 10 C56 18 46 24 42 22 Z" fill="#FF6FA5" />
-      <path d="M40 28 C52 28 58 24 60 27 C56 32 44 32 40 28 Z" fill="#A78BFA" />
+      <path d="M42 22 C52 14 56 8 58 10 C56 18 46 24 42 22 Z" fill="#ff6b96" />
+      <path d="M40 28 C52 28 58 24 60 27 C56 32 44 32 40 28 Z" fill="#8b6ef0" />
       <path d="M36 32 C42 42 46 48 44 50 C40 46 36 38 36 32 Z" fill="#FF9F5A" />
       <Glint cx={36} cy={17} rx={3} ry={1.6} />
     </>
@@ -150,7 +150,7 @@ export const PET_GLYPHS: Record<string, React.ReactNode> = {
   cat_yarn: (
     <>
       <path d="M20 22 L26 12 L32 20 H36 L42 12 L48 22 Z" fill="#FF9CC4" />
-      <circle cx="32" cy="36" r="20" fill="#FF6FA5" />
+      <circle cx="32" cy="36" r="20" fill="#ff6b96" />
       <path d="M16 32 C24 24 40 44 48 34" stroke="#FFFFFF" strokeWidth={2.5} strokeLinecap="round" opacity={0.85} />
       <path d="M20 42 C32 30 44 36 46 26" stroke="#FFFFFF" strokeWidth={2} strokeLinecap="round" opacity={0.75} />
       <path d="M48 44 C54 50 48 58 58 58" stroke="#FF9CC4" strokeWidth={3} strokeLinecap="round" />
@@ -162,9 +162,9 @@ export const PET_GLYPHS: Record<string, React.ReactNode> = {
   catnip: (
     <>
       <path d="M20 38 L16 32 L24 34 H40 L48 32 L44 38 L42 56 H22 Z" fill="#FFFFFF" />
-      <circle cx="28" cy="46" r="1.5" fill="#FF6FA5" />
-      <circle cx="36" cy="46" r="1.5" fill="#FF6FA5" />
-      <path d="M30 49 C32 51 34 51 34 49" stroke="#FF6FA5" strokeWidth={1.5} fill="none" />
+      <circle cx="28" cy="46" r="1.5" fill="#ff6b96" />
+      <circle cx="36" cy="46" r="1.5" fill="#ff6b96" />
+      <path d="M30 49 C32 51 34 51 34 49" stroke="#ff6b96" strokeWidth={1.5} fill="none" />
       <path d="M32 34 C32 22 22 18 16 22 C18 30 28 34 32 34 Z" fill="#5FD68B" />
       <path d="M32 34 C32 22 42 18 48 22 C46 30 36 34 32 34 Z" fill="#5FD68B" />
       <path d="M32 28 C32 14 32 8 32 8 C32 8 26 14 32 28 Z" fill="#7FE3A0" />
@@ -176,7 +176,7 @@ export const PET_GLYPHS: Record<string, React.ReactNode> = {
     <>
       <circle cx="32" cy="36" r="18" fill="#FFC93C" />
       <path d="M16 20 V12 L28 8 V16 M28 8 L16 12" stroke="#FF9F5A" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="38" cy="30" r="4" fill="#FF6FA5" />
+      <circle cx="38" cy="30" r="4" fill="#ff6b96" />
       <Face cx={32} cy={38} gap={5} dot={2.4} cheek={false} />
       <Glint cx={24} cy={28} rx={4} ry={2} />
     </>
@@ -196,11 +196,11 @@ export const PET_GLYPHS: Record<string, React.ReactNode> = {
   // 17. 翻滚打滚
   cat_roll: (
     <>
-      <circle cx="32" cy="32" r="22" fill="#DDF2FD" stroke="#4FC3F7" strokeWidth={2.5} strokeDasharray="6 5" />
-      <ellipse cx="32" cy="34" rx="8" ry="6" fill="#4FC3F7" />
-      <circle cx="24" cy="24" r="3" fill="#4FC3F7" />
-      <circle cx="32" cy="20" r="3" fill="#4FC3F7" />
-      <circle cx="40" cy="24" r="3" fill="#4FC3F7" />
+      <circle cx="32" cy="32" r="22" fill="#dcecfa" stroke="#55aee0" strokeWidth={2.5} strokeDasharray="6 5" />
+      <ellipse cx="32" cy="34" rx="8" ry="6" fill="#55aee0" />
+      <circle cx="24" cy="24" r="3" fill="#55aee0" />
+      <circle cx="32" cy="20" r="3" fill="#55aee0" />
+      <circle cx="40" cy="24" r="3" fill="#55aee0" />
       <Face cx={32} cy={34} gap={3.4} dot={1.7} cheek={false} />
       <Glint cx={24} cy={26} rx={3} ry={1.6} />
     </>
@@ -209,8 +209,8 @@ export const PET_GLYPHS: Record<string, React.ReactNode> = {
   cat_purr: (
     <>
       <path d="M16 28 L24 16 L30 26 H34 L40 16 L48 28 C52 32 52 46 32 48 C12 46 12 32 16 28 Z" fill="#FFE0EF" />
-      <path d="M22 34 Q 26 38 30 34" stroke="#FF6FA5" strokeWidth={2.5} strokeLinecap="round" fill="none" />
-      <path d="M34 34 Q 38 38 42 34" stroke="#FF6FA5" strokeWidth={2.5} strokeLinecap="round" fill="none" />
+      <path d="M22 34 Q 26 38 30 34" stroke="#ff6b96" strokeWidth={2.5} strokeLinecap="round" fill="none" />
+      <path d="M34 34 Q 38 38 42 34" stroke="#ff6b96" strokeWidth={2.5} strokeLinecap="round" fill="none" />
       <circle cx="20" cy="40" r="3.5" fill="#FF9CC4" opacity={0.8} />
       <circle cx="44" cy="40" r="3.5" fill="#FF9CC4" opacity={0.8} />
       <Glint cx={22} cy={24} rx={4} ry={2} op={0.7} />
@@ -232,7 +232,7 @@ export const PET_GLYPHS: Record<string, React.ReactNode> = {
     <>
       <rect x="14" y="28" width="36" height="24" rx="6" fill="#FFC93C" />
       <path d="M12 28 L18 16 L26 26 H38 L46 16 L52 28 Z" fill="#FF9F5A" strokeLinejoin="round" />
-      <circle cx="32" cy="38" r="4" fill="#FF6FA5" />
+      <circle cx="32" cy="38" r="4" fill="#ff6b96" />
       <rect x="29" y="36" width="6" height="2" rx="1" fill="#FFFFFF" />
       <rect x="31" y="34" width="2" height="6" rx="1" fill="#FFFFFF" />
       <Face cx={32} cy={44} gap={4} dot={2.2} cheek={false} />
@@ -254,8 +254,8 @@ export const PET_GLYPHS: Record<string, React.ReactNode> = {
   cat_wardrobe: (
     <>
       <rect x="14" y="22" width="36" height="36" rx="6" fill="#E0CCFF" />
-      <path d="M14 22 L22 10 L30 20 H34 L42 10 L50 22 Z" fill="#A78BFA" strokeLinejoin="round" />
-      <line x1="32" y1="22" x2="32" y2="58" stroke="#A78BFA" strokeWidth={2} />
+      <path d="M14 22 L22 10 L30 20 H34 L42 10 L50 22 Z" fill="#8b6ef0" strokeLinejoin="round" />
+      <line x1="32" y1="22" x2="32" y2="58" stroke="#8b6ef0" strokeWidth={2} />
       <circle cx="27" cy="40" r="2.5" fill="#FFFFFF" />
       <circle cx="37" cy="40" r="2.5" fill="#FFFFFF" />
       <Glint cx={20} cy={30} rx={4} ry={2} />
@@ -264,9 +264,9 @@ export const PET_GLYPHS: Record<string, React.ReactNode> = {
   // 23. 猫咪打工庄园标题
   cat_manor: (
     <>
-      <path d="M12 30 L20 14 L28 26 H36 L44 14 L52 30 Z" fill="#A9B6F5" strokeLinejoin="round" />
-      <rect x="16" y="30" width="32" height="26" rx="4" fill="#C7D2FE" />
-      <path d="M26 56 V42 C26 38 38 38 38 42 V56 Z" fill="#7B8CF0" />
+      <path d="M12 30 L20 14 L28 26 H36 L44 14 L52 30 Z" fill="#c2a8ef" strokeLinejoin="round" />
+      <rect x="16" y="30" width="32" height="26" rx="4" fill="#d9c6f5" />
+      <path d="M26 56 V42 C26 38 38 38 38 42 V56 Z" fill="#8b6ef0" />
       <Face cx={32} cy={48} gap={4} dot={2.2} cheek={false} />
       <Glint cx={22} cy={36} rx={4} ry={2} />
     </>
@@ -275,7 +275,7 @@ export const PET_GLYPHS: Record<string, React.ReactNode> = {
   cat_toybox: (
     <>
       <rect x="12" y="24" width="40" height="32" rx="8" fill="#FFE0EF" />
-      <path d="M10 24 C10 16 26 16 32 24 C38 16 54 16 54 24 Z" fill="#FF6FA5" strokeLinejoin="round" />
+      <path d="M10 24 C10 16 26 16 32 24 C38 16 54 16 54 24 Z" fill="#ff6b96" strokeLinejoin="round" />
       <ellipse cx="32" cy="40" rx="6" ry="4.5" fill="#FFFFFF" />
       <circle cx="25" cy="34" r="2" fill="#FFFFFF" />
       <circle cx="32" cy="32" r="2" fill="#FFFFFF" />

@@ -94,7 +94,7 @@ export const BREED_CONFIGS: Record<CatBreed, BreedConfig> = {
     secondaryColor: '#F5F5DC',
     eyeColor: '#FFA500',
     noseColor: '#FFB6C1',
-    pawPadColor: '#FF6B6B',
+    pawPadColor: '#ff5c7a',
     furLength: 'short',
     bodyScale: 1.05,
     earShape: 'round',

@@ -178,19 +178,19 @@ function HabitatMap() {
         {/* 简化世界地图 SVG 背景 */}
         <svg viewBox="0 0 100 50" className="absolute inset-2 h-[calc(100%-1rem)] w-[calc(100%-1rem)]" preserveAspectRatio="none">
           {/* 北美洲 */}
-          <path d="M 10 10 Q 25 8 30 15 Q 28 25 20 28 Q 12 25 8 18 Z" fill="#8BC34A" opacity="0.5" />
+          <path d="M 10 10 Q 25 8 30 15 Q 28 25 20 28 Q 12 25 8 18 Z" fill="#8fe7bc" opacity="0.5" />
           {/* 南美洲 */}
-          <path d="M 25 30 Q 30 28 32 35 Q 30 45 26 48 Q 22 42 24 33 Z" fill="#8BC34A" opacity="0.5" />
+          <path d="M 25 30 Q 30 28 32 35 Q 30 45 26 48 Q 22 42 24 33 Z" fill="#8fe7bc" opacity="0.5" />
           {/* 欧洲 */}
-          <path d="M 48 12 Q 55 10 58 16 Q 55 20 50 19 Q 46 17 48 12 Z" fill="#8BC34A" opacity="0.5" />
+          <path d="M 48 12 Q 55 10 58 16 Q 55 20 50 19 Q 46 17 48 12 Z" fill="#8fe7bc" opacity="0.5" />
           {/* 非洲 */}
-          <path d="M 50 22 Q 58 20 60 30 Q 58 40 53 45 Q 48 40 48 30 Z" fill="#8BC34A" opacity="0.5" />
+          <path d="M 50 22 Q 58 20 60 30 Q 58 40 53 45 Q 48 40 48 30 Z" fill="#8fe7bc" opacity="0.5" />
           {/* 亚洲 */}
-          <path d="M 60 10 Q 80 8 85 20 Q 82 28 70 26 Q 62 22 60 14 Z" fill="#8BC34A" opacity="0.5" />
+          <path d="M 60 10 Q 80 8 85 20 Q 82 28 70 26 Q 62 22 60 14 Z" fill="#8fe7bc" opacity="0.5" />
           {/* 澳大利亚 */}
-          <path d="M 80 35 Q 88 33 90 40 Q 86 43 82 42 Z" fill="#8BC34A" opacity="0.5" />
+          <path d="M 80 35 Q 88 33 90 40 Q 86 43 82 42 Z" fill="#8fe7bc" opacity="0.5" />
           {/* 南极 */}
-          <ellipse cx="50" cy="49" rx="35" ry="3" fill="#E0E0E0" opacity="0.6" />
+          <ellipse cx="50" cy="49" rx="35" ry="3" fill="#cda6b0" opacity="0.6" />
         </svg>
 
         {/* 动物标记 */}

@@ -143,8 +143,8 @@ export function charIndexAtTime(timeline: CharTimeline, elapsedMs: number): numb
   let result = -1;
   while (lo <= hi) {
     const mid = (lo + hi) >> 1;
-    if (slots[mid]!.startMs <= elapsedMs) {
-      if (slots[mid]!.speakable) result = mid;
+    if ((slots[mid]?.startMs ?? 0) <= elapsedMs) {
+      if (slots[mid]?.speakable) result = mid;
       lo = mid + 1;
     } else {
       hi = mid - 1;
@@ -159,12 +159,12 @@ export function lineIndexAtTime(timeline: CharTimeline, elapsedMs: number): numb
   if (!slots.length) return -1;
   const idx = charIndexAtTime(timeline, elapsedMs);
   if (idx < 0) return -1;
-  return slots[idx]!.line;
+  return slots[idx]?.line ?? -1;
 }
 
 /** 获取某句的起止时间（毫秒） */
 export function lineTimeRange(timeline: CharTimeline, lineIdx: number): { startMs: number; endMs: number } {
   const slots = timeline.slots.filter((s) => s.line === lineIdx);
   if (!slots.length) return { startMs: 0, endMs: 0 };
-  return { startMs: slots[0]!.startMs, endMs: slots[slots.length - 1]!.endMs };
+  return { startMs: slots[0]?.startMs ?? 0, endMs: slots[slots.length - 1]?.endMs ?? 0 };
 }

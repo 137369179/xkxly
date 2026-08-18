@@ -405,7 +405,7 @@ const MODULE_GLYPHS: Record<string, React.ReactNode> = {
   // 通用小图标
   apple: (
     <>
-      <path d="M32 24 C30 18 24 16 20 20 C14 26 16 40 24 47 C28 50 36 50 40 47 C48 40 50 26 44 20 C40 16 34 18 32 24 Z" fill="#FF6B6B" strokeLinejoin="round" />
+      <path d="M32 24 C30 18 24 16 20 20 C14 26 16 40 24 47 C28 50 36 50 40 47 C48 40 50 26 44 20 C40 16 34 18 32 24 Z" fill="#ff5c7a" strokeLinejoin="round" />
       <path d="M32 24 C32 20 33 17 36 15" stroke="#7A4A2B" strokeWidth={2.6} fill="none" strokeLinecap="round" />
       <path d="M34 22 C37 15 45 15 46 21 C43 25 36 25 34 22 Z" fill="#5FB36A" />
       <Glint cx={24} cy={30} rx={4} ry={2.5} op={0.5} />

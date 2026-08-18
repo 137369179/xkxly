@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState, lazy, Suspense, useEffect } from 'react';
 import { PINYIN_GROUPS, getPinyinByType, nextPinyin, type PinyinEntry } from '@/data/pinyinIndex';
 import { PageHeader, Panel, PanelTitle } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
@@ -7,6 +7,8 @@ import { TONE_STYLE } from '@/lib/tones';
 import { useStore } from '@/store/useStore';
 import { PinyinLearn } from './PinyinLearn';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useTrainingTarget } from '@/hooks/useTrainingTarget';
+import { TrainingBanner } from '@/components/TrainingBanner';
 
 // ── 懒加载各练习与闯关组件 ──
 const PinyinPractice = lazy(() => import('./PinyinPractice').then((m) => ({ default: m.PinyinPractice })));
@@ -26,6 +28,26 @@ export default function PinyinPage() {
 
   const [selected, setSelected] = useState<PinyinEntry | null>(null);
   const mastery = useStore((s) => s.progress.mastery);
+  const { target, clear } = useTrainingTarget('pinyin');
+
+  // 深链 param → 对应练习：tone 四声调 / blend 拼读 / dictation 听写 / group 分类连线
+  useEffect(() => {
+    const p = target?.param;
+    if (!p) return;
+    if (p === 'tone') {
+      setMainCat('blend_tone');
+      setBlendType('tone');
+    } else if (p === 'blend') {
+      setMainCat('blend_tone');
+      setBlendType('blend');
+    } else if (p === 'group') {
+      setMainCat('blend_tone');
+      setBlendType('group');
+    } else if (p === 'dictation') {
+      setMainCat('quiz_dictation');
+      setQuizType('dictation');
+    }
+  }, [target]);
 
   if (selected) {
     return (
@@ -61,6 +83,8 @@ export default function PinyinPage() {
         subtitle={tr('pinyinPage.subtitle') || '声母 · 韵母 · 整体认读 · 声韵拼读 · 四声调'}
         tone="blue"
       />
+
+      <TrainingBanner target={target} onClose={clear} />
 
       {/* 👑 一级大分类导航 */}
       <div className="grid grid-cols-3 gap-2.5">

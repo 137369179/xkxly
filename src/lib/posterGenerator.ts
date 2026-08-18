@@ -26,13 +26,13 @@ export function generateAchievementPoster({
     // 1. 绘制彩虹背景渐变
     const bgGrad = ctx.createLinearGradient(0, 0, width, height);
     bgGrad.addColorStop(0, '#FFEBF3');
-    bgGrad.addColorStop(0.5, '#E8F5E9');
-    bgGrad.addColorStop(1, '#E1F5FE');
+    bgGrad.addColorStop(0.5, '#f0faf4');
+    bgGrad.addColorStop(1, '#dcecfa');
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, width, height);
 
     // 2. 绘制顶部卡片圆弧
-    ctx.fillStyle = '#7A5CE0';
+    ctx.fillStyle = '#8b6ef0';
     ctx.beginPath();
     ctx.arc(width / 2, -300, 700, 0, Math.PI * 2);
     ctx.fill();
@@ -44,7 +44,7 @@ export function generateAchievementPoster({
     ctx.fillText('🌈 宝贝学习乐园 · 个人成就榜', width / 2, 90);
 
     ctx.font = 'bold 28px sans-serif';
-    ctx.fillStyle = '#FFEB3B';
+    ctx.fillStyle = '#FFD166';
     ctx.fillText(`✨ ${childName} 的阶段学习结业证书 ✨`, width / 2, 140);
 
     // 4. 白色卡片区域
@@ -72,10 +72,10 @@ export function generateAchievementPoster({
 
     // 6. 学情数据四宫格
     const stats = [
-      { label: '连续打卡', val: `${progress.streak || 1} 天`, emoji: '🔥', color: '#FF6B6B' },
-      { label: '收获星星', val: `${progress.stars} 颗`, emoji: '⭐', color: '#FFD166' },
-      { label: '成就徽章', val: `${progress.badges.length} 枚`, emoji: '🏅', color: '#7A5CE0' },
-      { label: '研读古诗', val: `${progress.poemsRead.length} 首`, emoji: '📜', color: '#06D6A0' },
+      { label: '连续打卡', val: `${progress.streak || 1} 天`, emoji: '🔥', color: '#ff5c7a' },
+      { label: '收获星星', val: `${progress.stars} 颗`, emoji: '⭐', color: '#e5ac2e' },
+      { label: '成就徽章', val: `${progress.badges.length} 枚`, emoji: '🏅', color: '#8b6ef0' },
+      { label: '研读古诗', val: `${progress.poemsRead.length} 首`, emoji: '📜', color: '#33a863' },
     ];
 
     const gridX = cardX + 40;
@@ -104,24 +104,24 @@ export function generateAchievementPoster({
       ctx.font = 'bold 30px sans-serif';
       ctx.fillText(item.val, x + 80, y + 56);
 
-      ctx.fillStyle = '#6B6076';
+      ctx.fillStyle = '#8a7a7e';
       ctx.font = 'bold 20px sans-serif';
       ctx.fillText(item.label, x + 24, y + 98);
     });
 
     // 7. AI 学情总结名言栏
     const remarkY = gridY + 310;
-    ctx.fillStyle = '#F4EEFF';
+    ctx.fillStyle = '#f0dde2';
     ctx.beginPath();
     ctx.roundRect(gridX, remarkY, cardW - 80, 160, 24);
     ctx.fill();
 
-    ctx.fillStyle = '#7A5CE0';
+    ctx.fillStyle = '#8b6ef0';
     ctx.font = 'bold 22px sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText('🤖 小智 AI 学情导师点评：', gridX + 24, remarkY + 44);
 
-    ctx.fillStyle = '#2D2338';
+    ctx.fillStyle = '#5c2e3d';
     ctx.font = 'bold 20px sans-serif';
     // 简易换行
     const words = aiRemark.match(/.{1,22}/g) || [aiRemark];
@@ -131,23 +131,23 @@ export function generateAchievementPoster({
 
     // 8. 扫码邀请区
     const footerY = remarkY + 200;
-    ctx.fillStyle = '#E8F5E9';
+    ctx.fillStyle = '#f0faf4';
     ctx.beginPath();
     ctx.roundRect(gridX, footerY, cardW - 80, 190, 24);
     ctx.fill();
 
     ctx.textAlign = 'left';
-    ctx.fillStyle = '#2E7D32';
+    ctx.fillStyle = '#33a863';
     ctx.font = 'bold 26px sans-serif';
     ctx.fillText('扫码跟我一起快乐学习！', gridX + 30, footerY + 60);
 
-    ctx.fillStyle = '#4CAF50';
+    ctx.fillStyle = '#5fd68b';
     ctx.font = '20px sans-serif';
     ctx.fillText('6 岁儿童启发式互动平台 · 科学复习', gridX + 30, footerY + 100);
     ctx.fillText('古诗学院 · 逻辑思维 · 字母数字大通关', gridX + 30, footerY + 136);
 
     // 右侧大二维码画框占位/标志
-    ctx.fillStyle = '#7A5CE0';
+    ctx.fillStyle = '#8b6ef0';
     ctx.beginPath();
     ctx.roundRect(gridX + cardW - 240, footerY + 30, 130, 130, 16);
     ctx.fill();
@@ -159,7 +159,7 @@ export function generateAchievementPoster({
     ctx.fillText('学习乐园', gridX + cardW - 175, footerY + 115);
 
     // 9. 底部日期落款
-    ctx.fillStyle = '#9A8FA5';
+    ctx.fillStyle = '#b38894';
     ctx.font = 'bold 18px sans-serif';
     ctx.textAlign = 'center';
     const dateStr = new Date().toLocaleDateString('zh-CN', {

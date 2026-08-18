@@ -32,7 +32,7 @@ const PUZZLES: Puzzle[] = [
 export function SequenceLogic() {
   const { t } = useTranslation();
   const [idx, setIdx] = useState(0);
-  const [shuffledOptions, setShuffledOptions] = useState(() => shuffle(PUZZLES[0]!.options));
+  const [shuffledOptions, setShuffledOptions] = useState(() => shuffle(PUZZLES[0]?.options ?? []));
   const [feedback, setFeedback] = useState('');
   const [score, setScore] = useState(0);
   const [showHint, setShowHint] = useState(false);
@@ -44,12 +44,12 @@ export function SequenceLogic() {
     if (timerRef.current) clearTimeout(timerRef.current);
   }, []);
 
-  const puzzle = PUZZLES[idx]!
+  const puzzle = PUZZLES[idx] ?? { seq: [], answer: '', options: [], hint: '' };
 
   const next = () => {
     const ni = (idx + 1) % PUZZLES.length;
     setIdx(ni);
-    setShuffledOptions(shuffle(PUZZLES[ni]!.options));
+    setShuffledOptions(shuffle(PUZZLES[ni]?.options ?? []));
     setFeedback('');
     setShowHint(false);
   };

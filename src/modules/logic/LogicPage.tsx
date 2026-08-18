@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { PageHeader } from '@/components/ui/Card';
 import { Tabs } from '@/components/ui/Tabs';
@@ -13,8 +13,22 @@ import { useStore } from '@/store/useStore';
 import { CodeBot } from './CodeBot';
 import { MazeGame } from './MazeGame';
 import { KidSudoku } from './KidSudoku';
+import { useTrainingTarget } from '@/hooks/useTrainingTarget';
+import { TrainingBanner } from '@/components/TrainingBanner';
 
 type TabId = 'pattern' | 'match' | 'order' | 'mixed' | 'code' | 'maze' | 'sudoku';
+
+/** 深链 param → 逻辑页 tab（codebot 映射到 code） */
+const LOGIC_PARAM_MAP: Record<string, TabId> = {
+  pattern: 'pattern',
+  match: 'match',
+  order: 'order',
+  mixed: 'mixed',
+  code: 'code',
+  codebot: 'code',
+  maze: 'maze',
+  sudoku: 'sudoku',
+};
 
 export default function LogicPage() {
   const { t } = useTranslation();
@@ -35,6 +49,15 @@ export default function LogicPage() {
   ];
   const [tab, setTab] = useState<TabId>('pattern');
   const [diff, setDiff, diffMeta] = useAdaptiveDifficultyState('logic');
+  const { target, clear } = useTrainingTarget('logic');
+
+  // 深链 param → 对应 tab（maze / sudoku / codebot / 其它已知 tab）
+  useEffect(() => {
+    const p = target?.param;
+    if (!p) return;
+    const nextTab = LOGIC_PARAM_MAP[p];
+    if (nextTab) setTab(nextTab);
+  }, [target]);
 
   const makeQuestion = (d: Difficulty) =>
     makeSpacedDrill('logic', (dd) => makeLogicQuestion(tab === 'mixed' ? 'mixed' : (tab as LogicKind), dd), () => useStore.getState().progress)(d);
@@ -47,6 +70,8 @@ export default function LogicPage() {
         subtitle="找规律 · 图形配对 · 排排序"
         tone="green"
       />
+
+      <TrainingBanner target={target} onClose={clear} />
 
       <Tabs<TabId>
         tone="green"

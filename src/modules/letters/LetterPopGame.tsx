@@ -43,27 +43,27 @@ interface Particle {
 const BALLOON_PRESETS = [
   {
     bg: 'from-rose-400 to-red-500 shadow-rose-200',
-    particle: '#f43f5e',
+    particle: '#ff5c7a',
   },
   {
     bg: 'from-sky-400 to-blue-500 shadow-sky-200',
-    particle: '#0ea5e9',
+    particle: '#2e93c9',
   },
   {
     bg: 'from-amber-400 to-orange-500 shadow-amber-200',
-    particle: '#f59e0b',
+    particle: '#e5ac2e',
   },
   {
     bg: 'from-emerald-400 to-green-500 shadow-emerald-200',
-    particle: '#10b981',
+    particle: '#33a863',
   },
   {
     bg: 'from-purple-400 to-indigo-500 shadow-purple-200',
-    particle: '#a855f7',
+    particle: '#8b6ef0',
   },
   {
     bg: 'from-pink-400 to-rose-400 shadow-pink-200',
-    particle: '#ec4899',
+    particle: '#ff6b96',
   },
 ];
 

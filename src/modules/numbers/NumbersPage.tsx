@@ -1,7 +1,9 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState, lazy, Suspense, useEffect } from 'react';
 import { PageHeader } from '@/components/ui/Card';
 import { useTranslation } from '@/i18n/useTranslation';
 import { sfxTap } from '@/lib/sfx';
+import { useTrainingTarget } from '@/hooks/useTrainingTarget';
+import { TrainingBanner } from '@/components/TrainingBanner';
 
 // ── 子组件全部懒加载以实现极优的首屏性能 ──
 const NumberWall = lazy(() => import('./NumberWall').then((m) => ({ default: m.NumberWall })));
@@ -85,10 +87,38 @@ const CATEGORIES: { id: MathCategory; label: string; emoji: string; desc: string
   },
 ];
 
+/** 深链 param（子活动 id）→ 分类 + 子标签 */
+const NUMBERS_PARAM_MAP: Record<string, { cat: MathCategory; sub: string }> = {
+  tenframe: { cat: 'sensory', sub: 'tenframe' },
+  count: { cat: 'sensory', sub: 'count' },
+  trace: { cat: 'sensory', sub: 'trace' },
+  skip: { cat: 'sensory', sub: 'skip' },
+  ladder: { cat: 'arithmetic', sub: 'ladder' },
+  rabbit: { cat: 'arithmetic', sub: 'run' },
+  word: { cat: 'practice', sub: 'word' },
+  shape: { cat: 'geometry', sub: 'shape' },
+  time: { cat: 'geometry', sub: 'clock' },
+  compare: { cat: 'geometry', sub: 'measure' },
+  fraction: { cat: 'geometry', sub: 'fraction' },
+  money: { cat: 'geometry', sub: 'money' },
+};
+
 export default function NumbersPage() {
   const { t } = useTranslation();
   const [activeCategory, setActiveCategory] = useState<MathCategory>('sensory');
   const [activeSubTab, setActiveSubTab] = useState<string>('wall');
+  const { target, clear } = useTrainingTarget('numbers');
+
+  // 深链 param → 打开对应数学子游戏
+  useEffect(() => {
+    const p = target?.param;
+    if (!p) return;
+    const mapped = NUMBERS_PARAM_MAP[p];
+    if (mapped) {
+      setActiveCategory(mapped.cat);
+      setActiveSubTab(mapped.sub);
+    }
+  }, [target]);
 
   const currentCategory = CATEGORIES.find((c) => c.id === activeCategory)!;
 
@@ -112,6 +142,8 @@ export default function NumbersPage() {
         subtitle={t('numbersPage.subtitle') || '数感启蒙 · 算术工坊 · 口算应用 · 几何度量'}
         tone="yellow"
       />
+
+      <TrainingBanner target={target} onClose={clear} />
 
       {/* 👑 一级大分类导航卡片 */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">

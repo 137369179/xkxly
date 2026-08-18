@@ -145,7 +145,7 @@ export function MathQuiz() {
               className="flex w-full items-center gap-2.5 rounded-2xl border-2 px-3.5 py-2.5 text-left transition active:translate-y-[2px]"
               style={{
                 background: aiMode ? '#ECE5FF' : '#FFFFFF',
-                borderColor: aiMode ? '#A78BFA' : '#E7E1F5',
+                borderColor: aiMode ? '#8b6ef0' : '#ece5ff',
               }}
             >
               <AiAvatar size={30} mood={aiMode ? 'talking' : 'sleep'} />
@@ -163,7 +163,7 @@ export function MathQuiz() {
               </span>
               <span
                 className="grid h-7 w-12 shrink-0 items-center rounded-full px-1 transition"
-                style={{ background: aiMode ? '#A78BFA' : '#DDD6EE' }}
+                style={{ background: aiMode ? '#8b6ef0' : '#d9c6f5' }}
               >
                 <span
                   className="block h-5 w-5 rounded-full bg-white transition-transform"

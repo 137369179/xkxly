@@ -46,7 +46,7 @@ export function VoiceScoreModal({ isOpen, poemTitle, onClose }: VoiceScoreModalP
         let x = 0;
 
         for (let i = 0; i < freqData.length; i++) {
-          const barHeight = (freqData[i]! / 255) * height;
+          const barHeight = ((freqData[i] ?? 0) / 255) * height;
 
           const hue = (i / freqData.length) * 360;
           ctx.fillStyle = `hsl(${hue}, 90%, 65%)`;

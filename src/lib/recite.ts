@@ -39,11 +39,12 @@ export function maskPoem(poem: DeepPoem, level: 1 | 2 | 3 | 4): MaskedPoem {
 
     if (han.length >= 2) {
       if (level === 1) {
-        hide.add(han[Math.floor(han.length / 2)]!);
+        hide.add(han[Math.floor(han.length / 2)] ?? -1);
       } else if (level === 2) {
         const mid = Math.floor(han.length / 2);
-        hide.add(han[mid]!);
-        if (han[mid - 1] !== undefined) hide.add(han[mid - 1]!);
+        hide.add(han[mid] ?? -1);
+        const m1 = han[mid - 1];
+        if (m1 !== undefined) hide.add(m1);
       } else if (level === 3) {
         // 仅留首字
         han.slice(1).forEach((i) => hide.add(i));
@@ -91,7 +92,7 @@ export function scoreRecite(poem: DeepPoem, userLines: string[]): ReciteResult {
     const len = Math.max(gold.length, user.length);
     let lineCorrect = 0;
     for (let k = 0; k < len; k++) {
-      if (gold[k] && gold[k] === user[k]!) lineCorrect++;
+      if (gold[k] && gold[k] === user[k]) lineCorrect++;
     }
     correct += lineCorrect;
     total += gold.length;

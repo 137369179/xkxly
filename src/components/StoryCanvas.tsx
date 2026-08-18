@@ -6,7 +6,7 @@ interface StoryCanvasProps {
   emoji?: string;
 }
 
-export function StoryCanvas({ theme = 'space', bgColor = '#E1F5FE', emoji = '🚀' }: StoryCanvasProps) {
+export function StoryCanvas({ theme = 'space', bgColor = '#dcecfa', emoji = '🚀' }: StoryCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -41,14 +41,14 @@ export function StoryCanvas({ theme = 'space', bgColor = '#E1F5FE', emoji = '�
         ctx.fill();
       }
       // 行星环
-      ctx.strokeStyle = '#7A5CE040';
+      ctx.strokeStyle = '#8B6EF040';
       ctx.lineWidth = 6;
       ctx.beginPath();
       ctx.ellipse(width * 0.75, height * 0.3, 40, 15, Math.PI / 6, 0, Math.PI * 2);
       ctx.stroke();
     } else if (lowerTheme.includes('sea') || lowerTheme.includes('ocean') || lowerTheme.includes('water')) {
       // 气泡与波浪
-      ctx.fillStyle = '#00B4D830';
+      ctx.fillStyle = '#55AEE030';
       for (let i = 0; i < 10; i++) {
         const x = (i * 40 + 20) % width;
         const y = height - (i * 25) % (height * 0.8);
@@ -58,7 +58,7 @@ export function StoryCanvas({ theme = 'space', bgColor = '#E1F5FE', emoji = '�
       }
     } else if (lowerTheme.includes('forest') || lowerTheme.includes('tree') || lowerTheme.includes('magic')) {
       // 魔法小光斑
-      ctx.fillStyle = '#06D6A040';
+      ctx.fillStyle = '#33a86340';
       for (let i = 0; i < 12; i++) {
         const x = (i * 35) % width;
         const y = (i * 20) % height;

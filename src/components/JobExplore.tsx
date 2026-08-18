@@ -28,7 +28,7 @@ export function JobExplore() {
   const { t } = useTranslation();
   const [mode, setMode] = useState<'learn' | 'quiz'>('learn');
   const [selected, setSelected] = useState(0);
-  const [quizJob, setQuizJob] = useState(() => JOBS[Math.floor(Math.random() * JOBS.length)]!);
+  const [quizJob, setQuizJob] = useState(() => JOBS[Math.floor(Math.random() * JOBS.length)] as (typeof JOBS)[number]);
   const [options, setOptions] = useState(() => shuffle(JOBS).slice(0, 4));
   const [feedback, setFeedback] = useState('');
   const [score, setScore] = useState(0);
@@ -40,10 +40,10 @@ export function JobExplore() {
     if (timerRef.current) clearTimeout(timerRef.current);
   }, []);
 
-  const j = mode === 'learn' ? JOBS[selected]! : quizJob!;
+  const j = mode === 'learn' ? (JOBS[selected] as (typeof JOBS)[number]) : quizJob;
 
   const nextQuiz = () => {
-    setQuizJob(JOBS[Math.floor(Math.random() * JOBS.length)]!);
+    setQuizJob(JOBS[Math.floor(Math.random() * JOBS.length)] as (typeof JOBS)[number]);
     setOptions(shuffle(JOBS).slice(0, 4));
     setFeedback('');
   };
@@ -52,8 +52,8 @@ export function JobExplore() {
     if (lockRef.current) return;
     lockRef.current = true;
     sfxTap();
-    if (job.name === quizJob!.name) {
-      sfxCorrect(); setScore(s => s + 1); setFeedback(`✅ ${t('jobExplore.correct', { name: quizJob!.name, desc: quizJob!.desc })}`);
+    if (job.name === quizJob.name) {
+      sfxCorrect(); setScore(s => s + 1); setFeedback(`✅ ${t('jobExplore.correct', { name: quizJob.name, desc: quizJob.desc })}`);
       void speak(`对了！${quizJob.name}`, { lang: 'zh-CN', rate: 0.85, module: 'praise' });
     } else {
       sfxWrong(); setFeedback(`❌ ${t('jobExplore.wrong', { name: quizJob.name })}`);

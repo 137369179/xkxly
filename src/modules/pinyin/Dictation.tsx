@@ -17,7 +17,8 @@ import { useTranslation } from '@/i18n/useTranslation';
 
 const Q_COUNT = 20;
 
-function makeQuestion(all: PinyinEntry[]): { correct: PinyinEntry; options: PinyinEntry[] } {
+/** 听写出题：正确音节 + 3 个异项干扰，打乱后返回（供单元测试覆盖出题正确性） */
+export function makeQuestion(all: PinyinEntry[]): { correct: PinyinEntry; options: PinyinEntry[] } {
   const correct = all[Math.floor(Math.random() * all.length)]!
   const wrongs = shuffle(all.filter(p => p.p !== correct.p)).slice(0, 3);
   const options = shuffle([correct, ...wrongs]);
@@ -39,7 +40,7 @@ export function Dictation() {
   const playSound = () => {
     sfxTap();
     // 用 TTS 朗读拼音的发音
-    speak(q.correct.p, { rate: 0.7 });
+    void speak(q.correct.p, { rate: 0.7 }).catch(() => {});
   };
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -50,7 +51,7 @@ export function Dictation() {
 
   // 自动播放
   useEffect(() => {
-    const t = setTimeout(() => speak(q.correct.p, { rate: 0.7 }), 300);
+    const t = setTimeout(() => { void speak(q.correct.p, { rate: 0.7 }).catch(() => {}); }, 300);
     return () => clearTimeout(t);
   }, [q]);
 
@@ -82,7 +83,7 @@ export function Dictation() {
         setIdx(i => i + 1);
         setPicked(null);
         if (timerRef.current) clearTimeout(timerRef.current);
-        timerRef.current = setTimeout(() => speak(questions[idx + 1]!.correct.p, { rate: 0.7 }), 300);
+        timerRef.current = setTimeout(() => { void speak(questions[idx + 1]!.correct.p, { rate: 0.7 }).catch(() => {}); }, 300);
       }
     }, 1000);
   };

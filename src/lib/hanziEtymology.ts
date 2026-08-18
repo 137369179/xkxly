@@ -233,7 +233,9 @@ export function recommendByPrereq(
   const ready = frontier.filter((h) => isReady(h.c, mastery));
   const cands = ready.length ? ready : frontier;
 
-  let best = cands[0]!;
+  const first = cands[0];
+  if (first === undefined) return null; // 防御：unlearned 非空时 frontier 必有元素
+  let best = first;
   let bestScore = -1;
   for (const h of cands) {
     const score = unlockValue(h.c, mastery);
@@ -315,7 +317,7 @@ export function buildFamilyGraph(
     };
   });
   const roles = new Set(members.map((m) => m.role));
-  const kind: HanziFamily['kind'] = roles.size === 1 ? [...roles][0]! : 'mixed';
+  const kind: HanziFamily['kind'] = roles.size === 1 ? ([...roles][0] ?? 'mixed') : 'mixed';
   return { root, rootPd: entryOf(root)?.pd ?? '', kind, members };
 }
 
@@ -353,9 +355,12 @@ export function componentDistractors(c: string, n = 3): string[] {
   // 在高频池里随机取，避免每次干扰项完全相同
   for (let i = out.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    const a = out[i]!;
-    out[i] = out[j]!;
-    out[j] = a;
+    const a = out[i];
+    const b = out[j];
+    if (a !== undefined && b !== undefined) {
+      out[i] = b;
+      out[j] = a;
+    }
   }
   return out.slice(0, n);
 }

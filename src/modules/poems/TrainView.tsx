@@ -11,7 +11,6 @@ import DEEP_POEMS from '@/data/poems-deep';
 import { useProgress } from '@/store/useStore';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
-import { TONE_STYLE, toneAt } from '@/lib/tones';
 import { useTranslation } from '@/i18n/useTranslation';
 
 export default function TrainView({ onOpen }: { onOpen: (id: string, tab?: '原文' | '注解' | '格律' | '语境' | '研读') => void }) {
@@ -56,16 +55,16 @@ export default function TrainView({ onOpen }: { onOpen: (id: string, tab?: '原�
 
   return (
     <div>
-      <PageHeader emoji="🎯" title={t('trainView.title')} subtitle={`已标难点 ${markedIds.size} 首 · 已背诵 ${recitedIds.size} 首 · 待复习 ${dueCount} 个`} tone="pink" />
+      <PageHeader emoji="🎯" title={t('trainView.title')} subtitle={`${markedIds.size} 首难点 · ${recitedIds.size} 首已背 · ${dueCount} 个待复习`} tone="pink" />
 
-      <Panel className="!py-4">
+      <Panel className="!py-2.5">
         <div className="relative">
-          <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xl">🔎</span>
+          <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-ink-soft">🔎</span>
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={t('trainView.search')}
-            className="tap-target w-full rounded-2xl border-2 border-candy-pink-soft bg-white/80 px-11 py-2.5 text-base font-bold text-ink outline-none placeholder:text-ink-soft/70 focus:border-candy-pink"
+            className="input-jelly w-full px-10 py-2 text-sm font-bold text-ink outline-none placeholder:text-ink-soft/70"
           />
         </div>
       </Panel>
@@ -73,8 +72,7 @@ export default function TrainView({ onOpen }: { onOpen: (id: string, tab?: '原�
       {focusList.length > 0 && (
         <div className="mt-4 space-y-2.5">
           <p className="text-sm font-extrabold text-ink-soft">{t('trainView.myFocus')}</p>
-          {focusList.map((p, i) => {
-            const ts = TONE_STYLE[toneAt(i)]!
+          {focusList.map((p) => {
             const m = progress.poemMarks[p.id];
             const r = progress.poemRecite[p.id];
             return (
@@ -82,28 +80,31 @@ export default function TrainView({ onOpen }: { onOpen: (id: string, tab?: '原�
                 key={p.id}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onOpen(p.id, '研读')}
-                className="flex w-full items-center gap-3 rounded-2xl bg-white/80 p-3 text-left shadow-candy-sm"
-                style={{ background: ts.soft }}
+                className="flex w-full items-center gap-3 rounded-2xl border-2 border-pink-200/80 bg-white/90 p-3 text-left shadow-candy-sm transition-all hover:-translate-y-0.5 hover:border-candy-pink/60"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-lg font-extrabold" style={{ color: ts.deep }}>{p.title}</p>
+                  <p className="truncate text-lg font-extrabold text-candy-pink-deep">{p.title}</p>
                   <p className="text-xs font-bold text-ink-soft">{p.author}·{p.dynasty}</p>
                   <div className="mt-1 flex flex-wrap gap-1.5">
                     {m && (m.chars.length > 0 || m.lines.length > 0) && (
-                      <span className="rounded-full bg-candy-orange-soft px-2 py-0.5 text-[11px] font-bold text-candy-orange-deep">
+                      <span className="rounded-full bg-pink-100 px-2 py-0.5 text-[11px] font-bold text-candy-pink-deep">
                         {t('trainView.difficult', { n: m.chars.length + m.lines.length })}
                       </span>
                     )}
                     {r && (
-                      <span className="rounded-full bg-candy-green-soft px-2 py-0.5 text-[11px] font-bold text-candy-green-deep">
+                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-700">
                         {t('trainView.bestRecite', { best: r.best, stage: r.stage })}
                       </span>
                     )}
                   </div>
                 </div>
                 <div className="flex shrink-0 gap-1.5">
-                  <CandyButton tone="purple" variant="soft" size="sm" onClick={(e) => { e.stopPropagation(); onOpen(p.id, '研读'); }}>自测</CandyButton>
-                  <CandyButton tone="pink" variant="soft" size="sm" onClick={(e) => { e.stopPropagation(); onOpen(p.id, '研读'); }}>背诵</CandyButton>
+                  <CandyButton tone="pink" variant="soft" size="sm" onClick={(e) => { e.stopPropagation(); onOpen(p.id, '研读'); }}>
+                    自测
+                  </CandyButton>
+                  <CandyButton tone="pink" variant="solid" size="sm" onClick={(e) => { e.stopPropagation(); onOpen(p.id, '研读'); }}>
+                    背诵
+                  </CandyButton>
                 </div>
               </motion.button>
             );
@@ -113,21 +114,17 @@ export default function TrainView({ onOpen }: { onOpen: (id: string, tab?: '原�
 
       {lib.length > 0 && (
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {lib.map((p, i) => {
-            const ts = TONE_STYLE[toneAt(i)]!
-            return (
-              <motion.button
-                key={p.id}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => onOpen(p.id, '研读')}
-                className="flex min-h-[96px] flex-col items-center justify-center gap-1 rounded-[1.5rem] p-3 text-center shadow-candy-sm"
-                style={{ background: ts.soft }}
-              >
-                <span className="line-clamp-2 text-base font-extrabold" style={{ color: ts.deep }}>{p.title}</span>
-                <span className="text-xs font-bold text-ink-soft">{p.author}</span>
-              </motion.button>
-            );
-          })}
+          {lib.map((p) => (
+            <motion.button
+              key={p.id}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => onOpen(p.id, '研读')}
+              className="flex min-h-[96px] flex-col items-center justify-center gap-1 rounded-[1.5rem] border-2 border-pink-200/80 bg-white/90 p-3 text-center shadow-candy-sm transition-all hover:-translate-y-0.5 hover:border-candy-pink/60"
+            >
+              <span className="line-clamp-2 text-base font-extrabold text-candy-pink-deep">{p.title}</span>
+              <span className="text-xs font-bold text-ink-soft">{p.author}</span>
+            </motion.button>
+          ))}
         </div>
       )}
 

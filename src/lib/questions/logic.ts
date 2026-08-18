@@ -23,7 +23,7 @@ export function makePatternQuestion(difficulty: Difficulty = 1): Question {
 
     const values = makeNumberOptions(answer, 4, 1, answer + 8);
     const options = values.map((v) => opt({ label: String(v) }));
-    const answerId = options[values.indexOf(answer)]!.id;
+    const answerId = options[values.indexOf(answer)]?.id ?? '';
 
     return {
       id: nextId('pat'),
@@ -50,16 +50,21 @@ export function makePatternQuestion(difficulty: Difficulty = 1): Question {
   const tpl = difficulty === 1 ? sample(patterns.slice(0, 2)) : sample(patterns);
   const need = new Set(tpl).size;
   const picked = sampleMany(pool, Math.max(need, 4));
-  const mapping: Record<string, string> = { A: picked[0]!, B: picked[1]!, C: picked[2]! };
+  const mapping: Record<string, string> = {
+    A: picked[0] ?? '',
+    B: picked[1] ?? '',
+    C: picked[2] ?? '',
+  };
 
   const showLen = difficulty === 1 ? 5 : 5;
-  const shown = tpl.slice(0, showLen).map((k) => mapping[k]!);
-  const answerShape = mapping[tpl[showLen]!];
+  const shown = tpl.slice(0, showLen).map((k) => mapping[k] ?? '');
+  const nextKey = tpl[showLen];
+  const answerShape = nextKey ? (mapping[nextKey] ?? '') : '';
 
   const wrongPool = shuffle(picked.filter((s) => s !== answerShape)).slice(0, 3);
   const all = shuffle([answerShape, ...wrongPool]);
   const options = all.map((s) => opt({ emoji: s }));
-  const answerId = options[all.indexOf(answerShape)]!.id;
+  const answerId = options[all.indexOf(answerShape)]?.id ?? '';
 
   return {
     id: nextId('pat'),
@@ -90,7 +95,7 @@ export function makeMatchQuestion(difficulty: Difficulty = 1): Question {
   while (wrongs.length < 3 && guard++ < 80) {
     const cand = target.slice();
     const idx = randInt(0, groupSize - 1);
-    const repl = sample(picked.filter((s) => s !== cand[idx]!));
+    const repl = sample(picked.filter((s) => s !== cand[idx]));
     cand[idx] = repl;
     const key = cand.join('');
     if (!seenKeys.has(key)) {
@@ -111,7 +116,7 @@ export function makeMatchQuestion(difficulty: Difficulty = 1): Question {
 
   const all = shuffle([target, ...wrongs]);
   const options = all.map((g) => opt({ shapes: g }));
-  const answerId = options[all.findIndex((g) => g.join('') === target.join(''))]!.id;
+  const answerId = options[all.findIndex((g) => g.join('') === target.join(''))]?.id ?? '';
 
   return {
     id: nextId('match'),
@@ -144,7 +149,7 @@ export function makeOrderQuestion(difficulty: Difficulty = 1): Question {
   if (mode === 'max' || mode === 'min') {
     const answer = mode === 'max' ? Math.max(...nums) : Math.min(...nums);
     const options = nums.map((n) => opt({ label: String(n) }));
-    const answerId = options[nums.indexOf(answer)]!.id;
+    const answerId = options[nums.indexOf(answer)]?.id ?? '';
     return {
       id: nextId('ord'),
       kind: 'logic',
@@ -178,13 +183,23 @@ export function makeOrderQuestion(difficulty: Difficulty = 1): Question {
   let fillGuard = 0;
   while (wrongs.length < 3 && fillGuard++ < 24) {
     const cand = asc.slice();
-    if (cand.length >= 2) [cand[0], cand[1]] = [cand[1]!, cand[0]!];
+    if (cand.length >= 2) {
+      const first = cand[0];
+      const second = cand[1];
+      if (first !== undefined && second !== undefined) {
+        [cand[0], cand[1]] = [second, first];
+      }
+    }
     const key = cand.join(',');
     if (!seen.has(key)) {
       seen.add(key);
       wrongs.push(cand);
     } else if (cand.length >= 3) {
-      [cand[cand.length - 1], cand[cand.length - 2]] = [cand[cand.length - 2]!, cand[cand.length - 1]!];
+      const tail = cand[cand.length - 1];
+      const preTail = cand[cand.length - 2];
+      if (tail !== undefined && preTail !== undefined) {
+        [cand[cand.length - 1], cand[cand.length - 2]] = [preTail, tail];
+      }
       const key2 = cand.join(',');
       if (!seen.has(key2)) {
         seen.add(key2);
@@ -195,7 +210,7 @@ export function makeOrderQuestion(difficulty: Difficulty = 1): Question {
 
   const all = shuffle([asc, ...wrongs]);
   const options = all.map((g) => opt({ label: g.join(' < ') }));
-  const answerId = options[all.findIndex((g) => g.join(',') === ascKey)]!.id;
+  const answerId = options[all.findIndex((g) => g.join(',') === ascKey)]?.id ?? '';
 
   return {
     id: nextId('ord'),

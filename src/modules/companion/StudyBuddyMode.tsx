@@ -237,7 +237,7 @@ export function StudyBuddyMode() {
                 style={{
                   background: '#FF9F5A',
                   color: '#FFFFFF',
-                  boxShadow: '0 5px 0 0 #E0742B',
+                  boxShadow: '0 5px 0 0 #c2410c',
                 }}
               >
                 ❌ {tr('buddy.wrongBtn')}

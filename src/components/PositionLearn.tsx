@@ -34,14 +34,14 @@ const SCENES = [
 export function PositionLearn() {
   const { t } = useTranslation();
   const [mode, setMode] = useState<'learn'|'quiz'>('learn');
-  const [scene, setScene] = useState(() => SCENES[Math.floor(Math.random()*SCENES.length)]!);
+  const [scene, setScene] = useState(() => SCENES[Math.floor(Math.random()*SCENES.length)] ?? { obj: '', container: '', pose: '', prompt: '' });
   const [options, setOptions] = useState(() => shuffle(POSES).slice(0,4));
   const [feedback, setFeedback] = useState('');
   const [score, setScore] = useState(0);
   const lockRef = useRef(false);
 
   const newRound = () => {
-    setScene(SCENES[Math.floor(Math.random()*SCENES.length)]!);
+    setScene(SCENES[Math.floor(Math.random()*SCENES.length)] ?? { obj: '', container: '', pose: '', prompt: '' });
     setOptions(shuffle(POSES).slice(0,4));
   };
 
@@ -53,7 +53,7 @@ export function PositionLearn() {
       setTimeout(() => lockRef.current = false, 800);
       return;
     }
-    const correct = POSES.find(p=>p.label===scene.pose)!;
+    const correct = POSES.find(p=>p.label===scene.pose) ?? { label: '', en: '', opposite: '', emoji: '', color: '' };
     if (pose.label === correct.label) {
       sfxCorrect(); setFeedback(t('position.correct', { prompt: scene.prompt })); setScore(s=>s+1);
       void speak(`对了！${scene.prompt}`, { lang:'zh-CN', rate:0.85, module:'praise' });

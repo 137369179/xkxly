@@ -34,6 +34,8 @@ import hanziListenZh from './locales/hanziListen.zh-CN.json';
 import hanziListenEn from './locales/hanziListen.en-US.json';
 import patchZh from './locales/patch.zh-CN.json';
 import patchEn from './locales/patch.en-US.json';
+import achievementCenterZh from './locales/achievementCenter.zh-CN.json';
+import achievementCenterEn from './locales/achievementCenter.en-US.json';
 
 /** 深度合并：将模块级翻译增量并入全局字典（不改动全局 i18n 文件，规避并发 WIP 冲突） */
 function deepMergeLocale(base: any, extra: any): any {
@@ -87,9 +89,9 @@ function interpolate(template: string, params?: Record<string, string | number>)
 }
 
 const translations: Record<Locale, TranslationData> = {
-  'zh-CN': deepMergeLocale(deepMergeLocale(zhCN, hanziListenZh), patchZh),
-  'zh-TW': deepMergeLocale(deepMergeLocale(zhCN, hanziListenZh), patchZh),
-  'en-US': deepMergeLocale(deepMergeLocale(enUS, hanziListenEn), patchEn),
+  'zh-CN': deepMergeLocale(deepMergeLocale(deepMergeLocale(zhCN, hanziListenZh), patchZh), achievementCenterZh),
+  'zh-TW': deepMergeLocale(deepMergeLocale(deepMergeLocale(zhCN, hanziListenZh), patchZh), achievementCenterZh),
+  'en-US': deepMergeLocale(deepMergeLocale(deepMergeLocale(enUS, hanziListenEn), patchEn), achievementCenterEn),
 };
 
 interface UseTranslationReturn {

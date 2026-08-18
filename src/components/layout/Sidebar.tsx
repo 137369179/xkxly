@@ -1,4 +1,5 @@
 import { motion } from 'motion/react';
+import { useRef } from 'react';
 import { NAV_ITEMS, navByCategory, NAV_CATEGORY_META, type NavItem } from '@/data/nav';
 import { navigate, type RouteId } from '@/lib/router';
 import { TONE_STYLE } from '@/lib/tones';
@@ -8,6 +9,7 @@ import { useStars, useBadgeCount, useStreak } from '@/store/useStore';
 import { StarIcon } from '@/components/ui/Stars';
 import { FluffyIcon } from '@/components/ui/FluffyIcon';
 import { useTranslation } from '@/i18n/useTranslation';
+import { announceToScreenReader, useKeyboardNavigation } from '@/components/Accessibility';
 
 /** 核心入口（不归入品类分组，置顶常驻） */
 const CORE_IDS = ['home', 'today'] as const;
@@ -17,6 +19,23 @@ export function Sidebar({ active }: { active: RouteId }) {
   const stars = useStars();
   const badgeCount = useBadgeCount();
   const streak = useStreak();
+  const btnRefs = useRef<Map<string, HTMLElement>>(new Map());
+
+  // 键盘方向键导航
+  const { containerRef } = useKeyboardNavigation({
+    items: [...NAV_ITEMS].map((item) => ({
+      id: item.id,
+      element: btnRefs.current.get(item.id),
+    })),
+    onNavigate: (idx) => {
+      const items = [...NAV_ITEMS];
+      if (items[idx]) {
+        sfxTap();
+        navigate(items[idx]!.id);
+        announceToScreenReader(`${translate(`nav.${items[idx]!.id}.label`) || items[idx]!.label}，已切换`);
+      }
+    },
+  });
 
   const renderItem = (item: NavItem) => {
     const t = TONE_STYLE[item.tone] ?? TONE_STYLE.pink;
@@ -24,9 +43,11 @@ export function Sidebar({ active }: { active: RouteId }) {
     return (
       <button
         key={item.id}
+        ref={(el) => { btnRefs.current.set(item.id, el!); }}
         onClick={() => {
           sfxTap();
           navigate(item.id);
+          announceToScreenReader(`${translate(`nav.${item.id}.label`) || item.label}，已切换`);
         }}
         aria-current={isActive ? 'page' : undefined}
         className={cn(
@@ -36,7 +57,7 @@ export function Sidebar({ active }: { active: RouteId }) {
         )}
         style={{
           background: isActive ? t.main : 'rgba(255,255,255,0.6)',
-          color: isActive ? t.on : '#6B6076',
+          color: isActive ? t.on : '#8a7a7e',
           boxShadow: isActive ? `0 5px 0 0 ${t.deep}` : '0 3px 0 0 rgba(0,0,0,0.04)',
         }}
       >
@@ -66,7 +87,10 @@ export function Sidebar({ active }: { active: RouteId }) {
   const groups = navByCategory();
 
   return (
-    <aside className="hidden w-[248px] shrink-0 flex-col gap-3 p-4 lg:flex xl:w-[276px] rounded-[2.2rem] border-4 border-pink-200/90 bg-white/95 shadow-fluffy">
+    <aside ref={containerRef} className="hidden w-[248px] shrink-0 flex-col gap-3 p-4 lg:flex xl:w-[276px] rounded-[2.2rem] border-4 border-pink-200/90 bg-white/95 shadow-fluffy"
+      role="navigation"
+      aria-label={translate('nav.sidebarLabel') || '侧边导航'}
+    >
       {/* Logo */}
       <button
         aria-label="返回首页"
@@ -88,8 +112,8 @@ export function Sidebar({ active }: { active: RouteId }) {
         {coreItems.map(renderItem)}
 
         {groups.map((g) => {
-          const meta = NAV_CATEGORY_META.find((m) => m.key === g.key)!;
-          const tone = TONE_STYLE[meta.tone]!;
+          const meta = NAV_CATEGORY_META.find((m) => m.key === g.key) ?? { key: g.key, label: g.key, emoji: '📚', tone: 'blue' };
+          const tone = TONE_STYLE[meta.tone];
           return (
             <div key={g.key} className="mt-1">
               <div className="mb-1.5 flex items-center gap-1.5 px-2">

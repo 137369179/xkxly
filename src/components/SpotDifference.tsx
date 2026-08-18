@@ -21,7 +21,7 @@ const THEMES = [
 ];
 
 function genLevel(): Level {
-  const theme = THEMES[Math.floor(Math.random()*THEMES.length)]!
+  const theme = THEMES[Math.floor(Math.random()*THEMES.length)] ?? { name: '', emojis: [] };
   const picks = [...theme.emojis].sort(()=>Math.random()-0.5).slice(0,6);
   const diffPositions = new Set<number>();
   const diffCount = 2 + Math.floor(Math.random()*2); // 2-3 differences
@@ -51,7 +51,7 @@ export function SpotDifference() {
     if (lockRef.current || found.has(pos)) return;
     lockRef.current = true;
     sfxTap();
-    const isDiff = level.left[pos]!.emoji !== level.right[pos]!.emoji;
+    const isDiff = (level.left[pos]?.emoji ?? '') !== (level.right[pos]?.emoji ?? '');
     if (isDiff) {
       sfxCorrect();
       const newFound = new Set(found);

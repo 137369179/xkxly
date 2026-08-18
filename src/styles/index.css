@@ -68,6 +68,17 @@
   --shadow-jelly: 0 4px 0 0 rgb(255 107 150 / 0.14), 0 10px 24px -4px rgb(255 107 150 / 0.28);
   --shadow-jelly-lg: 0 6px 0 0 rgb(255 107 150 / 0.16), 0 20px 44px -8px rgb(255 107 150 / 0.36);
 
+  /* —— 默认阴影粉化（Q 弹感统一收尾）——
+     覆盖 Tailwind 默认 shadow-xs~2xl 为粉色调果冻软阴影，
+     全站残留的 shadow-sm/md/lg 等 124 处无需改组件，一处生效变 Q 弹。 */
+  --shadow-2xs: 0 1px rgb(255 107 150 / 0.06);
+  --shadow-xs: 0 1px 2px 0 rgb(255 107 150 / 0.07);
+  --shadow-sm: 0 1px 3px 0 rgb(255 107 150 / 0.08), 0 1px 2px -1px rgb(255 107 150 / 0.08);
+  --shadow-md: 0 4px 6px -1px rgb(255 107 150 / 0.10), 0 2px 4px -2px rgb(255 107 150 / 0.08);
+  --shadow-lg: 0 10px 15px -3px rgb(255 107 150 / 0.14), 0 4px 6px -4px rgb(255 107 150 / 0.10);
+  --shadow-xl: 0 20px 25px -5px rgb(255 107 150 / 0.18), 0 8px 10px -6px rgb(255 107 150 / 0.12);
+  --shadow-2xl: 0 25px 50px -12px rgb(255 107 150 / 0.26);
+
   /* —— 动画 —— */
   --animate-float: float 4s ease-in-out infinite;
   --animate-wiggle: wiggle 0.6s ease-in-out;
@@ -78,6 +89,209 @@
   --animate-twinkle: twinkle 1.8s ease-in-out infinite;
   --animate-squishy: squishy 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   --animate-squish: squish 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* —— 果冻 Q 弹补充动画 —— */
+  --animate-jelly-bounce: jellyBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --animate-jelly-wobble: jellyWobble 2.4s ease-in-out infinite;
+  --animate-jelly-pop: jellyPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ============================================================
+     糖果化默认色板（颜色统一核心）
+     全站 580 处 tailwind 默认色类（bg-pink-100 / border-purple-200 …）
+     无需改动组件，在 token 层覆盖为果冻六色家族，一处生效全站统一。
+     仅覆盖装饰档 50~500，语义深档 600+ 保留原值供文字强调。
+     ============================================================ */
+  --color-pink-50: #fff0f4;
+  --color-pink-100: #ffe4ee;
+  --color-pink-200: #ffc9da;
+  --color-pink-300: #ffabc5;
+  --color-pink-400: #ff8db0;
+  --color-pink-500: #ff6b96;
+  --color-pink-600: #e05a80;
+  --color-pink-700: #c14d6e;
+  --color-pink-800: #9e3e5b;
+  --color-pink-900: #7c3047;
+
+  --color-rose-50: #ffe9ee;
+  --color-rose-100: #ffd3de;
+  --color-rose-200: #ffabc0;
+  --color-rose-300: #ff84a3;
+  --color-rose-400: #ff6b8d;
+  --color-rose-500: #ff5c7a;
+  --color-rose-600: #c2254a;
+  --color-rose-700: #a11e3e;
+  --color-rose-800: #831a34;
+  --color-rose-900: #65142a;
+
+  --color-fuchsia-50: #fdf2ff;
+  --color-fuchsia-100: #f9e4ff;
+  --color-fuchsia-200: #efc7fb;
+  --color-fuchsia-300: #e2a6f5;
+  --color-fuchsia-400: #d184ee;
+  --color-fuchsia-500: #c065e6;
+
+  --color-purple-50: #f8f4fd;
+  --color-purple-100: #ece5ff;
+  --color-purple-200: #d9c6f5;
+  --color-purple-300: #c2a8ef;
+  --color-purple-400: #a78bfa;
+  --color-purple-500: #8b6ef0;
+  --color-purple-600: #7c3aed;
+  --color-purple-700: #6631c7;
+  --color-purple-800: #53289f;
+  --color-purple-900: #40207a;
+
+  --color-violet-50: #f6f3ff;
+  --color-violet-100: #e9e2ff;
+  --color-violet-200: #d2c2fb;
+  --color-violet-300: #b59ff5;
+  --color-violet-400: #987cf0;
+  --color-violet-500: #7d5ceb;
+
+  --color-indigo-50: #f0f2ff;
+  --color-indigo-100: #dde1fc;
+  --color-indigo-200: #b9c1f7;
+  --color-indigo-300: #909df0;
+  --color-indigo-400: #6b7ce8;
+  --color-indigo-500: #4f5ed8;
+
+  --color-blue-50: #f2f6fd;
+  --color-blue-100: #dcecfa;
+  --color-blue-200: #a8d8f0;
+  --color-blue-300: #7cc3e8;
+  --color-blue-400: #55aee0;
+  --color-blue-500: #2e93c9;
+  --color-blue-600: #167aa9;
+  --color-blue-700: #12658c;
+  --color-blue-800: #0e4f6e;
+  --color-blue-900: #0a3a50;
+
+  --color-sky-50: #eef8fd;
+  --color-sky-100: #d6effa;
+  --color-sky-200: #a8d8f0;
+  --color-sky-300: #7ac3e6;
+  --color-sky-400: #4fabdc;
+  --color-sky-500: #2e93c9;
+
+  --color-cyan-50: #ecfbfa;
+  --color-cyan-100: #cdf3f2;
+  --color-cyan-200: #9be4e4;
+  --color-cyan-300: #63d2d4;
+  --color-cyan-400: #35bcc0;
+  --color-cyan-500: #14a3a8;
+
+  --color-teal-50: #effbf6;
+  --color-teal-100: #d7f5e8;
+  --color-teal-200: #a8ecd0;
+  --color-teal-300: #76dfb5;
+  --color-teal-400: #46d09a;
+  --color-teal-500: #1fb982;
+
+  --color-emerald-50: #f0faf4;
+  --color-emerald-100: #ddf7e7;
+  --color-emerald-200: #b8f0d8;
+  --color-emerald-300: #8fe7bc;
+  --color-emerald-400: #5fd68b;
+  --color-emerald-500: #33a863;
+  --color-emerald-600: #047857;
+  --color-emerald-700: #03614a;
+  --color-emerald-800: #024a3a;
+  --color-emerald-900: #01372b;
+
+  --color-green-50: #f0faf4;
+  --color-green-100: #ddf7e7;
+  --color-green-200: #b8f0d8;
+  --color-green-300: #8fe7bc;
+  --color-green-400: #5fd68b;
+  --color-green-500: #33a863;
+  --color-green-600: #047857;
+
+  --color-lime-50: #f6fbe8;
+  --color-lime-100: #eaf6cd;
+  --color-lime-200: #d3ec9e;
+  --color-lime-300: #b9df6a;
+  --color-lime-400: #9ed23c;
+  --color-lime-500: #83bd1f;
+
+  --color-amber-50: #fff4d6;
+  --color-amber-100: #ffe9ad;
+  --color-amber-200: #ffe5a8;
+  --color-amber-300: #ffd166;
+  --color-amber-400: #ffc93c;
+  --color-amber-500: #e5ac2e;
+  --color-amber-600: #b47805;
+  --color-amber-700: #95620a;
+  --color-amber-800: #774e08;
+  --color-amber-900: #593a06;
+
+  --color-yellow-50: #fff9e8;
+  --color-yellow-100: #fff1c8;
+  --color-yellow-200: #ffe5a8;
+  --color-yellow-300: #ffd876;
+  --color-yellow-400: #ffcc4d;
+  --color-yellow-500: #f2b52e;
+
+  --color-orange-50: #fff3ec;
+  --color-orange-100: #ffe7d6;
+  --color-orange-200: #ffd0b0;
+  --color-orange-300: #ffb88a;
+  --color-orange-400: #ffa86e;
+  --color-orange-500: #ff9f5a;
+  --color-orange-600: #e0742b;
+  --color-orange-700: #bc5f24;
+  --color-orange-800: #974b1e;
+  --color-orange-900: #733918;
+
+  /* ============================================================
+     暖调中性灰（颜色统一收尾）
+     gray / slate / zinc / neutral 四族 → 同一暖粉棕灰，
+     保留「灰暗感」的语义（禁用/锁定/次要文字）但不再发冷，
+     与果冻粉家族天然协调。语义亮红 red-* / 深档 600+ 均保留原值。
+     ============================================================ */
+  --color-gray-50: #fbf6f7;
+  --color-gray-100: #f7edf0;
+  --color-gray-200: #f0dde2;
+  --color-gray-300: #e2c4cb;
+  --color-gray-400: #cda6b0;
+  --color-gray-500: #b38894;
+  --color-gray-600: #966b78;
+  --color-gray-700: #78535f;
+  --color-gray-800: #5b3f49;
+  --color-gray-900: #3f2b33;
+
+  --color-slate-50: #fbf6f7;
+  --color-slate-100: #f7edf0;
+  --color-slate-200: #f0dde2;
+  --color-slate-300: #e2c4cb;
+  --color-slate-400: #cda6b0;
+  --color-slate-500: #b38894;
+  --color-slate-600: #966b78;
+  --color-slate-700: #78535f;
+  --color-slate-800: #5b3f49;
+  --color-slate-900: #3f2b33;
+  --color-slate-950: #2c1e24;
+
+  --color-zinc-50: #fbf6f7;
+  --color-zinc-100: #f7edf0;
+  --color-zinc-200: #f0dde2;
+  --color-zinc-300: #e2c4cb;
+  --color-zinc-400: #cda6b0;
+  --color-zinc-500: #b38894;
+  --color-zinc-600: #966b78;
+  --color-zinc-700: #78535f;
+  --color-zinc-800: #5b3f49;
+  --color-zinc-900: #3f2b33;
+
+  --color-neutral-50: #fbf6f7;
+  --color-neutral-100: #f7edf0;
+  --color-neutral-200: #f0dde2;
+  --color-neutral-300: #e2c4cb;
+  --color-neutral-400: #cda6b0;
+  --color-neutral-500: #b38894;
+  --color-neutral-600: #966b78;
+  --color-neutral-700: #78535f;
+  --color-neutral-800: #5b3f49;
+  --color-neutral-900: #3f2b33;
 }
 
 @keyframes float {
@@ -179,6 +393,67 @@
   }
   100% {
     transform: scale(1);
+  }
+}
+
+/* 果冻弹跳：落地压扁 → 拉高 → 回落回弹（Q 弹感主动画） */
+@keyframes jellyBounce {
+  0% {
+    transform: translateY(0) scale(1, 1);
+  }
+  30% {
+    transform: translateY(0) scale(1.12, 0.86);
+  }
+  55% {
+    transform: translateY(-14px) scale(0.94, 1.1);
+  }
+  72% {
+    transform: translateY(0) scale(1.06, 0.92);
+  }
+  86% {
+    transform: translateY(-4px) scale(0.98, 1.03);
+  }
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+}
+
+/* 果冻摇晃：轻微横向摆 + 挤压，轻柔永动，适合角色/徽章 */
+@keyframes jellyWobble {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1, 1);
+  }
+  15% {
+    transform: rotate(-5deg) scale(1.04, 0.94);
+  }
+  35% {
+    transform: rotate(4deg) scale(0.96, 1.05);
+  }
+  55% {
+    transform: rotate(-3deg) scale(1.02, 0.97);
+  }
+  75% {
+    transform: rotate(2deg) scale(0.98, 1.03);
+  }
+}
+
+/* 果冻弹入：入场时轻微挤压弹跳，适合奖章/提示卡出现 */
+@keyframes jellyPop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(1.08, 0.92);
+    opacity: 1;
+  }
+  75% {
+    transform: scale(0.96, 1.05);
+  }
+  100% {
+    transform: scale(1, 1);
+    opacity: 1;
   }
 }
 
@@ -286,6 +561,20 @@
   backdrop-filter: blur(12px);
   border: 3px solid rgb(255 209 225 / 0.9);
   box-shadow: var(--shadow-jelly);
+  position: relative;
+
+  /* 果冻高光弧：左上 45° 白弧，增强 Q 弹立体感 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 38%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgb(255 255 255 / 0.5), rgb(255 255 255 / 0) 70%);
+    pointer-events: none;
+  }
 }
 
 /* 果冻玻璃卡（设计方案 02 Glass）：白底 60% + blur 16px + 内发光粉边 */
@@ -322,6 +611,51 @@
     box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.35);
     pointer-events: none;
   }
+}
+
+/* 果冻可点击卡片：白底 / 粉边 / 软阴影 / 按压回弹 / 高光弧 */
+@utility jelly-card {
+  border-radius: 1.5rem;
+  background: rgb(255 255 255 / 0.9);
+  border: 2px solid rgb(255 209 225 / 0.85);
+  box-shadow: 0 4px 0 0 rgb(255 107 150 / 0.10), 0 8px 20px -6px rgb(255 107 150 / 0.22);
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.12s ease;
+  position: relative;
+  overflow: hidden;
+
+  &:active {
+    transform: translateY(2px) scale(0.97);
+    box-shadow: 0 1px 0 0 rgb(255 107 150 / 0.08), 0 4px 12px -6px rgb(255 107 150 / 0.15);
+  }
+
+  /* 高光弧 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 35%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgb(255 255 255 / 0.45), rgb(255 255 255 / 0) 70%);
+    pointer-events: none;
+  }
+}
+
+/* 果冻弹入动画：入场时 Q 弹挤压，适合徽章/奖章/提示卡 */
+@utility animate-jelly-pop {
+  animation: jellyPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 果冻弹跳：轻落地回弹，适合按钮/卡片首次出现 */
+@utility animate-jelly-bounce {
+  animation: jellyBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 果冻摇晃：永动轻柔摇晃，适合角色/图标 */
+@utility animate-jelly-wobble {
+  animation: jellyWobble 2.4s ease-in-out infinite;
 }
 
 /* 果冻输入框（设计方案 03 ⑤）：玻璃底 + 粉描边 + 聚焦主色发光
@@ -517,10 +851,10 @@
   border: 1px solid rgba(255, 255, 255, 0.35);
 }
 /* 色档：amber 价格 / pink 穿戴 / emerald 已拥有 / gray 买不起 */
-.badge-chip--amber   { background: linear-gradient(135deg, #f59e0b 0%, #ef4444 70%, #f97316 100%); }
-.badge-chip--pink    { background: linear-gradient(135deg, #ec4899 0%, #f472b6 50%, #ef4444 100%); }
-.badge-chip--emerald { background: linear-gradient(135deg, #10b981 0%, #059669 60%, #34d399 100%); }
-.badge-chip--gray    { background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%); opacity: 0.95; }
+.badge-chip--amber   { background: linear-gradient(135deg, #e5ac2e 0%, #ff5c7a 70%, #ff9f5a 100%); }
+.badge-chip--pink    { background: linear-gradient(135deg, #ff6b96 0%, #ff8db0 50%, #ff5c7a 100%); }
+.badge-chip--emerald { background: linear-gradient(135deg, #33a863 0%, #047857 60%, #5fd68b 100%); }
+.badge-chip--gray    { background: linear-gradient(135deg, #cda6b0 0%, #966b78 100%); opacity: 0.95; }
 
 /* 识字模块·部件拼装动画（P2 字理可视化） */
 @keyframes hz-comp-in {

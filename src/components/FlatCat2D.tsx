@@ -161,7 +161,7 @@ export function FlatCat2D({
         id: Date.now() + i,
         x: px + (Math.random() - 0.5) * 40,
         y: py,
-        symbol: symbols[i % symbols.length]!,
+        symbol: symbols[i % symbols.length] ?? '',
         dx: (Math.random() - 0.5) * 50,
       }));
       setParticles(prev => [...prev, ...newP]);

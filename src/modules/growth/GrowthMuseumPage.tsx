@@ -274,12 +274,12 @@ export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?:
                         has ? 'shadow-fluffy border-candy-purple/40 bg-white' : 'opacity-70 grayscale bg-gray-50 border-gray-200',
                       )}
                       style={{
-                        borderColor: has ? tone.main : '#e5e7eb',
-                        background: has ? tone.soft : '#f9fafb',
+                        borderColor: has ? tone.main : '#f0dde2',
+                        background: has ? tone.soft : '#fbf6f7',
                       }}
                     >
                       <div className={cn('text-3xl', has && 'animate-bounce-soft')}>{badge.emoji}</div>
-                      <div className="mt-1.5 truncate text-sm font-extrabold" style={{ color: has ? tone.deep : '#9ca3af' }}>
+                      <div className="mt-1.5 truncate text-sm font-extrabold" style={{ color: has ? tone.deep : '#cda6b0' }}>
                         {badge.name}
                       </div>
                       <div className="mt-0.5 line-clamp-2 text-[11px] font-semibold text-ink-soft">{badge.desc}</div>

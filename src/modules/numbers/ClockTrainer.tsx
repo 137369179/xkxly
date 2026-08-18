@@ -25,7 +25,7 @@ interface ClockTime {
   label: string; // 如 "3点整"、"3点半"
 }
 
-function randomTime(level: Level): ClockTime {
+export function randomTime(level: Level): ClockTime {
   const hour = Math.floor(Math.random() * 12) + 1;
   if (level === 1) {
     return { hour, minute: 0, label: `${hour}点整` };
@@ -39,7 +39,7 @@ function randomTime(level: Level): ClockTime {
     : { hour, minute: 0, label: `${hour}点整` };
 }
 
-function generateOptions(correct: ClockTime, count: number): ClockTime[] {
+export function generateOptions(correct: ClockTime, count: number): ClockTime[] {
   const opts = new Set([correct.label]);
   while (opts.size < count) {
     const h = Math.floor(Math.random() * 12) + 1;
@@ -55,12 +55,12 @@ function generateOptions(correct: ClockTime, count: number): ClockTime[] {
 }
 
 /** 时针角度（hour 1-12, minute 0/30） */
-function hourAngle(h: number, m: number): number {
+export function hourAngle(h: number, m: number): number {
   return ((h % 12) + m / 60) * 30;
 }
 
 /** 分针角度 */
-function minuteAngle(m: number): number {
+export function minuteAngle(m: number): number {
   return m * 6;
 }
 

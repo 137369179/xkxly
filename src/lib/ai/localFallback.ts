@@ -159,22 +159,22 @@ export function getSmartFallback(
   
   switch (scene) {
     case 'hanzi.story':
-      return getHanziLocalFallback(getString('char')!, { 
+      return getHanziLocalFallback(getString('char') ?? '', { 
         pinyin: getString('pinyin'),
         origin: getString('origin')
       });
     case 'math.explain':
-      return getMathLocalFallback(getString('display')!, getString('correct')!);
+      return getMathLocalFallback(getString('display') ?? '', getString('correct') ?? '');
     case 'pinyin.tutor':
-      return getPinyinLocalFallback(getString('symbol')!);
+      return getPinyinLocalFallback(getString('symbol') ?? '');
     case 'poem.tutor':
       return getPoemLocalFallback(
-        getString('title')!, 
-        getString('author')!, 
-        getString('content')!
+        getString('title') ?? '',
+        getString('author') ?? '',
+        getString('content') ?? ''
       );
     case 'logic.explain':
-      return getLogicLocalFallback(getString('seq')!, getString('correct')!);
+      return getLogicLocalFallback(getString('seq') ?? '', getString('correct') ?? '');
     default:
       return null;
   }
@@ -203,7 +203,7 @@ function generateWordExample(char: string): string {
   
   const words = examples[char];
   if (words && words.length > 0) {
-    return words[0]!;
+    return words[0] ?? '';
   }
   
   return `${char}${char === '人' ? '们' : char === '大' ? '家' : char === '小' ? '心' : '儿'}`;

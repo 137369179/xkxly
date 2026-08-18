@@ -52,6 +52,8 @@ export const NAV_ITEMS: NavItem[] = [
   { id: 'rewards', label: '奖励中心', short: '奖励', emoji: '🎁', imageIcon: '/icons/felt_box.jpg', tone: 'pink', desc: '贴纸册 · 徽章墙', hiddenInSidebar: true },
   { id: 'passport', label: '学习护照', short: '护照', emoji: '🛂', imageIcon: '/icons/felt_medal.jpg', tone: 'purple', desc: '盖章里程碑 · 成就墙', hiddenInSidebar: true },
   { id: 'parent', label: '家长中心', short: '家长', emoji: '👨‍👩‍👧', imageIcon: '/icons/parent.jpg', tone: 'green', desc: '报告 · 设置 · 护眼' },
+  { id: 'achievement', label: '宝贝成就中心', short: '成就', emoji: '🏅', imageIcon: '/icons/felt_medal.jpg', tone: 'pink', desc: '收集勋章 · 见证成长' },
+  { id: 'nursery', label: '儿歌乐园', short: '儿歌', emoji: '🎶', imageIcon: '/icons/cover-songs.png', tone: 'pink', desc: '逐句跟唱 · 学知识明道理', bottom: true },
 ];
 
 export const NAV_MAP = new Map(NAV_ITEMS.map((n) => [n.id, n]));
@@ -113,6 +115,8 @@ export const NAV_CATEGORY_MAP: Record<RouteId, NavCategory> = {
   rewards: 'parent',
   passport: 'parent',
   parent: 'parent',
+  achievement: 'growth',
+  nursery: 'learn',
 };
 
 export function categoryOf(id: RouteId): NavCategory {

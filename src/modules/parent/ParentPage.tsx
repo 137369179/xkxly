@@ -41,6 +41,7 @@ import {
   PIN_FAIL_LIMIT,
 } from '@/lib/pin';
 import { navigate } from '@/lib/router';
+import { openTraining, skillToTarget } from '@/lib/skillRouting';
 import { useTranslation } from '@/i18n/useTranslation';
 import { ParentPosterSection } from './ParentPosterSection';
 import { ParentBackupSection } from './ParentBackupSection';
@@ -48,6 +49,7 @@ import { ParentSettingsSection } from './ParentSettingsSection';
 import { ParentTtsDiagPanel } from './ParentTtsDiagPanel';
 import { ParentAiLogsPanel } from './ParentAiLogsPanel';
 import { ParentTodayLogPanel } from './ParentTodayLogPanel';
+import { ScreenTimeReport } from './ScreenTimePanel';
 
 const poemTitle = (id: string) => POEMS.find((p) => p.id === id)?.title;
 
@@ -376,6 +378,7 @@ export default function ParentPage() {
           <div className="space-y-2">
             {weak.map(({ skill, m }) => {
               const t = TONE_STYLE[skill.split(':')[0] as keyof typeof TONE_STYLE] ?? TONE_STYLE.purple;
+              const target = skillToTarget(skill);
               return (
                 <div key={skill} className="flex items-center gap-3 rounded-2xl bg-white/70 p-3">
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-lg font-extrabold" style={{ background: t.soft, color: t.deep }}>
@@ -390,6 +393,14 @@ export default function ParentPage() {
                   <span className="shrink-0 rounded-full px-3 py-1 text-xs font-extrabold" style={{ background: t.soft, color: t.deep }}>
                     {LEVEL_TEXT[m.lv]}
                   </span>
+                  {target && (
+                    <button
+                      onClick={() => openTraining(skill)}
+                      className="shrink-0 rounded-full bg-candy-orange-soft px-3 py-1 text-xs font-extrabold text-candy-orange-deep transition hover:brightness-105 active:scale-95"
+                    >
+                      🎯 去练习
+                    </button>
+                  )}
                 </div>
               );
             })}
@@ -427,6 +438,9 @@ export default function ParentPage() {
 
       {/* 今日学习日志 */}
       <ParentTodayLogPanel />
+
+      {/* 屏幕时间报告 */}
+      <ScreenTimeReport />
 
       {/* 数据备份与恢复 */}
       <ParentBackupSection />

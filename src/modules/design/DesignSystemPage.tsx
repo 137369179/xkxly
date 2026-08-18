@@ -27,6 +27,24 @@ const PINK_FAMILY = [
   { name: 'candy-red', hex: '#FF5C7A', note: '强调' },
 ];
 
+// 糖果六色家族（蓝/黄/绿/紫/橙），与 --color-candy-* 令牌一一对应
+const CANDY_FAMILY = [
+  { name: 'candy-blue', hex: '#A8D8F0', note: '主蓝' },
+  { name: 'candy-yellow', hex: '#FFE5A8', note: '主黄' },
+  { name: 'candy-green', hex: '#B8F0D8', note: '主绿' },
+  { name: 'candy-purple', hex: '#D9C6F5', note: '主紫' },
+  { name: 'candy-orange', hex: '#FFC9A8', note: '主橙' },
+];
+
+// 糖果语义色（图表/徽章常用），与 TONE_STYLE 主色一致
+const CANDY_SEMANTIC = [
+  { name: 'candy-blue-deep', hex: '#2E93C9', note: '蓝主色' },
+  { name: 'candy-yellow-deep', hex: '#E5AC2E', note: '黄主色' },
+  { name: 'candy-green-deep', hex: '#33A863', note: '绿主色' },
+  { name: 'candy-purple-deep', hex: '#8B6EF0', note: '紫主色' },
+  { name: 'candy-orange-deep', hex: '#FF9F5A', note: '橙主色' },
+];
+
 const NEUTRALS = [
   { name: 'cream', hex: '#FFF9FA', note: '暖白' },
   { name: 'ink', hex: '#5C2E3D', note: '墨棕' },
@@ -175,6 +193,14 @@ export default function DesignSystemPage() {
       <Section id="color" index="01" title="色彩板 · Color Palette" desc="果冻粉主色家族 + 中性色，全部来自 --color-candy-* 令牌。">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {PINK_FAMILY.map((c) => (
+            <Swatch key={c.name} {...c} />
+          ))}
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          {CANDY_FAMILY.map((c) => (
+            <Swatch key={c.name} {...c} />
+          ))}
+          {CANDY_SEMANTIC.map((c) => (
             <Swatch key={c.name} {...c} />
           ))}
         </div>
@@ -396,14 +422,30 @@ export default function DesignSystemPage() {
 /* 6 语义色调 */
 --color-candy-blue / yellow / green / purple / orange
 
-/* 阴影 */
+/* 糖果化默认色板（全站颜色统一核心） */
+--color-pink-50..500 / purple-* / amber-* / emerald-* / sky-* …
+覆盖 Tailwind 默认色为果冻六色家族，
+全站 bg-pink-100 / border-purple-200 等自动统一。
+
+/* 暖调中性灰（颜色统一收尾） */
+--color-gray / slate / zinc / neutral 50..900
+→ 统一暖粉棕灰，禁用/锁定/次要文字不再发冷；
+语义亮红 red-* 与深档 600+ 保留原值。
+
+/* 阴影（含默认阴影粉化） */
 --shadow-jelly:     0 4px 0 0 rgb(255 107 150/.14),
                     0 10px 24px -4px rgb(255 107 150/.28);
 --shadow-jelly-lg:  0 6px 0 0 rgb(255 107 150/.16),
                     0 20px 44px -8px rgb(255 107 150/.36);
+--shadow-xs..2xl 覆盖为粉色果冻软阴影，
+全站 shadow-sm/md/lg 自动变 Q 弹，无需改组件。
+
+/* 果冻 Q 弹动画 */
+--animate-jelly-bounce / jelly-wobble / jelly-pop
 
 /* 质感 utility */
-@utility glass / jelly-shine / input-jelly`}
+@utility glass / jelly-shine / input-jelly / card-candy
+@utility jelly-card / animate-jelly-pop / animate-jelly-bounce / animate-jelly-wobble`}
           </pre>
         </Panel>
       </Section>

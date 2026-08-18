@@ -122,9 +122,12 @@ export function QuizCard({
     const arr = [...question.options];
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      const tmp = arr[i]!;
-      arr[i] = arr[j]!;
-      arr[j] = tmp;
+      const tmp = arr[i];
+      const sw = arr[j];
+      if (tmp !== undefined && sw !== undefined) {
+        arr[i] = sw;
+        arr[j] = tmp;
+      }
     }
     return arr;
   // intentional: shuffle only on question id change, not on every render
@@ -222,7 +225,7 @@ export function QuizCard({
   useEffect(() => {
     if (!autoSpeak || !question.speak) return;
     const timer = setTimeout(() => {
-      void speak(question.speak!, { lang: question.speakLang ?? 'zh-CN', module: 'quiz' });
+      void speak(question.speak ?? '', { lang: question.speakLang ?? 'zh-CN', module: 'quiz' });
     }, 320);
     return () => {
       clearTimeout(timer);
@@ -376,7 +379,7 @@ export function QuizCard({
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              void speak(question.speak!, { lang: question.speakLang ?? 'zh-CN', module: 'quiz' });
+              void speak(question.speak ?? '', { lang: question.speakLang ?? 'zh-CN', module: 'quiz' });
             }}
             className="flex items-center gap-1.5 rounded-full bg-candy-purple-soft px-4 py-1.5 text-sm font-extrabold text-candy-purple-deep shadow-candy-sm transition active:translate-y-[1px]"
             aria-label={translate('quiz.listenAgainBtn')}

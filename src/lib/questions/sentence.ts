@@ -14,7 +14,7 @@ function resolveSentence(forceId?: string): Sentence {
     const found = SENTENCES.find((s) => s.id === forceId);
     if (found) return found;
   }
-  return sample(SENTENCES)!;
+  return sample(SENTENCES);
 }
 
 /** 看英文选中文（难度 1） */
@@ -31,7 +31,7 @@ function makeSentenceZhQuestion(forceId?: string): Question {
     display: target.en,
     speak: target.en,
     options,
-    answerId: options[opts.indexOf(target)]!.id,
+    answerId: options[opts.indexOf(target)]?.id ?? '',
     hint: target.words[0],
     why: `"${target.en}" 的意思是 "${target.zh}"`,
     difficulty: 1,
@@ -52,7 +52,7 @@ function makeSentenceListenQuestion(forceId?: string): Question {
     display: '🔊',
     speak: target.en,
     options,
-    answerId: options[opts.indexOf(target)]!.id,
+    answerId: options[opts.indexOf(target)]?.id ?? '',
     hint: target.en.split(' ')[0],
     why: `你听到 "${target.en}"，意思是 "${target.zh}"`,
     difficulty: 2,
@@ -64,7 +64,7 @@ function makeSentenceFillQuestion(forceId?: string): Question {
   const target = resolveSentence(forceId);
   const words = target.words;
   const idx = Math.floor(Math.random() * words.length);
-  const blank = words[idx]!;
+  const blank = words[idx] ?? '';
   const pool = distinct(SENTENCES.flatMap((s) => s.words.map((w) => w.toLowerCase())));
   const distractors = sampleMany(pool.filter((w) => w !== blank.toLowerCase()), 3);
   const options = shuffle([blank, ...distractors].map((w) => opt({ label: w })));
@@ -82,7 +82,7 @@ function makeSentenceFillQuestion(forceId?: string): Question {
     display: shown,
     speak: target.en,
     options,
-    answerId: options.find((o) => o.label === blank)!.id,
+    answerId: options.find((o) => o.label === blank)?.id ?? '',
     hint: `${blank} 的意思是 ${target.zh.match(/[^，。！？]+/)?.[0] ?? ''}`,
     why: `完整的句子是 "${target.en}"（${target.zh}）`,
     difficulty: 3,

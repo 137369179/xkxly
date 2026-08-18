@@ -8,7 +8,7 @@ export const THEMES: ThemePreset[] = [
     tone: 'orange',
     characters: ['小狮子', '小兔子', '小大象', '小狐狸'],
     sceneEmojis: ['🦊', '🐰', '🐿️', '🦉', '🌳'],
-    bgGradient: 'linear-gradient(180deg, #E8F5E9 0%, #C8E6C9 100%)',
+    bgGradient: 'linear-gradient(180deg, #f0faf4 0%, #b8f0d8 100%)',
   },
   {
     id: 'space',
@@ -17,7 +17,7 @@ export const THEMES: ThemePreset[] = [
     tone: 'purple',
     characters: ['小宇航员', '机器人小宝', '小星星'],
     sceneEmojis: ['⭐', '🌟', '☄️', '🛸', '🌙'],
-    bgGradient: 'linear-gradient(180deg, #1A237E 0%, #311B92 100%)',
+    bgGradient: 'linear-gradient(180deg, #6631c7 0%, #53289f 100%)',
   },
   {
     id: 'princess',
@@ -26,7 +26,7 @@ export const THEMES: ThemePreset[] = [
     tone: 'pink',
     characters: ['小公主', '花仙子', '美人鱼'],
     sceneEmojis: ['👑', '💎', '🦢', '🌸', '🏰'],
-    bgGradient: 'linear-gradient(180deg, #FCE4EC 0%, #F8BBD0 100%)',
+    bgGradient: 'linear-gradient(180deg, #ffe4ee 0%, #ffb6c9 100%)',
   },
   {
     id: 'dinosaur',
@@ -35,7 +35,7 @@ export const THEMES: ThemePreset[] = [
     tone: 'green',
     characters: ['小恐龙', '翼龙宝宝', '三角龙'],
     sceneEmojis: ['🦖', '🌴', '🥚', '🌋', '🦴'],
-    bgGradient: 'linear-gradient(180deg, #FFF3E0 0%, #FFCC80 100%)',
+    bgGradient: 'linear-gradient(180deg, #fff3ec 0%, #ffc9a8 100%)',
   },
   {
     id: 'ocean',
@@ -44,7 +44,7 @@ export const THEMES: ThemePreset[] = [
     tone: 'blue',
     characters: ['小海豚', '小乌龟', '小螃蟹'],
     sceneEmojis: ['🐢', '🦀', '🌊', '🐚', '🫧'],
-    bgGradient: 'linear-gradient(180deg, #E1F5FE 0%, #4FC3F7 100%)',
+    bgGradient: 'linear-gradient(180deg, #dcecfa 0%, #55aee0 100%)',
   },
   {
     id: 'forest',
@@ -53,7 +53,7 @@ export const THEMES: ThemePreset[] = [
     tone: 'green',
     characters: ['小蘑菇', '小松鼠', '小萤火虫'],
     sceneEmojis: ['🐌', '🦋', '🍃', '🌳', '🌿'],
-    bgGradient: 'linear-gradient(180deg, #E0F2F1 0%, #A5D6A7 100%)',
+    bgGradient: 'linear-gradient(180deg, #f0faf4 0%, #b8f0d8 100%)',
   },
 ];
 

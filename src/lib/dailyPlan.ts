@@ -392,10 +392,11 @@ export function slotDone(
   step: number,
 ): boolean {
   const slots = splitBySlot(plan);
-  const sections = slots[slot]!
+  const sections = slots[slot];
   if (sections.length === 0) return true;
   // step 是全局步骤索引，计算该时段最后一段是否已 done
-  const lastIdx = plan.sections.indexOf(sections[sections.length - 1]!);
+  const last = sections[sections.length - 1];
+  const lastIdx = last === undefined ? -1 : plan.sections.indexOf(last);
   return step > lastIdx;
 }
 
@@ -405,7 +406,8 @@ export function slotStartStep(
   slot: TimeSlot,
 ): number {
   const slots = splitBySlot(plan);
-  const sections = slots[slot]!
+  const sections = slots[slot];
   if (sections.length === 0) return 0;
-  return plan.sections.indexOf(sections[0]!);
+  const first = sections[0];
+  return first === undefined ? 0 : plan.sections.indexOf(first);
 }

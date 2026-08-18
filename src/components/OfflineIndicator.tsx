@@ -78,7 +78,7 @@ export function OfflineToast() {
           exit={{ opacity: 0, y: -20 }}
           className="fixed left-1/2 top-3 z-50 -translate-x-1/2 rounded-full px-4 py-2 text-sm font-extrabold text-white shadow-candy-sm"
           style={{
-            background: offline ? '#FF6B9D' : '#4ECDC4',
+            background: offline ? '#ff6b96' : '#5fd68b',
           }}
         >
           {offline ? t('offlineIndicator.toastDisconnected') : t('offlineIndicator.toastReconnected')}

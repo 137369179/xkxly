@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { BADGES } from '@/data/badges';
 import { TONE_STYLE, type Tone } from '@/lib/tones';
@@ -31,9 +31,9 @@ interface TierConfig {
 }
 
 const TIER_CONFIG: Record<Tier, TierConfig> = {
-  gold: { label: '金牌成就', emoji: '🥇', tone: 'yellow', ring: '#D99C0E', bg: 'linear-gradient(135deg, #FFF3D2, #FFE6A8)' },
-  silver: { label: '银牌成就', emoji: '🥈', tone: 'blue', ring: '#2196C9', bg: 'linear-gradient(135deg, #DDF2FD, #E8F4FB)' },
-  bronze: { label: '铜牌成就', emoji: '🥉', tone: 'orange', ring: '#E0742B', bg: 'linear-gradient(135deg, #FFEBDB, #FFE0CC)' },
+  gold: { label: '金牌成就', emoji: '🥇', tone: 'yellow', ring: '#e5ac2e', bg: 'linear-gradient(135deg, #FFF3D2, #FFE6A8)' },
+  silver: { label: '银牌成就', emoji: '🥈', tone: 'blue', ring: '#2e93c9', bg: 'linear-gradient(135deg, #dcecfa, #f2f6fd)' },
+  bronze: { label: '铜牌成就', emoji: '🥉', tone: 'orange', ring: '#c2410c', bg: 'linear-gradient(135deg, #FFEBDB, #FFE0CC)' },
 };
 
 /** 金色：通关类 + 全通类 */
@@ -129,6 +129,7 @@ function Medal({
   const { t: translate } = useTranslation();
   const cfg = TIER_CONFIG[tier] ?? TIER_CONFIG.bronze;
   const ts = TONE_STYLE[badge.tone ?? 'blue'] ?? TONE_STYLE.blue;
+  const [imgOk, setImgOk] = useState(true);
   return (
     <motion.div
       initial={{ scale: 0.9, opacity: 0 }}
@@ -143,7 +144,7 @@ function Medal({
       }}
       title={badge.desc}
     >
-      {/* 奖牌图标 */}
+      {/* 奖牌图标：优先展示勋章图片，失败回退 emoji */}
       <div
         className={cn('grid h-14 w-14 place-items-center rounded-full text-3xl', !unlocked && 'grayscale opacity-40')}
         style={{
@@ -151,7 +152,16 @@ function Medal({
           border: unlocked ? `3px solid ${cfg.ring}` : '3px solid #CFC8DA',
         }}
       >
-        {badge.emoji}
+        {badge.image && imgOk ? (
+          <img
+            src={badge.image}
+            alt={badge.name}
+            className="h-full w-full rounded-full object-cover"
+            onError={() => setImgOk(false)}
+          />
+        ) : (
+          badge.emoji
+        )}
       </div>
       <span
         className="line-clamp-1 text-[11px] font-extrabold"

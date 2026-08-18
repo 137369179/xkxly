@@ -28,8 +28,8 @@ export function ThemePicker({ value, onChange }: ThemePickerProps) {
             className="relative flex flex-col items-center justify-center gap-2 rounded-[1.5rem] p-4 sm:p-6 transition-colors"
             style={{
               backgroundColor: selected ? tone.soft : '#ffffff',
-              border: `4px solid ${selected ? tone.main : '#f0f0f0'}`,
-              boxShadow: selected ? `0 6px 0 ${tone.deep}` : '0 4px 0 #e0e0e0',
+              border: `4px solid ${selected ? tone.main : '#f0dde2'}`,
+              boxShadow: selected ? `0 6px 0 ${tone.deep}` : '0 4px 0 #e2c4cb',
             }}
           >
             {selected && (
@@ -47,7 +47,7 @@ export function ThemePicker({ value, onChange }: ThemePickerProps) {
             <span className="text-4xl sm:text-5xl">{theme.emoji}</span>
             <span
               className="text-base sm:text-lg font-bold"
-              style={{ color: selected ? tone.deep : '#666' }}
+              style={{ color: selected ? tone.deep : '#966b78' }}
             >
               {theme.label}
             </span>

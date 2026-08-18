@@ -100,8 +100,8 @@ export function PhoneticFamilies({ onLearn }: { onLearn?: (h: HanziEntry) => voi
                           }}
                           className="flex min-w-[72px] flex-col items-center rounded-2xl border-2 p-2 transition-all active:translate-y-[1px]"
                           style={{
-                            borderColor: learned ? '#22c55e66' : '#e5e0f0',
-                            background: learned ? '#f0fdf4' : 'white',
+                            borderColor: learned ? '#33a86366' : '#f0dde2',
+                            background: learned ? '#f0faf4' : 'white',
                           }}
                         >
                           <span className="text-3xl font-black text-ink">{h.c}</span>

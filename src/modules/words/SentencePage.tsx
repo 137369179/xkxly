@@ -50,11 +50,11 @@ export default function SentencePage() {
     setHi(-1);
     for (let i = 0; i < s.words.length; i++) {
       setHi(i);
-      await speak(s.words[i]!, { lang: 'en-US', rate: 0.7 });
+      try { await speak(s.words[i]!, { lang: 'en-US', rate: 0.7 }); } catch { /* TTS 失败不阻断逐词高亮 */ }
     }
     setHi(-1);
     // 朗读完整句
-    await speak(s.en, { lang: 'en-US', rate: 0.75 });
+    try { await speak(s.en, { lang: 'en-US', rate: 0.75 }); } catch { /* TTS 失败不阻断 */ }
   };
 
   // 测验
@@ -75,12 +75,13 @@ export default function SentencePage() {
     if (quizChosen) return;
     setQuizChosen(opt);
     const correct = opt === quizSent!.zh;
-    const skill = `sentence:${quizSent!.id}`;
+    const skill = `word:sentence:${quizSent!.id}`;
     if (correct) {
       sfxWin();
       celebrateSmall();
       setQuizOk(o => o + 1);
       learnSkill(skill);
+      practice(skill, true);
     } else {
       // 答错记录到错题本，便于后续复习
       practice(skill, false);
@@ -133,7 +134,7 @@ export default function SentencePage() {
             {quizSent.en}
           </motion.p>
           <button
-            onClick={() => speak(quizSent.en, { lang: 'en-US', rate: 0.7 })}
+            onClick={() => { void speak(quizSent.en, { lang: 'en-US', rate: 0.7 }).catch(() => {}); }}
             className="mt-2 text-sm font-bold text-candy-pink-deep"
           >
             🔊 {tr('sentencePage.listenAgain')}

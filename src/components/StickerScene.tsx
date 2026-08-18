@@ -25,7 +25,7 @@ const SCENES = [
   { name: '海底世界', bg: 'linear-gradient(180deg, #006994 0%, #00b4d8 50%, #90e0ef 100%)' },
   { name: '星空夜晚', bg: 'linear-gradient(180deg, #0a0a2e 0%, #1a1a4e 50%, #2d1b69 100%)' },
   { name: '森林草地', bg: 'linear-gradient(180deg, #2d5a27 0%, #4a8c3f 50%, #87ceeb 100%)' },
-  { name: '彩虹桥', bg: 'linear-gradient(180deg, #FF6B6B 0%, #FFE66D 25%, #4ecdc4 50%, #45B7D1 75%, #96C93D 100%)' },
+  { name: '彩虹桥', bg: 'linear-gradient(180deg, #ff5c7a 0%, #e5ac2e 25%, #5fd68b 50%, #55aee0 75%, #33a863 100%)' },
 ];
 
 export function StickerScene() {
@@ -74,7 +74,8 @@ export function StickerScene() {
       const offscreen = document.createElement('canvas');
       offscreen.width = rect.width * 2;
       offscreen.height = rect.height * 2;
-      const ctx = offscreen.getContext('2d')!;
+      const ctx = offscreen.getContext('2d');
+      if (!ctx) return;
       ctx.scale(2, 2);
       // 简单背景
       ctx.fillStyle = '#fff';
@@ -84,7 +85,7 @@ export function StickerScene() {
         const url = offscreen.toDataURL('image/png');
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${t("stickerScene.savePrefix")}_${SCENES[sceneIdx]!.name}.png`;
+        a.download = `${t("stickerScene.savePrefix")}_${(SCENES[sceneIdx] ?? SCENES[0] ?? { name: '' }).name}.png`;
         a.click();
         celebrateSmall();
         sfxStar();
@@ -123,7 +124,7 @@ export function StickerScene() {
       <div
         ref={canvasRef}
         className="relative mx-auto h-80 w-full max-w-md overflow-hidden rounded-2xl border-4 border-candy-pink-deep shadow-lg"
-        style={{ background: SCENES[sceneIdx]!.bg }}
+        style={{ background: (SCENES[sceneIdx] ?? SCENES[0] ?? { bg: '' }).bg }}
       >
         {placed.map(s => (
           <motion.div

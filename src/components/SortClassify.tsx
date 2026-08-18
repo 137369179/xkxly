@@ -67,7 +67,7 @@ const ROUNDS: Round[] = [
 export function SortClassify() {
   const { t } = useTranslation();
   const [roundIdx, setRoundIdx] = useState(0);
-  const round = ROUNDS[roundIdx]!
+  const round = ROUNDS[roundIdx] ?? { items: [], categories: [], catLabels: {}, catEmojis: {} };
   const [items, setItems] = useState(() => shuffle(round.items));
   const [assigned, setAssigned] = useState<Record<string, string[]>>(() => {
     const obj: Record<string,string[]> = {};
@@ -88,7 +88,7 @@ export function SortClassify() {
   }, []);
 
   const startNew = (idx: number) => {
-    const r = ROUNDS[idx]!
+    const r = ROUNDS[idx] ?? { items: [], categories: [], catLabels: {}, catEmojis: {} };
     setRoundIdx(idx);
     setItems(shuffle(r.items));
     const obj: Record<string,string[]> = {};
@@ -105,7 +105,7 @@ export function SortClassify() {
     if (!item) { lockRef.current = false; return; }
     if (item.category === cat) {
       sfxCorrect();
-      setAssigned(prev => ({ ...prev, [cat]: [...prev[cat]!, selected] }));
+      setAssigned(prev => ({ ...prev, [cat]: [...(prev[cat] ?? []), selected] }));
       setItems(prev => prev.filter(i=>i.id!==selected));
       setScore(s=>s+1);
       void speak(`${item.label}是${round.catLabels[cat]}！`, { lang:'zh-CN', rate:0.85, module:'praise' });
@@ -163,8 +163,8 @@ export function SortClassify() {
             <div className="mb-1 text-center text-2xl">{round.catEmojis[cat]}</div>
             <div className="mb-2 text-center text-xs font-extrabold">{round.catLabels[cat]}</div>
             <div className="flex flex-wrap justify-center gap-1">
-              {assigned[cat]!.map(id => {
-                const item = round.items.find(i=>i.id===id)!;
+              {(assigned[cat] ?? []).map(id => {
+                const item = round.items.find(i=>i.id===id) ?? { id, emoji: '❓', label: '', category: '' };
                 return <span key={id} className="text-xl">{item.emoji}</span>;
               })}
             </div>

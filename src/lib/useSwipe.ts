@@ -24,13 +24,13 @@ export function useSwipe<T extends HTMLElement = HTMLDivElement>({
     if (!el) return;
 
     const handleTouchStart = (e: TouchEvent) => {
-      startX.current = e.touches[0]!.clientX;
-      startY.current = e.touches[0]!.clientY;
+      startX.current = e.touches[0]?.clientX ?? 0;
+      startY.current = e.touches[0]?.clientY ?? 0;
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
-      const diffX = e.changedTouches[0]!.clientX - startX.current;
-      const diffY = e.changedTouches[0]!.clientY - startY.current;
+      const diffX = (e.changedTouches[0]?.clientX ?? 0) - startX.current;
+      const diffY = (e.changedTouches[0]?.clientY ?? 0) - startY.current;
 
       // 确保是以水平向滑为主的手势
       if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) >= threshold) {

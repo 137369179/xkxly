@@ -15,7 +15,7 @@ export const Glint: React.FC<{ cx?: number; cy?: number; rx?: number; ry?: numbe
 );
 
 /** 儿童笑脸：支持多种表情（happy/wink/sleepy/shy/surprised），让吉祥物各有个性。
- *  cheekTone 控制腮红配色：主系统用 'white'（白），宠物图标用 'pink'（粉 #FF9CB8）。 */
+ *  cheekTone 控制腮红配色：主系统用 'white'（白），宠物图标用 'pink'（粉 #ff8db0）。 */
 export const Face: React.FC<{
   cx?: number; cy?: number; gap?: number; dot?: number;
   smile?: boolean; cheek?: boolean; mood?: 'happy' | 'wink' | 'sleepy' | 'shy' | 'surprised';
@@ -73,16 +73,16 @@ export const Face: React.FC<{
     if (mood === 'shy') {
       return (
         <>
-          <circle cx={cx - gap - 6} cy={cy + 4} r={3.2} fill="#FF9CB8" opacity={0.7} />
-          <circle cx={cx + gap + 6} cy={cy + 4} r={3.2} fill="#FF9CB8" opacity={0.7} />
+          <circle cx={cx - gap - 6} cy={cy + 4} r={3.2} fill="#ff8db0" opacity={0.7} />
+          <circle cx={cx + gap + 6} cy={cy + 4} r={3.2} fill="#ff8db0" opacity={0.7} />
         </>
       );
     }
     if (cheekTone === 'pink') {
       return (
         <>
-          <circle cx={cx - gap - 5} cy={cy + 4} r={2.3} fill="#FF9CB8" opacity={0.7} />
-          <circle cx={cx + gap + 5} cy={cy + 4} r={2.3} fill="#FF9CB8" opacity={0.7} />
+          <circle cx={cx - gap - 5} cy={cy + 4} r={2.3} fill="#ff8db0" opacity={0.7} />
+          <circle cx={cx + gap + 5} cy={cy + 4} r={2.3} fill="#ff8db0" opacity={0.7} />
         </>
       );
     }

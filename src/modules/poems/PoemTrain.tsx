@@ -277,7 +277,7 @@ export function ChantBar({ poem }: { poem: DeepPoem }) {
                 {ln.tokens.map((t, k) => {
                   const w = Math.max(6, (t.holdMs / maxMs) * 100);
                   const bg =
-                    t.role === '平' ? '#93c5fd' : t.role === '仄' ? '#f9a8d4' : t.role === '入' ? '#fcd34d' : '#e5e7eb';
+                    t.role === '平' ? '#7cc3e8' : t.role === '仄' ? '#ffabc5' : t.role === '入' ? '#ffd166' : '#f0dde2';
                   return (
                     <div
                       key={k}
@@ -295,7 +295,7 @@ export function ChantBar({ poem }: { poem: DeepPoem }) {
                 <div className="mt-1 flex h-3 items-stretch gap-[2px]">
                   {chars.map((c, k) => {
                     const w = Math.max(4, (c.durMs / maxChar) * 100);
-                    const bg = c.role === '平' ? '#3b82f6' : c.role === '仄' ? '#ec4899' : '#d97706';
+                    const bg = c.role === '平' ? '#2e93c9' : c.role === '仄' ? '#ff6b96' : '#ff9f5a';
                     return (
                       <div
                         key={k}
@@ -316,7 +316,7 @@ export function ChantBar({ poem }: { poem: DeepPoem }) {
                   onPointerLeave={() => recLine === i && stopRec(i)}
                   className={cn(
                     'no-select rounded-full px-3 py-1 text-[11px] font-extrabold transition-colors',
-                    recLine === i ? 'bg-rose-500 text-white' : 'bg-candy-orange-soft text-candy-orange-deep',
+                    recLine === i ? 'bg-candy-red text-white' : 'bg-candy-orange-soft text-candy-orange-deep',
                   )}
                 >
                   {recLine === i ? tr('poem.recRelease') : tr('poem.recHold')}
@@ -349,7 +349,7 @@ export function ChantBar({ poem }: { poem: DeepPoem }) {
         </CandyButton>
       </div>
       {score && (
-        <div className={cn('rounded-2xl p-3 text-sm font-bold', score.score >= 80 ? 'bg-emerald-50 text-emerald-800' : score.score >= 60 ? 'bg-amber-50 text-amber-800' : 'bg-rose-50 text-rose-700')}>
+        <div className={cn('rounded-2xl p-3 text-sm font-bold', score.score >= 80 ? 'bg-candy-green-soft text-candy-green-deep' : score.score >= 60 ? 'bg-candy-yellow-soft text-candy-yellow-deep' : 'bg-candy-red-soft text-candy-red-deep')}>
           <div className="flex flex-wrap items-center gap-2">
             <span>{tr('poem.fitScore')} {score.score} {tr('poem.points')}</span>
             {score.fit !== undefined && <span className="text-xs">· {tr('poem.toneFit')} {score.fit} · {tr('poem.timeFit')} {score.timeFit}</span>}
@@ -404,9 +404,9 @@ export function QuizRunner({ poem }: { poem: DeepPoem }) {
                 const isChosen = o.id === chosen;
                 const tone = solved
                   ? isAns
-                    ? 'bg-emerald-100 text-emerald-800 ring-2 ring-emerald-400'
+                    ? 'bg-candy-green-soft text-candy-green-deep ring-2 ring-candy-green'
                     : isChosen
-                      ? 'bg-rose-100 text-rose-700 ring-2 ring-rose-400'
+                      ? 'bg-candy-red-soft text-candy-red-deep ring-2 ring-candy-red'
                       : 'bg-white/70 text-ink-soft'
                   : 'bg-white/70 text-ink hover:bg-candy-yellow-soft';
                 return (
@@ -423,13 +423,13 @@ export function QuizRunner({ poem }: { poem: DeepPoem }) {
               })}
             </div>
             {solved && q.hint && (
-              <p className="mt-1.5 rounded-xl bg-candy-yellow-soft p-2 text-xs leading-relaxed text-amber-800">💡 {q.hint}</p>
+              <p className="mt-1.5 rounded-xl bg-candy-yellow-soft p-2 text-xs leading-relaxed text-candy-yellow-deep">💡 {q.hint}</p>
             )}
           </div>
         );
       })}
       {done && (
-        <div className={cn('rounded-2xl p-3 text-center text-base font-extrabold', correctCount >= questions.length * 0.75 ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800')}>
+        <div className={cn('rounded-2xl p-3 text-center text-base font-extrabold', correctCount >= questions.length * 0.75 ? 'bg-candy-green-soft text-candy-green-deep' : 'bg-candy-yellow-soft text-candy-yellow-deep')}>
           答对 {correctCount}/{questions.length} 题{','}
           {correctCount >= questions.length * 0.75 ? ' 记忆牢固！' : ' 再读读原文巩固一下～'}
         </div>
@@ -455,9 +455,9 @@ export function PlanSummary({ poem }: { poem: DeepPoem }) {
     yellow: 'bg-candy-yellow-soft',
   };
   const priColor: Record<string, string> = {
-    high: 'text-rose-600',
-    mid: 'text-amber-600',
-    low: 'text-emerald-700',
+    high: 'text-candy-red-deep',
+    mid: 'text-candy-yellow-deep',
+    low: 'text-candy-green-deep',
   };
   const priLabel: Record<string, string> = { high: tr('poem.priHigh'), mid: tr('poem.priMid'), low: tr('poem.priLow') };
 

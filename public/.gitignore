@@ -1,0 +1,13 @@
+# 宝贝学习乐园 · public 本地生成资源（不入库）
+# 这些目录为本地生成的大体积媒体（合计约 2.3GB），已由根 .gitignore 忽略；
+# 此处显式声明，防止误 git add 撑爆仓库或拖慢克隆。
+
+# 汉字模块生成式媒体
+hanzi-videos/
+hanzi-imgs/
+
+# 其它生成缓存
+*.wav
+tmp/
+*.cache
+.DS_Store

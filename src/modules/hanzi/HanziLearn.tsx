@@ -4,7 +4,7 @@ import { TraceCanvas } from '@/components/TraceCanvas';
 import { StrokeAnimation } from '@/components/StrokeAnimation';
 import { StrokeTrace } from '@/components/StrokeTrace';
 import { warmupStrokes } from '@/lib/strokes';
-
+import { SpeechEvalButton } from '@/components/SpeechEvalButton';
 import { QuizCard } from '@/components/QuizCard';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
 import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
@@ -14,8 +14,8 @@ import { Panel } from '@/components/ui/Card';
 import { useAiStream } from '@/lib/ai/useAi';
 import { hanziStoryTask, hanziSentenceTask } from '@/lib/ai/tasks';
 import { speak } from '@/lib/speech';
-import { sfxTap, sfxCorrect } from '@/lib/sfx';
-import { celebrateSmall } from '@/lib/celebrate';
+import { sfxTap, sfxCorrect, sfxWin } from '@/lib/sfx';
+import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 import { makeHanziQuestion } from '@/lib/hanziQuestions';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -49,21 +49,67 @@ export function HanziLearn({ hanzi, onDone }: { hanzi: HanziEntry; onDone: () =>
       key: 'play',
       label: t('hanzi.steps.play'),
       emoji: '🎮',
-      // gate: 必须点击"听一听这个故事"按钮触发 api.ready() 后才能解锁"认"步骤
       gate: true,
       render: (api) => (
         <div className="space-y-4">
-          <div className="text-center">
-            <div className="text-8xl font-black text-ink">{hanzi.c}</div>
-            <p className="mt-2 text-lg font-bold text-ink-soft">{hanzi.pd}</p>
+          <div className="rounded-3xl border-3 border-candy-orange-soft/40 bg-gradient-to-b from-candy-orange-soft/30 via-white to-candy-yellow-soft/30 p-5 text-center shadow-md">
+            <div className="inline-block rounded-full bg-candy-orange-deep/10 px-3 py-1 text-xs font-black text-candy-orange-deep mb-2">
+              ✨ 象形探秘 · 汉字起源
+            </div>
+            <div className="flex items-center justify-center gap-6 my-2">
+              <div className="flex flex-col items-center">
+                <div className="grid h-24 w-24 place-items-center rounded-2xl border-2 border-dashed border-candy-orange-deep/40 bg-white/90 shadow-sm">
+                  <img
+                    src={`/hanzi-imgs/${hanzi.c}.png`}
+                    alt={hanzi.c}
+                    className="h-20 w-20 object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      const parent = (e.target as HTMLElement).parentElement;
+                      if (parent && !parent.querySelector('.fallback-glyph')) {
+                        const span = document.createElement('span');
+                        span.className = 'fallback-glyph text-4xl';
+                        span.innerText = '📜';
+                        parent.appendChild(span);
+                      }
+                    }}
+                  />
+                </div>
+                <span className="mt-1 text-xs font-bold text-ink-soft">古代物象</span>
+              </div>
+              <div className="text-2xl font-black text-candy-orange-deep animate-pulse">➔</div>
+              <div className="flex flex-col items-center">
+                <div className="grid h-24 w-24 place-items-center rounded-2xl bg-white shadow-md border-2 border-candy-orange-soft">
+                  <span className="text-5xl font-black text-ink">{hanzi.c}</span>
+                </div>
+                <span className="mt-1 text-xs font-bold text-candy-orange-deep">{hanzi.pd}</span>
+              </div>
+            </div>
+            <p className="mt-3 text-sm font-semibold text-ink leading-relaxed max-w-md mx-auto">
+              {hanzi.origin || `古代人根据物体的形状创造了“${hanzi.c}”字，快来听听它的有趣故事吧！`}
+            </p>
           </div>
-          <CandyButton tone="green" size="lg" fullWidth onClick={() => { sfxTap(); story.run(hanziStoryTask({ char: hanzi.c, meaning: hanzi.origin, origin: hanzi.origin, evolve: hanzi.evolve })); learnSkill(skill); api.ready(); }}>
+
+          <CandyButton
+            tone="green"
+            size="lg"
+            fullWidth
+            onClick={() => {
+              sfxTap();
+              story.run(hanziStoryTask({ char: hanzi.c, meaning: hanzi.origin, origin: hanzi.origin, evolve: hanzi.evolve }));
+              learnSkill(skill);
+              api.ready();
+            }}
+          >
             {t('hanzi.listenStory')}
           </CandyButton>
           <AiPanel state={story} tone="green" title={t('hanzi.storyTitle')} />
           <div className="flex justify-center gap-3">
             <CandyButton tone="blue" size="sm" variant="soft" onClick={() => speak(hanzi.c, { lang: 'zh-CN', rate: 0.7 })}>
               {t('hanzi.listenCharAgain')}
+            </CandyButton>
+            <CandyButton tone="orange" size="sm" variant="soft" onClick={() => speak(`${hanzi.c}。${hanzi.origin}`, { lang: 'zh-CN', rate: 0.8 })}>
+              🔊 朗读字源解说
             </CandyButton>
           </div>
         </div>
@@ -77,74 +123,126 @@ export function HanziLearn({ hanzi, onDone }: { hanzi: HanziEntry; onDone: () =>
       render: (api) => {
         const liushu = liushuOf(hanzi.c);
         return (
-        <div className="space-y-4">
-          <Panel>
-            <div className="text-center">
-              <img src={`/hanzi-imgs/${hanzi.c}.png`} alt={hanzi.c} className="w-32 h-32 object-contain rounded-2xl mx-auto mb-2" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-              <div className="text-7xl font-black text-ink">{hanzi.c}</div>
-              <p className="mt-1 text-xl font-bold text-candy-purple-deep">{hanzi.pd}</p>
-              {liushu && (
-                <div className="mt-2 flex justify-center">
-                  <LiushuBadge liushu={liushu} size="sm" />
+          <div className="space-y-4">
+            <Panel>
+              <div className="text-center">
+                <div className="text-7xl font-black text-ink tracking-wide">{hanzi.c}</div>
+                <p className="mt-1 text-2xl font-bold text-candy-purple-deep">{hanzi.pd}</p>
+                {liushu && (
+                  <div className="mt-2 flex justify-center">
+                    <LiushuBadge liushu={liushu} size="sm" />
+                  </div>
+                )}
+              </div>
+              <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+                <div className="rounded-xl bg-candy-blue-soft p-3 shadow-sm">
+                  <div className="text-xs font-bold text-ink-soft">{t('hanzi.radical')}</div>
+                  <div className="text-xl font-extrabold text-candy-blue-deep">{hanzi.radical}</div>
                 </div>
-              )}
+                <div className="rounded-xl bg-candy-green-soft p-3 shadow-sm">
+                  <div className="text-xs font-bold text-ink-soft">笔画数</div>
+                  <div className="text-xl font-extrabold text-candy-green-deep">{t('hanzi.strokesCount', { count: hanzi.strokes })}</div>
+                </div>
+                <div className="rounded-xl bg-candy-orange-soft p-3 shadow-sm">
+                  <div className="text-xs font-bold text-ink-soft">声调</div>
+                  <div className="text-xl font-extrabold text-candy-orange-deep">{t('hanzi.toneN', { tone: hanzi.tone })}</div>
+                </div>
+              </div>
+              <div className="mt-4 space-y-2 rounded-2xl bg-white/70 p-3.5 border border-candy-purple-soft/30">
+                <p className="text-xs font-bold text-candy-purple-deep">📖 字形演变与解析</p>
+                <p className="text-sm font-semibold text-ink leading-relaxed">{hanzi.evolve || hanzi.origin}</p>
+              </div>
+              <div className="mt-4">
+                <p className="text-sm font-bold text-ink-soft">{t('hanzi.words')}</p>
+                <div className="mt-2 flex flex-wrap gap-2 justify-center">
+                  {hanzi.words.map(w => (
+                    <button
+                      key={w}
+                      onClick={() => {
+                        sfxTap();
+                        speak(w, { lang: 'zh-CN', rate: 0.75 });
+                      }}
+                      className="rounded-full bg-candy-pink-soft px-4 py-2 text-base font-bold text-candy-pink-deep shadow-sm transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5"
+                    >
+                      <span>🔊</span>
+                      <span>{w}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-4 rounded-xl bg-candy-yellow-soft p-3">
+                <p className="text-sm font-bold text-ink-soft">{t('hanzi.sentence')}</p>
+                <p className="mt-1 text-base font-semibold text-ink">{hanzi.sentence}</p>
+                <CandyButton tone="yellow" size="sm" variant="soft" className="mt-2" onClick={() => speak(hanzi.sentence, { lang: 'zh-CN', rate: 0.8 })}>
+                  {t('hanzi.listenSentence')}
+                </CandyButton>
+              </div>
+            </Panel>
+
+            {liushu && <FormationExplainer char={hanzi.c} />}
+            <ComponentBreakdown char={hanzi.c} />
+            <AssemblyAnimation char={hanzi.c} />
+            <HanziFamilyTree char={hanzi.c} />
+
+            <div className="flex justify-center gap-3">
+              <CandyButton tone="purple" size="sm" variant="soft" onClick={() => { sfxTap(); sentence.run(hanziSentenceTask({ char: hanzi.c, words: hanzi.words, sentence: hanzi.sentence })); }}>
+                {t('hanzi.aiSentence')}
+              </CandyButton>
             </div>
-            <div className="mt-4 grid grid-cols-3 gap-3 text-center">
-              <div className="rounded-xl bg-candy-blue-soft p-3">
-                <div className="text-xs font-bold text-ink-soft">{t('hanzi.radical')}</div>
-                <div className="text-xl font-extrabold text-candy-blue-deep">{hanzi.radical}</div>
-              </div>
-              <div className="rounded-xl bg-candy-green-soft p-3">
-                <div className="text-xs font-bold text-ink-soft">笔画</div>
-                <div className="text-xl font-extrabold text-candy-green-deep">{t('hanzi.strokesCount', { count: hanzi.strokes })}</div>
-              </div>
-              <div className="rounded-xl bg-candy-orange-soft p-3">
-                <div className="text-xs font-bold text-ink-soft">声调</div>
-                <div className="text-xl font-extrabold text-candy-orange-deep">{t('hanzi.toneN', { tone: hanzi.tone })}</div>
-              </div>
+            <AiPanel state={sentence} tone="purple" title={t('hanzi.aiSentenceTitle')} />
+            <div className="flex justify-center">
+              <CandyButton tone="green" size="lg" onClick={() => { learnSkill(skill); api.ready(); }}>
+                {t('hanzi.knowIt')}
+              </CandyButton>
             </div>
+          </div>
+        );
+      },
+    },
+    {
+      key: 'speak',
+      label: t('hanzi.steps.speak'),
+      emoji: '🗣️',
+      gate: true,
+      render: (api) => (
+        <div className="space-y-4">
+          <Panel className="text-center">
+            <div className="text-7xl font-black text-ink">{hanzi.c}</div>
+            <p className="mt-1 text-2xl font-bold text-candy-purple-deep">{hanzi.pd}</p>
+
+            <div className="my-5 rounded-2xl bg-gradient-to-r from-candy-blue-soft/30 via-candy-purple-soft/30 to-candy-pink-soft/30 p-4">
+              <p className="text-xs font-bold text-ink-soft mb-2">🎙️ 点击下方大声跟读，小智为你评分：</p>
+              <SpeechEvalButton
+                targetText={hanzi.c}
+                lang="zh-CN"
+                onPass={() => {
+                  sfxWin();
+                  celebrateBig();
+                  learnSkill(skill);
+                  api.ready();
+                }}
+              />
+            </div>
+
             <div className="mt-4 space-y-2">
-              <p className="text-sm font-bold text-ink-soft">{t('hanzi.origin')}</p>
-              <p className="text-base font-semibold text-ink">{hanzi.origin}</p>
-              <p className="text-sm font-bold text-ink-soft mt-2">{t('hanzi.evolve')}</p>
-              <p className="text-base font-semibold text-ink">{hanzi.evolve}</p>
-            </div>
-            <div className="mt-4">
-              <p className="text-sm font-bold text-ink-soft">{t('hanzi.words')}</p>
-              <div className="mt-1 flex flex-wrap gap-2">
-                {hanzi.words.map(w => (
-                  <button key={w} onClick={() => speak(w, { lang: 'zh-CN', rate: 0.75 })} className="rounded-full bg-candy-pink-soft px-4 py-2 text-base font-bold text-candy-pink-deep active:scale-95">
-                    {w}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="mt-4 rounded-xl bg-candy-yellow-soft p-3">
-              <p className="text-sm font-bold text-ink-soft">{t('hanzi.sentence')}</p>
-              <p className="mt-1 text-base font-semibold text-ink">{hanzi.sentence}</p>
-              <CandyButton tone="yellow" size="sm" variant="soft" className="mt-2" onClick={() => speak(hanzi.sentence, { lang: 'zh-CN', rate: 0.8 })}>{t('hanzi.listenSentence')}</CandyButton>
+              <CandyButton tone="blue" size="md" fullWidth onClick={() => speak(hanzi.c, { lang: 'zh-CN', rate: 0.7 })}>
+                {t('hanzi.readChar')}
+              </CandyButton>
+              <CandyButton tone="purple" size="md" fullWidth onClick={() => speak(hanzi.words.join('，'), { lang: 'zh-CN', rate: 0.75 })}>
+                {t('hanzi.readWords')}
+              </CandyButton>
+              <CandyButton tone="orange" size="md" fullWidth onClick={() => speak(hanzi.sentence, { lang: 'zh-CN', rate: 0.8 })}>
+                {t('hanzi.readSentence')}
+              </CandyButton>
             </div>
           </Panel>
-
-          {liushu && <FormationExplainer char={hanzi.c} />}
-          <ComponentBreakdown char={hanzi.c} />
-          <AssemblyAnimation char={hanzi.c} />
-          <HanziFamilyTree char={hanzi.c} />
-
-          <div className="flex justify-center gap-3">
-            <CandyButton tone="purple" size="sm" variant="soft" onClick={() => { sfxTap(); sentence.run(hanziSentenceTask({ char: hanzi.c, words: hanzi.words, sentence: hanzi.sentence })); }}>
-              {t('hanzi.aiSentence')}
-            </CandyButton>
-          </div>
-          <AiPanel state={sentence} tone="purple" title={t('hanzi.aiSentenceTitle')} />
           <div className="flex justify-center">
-            <CandyButton tone="green" size="lg" onClick={() => { learnSkill(skill); api.ready(); }}>
-              {t('hanzi.knowIt')}
+            <CandyButton tone="green" size="lg" onClick={() => { sfxCorrect(); api.ready(); }}>
+              {t('hanzi.readDone')}
             </CandyButton>
           </div>
         </div>
-        );
-      },
+      ),
     },
     {
       key: 'practice',
@@ -173,7 +271,6 @@ export function HanziLearn({ hanzi, onDone }: { hanzi: HanziEntry; onDone: () =>
           <QuizCard
             question={makeHanziQuestion(hanzi, difficulty, t)}
             onAnswer={(correct: boolean) => {
-              // P1-3: 透传当前难度给 SRS（识字三种题型难度不同，高难答对应加速掌握）
               practice(skill, correct, 1, difficulty);
               if (correct) {
                 sfxCorrect();
@@ -219,28 +316,9 @@ export function HanziLearn({ hanzi, onDone }: { hanzi: HanziEntry; onDone: () =>
               onPass={() => { markTraced(`hanzi:${hanzi.c}`); api.ready(); }}
             />
           )}
-
-        </div>
-      ),
-    },
-    {
-      key: 'speak',
-      label: t('hanzi.steps.speak'),
-      emoji: '🗣️',
-      render: (api) => (
-        <div className="space-y-4">
-          <Panel className="text-center">
-            <div className="text-6xl font-black text-ink">{hanzi.c}</div>
-            <p className="mt-1 text-lg font-bold text-candy-purple-deep">{hanzi.pd}</p>
-            <div className="mt-4 space-y-2">
-              <CandyButton tone="blue" size="md" fullWidth onClick={() => speak(hanzi.c, { lang: 'zh-CN', rate: 0.7 })}>{t('hanzi.readChar')}</CandyButton>
-              <CandyButton tone="purple" size="md" fullWidth onClick={() => speak(hanzi.words.join('，'), { lang: 'zh-CN', rate: 0.75 })}>{t('hanzi.readWords')}</CandyButton>
-              <CandyButton tone="orange" size="md" fullWidth onClick={() => speak(hanzi.sentence, { lang: 'zh-CN', rate: 0.8 })}>{t('hanzi.readSentence')}</CandyButton>
-            </div>
-          </Panel>
-          <div className="flex justify-center">
-            <CandyButton tone="green" size="lg" onClick={() => { sfxCorrect(); api.ready(); onDone(); }}>
-              {t('hanzi.readDone')}
+          <div className="flex justify-center pt-2">
+            <CandyButton tone="green" size="lg" onClick={() => { sfxWin(); api.ready(); onDone(); }}>
+              {t('hanzi.finishLearn')}
             </CandyButton>
           </div>
         </div>
@@ -250,3 +328,4 @@ export function HanziLearn({ hanzi, onDone }: { hanzi: HanziEntry; onDone: () =>
 
   return <LearnFlow steps={steps} tone="green" finishLabel={t('hanzi.finishLearn')} onFinish={onDone} />;
 }
+

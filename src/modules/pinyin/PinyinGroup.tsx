@@ -8,8 +8,10 @@ import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { cn, shuffle } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useStore } from '@/store/useStore';
 
-const YUNMU = [
+/** 韵母分类数据（教学正确性核心：单6/复9/前鼻5/后鼻4，供单元测试校验） */
+export const YUNMU = [
   // 单韵母 (6)
   ...['a','o','e','i','u','ü'].map(p => ({ p, type: 'single' as const, label: '单韵母' })),
   // 复韵母 (9)
@@ -20,7 +22,7 @@ const YUNMU = [
   ...['ang','eng','ing','ong'].map(p => ({ p, type: 'back_nasal' as const, label: '后鼻韵母' })),
 ];
 
-const CATEGORIES = [
+export const CATEGORIES = [
   { id: 'single', label: '单韵母', emoji: '😮', color: 'bg-candy-blue-soft', desc: 'a o e i u ü', hint: '嘴巴形状不变' },
   { id: 'compound', label: '复韵母', emoji: '🔄', color: 'bg-candy-green-soft', desc: 'ai ei ui ao ou iu ie üe er', hint: '两个单韵母组合' },
   { id: 'front_nasal', label: '前鼻韵母', emoji: '👃', color: 'bg-candy-orange-soft', desc: 'an en in un ün', hint: '以 n 结尾，舌尖抵上牙膛' },
@@ -38,24 +40,27 @@ export function PinyinGroup() {
   const [feedback, setFeedback] = useState<{ correct: boolean; pinyin: string; category: YMCategory } | null>(null);
   const [score, setScore] = useState(0);
   const lockRef = useRef(false);
+  const practice = useStore((s) => s.practice);
 
   const handleDrop = (categoryId: YMCategory) => {
     if (!draggedItem || lockRef.current) return;
     const item = YUNMU.find(y => y.p === draggedItem);
     if (!item) return;
     const isCorrect = item.type === categoryId;
+    // SRS 回写：以该韵母所属分组的稳定 id 作为掌握度 key
+    practice(`pinyin:group:${item.type}`, isCorrect, isCorrect ? 1 : 0);
 
     if (isCorrect) {
       sfxCorrect();
       setScore(s => s + 1);
       setPlaced(prev => ({ ...prev, [item.p]: categoryId }));
-      void speak(`对了，${item.p}是${CATEGORIES.find(c => c.id === categoryId)?.label}`, { lang: 'zh-CN', rate: 0.8, module: 'praise' });
+      void speak(`对了，${item.p}是${CATEGORIES.find(c => c.id === categoryId)?.label}`, { lang: 'zh-CN', rate: 0.8, module: 'praise' }).catch(() => {});
       setFeedback({ correct: true, pinyin: item.p, category: categoryId });
     } else {
       sfxWrong();
       const correctCat = CATEGORIES.find(c => c.id === item.type);
       setFeedback({ correct: false, pinyin: item.p, category: categoryId });
-      void speak(`${item.p}不是${CATEGORIES.find(c => c.id === categoryId)?.label}，它是${correctCat?.label}`, { lang: 'zh-CN', rate: 0.8, module: 'praise' });
+      void speak(`${item.p}不是${CATEGORIES.find(c => c.id === categoryId)?.label}，它是${correctCat?.label}`, { lang: 'zh-CN', rate: 0.8, module: 'praise' }).catch(() => {});
     }
     setDraggedItem(null);
     setTimeout(() => {
@@ -93,7 +98,7 @@ export function PinyinGroup() {
             return (
               <button
                 key={item.p}
-                onClick={() => { sfxTap(); setDraggedItem(item.p); void speak(item.p, { lang: 'zh-CN', rate: 0.7, module: 'ai' }); }}
+                onClick={() => { sfxTap(); setDraggedItem(item.p); void speak(item.p, { lang: 'zh-CN', rate: 0.7, module: 'ai' }).catch(() => {}); }}
                 className={cn(
                   'rounded-xl px-4 py-3 text-xl font-extrabold shadow-candy-sm transition-all',
                   isDragging ? 'scale-110 bg-candy-purple-soft ring-2 ring-candy-purple-deep' : 'bg-white hover:bg-pink-50',

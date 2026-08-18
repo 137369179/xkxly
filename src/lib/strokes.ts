@@ -60,10 +60,15 @@ export async function warmupStrokes(): Promise<void> {
 /** 把稀疏中线点插值为稠密采样点（间距≈step 单位），跟写判定用 */
 export function densifyMedian(median: [number, number][], step = 16): [number, number][] {
   if (median.length < 2) return median;
-  const out: [number, number][] = [median[0]!];
+  const first = median[0];
+  if (first === undefined) return median; // 防御：length>=2 时必存在
+  const out: [number, number][] = [first];
   for (let i = 1; i < median.length; i++) {
-    const [x0, y0] = median[i - 1]!;
-    const [x1, y1] = median[i]!;
+    const prev = median[i - 1];
+    const cur = median[i];
+    if (prev === undefined || cur === undefined) continue; // 防御：索引在界内
+    const [x0, y0] = prev;
+    const [x1, y1] = cur;
     const dist = Math.hypot(x1 - x0, y1 - y0);
     const n = Math.max(1, Math.ceil(dist / step));
     for (let k = 1; k <= n; k++) {
@@ -77,8 +82,9 @@ export function densifyMedian(median: [number, number][], step = 16): [number, n
 export function medianLength(median: [number, number][]): number {
   let len = 0;
   for (let i = 1; i < median.length; i++) {
-    const a = median[i]!;
-    const b = median[i - 1]!;
+    const a = median[i];
+    const b = median[i - 1];
+    if (a === undefined || b === undefined) continue; // 防御：索引在界内
     len += Math.hypot(a[0] - b[0], a[1] - b[1]);
   }
   return len;

@@ -12,13 +12,13 @@ import { useTranslation } from '@/i18n/useTranslation';
 
 const EMOJIS = ['🐱','🐶','🐰'];
 
-function genBoard(): { grid: (string|null)[][]; solution: string[][] } {
+export function genBoard(): { grid: (string|null)[][]; solution: string[][] } {
   // 3x3 Latin square
   const base = [['🐱','🐶','🐰'],['🐶','🐰','🐱'],['🐰','🐱','🐶']];
   // shuffle rows
   const rows = [0,1,2].sort(()=>Math.random()-0.5);
   const cols = [0,1,2].sort(()=>Math.random()-0.5);
-  const solution = rows.map(r => cols.map(c => base[r]![c]!));
+  const solution = rows.map(r => cols.map(c => base[r]?.[c] ?? ''));
   // make puzzle: remove 3-4 cells
   const grid = solution.map(row => [...row]) as (string|null)[][];
   let removed = 0;
@@ -26,7 +26,8 @@ function genBoard(): { grid: (string|null)[][]; solution: string[][] } {
   while (removed < targets) {
     const r = Math.floor(Math.random()*3);
     const c = Math.floor(Math.random()*3);
-    if (grid[r]![c] !== null) { grid[r]![c] = null; removed++; }
+    const row = grid[r];
+    if (row && row[c] !== null) { row[c] = null; removed++; }
   }
   return { grid, solution };
 }
@@ -48,17 +49,20 @@ export function MiniSudoku() {
   const newGame = () => { setState(genBoard()); setSelected(null); setFeedback(''); };
 
   const checkWin = (g: (string|null)[][]) => {
-    for (let r=0;r<3;r++) for (let c=0;c<3;c++) if (!g[r]![c]) return false;
-    return g.every((row,r) => row.every((cell,c) => cell === solution[r]![c]));
+    for (let r=0;r<3;r++) for (let c=0;c<3;c++) if (!g[r]?.[c]) return false;
+    return g.every((row,r) => row.every((cell,c) => cell === (solution[r]?.[c] ?? '')));
   };
 
   const fillCell = (emoji: string) => {
     if (!selected || lockRef.current) return;
     const [r,c] = selected;
-    if (grid[r]![c] !== null && grid[r]![c] === solution[r]![c]) return; // pre-filled
+    const curRow = grid[r];
+    const solRow = solution[r];
+    if (curRow && solRow && curRow[c] !== null && curRow[c] === solRow[c]) return; // pre-filled
     sfxTap();
     const newGrid = grid.map(row=>[...row]) as (string|null)[][];
-    newGrid[r]![c] = emoji;
+    const targetRow = newGrid[r];
+    if (targetRow) targetRow[c] = emoji;
     setState({ grid: newGrid, solution });
     setSelected(null);
     if (checkWin(newGrid)) {

@@ -24,8 +24,8 @@ export function OnboardingModal({ onComplete }: { onComplete: (name: string, ava
   const active = useActiveProfileMeta();
 
   const [name, setName] = useState(active?.name && active.name !== '宝贝' ? active.name : '');
-  const [avatar, setAvatar] = useState(active?.avatar ?? PROFILE_AVATARS[0]!);
-  const [color, setColor] = useState(active?.color ?? PROFILE_COLORS[0]!.key);
+  const [avatar, setAvatar] = useState(active?.avatar ?? PROFILE_AVATARS[0] ?? '👦');
+  const [color, setColor] = useState(active?.color ?? PROFILE_COLORS[0]?.key ?? 'pink');
   const [ageRange, setAgeRange] = useState<AgeRangeKey>(active?.ageRange ?? '7-8');
 
   const start = () => {

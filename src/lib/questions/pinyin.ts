@@ -25,7 +25,7 @@ function makePinyinRhymeQuestion(target: PinyinEntry, pool: PinyinEntry[]): Ques
     display: target.p,
     speak: target.p,
     options,
-    answerId: options[opts.indexOf(target)]!.id,
+    answerId: options[opts.indexOf(target)]?.id ?? '',
     hint: target.sound,
     why: `${target.p}：${target.rhyme}`,
   };
@@ -45,7 +45,7 @@ function makePinyinCharQuestion(target: PinyinEntry, pool: PinyinEntry[]): Quest
     display: char,
     speak: char,
     options,
-    answerId: options[opts.indexOf(target)]!.id,
+    answerId: options[opts.indexOf(target)]?.id ?? '',
     hint: target.sound,
     why: `${char} 的拼音是 "${target.p}"，${target.rhyme}`,
   };
@@ -59,7 +59,7 @@ function makePinyinTypeQuestion(target: PinyinEntry): Question {
     zhengti: '整体认读音节',
   };
   const allTypes = ['声母', '韵母', '整体认读音节'];
-  const answer = typeLabel[target.type]!
+  const answer = typeLabel[target.type]
   const distractors = shuffle(allTypes.filter((t) => t !== answer));
   const opts = shuffle([answer, ...distractors.slice(0, 2)]);
   const options = opts.map((t) => opt({ label: t }));
@@ -71,7 +71,7 @@ function makePinyinTypeQuestion(target: PinyinEntry): Question {
     display: target.p,
     speak: target.p,
     options,
-    answerId: options[opts.indexOf(answer)]!.id,
+    answerId: options[opts.indexOf(answer)]?.id ?? '',
     hint: target.sound,
     why: `${target.p} 是${answer}，${target.rhyme}`,
   };

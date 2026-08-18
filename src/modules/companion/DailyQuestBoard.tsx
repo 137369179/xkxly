@@ -90,7 +90,7 @@ function QuestCard({ quest, tone, onClaim }: {
           style={{
             background: '#FFC93C',
             color: '#5A4408',
-            boxShadow: '0 4px 0 0 #D99C0E',
+            boxShadow: '0 4px 0 0 #e5ac2e',
           }}
         >
           🎁 {tr('quest.claimReward')}

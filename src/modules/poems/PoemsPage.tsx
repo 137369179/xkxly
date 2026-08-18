@@ -13,7 +13,6 @@ import type { DeepPoem } from '@/types';
 import { useStore, useSettings, useProgress } from '@/store/useStore';
 import { sfxTap } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
-import { TONE_STYLE, toneAt } from '@/lib/tones';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
 import { CandyButton } from '@/components/ui/Button';
@@ -39,29 +38,32 @@ const PoemCard = memo(function PoemCard({
   read,
   fav,
   deep,
-  toneStyle,
   onClick,
 }: {
   poem: { id: string; title: string; author: string; dynasty: string; genre: string };
   read: boolean;
   fav: boolean;
   deep: boolean;
-  toneStyle: { soft: string; deep: string };
   onClick: (id: string) => void;
 }) {
   return (
     <motion.button
       onClick={() => onClick(poem.id)}
       whileTap={{ scale: 0.95 }}
-      className="no-select relative flex min-h-[120px] flex-col items-center justify-center gap-1 rounded-[1.5rem] p-3 text-center shadow-candy-sm transition-shadow"
-      style={{ background: toneStyle.soft }}
+      className="no-select relative flex min-h-[120px] flex-col items-center justify-center gap-1 rounded-[1.5rem] border-2 border-pink-200/80 bg-white/90 p-3 text-center shadow-candy-sm transition-all hover:-translate-y-0.5 hover:border-candy-pink/60"
     >
-      {read && <span className="absolute top-2 left-2 text-sm" title="Read">✅</span>}
-      {fav && <span className="absolute top-2 right-2 text-sm" title="Favorited">❤️</span>}
-      {deep && <span className="absolute bottom-2 right-2 text-[10px] font-extrabold text-candy-purple-deep" title="Has deep notes">研</span>}
-      <span className="line-clamp-2 text-lg font-extrabold" style={{ color: toneStyle.deep }}>{poem.title}</span>
+      {read && (
+        <span className="absolute top-2 left-2 grid h-6 w-6 place-items-center rounded-full bg-white/90 text-[11px] shadow-sm" title="Read">✅</span>
+      )}
+      {fav && (
+        <span className="absolute top-2 right-2 grid h-6 w-6 place-items-center rounded-full bg-white/90 text-[11px] shadow-sm" title="Favorited">❤️</span>
+      )}
+      {deep && (
+        <span className="absolute bottom-2 right-2 grid h-5 w-5 place-items-center rounded-full bg-candy-pink/10 text-[10px] font-extrabold text-candy-pink-deep" title="Has deep notes">研</span>
+      )}
+      <span className="line-clamp-2 text-lg font-extrabold text-candy-pink-deep">{poem.title}</span>
       <span className="text-xs font-bold text-ink-soft">{poem.author}·{poem.dynasty}</span>
-      <span className="text-[11px] font-semibold text-ink-soft/80">{poem.genre}</span>
+      <span className="text-[11px] font-semibold text-ink-soft/60">{poem.genre}</span>
     </motion.button>
   );
 });
@@ -84,9 +86,11 @@ export default function PoemsPage({ param }: { param?: string }) {
   const [deepPoem, setDeepPoem] = useState<DeepPoem | null>(null);
   const [deepLoaded, setDeepLoaded] = useState(false);
 
-  // —— 诗库检索 ——
+  // 诗库检索 / 高级筛选折叠
   const [query, setQuery] = useState('');
   const [favOnly, setFavOnly] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [dyn, setDyn] = useState<Set<string>>(new Set());
   const [gen, setGen] = useState<Set<string>>(new Set());
   const [thm, setThm] = useState<Set<string>>(new Set());
@@ -195,75 +199,116 @@ export default function PoemsPage({ param }: { param?: string }) {
 
   return (
     <div>
-      {/* 三视图切换 */}
+      {/* 页头 */}
       <PageHeader emoji="🌸" title={t('poem.academy')} subtitle={t('poem.academySubtitle', { count: POEMS.length })} tone="pink" />
 
-      <div className="mb-5 flex gap-2">
+      {/* 主导航：核心 3 个 + 「更多」下拉 */}
+      <div className="mb-4 flex gap-2">
         <Seg active={view === 'lib'} onClick={() => setView('lib')} emoji="📚" label={t('poem.lib')} />
         <Seg active={view === 'train'} onClick={() => setView('train')} emoji="🎯" label={t('poem.train')} />
         <Seg active={view === 'plan'} onClick={() => setView('plan')} emoji="🗺️" label={t('poem.plan')} />
-        <Seg active={view === 'notes'} onClick={() => setView('notes')} emoji="📝" label={t('poem.notes')} />
-        <Seg active={view === 'timeline'} onClick={() => setView('timeline')} emoji="⏳" label={t('poem.poets')} />
-        <Seg active={view === 'archive'} onClick={() => setView('archive')} emoji="📜" label={t('poem.archive')} />
-        <Seg active={view === 'works'} onClick={() => setView('works')} emoji="📖" label={t('poem.works')} />
-        <Seg active={view === 'flying'} onClick={() => setView('flying')} emoji="🌸" label={t('poem.flying')} />
+        <div className="relative">
+          <Seg
+            active={!['lib', 'train', 'plan'].includes(view)}
+            onClick={() => setShowMoreMenu((v) => !v)}
+            emoji="⋯"
+            label={t('poem.more')}
+          />
+          {showMoreMenu && (
+            <div className="absolute right-0 top-full z-20 mt-2 w-48 overflow-hidden rounded-2xl border border-gray-100 bg-white/95 p-1 shadow-candy-sm backdrop-blur">
+              {[
+                { k: 'notes', e: '📝', l: t('poem.notes') },
+                { k: 'timeline', e: '⏳', l: t('poem.poets') },
+                { k: 'archive', e: '📜', l: t('poem.archive') },
+                { k: 'works', e: '📖', l: t('poem.works') },
+                { k: 'flying', e: '🌸', l: t('poem.flying') },
+              ].map((m) => (
+                <button
+                  key={m.k}
+                  onClick={() => { setView(m.k as ViewKey); setShowMoreMenu(false); }}
+                  className={cn(
+                    'flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-extrabold transition-colors',
+                    view === m.k ? 'bg-candy-pink text-white' : 'text-ink-soft hover:bg-pink-50',
+                  )}
+                >
+                  <span>{m.e}</span>
+                  {m.l}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {view === 'lib' && (
         <>
-          <Panel className="!py-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          {/* 一行完成：搜索 + 收藏 + 拼音 + 高级筛选入口 */}
+          <Panel className="!py-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <div className="relative flex-1">
-                <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xl">🔎</span>
+                <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-ink-soft">🔎</span>
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={t('poem.searchPlaceholder')}
-                  className="tap-target input-jelly w-full px-11 py-2.5 text-base font-bold text-ink outline-none placeholder:text-ink-soft/70 focus-visible:outline-4 focus-visible:outline-candy-pink/40"
+                  className="input-jelly w-full px-10 py-2 text-sm font-bold text-ink outline-none placeholder:text-ink-soft/70"
                 />
               </div>
-              <div className="flex flex-wrap gap-2.5">
-                <CandyButton tone={favOnly ? 'pink' : 'purple'} variant={favOnly ? 'solid' : 'soft'} size="sm" onClick={() => setFavOnly((v) => !v)}>
+              <div className="flex flex-wrap gap-1.5">
+                <ChipBtn active={favOnly} onClick={() => setFavOnly((v) => !v)} emoji="❤️">
                   {t('poem.favorite')}
-                </CandyButton>
-                <CandyButton tone={showPinyin ? 'blue' : 'purple'} variant={showPinyin ? 'solid' : 'soft'} size="sm" onClick={() => setShowPinyin(!showPinyin)}>
+                </ChipBtn>
+                <ChipBtn active={showPinyin} onClick={() => setShowPinyin(!showPinyin)} emoji="🔤">
                   {t('poem.pinyinToggle')}
-                </CandyButton>
+                </ChipBtn>
+                <ChipBtn
+                  active={showAdvanced || (dyn.size + gen.size + thm.size + img.size) > 0}
+                  onClick={() => setShowAdvanced((v) => !v)}
+                  emoji="🎛️"
+                  badge={(dyn.size + gen.size + thm.size + img.size) || undefined}
+                >
+                  {t('poem.advanced')}
+                </ChipBtn>
               </div>
             </div>
+
+            {/* 高级筛选：默认折叠，点开才显示 */}
+            {showAdvanced && (
+              <div className="mt-3 space-y-2 border-t border-gray-100 pt-3">
+                <FacetCompact label={t('poem.dynastyLabel')} values={DYNASTIES} sel={dyn} onToggle={(v) => toggle(dyn, setDyn, v)} />
+                <FacetCompact label={t('poem.genreLabel')} values={GENRES} sel={gen} onToggle={(v) => toggle(gen, setGen, v)} />
+                <FacetCompact label={t('poem.themeLabel')} values={THEMES} sel={thm} onToggle={(v) => toggle(thm, setThm, v)} />
+                <FacetCompact label={t('poem.imageryLabel')} values={IMAGERY} sel={img} onToggle={(v) => toggle(img, setImg, v)} />
+                <div className="flex justify-end">
+                  <button
+                    className="text-xs font-extrabold text-ink-soft underline-offset-2 hover:text-candy-pink hover:underline"
+                    onClick={() => { setDyn(new Set()); setGen(new Set()); setThm(new Set()); setImg(new Set()); }}
+                  >
+                    {t('poem.clearFilters')}
+                  </button>
+                </div>
+              </div>
+            )}
           </Panel>
 
-          <div className="mt-4 space-y-2.5">
-            <Facet label={t('poem.dynastyLabel')} values={DYNASTIES} sel={dyn} onToggle={(v) => toggle(dyn, setDyn, v)} />
-            <Facet label={t('poem.genreLabel')} values={GENRES} sel={gen} onToggle={(v) => toggle(gen, setGen, v)} />
-            <Facet label={t('poem.themeLabel')} values={THEMES} sel={thm} onToggle={(v) => toggle(thm, setThm, v)} />
-            <Facet label={t('poem.imageryLabel')} values={IMAGERY} sel={img} onToggle={(v) => toggle(img, setImg, v)} />
-          </div>
-
-          <p className="mb-3 mt-4 text-sm font-extrabold text-ink-soft">
-            {t('poem.foundCount', { count: filtered.length })}{readSet.size > 0 && ` · ${t('poem.readCount', { count: readSet.size })}`}
-            {(dyn.size || gen.size || thm.size || img.size) > 0 && (
-              <button className="ml-2 text-candy-pink underline" onClick={() => { setDyn(new Set()); setGen(new Set()); setThm(new Set()); setImg(new Set()); }}>
-                {t('poem.clearFilter')}
-              </button>
-            )}
+          <p className="mb-3 mt-4 text-xs font-extrabold text-ink-soft">
+            {t('poem.foundCount', { count: filtered.length })}
+            {readSet.size > 0 && ` · ${t('poem.readCount', { count: readSet.size })}`}
           </p>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-            {poemVisible_list.map((p, i) => (
+            {poemVisible_list.map((p) => (
               <PoemCard
                 key={p.id}
                 poem={p}
                 read={readSet.has(p.id)}
                 fav={favSet.has(p.id)}
                 deep={dossierIds.has(p.id)}
-                toneStyle={TONE_STYLE[toneAt(i)]}
                 onClick={openPoem}
               />
             ))}
           </div>
 
-          {/* 滚动哨兵：进入视口时加载下一页 */}
           {poemHasMore && <div ref={poemSentinelRef} className="h-4" />}
         </>
       )}
@@ -362,8 +407,8 @@ function Seg({ active, onClick, emoji, label }: { active: boolean; onClick: () =
       type="button"
       onClick={onClick}
       className={cn(
-        'no-select flex flex-1 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-lg font-extrabold transition-all active:translate-y-[2px]',
-        active ? 'bg-candy-pink text-white shadow-candy-sm' : 'bg-white/80 text-ink-soft hover:bg-candy-pink-soft',
+        'no-select flex flex-1 items-center justify-center gap-1.5 rounded-2xl px-3 py-2.5 text-sm font-extrabold transition-all active:translate-y-[2px] sm:text-base',
+        active ? 'bg-candy-pink text-white shadow-candy-sm' : 'bg-gray-100 text-ink-soft hover:bg-pink-100',
       )}
     >
       <span>{emoji}</span>
@@ -372,19 +417,46 @@ function Seg({ active, onClick, emoji, label }: { active: boolean; onClick: () =
   );
 }
 
-function Facet({ label, values, sel, onToggle }: { label: string; values: string[]; sel: Set<string>; onToggle: (v: string) => void }) {
+/** 紧凑 chips 按钮（搜索栏右侧切换用） */
+function ChipBtn({
+  active, onClick, emoji, children, badge,
+}: {
+  active: boolean; onClick: () => void; emoji: string; children: React.ReactNode; badge?: number;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'tap-target relative inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-extrabold transition-colors sm:text-sm',
+        active ? 'bg-candy-pink text-white shadow-candy-sm' : 'bg-gray-100 text-ink-soft hover:bg-pink-100',
+      )}
+    >
+      <span>{emoji}</span>
+      {children}
+      {badge !== undefined && (
+        <span className="ml-0.5 rounded-full bg-white px-1.5 py-0 text-[10px] font-black text-candy-pink-deep">
+          {badge}
+        </span>
+      )}
+    </button>
+  );
+}
+
+/** 极简版分面：中性灰标签，选中才用果冻粉强调 */
+function FacetCompact({ label, values, sel, onToggle }: { label: string; values: string[]; sel: Set<string>; onToggle: (v: string) => void }) {
   return (
     <div className="flex items-start gap-2">
-      <span className="mt-1.5 w-10 shrink-0 text-xs font-extrabold text-ink-soft">{label}</span>
-      <div className="flex flex-wrap gap-1.5">
+      <span className="mt-1 w-10 shrink-0 text-[11px] font-extrabold text-ink-soft">{label}</span>
+      <div className="flex flex-wrap gap-1">
         {values.map((v) => (
           <button
             key={v}
             type="button"
             onClick={() => onToggle(v)}
             className={cn(
-              'tap-target rounded-full px-3 py-1.5 text-sm font-extrabold transition-colors',
-              sel.has(v) ? 'bg-candy-pink text-white shadow-candy-sm' : 'bg-white/80 text-ink-soft hover:bg-candy-pink-soft',
+              'tap-target rounded-full px-2.5 py-0.5 text-[11px] font-extrabold transition-colors',
+              sel.has(v) ? 'bg-candy-pink text-white shadow-candy-xs' : 'bg-gray-100 text-ink-soft hover:bg-pink-100',
             )}
           >
             {v}

@@ -25,7 +25,7 @@ export async function generateStorybookPdf(story: StoryBookData, childName = '�
   if (!ctx) throw new Error('Canvas 2D context creation failed');
 
   // 背景底色
-  ctx.fillStyle = '#FAF5FF';
+  ctx.fillStyle = '#f8f4fd';
   ctx.fillRect(0, 0, width, canvas.height);
 
   let bgCertImg: HTMLImageElement | null = null;
@@ -40,24 +40,24 @@ export async function generateStorybookPdf(story: StoryBookData, childName = '�
     const pageY = 0;
     // 渐变封面背景
     const grad = ctx.createLinearGradient(0, pageY, 0, pageY + pageHeight);
-    grad.addColorStop(0, '#F3E8FF');
-    grad.addColorStop(1, '#EDE9FE');
+    grad.addColorStop(0, '#f8f4fd');
+    grad.addColorStop(1, '#ece5ff');
     ctx.fillStyle = grad;
     ctx.fillRect(0, pageY, width, pageHeight);
 
     // 封面花边卡片
-    ctx.strokeStyle = '#8B5CF6';
+    ctx.strokeStyle = '#8b6ef0';
     ctx.lineWidth = 12;
     ctx.strokeRect(60, pageY + 60, width - 120, pageHeight - 120);
 
     // 装饰顶部文字
-    ctx.fillStyle = '#6D28D9';
+    ctx.fillStyle = '#6631c7';
     ctx.font = 'bold 36px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('✨ 宝贝 AI 奇幻故事绘本系列 ✨', width / 2, pageY + 160);
 
     // 大标题
-    ctx.fillStyle = '#4C1D95';
+    ctx.fillStyle = '#53289f';
     ctx.font = '900 68px sans-serif';
     ctx.fillText(story.bookTitle, width / 2, pageY + 300);
 
@@ -66,16 +66,16 @@ export async function generateStorybookPdf(story: StoryBookData, childName = '�
     ctx.fillText('📖 🦁 🚀 🌌', width / 2, pageY + 600);
 
     // 寓意
-    ctx.fillStyle = '#6D28D9';
+    ctx.fillStyle = '#6631c7';
     ctx.font = 'bold 36px sans-serif';
     ctx.fillText(`💡 启示：${story.moral}`, width / 2, pageY + 850);
 
     // 绘本小作者名章
-    ctx.fillStyle = '#5B21B6';
+    ctx.fillStyle = '#53289f';
     ctx.font = '900 44px sans-serif';
     ctx.fillText(`✍️ 绘本小作家：${childName}`, width / 2, pageY + 1100);
 
-    ctx.fillStyle = '#8B5CF6';
+    ctx.fillStyle = '#8b6ef0';
     ctx.font = 'bold 30px sans-serif';
     ctx.fillText('宝贝学习乐园 · AI 儿童出版工作室 出品', width / 2, pageY + 1200);
   }
@@ -90,18 +90,18 @@ export async function generateStorybookPdf(story: StoryBookData, childName = '�
     ctx.fillRect(40, pageY + 40, width - 80, pageHeight - 80);
 
     // 装饰框
-    ctx.strokeStyle = '#DDD6FE';
+    ctx.strokeStyle = '#d9c6f5';
     ctx.lineWidth = 6;
     ctx.strokeRect(60, pageY + 60, width - 120, pageHeight - 120);
 
     // 顶端页码标记
-    ctx.fillStyle = '#8B5CF6';
+    ctx.fillStyle = '#8b6ef0';
     ctx.font = 'bold 32px sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText(`第 ${i + 1} 章 · ${page.title}`, 100, pageY + 140);
 
     // 正文拼音 / 英文短句与故事文字
-    ctx.fillStyle = '#1E1B4B';
+    ctx.fillStyle = '#5c2e3d';
     ctx.font = '900 42px sans-serif';
     
     // 换行绘制文本
@@ -117,14 +117,14 @@ export async function generateStorybookPdf(story: StoryBookData, childName = '�
     const boxHeight = pageHeight - (canvasBoxY - pageY) - 140;
 
     // 绘制彩色插图模拟背景
-    ctx.fillStyle = '#F5F3FF';
+    ctx.fillStyle = '#fbf6f7';
     ctx.fillRect(100, canvasBoxY, width - 200, boxHeight);
-    ctx.strokeStyle = '#C4B5FD';
+    ctx.strokeStyle = '#d9c6f5';
     ctx.lineWidth = 4;
     ctx.strokeRect(100, canvasBoxY, width - 200, boxHeight);
 
     // 插图意境核心图形
-    ctx.fillStyle = '#8B5CF6';
+    ctx.fillStyle = '#8b6ef0';
     ctx.font = 'bold 36px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(`🎨 [画面场景] ${page.illustrationTheme}`, width / 2, canvasBoxY + boxHeight / 2);

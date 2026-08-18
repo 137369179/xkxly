@@ -121,28 +121,37 @@ export function VerticalMath() {
       </div>
 
       {/* 竖式展示 */}
-      <Panel className="text-center">
-        <div className="mx-auto inline-block font-mono text-3xl">
+      <Panel className="text-center !py-6">
+        <div className="mx-auto inline-block font-mono text-3xl font-bold">
+          {/* 进位/借位标记行 */}
+          <div className="text-right text-xs font-black text-candy-pink-deep h-4" style={{ minWidth: `${maxLen + 2}ch` }}>
+            {op === 'add' && (a % 10) + (b % 10) >= 10 && showSteps && (
+              <span className="inline-block rounded-full bg-pink-100 px-1 border border-pink-300 mr-4">¹</span>
+            )}
+            {op === 'sub' && (a % 10) < (b % 10) && showSteps && (
+              <span className="inline-block text-candy-purple-deep mr-4 font-black">· (借1当10)</span>
+            )}
+          </div>
           {/* 第一个数 */}
-          <div className="text-right" style={{ minWidth: `${maxLen + 2}ch` }}>
+          <div className="text-right tracking-widest" style={{ minWidth: `${maxLen + 2}ch` }}>
             {aStr}
           </div>
           {/* 运算符+第二个数 */}
-          <div className="text-right border-b-2 border-ink" style={{ minWidth: `${maxLen + 2}ch` }}>
-            {OP_SYMBOL[op]}{bStr}
+          <div className="text-right border-b-4 border-ink tracking-widest pb-1" style={{ minWidth: `${maxLen + 2}ch` }}>
+            <span className="text-candy-purple-deep mr-2">{OP_SYMBOL[op]}</span>{bStr}
           </div>
           {/* 结果 */}
-          <div className="text-right" style={{ minWidth: `${maxLen + 2}ch` }}>
+          <div className="text-right text-candy-green-deep tracking-widest pt-2 font-black" style={{ minWidth: `${maxLen + 2}ch` }}>
             {showSteps ? rStr : '？'}
           </div>
         </div>
 
-        <div className="mt-4 flex justify-center gap-2">
-          <CandyButton tone="blue" size="sm" onClick={() => { sfxTap(); setShowSteps(s => !s); }}>
-            {showSteps ? t('verticalMath.hideAnswer') : t('verticalMath.showAnswer')}
+        <div className="mt-5 flex justify-center gap-3">
+          <CandyButton tone="blue" size="md" onClick={() => { sfxTap(); setShowSteps(s => !s); }}>
+            {showSteps ? t('verticalMath.hideAnswer') : `💡 ${t('verticalMath.showAnswer')}`}
           </CandyButton>
-          <CandyButton tone="green" size="sm" onClick={() => newQuestion()}>
-            {t('verticalMath.newQuestion')}
+          <CandyButton tone="green" size="md" onClick={() => newQuestion()}>
+            🔄 {t('verticalMath.newQuestion')}
           </CandyButton>
         </div>
       </Panel>

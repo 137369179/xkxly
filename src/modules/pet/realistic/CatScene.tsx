@@ -175,7 +175,7 @@ function SceneLighting({ envLighting }: SceneLightingProps) {
 
       {/* 半球光（天空色 + 地面色） */}
       <hemisphereLight
-        args={['#B0C4DE', '#8B4513', 0.3]}
+        args={['#dcecfa', '#8B4513', 0.3]}
       />
     </>
   );
@@ -522,8 +522,8 @@ function FallbackCatView({
       <ellipse cx="128" cy="168" rx="12" ry="9" fill={colors.secondary} stroke={colors.primary} strokeWidth="1.5" />
 
       {/* 肉垫 */}
-      <circle cx="68" cy="170" r="4" fill="#FF6B6B" opacity="0.7" />
-      <circle cx="132" cy="170" r="4" fill="#FF6B6B" opacity="0.7" />
+      <circle cx="68" cy="170" r="4" fill="#ff5c7a" opacity="0.7" />
+      <circle cx="132" cy="170" r="4" fill="#ff5c7a" opacity="0.7" />
 
       {/* 耳朵 */}
       <path d="M50 62 L22 20 Q42 22 68 42 Z" fill={colors.primary} opacity="0.85" />

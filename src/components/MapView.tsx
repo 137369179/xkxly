@@ -55,12 +55,12 @@ function buildNodes(
       : 0;
     nodes.push({
       id: `${i}`,
-      label: nodeLabels[i]!.label,
-      emoji: nodeLabels[i]!.emoji,
+      label: nodeLabels[i]?.label ?? '',
+      emoji: nodeLabels[i]?.emoji ?? '',
       lv: avgLv,
       unlocked: prevUnlocked || learned >= threshold * 0.15,
     });
-    prevUnlocked = nodes[nodes.length - 1]!.unlocked;
+    prevUnlocked = nodes[nodes.length - 1]?.unlocked ?? false;
   }
   return nodes;
 }
@@ -210,7 +210,7 @@ export function MapView() {
 
       <div className="space-y-4">
         {stages.map((stage) => {
-          const toneStyle = TONE_STYLE[stage.tone]!;
+          const toneStyle = TONE_STYLE[stage.tone];
           return (
             <div
               key={stage.key}
@@ -241,7 +241,7 @@ export function MapView() {
 
               <div className={cn('space-y-3', !stage.unlocked && 'pointer-events-none')}>
                 {stage.regions.map((region) => {
-                  const rTone = TONE_STYLE[region.tone]!;
+                  const rTone = TONE_STYLE[region.tone];
                   return (
                     <div key={region.id} className="rounded-2xl border-2 p-3" style={{ borderColor: rTone.main + '44', background: 'white' }}>
                       <div className="mb-2 flex items-center gap-2">

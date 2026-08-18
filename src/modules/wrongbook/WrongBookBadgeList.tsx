@@ -77,7 +77,7 @@ export function WrongBookBadgeList() {
               }}
               className="relative overflow-hidden rounded-2xl p-3 text-center transition"
               style={{
-                background: b.unlocked ? tone.soft : '#f3f4f6',
+                background: b.unlocked ? tone.soft : '#f7edf0',
                 opacity: b.unlocked ? 1 : 0.6,
               }}
             >
@@ -92,7 +92,7 @@ export function WrongBookBadgeList() {
               {/* 名称 */}
               <div
                 className="mt-1 text-sm font-extrabold"
-                style={{ color: b.unlocked ? tone.deep : '#9ca3af' }}
+                style={{ color: b.unlocked ? tone.deep : '#b38894' }}
               >
                 {b.name}
               </div>

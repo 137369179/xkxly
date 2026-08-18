@@ -1,9 +1,11 @@
 import { dateKey } from '@/lib/dailyPlan';
 import type { BadgeDef, Progress } from '@/types';
+import { MEDALS } from '@/data/medals';
 
 const totalLevels = 18;
 
 export const BADGES: BadgeDef[] = [
+  ...MEDALS,
   {
     id: 'first-step',
     name: '启程小星',
@@ -419,8 +421,8 @@ export const BADGES: BadgeDef[] = [
     desc: '学会 10 个成语',
     emoji: '🏯',
     tone: 'purple',
-    check: (p) => Object.keys(p.mastery).filter(k => k.startsWith('idiom:') && p.mastery[k]!.lv >= 1).length >= 10,
-    meter: (p) => [Object.keys(p.mastery).filter(k => k.startsWith('idiom:') && p.mastery[k]!.lv >= 1).length, 10],
+    check: (p) => Object.keys(p.mastery).filter(k => k.startsWith('idiom:') && (p.mastery[k]?.lv ?? 0) >= 1).length >= 10,
+    meter: (p) => [Object.keys(p.mastery).filter(k => k.startsWith('idiom:') && (p.mastery[k]?.lv ?? 0) >= 1).length, 10],
   },
   {
     id: 'idiom-30',
@@ -428,8 +430,8 @@ export const BADGES: BadgeDef[] = [
     desc: '学会 30 个成语',
     emoji: '📚',
     tone: 'purple',
-    check: (p) => Object.keys(p.mastery).filter(k => k.startsWith('idiom:') && p.mastery[k]!.lv >= 1).length >= 30,
-    meter: (p) => [Object.keys(p.mastery).filter(k => k.startsWith('idiom:') && p.mastery[k]!.lv >= 1).length, 30],
+    check: (p) => Object.keys(p.mastery).filter(k => k.startsWith('idiom:') && (p.mastery[k]?.lv ?? 0) >= 1).length >= 30,
+    meter: (p) => [Object.keys(p.mastery).filter(k => k.startsWith('idiom:') && (p.mastery[k]?.lv ?? 0) >= 1).length, 30],
   },
   {
     id: 'sentence-10',
@@ -437,8 +439,8 @@ export const BADGES: BadgeDef[] = [
     desc: '学会 10 个英语句子',
     emoji: '🗣️',
     tone: 'blue',
-    check: (p) => Object.keys(p.mastery).filter(k => k.startsWith('sentence:') && p.mastery[k]!.lv >= 1).length >= 10,
-    meter: (p) => [Object.keys(p.mastery).filter(k => k.startsWith('sentence:') && p.mastery[k]!.lv >= 1).length, 10],
+    check: (p) => Object.keys(p.mastery).filter(k => k.startsWith('sentence:') && (p.mastery[k]?.lv ?? 0) >= 1).length >= 10,
+    meter: (p) => [Object.keys(p.mastery).filter(k => k.startsWith('sentence:') && (p.mastery[k]?.lv ?? 0) >= 1).length, 10],
   },
   {
     id: 'speed-20',
@@ -456,8 +458,8 @@ export const BADGES: BadgeDef[] = [
     desc: '学会 1 首儿歌',
     emoji: '🎵',
     tone: 'pink',
-    check: (p) => Object.keys(p.mastery).filter(k => k.startsWith('rhyme:') && p.mastery[k]!.lv >= 1).length >= 1,
-    meter: (p) => [Object.keys(p.mastery).filter(k => k.startsWith('rhyme:') && p.mastery[k]!.lv >= 1).length, 1],
+    check: (p) => Object.keys(p.mastery).filter(k => k.startsWith('rhyme:') && (p.mastery[k]?.lv ?? 0) >= 1).length >= 1,
+    meter: (p) => [Object.keys(p.mastery).filter(k => k.startsWith('rhyme:') && (p.mastery[k]?.lv ?? 0) >= 1).length, 1],
   },
   {
     id: 'rhyme-5',
@@ -465,8 +467,8 @@ export const BADGES: BadgeDef[] = [
     desc: '学会 5 首儿歌',
     emoji: '🎶',
     tone: 'purple',
-    check: (p) => Object.keys(p.mastery).filter(k => k.startsWith('rhyme:') && p.mastery[k]!.lv >= 1).length >= 5,
-    meter: (p) => [Object.keys(p.mastery).filter(k => k.startsWith('rhyme:') && p.mastery[k]!.lv >= 1).length, 5],
+    check: (p) => Object.keys(p.mastery).filter(k => k.startsWith('rhyme:') && (p.mastery[k]?.lv ?? 0) >= 1).length >= 5,
+    meter: (p) => [Object.keys(p.mastery).filter(k => k.startsWith('rhyme:') && (p.mastery[k]?.lv ?? 0) >= 1).length, 5],
   },
   {
     id: 'rhyme-all',
@@ -474,8 +476,8 @@ export const BADGES: BadgeDef[] = [
     desc: '学会全部 10 首儿歌',
     emoji: '🎤',
     tone: 'yellow',
-    check: (p) => Object.keys(p.mastery).filter(k => k.startsWith('rhyme:') && p.mastery[k]!.lv >= 1).length >= 10,
-    meter: (p) => [Object.keys(p.mastery).filter(k => k.startsWith('rhyme:') && p.mastery[k]!.lv >= 1).length, 10],
+    check: (p) => Object.keys(p.mastery).filter(k => k.startsWith('rhyme:') && (p.mastery[k]?.lv ?? 0) >= 1).length >= 10,
+    meter: (p) => [Object.keys(p.mastery).filter(k => k.startsWith('rhyme:') && (p.mastery[k]?.lv ?? 0) >= 1).length, 10],
   },
   // ── 小智伙伴徽章 ──────────────────────────────────────
   {

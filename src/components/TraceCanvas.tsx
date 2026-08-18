@@ -52,7 +52,8 @@ function buildMasks(char: string): Masks {
   const off = document.createElement('canvas');
   off.width = SIZE;
   off.height = SIZE;
-  const ctx = off.getContext('2d', { willReadFrequently: true })!;
+  const ctx = off.getContext('2d', { willReadFrequently: true });
+  if (!ctx) throw new Error('Canvas 2D context unavailable');
   ctx.clearRect(0, 0, SIZE, SIZE);
   ctx.fillStyle = '#000';
   ctx.textAlign = 'center';
@@ -66,7 +67,7 @@ function buildMasks(char: string): Masks {
   const target = new Uint8Array(GRID * GRID);
   for (let y = 0; y < SIZE; y++) {
     for (let x = 0; x < SIZE; x++) {
-      if (data[(y * SIZE + x) * 4 + 3]! > 80) {
+      if ((data[(y * SIZE + x) * 4 + 3] ?? 0) > 80) {
         target[Math.floor(y / CELL) * GRID + Math.floor(x / CELL)] = 1;
       }
     }
@@ -102,7 +103,7 @@ export interface TraceCanvasProps {
 
 export function TraceCanvas({ char, tone = 'blue', onPass, hint }: TraceCanvasProps) {
   const { t: tr } = useTranslation();
-  const t = TONE_STYLE[tone]!
+  const t = TONE_STYLE[tone];
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const masksRef = useRef<Masks | null>(null);
   const drawnRef = useRef<Uint8Array>(new Uint8Array(GRID * GRID));
@@ -121,21 +122,51 @@ export function TraceCanvas({ char, tone = 'blue', onPass, hint }: TraceCanvasPr
   const paintBase = useCallback(() => {
     const cvs = canvasRef.current;
     if (!cvs) return;
-    const ctx = cvs.getContext('2d')!;
+    const ctx = cvs.getContext('2d');
+    if (!ctx) return;
     ctx.clearRect(0, 0, SIZE, SIZE);
 
-    // 田字格辅助线
-    ctx.save();
-    ctx.strokeStyle = 'rgba(140,120,170,0.35)';
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([7, 7]);
-    ctx.beginPath();
-    ctx.moveTo(SIZE / 2, 8);
-    ctx.lineTo(SIZE / 2, SIZE - 8);
-    ctx.moveTo(8, SIZE / 2);
-    ctx.lineTo(SIZE - 8, SIZE / 2);
-    ctx.stroke();
-    ctx.restore();
+    const isLatin = /^[A-Za-z0-9]$/.test(char);
+
+    if (isLatin) {
+      // 英文四线三格规范辅助线 (Top red, Mid dashed blue, Base blue, Bottom red)
+      ctx.save();
+      const lines = [
+        { y: SIZE * 0.22, color: 'rgba(239, 68, 68, 0.45)', dash: [] }, // 顶线 (上加线)
+        { y: SIZE * 0.42, color: 'rgba(59, 130, 246, 0.45)', dash: [6, 6] }, // 中线 (虚线)
+        { y: SIZE * 0.62, color: 'rgba(59, 130, 246, 0.55)', dash: [] }, // 基准线
+        { y: SIZE * 0.82, color: 'rgba(239, 68, 68, 0.45)', dash: [] }, // 底线 (下加线)
+      ];
+      for (const l of lines) {
+        ctx.strokeStyle = l.color;
+        ctx.lineWidth = 1.8;
+        ctx.setLineDash(l.dash);
+        ctx.beginPath();
+        ctx.moveTo(10, l.y);
+        ctx.lineTo(SIZE - 10, l.y);
+        ctx.stroke();
+      }
+      ctx.restore();
+    } else {
+      // 汉字米字格辅助线（横/竖/对角虚线）
+      ctx.save();
+      ctx.strokeStyle = 'rgba(140, 120, 170, 0.35)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      // 十字线
+      ctx.moveTo(SIZE / 2, 8);
+      ctx.lineTo(SIZE / 2, SIZE - 8);
+      ctx.moveTo(8, SIZE / 2);
+      ctx.lineTo(SIZE - 8, SIZE / 2);
+      // 对角线
+      ctx.moveTo(12, 12);
+      ctx.lineTo(SIZE - 12, SIZE - 12);
+      ctx.moveTo(SIZE - 12, 12);
+      ctx.lineTo(12, SIZE - 12);
+      ctx.stroke();
+      ctx.restore();
+    }
 
     // 引导字形（淡色描红底）
     ctx.save();
@@ -199,7 +230,8 @@ export function TraceCanvas({ char, tone = 'blue', onPass, hint }: TraceCanvasPr
   const strokeTo = (x: number, y: number) => {
     const cvs = canvasRef.current;
     if (!cvs) return;
-    const ctx = cvs.getContext('2d')!;
+    const ctx = cvs.getContext('2d');
+    if (!ctx) return;
     const last = lastRef.current ?? { x, y };
     ctx.save();
     ctx.strokeStyle = t.main;

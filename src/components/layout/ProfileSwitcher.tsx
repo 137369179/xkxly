@@ -33,8 +33,8 @@ export function ProfileSwitcher({ open, onClose }: { open: boolean; onClose: () 
   const [mode, setMode] = useState<Mode>('list');
   const [editingId, setEditingId] = useState<string>('');
   const [name, setName] = useState('');
-  const [avatar, setAvatar] = useState(PROFILE_AVATARS[0]!);
-  const [color, setColor] = useState(PROFILE_COLORS[0]!.key);
+  const [avatar, setAvatar] = useState(PROFILE_AVATARS[0] ?? '👦');
+  const [color, setColor] = useState(PROFILE_COLORS[0]?.key ?? 'pink');
   const [ageRange, setAgeRangeLocal] = useState<AgeRangeKey>('7-8');
   const [confirmId, setConfirmId] = useState('');
 
@@ -42,8 +42,8 @@ export function ProfileSwitcher({ open, onClose }: { open: boolean; onClose: () 
 
   const resetForm = () => {
     setName('');
-    setAvatar(PROFILE_AVATARS[0]!);
-    setColor(PROFILE_COLORS[0]!.key);
+    setAvatar(PROFILE_AVATARS[0] ?? '👦');
+    setColor(PROFILE_COLORS[0]?.key ?? 'pink');
     setAgeRangeLocal('7-8');
     setEditingId('');
     setConfirmId('');

@@ -55,7 +55,7 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
 
     // 播放提示音
     setTimeout(() => {
-      speak(`请选出汉字：${currentHanzi.c}，拼音是 ${currentHanzi.p}`);
+      void speak(`请选出汉字：${currentHanzi.c}，拼音是 ${currentHanzi.p}`).catch(() => {});
     }, 300);
   }, [currentIndex, pool, level]);
 
@@ -74,11 +74,11 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
       setStreak((prev) => prev + 1);
       setTotalStars((prev) => prev + 1);
       addFish(1);
-      speak(`答对啦！${entry.c}，${entry.p}。真棒！`);
+      void speak(`答对啦！${entry.c}，${entry.p}。真棒！`).catch(() => {});
       practice(`hanzi:${entry.c}`, true);
     } else {
       setStreak(0);
-      speak(`差一点点哦，这是 ${entry.c}，正确答案是 ${currentHanzi.c}`);
+      void speak(`差一点点哦，这是 ${entry.c}，正确答案是 ${currentHanzi.c}`).catch(() => {});
       practice(`hanzi:${currentHanzi.c}`, false);
     }
 
@@ -88,7 +88,7 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
       } else {
         setIsCompleted(true);
         celebrateSmall();
-        speak(`恭喜你完成汉字闯关！一共获得 ${totalStars + (correct ? 1 : 0)} 颗星！`);
+        void speak(`恭喜你完成汉字闯关！一共获得 ${totalStars + (correct ? 1 : 0)} 颗星！`).catch(() => {});
       }
     }, 1800);
   };

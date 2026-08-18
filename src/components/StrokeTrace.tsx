@@ -39,7 +39,11 @@ function dist(a: Pt, b: Pt) {
 
 function pathLen(pts: Pt[]) {
   let l = 0;
-  for (let i = 1; i < pts.length; i++) l += dist(pts[i]!, pts[i - 1]!);
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i];
+    const b = pts[i - 1];
+    if (a !== undefined && b !== undefined) l += dist(a, b);
+  }
   return l;
 }
 
@@ -79,7 +83,7 @@ export interface StrokeTraceProps {
 }
 
 export function StrokeTrace({ char, tone = 'green', onPass }: StrokeTraceProps) {
-  const t = TONE_STYLE[tone]!
+  const t = TONE_STYLE[tone];
   const { t: translate } = useTranslation();
   const [data, setData] = useState<StrokeData | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -122,7 +126,8 @@ export function StrokeTrace({ char, tone = 'green', onPass }: StrokeTraceProps) 
 
   /** 屏幕事件 → 1024 原始坐标（y 翻转回来） */
   const toRaw = (e: React.PointerEvent): Pt => {
-    const el = svgRef.current!;
+    const el = svgRef.current ?? null;
+    if (!el) return [0, 0];
     const r = el.getBoundingClientRect();
     const sx = ((e.clientX - r.left) / r.width) * VIEW;
     const sy = ((e.clientY - r.top) / r.height) * VIEW;
@@ -208,7 +213,7 @@ export function StrokeTrace({ char, tone = 'green', onPass }: StrokeTraceProps) 
           style={{ boxShadow: '0 8px 24px rgba(120,100,160,0.18)' }}
         >
           {/* 米字格 */}
-          <g stroke="#e4def5" strokeDasharray="14,14" strokeWidth="3">
+          <g stroke="#ece5ff" strokeDasharray="14,14" strokeWidth="3">
             <line x1={0} y1={VIEW / 2} x2={VIEW} y2={VIEW / 2} />
             <line x1={VIEW / 2} y1={0} x2={VIEW / 2} y2={VIEW} />
             <line x1={0} y1={0} x2={VIEW} y2={VIEW} />
@@ -218,11 +223,11 @@ export function StrokeTrace({ char, tone = 'green', onPass }: StrokeTraceProps) 
           <g transform="scale(1,-1) translate(0,-900)">
             {/* 未写的笔：浅灰底 */}
             {data?.s.map((d, i) => (
-              <path key={`g${i}`} d={d} fill={i < doneStrokes ? 'none' : '#ece7f7'} />
+              <path key={`g${i}`} d={d} fill={i < doneStrokes ? 'none' : '#ece5ff'} />
             ))}
             {/* 已完成的笔：墨色实心 */}
             {data?.s.map((d, i) =>
-              i < doneStrokes ? <path key={`f${i}`} d={d} fill="#3730a3" /> : null,
+              i < doneStrokes ? <path key={`f${i}`} d={d} fill="#5c2e3d" /> : null,
             )}
             {/* 当前笔：呼吸高亮轮廓 */}
             {data && strokeIdx < total && status !== 'pass' && (
@@ -235,7 +240,7 @@ export function StrokeTrace({ char, tone = 'green', onPass }: StrokeTraceProps) 
             )}
             {/* 起笔提示点 */}
             {startDot && status !== 'pass' && (
-              <circle cx={startDot[0]} cy={startDot[1]} r={34} fill="#f59e0b" className="animate-ping" />
+              <circle cx={startDot[0]} cy={startDot[1]} r={34} fill="#e5ac2e" className="animate-ping" />
             )}
             {/* 当前轨迹 */}
             {trailPath && (
@@ -275,7 +280,7 @@ export function StrokeTrace({ char, tone = 'green', onPass }: StrokeTraceProps) 
                 i < doneStrokes ? 'scale-110' : i === strokeIdx ? 'animate-pulse' : '',
               )}
               style={{
-                background: i < doneStrokes ? '#22c55e' : i === strokeIdx ? t.main : '#e5e0f0',
+                background: i < doneStrokes ? '#33a863' : i === strokeIdx ? t.main : '#f0dde2',
               }}
             />
           ))}

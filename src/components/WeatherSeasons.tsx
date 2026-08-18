@@ -28,6 +28,8 @@ function WeatherSeasonsImpl() {
   const { t } = useTranslation();
   const [tab, setTab] = useState<'season'|'weather'>('season');
   const [selected, setSelected] = useState(0);
+  const season = SEASONS[selected] ?? SEASONS[0];
+  if (!season) return null;
 
   return (
     <div className="card-candy p-4 sm:p-6">
@@ -51,12 +53,12 @@ function WeatherSeasonsImpl() {
           </div>
           <motion.div key={selected} initial={{opacity:0,y:5}} animate={{opacity:1,y:0}} className="rounded-xl bg-white p-4 shadow-sm">
             <div className="flex items-center gap-3">
-              <span className="text-4xl">{SEASONS[selected]!.emoji}</span>
+              <span className="text-4xl">{season.emoji}</span>
               <div>
-                <p className="font-extrabold text-ink">{SEASONS[selected]!.name} ({SEASONS[selected]!.months})</p>
-                <p className="text-xs font-medium text-ink-soft">{SEASONS[selected]!.desc}</p>
+                <p className="font-extrabold text-ink">{season.name} ({season.months})</p>
+                <p className="text-xs font-medium text-ink-soft">{season.desc}</p>
                 <div className="mt-1 flex gap-1">
-                  {SEASONS[selected]!.weather.map(w => <span key={w} className="rounded-lg bg-ink-soft/10 px-2 py-0.5 text-[10px] font-bold">{w}</span>)}
+                  {season.weather.map(w => <span key={w} className="rounded-lg bg-ink-soft/10 px-2 py-0.5 text-[10px] font-bold">{w}</span>)}
                 </div>
               </div>
             </div>

@@ -22,13 +22,16 @@ import {
 } from './WrongBookStats';
 import { AdaptiveTrainer } from './AdaptiveTrainer';
 import { WrongBookBadgeList } from './WrongBookBadgeList';
+import { clusterWrongBook, type WrongCluster } from '@/lib/wrongCluster';
+import { openTraining, skillToTarget } from '@/lib/skillRouting';
 
-type TabId = 'overview' | 'train' | 'badges';
+type TabId = 'overview' | 'train' | 'badges' | 'causes';
 
 const TABS: { id: TabId; label: string; emoji: string }[] = [
   { id: 'overview', label: 'wrongbook.tab.overview', emoji: '📊' },
   { id: 'train', label: 'wrongbook.tab.train', emoji: '🧠' },
   { id: 'badges', label: 'wrongbook.tab.badges', emoji: '🏅' },
+  { id: 'causes', label: 'wrongbook.tab.causes', emoji: '🧩' },
 ];
 
 export default function WrongBookDashboard() {
@@ -116,11 +119,12 @@ export default function WrongBookDashboard() {
           {tab === 'overview' && <OverviewTab />}
           {tab === 'train' && <AdaptiveTrainer />}
           {tab === 'badges' && <WrongBookBadgeList />}
+          {tab === 'causes' && <CausesTab />}
         </motion.div>
       </AnimatePresence>
 
       {/* 空状态引导 */}
-      {progress.wrongBook.length === 0 && tab !== 'badges' && (
+      {progress.wrongBook.length === 0 && tab !== 'badges' && tab !== 'causes' && (
         <Panel className="text-center">
           <div className="text-5xl">🎉</div>
           <h3 className="mt-2 text-lg font-extrabold text-ink">{t('wrongbook.emptyTitle')}</h3>
@@ -163,6 +167,82 @@ function OverviewTab() {
           <KillProgressRing />
         </Panel>
       </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* 按原因 Tab（错题因果聚类）                                           */
+/* ------------------------------------------------------------------ */
+function CausesTab() {
+  const { t } = useTranslation();
+  const progress = useProgress();
+  const clusters = useMemo(() => clusterWrongBook(progress), [progress]);
+
+  return (
+    <div className="space-y-4">
+      <Panel className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-extrabold text-ink">🧩 {t('wrongbook.causes.title')}</h3>
+          {clusters.length > 0 && (
+            <span className="text-sm font-bold text-ink-soft">
+              {t('wrongbook.causes.summary', { groups: clusters.length, total: progress.wrongBook.length })}
+            </span>
+          )}
+        </div>
+        {clusters.length === 0 ? (
+          <p className="text-center text-sm font-bold text-ink-soft">🎉 {t('wrongbook.empty')}</p>
+        ) : (
+          <div className="space-y-2">
+            {clusters.map((c) => (
+              <CauseCard key={c.key} cluster={c} />
+            ))}
+          </div>
+        )}
+      </Panel>
+    </div>
+  );
+}
+
+function CauseCard({ cluster }: { cluster: WrongCluster }) {
+  const { t } = useTranslation();
+  const firstSkill = cluster.skills[0];
+  const canTrain = firstSkill !== undefined && skillToTarget(firstSkill) !== null;
+  const sampleSkills = cluster.skills.slice(0, 3);
+
+  return (
+    <div className="rounded-2xl bg-white/70 p-3">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span className="text-base font-extrabold text-ink">{cluster.label}</span>
+          <span className="rounded-full bg-candy-purple-soft px-2 py-0.5 text-xs font-bold text-candy-purple-deep">
+            {t('wrongbook.causes.count', { count: cluster.count })}
+          </span>
+        </div>
+        {canTrain && firstSkill && (
+          <CandyButton
+            tone="blue"
+            size="sm"
+            onClick={() => {
+              openTraining(firstSkill);
+            }}
+          >
+            🎯 {t('wrongbook.causes.practice')}
+          </CandyButton>
+        )}
+      </div>
+      {sampleSkills.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {sampleSkills.map((s) => (
+            <span
+              key={s}
+              className="rounded-lg bg-white px-2 py-0.5 text-xs font-bold text-ink-soft"
+            >
+              {s}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

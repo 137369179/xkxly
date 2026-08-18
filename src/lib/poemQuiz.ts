@@ -39,13 +39,18 @@ function shuffle<T>(arr: T[], rand: () => number): T[] {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(rand() * (i + 1));
-    [a[i], a[j]] = [a[j]!, a[i]!];
+    const ai = a[i];
+    const aj = a[j];
+    if (ai !== undefined && aj !== undefined) {
+      a[i] = aj;
+      a[j] = ai;
+    }
   }
   return a;
 }
 
 function lineText(poem: DeepPoem, i: number): string {
-  return poem.lines[i]!.chars.map((c) => c.c).join('');
+  return (poem.lines[i] ?? { chars: [] }).chars.map((c) => c.c).join('');
 }
 
 /** 生成一首诗的自测题 */
@@ -81,7 +86,7 @@ export function generatePoemQuiz(poem: DeepPoem, opts: QuizOptions = {}): Questi
       prompt: `《${poem.title}》的作者是谁？`,
       display: poem.title,
       options: opts2,
-      answerId: opts2.find((o) => o.label === poem.author)!.id,
+      answerId: opts2.find((o) => o.label === poem.author)?.id ?? '',
       hint: `本诗作者为${poem.author}（${poem.dynasty}）。`,
       speak: poem.title,
       speakLang: 'zh-CN',
@@ -103,7 +108,7 @@ export function generatePoemQuiz(poem: DeepPoem, opts: QuizOptions = {}): Questi
       speak: prev,
       speakLang: 'zh-CN',
       options: opts2,
-      answerId: opts2.find((o) => o.label === nextLine)!.id,
+      answerId: opts2.find((o) => o.label === nextLine)?.id ?? '',
       hint: `原诗为：「${prev}，${nextLine}」。`,
     });
   }
@@ -111,11 +116,11 @@ export function generatePoemQuiz(poem: DeepPoem, opts: QuizOptions = {}): Questi
   // 填空题（隐去句中一字）
   if (kinds.includes('fill')) {
     const li = Math.floor(rand() * poem.lines.length);
-    const chars = poem.lines[li]!.chars;
+    const chars = (poem.lines[li] ?? { chars: [] }).chars;
     const hanIdx = chars.map((c, i) => (/[一-龥]/.test(c.c) ? i : -1)).filter((i) => i >= 0);
     if (hanIdx.length >= 2) {
-      const hideAt = hanIdx[1 + Math.floor(rand() * (hanIdx.length - 1))]!
-      const correct = chars[hideAt]!.c;
+      const hideAt = hanIdx[1 + Math.floor(rand() * (hanIdx.length - 1))] ?? -1;
+      const correct = chars[hideAt]?.c ?? '';
       const masked = chars.map((c, i) => (i === hideAt ? '（　）' : c.c)).join('');
       const poolChars = new Set<string>();
       others.forEach((p) =>
@@ -135,7 +140,7 @@ export function generatePoemQuiz(poem: DeepPoem, opts: QuizOptions = {}): Questi
         speak: lineText(poem, li),
         speakLang: 'zh-CN',
         options: opts2,
-        answerId: opts2.find((o) => o.label === correct)!.id,
+        answerId: opts2.find((o) => o.label === correct)?.id ?? '',
         hint: `原句为：「${lineText(poem, li)}」。`,
       });
     }
@@ -144,7 +149,7 @@ export function generatePoemQuiz(poem: DeepPoem, opts: QuizOptions = {}): Questi
   // 主题归类题
   if (kinds.includes('theme') && (poem.themes ?? []).length) {
     const themes = poem.themes ?? [];
-    const theme = themes[Math.floor(rand() * themes.length)]!;
+    const theme = themes[Math.floor(rand() * themes.length)] ?? '';
     const allThemes = new Set<string>(themes);
     others.forEach((p) => (p.themes ?? []).forEach((t) => allThemes.add(t)));
     const wrong = shuffle([...allThemes].filter((t) => t !== theme), rand).slice(0, 3);
@@ -156,7 +161,7 @@ export function generatePoemQuiz(poem: DeepPoem, opts: QuizOptions = {}): Questi
       prompt: `《${poem.title}》更可能属于哪类主题？`,
       display: poem.title,
       options: opts2,
-      answerId: opts2.find((o) => o.label === theme)!.id,
+      answerId: opts2.find((o) => o.label === theme)?.id ?? '',
       hint: `本诗标注主题：${themes.join('、')}。`,
     });
   }

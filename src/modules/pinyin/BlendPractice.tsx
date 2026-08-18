@@ -88,17 +88,17 @@ export function BlendPractice() {
 
   const playShengmu = () => {
     if (!round) return;
-    speak(round.combo.shengmu, { rate: 0.65, lang: 'zh-CN' });
+    void speak(round.combo.shengmu, { rate: 0.65, lang: 'zh-CN' }).catch(() => {});
   };
 
   const playYunmu = () => {
     if (!round) return;
-    speak(round.combo.yunmu, { rate: 0.65, lang: 'zh-CN' });
+    void speak(round.combo.yunmu, { rate: 0.65, lang: 'zh-CN' }).catch(() => {});
   };
 
   const playBlendSound = () => {
     if (!round) return;
-    speak(round.combo.result, { rate: 0.65, lang: 'zh-CN' });
+    void speak(round.combo.result, { rate: 0.65, lang: 'zh-CN' }).catch(() => {});
   };
 
   const handlePick = (opt: string) => {

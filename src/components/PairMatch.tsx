@@ -59,7 +59,7 @@ export function PairMatch() {
     if (lockRef.current || matched.has(i)) return;
     sfxTap();
     setLeftSel(i);
-    void speak(pairs[i]!.left.label, { lang: 'zh-CN', rate: 0.8, module: 'ai' });
+    void speak(pairs[i]?.left.label ?? '', { lang: 'zh-CN', rate: 0.8, module: 'ai' });
   };
 
   const pickRight = (i: number) => {
@@ -71,7 +71,7 @@ export function PairMatch() {
       newMatched.add(i);
       setMatched(newMatched);
       setScore(s => s + 1);
-      setFeedback(t('pair.success', { left: pairs[i]!.left.label, right: pairs[i]!.right.label }));
+      setFeedback(t('pair.success', { left: pairs[i]?.left.label ?? '', right: pairs[i]?.right.label ?? '' }));
       void speak(`配对成功！`, { lang: 'zh-CN', rate: 0.85, module: 'praise' });
       setLeftSel(null);
       if (newMatched.size >= pairs.length) {
@@ -127,8 +127,8 @@ export function PairMatch() {
                 matched.has(ri) ? 'bg-candy-green-soft opacity-50' :
                 wrongPair?.r === ri ? 'bg-candy-pink-soft animate-shake' : 'bg-white hover:bg-green-50'
               )}>
-              <span className="text-4xl">{pairs[ri]!.right.emoji}</span>
-              <div className="mt-1 text-xs font-extrabold">{pairs[ri]!.right.label}</div>
+              <span className="text-4xl">{pairs[ri]?.right.emoji ?? ''}</span>
+              <div className="mt-1 text-xs font-extrabold">{pairs[ri]?.right.label ?? ''}</div>
             </button>
           ))}
         </div>

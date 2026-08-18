@@ -36,7 +36,7 @@ export function makeMulQuestion(difficulty: Difficulty = 1): Question {
   const display = `${a} × ${b} = ?`;
   const values = makeNumberOptions(answer, 4, Math.max(0, answer - 6), answer + 6);
   const options = values.map((v) => opt({ label: String(v) }));
-  const answerId = options[values.indexOf(answer)]!.id;
+  const answerId = options[values.indexOf(answer)]?.id ?? '';
   return {
     id: `mul-${Date.now().toString(36)}`,
     kind: 'math-mul',
@@ -60,7 +60,7 @@ export function makeDivQuestion(difficulty: Difficulty = 1): Question {
   const display = `${total} ÷ ${b} = ?`;
   const values = makeNumberOptions(answer, 4, Math.max(0, answer - 4), answer + 4);
   const options = values.map((v) => opt({ label: String(v) }));
-  const answerId = options[values.indexOf(answer)]!.id;
+  const answerId = options[values.indexOf(answer)]?.id ?? '';
   return {
     id: `div-${Date.now().toString(36)}`,
     kind: 'math-div',
@@ -137,7 +137,7 @@ export function makeCoinQuestion(difficulty: Difficulty = 1): Question {
   const picked = Array.from({ length: coinCount }, () => sample(items));
   // 难度1 限制：至少包含一枚 1 元，避免全是 1 角的过简单题目
   if (difficulty === 1 && !picked.some((c) => c.value === 100)) {
-    picked[0] = items[0]!;
+    picked[0] = items[0] ?? { name: '1元', value: 100, emoji: '🪙' };
   }
   const total = picked.reduce((s, c) => s + c.value, 0);
   const yuan = Math.floor(total / 100);
@@ -189,7 +189,7 @@ export function makeMathQuestion(difficulty: Difficulty = 1, forceOp?: 'add' | '
 
   const values = makeNumberOptions(answer, 4, 0, max);
   const options = values.map((v) => opt({ label: String(v) }));
-  const answerId = options[values.indexOf(answer)]!.id;
+  const answerId = options[values.indexOf(answer)]?.id ?? '';
 
   return {
     id: nextId('math'),
@@ -219,7 +219,7 @@ export function makeCountQuestion(difficulty: Difficulty = 1): Question {
 
   const values = makeNumberOptions(n, 4, 1, max + 2);
   const options = values.map((v) => opt({ label: String(v) }));
-  const answerId = options[values.indexOf(n)]!.id;
+  const answerId = options[values.indexOf(n)]?.id ?? '';
 
   return {
     id: nextId('count'),
@@ -245,7 +245,7 @@ export function makeNumberQuestion(difficulty: Difficulty = 1, forceN?: number):
 
   const values = makeNumberOptions(n, 4, 0, Math.max(max, n + 4));
   const options = values.map((v) => opt({ label: useChinese ? String(v) : toChineseNumber(v) }));
-  const answerId = options[values.indexOf(n)]!.id;
+  const answerId = options[values.indexOf(n)]?.id ?? '';
 
   return {
     id: nextId('num'),

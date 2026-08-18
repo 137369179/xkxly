@@ -8,7 +8,8 @@ import { speak } from '@/lib/speech';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
 
-const PARTS = [
+/** 身体部位数据（供单元测试校验完整性） */
+export const PARTS = [
   { id:'head', name:'头', en:'Head', emoji:'😀', zone:'head', desc:'我们用它来思考问题' },
   { id:'eye', name:'眼睛', en:'Eye', emoji:'👁️', zone:'head', desc:'用来看世界的窗户' },
   { id:'ear', name:'耳朵', en:'Ear', emoji:'👂', zone:'head', desc:'用来听声音的' },

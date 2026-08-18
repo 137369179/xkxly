@@ -14,12 +14,12 @@ interface ToneStyle {
 }
 
 export const TONE_STYLE: Record<Tone, ToneStyle> = {
-  pink: { main: '#FF6FA5', deep: '#D9457B', soft: '#FFE4EF', on: '#FFFFFF' },
-  blue: { main: '#4FC3F7', deep: '#2196C9', soft: '#DDF2FD', on: '#FFFFFF' },
-  yellow: { main: '#FFC93C', deep: '#D99C0E', soft: '#FFF3D2', on: '#5A4408' },
-  green: { main: '#5FD68B', deep: '#33A863', soft: '#DDF7E7', on: '#FFFFFF' },
-  purple: { main: '#A78BFA', deep: '#7B57E8', soft: '#ECE5FF', on: '#FFFFFF' },
-  orange: { main: '#FF9F5A', deep: '#E0742B', soft: '#FFEBDB', on: '#FFFFFF' },
+  pink: { main: '#ff6b96', deep: '#e05a80', soft: '#ffe4ee', on: '#FFFFFF' },
+  blue: { main: '#55aee0', deep: '#2e93c9', soft: '#dcecfa', on: '#FFFFFF' },
+  yellow: { main: '#ffc93c', deep: '#e5ac2e', soft: '#fff4d6', on: '#5a4408' },
+  green: { main: '#5fd68b', deep: '#33a863', soft: '#f0faf4', on: '#FFFFFF' },
+  purple: { main: '#8b6ef0', deep: '#6631c7', soft: '#ece5ff', on: '#FFFFFF' },
+  orange: { main: '#ff9f5a', deep: '#c2410c', soft: '#fff3ec', on: '#FFFFFF' },
 };
 
 /** 按索引循环取色，用于列表着色 */

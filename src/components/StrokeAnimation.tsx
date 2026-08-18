@@ -22,9 +22,9 @@ interface StrokeAnimationProps {
   strokeMs?: number;
 }
 
-const INK = '#4338ca'; // 主墨色
-const INK_DONE = '#312e81';
-const GUIDE = '#e7e3f4';
+const INK = '#5c2e3d'; // 主墨色（--color-ink 暖墨）
+const INK_DONE = '#471f2c';
+const GUIDE = '#ece5ff';
 
 function medianToPath(m: [number, number][]): string {
   return m.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' ');
@@ -110,7 +110,7 @@ export function StrokeAnimation({ char, autoPlay = true, strokeMs = 750 }: Strok
 
       <div className="relative flex h-44 w-44 items-center justify-center rounded-2xl border-2 border-indigo-300 bg-white shadow-fluffy">
         {/* 米字格 */}
-        <svg className="absolute inset-0 h-full w-full" stroke="#ddd6fe" strokeDasharray="5,5">
+        <svg className="absolute inset-0 h-full w-full" stroke="#d9c6f5" strokeDasharray="5,5">
           <line x1="0" y1="50%" x2="100%" y2="50%" strokeWidth="1" />
           <line x1="50%" y1="0" x2="50%" y2="100%" strokeWidth="1" />
           <line x1="0" y1="0" x2="100%" y2="100%" strokeWidth="1" />
@@ -120,7 +120,7 @@ export function StrokeAnimation({ char, autoPlay = true, strokeMs = 750 }: Strok
         {total > 0 ? (
           <svg viewBox="0 0 1024 1024" className="relative z-10 h-40 w-40">
             <defs>
-              {data!.s.map((d, i) => (
+              {(data?.s ?? []).map((d, i) => (
                 <clipPath key={`d-${i}`} id={`hz-clip-${char}-${i}`}>
                   <path d={d} />
                 </clipPath>
@@ -128,21 +128,21 @@ export function StrokeAnimation({ char, autoPlay = true, strokeMs = 750 }: Strok
             </defs>
             <g transform="scale(1,-1) translate(0,-900)">
               {/* 浅灰字形底（未写到的笔） */}
-              {data!.s.map((d, i) => (
+              {(data?.s ?? []).map((d, i) => (
                 <path key={`g${i}`} d={d} fill={i <= current ? 'none' : GUIDE} />
               ))}
               {/* 已完成的笔：实心墨色 */}
-              {data!.s.map((d, i) =>
+              {(data?.s ?? []).map((d, i) =>
                 i < current || (done && i <= current) ? (
                   <path key={`f${i}`} d={d} fill={INK_DONE} />
                 ) : null,
               )}
               {/* 正在书写的笔：中线粗线 + dash 动画，被笔形裁剪 */}
-              {current >= 0 && current < total && data!.m[current] && (
+              {current >= 0 && current < total && data?.m[current] && (
                 <g clipPath={`url(#hz-clip-${char}-${current})`}>
                   <path
                     key={`stroke-${char}-${current}`}
-                    d={medianToPath(data!.m[current]!)}
+                    d={medianToPath(data?.m[current] ?? [])}
                     fill="none"
                     stroke={INK}
                     strokeWidth={110}

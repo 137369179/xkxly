@@ -176,7 +176,8 @@ export function makeHanziSimilarQuestion(target: HanziEntry, pool: HanziEntry[])
   while (distractors.length < 3) {
     const cand = pick(pool.filter(h => h.c !== target.c && !distractors.includes(h)), 1);
     if (!cand.length) break;
-    distractors.push(cand[0]!);
+    const candV = cand[0];
+    if (candV !== undefined) distractors.push(candV);
   }
   const opts = pick([target, ...distractors], 4);
   return {
@@ -255,13 +256,13 @@ export function makeHanziComponentQuestion(target: HanziEntry, pool?: HanziEntry
   if (containable.length) kinds.push('contains');
   if (!kinds.length) return makeHanziFormationQuestion(target, t);
 
-  const kind = kinds[Math.floor(Math.random() * kinds.length)]!;
+  const kind = kinds[Math.floor(Math.random() * kinds.length)] ?? 'semantic';
   const p = pool ?? getHanziByLevel(target.level);
   const tr = (key: string, fallback: string, params?: Record<string, string | number>) =>
     t ? t(key, params) : fallback;
 
   if (kind === 'semantic') {
-    const ans = e.semantic!;
+    const ans = e.semantic ?? target.radical;
     return {
       id: genId(),
       kind: 'hanzi-component',
@@ -277,7 +278,7 @@ export function makeHanziComponentQuestion(target: HanziEntry, pool?: HanziEntry
   }
 
   if (kind === 'phonetic') {
-    const ans = e.phonetic!;
+    const ans = e.phonetic ?? '';
     const relPhrase =
       e.soundRel === 'exact' ? '读音和它一样' : e.soundRel === 'rhyme' ? '韵母和它一样' : '开头音和它一样';
     return {
@@ -295,9 +296,9 @@ export function makeHanziComponentQuestion(target: HanziEntry, pool?: HanziEntry
   }
 
   // contains：从「含有部件 X」的字里挑一个正确答案，再从同阶字里挑不含 X 的干扰
-  const comp = containable[Math.floor(Math.random() * containable.length)]!;
+  const comp = containable[Math.floor(Math.random() * containable.length)] ?? '';
   const userChars = componentUsers(comp).filter((c) => c !== target.c);
-  const correctChar = userChars.length ? pick(userChars, 1)[0]! : comp;
+  const correctChar = userChars.length ? (pick(userChars, 1)[0] ?? comp) : comp;
   const nonUsers = p.filter((h) => h.c !== target.c && !componentUsers(comp).includes(h.c));
   const distractors = pick(nonUsers, 3);
   const opts = pick([getHanziByChar(correctChar) ?? target, ...distractors], 4).map((h) => ({

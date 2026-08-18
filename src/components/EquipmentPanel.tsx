@@ -71,7 +71,7 @@ export function EquipmentPanel({ ownedFragments, ownedEquipment, equippedItems, 
               {EQUIPMENT.map((eq) => {
                 const isOwned = ownedEquipment.includes(eq.id);
                 const isEquipped = equippedItems[eq.slot] === eq.id;
-                const slotInfo = SLOT_LABELS[eq.slot]!;
+                const slotInfo = SLOT_LABELS[eq.slot] ?? { label: eq.slot, emoji: '❓' };
                 return (
                   <motion.button
                     key={eq.id}

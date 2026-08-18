@@ -140,7 +140,7 @@ export const PLANETS: PlanetItem[] = [
     rotationPeriod: 23.93,
     moons: 1,
     surfaceTemp: '-89°C ~ 58°C',
-    model3D: { radius: 0.6, color: '#4A90D9', orbitRadius: 7, orbitSpeed: 0.01, rotationSpeed: 0.02 },
+    model3D: { radius: 0.6, color: '#55aee0', orbitRadius: 7, orbitSpeed: 0.01, rotationSpeed: 0.02 },
     order: 3,
   },
   {

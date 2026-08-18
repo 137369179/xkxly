@@ -7,10 +7,11 @@
  */
 
 import { useState, Suspense, lazy } from 'react';
-import { PageHeader } from '@/components/ui/Card';
+import { PageHeader, Panel } from '@/components/ui/Card';
 import { sfxTap } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
+import { SCIENCE_ITEMS } from '@/data/scienceIndex';
 
 // 懒加载 5 大模块
 const DinoWorld = lazy(() => import('./components/DinoWorld').then(m => ({ default: m.DinoWorld })));
@@ -66,6 +67,33 @@ export default function SciencePage() {
         subtitle={t('sciencePage.subtitle')}
         tone="green"
       />
+
+      {/* 知识卡片精选 */}
+      <Panel>
+        <div className="text-sm font-extrabold text-ink mb-3">
+          🌿 {t('sciencePage.knowledgeCards') ?? '知识卡片'}
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {SCIENCE_ITEMS.map((item) => (
+            <div
+              key={item.id}
+              className={cn(
+                'flex flex-col items-center rounded-2xl border-2 bg-white p-3 text-center transition-all hover:scale-105 active:translate-y-[1px] cursor-pointer',
+                item.category === 'dino' ? 'border-green-200' : item.category === 'space' ? 'border-blue-200' : 'border-orange-200',
+              )}
+              onClick={() => {
+                sfxTap();
+                const tabMap: Record<string, SciTab> = { dino: 'dino', space: 'space', weather: 'weather' };
+                setTab(tabMap[item.category] ?? 'dino');
+              }}
+            >
+              <span className="text-3xl">{item.emoji}</span>
+              <div className="mt-1 text-xs font-extrabold text-ink">{item.nameZh}</div>
+              <div className="text-[10px] font-bold text-ink-soft">{item.nameEn}</div>
+            </div>
+          ))}
+        </div>
+      </Panel>
 
       {/* Tab 导航 */}
       <div className="scrollbar-none flex gap-2 overflow-x-auto rounded-[1.4rem] bg-white/60 p-1.5 shadow-candy-sm">

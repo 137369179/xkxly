@@ -119,10 +119,10 @@ export function DeepSparkline({ progress }: { progress: Progress }) {
   const line = pts.map((p) => p.join(',')).join(' ');
   return (
     <svg viewBox="0 0 100 42" className="mt-2 w-full" style={{ height: 64 }} aria-hidden>
-      <polygon points={`0,40 ${line} 100,40`} fill="rgba(34,197,94,0.12)" />
-      <polyline points={line} fill="none" stroke="#22c55e" strokeWidth={0.9} strokeLinejoin="round" />
+      <polygon points={`0,40 ${line} 100,40`} fill="rgba(51,168,99,0.12)" />
+      <polyline points={line} fill="none" stroke="#33a863" strokeWidth={0.9} strokeLinejoin="round" />
       {pts.map((p, i) => (
-        <circle key={`pt-${i}`} cx={p[0]} cy={p[1]} r={0.8} fill="#22c55e" />
+        <circle key={`pt-${i}`} cx={p[0]} cy={p[1]} r={0.8} fill="#33a863" />
       ))}
     </svg>
   );

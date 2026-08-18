@@ -1,0 +1,15 @@
+{
+  "achievementCenter": {
+    "title": "Achievement Center",
+    "subtitle": "Collected {done}/{total} medals",
+    "statCollected": "Medals Collected",
+    "statStars": "Total Stars",
+    "tabAll": "All",
+    "tabAchievement": "Skills",
+    "tabMilestone": "Milestones",
+    "tabBehavior": "Habits",
+    "unlocked": "Unlocked",
+    "notStarted": "Not started",
+    "progress": "Collection Progress"
+  }
+}

@@ -70,7 +70,7 @@ class SpeechRecogManager {
           analyser.getByteFrequencyData(dataArray);
           let sum = 0;
           for (let i = 0; i < dataArray.length; i++) {
-            sum += dataArray[i]!;
+            sum += dataArray[i] ?? 0;
           }
           const average = sum / dataArray.length;
           if (average > 15) {
@@ -126,10 +126,10 @@ class SpeechRecogManager {
           let finalTranscript = '';
 
           for (let i = event.resultIndex; i < event.results.length; ++i) {
-            if (event.results[i]!.isFinal) {
-              finalTranscript += event.results[i]![0]!.transcript;
+            if (event.results[i]?.isFinal) {
+              finalTranscript += event.results[i]?.[0]?.transcript ?? '';
             } else {
-              interimTranscript += event.results[i]![0]!.transcript;
+              interimTranscript += event.results[i]?.[0]?.transcript ?? '';
             }
           }
 

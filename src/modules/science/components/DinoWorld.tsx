@@ -133,7 +133,7 @@ function DinoCompare() {
         <div className="flex flex-col items-center">
           <svg width="30" height={humanHeight * scale} viewBox={`0 0 30 ${humanHeight * scale}`}>
             <circle cx="15" cy="10" r="8" fill="#FFD8A8" />
-            <rect x="10" y="18" width="10" height={humanHeight * scale - 40} fill="#4A90D9" rx="3" />
+            <rect x="10" y="18" width="10" height={humanHeight * scale - 40} fill="#55aee0" rx="3" />
             <rect x="5" y={humanHeight * scale - 25} width="6" height="22" fill="#333" rx="2" />
             <rect x="19" y={humanHeight * scale - 25} width="6" height="22" fill="#333" rx="2" />
           </svg>

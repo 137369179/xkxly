@@ -18,39 +18,39 @@ const THEMES = {
   color: { items: ['🔴','🟡','🟢','🔵'], name: '颜色' },
 };
 
-const PUZZLES: Board[] = [
+export const PUZZLES: Board[] = [
   [1,0,0,4, 0,4,1,0, 4,1,0,0, 0,0,4,1],
   [0,2,0,0, 1,0,3,0, 0,1,0,4, 0,0,2,0],
   [3,0,1,0, 0,2,0,0, 0,0,4,1, 0,1,0,2],
   [0,4,0,1, 2,0,0,0, 0,0,1,3, 4,0,0,0],
 ];
 
-const SOLUTIONS: Board[] = [
+export const SOLUTIONS: Board[] = [
   [1,3,2,4, 3,4,1,2, 4,1,3,2, 2,3,4,1],
   [3,2,4,1, 1,4,3,2, 2,1,3,4, 3,4,2,1],
   [3,2,1,4, 4,2,3,1, 2,3,4,1, 4,1,3,2],
   [2,4,3,1, 2,1,3,4, 2,3,1,3, 4,1,2,3],
 ];
 
-function isCorrect(board: Board, sol: Board): boolean {
-  return board.every((v, i) => v === sol[i]!);
+export function isCorrect(board: Board, sol: Board): boolean {
+  return board.every((v, i) => v === (sol[i] ?? 0));
 }
 
 export function SudokuEasy() {
   const { t } = useTranslation();
   const [theme, setTheme] = useState<keyof typeof THEMES>('emoji');
   const [puzzleIdx, setPuzzleIdx] = useState(0);
-  const [board, setBoard] = useState<Board>([...PUZZLES[0]!]);
+  const [board, setBoard] = useState<Board>([...PUZZLES[0] ?? []]);
   const [selected, setSelected] = useState<number | null>(null);
   const [done, setDone] = useState(false);
 
-  const puzzle = PUZZLES[puzzleIdx]!
-  const solution = SOLUTIONS[puzzleIdx]!
-  const items = THEMES[theme]!.items;
+  const puzzle = PUZZLES[puzzleIdx] ?? []
+  const solution = SOLUTIONS[puzzleIdx] ?? []
+  const items = THEMES[theme].items;
 
   const newGame = (idx: number) => {
     setPuzzleIdx(idx);
-    setBoard([...PUZZLES[idx]!]);
+    setBoard([...PUZZLES[idx] ?? []]);
     setSelected(null);
     setDone(false);
   };
@@ -89,7 +89,7 @@ export function SudokuEasy() {
             className={cn('rounded-xl px-3 py-1.5 text-xs font-extrabold',
               theme===t ? 'bg-candy-purple-deep text-white' : 'bg-white text-ink-soft shadow-sm'
             )}>
-            {THEMES[t]!.name}
+            {THEMES[t].name}
           </button>
         ))}
       </div>
@@ -109,17 +109,17 @@ export function SudokuEasy() {
         <div className="grid grid-cols-4 gap-1.5">
           {board.map((val, i) => {
             const isFixed = puzzle[i] !== 0;
-            const isCorrectCell = val !== 0 && val === solution[i]!;
-            const isWrongCell = val !== 0 && val !== solution[i]! && !isFixed;
+            const isCorrectCell = val !== 0 && val === (solution[i] ?? 0);
+            const isWrongCell = val !== 0 && val !== (solution[i] ?? 0) && !isFixed;
             return (
               <button key={`val-${i}`} onClick={()=>setSelected(i)}
                 className={cn('aspect-square rounded-lg flex items-center justify-center text-2xl shadow-sm transition-all',
                   isFixed ? 'bg-gray-100' : 'bg-white hover:bg-candy-purple-soft/30',
                   selected === i && 'ring-2 ring-candy-purple-deep',
-                  !isFixed && isCorrectCell && board.every((v,j) => v === solution[j]!) && 'bg-candy-green-soft',
+                  !isFixed && isCorrectCell && board.every((v,j) => v === (solution[j] ?? 0)) && 'bg-candy-green-soft',
                   isWrongCell && 'bg-red-100'
                 )}>
-                {val === 0 ? '' : items[val - 1]}
+                {val === 0 ? '' : (items[val - 1] ?? '')}
               </button>
             );
           })}
