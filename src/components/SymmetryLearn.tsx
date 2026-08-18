@@ -48,7 +48,7 @@ export function SymmetryLearn() {
     if (lockRef.current) return;
     lockRef.current = true;
     sfxTap();
-    const target = ITEMS[current]!
+    const target = ITEMS[current] ?? { emoji: '', label: '', symmetric: false, axes: 0 };
     if (item.symmetric === target.symmetric) {
       sfxCorrect(); setScore(s=>s+1); setFeedback(t('symmetryLearn.correct'));
       void speak(`对了！`, { lang:'zh-CN', rate:0.85, module:'praise' });
@@ -56,13 +56,13 @@ export function SymmetryLearn() {
       sfxWrong(); setFeedback(t('symmetryLearn.wrong'));
       void speak('再想想', { lang:'zh-CN', rate:0.85, module:'praise' });
     }
-    setTimeout(() => { setCurrent(ITEMS.indexOf(options[Math.floor(Math.random()*options.length)]!)); setOptions(shuffle(ITEMS).slice(0,4)); setFeedback(''); lockRef.current = false; }, 1200);
+    setTimeout(() => { setCurrent(ITEMS.indexOf(options[Math.floor(Math.random()*options.length)] ?? options[0] ?? { emoji: '', label: '', symmetric: false, axes: 0 })); setOptions(shuffle(ITEMS).slice(0,4)); setFeedback(''); lockRef.current = false; }, 1200);
   };
 
   const pickYesNo = (yes: boolean) => {
     if (lockRef.current) return;
     lockRef.current = true;
-    const item = ITEMS[current]!
+    const item = ITEMS[current] ?? { emoji: '', label: '', symmetric: false, axes: 0 };
     if ((yes && item.symmetric) || (!yes && !item.symmetric)) {
       sfxCorrect(); setScore(s=>s+1); setFeedback(item.symmetric ? t('symmetryLearn.correctSym', { label: item.label }) : t('symmetryLearn.correctAsym', { label: item.label }));
       void speak(`对了！${item.label}${item.symmetric?'是对称图形':'不是对称图形'}`, { lang:'zh-CN', rate:0.85, module:'praise' });
@@ -73,7 +73,7 @@ export function SymmetryLearn() {
     setTimeout(() => { setCurrent(Math.floor(Math.random()*ITEMS.length)); setFeedback(''); lockRef.current = false; }, 1500);
   };
 
-  const item = ITEMS[current]!
+  const item = ITEMS[current] ?? { emoji: '', label: '', symmetric: false, axes: 0 };
 
   return (
     <div className="card-candy p-4 sm:p-6">

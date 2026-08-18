@@ -44,7 +44,7 @@ function frLog(stage: string, extra?: Record<string, unknown>): void {
   // eslint-disable-next-line no-console
   console.log(
     `%c[FollowRead] ${stage}`,
-    'color:#ec4899;font-weight:bold',
+    'color:#ff6b96;font-weight:bold',
     { t_ms: tRel, ...extra },
   );
 }

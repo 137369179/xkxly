@@ -32,7 +32,7 @@ export function PhonicsListen() {
     return {
       id: `phonics-${rule.letter}-${Math.random().toString(36).slice(2, 8)}`,
       type: 'letter',
-      skill: `letter:phonics:${rule.letter}`,
+      skill: `word:phonics:${rule.letter}`,
       difficulty: 1,
       prompt: t('phonicsListen.title'),
       speak: example,

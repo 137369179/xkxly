@@ -96,9 +96,10 @@ function flush() {
   } catch {
     // 容量超限：砍掉一半最久没用的再试一次，还不行就整体放弃
     try {
-      const keys = Object.keys(mem).sort((a, b) => mem![a]!.at - mem![b]!.at);
-      keys.slice(0, Math.ceil(keys.length / 2)).forEach((k) => delete mem![k]);
-      safeSetItem(KEY, JSON.stringify(mem));
+      const m = mem;
+      const keys = Object.keys(m).sort((a, b) => (m[a]?.at ?? 0) - (m[b]?.at ?? 0));
+      keys.slice(0, Math.ceil(keys.length / 2)).forEach((k) => delete m[k]);
+      safeSetItem(KEY, JSON.stringify(m));
     } catch {
       safeRemoveItem(KEY);
     }
@@ -124,7 +125,7 @@ if (typeof window !== 'undefined') {
 /* ------------------------------------------------------------------ */
 export function cacheGet(key: string): string | null {
   const s = load();
-  const e = s[key]!;
+  const e = s[key];
   if (!e) return null;
   if (Date.now() > e.exp) {
     delete s[key];
@@ -137,6 +138,16 @@ export function cacheGet(key: string): string | null {
   return e.v;
 }
 
+// 从 Web Worker 异步加载缓存（不阻塞主线程），仅在内存未命中时调用
+export async function cacheGetWorker(key: string): Promise<string | null> {
+  try {
+    const { aiCacheWorker } = await import('./cacheWorker');
+    return await aiCacheWorker.get(key) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export function cacheSet(key: string, value: string, ttl = CACHE_TTL) {
   if (!key || !value) return;
   const s = load();
@@ -146,17 +157,23 @@ export function cacheSet(key: string, value: string, ttl = CACHE_TTL) {
   const keys = Object.keys(s);
   if (keys.length > CAP) {
     // 先清过期，再按 LRU 砍到 80%
-    for (const k of keys) if (s[k]!.exp <= now) delete s[k];
+    for (const k of keys) if ((s[k]?.exp ?? 0) <= now) delete s[k];
     const left = Object.keys(s);
     if (left.length > CAP) {
       const target = Math.floor(CAP * 0.8);
       left
-        .sort((a, b) => s[a]!.at - s[b]!.at)
+        .sort((a, b) => (s[a]?.at ?? 0) - (s[b]?.at ?? 0))
         .slice(0, left.length - target)
         .forEach((k) => delete s[k]);
     }
   }
   scheduleFlush();
+  // 非阻塞地推送到 Web Worker，避免主线程序列化大文本时掉帧
+  try {
+    import('./cacheWorker').then(({ aiCacheWorker }) => {
+      aiCacheWorker.set(key, value);
+    }).catch(() => {});
+  } catch { /* worker 不可用，静默降级 */ }
 }
 
 export function cacheClear() {

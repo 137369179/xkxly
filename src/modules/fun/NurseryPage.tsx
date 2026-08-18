@@ -13,11 +13,11 @@ import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/i18n/useTranslation';
 
 const THEME_COLORS: Record<RhymeTheme, string> = {
-  animals: '#FF6B6B',
-  nature: '#4ECDC4',
-  number: '#FFE66D',
-  daily: '#A8E6CF',
-  family: '#FF8B94',
+  animals: '#ff5c7a',
+  nature: '#5fd68b',
+  number: '#e5ac2e',
+  daily: '#b8f0d8',
+  family: '#ff8db0',
 };
 
 export function NurseryPage() {

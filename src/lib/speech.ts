@@ -258,8 +258,8 @@ function pushTtsState(isSpeaking: boolean, snippet = '', module = ''): void {
 export function stopSpeaking(): void {
   // 清空等待队列，避免停止后又被队列里的项触发
   while (pendingQueue.length) {
-    const item = pendingQueue.shift()!;
-    item.resolve();
+    const item = pendingQueue.shift();
+    item?.resolve();
   }
   currentPriority = null;
   currentUtterance = null;
@@ -279,8 +279,8 @@ export function stopSpeaking(): void {
 export function clearPendingQueue(): number {
   let n = 0;
   while (pendingQueue.length) {
-    const item = pendingQueue.shift()!;
-    item.resolve();
+    const item = pendingQueue.shift();
+    item?.resolve();
     n++;
   }
   return n;
@@ -345,8 +345,8 @@ export function speak(text: string, options: SpeakOptions = {}): Promise<void> {
     return new Promise<void>((resolve) => {
       // 队列上限 1：丢弃最旧的低优先级排队项，防止堆积后孩子听到一长串过时内容
       if (pendingQueue.length >= 1) {
-        const dropped = pendingQueue.shift()!;
-        dropped.resolve();
+        const dropped = pendingQueue.shift();
+        dropped?.resolve();
       }
       pendingQueue.push({ text, options, priority, resolve });
     });
@@ -571,7 +571,7 @@ export function speakSequence(
     for (let i = 0; i < lines.length; i++) {
       if (cancelled) break;
       onLine?.(i);
-      await speak(lines[i]!, speakOpts);
+      await speak(lines[i] ?? '', speakOpts);
       if (cancelled) break;
       if (gap > 0 && i < lines.length - 1) {
         await new Promise<void>((r) => {
@@ -669,7 +669,7 @@ export function speakChant(
       // spoken 是多音字纠音后的文本（还→环、见→限），页面显示仍是原文；
       // 家长可在设置里关掉纠音回到原文发音。
       const usePoly = getSettings().polyphone;
-      const text = lines[i]!
+      const text = (lines[i] ?? [])
         .filter((s) => s.type === 'speak')
         .map((s) => (usePoly ? s.spoken || s.text : s.text))
         .join('');
@@ -685,7 +685,8 @@ export function speakChant(
       }
       if (cancelled) break;
       // 句末停顿：依据本句最后一个停顿片段（标点）时长，保留句读分明
-      const last = lines[i]![lines[i]!.length - 1];
+      const segs = lines[i] ?? [];
+      const last = segs[segs.length - 1];
       const endMs = last && last.type === 'pause' ? last.ms : 220;
       if (endMs > 0 && i < lines.length - 1) await wait(endMs);
     }

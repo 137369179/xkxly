@@ -21,10 +21,10 @@ const CATEGORIES: { id: HanziItem['category'] | 'all'; labelKey: string; emoji: 
 ];
 
 const CAT_COLOR: Record<string, string> = {
-  '象形': '#FF6B6B',
-  '指事': '#4ECDC4',
-  '会意': '#FFE66D',
-  '形声': '#A8E6CF',
+  '象形': '#ff5c7a',
+  '指事': '#5fd68b',
+  '会意': '#e5ac2e',
+  '形声': '#b8f0d8',
 };
 
 /** 性能优化（核心加强 P）：分页加载
@@ -148,7 +148,7 @@ export function Hanzi500Page() {
             key={h.id}
             onClick={() => { sfxTap(); setSelected(h); learnSkill(`hanzi:${h.char}`); }}
             className="flex flex-col items-center rounded-xl border-4 bg-white p-2 transition-all hover:scale-105 active:translate-y-[1px]"
-            style={{ borderColor: (CAT_COLOR[h.category] ?? '#ccc') + '40' }}
+            style={{ borderColor: (CAT_COLOR[h.category] ?? '#cda6b0') + '40' }}
           >
             <span className="text-2xl font-black text-ink">{h.char}</span>
             <span className="text-[10px] font-bold text-ink-soft">{h.pinyin}</span>

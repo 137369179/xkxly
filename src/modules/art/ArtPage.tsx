@@ -72,14 +72,14 @@ function mixSkillKey(a: ColorCode, b: ColorCode): string {
 
 /** Canvas 画板可用颜色（8 个基本色） */
 const CANVAS_COLORS: { name: string; css: string }[] = [
-  { name: '红',  css: '#ef4444' },
-  { name: '橙',  css: '#f97316' },
-  { name: '黄',  css: '#eab308' },
-  { name: '绿',  css: '#22c55e' },
-  { name: '青',  css: '#06b6d4' },
-  { name: '蓝',  css: '#3b82f6' },
-  { name: '紫',  css: '#a855f7' },
-  { name: '粉',  css: '#ec4899' },
+  { name: '红',  css: '#ff5c7a' },
+  { name: '橙',  css: '#ff9f5a' },
+  { name: '黄',  css: '#e5ac2e' },
+  { name: '绿',  css: '#33a863' },
+  { name: '青',  css: '#35bcc0' },
+  { name: '蓝',  css: '#2e93c9' },
+  { name: '紫',  css: '#8b6ef0' },
+  { name: '粉',  css: '#ff6b96' },
 ];
 
 const CANVAS_SIZE = 300;

@@ -357,7 +357,7 @@ export function StoryBook() {
               style={{
                 backgroundColor:
                   currentPage === 0
-                    ? '#FFF9C4'
+                    ? '#fff4d6'
                     : bookData.pages[currentPage - 1]?.bgColor || '#FFFFFF',
               }}
             >

@@ -285,7 +285,8 @@
       "label": "Research Park",
       "short": "Research",
       "desc": "Pick a topic · explore · record findings"
-    }
+    },
+    "sidebarLabel": "Sidebar navigation"
   },
   "research": {
     "title": "Research Park",
@@ -694,6 +695,8 @@
     "archive": "Archive",
     "works": "Works",
     "flying": "Flying Flowers",
+    "more": "More",
+    "advanced": "Advanced",
     "searchPlaceholder": "Search poem / poet / theme…",
     "pinyinToggle": "🔤 Pinyin",
     "dynastyLabel": "Dynasty",
@@ -1027,7 +1030,17 @@
     "suggestions": "Suggestions",
     "wrongAnalyze": "AI Wrong-Answer Analysis",
     "wrongAnalyzeSub": "Smart diagnosis of mistakes",
-    "analyze": "Analyze"
+    "analyze": "Analyze",
+    "screenTimeTitle": "Screen Time",
+    "todayTime": "Study Today",
+    "todayItems": "Practice Count",
+    "todayStars": "Stars Earned",
+    "todayProgress": "Today's Progress",
+    "limitReached": "⚠️ Daily limit reached",
+    "timeLeft": "Time left",
+    "minutes": "min",
+    "weekTrend": "This Week",
+    "weekTotal": "Week total"
   },
   "accessibility": {
     "playAudio": "Play audio",
@@ -1376,12 +1389,24 @@
     "title": "Wrong Answers",
     "dueCount": "{count} wrong answers are due for review!",
     "reviewNow": "Review now",
-    "tab.overview": "Overview",
-    "tab.train": "Train",
-    "tab.badges": "Badges",
+    "tab": {
+      "overview": "Overview",
+      "train": "Train",
+      "badges": "Badges",
+      "causes": "By Cause"
+    },
+    "causes": {
+      "title": "By Cause",
+      "summary": "{groups} causes · {total} items",
+      "count": "{count} items",
+      "practice": "Practice"
+    },
     "emptyTitle": "No wrong answers yet!",
     "emptyHint": "Go learn some new things, then come back to review!",
     "backHome": "Back to Home"
+  },
+  "training": {
+    "banner": "Focus Training"
   },
   "storybook": {
     "pageTitle": "AI Storybook",
@@ -4219,7 +4244,8 @@
     "tabSpace": "Space",
     "tabWeather": "Weather",
     "tabAnimal": "Animals",
-    "tabBody": "Body"
+    "tabBody": "Body",
+    "knowledgeCards": "Knowledge Cards"
   },
   "letterTrace": {
     "upper": "A-Z Uppercase",

@@ -41,7 +41,7 @@ const RADICAL_PAIRS: RadicalPair[] = [
 export function RadicalsMagic() {
   const { t } = useTranslation();
   const [idx, setIdx] = useState(0);
-  const current = RADICAL_PAIRS[idx]!;
+  const current = RADICAL_PAIRS[idx] ?? { r1: '', r2: '', res: '', pinyin: '', meaning: '', emoji: '' };
   const [merged, setMerged] = useState(false);
 
   const handleMerge = () => {

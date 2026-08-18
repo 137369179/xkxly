@@ -277,7 +277,7 @@ export function ChantBar({ poem }: { poem: DeepPoem }) {
                 {ln.tokens.map((t, k) => {
                   const w = Math.max(6, (t.holdMs / maxMs) * 100);
                   const bg =
-                    t.role === '平' ? '#93c5fd' : t.role === '仄' ? '#f9a8d4' : t.role === '入' ? '#fcd34d' : '#e5e7eb';
+                    t.role === '平' ? '#7cc3e8' : t.role === '仄' ? '#ffabc5' : t.role === '入' ? '#ffd166' : '#f0dde2';
                   return (
                     <div
                       key={k}
@@ -295,7 +295,7 @@ export function ChantBar({ poem }: { poem: DeepPoem }) {
                 <div className="mt-1 flex h-3 items-stretch gap-[2px]">
                   {chars.map((c, k) => {
                     const w = Math.max(4, (c.durMs / maxChar) * 100);
-                    const bg = c.role === '平' ? '#3b82f6' : c.role === '仄' ? '#ec4899' : '#f97316';
+                    const bg = c.role === '平' ? '#2e93c9' : c.role === '仄' ? '#ff6b96' : '#ff9f5a';
                     return (
                       <div
                         key={k}

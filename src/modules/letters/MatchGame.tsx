@@ -194,8 +194,8 @@ export function MatchGame() {
             onClick={() => setAiMode((v) => !v)}
             className="mt-3 flex w-full items-center gap-2.5 rounded-2xl border-2 px-3.5 py-2.5 text-left transition active:translate-y-[2px]"
             style={{
-              background: aiMode ? '#E8F0FF' : '#FFFFFF',
-              borderColor: aiMode ? '#60A5FA' : '#D5E0F5',
+              background: aiMode ? '#dcecfa' : '#FFFFFF',
+              borderColor: aiMode ? '#55aee0' : '#e2c4cb',
             }}
           >
             <AiAvatar size={28} mood={aiLoading ? 'talking' : aiMode ? 'talking' : 'sleep'} />
@@ -213,7 +213,7 @@ export function MatchGame() {
             </span>
             <span
               className="grid h-7 w-12 shrink-0 items-center rounded-full px-1 transition"
-              style={{ background: aiMode ? '#60A5FA' : '#D5DDE8' }}
+              style={{ background: aiMode ? '#55aee0' : '#f0dde2' }}
             >
               <span
                 className="block h-5 w-5 rounded-full bg-white transition-transform"

@@ -11,11 +11,9 @@ import { StudyGuard } from '@/components/StudyGuard';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { OfflineToast } from '@/components/OfflineIndicator';
 import { FriendlyLoading } from '@/components/FriendlyLoading';
-import { useSettingsStore } from '@/store/useSettingsStore';
 import { useTtsStore } from '@/store/useTtsStore';
 import { useProfilesStore } from '@/store/useProfilesStore';
 import { OnboardingModal } from '@/components/OnboardingModal';
-import { setMuted } from '@/lib/sfx';
 import { stopSpeaking } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
 import { AiVoiceModal } from '@/components/ai/AiVoiceModal';
@@ -24,6 +22,8 @@ import { SwUpdateToast } from '@/components/SwUpdateToast';
 import { BackupRestorePanel, useBackupDetection } from '@/components/BackupRestorePanel';
 import { startAutoBackup } from '@/lib/autoBackup';
 import { useStore } from '@/store/useStore';
+import { announceToScreenReader } from '@/components/Accessibility';
+import { useSoundSync } from '@/hooks/useSoundSync';
 const CatCompanion = lazy(() =>
   import('@/modules/companion/CatCompanion').then((m) => ({ default: m.CatCompanion })) as Promise<{ default: React.ComponentType<any> }>
 );
@@ -67,6 +67,7 @@ const ResearchModePage = lazy(() => import('@/modules/research/ResearchModePage'
 const DiscoveryGallery = lazy(() => import('@/modules/research/DiscoveryGallery'));
 const DesignSystemPage = lazy(() => import('@/modules/design/DesignSystemPage'));
 const AchievementCenter = lazy(() => import('@/modules/achievement/AchievementCenter'));
+const NurseryPage = lazy(() => import('@/modules/fun/NurseryPage'));
 
 function Page() {
   const { route, param } = useRoute();
@@ -118,6 +119,7 @@ function Page() {
       case 'discoveries': return <DiscoveryGallery />;
       case 'design': return <DesignSystemPage />;
       case 'achievement': return <AchievementCenter />;
+      case 'nursery': return <NurseryPage />;
       default: return <HomePage />;
     }
   }, [route]);
@@ -142,7 +144,8 @@ function Page() {
 export function App() {
   const { t } = useTranslation();
   const { route } = useRoute();
-  const sound = useSettingsStore((s) => s.settings.sound);
+  // 音效开关同步 Hook（避免重复使用 setMuted）
+  useSoundSync();
   const voiceModalOpen = useTtsStore((s) => s.voiceModalOpen);
   const closeVoiceModal = useTtsStore((s) => s.closeVoiceModal);
   const onboarded = useProfilesStore((s) => s.onboarded);
@@ -169,11 +172,6 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    // 静音开关同步到音效模块；Service Worker 注册统一由 main.tsx 的 registerSW() 完成
-    setMuted(!sound);
-  }, [sound]);
-
-  useEffect(() => {
     // P1-2：多档案启动迁移 —— 首次把当前进度转为「宝贝」档案，老数据零丢失；
     // 之后每次启动把运行时最新进度同步回 active 仓库，保证两份持久化一致。
     useProfilesStore.getState().ensureInit();
@@ -192,6 +190,8 @@ export function App() {
     } else {
       document.title = `${t('app.name')}${child}`;
     }
+    // 页面切换时通知屏幕阅读器
+    announceToScreenReader(item?.label ?? t('app.name'));
   }, [route]);
 
   return (

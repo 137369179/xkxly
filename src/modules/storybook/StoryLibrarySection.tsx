@@ -18,9 +18,9 @@ interface Shelf {
 }
 
 const SHELVES: Shelf[] = [
-  { key: 'songs', titleKey: 'storylib.shelf.songs', emoji: '🎵', tone: 'pink', spine: '#ec4899' },
-  { key: 'idioms', titleKey: 'storylib.shelf.idioms', emoji: '🏯', tone: 'blue', spine: '#3b82f6' },
-  { key: 'poems', titleKey: 'storylib.shelf.poems', emoji: '🌸', tone: 'green', spine: '#22c55e' },
+  { key: 'songs', titleKey: 'storylib.shelf.songs', emoji: '🎵', tone: 'pink', spine: '#ff6b96' },
+  { key: 'idioms', titleKey: 'storylib.shelf.idioms', emoji: '🏯', tone: 'blue', spine: '#2e93c9' },
+  { key: 'poems', titleKey: 'storylib.shelf.poems', emoji: '🌸', tone: 'green', spine: '#33a863' },
 ];
 
 export function StoryLibrarySection() {

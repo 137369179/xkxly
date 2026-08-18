@@ -33,7 +33,7 @@ const SCENARIOS = [
 export function EmotionCards() {
   const { t } = useTranslation();
   const [mode, setMode] = useState<'learn' | 'quiz'>('learn');
-  const [scenario, setScenario] = useState(() => SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)] ?? SCENARIOS[0]!);
+  const [scenario, setScenario] = useState(() => SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)] ?? { scene: '', emotion: '' });
   const [options, setOptions] = useState(() => shuffle(EMOTIONS).slice(0, 4));
   const [feedback, setFeedback] = useState('');
   const [score, setScore] = useState(0);
@@ -46,16 +46,16 @@ export function EmotionCards() {
   }, []);
 
   const nextQuiz = () => {
-    const sc = SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)] ?? SCENARIOS[0]!;
+    const sc = SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)] ?? { scene: '', emotion: '' };
     setScenario(sc);
-    const corr = EMOTIONS.find(e => e.emoji === sc.emotion) ?? EMOTIONS[0]!;
+    const corr = EMOTIONS.find(e => e.emoji === sc.emotion) ?? { emoji: '', name: '', en: '', color: '', desc: '' };
     const others = shuffle(EMOTIONS.filter(e => e.emoji !== sc.emotion)).slice(0, 3);
     setOptions(shuffle([corr, ...others]));
     setFeedback('');
   };
 
   const nextScenario = () => {
-    setScenario(SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)] ?? SCENARIOS[0]!);
+    setScenario(SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)] ?? { scene: '', emotion: '' });
     setOptions(shuffle(EMOTIONS).slice(0, 4));
     setFeedback('');
   };
@@ -69,7 +69,7 @@ export function EmotionCards() {
     if (lockRef.current) return;
     lockRef.current = true;
     sfxTap();
-    const correct = EMOTIONS.find(e => e.emoji === scenario.emotion)!;
+    const correct = EMOTIONS.find(e => e.emoji === scenario.emotion) ?? { emoji: '', name: '', en: '', color: '', desc: '' };
     if (emoji === scenario.emotion) {
       sfxCorrect(); setScore(s => s + 1); setFeedback(t('emotion.correct', { name: correct.name }));
       void speak(`对了！这是${correct.name}`, { lang: 'zh-CN', rate: 0.85, module: 'praise' });

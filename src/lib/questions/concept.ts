@@ -46,7 +46,7 @@ export function makeCategoryQuestion(difficulty: Difficulty = 1): Question {
   }
 
   const opts = shuffle([target.cat, ...wrongCats.map((c) => c.cat)]).map((c) => opt({ label: c }));
-  const answerId = opts.find((o) => o.label === target.cat)!.id;
+  const answerId = opts.find((o) => o.label === target.cat)?.id ?? '';
   return {
     id: nextId('cat'),
     kind: 'sort',
@@ -87,7 +87,7 @@ export function makeOppositeQuestion(difficulty: Difficulty = 1): Question {
     if (cand !== b && !wrongs.includes(cand)) wrongs.push(cand);
   }
   const opts = shuffle([b, ...wrongs]).map((w) => opt({ label: w }));
-  const answerId = opts.find((o) => o.label === b)!.id;
+  const answerId = opts.find((o) => o.label === b)?.id ?? '';
   return {
     id: nextId('opp'),
     kind: 'pair',
@@ -124,7 +124,7 @@ export function makeSimilarHanziQuestion(difficulty: Difficulty = 1): Question {
   // 同组不足时跨组补
   let gi = 0;
   while (pool.length < distractCount) {
-    const g = SIMILAR_GROUPS[gi++ % SIMILAR_GROUPS.length]!
+    const g = SIMILAR_GROUPS[gi++ % SIMILAR_GROUPS.length] ?? []
     const c = sample(g);
     if (c !== target && !pool.includes(c)) pool.push(c);
   }
@@ -134,7 +134,7 @@ export function makeSimilarHanziQuestion(difficulty: Difficulty = 1): Question {
     let extra: string | null = null;
     let gi2 = 0;
     while (extra === null && gi2 < SIMILAR_GROUPS.length * 3) {
-      const g = SIMILAR_GROUPS[gi2++ % SIMILAR_GROUPS.length]!
+      const g = SIMILAR_GROUPS[gi2++ % SIMILAR_GROUPS.length] ?? []
       if (g === group) continue;
       const c = sample(g);
       if (c !== target && !pool.includes(c)) extra = c;
@@ -146,7 +146,7 @@ export function makeSimilarHanziQuestion(difficulty: Difficulty = 1): Question {
   }
 
   const opts = shuffle([target, ...pool]).map((c) => opt({ label: c }));
-  const answerId = opts.find((o) => o.label === target)!.id;
+  const answerId = opts.find((o) => o.label === target)?.id ?? '';
   return {
     id: nextId('sim'),
     kind: 'similar',

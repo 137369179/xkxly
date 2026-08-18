@@ -52,6 +52,28 @@ export default defineConfig(({ mode }) => ({
     emptyOutDir: false,
     cssCodeSplit: true,
     chunkSizeWarningLimit: 900,
+    // 大型按需 chunk 不参与静态预取：three(972KB)/opencc(1180KB)/诗词语料(787KB)/
+    // pinyin-pro(304KB)/数据分包 仅在对应功能被真正打开时由动态 import 触发下载。
+    // 若留在 index.html 的 <link rel=modulepreload> 中，浏览器会在首屏预取约 2.4MB
+    // 无效流量（多数用户从不进入写实猫页/繁体模式）。剔除只移除预取提示，
+    // 不改变任何 chunk 内容与运行时按需加载语义，动态 import 依旧即时生效。
+    modulePreload: {
+      polyfill: true,
+      // vitest/config 的 UserConfig 类型对 PreloadEntry 推断不全（deps 为 never），
+      // 显式声明兼容签名：PreloadEntry = string | { relativeUrl: string }
+      resolveDependencies: (
+        _filename: string,
+        deps: Array<string | { relativeUrl: string }>
+      ) =>
+        // 返回须为 string[]（Vite ModulePreloadOptions 契约）：对象型依赖收敛为其
+        // relativeUrl 字符串，既满足类型约束，又保证运行时 modulepreload 链接正确。
+        deps
+          .filter((d) => {
+            const id = typeof d === 'string' ? d : d.relativeUrl;
+            return !/(vendor-three|vendor-opencc|data-poems|vendor-pinyin|data-hanzi|data-languages|data-encyclopedia|confetti)/.test(id);
+          })
+          .map((d) => (typeof d === 'string' ? d : d.relativeUrl)),
+    },
     rollupOptions: {
       output: {
         manualChunks(id) {

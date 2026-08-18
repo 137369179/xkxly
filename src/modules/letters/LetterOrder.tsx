@@ -19,6 +19,7 @@ type Mode = 'learn' | 'order' | 'fill';
 export function LetterOrder() {
   const { t: tr } = useTranslation();
   const addStars = useStore((s) => s.addStars);
+  const practice = useStore((s) => s.practice);
   const [mode, setMode] = useState<Mode>('learn');
   const [current, setCurrent] = useState(0);
   const [letters, setLetters] = useState<string[]>([]);
@@ -33,7 +34,7 @@ export function LetterOrder() {
     sfxTap();
     setCurrent(i);
     void playLetterVoice(ALPHABET[i]!).catch(() => {
-      void speak(ALPHABET[i]!, { lang: 'en-US', rate: 0.6 });
+      void speak(ALPHABET[i]!, { lang: 'en-US', rate: 0.6 }).catch(() => {});
     });
   };
 
@@ -71,7 +72,7 @@ export function LetterOrder() {
       const newAns = [...answer, letter];
       setAnswer(newAns);
       void playLetterVoice(letter).catch(() => {
-        void speak(letter, { lang: 'en-US', rate: 0.6 });
+        void speak(letter, { lang: 'en-US', rate: 0.6 }).catch(() => {});
       });
 
       if (newAns.length === letters.length) {
@@ -82,10 +83,12 @@ export function LetterOrder() {
           setFeedback(`🎉 ${tr('letterOrder.perfect')}`);
           setScore((s) => s + 1);
           addStars(1);
-          void speak('Great job! ABC order is correct!', { lang: 'en-US', rate: 0.8, module: 'praise' });
+          practice('letter-order', true);
+          void speak('Great job! ABC order is correct!', { lang: 'en-US', rate: 0.8, module: 'praise' }).catch(() => {});
         } else {
           sfxWrong();
           setFeedback(`❌ ${tr('letterOrder.correctSeq', { seq: correctSeq.join(' → ') })}`);
+          practice('letter-order', false);
         }
         if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
         nextTimerRef.current = setTimeout(() => {
@@ -118,12 +121,14 @@ export function LetterOrder() {
       setFeedback(`🎉 ${tr('letterOrder.correct')}`);
       setScore((s) => s + 1);
       addStars(1);
+      practice('letter-order', true);
       void playLetterVoice(letter).catch(() => {
-        void speak(letter, { lang: 'en-US', rate: 0.7, module: 'praise' });
+        void speak(letter, { lang: 'en-US', rate: 0.7, module: 'praise' }).catch(() => {});
       });
     } else {
       sfxWrong();
       setFeedback(`❌ ${tr('letterOrder.wrongExp', { expected: expected ?? '' })}`);
+      practice('letter-order', false);
     }
     if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
     nextTimerRef.current = setTimeout(() => {

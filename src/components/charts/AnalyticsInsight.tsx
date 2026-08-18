@@ -59,7 +59,7 @@ export function AnalyticsInsight() {
       const d = new Date(Date.now() - i * 86400000);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       const sec = log[key]?.sec ?? 0;
-      if (sec > 0) byWeekday[d.getDay()]! += sec;
+      if (sec > 0) byWeekday[d.getDay()] = (byWeekday[d.getDay()] ?? 0) + sec;
     }
     const favIdx = byWeekday.indexOf(Math.max(...byWeekday));
 

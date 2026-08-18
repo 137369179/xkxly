@@ -15,6 +15,8 @@ type Beat = '🔴' | '🟡' | '🟢';
 const BEAT_EMOJI: Beat[] = ['🔴','🟡','🟢'];
 
 interface Pattern { beats: Beat[]; speed: number; name: string; }
+/** 防御兜底（模块级常量，保证跨渲染引用稳定，不触发 exhaustive-deps） */
+const EMPTY_PATTERN: Pattern = { beats: [], speed: 0, name: '' };
 const PATTERNS: Pattern[] = [
   { name: '入门', speed: 600, beats: ['🔴','🔴','🟡','🟢'] },
   { name: '简单', speed: 500, beats: ['🔴','🟡','🔴','🟢','🟡'] },
@@ -51,7 +53,7 @@ export function RhythmRepeat({ onComplete }: { onComplete?: (correct: boolean, s
   const timerRef      = useRef<ReturnType<typeof setTimeout> | null>(null);
   const patternTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const pattern = PATTERNS[patternIdx]!
+  const pattern = PATTERNS[patternIdx] ?? EMPTY_PATTERN;
 
   const playPattern = useCallback(() => {
     setMode('listen');
@@ -64,7 +66,7 @@ export function RhythmRepeat({ onComplete }: { onComplete?: (correct: boolean, s
         setMode('play');
         return;
       }
-      const beat = pattern.beats[i]!;
+      const beat = pattern.beats[i] ?? '🔴';
       setDisplayBeat(beat);
       playDrum(beat);
       i++;

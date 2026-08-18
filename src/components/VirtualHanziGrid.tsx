@@ -123,12 +123,14 @@ export const VirtualHanziGrid = memo(function VirtualHanziGrid({
                 const cardIndex = row * COLUMNS + colIdx;
                 if (cardIndex >= data.length) return <div key={colIdx} style={{ width: 'calc(25% - 6px)' }} />;
                 
+                const card = data[cardIndex];
+                if (card === undefined) return <div key={colIdx} style={{ width: 'calc(25% - 6px)' }} />;
                 return (
                   <div
                     key={colIdx}
                     style={{ width: 'calc(25% - 6px)' }}
                   >
-                    {renderCard(data[cardIndex]!, cardIndex)}
+                    {renderCard(card, cardIndex)}
                   </div>
                 );
               })}

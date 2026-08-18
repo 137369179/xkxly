@@ -156,7 +156,7 @@ export function KaraokeReader({
       setCurrentLine(idx);
       lineStartRef.current = performance.now();
       setIsPlaying(true);
-      void speak(sentenceLines[idx]!, {
+      void speak(sentenceLines[idx] ?? '', {
         lang,
         rate: effectiveRate,
         module,
@@ -265,7 +265,7 @@ export function KaraokeReader({
         {sentenceLines.map((line, lineIdx) => {
           const isActive = currentLine === lineIdx;
           const isPast = currentLine > lineIdx || (currentLine < 0 && false);
-          const range = lineCharRanges[lineIdx]!
+          const range = lineCharRanges[lineIdx] ?? { start: 0, end: 0 };
           return (
             <motion.div
               key={lineIdx}

@@ -2,7 +2,7 @@
  * 字母描红 - 26个字母大小写描红练习
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { TraceCanvas } from '@/components/TraceCanvas';
@@ -17,10 +17,17 @@ import { useTranslation } from '@/i18n/useTranslation';
 const UPPER_CHARS = LETTERS.map((l) => l.upper);
 const LOWER_CHARS = LETTERS.map((l) => l.lower);
 
-export function LetterTrace() {
+export function LetterTrace({ initialLetter }: { initialLetter?: string }) {
   const { t } = useTranslation();
-  const [idx, setIdx] = useState(0);
-  const [mode, setMode] = useState<'upper' | 'lower'>('upper');
+  // 深链 trace:<A> 进入时预选目标字母（大小写自适应），仅在挂载时生效一次
+  const initial = useMemo(() => {
+    if (!initialLetter) return { idx: 0, mode: 'upper' as const };
+    const up = initialLetter.toUpperCase();
+    const i = LETTERS.findIndex((l) => l.upper === up);
+    return { idx: i >= 0 ? i : 0, mode: (initialLetter === initialLetter.toLowerCase() ? 'lower' : 'upper') as 'upper' | 'lower' };
+  }, [initialLetter]);
+  const [idx, setIdx] = useState(initial.idx);
+  const [mode, setMode] = useState<'upper' | 'lower'>(initial.mode);
   const [passed, setPassed] = useState<Set<string>>(new Set());
 
   const store = useStore();
@@ -79,7 +86,7 @@ export function LetterTrace() {
                   size="sm"
                   onClick={() => {
                     sfxTap();
-                    void speakLetter(char);
+                    void speakLetter(char).catch(() => {});
                   }}
                 >
                   🔊 字母音
@@ -90,7 +97,7 @@ export function LetterTrace() {
                   variant="soft"
                   onClick={() => {
                     sfxTap();
-                    void speakPhonics(letter.phonicsRhyme, letter.upper);
+                    void speakPhonics(letter.phonicsRhyme, letter.upper).catch(() => {});
                   }}
                 >
                   🎵 拼读口诀
@@ -111,6 +118,7 @@ export function LetterTrace() {
             sfxStar();
             setPassed((p) => new Set([...p, char]));
             store.addStars(1);
+            store.practice(`letter-trace:${char}`, true);
             if (letter) {
               store.markTraced(`letter:${char}`);
               store.learnSkill(`letter:${mode === 'upper' ? char : char.toUpperCase()}`);

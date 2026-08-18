@@ -75,7 +75,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
               <summary className="cursor-pointer text-[11px] font-bold text-ink-soft/70">
                 错误详情
               </summary>
-              <pre className="mt-2 max-h-32 overflow-auto rounded-lg bg-[#F5F3FA] p-2 text-[10px] leading-relaxed whitespace-pre-wrap text-ink-soft">
+              <pre className="mt-2 max-h-32 overflow-auto rounded-lg bg-[#fbf6f7] p-2 text-[10px] leading-relaxed whitespace-pre-wrap text-ink-soft">
                 {error.message}
                 {stack ? `\n${stack}` : ''}
               </pre>
@@ -117,7 +117,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
             <summary className="cursor-pointer text-xs font-bold text-ink-soft/70">
               给家长看的错误详情
             </summary>
-            <pre className="mt-2 max-h-40 overflow-auto rounded-xl bg-[#F5F3FA] p-3 text-[11px] leading-relaxed whitespace-pre-wrap text-ink-soft">
+            <pre className="mt-2 max-h-40 overflow-auto rounded-xl bg-[#fbf6f7] p-3 text-[11px] leading-relaxed whitespace-pre-wrap text-ink-soft">
               {error.message}
               {stack ? `\n${stack}` : ''}
             </pre>

@@ -28,8 +28,9 @@ function makeQuestion(): Question {
     (d) => makeLogicQuestion('mixed', d as Difficulty),
   ];
   const idx = Math.floor(Math.random() * makers.length);
-  const maker = makers[idx] ?? makers[0]!;
-  return maker(1 + Math.floor(Math.random() * 2));
+  const maker = makers[idx] ?? makers[0];
+  if (maker) return maker(1 + Math.floor(Math.random() * 2));
+  return makeMathQuestion(1); // 防御：makers 恒非空，正常不会走到
 }
 
 export function DualPK() {

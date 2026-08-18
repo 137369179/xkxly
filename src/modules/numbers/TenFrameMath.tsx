@@ -1,16 +1,10 @@
-/**
- * 蒙台梭利十格阵 (Ten-Frame) 凑十法与破十法认知组件 🥕 (N5)
- * ------------------------------------------------------------
- * 基于蒙氏感官数学与幼小衔接大纲：
- * 1. 凑十法加法 (如 7 + 5 = 12)
- * 2. 破十法减法 (如 13 - 5 = 8)
- */
-
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect } from '@/lib/sfx';
+import { celebrateSmall } from '@/lib/celebrate';
 import { speak } from '@/lib/speech';
+import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/i18n/useTranslation';
 
 interface TenFrameProblem {
@@ -28,6 +22,7 @@ const ADD_PROBLEMS: TenFrameProblem[] = [
   { a: 6, b: 5, makeTen: 4, remain: 1, sum: 11 },
   { a: 8, b: 5, makeTen: 2, remain: 3, sum: 13 },
   { a: 7, b: 6, makeTen: 3, remain: 3, sum: 13 },
+  { a: 9, b: 6, makeTen: 1, remain: 5, sum: 15 },
 ];
 
 interface SubProblem {
@@ -44,145 +39,214 @@ const SUB_PROBLEMS: SubProblem[] = [
   { total: 14, sub: 6, breakTen: 4, remain: 4, result: 8 },
   { total: 11, sub: 3, breakTen: 7, remain: 1, result: 8 },
   { total: 15, sub: 7, breakTen: 3, remain: 5, result: 8 },
+  { total: 16, sub: 8, breakTen: 2, remain: 6, result: 8 },
+];
+
+const SKINS = [
+  { id: 'carrot', label: '🥕 胡萝卜', emoji1: '🥕', emoji2: '🌟' },
+  { id: 'apple', label: '🍎 甜苹果', emoji1: '🍎', emoji2: '🍏' },
+  { id: 'dino', label: '🦕 小恐龙', emoji1: '🦕', emoji2: '🦖' },
+  { id: 'cookie', label: '🍪 小饼干', emoji1: '🍪', emoji2: '🧁' },
 ];
 
 export function TenFrameMath() {
   const { t } = useTranslation();
+  const practice = useStore((s) => s.practice);
   const [mode, setMode] = useState<'add' | 'sub'>('add');
+  const [skinIdx, setSkinIdx] = useState(0);
   const [idx, setIdx] = useState(0);
   const [step, setStep] = useState<'initial' | 'action' | 'done'>('initial');
 
-  const addProb = ADD_PROBLEMS[idx % ADD_PROBLEMS.length]!
-  const subProb = SUB_PROBLEMS[idx % SUB_PROBLEMS.length]!
+  const skin = SKINS[skinIdx]!;
+  const addProb = ADD_PROBLEMS[idx % ADD_PROBLEMS.length]!;
+  const subProb = SUB_PROBLEMS[idx % SUB_PROBLEMS.length]!;
 
   const handleMakeTen = () => {
     sfxTap();
     setStep('action');
-    speak(`从第二个数借走 ${addProb.makeTen} 个，凑成 10！剩下 ${addProb.remain} 个！`, { lang: 'zh-CN' });
+    speak(`从第二个数借走 ${addProb.makeTen} 个，凑成 10！剩下 ${addProb.remain} 个！`, { lang: 'zh-CN' }).catch(() => {});
   };
 
   const handleBreakTen = () => {
     sfxTap();
     setStep('action');
-    speak(`从 10 格框拿走 ${subProb.sub} 个，剩 ${subProb.breakTen} 个！再加上单出来的 ${subProb.remain} 个！`, { lang: 'zh-CN' });
+    speak(`从 10 格框拿走 ${subProb.sub} 个，剩 ${subProb.breakTen} 个！再加上多出来的 ${subProb.remain} 个！`, { lang: 'zh-CN' }).catch(() => {});
   };
 
   const handleComplete = () => {
     sfxCorrect();
+    celebrateSmall();
     setStep('done');
+    practice('math:tenframe', true);
     if (mode === 'add') {
-      speak(`10 加上 ${addProb.remain}，等于 ${addProb.sum}！太棒啦！`, { lang: 'zh-CN' });
+      speak(`10 加上 ${addProb.remain}，等于 ${addProb.sum}！凑十法真聪明！`, { lang: 'zh-CN' }).catch(() => {});
     } else {
-      speak(`5 加上 ${subProb.remain}，等于 ${subProb.result}！破十法算对啦！`, { lang: 'zh-CN' });
+      speak(`10 减 ${subProb.sub} 得 ${subProb.breakTen}，再加上 ${subProb.remain}，等于 ${subProb.result}！破十法算对啦！`, { lang: 'zh-CN' }).catch(() => {});
     }
   };
 
   const handleNext = () => {
     sfxTap();
     setStep('initial');
-    setIdx(i => i + 1);
+    setIdx((i) => i + 1);
   };
 
   return (
-    <div className="card-candy space-y-5 p-5 text-center">
-      {/* 模式选择 */}
-      <div className="flex justify-center gap-2 mb-2">
+    <div className="card-candy space-y-4 p-5 text-center shadow-fluffy">
+      {/* 顶部模式与道具皮肤切换 */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-purple-100 pb-3">
+        <div className="flex gap-2">
+          <button
+            onClick={() => { setMode('add'); setStep('initial'); }}
+            className={`rounded-2xl px-4 py-1.5 text-xs font-black transition-all ${
+              mode === 'add' ? 'bg-candy-orange-deep text-white shadow-sm scale-105' : 'bg-orange-100 text-orange-800'
+            }`}
+          >
+            ✨ 凑十法 (加法进位)
+          </button>
+          <button
+            onClick={() => { setMode('sub'); setStep('initial'); }}
+            className={`rounded-2xl px-4 py-1.5 text-xs font-black transition-all ${
+              mode === 'sub' ? 'bg-candy-purple-deep text-white shadow-sm scale-105' : 'bg-purple-100 text-purple-800'
+            }`}
+          >
+            ✂️ 破十法 (退位减法)
+          </button>
+        </div>
+
+        {/* 皮肤选择器 */}
         <button
-          onClick={() => { setMode('add'); setStep('initial'); }}
-          className={`rounded-2xl px-4 py-1.5 text-xs font-black transition-all ${
-            mode === 'add' ? 'bg-orange-500 text-white shadow-sm' : 'bg-orange-100 text-orange-800'
-          }`}
+          onClick={() => setSkinIdx((s) => (s + 1) % SKINS.length)}
+          className="rounded-full bg-white px-3 py-1 text-xs font-bold text-ink-soft border border-pink-200 shadow-xs hover:scale-105 active:scale-95"
         >
-          {t('tenFrameMath.makeTen')}
-        </button>
-        <button
-          onClick={() => { setMode('sub'); setStep('initial'); }}
-          className={`rounded-2xl px-4 py-1.5 text-xs font-black transition-all ${
-            mode === 'sub' ? 'bg-purple-500 text-white shadow-sm' : 'bg-purple-100 text-purple-800'
-          }`}
-        >
-          {t('tenFrameMath.breakTen')}
+          道具: {skin.label}
         </button>
       </div>
 
       {mode === 'add' ? (
-        <>
-          <div className="text-3xl font-black text-ink">
-            {addProb.a} + {addProb.b} = {step === 'done' ? addProb.sum : '?'}
+        <div className="space-y-4">
+          <div className="text-3xl font-black text-ink tracking-wide">
+            <span className="text-candy-orange-deep">{addProb.a}</span> + <span className="text-candy-blue-deep">{addProb.b}</span> = <span className="text-candy-green-deep">{step === 'done' ? addProb.sum : '?'}</span>
           </div>
 
-          <div className="mx-auto grid max-w-sm grid-cols-5 gap-2 rounded-3xl border-4 border-amber-300 bg-amber-50 p-4 shadow-inner">
+          <p className="text-xs font-bold text-ink-soft">
+            {step === 'initial' && `第 1 步：观察十格阵，${addProb.a} 还差几个凑成 10 呢？`}
+            {step === 'action' && `第 2 步：借来 ${addProb.makeTen} 个填满十格阵，还剩 ${addProb.remain} 个！`}
+            {step === 'done' && `第 3 步：10 + ${addProb.remain} = ${addProb.sum}，太厉害啦！`}
+          </p>
+
+          {/* 十格阵 1 (主框 10 格) */}
+          <div className="mx-auto grid max-w-sm grid-cols-5 gap-2 rounded-3xl border-4 border-amber-300 bg-amber-50/80 p-3 shadow-inner">
             {Array.from({ length: 10 }).map((_, i) => {
               const isFromA = i < addProb.a;
               const isFilledFromB = step !== 'initial' && i >= addProb.a && i < 10;
+              const isLeftGroup = i < 5;
               return (
-                <div key={`_-${i}`} className="flex h-14 w-full items-center justify-center rounded-2xl bg-white text-2xl shadow-sm border border-amber-200">
+                <div
+                  key={`frame1-${i}`}
+                  className={`flex h-14 w-full items-center justify-center rounded-2xl text-2xl shadow-sm border ${
+                    isLeftGroup ? 'bg-orange-50/80 border-orange-200' : 'bg-yellow-50/80 border-yellow-200'
+                  }`}
+                >
                   <AnimatePresence mode="wait">
-                    {isFromA && <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }}>🥕</motion.span>}
-                    {isFilledFromB && <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }}>🌟</motion.span>}
+                    {isFromA && (
+                      <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
+                        {skin.emoji1}
+                      </motion.span>
+                    )}
+                    {isFilledFromB && (
+                      <motion.span initial={{ scale: 0, y: 15 }} animate={{ scale: 1, y: 0 }} className="text-candy-yellow-deep">
+                        {skin.emoji2}
+                      </motion.span>
+                    )}
                   </AnimatePresence>
                 </div>
               );
             })}
           </div>
 
-          <div className="flex justify-center gap-3">
+          {/* 辅框 (剩余分散格) */}
+          {step !== 'initial' && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mx-auto max-w-sm rounded-2xl bg-blue-50/70 p-2.5 border border-blue-200 flex items-center justify-center gap-2"
+            >
+              <span className="text-xs font-bold text-blue-900">第二组剩余:</span>
+              <div className="flex gap-1.5">
+                {Array.from({ length: addProb.remain }).map((_, i) => (
+                  <span key={`rem-${i}`} className="text-2xl animate-bounce">
+                    {skin.emoji2}
+                  </span>
+                ))}
+              </div>
+              <span className="text-xs font-black text-blue-700">({addProb.remain} 个)</span>
+            </motion.div>
+          )}
+
+          <div className="flex justify-center gap-3 pt-2">
             {step === 'initial' && (
-              <CandyButton tone="purple" size="md" onClick={handleMakeTen}>
-                {t('tenFrameMath.step1Add', { n: addProb.makeTen })}
+              <CandyButton tone="orange" size="md" onClick={handleMakeTen}>
+                👉 {t('tenFrameMath.step1Add', { n: addProb.makeTen })}
               </CandyButton>
             )}
 
             {step === 'action' && (
-              <CandyButton tone="orange" size="md" onClick={handleComplete}>
-                {t('tenFrameMath.step2Add', { n: addProb.remain })}
+              <CandyButton tone="green" size="md" onClick={handleComplete}>
+                🌟 {t('tenFrameMath.step2Add', { n: addProb.remain })}
               </CandyButton>
             )}
 
             {step === 'done' && (
               <CandyButton tone="green" size="md" onClick={handleNext}>
-                {t('tenFrameMath.nextAdd')}
+                ✨ {t('tenFrameMath.nextAdd')}
               </CandyButton>
             )}
           </div>
-        </>
+        </div>
       ) : (
-        <>
-          <div className="text-3xl font-black text-ink">
-            {subProb.total} - {subProb.sub} = {step === 'done' ? subProb.result : '?'}
+        <div className="space-y-4">
+          <div className="text-3xl font-black text-ink tracking-wide">
+            <span className="text-candy-purple-deep">{subProb.total}</span> - <span className="text-candy-pink-deep">{subProb.sub}</span> = <span className="text-candy-green-deep">{step === 'done' ? subProb.result : '?'}</span>
           </div>
 
-          <div className="mx-auto grid max-w-sm grid-cols-5 gap-2 rounded-3xl border-4 border-purple-300 bg-purple-50 p-4 shadow-inner">
+          <p className="text-xs font-bold text-ink-soft">
+            {step === 'initial' && `第 1 步：把 ${subProb.total} 拆成 10 和 ${subProb.remain}，先算 10 - ${subProb.sub}`}
+            {step === 'action' && `第 2 步：从 10 拿走 ${subProb.sub} 剩 ${subProb.breakTen}，再加上单出的 ${subProb.remain}`}
+            {step === 'done' && `第 3 步：${subProb.breakTen} + ${subProb.remain} = ${subProb.result}，算对啦！`}
+          </p>
+
+          <div className="mx-auto grid max-w-sm grid-cols-5 gap-2 rounded-3xl border-4 border-purple-300 bg-purple-50/80 p-3 shadow-inner">
             {Array.from({ length: 10 }).map((_, i) => {
               const isSubbed = step !== 'initial' && i >= (10 - subProb.sub);
               return (
-                <div key={`_-${i}`} className="flex h-14 w-full items-center justify-center rounded-2xl bg-white text-2xl shadow-sm border border-purple-200">
-                  {!isSubbed ? '🥕' : '❌'}
+                <div key={`frameSub-${i}`} className="flex h-14 w-full items-center justify-center rounded-2xl bg-white text-2xl shadow-sm border border-purple-200">
+                  {!isSubbed ? skin.emoji1 : <span className="text-lg opacity-40">❌</span>}
                 </div>
               );
             })}
           </div>
 
-          <div className="flex justify-center gap-3">
+          <div className="flex justify-center gap-3 pt-2">
             {step === 'initial' && (
               <CandyButton tone="purple" size="md" onClick={handleBreakTen}>
-                {t('tenFrameMath.step1Sub', { sub: subProb.sub, remain: subProb.breakTen })}
+                👉 {t('tenFrameMath.step1Sub', { sub: subProb.sub, remain: subProb.breakTen })}
               </CandyButton>
             )}
 
             {step === 'action' && (
-              <CandyButton tone="orange" size="md" onClick={handleComplete}>
-                {t('tenFrameMath.step2Sub', { n1: subProb.breakTen, n2: subProb.remain })}
+              <CandyButton tone="green" size="md" onClick={handleComplete}>
+                🌟 {t('tenFrameMath.step2Sub', { n1: subProb.breakTen, n2: subProb.remain })}
               </CandyButton>
             )}
 
             {step === 'done' && (
               <CandyButton tone="green" size="md" onClick={handleNext}>
-                {t('tenFrameMath.nextSub')}
+                ✨ {t('tenFrameMath.nextSub')}
               </CandyButton>
             )}
           </div>
-        </>
+        </div>
       )}
     </div>
   );

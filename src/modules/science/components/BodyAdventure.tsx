@@ -13,12 +13,12 @@ import { ScienceAiPanel } from './ScienceAiPanel';
 import { useTranslation } from '@/i18n/useTranslation';
 
 const SYSTEM_COLORS: Record<string, string> = {
-  消化: '#FF6B6B',
-  呼吸: '#74C0FC',
-  循环: '#FF6B9D',
-  骨骼: '#FFE8A3',
-  神经: '#B197FC',
-  感觉: '#69DB7C',
+  消化: '#ff5c7a',
+  呼吸: '#55aee0',
+  循环: '#ff6b96',
+  骨骼: '#ffe9ad',
+  神经: '#8b6ef0',
+  感觉: '#5fd68b',
 };
 
 const SYSTEM_BG: Record<string, string> = {

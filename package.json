@@ -19,6 +19,7 @@
     "test:ci": "vitest run --reporter=default --reporter=junit --outputFile=test-results/junit.xml",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "lint:budget": "node scripts/lint-warn-budget.mjs",
     "smoke": "node scripts/smoke.mjs",
     "smoke:full": "npm run build && node scripts/smoke.mjs"
   },

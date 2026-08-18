@@ -14,6 +14,7 @@ import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { cn } from '@/lib/utils';
+import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/i18n/useTranslation';
 
 const ANIMALS = ['🐱', '🐶', '🐰', '🐻'];
@@ -75,6 +76,7 @@ function createPuzzle(solution: string[][], difficulty: number): Puzzle {
 
 export function KidSudoku() {
   const { t: tr } = useTranslation();
+  const practice = useStore((s) => s.practice);
   const [solution] = useState(() => generateSolution());
   const [puzzle, setPuzzle] = useState(() => createPuzzle(solution, 1));
   const [grid, setGrid] = useState(() => puzzle.grid.map(row => [...row]));
@@ -132,13 +134,14 @@ export function KidSudoku() {
     } else {
       sfxCorrect();
       setHint('');
-      void speak(animal, { lang: 'zh-CN', rate: 0.8, module: 'praise' });
+      speak(animal, { lang: 'zh-CN', rate: 0.8, module: 'praise' }).catch(() => {});
     }
 
     if (checkComplete(newGrid)) {
       setDone(true);
       sfxCorrect();
-      void speak('太棒了！你完成了数独！', { lang: 'zh-CN', rate: 0.85, module: 'praise' });
+      practice('logic:sudoku', true);
+      speak('太棒了！你完成了数独！', { lang: 'zh-CN', rate: 0.85, module: 'praise' }).catch(() => {});
     }
   };
 

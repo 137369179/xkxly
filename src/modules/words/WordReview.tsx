@@ -6,7 +6,7 @@ import { useState, useMemo } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { WORD_THEMES, getAllWords, getWordsByLevel } from '@/data/wordIndex';
-import { useProgress } from '@/store/useStore';
+import { useProgress, useStore } from '@/store/useStore';
 import { speak } from '@/lib/speech';
 import { sfxTap } from '@/lib/sfx';
 import { motion } from 'motion/react';
@@ -81,13 +81,13 @@ export function WordReview() {
         </motion.div>
 
         <div className="flex justify-center gap-3">
-          <CandyButton tone="pink" size="sm" onClick={() => speak(current.word, { lang: 'en-US', rate: 0.7 })}>
+          <CandyButton tone="pink" size="sm" onClick={() => { void speak(current.word, { lang: 'en-US', rate: 0.7 }).catch(() => {}); }}>
             {t('wordReview.speak')}
           </CandyButton>
           <CandyButton
             tone="blue"
             size="sm"
-            onClick={() => { sfxTap(); setShowZh(false); setFlashIdx(i => (i + 1) % words.length); }}
+            onClick={() => { sfxTap(); useStore.getState().practice(`word:review:${current.word}`, true); setShowZh(false); setFlashIdx(i => (i + 1) % words.length); }}
           >
             {t('wordReview.next')}
           </CandyButton>
@@ -179,7 +179,7 @@ export function WordReview() {
                   <div className="text-xs font-bold text-ink-soft">{w.zh}</div>
                   <div className="mt-1 flex items-center justify-center gap-1">
                     <button aria-label="🔊"
-                      onClick={() => speak(w.word, { lang: 'en-US', rate: 0.7 })}
+                      onClick={() => { void speak(w.word, { lang: 'en-US', rate: 0.7 }).catch(() => {}); }}
                       className="rounded-full bg-candy-blue-soft px-2 py-0.5 text-xs font-bold text-candy-blue-deep"
                     >
                       🔊

@@ -8,7 +8,7 @@ import { sfxTap } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
 
-const COLORS = ['#EF4444','#F97316','#EAB308','#22C55E','#3B82F6','#8B5CF6','#EC4899','#000000'];
+const COLORS = ['#ff5c7a','#ff9f5a','#ffc93c','#5fd68b','#55aee0','#8b6ef0','#ff6b96','#000000'];
 
 function MirrorDrawImpl() {
   const { t } = useTranslation();
@@ -18,15 +18,15 @@ function MirrorDrawImpl() {
   const drawing = useRef(false);
 
   const getPos = (e: React.PointerEvent) => {
-    const canvas = canvasRef.current!;
+    const canvas = canvasRef.current as HTMLCanvasElement;
     const rect = canvas.getBoundingClientRect();
     return { x: (e.clientX - rect.left) * (canvas.width / rect.width), y: (e.clientY - rect.top) * (canvas.height / rect.height) };
   };
 
   const drawDot = (x: number, y: number) => {
-    const ctx = canvasRef.current!.getContext('2d')!;
-    const mid = canvasRef.current!.width / 2;
-    ctx.fillStyle = color!;
+    const ctx = (canvasRef.current as HTMLCanvasElement).getContext('2d') as CanvasRenderingContext2D;
+    const mid = (canvasRef.current as HTMLCanvasElement).width / 2;
+    ctx.fillStyle = color ?? '#000000';
     ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill();
     // 镜像
     ctx.beginPath(); ctx.arc(2 * mid - x, y, size, 0, Math.PI * 2); ctx.fill();
@@ -37,11 +37,11 @@ function MirrorDrawImpl() {
   const onUp = () => { drawing.current = false; };
 
   const clear = () => {
-    const canvas = canvasRef.current!;
-    const ctx = canvas.getContext('2d')!;
+    const canvas = canvasRef.current as HTMLCanvasElement;
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     // 画中线
-    ctx.strokeStyle = '#E5E7EB';
+    ctx.strokeStyle = '#e2c4cb';
     ctx.lineWidth = 1;
     ctx.setLineDash([4, 4]);
     ctx.beginPath();

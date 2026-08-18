@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState, lazy, Suspense, useEffect } from 'react';
 import { navigate } from '@/lib/router';
 import { useProgress } from '@/store/useStore';
 import { masteredCount } from '@/lib/englishCurriculum';
@@ -7,6 +7,8 @@ import { PageHeader } from '@/components/ui/Card';
 import { Tabs } from '@/components/ui/Tabs';
 import { sfxTap } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
+import { useTrainingTarget } from '@/hooks/useTrainingTarget';
+import { TrainingBanner } from '@/components/TrainingBanner';
 
 // 按需懒加载子模块
 const LetterWall = lazy(() => import('./LetterWall').then((m) => ({ default: m.LetterWall })));
@@ -24,8 +26,31 @@ export default function LettersPage() {
   const [arcadeMode, setArcadeMode] = useState<ArcadeMode>('pop');
   const progress = useProgress();
   const { t } = useTranslation();
+  const { target, clear } = useTrainingTarget('letters');
   const lettersDone = masteredCount(progress, 'letter:');
   const unlockedPhonics = lettersDone >= 8;
+  // 深链预选目标：trace:<A> 描红预选字母；单字母 A 预选精学字母
+  const [traceLetter, setTraceLetter] = useState<string | undefined>(undefined);
+  const [studyLetter, setStudyLetter] = useState<string | undefined>(undefined);
+
+  // 深链 param → 专项：trace:<A> 描红；order 排序；单个大写字母进入字母精学
+  useEffect(() => {
+    const p = target?.param;
+    if (!p) return;
+    if (p === 'order') {
+      setTab('order');
+      return;
+    }
+    const colon = p.indexOf(':');
+    const cmd = colon === -1 ? '' : p.slice(0, colon);
+    if (cmd === 'trace') {
+      setTab('trace');
+      setTraceLetter(p.slice('trace:'.length) || undefined);
+    } else if (/^[A-Z]$/.test(p)) {
+      setTab('study');
+      setStudyLetter(p);
+    }
+  }, [target]);
 
   return (
     <div className="space-y-4">
@@ -35,6 +60,8 @@ export default function LettersPage() {
         subtitle={t('letters.subtitle')}
         tone="blue"
       />
+
+      <TrainingBanner target={target} onClose={clear} />
 
       {unlockedPhonics && (
         <button
@@ -79,8 +106,8 @@ export default function LettersPage() {
         }
       >
         {tab === 'wall' && <LetterWall />}
-        {tab === 'study' && <LetterStudy />}
-        {tab === 'trace' && <LetterTrace />}
+        {tab === 'study' && <LetterStudy initialUpper={studyLetter} />}
+        {tab === 'trace' && <LetterTrace initialLetter={traceLetter} />}
         {tab === 'order' && <LetterOrder />}
         {tab === 'arcade' && (
           <div className="space-y-4">

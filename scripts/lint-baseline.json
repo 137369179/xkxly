@@ -1,0 +1,9 @@
+{
+  "updatedAt": "2026-08-17T11:26:41.112Z",
+  "rules": {
+    "@typescript-eslint/no-explicit-any": 22,
+    "react-hooks/exhaustive-deps": 58,
+    "@typescript-eslint/no-non-null-assertion": 524,
+    "no-console": 6
+  }
+}

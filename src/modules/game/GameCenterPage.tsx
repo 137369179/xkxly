@@ -186,7 +186,7 @@ export default function GameCenterPage() {
         className={cn(
           'no-select flex w-full items-center justify-center gap-2 rounded-[1.8rem] border-4 border-white py-4 text-lg font-black text-white shadow-pop sm:hidden',
         )}
-        style={{ background: 'linear-gradient(90deg,#a855f7,#ec4899)' }}
+        style={{ background: 'linear-gradient(90deg,#8b6ef0,#ff6b96)' }}
       >
         🎲 {t('gamecenter.random')}
       </motion.button>

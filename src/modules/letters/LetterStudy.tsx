@@ -5,15 +5,16 @@ import { cn } from '@/lib/utils';
 import { LetterLearn } from '@/components/LetterLearn';
 import { CandyButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useProgress } from '@/store/useStore';
+import { useProgress, useStore } from '@/store/useStore';
 import { sfxTap } from '@/lib/sfx';
 
 type CategoryFilter = 'all' | 'vowel' | 'consonant1' | 'consonant2';
 
 /** 字母乐园 · 精学：选一个字母走完五步闭环（玩 → 认 → 练 → 写 → 说） */
-export function LetterStudy() {
+export function LetterStudy({ initialUpper }: { initialUpper?: string }) {
   const { t } = useTranslation();
-  const [upper, setUpper] = useState<string | null>(null);
+  // 深链 单字母 进入时直接预选对应字母精学
+  const [upper, setUpper] = useState<string | null>(initialUpper ?? null);
   const [filter, setFilter] = useState<CategoryFilter>('all');
 
   const filteredLetters = useMemo(() => {
@@ -100,6 +101,7 @@ export function LetterStudy() {
               key={item.upper}
               onClick={() => {
                 sfxTap();
+                useStore.getState().practice(`letter-study:${item.upper}`, true);
                 setUpper(item.upper);
               }}
               className={cn(

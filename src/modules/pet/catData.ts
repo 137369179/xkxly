@@ -97,8 +97,8 @@ export const STAGE_THEME: Record<'sunlight' | 'nebula' | 'starry', { panel: stri
   },
   starry: {
     panel: 'border-2 border-indigo-300 bg-gradient-to-tr from-indigo-950 via-slate-900 to-indigo-900 text-white',
-    frame: 'border-indigo-400 shadow-[0_10px_40px_-10px_rgba(99,102,241,0.7)]',
-    glow: 'radial-gradient(circle at 70% 20%, rgba(129,140,248,0.55), transparent 65%)',
+    frame: 'border-violet-400 shadow-[0_10px_40px_-10px_rgba(152,124,240,0.7)]',
+    glow: 'radial-gradient(circle at 70% 20%, rgba(152,124,240,0.55), transparent 65%)',
   },
 };
 

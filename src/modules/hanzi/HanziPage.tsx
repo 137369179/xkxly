@@ -1,12 +1,12 @@
-import { useMemo, useState } from 'react';
-import { HANZI_LEVELS, getHanziByLevel, searchHanzi, nextHanzi } from '@/data/hanziIndex';
+import { useEffect, useMemo, useState } from 'react';
+import { HANZI_LEVELS, getHanziByLevel, searchHanzi, nextHanzi, getHanziByChar } from '@/data/hanziIndex';
 import type { HanziEntry, HanziLevel } from '@/data/hanziIndex';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { Tabs, type TabItem } from '@/components/ui/Tabs';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { CandyButton } from '@/components/ui/Button';
 import { QuizCard } from '@/components/QuizCard';
-import { useProgress } from '@/store/useStore';
+import { useProgress, useStore } from '@/store/useStore';
 import { sfxTap } from '@/lib/sfx';
 import { TONE_STYLE } from '@/lib/tones';
 import type { Question } from '@/types';
@@ -26,6 +26,9 @@ import { HanziQuizGame } from '@/modules/hanzi/HanziQuizGame';
 import { HanziFlashReview } from '@/modules/hanzi/HanziFlashReview';
 import { HanziTrailMap } from '@/modules/hanzi/HanziTrailMap';
 import { VirtualHanziGrid } from '@/components/VirtualHanziGrid';
+import { useTrainingTarget } from '@/hooks/useTrainingTarget';
+import { TrainingBanner } from '@/components/TrainingBanner';
+import { useOptimizedHanziQuery, useDebounceSearch } from '@/hooks/useOptimizedHanzi';
 
 type MainZone = 'trail' | 'library' | 'playground';
 type LibraryTab = 'level1' | 'level2' | 'level3' | 'h500' | 'radical' | 'evolve' | 'family';
@@ -134,6 +137,7 @@ function RecommendCard({
 /** 小测验弹层 */
 function MiniQuiz({ questions, onClose }: { questions: Question[]; onClose: () => void }) {
   const { t } = useTranslation();
+  const practice = useStore((s) => s.practice);
   const [idx, setIdx] = useState(0);
   const [firstTry, setFirstTry] = useState<boolean[]>([]);
   const [finished, setFinished] = useState(false);
@@ -180,6 +184,8 @@ function MiniQuiz({ questions, onClose }: { questions: Question[]; onClose: () =
           meta={t('hanzi.qMeta', { current: idx + 1, total: questions.length })}
           nextLabel={idx < questions.length - 1 ? t('hanzi.nextQ') : t('hanzi.result')}
           onAnswer={(correct) => {
+            // SRS 回写：题目自带 skill（hanzi:<char>），QuizCard 保证每题只上报一次
+            practice(q.skill, correct, correct ? 1 : 0, q.difficulty);
             setFirstTry((prev) => {
               if (prev[idx] !== undefined) return prev;
               const next = [...prev];
@@ -206,10 +212,43 @@ export default function HanziPage() {
   const [libTab, setLibTab] = useState<LibraryTab>('level1');
   const [playTab, setPlayTab] = useState<PlaygroundTab>('dictation');
   const [query, setQuery] = useState('');
+  const debouncedQuery = useDebounceSearch(query, 300);
   const [selected, setSelected] = useState<HanziEntry | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
   const [quizQuestions, setQuizQuestions] = useState<Question[]>([]);
   const progress = useProgress();
+  const { target, clear } = useTrainingTarget('hanzi');
+
+  // 深链 stroke:<字> / build:<字> → 解析出目标字，直接下发给对应子组件预选
+  const writerTarget = useMemo<HanziEntry | null>(() => {
+    const p = target?.param;
+    if (p?.startsWith('stroke:')) return getHanziByChar(p.slice('stroke:'.length)) ?? null;
+    return null;
+  }, [target]);
+  const builderTargetChar = useMemo<string | undefined>(() => {
+    const p = target?.param;
+    if (p?.startsWith('build:')) return p.slice('build:'.length);
+    return undefined;
+  }, [target]);
+
+  // 深链 param → 专项训练：<char> 进入该字学习；stroke:<char> 笔顺描红；build:<char> 组词
+  useEffect(() => {
+    const p = target?.param;
+    if (!p) return;
+    const colon = p.indexOf(':');
+    const cmd = colon === -1 ? '' : p.slice(0, colon);
+    const char = colon === -1 ? p : p.slice(colon + 1);
+    if (cmd === 'stroke') {
+      setZone('playground');
+      setPlayTab('writer');
+    } else if (cmd === 'build') {
+      setZone('playground');
+      setPlayTab('builder');
+    } else {
+      const entry = getHanziByChar(char);
+      if (entry) setSelected(entry);
+    }
+  }, [target]);
 
   const isLevelTab = zone === 'library' && (libTab === 'level1' || libTab === 'level2' || libTab === 'level3');
   const levelNum = libTab === 'level2' ? 2 : libTab === 'level3' ? 3 : 1;
@@ -218,15 +257,17 @@ export default function HanziPage() {
 
   const list = useMemo(() => {
     if (!isLevelTab) return [];
-    if (query.trim()) return searchHanzi(query.trim());
+    if (debouncedQuery.trim()) return searchHanzi(debouncedQuery.trim());
     return getHanziByLevel(levelNum);
-  }, [isLevelTab, levelNum, query]);
+  }, [isLevelTab, levelNum, debouncedQuery]);
 
   const learnedInLevel = useMemo(() => {
     return getHanziByLevel(levelNum).filter(
       (h) => (progress.mastery[`hanzi:${h.c}`]?.lv ?? 0) >= 1,
     ).length;
   }, [levelNum, progress.mastery]);
+
+  const { learnedMap: cachedLearnedMap } = useOptimizedHanziQuery();
 
   const totalLearnedCount = useMemo(() => {
     return Object.keys(progress.mastery).filter(
@@ -261,6 +302,8 @@ export default function HanziPage() {
   return (
     <div className="space-y-5">
       <PageHeader emoji="🔤" title={t('hanzi.pageTitle')} subtitle={t('hanzi.subtitle')} tone={tone} />
+
+      <TrainingBanner target={target} onClose={clear} />
 
       {/* 核心三区降维导向菜单 */}
       <Tabs
@@ -393,9 +436,7 @@ export default function HanziPage() {
             <VirtualHanziGrid
               data={list}
               learnedMap={Object.fromEntries(
-                Object.entries(progress.mastery)
-                  .filter(([k, v]) => k.startsWith('hanzi:') && v.lv >= 1)
-                  .map(([k]) => [k.replace('hanzi:', ''), true])
+                Object.entries(cachedLearnedMap).map(([k, v]) => [k, (v?.lv ?? 0) >= 1]),
               )}
               onCardClick={setSelected}
             />
@@ -432,11 +473,11 @@ export default function HanziPage() {
           )}
           {playTab === 'writer' && (
             <HanziStrokeWriter
-              hanzi={recommended || getHanziByLevel(1)[0]!}
+              hanzi={writerTarget ?? recommended ?? getHanziByLevel(1)[0]!}
             />
           )}
           {playTab === 'dictation' && <HanziDictation />}
-          {playTab === 'builder' && <WordBuilder />}
+          {playTab === 'builder' && <WordBuilder initialChar={builderTargetChar} />}
           {playTab === 'magic' && <RadicalsMagic />}
           {playTab === 'worksheet' && <HanziWorksheet />}
         </div>

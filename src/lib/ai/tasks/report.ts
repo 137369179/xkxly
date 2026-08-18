@@ -25,7 +25,7 @@ import { pick, type StreamTask, type TaskResult } from './types';
 /** 报告层学科映射单一真相源：取 @/lib/srs 的 8 个学科，消除本地重复定义 */
 const REPORT_KEYS = ['letter', 'number', 'math', 'poem', 'hanzi', 'pinyin', 'word', 'logic'];
 const REPORT_SUBJECTS = REPORT_KEYS.map((key) => {
-  const def = SUBJECTS.find((s) => s.key === key)!;
+  const def = SUBJECTS.find((s) => s.key === key) ?? { key, label: key };
   return { key, label: def.label };
 });
 
@@ -139,7 +139,7 @@ export function buildDeepReportData(p: Progress): string {
   // 错题类别分布
   const catCount: Record<string, number> = {};
   for (const skill of p.wrongBook) {
-    const c = skill.split(':')[0]!;
+    const c = skill.split(':')[0] ?? '';
     catCount[c] = (catCount[c] ?? 0) + 1;
   }
   const wrongDist = Object.entries(catCount)
@@ -174,7 +174,7 @@ function localDeepReport(p: Progress): DeepReport {
   const weakSub = [...subs].sort((a, b) => a.pct - b.pct)[0];
 
   const g = p.growth.slice(-14);
-  const delta = g.length >= 2 ? (g[g.length - 1]!.rate ?? 0) - (g[0]!.rate ?? 0) : 0;
+  const delta = g.length >= 2 ? ((g[g.length - 1]?.rate ?? 0) - (g[0]?.rate ?? 0)) : 0;
   const trend =
     g.length < 2
       ? '多练几天，成长趋势就会显现啦'
@@ -316,7 +316,7 @@ export async function wrongAnalyzeTask(p: Progress): Promise<TaskResult<WrongAna
   const wrongList = p.wrongBook.map((s) => skillLabel(s)).join('、');
   const dist: Record<string, number> = {};
   p.wrongBook.forEach((s) => {
-    const cat = s.split(':')[0]!;
+    const cat = s.split(':')[0] ?? '';
     dist[cat] = (dist[cat] || 0) + 1;
   });
   const skillDist = Object.entries(dist).map(([k, v]) => `${k}:${v}题`).join('、');

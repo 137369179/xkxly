@@ -70,15 +70,18 @@ function normalize(text: string, lang: 'zh-CN' | 'en-US'): string {
 function levenshteinMatrix(a: string, b: string): number[][] {
   const m = a.length;
   const n = b.length;
-  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
-  for (let i = 0; i <= m; i++) dp[i]![0] = i;
-  for (let j = 0; j <= n; j++) dp[0]![j] = j;
+  // 初始化：首行 = 列下标、首列 = 行下标、其余为 0（等价于先 fill(0) 再补首行首列）
+  const dp: number[][] = Array.from({ length: m + 1 }, (_, i) =>
+    Array.from({ length: n + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0)),
+  );
   for (let i = 1; i <= m; i++) {
+    const cur = dp[i] ?? [];
+    const prev = dp[i - 1] ?? [];
     for (let j = 1; j <= n; j++) {
       if (a[i - 1] === b[j - 1]) {
-        dp[i]![j] = dp[i - 1]![j - 1]!;
+        cur[j] = prev[j - 1] ?? 0;
       } else {
-        dp[i]![j] = 1 + Math.min(dp[i - 1]![j - 1]!, dp[i - 1]![j]!, dp[i]![j - 1]!);
+        cur[j] = 1 + Math.min(prev[j - 1] ?? 0, prev[j] ?? 0, cur[j - 1] ?? 0);
       }
     }
   }
@@ -98,12 +101,12 @@ function backtrackAlign(
   const tmp: CharEval[] = [];
   while (i > 0 || j > 0) {
     if (i > 0 && j > 0 && a[i - 1] === b[j - 1]) {
-      tmp.push({ ch: a[i - 1]!, index: i - 1, status: 'correct', heard: b[j - 1]! });
+      tmp.push({ ch: a[i - 1] ?? '', index: i - 1, status: 'correct', heard: b[j - 1] ?? '' });
       i--;
       j--;
-    } else if (i > 0 && (j === 0 || dp[i - 1]![j]! <= dp[i]![j - 1]!)) {
+    } else if (i > 0 && (j === 0 || (dp[i - 1]?.[j] ?? 0) <= (dp[i]?.[j - 1] ?? 0))) {
       // 目标字在识别结果中缺失
-      tmp.push({ ch: a[i - 1]!, index: i - 1, status: 'missing', heard: '' });
+      tmp.push({ ch: a[i - 1] ?? '', index: i - 1, status: 'missing', heard: '' });
       i--;
     } else {
       // 识别结果中多出的字（插入），不对应目标字，跳过
@@ -125,17 +128,22 @@ function backtrackAlign(
   const tmp2: CharEval[] = [];
   while (ii > 0 || jj > 0) {
     if (ii > 0 && jj > 0 && a[ii - 1] === b[jj - 1]) {
-      tmp2.push({ ch: a[ii - 1]!, index: ii - 1, status: 'correct', heard: b[jj - 1]! });
+      tmp2.push({ ch: a[ii - 1] ?? '', index: ii - 1, status: 'correct', heard: b[jj - 1] ?? '' });
       ii--;
       jj--;
-    } else if (ii > 0 && jj > 0 && (dp[ii - 1]![jj - 1]! <= dp[ii - 1]![jj]! || dp[ii - 1]![jj - 1]! <= dp[ii]![jj - 1]!)) {
+    } else if (
+      ii > 0 &&
+      jj > 0 &&
+      ((dp[ii - 1]?.[jj - 1] ?? 0) <= (dp[ii - 1]?.[jj] ?? 0) ||
+        (dp[ii - 1]?.[jj - 1] ?? 0) <= (dp[ii]?.[jj - 1] ?? 0))
+    ) {
       // 替换：目标字与识别字不同
-      tmp2.push({ ch: a[ii - 1]!, index: ii - 1, status: 'wrong', heard: b[jj - 1]! });
+      tmp2.push({ ch: a[ii - 1] ?? '', index: ii - 1, status: 'wrong', heard: b[jj - 1] ?? '' });
       ii--;
       jj--;
-    } else if (ii > 0 && (jj === 0 || dp[ii - 1]![jj]! < dp[ii]![jj - 1]!)) {
+    } else if (ii > 0 && (jj === 0 || (dp[ii - 1]?.[jj] ?? 0) < (dp[ii]?.[jj - 1] ?? 0))) {
       // 目标字缺失
-      tmp2.push({ ch: a[ii - 1]!, index: ii - 1, status: 'missing', heard: '' });
+      tmp2.push({ ch: a[ii - 1] ?? '', index: ii - 1, status: 'missing', heard: '' });
       ii--;
     } else {
       // 识别多出的字，跳过

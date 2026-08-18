@@ -370,7 +370,7 @@ export function BeatTap({ rhyme, tone }: BeatTapProps) {
                       animate={{
                         scale: isCurrent ? [1, 1.3, 1] : 1,
                         backgroundColor: isCurrent ? toneStyle.main : isPast
-                          ? (result?.grade === 'perfect' ? '#5FD68B' : result?.grade === 'good' ? '#FFC93C' : '#FF6B6B')
+                          ? (result?.grade === 'perfect' ? '#5fd68b' : result?.grade === 'good' ? '#e5ac2e' : '#ff5c7a')
                           : 'rgba(255,255,255,0.6)',
                       }}
                       transition={{
@@ -435,7 +435,7 @@ export function BeatTap({ rhyme, tone }: BeatTapProps) {
                 color:
                   lastGrade === 'perfect' ? TONE_STYLE.green.deep :
                   lastGrade === 'good' ? TONE_STYLE.yellow.deep :
-                  '#FF6B6B',
+                  '#ff5c7a',
               }}
             >
               {lastGrade === 'perfect' ? tr('beatTap.perfectHit') :

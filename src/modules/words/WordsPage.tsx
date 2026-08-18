@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { lazy, Suspense } from 'react';
 import { WORD_THEMES, searchWords, getWordCount, getSightWordsByGrade } from '@/data/wordIndex';
 import type { WordEntry } from '@/data/wordIndex';
@@ -14,6 +14,8 @@ import { TONE_STYLE } from '@/lib/tones';
 import { useTranslation } from '@/i18n/useTranslation';
 import { ENGLISH_STAGES, currentStage, stageOverview, type EnglishStage } from '@/lib/englishCurriculum';
 import { WordLearn } from './WordLearn';
+import { useTrainingTarget } from '@/hooks/useTrainingTarget';
+import { TrainingBanner } from '@/components/TrainingBanner';
 
 const PhonicsPage = lazy(() => import('./PhonicsPage').then((m) => ({ default: m.PhonicsPage })));
 const SpellingTest = lazy(() => import('./SpellingTest').then((m) => ({ default: m.SpellingTest })));
@@ -52,6 +54,14 @@ const STAGE_ACTIONS: Record<EnglishStage, { main: MainTab; practice?: PracticeTa
   5: { main: 'practice', practice: 'dialogue' },
 };
 
+/** 深链 param → 练习板块 tab */
+const WORDS_PARAM_MAP: Record<string, PracticeTab> = {
+  sentence: 'sentences',
+  dialogue: 'dialogue',
+  phonics: 'phonics',
+  practice: 'phonics',
+};
+
 export default function WordsPage() {
   const [mainTab, setMainTab] = useState<MainTab>('course');
   const [practiceTab, setPracticeTab] = useState<PracticeTab>('phonics');
@@ -62,6 +72,18 @@ export default function WordsPage() {
   const [sightGrade, setSightGrade] = useState<1 | 2 | 3>(1);
   const progress = useProgress();
   const { t: tr } = useTranslation();
+  const { target, clear } = useTrainingTarget('words');
+
+  // 深链 param → 练习板块对应 tab（sentence/dialogue/phonics/practice）
+  useEffect(() => {
+    const p = target?.param;
+    if (!p) return;
+    const practice = WORDS_PARAM_MAP[p];
+    if (practice) {
+      setMainTab('practice');
+      setPracticeTab(practice);
+    }
+  }, [target]);
 
   const MAIN_TABS: TabItem<MainTab>[] = useMemo(() => [
     { id: 'course', label: tr('words.tab.course'), emoji: '📚' },
@@ -95,6 +117,7 @@ export default function WordsPage() {
     return (
       <div className="space-y-5">
         <PageHeader iconType="town" title={tr('words.courseTitle')} subtitle={tr('words.courseSubtitle')} tone="purple" />
+        <TrainingBanner target={target} onClose={clear} />
         <Tabs items={MAIN_TABS} value={mainTab} onChange={setMainTab} tone="purple" layoutId="words-main-tabs" />
 
         {/* 当前阶段横幅 */}
@@ -160,6 +183,7 @@ export default function WordsPage() {
     return (
       <div className="space-y-5">
         <PageHeader emoji="🎯" title={tr('words.practiceTitle')} subtitle={tr('words.practiceSubtitle')} tone="pink" />
+        <TrainingBanner target={target} onClose={clear} />
         <Tabs items={MAIN_TABS} value={mainTab} onChange={setMainTab} tone="pink" layoutId="words-main-tabs" />
         <Tabs items={practiceTabs} value={practiceTab} onChange={setPracticeTab} tone="purple" layoutId="words-practice-tabs" />
 
@@ -183,6 +207,7 @@ export default function WordsPage() {
     return (
       <div className="space-y-5">
         <PageHeader emoji="🔁" title={tr('words.tab.review')} subtitle={tr('words.reviewSubtitle')} tone="green" />
+        <TrainingBanner target={target} onClose={clear} />
         <Tabs items={MAIN_TABS} value={mainTab} onChange={setMainTab} tone="green" layoutId="words-main-tabs" />
         <Suspense fallback={<div className="py-12 text-center text-3xl animate-bounce">🔁</div>}>
           <WordReview />
@@ -208,6 +233,7 @@ export default function WordsPage() {
   return (
     <div className="space-y-5">
       <PageHeader iconType="town" title={tr('words.wordsTitle')} subtitle={tr('words.homeSubtitle', { count: getWordCount() })} tone={tone} />
+      <TrainingBanner target={target} onClose={clear} />
       <Tabs items={MAIN_TABS} value={mainTab} onChange={setMainTab} tone="blue" layoutId="words-main-tabs" />
 
       {/* 3D 羊毛毡 Sight Words 魔法高频词宝盒 */}

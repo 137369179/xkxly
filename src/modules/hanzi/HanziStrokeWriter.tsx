@@ -21,6 +21,7 @@ interface HanziStrokeWriterProps {
 export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWriterProps) {
   const { t } = useTranslation();
   const addFish = useStore((s) => s.addFish);
+  const practice = useStore((s) => s.practice);
   const [gridType, setGridType] = useState<'tian' | 'mi'>('tian');
   const [isAnimating, setIsAnimating] = useState(false);
   const [strokeProgress, setStrokeProgress] = useState(0);
@@ -51,8 +52,8 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
 
   useEffect(() => {
     clearCanvas();
-    // 自动发音
-    speak(`${hanzi.c}，${hanzi.p}`);
+    // 自动发音（TTS 不可用时静默降级）
+    void speak(`${hanzi.c}，${hanzi.p}`).catch(() => {});
   }, [hanzi]);
 
   // 模拟笔画动画播放
@@ -61,7 +62,7 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
     sfxTap();
     setIsAnimating(true);
     setStrokeProgress(0);
-    speak(`${hanzi.c}，按顺时针书写，共 ${hanzi.strokes} 画`);
+    void speak(`${hanzi.c}，按顺时针书写，共 ${hanzi.strokes} 画`).catch(() => {});
 
     const strokeCount = hanzi.strokes || 5;
     let step = 0;
@@ -134,6 +135,8 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
       const data = await ensureStrokeData(hanzi.c);
       const grade = gradeHanziWriting(trailRef.current, data);
       setStars(grade.stars);
+      // SRS 回写：笔画书写达 2 星以上视为掌握一次
+      practice(`hanzi-stroke:${hanzi.c}`, grade.stars >= 2, grade.stars);
       if (grade.fish > 0) addFish(grade.fish);
       if (grade.stars >= 2) celebrateSmall();
       const msg =
@@ -142,8 +145,10 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
           : grade.stars === 2
             ? t('hanziStrokeWriter.rewardGood', { char: hanzi.c, fish: grade.fish })
             : t('hanziStrokeWriter.rewardTry', { char: hanzi.c });
-      speak(msg, { lang: 'zh-CN' });
+      void speak(msg, { lang: 'zh-CN' }).catch(() => {});
       onComplete?.();
+    } catch {
+      // 笔顺数据加载失败 / 评分异常：保持可继续书写，不整页崩溃
     } finally {
       setSubmitting(false);
     }
@@ -153,9 +158,14 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
   const handleGenerateAiStory = () => {
     sfxTap();
     setShowAiStory(true);
-    runAiStream(
-      companionChatTask(`请用适合3-6岁孩子的童趣口吻，围绕汉字“${hanzi.c}”（拼音：${hanzi.p}，含义：${hanzi.origin}）编一段30字以内超可爱的微故事！`, [])
-    );
+    // AI 调用失败（超时 / 服务不可用）时保留加载文案，不抛到渲染层
+    try {
+      runAiStream(
+        companionChatTask(`请用适合3-6岁孩子的童趣口吻，围绕汉字“${hanzi.c}”（拼音：${hanzi.p}，含义：${hanzi.origin}）编一段30字以内超可爱的微故事！`, [])
+      );
+    } catch {
+      // ignore
+    }
   };
 
   return (
@@ -245,7 +255,7 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
         <button
           onClick={() => {
             sfxTap();
-            speak(`${hanzi.c}，${hanzi.p}`);
+            void speak(`${hanzi.c}，${hanzi.p}`).catch(() => {});
           }}
           className="px-4 py-2 bg-candy-pink hover:bg-candy-pink-deep text-white font-black rounded-xl shadow-jelly active:scale-95 flex items-center gap-1.5 text-sm"
         >

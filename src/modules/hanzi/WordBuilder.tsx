@@ -2,19 +2,20 @@
  * 组词造句练习 🀄 (N4)
  * 基于已学汉字，进行组词 + 造句双重练习
  */
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
-import { useProgress } from '@/store/useStore';
+import { useProgress, useStore } from '@/store/useStore';
 import { getHanziByChar } from '@/data/hanziIndex';
 import type { HanziEntry } from '@/data/hanzi';
 import { useTranslation } from '@/i18n/useTranslation';
 
 type Stage = 'word' | 'sentence' | 'review';
 
-export function WordBuilder() {
+export function WordBuilder({ initialChar }: { initialChar?: string }) {
   const { t: tr } = useTranslation();
   const p = useProgress();
+  const practice = useStore((s) => s.practice);
   const [stage, setStage] = useState<Stage>('word');
   const [current, setCurrent] = useState<HanziEntry | null>(null);
   const [userWord, setUserWord] = useState('');
@@ -22,6 +23,21 @@ export function WordBuilder() {
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | ''>('');
   const [score, setScore] = useState(0);
   const [doneList, setDoneList] = useState<string[]>([]);
+  // 深链 build:<字> 进入时，仅自动预选一次目标字，不干扰后续自由练习流
+  const seededRef = useRef(false);
+
+  useEffect(() => {
+    if (seededRef.current || !initialChar) return;
+    const e = getHanziByChar(initialChar);
+    if (e) {
+      seededRef.current = true;
+      setCurrent(e);
+      setStage('word');
+      setUserWord('');
+      setUserSentence('');
+      setFeedback('');
+    }
+  }, [initialChar]);
 
   const learned = useMemo(() => {
     const entries = Object.entries(p.mastery);
@@ -69,13 +85,15 @@ export function WordBuilder() {
     if (valid) {
       sfxCorrect();
       setFeedback('correct');
+      practice(`hanzi-build:${current.c}`, true, 1);
       setScore(s => s + 1);
-      void speak(`好！${current.c}可以组成${userWord.trim()}`, { lang: 'zh-CN', rate: 0.85, module: 'praise' });
+      void speak(`好！${current.c}可以组成${userWord.trim()}`, { lang: 'zh-CN', rate: 0.85, module: 'praise' }).catch(() => {});
       setTimeout(() => { setFeedback(''); setStage('sentence'); }, 800);
     } else {
       sfxWrong();
       setFeedback('wrong');
-      void speak(`再想想，${current.c}能组成什么词呢？`, { lang: 'zh-CN', rate: 0.85, module: 'praise' });
+      practice(`hanzi-build:${current.c}`, false, 0);
+      void speak(`再想想，${current.c}能组成什么词呢？`, { lang: 'zh-CN', rate: 0.85, module: 'praise' }).catch(() => {});
       setTimeout(() => setFeedback(''), 1500);
     }
   };
@@ -84,12 +102,14 @@ export function WordBuilder() {
     if (!current) return;
     if (userSentence.trim().includes(current.c) && userSentence.trim().length >= 3) {
       sfxCorrect();
+      practice(`hanzi-build:${current.c}`, true, 1);
       setScore(s => s + 1);
-      void speak(`真棒！${userSentence.trim()}`, { lang: 'zh-CN', rate: 0.85, module: 'praise' });
+      void speak(`真棒！${userSentence.trim()}`, { lang: 'zh-CN', rate: 0.85, module: 'praise' }).catch(() => {});
       setStage('review');
     } else {
       sfxWrong();
-      void speak(`句子里面要有"${current.c}"这个字哦`, { lang: 'zh-CN', rate: 0.85, module: 'praise' });
+      practice(`hanzi-build:${current.c}`, false, 0);
+      void speak(`句子里面要有"${current.c}"这个字哦`, { lang: 'zh-CN', rate: 0.85, module: 'praise' }).catch(() => {});
     }
   };
 
@@ -173,7 +193,7 @@ export function WordBuilder() {
           </div>
           <div className="flex gap-2">
             <button
-              onClick={() => speak(`组词：${userWord}。造句：${userSentence}`, { lang: 'zh-CN', rate: 0.8 })}
+              onClick={() => { void speak(`组词：${userWord}。造句：${userSentence}`, { lang: 'zh-CN', rate: 0.8 }).catch(() => {}); }}
               className="flex-1 rounded-xl bg-candy-green-deep py-3 text-sm font-extrabold text-white shadow-sm flex items-center justify-center gap-1 active:scale-95 transition-all"
             >
               🔊 朗读我的创作

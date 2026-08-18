@@ -126,7 +126,7 @@ export function AiPanel({
                 'whitespace-pre-wrap break-words font-medium',
                 compact ? 'text-base leading-relaxed' : 'text-lg leading-8',
               )}
-              style={{ color: '#3B3355' }}
+              style={{ color: '#5c2e3d' }}
             >
               {text}
               {status === 'streaming' && (

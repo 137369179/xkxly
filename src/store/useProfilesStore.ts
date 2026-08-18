@@ -82,12 +82,12 @@ export interface ProfileColorDef {
 
 /** 预设主题色（糖果色系，与全站视觉一致） */
 export const PROFILE_COLORS: ProfileColorDef[] = [
-  { key: 'pink', hex: '#FF7EB6', soft: '#FFF0F6' },
-  { key: 'blue', hex: '#5B9DF9', soft: '#EEF5FF' },
-  { key: 'green', hex: '#46C98B', soft: '#ECFBF2' },
-  { key: 'orange', hex: '#FFA45B', soft: '#FFF4E8' },
-  { key: 'purple', hex: '#A876F1', soft: '#F5EEFF' },
-  { key: 'teal', hex: '#2FC9C0', soft: '#E7FBFA' },
+  { key: 'pink', hex: '#ff6b96', soft: '#ffe4ee' },
+  { key: 'blue', hex: '#55aee0', soft: '#dcecfa' },
+  { key: 'green', hex: '#5fd68b', soft: '#f0faf4' },
+  { key: 'orange', hex: '#ff9f5a', soft: '#fff3ec' },
+  { key: 'purple', hex: '#8b6ef0', soft: '#ece5ff' },
+  { key: 'teal', hex: '#35bcc0', soft: '#ecfbfa' },
 ];
 
 export const PROFILE_AVATARS = [
@@ -97,10 +97,10 @@ export const PROFILE_AVATARS = [
 ];
 
 export function colorHex(key: string): string {
-  return PROFILE_COLORS.find((c) => c.key === key)?.hex ?? PROFILE_COLORS[0]!.hex;
+  return PROFILE_COLORS.find((c) => c.key === key)?.hex ?? PROFILE_COLORS[0]?.hex ?? '';
 }
 export function colorSoft(key: string): string {
-  return PROFILE_COLORS.find((c) => c.key === key)?.soft ?? PROFILE_COLORS[0]!.soft;
+  return PROFILE_COLORS.find((c) => c.key === key)?.soft ?? PROFILE_COLORS[0]?.soft ?? '';
 }
 
 function genId(): string {
@@ -200,7 +200,7 @@ export const useProfilesStore = create<ProfilesState>()(
         // 1) 先把主 Store 当前（最新）进度存回旧孩子的仓库
         const current = useStore.getState().progress;
         // 2) 再载入新孩子的进度到主 Store
-        const target = st.profiles[id]!;
+        const target = st.profiles[id];
         set({
           profiles: { ...st.profiles, [st.activeProfileId]: current },
           activeProfileId: id,
@@ -255,9 +255,9 @@ export const useProfilesStore = create<ProfilesState>()(
 
         if (id === st.activeProfileId) {
           // 删除当前孩子 → 自动切到剩余第一个，并把其进度载入主 Store
-          const nextId = Object.keys(profiles)[0]!;
+          const nextId = Object.keys(profiles)[0] ?? '';
           set({ profiles, meta, activeProfileId: nextId });
-          useStore.setState({ progress: profiles[nextId]! });
+          useStore.setState({ progress: profiles[nextId] ?? createInitialProgress() });
         } else {
           set({ profiles, meta });
         }

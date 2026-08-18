@@ -285,7 +285,8 @@
       "label": "研究乐园",
       "short": "研究",
       "desc": "选题探索 · 记录发现"
-    }
+    },
+    "sidebarLabel": "侧边导航"
   },
   "research": {
     "title": "研究乐园",
@@ -694,6 +695,8 @@
     "archive": "档案",
     "works": "作品",
     "flying": "飞花令",
+    "more": "更多",
+    "advanced": "高级筛选",
     "searchPlaceholder": "搜诗名 / 作者 / 主题…",
     "pinyinToggle": "🔤 拼音",
     "dynastyLabel": "朝代",
@@ -1027,7 +1030,17 @@
     "suggestions": "建议",
     "wrongAnalyze": "AI 错题分析",
     "wrongAnalyzeSub": "智能诊断错题模式",
-    "analyze": "分析"
+    "analyze": "分析",
+    "screenTimeTitle": "屏幕时间",
+    "todayTime": "今日学习",
+    "todayItems": "练习题数",
+    "todayStars": "获得星星",
+    "todayProgress": "今日进度",
+    "limitReached": "⚠️ 已达今日上限",
+    "timeLeft": "剩余",
+    "minutes": "分钟",
+    "weekTrend": "本周趋势",
+    "weekTotal": "本周总计"
   },
   "accessibility": {
     "playAudio": "播放音频",
@@ -1376,12 +1389,24 @@
     "title": "错题本",
     "dueCount": "有 {count} 个错题到了最佳复习时间！",
     "reviewNow": "立即复习",
-    "tab.overview": "概览",
-    "tab.train": "训练",
-    "tab.badges": "徽章",
+    "tab": {
+      "overview": "概览",
+      "train": "训练",
+      "badges": "徽章",
+      "causes": "按原因"
+    },
+    "causes": {
+      "title": "按原因",
+      "summary": "{groups} 类原因 · {total} 题",
+      "count": "{count} 题",
+      "practice": "去练习"
+    },
     "emptyTitle": "错题本空空如也！",
     "emptyHint": "去学习积攒一些错题，再来这里消灭它们吧！",
     "backHome": "回首页学习"
+  },
+  "training": {
+    "banner": "专项训练"
   },
   "storybook": {
     "pageTitle": "AI 绘本工坊",
@@ -4219,7 +4244,8 @@
     "tabSpace": "太空",
     "tabWeather": "天气",
     "tabAnimal": "动物",
-    "tabBody": "人体"
+    "tabBody": "人体",
+    "knowledgeCards": "知识卡片"
   },
   "letterTrace": {
     "upper": "A-Z 大写",

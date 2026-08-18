@@ -8,6 +8,7 @@ import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxStar, sfxWin } from '@/lib/sfx';
 import { celebrateBig, celebrateSmall } from '@/lib/celebrate';
 import { motion, AnimatePresence } from 'motion/react';
+import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/i18n/useTranslation';
 
 const DIRS: Record<string, [number, number]> = {
@@ -106,6 +107,7 @@ const LEVELS: MazeLevel[] = [
 
 export function MazeGame() {
   const { t: tr } = useTranslation();
+  const practice = useStore((s) => s.practice);
   const [level, setLevel] = useState(0);
   const [pos, setPos] = useState<[number, number]>(LEVELS[0]!.start);
   const [collected, setCollected] = useState<Set<string>>(new Set());
@@ -153,6 +155,7 @@ export function MazeGame() {
     if (nr === lv.end[0] && nc === lv.end[1]) {
       sfxWin();
       setComplete(true);
+      practice('logic:maze', true);
       if (collected.size >= lv.items.length - (lv.items.some(([ir, ic]) => ir === nr && ic === nc) ? 0 : 0)) {
         celebrateBig();
       } else {

@@ -68,7 +68,7 @@ export function GrowthTrend() {
         <svg viewBox="0 0 100 42" className="w-full" style={{ height: 130 }}>
           {/* 网格线 */}
           {[0.25, 0.5, 0.75, 1].map((r) => (
-            <line key={r} x1={0} y1={40 - r * 36} x2={100} y2={40 - r * 36} stroke="#eef2f7" strokeWidth={0.3} />
+            <line key={r} x1={0} y1={40 - r * 36} x2={100} y2={40 - r * 36} stroke="#f0dde2" strokeWidth={0.3} />
           ))}
           {/* 面积 + 折线 */}
           {(() => {
@@ -82,16 +82,16 @@ export function GrowthTrend() {
             const area = `0,40 ${line} 100,40`;
             return (
               <>
-                <polygon points={area} fill="rgba(59,130,246,0.12)" />
-                <polyline points={line} fill="none" stroke="#3b82f6" strokeWidth={0.8} strokeLinejoin="round" />
+                <polygon points={area} fill="rgba(46,147,201,0.12)" />
+                <polyline points={line} fill="none" stroke="#2e93c9" strokeWidth={0.8} strokeLinejoin="round" />
                 {pts.map((p, i) => (
-                  <circle key={`p-${i}`} cx={p[0]} cy={p[1]} r={0.9} fill="#3b82f6" />
+                  <circle key={`p-${i}`} cx={p[0]} cy={p[1]} r={0.9} fill="#2e93c9" />
                 ))}
               </>
             );
           })()}
           {/* 趋势标注 */}
-          <text x={2} y={4} fontSize={2.4} fill="#9ca3af">
+          <text x={2} y={4} fontSize={2.4} fill="#cda6b0">
             {tr('parent.startPoint', { pct: Math.round(first * 100) })}
           </text>
         </svg>
@@ -123,20 +123,20 @@ function SubjectRadar({ data }: { data: { label: string; color: string; pct: num
           key={ri}
           points={data.map((_, i) => pt(i, r).join(',')).join(' ')}
           fill="none"
-          stroke="#eef2f7"
+          stroke="#f0dde2"
           strokeWidth={0.6}
         />
       ))}
       {/* 轴线 */}
       {data.map((_, i) => {
         const [x, y] = pt(i, 1);
-        return <line key={`_-${i}`} x1={cx} y1={cy} x2={x} y2={y} stroke="#eef2f7" strokeWidth={0.6} />;
+        return <line key={`_-${i}`} x1={cx} y1={cy} x2={x} y2={y} stroke="#f0dde2" strokeWidth={0.6} />;
       })}
       {/* 数据多边形 */}
       <polygon
         points={data.map((d, i) => pt(i, Math.max(0, Math.min(1, d.pct))).join(',')).join(' ')}
         fill="rgba(168,85,247,0.18)"
-        stroke="#a855f7"
+        stroke="#8b6ef0"
         strokeWidth={1.3}
         strokeLinejoin="round"
       />
@@ -238,7 +238,7 @@ export function StudyTips({ onPracticeSubject }: { onPracticeSubject?: (subject:
               {onPracticeSubject && t.subject && (
                 <button
                   type="button"
-                  onClick={() => onPracticeSubject(t.subject!)}
+                  onClick={() => onPracticeSubject(t.subject ?? '')}
                   className="shrink-0 rounded-full bg-candy-green-soft px-2.5 py-1 text-[11px] font-extrabold text-candy-green-deep active:scale-95"
                 >
                   {tr('parent.goPractice')}
@@ -269,12 +269,12 @@ function buildTips(p: Progress): { emoji: string; text: string; subject?: string
   // 2) 错题最多的类别
   const catCount: Record<string, number> = {};
   for (const skill of p.wrongBook) {
-    const c = skill.split(':')[0]!;
+    const c = skill.split(':')[0] ?? '';
     catCount[c] = (catCount[c] ?? 0) + 1;
   }
   const topCat = Object.entries(catCount).sort((a, b) => b[1] - a[1])[0];
   if (topCat) {
-    const label = SUBJECTS.find((s) => s.key === topCat[0]!)?.label ?? topCat[0];
+    const label = SUBJECTS.find((s) => s.key === topCat[0])?.label ?? topCat[0];
     out.push({ emoji: '🔁', text: `错题本里「${label}」最多（${topCat[1]} 题），周末安排一次专项回炉`, subject: topCat[0] });
   }
 

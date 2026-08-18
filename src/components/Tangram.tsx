@@ -34,16 +34,16 @@ const PUZZLES: Puzzle[] = [
   { id: 'bird', name: '小鸟', emoji: '🐦', hint: '翅膀展开' },
 ];
 
-const COLORS = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#A8E6CF', '#FF8B94', '#C7CEEA', '#B5EAD7'];
+const COLORS = ['#ff5c7a', '#35bcc0', '#ffd166', '#8fe7bc', '#ff8db0', '#a8d8f0', '#b8f0d8'];
 
 const INITIAL_PIECES: Piece[] = [
-  { id: 'p1', shape: 'triangle-lg', color: COLORS[0]!, x: 50, y: 50, rotation: 0 },
-  { id: 'p2', shape: 'triangle-lg', color: COLORS[1]!, x: 200, y: 50, rotation: 90 },
-  { id: 'p3', shape: 'triangle-md', color: COLORS[2]!, x: 100, y: 180, rotation: 0 },
-  { id: 'p4', shape: 'triangle-sm', color: COLORS[3]!, x: 250, y: 180, rotation: 180 },
-  { id: 'p5', shape: 'triangle-sm', color: COLORS[4]!, x: 50, y: 250, rotation: 270 },
-  { id: 'p6', shape: 'square', color: COLORS[5]!, x: 180, y: 250, rotation: 0 },
-  { id: 'p7', shape: 'parallelogram', color: COLORS[6]!, x: 280, y: 280, rotation: 0 },
+  { id: 'p1', shape: 'triangle-lg', color: COLORS[0] as string, x: 50, y: 50, rotation: 0 },
+  { id: 'p2', shape: 'triangle-lg', color: COLORS[1] as string, x: 200, y: 50, rotation: 90 },
+  { id: 'p3', shape: 'triangle-md', color: COLORS[2] as string, x: 100, y: 180, rotation: 0 },
+  { id: 'p4', shape: 'triangle-sm', color: COLORS[3] as string, x: 250, y: 180, rotation: 180 },
+  { id: 'p5', shape: 'triangle-sm', color: COLORS[4] as string, x: 50, y: 250, rotation: 270 },
+  { id: 'p6', shape: 'square', color: COLORS[5] as string, x: 180, y: 250, rotation: 0 },
+  { id: 'p7', shape: 'parallelogram', color: COLORS[6] as string, x: 280, y: 280, rotation: 0 },
 ];
 
 function PieceSvg({ piece, onDrag }: { piece: Piece; onDrag: (id: string, x: number, y: number) => void }) {
@@ -98,7 +98,7 @@ export function Tangram() {
   const [pieces, setPieces] = useState(INITIAL_PIECES);
   const [completed, setCompleted] = useState<Set<string>>(new Set());
 
-  const puzzle = PUZZLES[puzzleIdx]!
+  const puzzle = PUZZLES[puzzleIdx] as Puzzle
 
   const handleDrag = useCallback((id: string, x: number, y: number) => {
     setPieces(prev => prev.map(p => p.id === id ? { ...p, x, y } : p));

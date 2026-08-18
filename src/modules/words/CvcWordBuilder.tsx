@@ -1,45 +1,60 @@
-/**
- * CVC 单词字母拖拽拼字组件 🔤 (CVC Word Builder)
- * ------------------------------------------------------------
- * 自然拼读极速拼词：
- * 点击/拖拽发音字母块，拼出目标单词 (c - a - t -> cat)
- */
-
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
-import { speak } from '@/lib/speech';
+import { speak, speakLetter } from '@/lib/speech';
+import { celebrateSmall } from '@/lib/celebrate';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useStore } from '@/store/useStore';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface CvcTarget {
   word: string;
   letters: string[];
   emoji: string;
   meaning: string;
+  phonics: string[];
   options: string[];
 }
 
 const CVC_WORDS: CvcTarget[] = [
-  { word: 'cat', letters: ['c', 'a', 't'], emoji: '🐱', meaning: '猫咪', options: ['c', 'b', 'a', 't', 'p', 'o'] },
-  { word: 'dog', letters: ['d', 'o', 'g'], emoji: '🐶', meaning: '小狗', options: ['d', 'o', 'g', 'a', 't', 'u'] },
-  { word: 'pig', letters: ['p', 'i', 'g'], emoji: '🐷', meaning: '小猪', options: ['p', 'i', 'g', 'e', 'n', 'b'] },
-  { word: 'bus', letters: ['b', 'u', 's'], emoji: '🚌', meaning: '巴士', options: ['b', 'u', 's', 'c', 'a', 'r'] },
-  { word: 'sun', letters: ['s', 'u', 'n'], emoji: '☀️', meaning: '太阳', options: ['s', 'u', 'n', 'o', 't', 'p'] },
-  { word: 'pen', letters: ['p', 'e', 'n'], emoji: '🖊️', meaning: '钢笔', options: ['p', 'e', 'n', 'a', 't', 'i'] },
-  { word: 'fox', letters: ['f', 'o', 'x'], emoji: '🦊', meaning: '狐狸', options: ['f', 'o', 'x', 'a', 't', 'u'] },
-  { word: 'hat', letters: ['h', 'a', 't'], emoji: '🎩', meaning: '帽子', options: ['h', 'a', 't', 'o', 'e', 'g'] },
+  { word: 'cat', letters: ['c', 'a', 't'], emoji: '🐱', meaning: '猫咪', phonics: ['/k/', '/æ/', '/t/'], options: ['c', 'b', 'a', 't', 'p', 'o'] },
+  { word: 'dog', letters: ['d', 'o', 'g'], emoji: '🐶', meaning: '小狗', phonics: ['/d/', '/ɒ/', '/g/'], options: ['d', 'o', 'g', 'a', 't', 'u'] },
+  { word: 'pig', letters: ['p', 'i', 'g'], emoji: '🐷', meaning: '小猪', phonics: ['/p/', '/ɪ/', '/g/'], options: ['p', 'i', 'g', 'e', 'n', 'b'] },
+  { word: 'bus', letters: ['b', 'u', 's'], emoji: '🚌', meaning: '巴士', phonics: ['/b/', '/ʌ/', '/s/'], options: ['b', 'u', 's', 'c', 'a', 'r'] },
+  { word: 'sun', letters: ['s', 'u', 'n'], emoji: '☀️', meaning: '太阳', phonics: ['/s/', '/ʌ/', '/n/'], options: ['s', 'u', 'n', 'o', 't', 'p'] },
+  { word: 'pen', letters: ['p', 'e', 'n'], emoji: '🖊️', meaning: '钢笔', phonics: ['/p/', '/e/', '/n/'], options: ['p', 'e', 'n', 'a', 't', 'i'] },
+  { word: 'fox', letters: ['f', 'o', 'x'], emoji: '🦊', meaning: '狐狸', phonics: ['/f/', '/ɒ/', '/ks/'], options: ['f', 'o', 'x', 'a', 't', 'u'] },
+  { word: 'hat', letters: ['h', 'a', 't'], emoji: '🎩', meaning: '帽子', phonics: ['/h/', '/æ/', '/t/'], options: ['h', 'a', 't', 'o', 'e', 'g'] },
+  { word: 'bed', letters: ['b', 'e', 'd'], emoji: '🛏️', meaning: '小床', phonics: ['/b/', '/e/', '/d/'], options: ['b', 'e', 'd', 'p', 'a', 't'] },
+  { word: 'cup', letters: ['c', 'u', 'p'], emoji: '🥛', meaning: '杯子', phonics: ['/k/', '/ʌ/', '/p/'], options: ['c', 'u', 'p', 'b', 'o', 't'] },
 ];
 
 export function CvcWordBuilder() {
   const { t } = useTranslation();
+  const practice = useStore((s) => s.practice);
   const [idx, setIdx] = useState(0);
-  const current = CVC_WORDS[idx]!
+  const current = CVC_WORDS[idx] ?? CVC_WORDS[0]!;
   const [userLetters, setUserLetters] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | ''>('');
+  const [blendingStep, setBlendingStep] = useState<number | null>(null);
+
+  const playBlending = useCallback(async () => {
+    sfxTap();
+    for (let i = 0; i < current.letters.length; i++) {
+      setBlendingStep(i);
+      const letter = current.letters[i]!;
+      await speakLetter(letter);
+      await new Promise(r => setTimeout(r, 180));
+    }
+    setBlendingStep(current.letters.length);
+    await speak(current.word, { lang: 'en-US', rate: 0.75 });
+    await new Promise(r => setTimeout(r, 200));
+    setBlendingStep(null);
+  }, [current]);
 
   const handlePickLetter = (letter: string) => {
     sfxTap();
-    speak(letter, { lang: 'en-US', rate: 0.8 });
+    void speakLetter(letter).catch(() => {});
     if (userLetters.length >= current.letters.length) return;
     const nextList = [...userLetters, letter];
     setUserLetters(nextList);
@@ -47,14 +62,25 @@ export function CvcWordBuilder() {
     if (nextList.length === current.letters.length) {
       if (nextList.join('') === current.word) {
         sfxCorrect();
+        celebrateSmall();
         setFeedback('correct');
-        speak(`${current.word}! ${current.meaning}!`, { lang: 'en-US', rate: 0.8 });
+        practice(`word:${current.word}`, true);
+        void speak(`${current.word}! ${current.meaning}!`, { lang: 'en-US', rate: 0.8 }).catch(() => {});
       } else {
         sfxWrong();
         setFeedback('wrong');
-        speak('Try again!', { lang: 'en-US' });
+        practice(`word:${current.word}`, false);
+        void speak('Try again!', { lang: 'en-US' }).catch(() => {});
       }
     }
+  };
+
+  const handleRemoveSlot = (slotIdx: number) => {
+    sfxTap();
+    const next = [...userLetters];
+    next.splice(slotIdx, 1);
+    setUserLetters(next);
+    setFeedback('');
   };
 
   const handleClear = () => {
@@ -71,69 +97,105 @@ export function CvcWordBuilder() {
   };
 
   return (
-    <div className="rounded-3xl border-2 border-pink-300 bg-gradient-to-r from-pink-50 via-purple-50 to-amber-50 p-5 text-center space-y-4 shadow-fluffy">
+    <div className="rounded-3xl border-3 border-candy-pink-soft/60 bg-gradient-to-br from-pink-50 via-purple-50 to-amber-50 p-5 text-center space-y-4 shadow-fluffy">
       <div className="flex items-center justify-between">
-        <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-pink-700 shadow-sm">
+        <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-pink-700 shadow-sm border border-pink-100">
           {t('cvcWordBuilder.badge', { current: idx + 1, total: CVC_WORDS.length })}
         </span>
-        <span className="text-3xl">{current.emoji}</span>
+        <button
+          onClick={playBlending}
+          className="rounded-full bg-candy-purple-soft px-3 py-1 text-xs font-black text-candy-purple-deep border border-candy-purple-deep/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-1"
+        >
+          <span>✨ 示范拼读</span>
+        </button>
       </div>
 
-      <div className="text-xl font-black text-pink-900">
-        {t('cvcWordBuilder.spellPrompt')}<span className="text-pink-600">{current.meaning}</span>
+      <div className="text-center my-1">
+        <motion.div
+          key={current.word}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="text-7xl mb-1 inline-block"
+        >
+          {current.emoji}
+        </motion.div>
+        <div className="text-xl font-black text-ink">
+          {t('cvcWordBuilder.spellPrompt')}<span className="text-candy-pink-deep underline decoration-wavy decoration-pink-300 ml-1">{current.meaning}</span>
+        </div>
       </div>
 
-      {/* 用户拼词格子 */}
-      <div className="flex justify-center gap-3">
-        {current.letters.map((_, i) => (
-          <div
-            key={`_-${i}`}
-            className={`flex h-16 w-16 items-center justify-center rounded-2xl border-4 text-3xl font-black shadow-sm transition-all ${
-              userLetters[i]
-                ? 'border-pink-500 bg-pink-400 text-white scale-105'
-                : 'border-dashed border-pink-300 bg-white text-gray-400'
-            }`}
-          >
-            {userLetters[i] || '?'}
-          </div>
-        ))}
+      {/* 用户拼词积木插槽 */}
+      <div className="flex justify-center gap-3 my-2">
+        {current.letters.map((_, i) => {
+          const isSlotFilled = !!userLetters[i];
+          const isHighlight = blendingStep === i;
+          return (
+            <motion.button
+              key={`slot-${i}`}
+              onClick={() => isSlotFilled && handleRemoveSlot(i)}
+              whileHover={isSlotFilled ? { scale: 1.05 } : {}}
+              whileTap={isSlotFilled ? { scale: 0.95 } : {}}
+              className={`flex h-20 w-20 flex-col items-center justify-center rounded-2xl border-3 text-3xl font-black shadow-md transition-all ${
+                isSlotFilled
+                  ? 'border-candy-pink-deep bg-gradient-to-b from-candy-pink-deep to-pink-500 text-white'
+                  : 'border-dashed border-pink-300 bg-white/90 text-gray-300'
+              } ${isHighlight ? 'ring-4 ring-candy-yellow-deep scale-110' : ''}`}
+            >
+              <span>{userLetters[i] || '?'}</span>
+              <span className="text-[10px] font-bold opacity-75">{current.phonics[i]}</span>
+            </motion.button>
+          );
+        })}
       </div>
 
-      {/* 字母选块 */}
-      <div className="flex flex-wrap justify-center gap-2 pt-2">
-        {current.options.map((l, i) => (
-          <button
-            key={`l-${i}`}
-            onClick={() => handlePickLetter(l)}
-            className="flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-pink-200 bg-white text-2xl font-black text-pink-900 shadow-sm hover:scale-110 active:scale-95 transition-transform"
-          >
-            {l}
-          </button>
-        ))}
-      </div>
-
-      {/* 按钮区域 */}
-      <div className="flex justify-center gap-3 pt-2">
-        <CandyButton tone="pink" variant="soft" size="sm" onClick={handleClear}>
-          {t('cvcWordBuilder.clear')}
-        </CandyButton>
+      {/* 拼写反馈提示 */}
+      <AnimatePresence mode="wait">
         {feedback === 'correct' && (
-          <CandyButton tone="orange" size="sm" onClick={handleNext}>
-            {t('cvcWordBuilder.nextWord')}
-          </CandyButton>
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex items-center justify-center gap-2 text-lg font-black text-green-600 bg-green-100/90 py-2 rounded-2xl border border-green-300"
+          >
+            <span>🎉 太棒啦！{current.word.toUpperCase()} = {current.meaning}</span>
+          </motion.div>
         )}
+        {feedback === 'wrong' && (
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex items-center justify-center gap-2 text-sm font-bold text-amber-700 bg-amber-100/90 py-2 rounded-2xl border border-amber-300"
+          >
+            <span>🤔 顺序不太对，点击字母格修改或重试哦！</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 候选字母卡片 */}
+      <div className="flex flex-wrap justify-center gap-2.5 pt-2">
+        {current.options.map((opt, i) => (
+          <motion.button
+            key={`opt-${i}-${opt}`}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={() => handlePickLetter(opt)}
+            className="flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-purple-200 bg-white text-2xl font-black text-purple-900 shadow-md hover:bg-purple-50 active:bg-purple-100"
+          >
+            {opt}
+          </motion.button>
+        ))}
       </div>
 
-      {feedback === 'correct' && (
-        <div className="text-sm font-black text-green-700 animate-bounce">
-          {t('cvcWordBuilder.correctFeedback', { word: current.word.toUpperCase() })}
-        </div>
-      )}
-      {feedback === 'wrong' && (
-        <div className="text-sm font-black text-rose-700">
-          {t('cvcWordBuilder.wrongFeedback')}
-        </div>
-      )}
+      {/* 操作栏 */}
+      <div className="flex justify-center gap-3 pt-2">
+        <CandyButton tone="purple" variant="soft" size="md" onClick={handleClear}>
+          🔄 {t('cvcWordBuilder.clearBtn')}
+        </CandyButton>
+        <CandyButton tone="green" size="md" onClick={handleNext}>
+          ✨ {t('cvcWordBuilder.nextBtn')}
+        </CandyButton>
+      </div>
     </div>
   );
 }

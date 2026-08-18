@@ -43,12 +43,27 @@ beforeEach(() => {
 
 describe('useStore · 练习掌握度回写', () => {
   it('答对后 mastery / stars / wrongBook 正确回写', () => {
+    const before = useStore.getState().progress.stars;
     useStore.getState().practice('letter:A', true, 2);
     const { progress } = useStore.getState();
 
     expect(progress.mastery['letter:A']).toBeDefined();
     expect(progress.mastery['letter:A']!.lv).toBe(1);
-    expect(progress.stars).toBe(2);
+
+    /*
+     * 星星断言说明：
+     * applyProgress 在结算后会检测新解锁勋章并自动补发绑定奖励（见 data/medals.ts），
+     * 因此 progress.stars 的增量 = practice 本次发放 + 勋章补发，不是恒定值。
+     * 这里用两条稳定断言替代脆弱的「等于 2」：
+     *   1. dailyLog 只记录 practice 自身发放的星星，勋章补发不写入 → 可精确校验为 2；
+     *   2. 总星数至少涨到 practice 发放量，避免回写丢失。
+     */
+    const today = Object.keys(progress.dailyLog).sort().pop()!;
+    expect(progress.dailyLog[today]!.stars).toBe(2);
+    expect(progress.dailyLog[today]!.items).toBe(1);
+    expect(progress.dailyLog[today]!.ok).toBe(1);
+    expect(progress.stars).toBeGreaterThanOrEqual(before + 2);
+
     expect(Array.isArray(progress.wrongBook)).toBe(true);
     expect(progress.wrongBook).not.toContain('letter:A');
   });

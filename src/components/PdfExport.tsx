@@ -112,13 +112,13 @@ async function generateReport(
 
   // 背景渐变
   const grad = ctx.createLinearGradient(0, 0, W, H);
-  grad.addColorStop(0, '#E8F5E9');
-  grad.addColorStop(1, '#E1F5FE');
+  grad.addColorStop(0, '#f0faf4');
+  grad.addColorStop(1, '#dcecfa');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, W, H);
 
   // 标题
-  ctx.fillStyle = '#2E7D32';
+  ctx.fillStyle = '#33a863';
   ctx.font = 'bold 38px sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText('📊 宝贝成长档案', W / 2, 62);
@@ -169,7 +169,7 @@ async function generateReport(
     ctx.textAlign = 'left';
     ctx.fillText(s.label, 60, y + 11);
     // 背景条
-    ctx.fillStyle = '#ECEFF1';
+    ctx.fillStyle = '#f7edf0';
     roundRect(ctx, barX, y, barW, barH, 7);
     ctx.fill();
     // 前景条

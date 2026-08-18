@@ -7,6 +7,7 @@ import { sfxTap, sfxCorrect, sfxWrong, sfxStar, sfxWin } from '@/lib/sfx';
 import { HANZI_DATA } from '@/data/hanzi';
 import { HANZI_LEVELS, type HanziEntry } from '@/data/hanziIndex';
 import { HANZI_SENTENCES, type HanziSentence } from '@/data/hanziSentences';
+import { useStore } from '@/store/useStore';
 
 /**
  * 听音识字（融合自 luomor-web/hanzi-study 的「听音识字」玩法）
@@ -63,6 +64,7 @@ function pickDistinct<T>(arr: T[], n: number, exclude: (x: T) => boolean): T[] {
 export default function HanziListen() {
   const { t } = useTranslation();
   const targets = useMemo(buildTargets, []);
+  const practice = useStore((s) => s.practice);
 
   const [level, setLevel] = useState<Level>('all');
   const [started, setStarted] = useState(false);
@@ -85,7 +87,12 @@ export default function HanziListen() {
     const phrase = full
       ? `${tg.c}，${tg.word}的${tg.c}。${tg.sentence}`
       : `${tg.c}，${tg.word}的${tg.c}`;
-    void speak(phrase, { module: 'hanzi', lang: 'zh-CN' });
+    // TTS 不可用（音频上下文异常 / 语音资源缺失）时静默降级，不影响答题
+    try {
+      void speak(phrase, { module: 'hanzi', lang: 'zh-CN' }).catch(() => {});
+    } catch {
+      // ignore
+    }
   }, []);
 
   const next = useCallback(() => {
@@ -123,6 +130,7 @@ export default function HanziListen() {
       if (opt.c === target.c) {
         lockRef.current = true;
         setStatus('correct');
+        practice(`hanzi:${target.c}`, true, 1);
         setScore((s) => s + 1);
         setStreak((s) => s + 1);
         sfxCorrect();
@@ -134,12 +142,13 @@ export default function HanziListen() {
         }, 2200);
       } else {
         setStatus('wrong');
+        practice(`hanzi:${target.c}`, false, 0);
         setStreak(0);
         sfxWrong();
         setTimeout(() => setStatus('idle'), 700);
       }
     },
-    [target, streak, next],
+    [target, streak, next, practice],
   );
 
   const restart = useCallback(() => {

@@ -62,13 +62,13 @@ export function review(
     // 难度感知：高难度答对升 2 级，其余升 1 级
     const step = difficulty === 3 ? 2 : 1;
     const lv = Math.min(MAX_LEVEL, cur.lv + step);
-    return { lv, due: now + INTERVALS[lv]! * DAY, ok: cur.ok + 1, ng: cur.ng, last: now };
+    return { lv, due: now + (INTERVALS[lv] ?? 0) * DAY, ok: cur.ok + 1, ng: cur.ng, last: now };
   }
   // 难度感知：低难度答错降 2 级，其余降 1 级
   const step = difficulty === 1 ? 2 : 1;
   const lv = Math.max(0, cur.lv - step);
   // 答错间隔温和化：降级后等级对应间隔的一半，最低 10 分钟
-  const intervalMs = Math.max(10 * 60000, Math.ceil((INTERVALS[lv]! * DAY) / 2));
+  const intervalMs = Math.max(10 * 60000, Math.ceil(((INTERVALS[lv] ?? 0) * DAY) / 2));
   return { lv, due: now + intervalMs, ok: cur.ok, ng: cur.ng + 1, last: now };
 }
 
@@ -96,13 +96,13 @@ export function dueSkills(p: Progress, now = Date.now(), limit = 999): string[] 
     .filter((e): e is [string, MasteryItem] => !!e[1] && isDue(e[1], now));
   return items
     .sort((a, b) => {
-      const lvDiff = (a[1]!.lv ?? 0) - (b[1]!.lv ?? 0);
+      const lvDiff = (a[1].lv ?? 0) - (b[1].lv ?? 0);
       if (lvDiff !== 0) return lvDiff;
       // 错误率：ng / (ok+ng)，越大越优先复习
-      const ra = a[1]!.ng / Math.max(1, a[1]!.ok + a[1]!.ng);
-      const rb = b[1]!.ng / Math.max(1, b[1]!.ok + b[1]!.ng);
+      const ra = a[1].ng / Math.max(1, a[1].ok + a[1].ng);
+      const rb = b[1].ng / Math.max(1, b[1].ok + b[1].ng);
       if (ra !== rb) return rb - ra;
-      return (a[1]!.due ?? 0) - (b[1]!.due ?? 0);
+      return (a[1].due ?? 0) - (b[1].due ?? 0);
     })
     .slice(0, limit)
     .map(([k]) => k);
@@ -151,17 +151,17 @@ const SUBJECT_ORDER = [
 
 /** 图表配色：注册表的 SubjectDef 不含 color 字段，这里按学科 key 补齐 */
 const SUBJECT_COLOR: Record<string, string> = {
-  letter: '#3b82f6',
-  number: '#eab308',
-  math: '#22c55e',
-  poem: '#ec4899',
-  hanzi: '#10b981',
-  pinyin: '#6366f1',
-  word: '#f97316',
-  logic: '#a855f7',
-  idiom: '#ef4444',
-  sentence: '#14b8a6',
-  research: '#6366f1',
+  letter: '#2e93c9',
+  number: '#e5ac2e',
+  math: '#33a863',
+  poem: '#ff6b96',
+  hanzi: '#33a863',
+  pinyin: '#8b6ef0',
+  word: '#ff9f5a',
+  logic: '#8b6ef0',
+  idiom: '#ff5c7a',
+  sentence: '#1fb982',
+  research: '#8b6ef0',
 };
 
 /**
@@ -189,13 +189,13 @@ export const SUBJECTS: {
   tone: Tone;
   color: string;
 }[] = SUBJECT_ORDER.map((key) => {
-  const meta = getSubjectById(key) ?? SUBJECT_EXTRA[key]!;
+  const meta = getSubjectById(key) ?? SUBJECT_EXTRA[key] ?? { label: key, emoji: '📘', tone: 'blue' as Tone };
   return {
     key,
     label: meta.label,
     emoji: meta.emoji,
     tone: meta.tone as Tone,
-    color: SUBJECT_COLOR[key] ?? '#94a3b8',
+    color: SUBJECT_COLOR[key] ?? '#b38894',
   };
 });
 
@@ -207,31 +207,42 @@ const CATEGORY: Record<string, { label: string; tone: Tone; emoji: string }> = O
 );
 
 /**
+ * 从 skill 字符串或直连 key 中解出学科 key（`math:add` → `math`，`math` → `math`）。
+ * 用 indexOf/slice 而非 split，保证返回类型恒为 string
+ * （split()[0] 在 noUncheckedIndexedAccess 下为 string | undefined，不能直接用作索引），
+ * 同时避免每次调用产生中间数组。
+ */
+function subjectKeyOf(skillOrKey: string): string {
+  const idx = skillOrKey.indexOf(':');
+  return idx === -1 ? skillOrKey : skillOrKey.slice(0, idx);
+}
+
+/**
  * 学科统一中文名（单一真相源）。
  * 入参可为 skill 字符串（如 `math:add`，自动取前缀 `math`）或直连 key；
  * 优先查 SUBJECTS，其次回退到 CATEGORY，未知返回「其他」。
  */
 export function subjectLabel(skillOrKey: string): string {
-  const key = skillOrKey.includes(':') ? skillOrKey.split(':')[0] : skillOrKey;
-  return SUBJECTS.find((s) => s.key === key)?.label ?? CATEGORY[key!]?.label ?? '其他';
+  const key = subjectKeyOf(skillOrKey);
+  return SUBJECTS.find((s) => s.key === key)?.label ?? CATEGORY[key]?.label ?? '其他';
 }
 
 /** 学科 emoji（单一真相源），未知返回默认书本 emoji。 */
 export function subjectEmoji(skillOrKey: string): string {
-  const key = skillOrKey.includes(':') ? skillOrKey.split(':')[0] : skillOrKey;
-  return SUBJECTS.find((s) => s.key === key)?.emoji ?? CATEGORY[key!]?.emoji ?? '📘';
+  const key = subjectKeyOf(skillOrKey);
+  return SUBJECTS.find((s) => s.key === key)?.emoji ?? CATEGORY[key]?.emoji ?? '📘';
 }
 
 /** 学科 tone（单一真相源），未知返回 blue。 */
 export function subjectTone(skillOrKey: string): Tone {
-  const key = skillOrKey.includes(':') ? skillOrKey.split(':')[0] : skillOrKey;
-  return SUBJECTS.find((s) => s.key === key)?.tone ?? CATEGORY[key!]?.tone ?? ('blue' as Tone);
+  const key = subjectKeyOf(skillOrKey);
+  return SUBJECTS.find((s) => s.key === key)?.tone ?? CATEGORY[key]?.tone ?? ('blue' as Tone);
 }
 
 /** 学科图表配色（单一真相源），未知返回灰色。 */
 export function subjectColor(skillOrKey: string): string {
-  const key = skillOrKey.includes(':') ? skillOrKey.split(':')[0] : skillOrKey;
-  return SUBJECTS.find((s) => s.key === key)?.color ?? '#94a3b8';
+  const key = subjectKeyOf(skillOrKey);
+  return SUBJECTS.find((s) => s.key === key)?.color ?? '#b38894';
 }
 
 const LOGIC_NAME: Record<string, string> = {
@@ -241,8 +252,8 @@ const LOGIC_NAME: Record<string, string> = {
 };
 
 export function skillCategory(skill: string): { key: string; label: string; tone: Tone; emoji: string } {
-  const key = skill.split(':')[0]!;
-  const c = CATEGORY[key]! ?? { label: '其他', tone: 'blue' as Tone, emoji: '📘' };
+  const key = skill.split(':')[0] ?? '';
+  const c = CATEGORY[key] ?? { label: '其他', tone: 'blue' as Tone, emoji: '📘' };
   return { key, ...c };
 }
 
@@ -283,7 +294,7 @@ export function skillLabel(skill: string, poemTitle?: (id: string) => string | u
 export const LEVEL_TEXT = ['刚接触', '有印象', '认得出', '比较熟', '很熟练', '已掌握'] as const;
 
 export function levelColor(lv: number): string {
-  return ['#e8e3ef', '#ffd4e0', '#ffe6a8', '#c9e8ff', '#bdf0cf', '#8fe3ae'][Math.min(5, Math.max(0, lv))]!;
+  return ['#e8e3ef', '#ffd4e0', '#ffe6a8', '#c9e8ff', '#bdf0cf', '#8fe3ae'][Math.min(5, Math.max(0, lv))] ?? '#e8e3ef';
 }
 
 /** 距离下次复习的人类可读文案 */

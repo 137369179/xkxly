@@ -7,9 +7,11 @@ import { sfxTap, sfxWin, sfxWrong } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { CandyButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useStore } from '@/store/useStore';
 
 export function RabbitRunMath() {
   const { t } = useTranslation();
+  const practice = useStore((s) => s.practice);
   const [step, setStep] = useState(0);
   const [num1, setNum1] = useState(3);
   const [num2, setNum2] = useState(2);
@@ -35,6 +37,7 @@ export function RabbitRunMath() {
       celebrateSmall();
       const newStep = step + 1;
       setStep(newStep);
+      practice('math:rabbit', true);
       setMsg(t('rabbitRunMath.correctMsg'));
       if (newStep >= targetStep) {
         celebrateBig();
@@ -43,6 +46,7 @@ export function RabbitRunMath() {
       }
     } else {
       sfxWrong();
+      practice('math:rabbit', false);
       setMsg(t('rabbitRunMath.tryAgain'));
     }
   };

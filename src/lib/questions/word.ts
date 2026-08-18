@@ -39,7 +39,7 @@ function makeWordEmojiQuestion(target: WordEntry, pool: WordEntry[]): Question {
     display: target.emoji,
     speak: target.word,
     options,
-    answerId: options[opts.indexOf(target)]!.id,
+    answerId: options[opts.indexOf(target)]?.id ?? '',
     hint: target.phonics,
     why: `${target.emoji} 的英文是 "${target.word}"，中文是"${target.zh}"`,
   };
@@ -58,7 +58,7 @@ function makeWordZhQuestion(target: WordEntry, pool: WordEntry[]): Question {
     display: target.word,
     speak: target.word,
     options,
-    answerId: options[opts.indexOf(target)]!.id,
+    answerId: options[opts.indexOf(target)]?.id ?? '',
     hint: target.phonics,
     why: `"${target.word}" 的意思是"${target.zh}"，${target.sentenceZh}`,
   };
@@ -77,8 +77,8 @@ function makeWordEnQuestion(target: WordEntry, pool: WordEntry[]): Question {
     display: target.zh,
     speak: target.zh,
     options,
-    answerId: options[opts.indexOf(target)]!.id,
-    hint: `首字母是 ${target.word[0]!.toUpperCase()}`,
+    answerId: options[opts.indexOf(target)]?.id ?? '',
+    hint: `首字母是 ${target.word[0]?.toUpperCase() ?? ''}`,
     why: `"${target.zh}" 的英文是 "${target.word}"，${target.sentence}`,
   };
 }
@@ -100,7 +100,7 @@ export function makeWordQuestion(difficulty: Difficulty = 1, forceWord?: string,
   if (!all.length) return null;
   const entry = resolveTarget(all, forceWord, mastery);
   if (!entry) return null;
-  const pool = all.filter((w) => w.level === entry!.level);
+  const pool = all.filter((w) => w.level === entry.level);
   if (difficulty === 1) return makeWordEmojiQuestion(entry, pool);
   if (difficulty === 2) return makeWordZhQuestion(entry, pool);
   return makeWordEnQuestion(entry, pool);
@@ -122,7 +122,7 @@ export function makeWordListenQuestion(forceWord?: string): Question | null {
     display: '🔊',
     speak: target.word,
     options,
-    answerId: options[opts.indexOf(target)]!.id,
+    answerId: options[opts.indexOf(target)]?.id ?? '',
     hint: target.zh,
     why: `你听到的是 "${target.word}"（${target.zh}），${target.sentenceZh}`,
     difficulty: 2,
@@ -145,7 +145,7 @@ export function makeWordSpellQuestion(forceWord?: string): Question | null {
     prompt: `"${target.zh}" 的英文拼写是？`,
     display: target.emoji,
     options,
-    answerId: options[opts.indexOf(target)]!.id,
+    answerId: options[opts.indexOf(target)]?.id ?? '',
     hint: target.phonics,
     why: `"${target.zh}" 的拼写是 "${target.word}"，${target.sentence}`,
     difficulty: 3,
@@ -167,8 +167,13 @@ export function makeWordFamilyQuestion(forceWord?: string): Question | null {
     const pool = all.filter((w) => w.level === target.level);
     return makeWordEnQuestion(target, pool);
   }
-  const answerWord = sample(siblings)!;
-  const answer = all.find((w) => w.word === answerWord)!;
+  const answerWord = sample(siblings) ?? siblings[0] ?? '';
+  const answer = all.find((w) => w.word === answerWord);
+  if (!answer) {
+    // 防御：siblings 已按「词库中存在」过滤，正常情况下必能找到
+    const pool = all.filter((w) => w.level === target.level);
+    return makeWordEnQuestion(target, pool);
+  }
   const others = all.filter((w) => w.word !== target.word && w.word !== answer.word && !fam.words.includes(w.word));
   const distractors = sampleMany(others, 3);
   const opts = shuffle([answer, ...distractors]);
@@ -180,7 +185,7 @@ export function makeWordFamilyQuestion(forceWord?: string): Question | null {
     prompt: `"${target.word}" 和哪个单词是同一个词族（-${fam.id}）？`,
     display: `${target.word} ${target.emoji}`,
     options,
-    answerId: options[opts.findIndex((w) => w.word === answer.word)]!.id,
+    answerId: options[opts.findIndex((w) => w.word === answer.word)]?.id ?? '',
     hint: `都押 ${fam.sound} 的音，试着读一读`,
     why: `${answer.word} 和 ${target.word} 都在 -${fam.id} 家族，都发 ${fam.sound} 的音`,
     difficulty: 3,

@@ -66,7 +66,7 @@ export function ShadowMatch() {
 
   const clickShadow = (sIdx: number) => {
     if (selectedItem === null || matched.includes(selectedItem)) return;
-    if (items[selectedItem]!.name === shadows[sIdx]!.name) {
+    if (items[selectedItem]?.name === shadows[sIdx]?.name) {
       sfxCorrect();
       setMatched(m => [...m, selectedItem]);
       setScore(s => s + 1);
@@ -107,7 +107,7 @@ export function ShadowMatch() {
         <p className="mb-2 text-center text-xs font-extrabold text-ink-soft">{t('shadowMatch.shadowsLabel')}</p>
         <div className="flex justify-center gap-3">
           {shadows.map((shadow, i) => {
-            const isMatched = matched.some(mi => items[mi]!.name === shadow.name);
+            const isMatched = matched.some(mi => items[mi]?.name === shadow.name);
             return (
               <button key={`shadow-${i}`} onClick={() => clickShadow(i)} disabled={isMatched}
                 className={cn('flex h-16 w-16 items-center justify-center rounded-2xl text-3xl shadow-sm transition-all',

@@ -17,14 +17,14 @@ import { useTranslation } from '@/i18n/useTranslation';
 const DYNASTY_ORDER = ['先秦', '汉', '魏晋', '唐', '宋', '元', '明', '清'];
 
 const DYNASTY_COLORS: Record<string, string> = {
-  '先秦': '#8B4513',
-  '汉': '#A0522D',
-  '魏晋': '#5D4037',
-  '唐': '#FF6B6B',
-  '宋': '#4ECDC4',
-  '元': '#66BB6A',
-  '明': '#42A5F5',
-  '清': '#AB47BC',
+  '先秦': '#b47805',
+  '汉': '#c2410c',
+  '魏晋': '#e05a80',
+  '唐': '#ff5c7a',
+  '宋': '#5fd68b',
+  '元': '#35bcc0',
+  '明': '#55aee0',
+  '清': '#8b6ef0',
 };
 
 /** 朝代 -> i18n key（数据值保持中文，仅显示处翻译） */
@@ -75,7 +75,7 @@ export default function PoetTimeline() {
           >
             {DYNASTY_ORDER.filter(d => poetsByDynasty[d]).map(dynasty => {
               const poets = poetsByDynasty[dynasty]!
-              const color = DYNASTY_COLORS[dynasty]! || '#999';
+              const color = DYNASTY_COLORS[dynasty]! || '#b38894';
               return (
                 <div key={dynasty} className="mb-4">
                   {/* 朝代标签 */}
@@ -133,7 +133,7 @@ export default function PoetTimeline() {
               <div className="flex items-center gap-4">
                 <div
                   className="flex h-16 w-16 items-center justify-center rounded-2xl text-3xl text-white"
-                  style={{ background: DYNASTY_COLORS[selected.dynasty] || '#999' }}
+                  style={{ background: DYNASTY_COLORS[selected.dynasty] || '#b38894' }}
                 >
                   👤
                 </div>

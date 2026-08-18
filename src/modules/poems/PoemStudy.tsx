@@ -338,11 +338,11 @@ function RhymeRail({ feet }: { feet: string[] }) {
   return (
     <div className="flex flex-col items-center">
       <svg width="40" height={feet.length * 46} className="overflow-visible">
-        <line x1="20" y1="14" x2="20" y2={feet.length * 46 - 14} stroke="#10b981" strokeWidth="2.5" strokeDasharray="4 4" />
+        <line x1="20" y1="14" x2="20" y2={feet.length * 46 - 14} stroke="#33a863" strokeWidth="2.5" strokeDasharray="4 4" />
         {feet.map((c, i) => (
           <g key={`c-${i}`} transform={`translate(20,${i * 46 + 14})`}>
-            <circle r="13" fill="#ecfdf5" stroke="#10b981" strokeWidth="2.5" />
-            <text textAnchor="middle" dy="5" fontSize="15" fontWeight="bold" fill="#047857">
+            <circle r="13" fill="#f0faf4" stroke="#33a863" strokeWidth="2.5" />
+            <text textAnchor="middle" dy="5" fontSize="15" fontWeight="bold" fill="#33a863">
               {c}
             </text>
           </g>

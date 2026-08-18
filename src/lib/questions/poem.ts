@@ -28,8 +28,8 @@ export function makePoemQuestion(
   if (mode === 'nextLine' && target.lines.length >= 2) {
     // 给上句，选下句
     const i = randInt(0, target.lines.length - 2);
-    const cur = target.lines[i]!;
-    const answer = target.lines[i + 1]!;
+    const cur = target.lines[i] ?? '';
+    const answer = target.lines[i + 1] ?? '';
 
     // 干扰句去重 + 过滤掉答案本身，避免选项重复导致实际只有 2-3 个选项
     const otherLines = [...new Set(
@@ -37,8 +37,8 @@ export function makePoemQuestion(
     )].filter((l) => l !== answer);
     const others = sampleMany(otherLines, Math.min(3, otherLines.length));
     const all = shuffle([answer, ...others]);
-    const options = all.map((s) => opt({ label: s!.replace(/[，。？！]$/, '') }));
-    const answerId = options[all.indexOf(answer)]!.id;
+    const options = all.map((s) => opt({ label: s.replace(/[，。？！]$/, '') }));
+    const answerId = options[all.indexOf(answer)]?.id ?? '';
 
     return {
       id: nextId('poem'),
@@ -62,7 +62,7 @@ export function makePoemQuestion(
   );
   const all = shuffle([target.title, ...others]);
   const options = all.map((s) => opt({ label: s }));
-  const answerId = options[all.indexOf(target.title)]!.id;
+  const answerId = options[all.indexOf(target.title)]?.id ?? '';
 
   return {
     id: nextId('poem'),
@@ -95,7 +95,7 @@ export function makePoemFillQuestion(
   const line = sample(cand);
   const chars = [...line];
   const idx = randInt(0, chars.length - 1);
-  const blank = chars[idx]!
+  const blank = chars[idx] ?? ''
   const shown = chars.map((c, i) => (i === idx ? '＿' : c)).join('');
   // 优化：先用 Set 去重（避免 distinct 后不足 3 个），再用随机索引抽取 3 个
   // （不全量 shuffle 数千字符池，O(k) 替代 O(n)）
@@ -111,11 +111,11 @@ export function makePoemFillQuestion(
     const i = randInt(0, charPool.length - 1);
     if (!usedIdx.has(i)) {
       usedIdx.add(i);
-      distract.push(charPool[i]!);
+      distract.push(charPool[i] ?? '');
     }
   }
   const opts = shuffle([blank, ...distract]).map((c) => opt({ label: c }));
-  const answerId = opts.find((o) => o.label === blank)!.id;
+  const answerId = opts.find((o) => o.label === blank)?.id ?? '';
   return {
     id: nextId('poemfill'),
     kind: 'poem',

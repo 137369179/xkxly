@@ -22,7 +22,7 @@ type Pos = [number, number];
 export function ConnectMaze() {
   const { t } = useTranslation();
   const [lvIdx, setLvIdx] = useState(0);
-  const lv = LEVELS[lvIdx] ?? LEVELS[0]!;
+  const lv = LEVELS[lvIdx] ?? { size: 4, walls: [], start: [0, 0], end: [3, 3], name: '' };
   const [path, setPath] = useState<Pos[]>(() => [lv.start as Pos]);
   const [feedback, setFeedback] = useState('');
   const [score, setScore] = useState(0);

@@ -8,10 +8,15 @@ import { cn } from '@/lib/utils';
 import { CandyButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
 
-type Grid = number[][];
+export type Grid = number[][];
 const SIZES = [3, 4];
 
-function genGrid(size: number): Grid {
+/** 边界安全的格子读取：越界或空格统一返回 0（空格标记） */
+function cellAt(g: Grid, r: number, c: number): number {
+  return g[r]?.[c] ?? 0;
+}
+
+export function genGrid(size: number): Grid {
   const total = size * size;
   const arr = Array.from({ length: total - 1 }, (_, i) => i + 1);
   arr.push(0); // 空格
@@ -21,18 +26,27 @@ function genGrid(size: number): Grid {
   for (let i = 0; i < 200; i++) {
     const [br, bc] = findBlank(grid, size);
     const moves = getMoves(br, bc, size);
-    const [mr, mc] = moves[Math.floor(Math.random() * moves.length)]!;
-    [grid[br]![bc], grid[mr]![mc]] = [grid[mr]![mc]!, grid[br]![bc]!];
+    const mv = moves[Math.floor(Math.random() * moves.length)];
+    if (!mv) continue; // 类型守卫：moves 恒非空，此处仅兜底
+    const [mr, mc] = mv;
+    const a = cellAt(grid, br, bc);
+    const b = cellAt(grid, mr, mc);
+    const rowB = grid[br];
+    const rowM = grid[mr];
+    if (rowB && rowM) {
+      rowB[bc] = b;
+      rowM[mc] = a;
+    }
   }
   return grid;
 }
 
-function findBlank(g: Grid, s: number): [number, number] {
-  for (let r = 0; r < s; r++) for (let c = 0; c < s; c++) if (g[r]![c] === 0) return [r, c];
+export function findBlank(g: Grid, s: number): [number, number] {
+  for (let r = 0; r < s; r++) for (let c = 0; c < s; c++) if (cellAt(g, r, c) === 0) return [r, c];
   return [0, 0];
 }
 
-function getMoves(r: number, c: number, s: number): [number, number][] {
+export function getMoves(r: number, c: number, s: number): [number, number][] {
   const m: [number, number][] = [];
   if (r > 0) m.push([r - 1, c]);
   if (r < s - 1) m.push([r + 1, c]);
@@ -41,11 +55,11 @@ function getMoves(r: number, c: number, s: number): [number, number][] {
   return m;
 }
 
-function isSolved(g: Grid, s: number): boolean {
+export function isSolved(g: Grid, s: number): boolean {
   for (let r = 0; r < s; r++) for (let c = 0; c < s; c++) {
     const expected = r * s + c + 1;
-    if (r === s - 1 && c === s - 1) return g[r]![c] === 0;
-    if (g[r]![c] !== expected) return false;
+    if (r === s - 1 && c === s - 1) return cellAt(g, r, c) === 0;
+    if (cellAt(g, r, c) !== expected) return false;
   }
   return true;
 }
@@ -71,7 +85,14 @@ export function SlidingPuzzle() {
     if ((dr === 1 && dc === 0) || (dr === 0 && dc === 1)) {
       sfxTap();
       const ng = grid.map(row => [...row]);
-      [ng[r]![c], ng[br]![bc]] = [ng[br]![bc]!, ng[r]![c]!];
+      const a = cellAt(ng, r, c);
+      const b = cellAt(ng, br, bc);
+      const rowR = ng[r];
+      const rowB = ng[br];
+      if (rowR && rowB) {
+        rowR[c] = b;
+        rowB[bc] = a;
+      }
       setGrid(ng);
       setMoves(m => m + 1);
       if (isSolved(ng, size)) {

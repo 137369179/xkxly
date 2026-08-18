@@ -79,7 +79,7 @@ const STORIES: Story[] = [
 
 export function StorySort() {
   const { t: tr } = useTranslation();
-  const [story, setStory] = useState(() => STORIES[Math.floor(Math.random() * STORIES.length)]!);
+  const [story, setStory] = useState(() => STORIES[Math.floor(Math.random() * STORIES.length)] ?? { title: '', steps: [] });
   const [shuffled, setShuffled] = useState(() => shuffle(story.steps));
   const [userOrder, setUserOrder] = useState<number[]>([]);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | ''>('');
@@ -92,10 +92,10 @@ export function StorySort() {
     if (userOrder.includes(index)) return;
     const newOrder = [...userOrder, index];
     setUserOrder(newOrder);
-    void speak(shuffled[index]!.text, { lang: 'zh-CN', rate: 0.85, module: 'ai' });
+    void speak(shuffled[index]?.text ?? '', { lang: 'zh-CN', rate: 0.85, module: 'ai' });
 
     if (newOrder.length === correctOrder.length) {
-      const isCorrect = newOrder.every((n, i) => n === correctOrder[i]!);
+      const isCorrect = newOrder.every((n, i) => n === correctOrder[i]);
       if (isCorrect) {
         sfxCorrect();
         setFeedback('correct');
@@ -110,7 +110,7 @@ export function StorySort() {
   };
 
   const newStory = () => {
-    const s = STORIES[Math.floor(Math.random() * STORIES.length)]!
+    const s = STORIES[Math.floor(Math.random() * STORIES.length)] ?? { title: '', steps: [] };
     setStory(s);
     const sh = shuffle(s.steps);
     setShuffled(sh);
@@ -143,7 +143,7 @@ export function StorySort() {
         )}
         <div className="flex flex-col gap-2">
           {userOrder.map((idx, order) => {
-            const step = shuffled[idx]!
+            const step = shuffled[idx] ?? { emoji: '', text: '' };
             const isCorrectPos = feedback === 'correct' || (feedback === 'wrong' && correctOrder[order] === idx);
             return (
               <motion.div

@@ -146,7 +146,7 @@ export function StudyCalendar() {
                       className="h-3 w-3 rounded-sm transition-transform hover:scale-150"
                       style={{
                         background: LEVEL_COLORS[day.level],
-                        outline: isToday ? '2px solid #f59e0b' : 'none',
+                        outline: isToday ? '2px solid #e5ac2e' : 'none',
                         outlineOffset: '1px',
                       }}
                       title={t('studyCalendar.minutesTooltip', { date: day.date, count: day.count })}

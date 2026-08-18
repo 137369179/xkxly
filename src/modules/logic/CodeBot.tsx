@@ -7,6 +7,7 @@ import { logicExplainTask } from '@/lib/ai/tasks';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { celebrateBig } from '@/lib/celebrate';
 import { motion } from 'motion/react';
+import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/i18n/useTranslation';
 
 type Dir = 'up' | 'down' | 'left' | 'right';
@@ -93,6 +94,7 @@ const DIR_DELTA: Record<Dir, { x: number; y: number }> = {
 
 export function CodeBot() {
   const { t: tr } = useTranslation();
+  const practice = useStore((s) => s.practice);
   const [levelIdx, setLevelIdx] = useState(0);
   const [commands, setCommands] = useState<Dir[]>([]);
   const [executing, setExecuting] = useState(false);
@@ -152,6 +154,7 @@ export function CodeBot() {
       if (nx < 0 || nx >= cols || ny < 0 || ny >= rows) {
         setStatus('fail');
         sfxWrong();
+        practice('logic:codebot', false);
         setExecuting(false);
         return;
       }
@@ -159,6 +162,7 @@ export function CodeBot() {
       if (cell === 'wall') {
         setStatus('fail');
         sfxWrong();
+        practice('logic:codebot', false);
         setExecuting(false);
         return;
       }
@@ -172,12 +176,14 @@ export function CodeBot() {
       if (cell === 'goal') {
         setStatus('win');
         celebrateBig();
+        practice('logic:codebot', true);
         setExecuting(false);
         return;
       }
     }
     setStatus('fail');
     sfxWrong();
+    practice('logic:codebot', false);
     setExecuting(false);
   };
 
@@ -302,7 +308,7 @@ export function CodeBot() {
           <div className="text-4xl">🤔</div>
           <p className="mt-2 text-base font-bold text-candy-orange-deep">{tr('logic.failMsg')}</p>
           <div className="mt-2">
-            <CandyButton tone="purple" size="sm" variant="soft" onClick={() => { explain.run(logicExplainTask(level.hint, '', '')); }}>{tr('logic.aiHelp')}</CandyButton>
+            <CandyButton tone="purple" size="sm" variant="soft" onClick={() => { try { explain.run(logicExplainTask(level.hint, '', '')); } catch { /* AI 讲解失败不阻断游戏 */ } }}>{tr('logic.aiHelp')}</CandyButton>
           </div>
           <AiPanel state={explain} tone="purple" title={tr('logic.aiHint')} />
         </Panel>

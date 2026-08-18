@@ -143,7 +143,7 @@ export function buildStandardGrid(
   isLv: boolean,
 ): ('平' | '仄' | '·')[][] {
   const qk = qi === '平' ? 'ping' : 'ze';
-  const base = (genreLen === 5 ? WU_BASE : QI_BASE)[`${qk}-${ru ? 'ru' : 'bu'}`]!;
+  const base = (genreLen === 5 ? WU_BASE : QI_BASE)[`${qk}-${ru ? 'ru' : 'bu'}`] ?? [];
   return isLv ? [...base, ...base] : base;
 }
 
@@ -189,7 +189,7 @@ const RUSHENG = new Set(
 export function levelOf(pinyin: string): '平' | '仄' | '' {
   if (!pinyin) return '';
   for (const ch of pinyin) {
-    const t = TONE_MAP[ch]!
+    const t = TONE_MAP[ch];
     if (t !== undefined) return t <= 2 ? '平' : '仄';
   }
   return '平'; // 无声调（轻声/儿化等）按平处理
@@ -256,7 +256,8 @@ export function rhymeBase(pinyin: string): string {
 /** 取一句的韵脚字与其拼音 */
 function rhymeFoot(line: { chars: { c: string; p: string }[] }): { c: string; p: string } {
   for (let k = line.chars.length - 1; k >= 0; k--) {
-    const ch = line.chars[k]!;
+    const ch = line.chars[k];
+    if (ch === undefined) continue;
     if (ch.p && /[\u4e00-\u9fa5]/.test(ch.c)) return ch;
   }
   return { c: '', p: '' };
@@ -272,17 +273,17 @@ function rhymeFoot(line: { chars: { c: string; p: string }[] }): { c: string; p:
  */
 function detectFaults(cl: string[][], cidx: number[][], rhyme: boolean[]): ProsodyFault[] {
   const faults: ProsodyFault[] = [];
-  const last = (i: number) => cl[i]!.length - 1;
+  const last = (i: number) => (cl[i] ?? []).length - 1;
 
   cl.forEach((line, i) => {
     if (line.length < 2) return;
-    const tail = line[last(i)]!
-    const isRhyme = rhyme[i]!
+    const tail = line[last(i)];
+    const isRhyme = rhyme[i];
 
     if (isRhyme) {
       // 押韵句：尾字必平；平收句检查孤平 / 三平调
       if (tail === '仄') {
-        faults.push({ line: i, type: '失韵', detail: '押韵句尾字当用平声，今检为仄声。', at: [cidx[i]![last(i)]!] });
+        faults.push({ line: i, type: '失韵', detail: '押韵句尾字当用平声，今检为仄声。', at: [cidx[i]?.[last(i)] ?? -1] });
       }
       const body = line.slice(0, -1);
       const pingIdx = body.map((x, k) => (x === '平' ? k : -1)).filter((k) => k >= 0);
@@ -293,28 +294,32 @@ function detectFaults(cl: string[][], cidx: number[][], rhyme: boolean[]): Proso
           line: i,
           type: '孤平',
           detail: '除韵脚外仅余一个平声且与韵脚不相邻，犯"孤平"（大忌），唐人多以拗救化解。',
-          at: cidx[i]!.slice(0, -1),
+          at: cidx[i]?.slice(0, -1),
         });
       }
       if (line.length >= 3 && line[last(i) - 2] === '平' && line[last(i) - 1] === '平' && tail === '平') {
+        const row = cidx[i] ?? [];
+        const li = last(i);
         faults.push({
           line: i,
           type: '三平调',
           detail: '句尾三字皆平，犯"三平调"（大忌）。',
-          at: [cidx[i]![last(i) - 2]!, cidx[i]![last(i) - 1]!, cidx[i]![last(i)]!],
+          at: [row[li - 2] ?? -1, row[li - 1] ?? -1, row[li] ?? -1],
         });
       }
     } else {
       // 非押韵（仄收）句：尾字必仄，且忌三仄尾
       if (tail === '平') {
-        faults.push({ line: i, type: '出律', detail: '非押韵句尾字当用仄声，今检为平声（落平）。', at: [cidx[i]![last(i)]!] });
+        faults.push({ line: i, type: '出律', detail: '非押韵句尾字当用仄声，今检为平声（落平）。', at: [cidx[i]?.[last(i)] ?? -1] });
       }
       if (line.length >= 3 && line[last(i) - 2] === '仄' && line[last(i) - 1] === '仄' && tail === '仄') {
+        const row = cidx[i] ?? [];
+        const li = last(i);
         faults.push({
           line: i,
           type: '三仄尾',
           detail: '仄收句尾三字皆仄，犯"三仄尾"。',
-          at: [cidx[i]![last(i) - 2]!, cidx[i]![last(i) - 1]!, cidx[i]![last(i)]!],
+          at: [row[li - 2] ?? -1, row[li - 1] ?? -1, row[li] ?? -1],
         });
       }
     }
@@ -330,7 +335,7 @@ function detectFaults(cl: string[][], cidx: number[][], rhyme: boolean[]): Proso
 function spectrumMatch(meas: string[], std: ('平' | '仄' | '·')[], gLen: number): boolean {
   const rp = rhythmPoints(gLen);
   for (const k of rp) {
-    if (std[k] !== '·' && meas[k] && std[k] !== meas[k]!) return false;
+    if (std[k] !== '·' && meas[k] && std[k] !== meas[k]) return false;
   }
   return true;
 }
@@ -363,7 +368,7 @@ export function analyzeProsody(poem: DeepPoem): Prosody {
   const count = (idxs: number[]) => {
     const freq: Record<string, number> = {};
     idxs.forEach((i) => {
-      const b = bases[i]!
+      const b = bases[i];
       if (b) freq[b] = (freq[b] || 0) + 1;
     });
     let best = '';
@@ -391,7 +396,7 @@ export function analyzeProsody(poem: DeepPoem): Prosody {
     const mainModern = count(even); // 现代十三辙基准，用于「古今音变」标注
 
     // 平水韵：以偶句平收韵脚的韵部为主韵
-    const evenBu = even.map((i) => (grid[i]!.some((c) => c.level === '平') ? yunBuShort(rhymeFeet[i]!) : '')).filter(Boolean);
+    const evenBu = even.map((i) => (grid[i]?.some((c) => c.level === '平') ? yunBuShort(rhymeFeet[i] ?? '') : '')).filter(Boolean);
     const buFreq: Record<string, number> = {};
     evenBu.forEach((b) => (buFreq[b] = (buFreq[b] || 0) + 1));
     mainBu = '';
@@ -402,7 +407,7 @@ export function analyzeProsody(poem: DeepPoem): Prosody {
       if (i % 2 === 1) return true; // 偶句必押
       if (i === 0) {
         // 首句可入韵：平收即视为入韵（平水韵宽容，如「斜」与「家花」同麻韵）
-        const tail0 = grid[0]!.filter((c) => c.level !== '').map((c) => c.level);
+        const tail0 = (grid[0] ?? []).filter((c) => c.level !== '').map((c) => c.level);
         return tail0.length ? tail0[tail0.length - 1] === '平' : false;
       }
       return false;
@@ -466,7 +471,7 @@ export function analyzeProsody(poem: DeepPoem): Prosody {
     const aligned = cl.length > 0 && cl.every((line) => line.length === genreLen);
 
     const qi: '仄' | '平' = cl[0]?.[1] === '平' ? '平' : '仄';
-    const ru = rhymingLines[0]!
+    const ru = rhymingLines[0] ?? false;
 
     pattern = `${qi}起首句${ru ? '入韵' : '不入韵'}·${poem.genre}`;
 
@@ -475,9 +480,9 @@ export function analyzeProsody(poem: DeepPoem): Prosody {
     if (mainBu) {
       rhymingLines.forEach((isR, i) => {
         if (!isR) return;
-        const bu = yunBuShort(rhymeFeet[i]!);
+        const bu = yunBuShort(rhymeFeet[i] ?? '');
         if (bu && bu !== mainBu) {
-          const at = grid[i]!.map((c, j) => (c.c === rhymeFeet[i]! ? j : -1)).filter((j) => j >= 0);
+          const at = (grid[i] ?? []).map((c, j) => (c.c === rhymeFeet[i] ? j : -1)).filter((j) => j >= 0);
           luoyun.push({
             line: i,
             type: '失韵',
@@ -490,7 +495,7 @@ export function analyzeProsody(poem: DeepPoem): Prosody {
 
     if (aligned) {
       standardGrid = buildStandardGrid(genreLen, qi, ru, isLv);
-      const matched = standardGrid.every((std, i) => spectrumMatch(cl[i]!, std, genreLen));
+      const matched = standardGrid.every((std, i) => spectrumMatch(cl[i] ?? [], std, genreLen));
 
       if (isLv) {
         // 律诗：整谱核对大忌

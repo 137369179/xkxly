@@ -205,7 +205,11 @@ export function DailyChallenge({ compact = false }: { compact?: boolean } = {}) 
       >
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🎯</span>
+            <img
+              src="/icons/jelly-target.jpg"
+              alt=""
+              className="h-8 w-8 rounded-full object-cover shadow-candy-sm"
+            />
             <span className="text-base font-extrabold text-candy-orange-deep">{tr('dailyChallenge.title')}</span>
             <span className="rounded-full bg-white/80 px-2 py-0.5 text-[11px] font-bold text-candy-orange-deep">
               {claimedCount}/{challenges.length}

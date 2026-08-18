@@ -30,12 +30,12 @@ const HanziVideoCard = memo(function HanziVideoCard({
   
   // 声调颜色映射
   const toneColors = {
-    1: '#FF6B6B', // 一声 - 红色
-    2: '#4ECDC4', // 二声 - 青色
-    3: '#45B7D1', // 三声 - 蓝色
-    4: '#96CEB4', // 四声 - 绿色
+    1: '#ff5c7a', // 一声 - 红色
+    2: '#5fd68b', // 二声 - 青色
+    3: '#55aee0', // 三声 - 蓝色
+    4: '#33a863', // 四声 - 绿色
   };
-  const toneColor = toneColors[tone as keyof typeof toneColors] || '#666';
+  const toneColor = toneColors[tone as keyof typeof toneColors] || '#78535f';
   
   // 监听网络状态
   useEffect(() => {
@@ -57,10 +57,14 @@ const HanziVideoCard = memo(function HanziVideoCard({
     e.stopPropagation();
     
     if (!videoSrc) {
-      // 尝试从缓存加载
-      const cachedUrl = await offlineCache.getVideoBlobUrl(`${char}-教学`);
-      if (cachedUrl) {
-        setVideoSrc(cachedUrl);
+      // 尝试从缓存加载（IndexedDB / 缓存不可用时回退到网络地址）
+      try {
+        const cachedUrl = await offlineCache.getVideoBlobUrl(`${char}-教学`);
+        if (cachedUrl) {
+          setVideoSrc(cachedUrl);
+        }
+      } catch {
+        // ignore
       }
     }
     
@@ -129,7 +133,9 @@ const HanziVideoCard = memo(function HanziVideoCard({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            import('@/lib/speech').then(m => m.speak(char, { lang: 'zh-CN', rate: 0.7 }));
+            void import('@/lib/speech')
+              .then(m => m.speak(char, { lang: 'zh-CN', rate: 0.7 }))
+              .catch(() => {});
           }}
           className="absolute bottom-2 left-2 w-7 h-7 rounded-full bg-candy-blue-soft text-candy-blue-deep flex items-center justify-center text-xs font-bold hover:scale-105 transition-transform"
           aria-label={t('hanziVideoCard.readAria', { char })}
