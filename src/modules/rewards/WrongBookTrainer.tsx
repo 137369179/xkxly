@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { Panel } from '@/components/ui/Card';
 import { QuizCard } from '@/components/QuizCard';
-import { useStore, useProgress } from '@/store/useStore';
+import { useStore, useWrongBook } from '@/store/useStore';
 import { questionForSkill } from '@/lib/questions';
 import { makeMathQuestion } from '@/lib/questions';
 import { sfxTap, sfxWin, sfxWrong } from '@/lib/sfx';
@@ -28,7 +28,7 @@ function genFromSkill(skill: string): Question | null {
 
 export function WrongBookTrainer() {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
+  const wrongBook = useWrongBook();
   const practice = useStore((s) => s.practice);
 
   const [active, setActive] = useState(false);
@@ -47,14 +47,14 @@ export function WrongBookTrainer() {
   }, []);
 
   const nextQuestion = useCallback(() => {
-    if (progress.wrongBook.length === 0) {
+    if (wrongBook.length === 0) {
       setDone(true);
       setActive(false);
       return;
     }
     // 随机选一个错题 skill
-    const idx = Math.floor(Math.random() * progress.wrongBook.length);
-    const skill = progress.wrongBook[idx]!;
+    const idx = Math.floor(Math.random() * wrongBook.length);
+    const skill = wrongBook[idx]!;
     const q = genFromSkill(skill);
     if (!q) {
       // 跳过无法生成的
@@ -62,7 +62,7 @@ export function WrongBookTrainer() {
     } else {
       setCurrent(q);
     }
-  }, [progress.wrongBook]);
+  }, [wrongBook]);
 
   const start = () => {
     sfxTap();
@@ -126,8 +126,8 @@ export function WrongBookTrainer() {
         <div className="text-5xl">⚡</div>
         <h3 className="mt-2 text-lg font-extrabold text-ink">{tr('wrongBookTrainer.title')}</h3>
         <p className="mt-1 text-sm font-bold text-ink-soft">
-          {progress.wrongBook.length > 0
-            ? tr('wrongBookTrainer.pendingDesc', { count: String(progress.wrongBook.length) })
+          {wrongBook.length > 0
+            ? tr('wrongBookTrainer.pendingDesc', { count: String(wrongBook.length) })
             : tr('wrongBookTrainer.emptyDesc')}
         </p>
         <div className="mt-4">
@@ -135,7 +135,7 @@ export function WrongBookTrainer() {
             tone="orange"
             size="lg"
             fullWidth
-            disabled={progress.wrongBook.length === 0}
+            disabled={wrongBook.length === 0}
             onClick={start}
           >
             {tr('wrongBookTrainer.start')}

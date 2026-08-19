@@ -17,7 +17,7 @@ vi.mock('@/i18n/useTranslation', () => ({ useTranslation: () => ({ t: (k: any) =
 const fakeState = { practice: vi.fn(), addStars: vi.fn(), markTraced: vi.fn(), learnSkill: vi.fn() };
 vi.mock('@/store/useStore', () => ({
   useStore: (sel?: any) => (sel ? sel(fakeState) : fakeState),
-  useProgress: () => ({ mastery: {} }),
+  useMastery: () => ({}),
 }));
 
 const { WordBuilder } = await import('@/modules/hanzi/WordBuilder');

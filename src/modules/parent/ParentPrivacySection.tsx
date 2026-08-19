@@ -99,7 +99,7 @@ export function ParentPrivacySection() {
           <div className="mt-2 flex flex-wrap gap-2">
             {confirming ? (
               <>
-                <CandyButton tone="red" size="sm" onClick={handleClearAll}>
+                <CandyButton tone="orange" size="sm" onClick={handleClearAll}>
                   {tr('privacy.clearConfirm')}
                 </CandyButton>
                 <CandyButton tone="green" variant="soft" size="sm" onClick={() => setConfirming(false)}>
@@ -107,7 +107,7 @@ export function ParentPrivacySection() {
                 </CandyButton>
               </>
             ) : (
-              <CandyButton tone="red" variant="soft" size="sm" onClick={handleClearAll}>
+              <CandyButton tone="orange" variant="soft" size="sm" onClick={handleClearAll}>
                 {tr('privacy.clearBtn')}
               </CandyButton>
             )}

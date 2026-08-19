@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { PageHeader, Panel, PanelTitle } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
-import { useStore, useProgress } from '@/store/useStore';
+import { useStore, useMastery } from '@/store/useStore';
 import { navigate, type RouteId } from '@/lib/router';
 import { stopSpeaking } from '@/lib/speech';
 import { sfxTap, sfxWin } from '@/lib/sfx';
@@ -62,12 +62,12 @@ function RhymePlayer({
 }) {
   const learnSkill = useStore((s) => s.learnSkill);
   const practice = useStore((s) => s.practice);
-  const progress = useProgress();
+  const mastery = useMastery();
   const { t: translate } = useTranslation();
   const t = TONE_STYLE[rhyme.tone]!
   const skill = `rhyme:${rhyme.id}`;
-  const learned = !!progress.mastery[skill];
-  const masteryLv = progress.mastery[skill]?.lv ?? 0;
+  const learned = !!mastery[skill];
+  const masteryLv = mastery[skill]?.lv ?? 0;
   const lang = isEnglishRhyme(rhyme) ? 'en-US' : 'zh-CN';
 
   // Tab 切换：sing（跟唱）/ fillblank（填词）/ beattap（打拍）

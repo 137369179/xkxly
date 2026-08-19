@@ -316,24 +316,25 @@ describe('SpeechEvalButton 跟读按钮', () => {
     cleanup();
   });
 
-  it('onstart 已触发（服务正常工作）后 hang → 12s 兜底超时复位并不朗读', async () => {
+  it('onstart 已触发（服务正常启动）后 hang 无结果 → 2.5s 降级大声朗读（P2-1 D）', async () => {
     vi.useFakeTimers();
-    const { button, text, cleanup } = renderButton({ enableAiAdvice: false });
+    const { button, text, bodyText, cleanup } = renderButton({ enableAiAdvice: false });
 
     await clickAndFlush(button);
     const inst = FakeSpeechRecognition.instances[0]!;
     expect(inst.started).toBe(true);
 
-    // 模拟识别正常启动（触发 onstart，消除 2.5s 快速检测），之后却一直无结果/无结束
-    // 组件把 onstart 作为实例上的普通属性赋值，因此直接取出来调用
+    // 模拟识别正常启动（触发 onstart，消除「启动前」2.5s 快速检测），
+    // 之后却一直无结果/无结束 → 启动后 2.5s 仍无输出则降级大声朗读，
+    // 而不是让孩子对着 12s 硬超时干等。
     ((inst as unknown as { onstart?: () => void }).onstart)?.();
 
     await act(async () => {
-      vi.advanceTimersByTime(12_000);
+      vi.advanceTimersByTime(2500);
     });
 
-    expect(text()).toContain('tts.tapRead');
-    expect(inst.aborted).toBe(true);
+    expect(text()).toContain('tts.loudReadListening');
+    expect(bodyText()).toContain('tts.loudReadMode');
     cleanup();
   });
 

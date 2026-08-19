@@ -6,8 +6,10 @@
  * lib→store 的层倒置循环依赖：纯逻辑留在 lib，需要订阅 store 的钩子放在本层。
  */
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { useProgress } from '@/store/useStore';
+import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { getSlot, recommendDifficulty, type AdaptiveDifficultyMeta } from '@/lib/adaptChain';
+import type { MasteryItem, Progress } from '@/types';
 
 export { type AdaptiveDifficultyMeta } from '@/lib/adaptChain';
 
@@ -18,8 +20,18 @@ export function useChainSlot(cat: string) {
 
 /** 某类学科的"小智建议难度"（响应式跟随 DDA 推荐） */
 export function useAdaptiveDifficulty(cat: string): 1 | 2 | 3 {
-  const p = useProgress();
-  return useMemo(() => recommendDifficulty(p, cat), [p, cat]);
+  // P1-6：recommendDifficulty 对 progress 的唯一读取是 adaptiveDifficulty 的 mastery
+  // 按类目聚合（sum ok/ng），故只订阅本类目的 mastery 项——其它学科/进度字段变化
+  // （星星、每日日志等）不再触发 20+ 模块的难度重算。
+  const mastery = useStore(
+    useShallow((s): Record<string, MasteryItem> => {
+      const m = s.progress.mastery;
+      const out: Record<string, MasteryItem> = {};
+      for (const k of Object.keys(m)) if (k.startsWith(`${cat}:`)) out[k] = m[k]!;
+      return out;
+    }),
+  );
+  return useMemo(() => recommendDifficulty({ mastery } as Progress, cat), [mastery, cat]);
 }
 
 /**

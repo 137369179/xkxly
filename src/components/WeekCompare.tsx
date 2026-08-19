@@ -5,7 +5,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { Panel, PanelTitle } from '@/components/ui/Card';
-import { useProgress } from '@/store/useStore';
+import { useDailyLog } from '@/store/useStore';
 import { dateKey } from '@/lib/dailyPlan';
 
 interface WeekData {
@@ -16,14 +16,14 @@ interface WeekData {
   days: number;
 }
 
-function getWeekData(progress: ReturnType<typeof useProgress>, daysAgo: number): WeekData {
+function getWeekData(dailyLog: Record<string, { sec: number; items: number; ok: number; stars: number }>, daysAgo: number): WeekData {
   const now = new Date();
   let minutes = 0, items = 0, ok = 0, stars = 0, days = 0;
 
   for (let i = 0; i < 7; i++) {
     const d = new Date(now.getTime() - (daysAgo + i) * 86400000);
     const key = dateKey(d.getTime());
-    const entry = progress.dailyLog[key];
+    const entry = dailyLog[key];
     if (entry) {
       minutes += Math.floor((entry.sec ?? 0) / 60);
       items += entry.items ?? 0;
@@ -75,10 +75,10 @@ function RingChart({ value, max, label, color }: { value: number; max: number; l
 
 export function WeekCompare() {
   const { t } = useTranslation();
-  const progress = useProgress();
+  const dailyLog = useDailyLog();
 
-  const thisWeek = useMemo(() => getWeekData(progress, 0), [progress]);
-  const lastWeek = useMemo(() => getWeekData(progress, 7), [progress]);
+  const thisWeek = useMemo(() => getWeekData(dailyLog, 0), [dailyLog]);
+  const lastWeek = useMemo(() => getWeekData(dailyLog, 7), [dailyLog]);
 
   const maxMin = Math.max(thisWeek.minutes, lastWeek.minutes, 1);
 

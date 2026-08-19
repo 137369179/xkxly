@@ -10,7 +10,7 @@ import type { HanziEntry } from '@/data/hanzi';
 
 
 
-import { useProgress } from '@/store/useStore';
+import { useMastery } from '@/store/useStore';
 import { speak } from '@/lib/speech';
 import { sfxTap } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
@@ -20,20 +20,20 @@ export function RadicalBrowser() {
   const { t } = useTranslation();
   const [radical, setRadical] = useState<string | null>(null);
   const [selected, setSelected] = useState<HanziEntry | null>(null);
-  const progress = useProgress();
+  const mastery = useMastery();
 
   const radicals = useMemo(() => getAllRadicals(), []);
   const list = useMemo(() => radical ? getHanziByRadical(radical) : [], [radical]);
 
   const learnedSet = useMemo(() => {
     const s = new Set<string>();
-    Object.keys(progress.mastery).forEach(k => {
-      if (k.startsWith('hanzi:') && progress.mastery[k]!.lv >= 1) {
+    Object.keys(mastery).forEach(k => {
+      if (k.startsWith('hanzi:') && mastery[k]!.lv >= 1) {
         s.add(k.slice(5));
       }
     });
     return s;
-  }, [progress.mastery]);
+  }, [mastery]);
 
   return (
     <div className="space-y-4">

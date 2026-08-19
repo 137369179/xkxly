@@ -1,5 +1,5 @@
 import { useTranslation } from '@/i18n/useTranslation';
-import { useProgress } from '@/store/useStore';
+import { useDailyLog } from '@/store/useStore';
 import { dateKey } from '@/lib/dailyPlan';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
@@ -7,8 +7,8 @@ import { Stat } from './ParentSections';
 
 export function ParentTodayLogPanel() {
   const { t: translate } = useTranslation();
-  const progress = useProgress();
-  const todayLog = progress.dailyLog[dateKey()];
+  const dailyLog = useDailyLog();
+  const todayLog = dailyLog[dateKey()];
   if (!todayLog) return null;
 
   return (

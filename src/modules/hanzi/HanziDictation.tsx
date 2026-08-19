@@ -15,7 +15,7 @@ import { QuizCard } from '@/components/QuizCard';
 import { getHanziByLevel, getHanziByChar, type HanziEntry } from '@/data/hanziIndex';
 import { makeHanziListenQuestion, makeHanziSimilarQuestion } from '@/lib/hanziQuestions';
 import { dueSkills } from '@/lib/srs';
-import { useStore } from '@/store/useStore';
+import { useStore, useMastery } from '@/store/useStore';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
 import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
 import type { Progress, MasteryItem } from '@/types';
@@ -37,6 +37,7 @@ export function HanziDictation() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [idx, setIdx] = useState(0);
   const [score, setScore] = useState(0);
+  const mastery = useMastery();
   const practice = useStore((s) => s.practice);
   const wrongBook = useStore((s) => s.progress.wrongBook);
 

@@ -52,7 +52,7 @@ function getNestedValue(obj: any, path: string): string {
   if (raw === undefined || raw === null) return path;
   if (typeof raw === 'string') return raw;
   if (typeof raw === 'object') {
-    return raw.string || Object.values(raw)[0] || path;
+    return (raw as Record<string, unknown>).string || Object.values(raw)[0] || path;
   }
   return path;
 }
@@ -64,7 +64,9 @@ function resolvePath(obj: any, segments: string[]): unknown {
   const viaLiteral = obj[literal];
   if (viaLiteral !== undefined && viaLiteral !== null) return viaLiteral;
   if (segments.length === 1) return undefined;
-  return resolvePath(obj[segments[0]], segments.slice(1));
+  const first = segments[0];
+  if (!first) return undefined;
+  return resolvePath(obj[first], segments.slice(1));
 }
 
 function interpolate(template: string, params?: Record<string, string | number>): string {

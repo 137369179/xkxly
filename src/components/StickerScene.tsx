@@ -6,7 +6,7 @@ import { useState, useRef } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxStar } from '@/lib/sfx';
-import { useProgress } from '@/store/useStore';
+import { useStickers } from '@/store/useStore';
 import { STICKERS, ALBUMS } from '@/data/stickers';
 import type { StickerDef } from '@/types';
 import { celebrateSmall } from '@/lib/celebrate';
@@ -30,8 +30,8 @@ const SCENES = [
 
 export function StickerScene() {
   const { t } = useTranslation();
-  const progress = useProgress();
-  const ownedIds = new Set<string>(progress.stickers);
+  const stickers = useStickers();
+  const ownedIds = new Set<string>(stickers);
   const owned = STICKERS.filter(s => ownedIds.has(s.id));
 
   const [sceneIdx, setSceneIdx] = useState(0);

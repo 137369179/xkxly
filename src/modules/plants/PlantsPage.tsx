@@ -11,7 +11,7 @@ import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useStore, useProgress } from '@/store/useStore';
+import { useStore, useMastery } from '@/store/useStore';
 
 interface Plant {
   id: string;
@@ -42,7 +42,7 @@ const PLANTS: Plant[] = [
 
 export default function PlantsPage() {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
+  const mastery = useMastery();
   const { learnSkill, tickTime, practice } = useStore();
   const [selectedP, setSelectedP] = useState<Plant>(PLANTS[0]!);
   const [growthStage, setGrowthStage] = useState<number>(0); // 0: 种子 🌰, 1: 发芽 🌱, 2: 开花 🌸, 3: 结果 🍎
@@ -51,7 +51,7 @@ export default function PlantsPage() {
 
   // 计算已认识的植物数量（mastery 中 plant:{id} 的 lv >= 0 即接触过）
   const knownPlantCount = PLANTS.filter(p => {
-    const m = progress.mastery[`plant:${p.id}`];
+    const m = mastery[`plant:${p.id}`];
     return m && m.lv >= 0;
   }).length;
 

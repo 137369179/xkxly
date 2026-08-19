@@ -8,7 +8,7 @@ import { CandyButton } from '@/components/ui/Button';
 import { POETS, poetLinks } from '@/data/poets';
 import type { PoetProfile } from '@/types';
 import POEMS from '@/data/poems';
-import { useProgress } from '@/store/useStore';
+import { usePoemsRead } from '@/store/useStore';
 import { sfxTap } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { motion, AnimatePresence } from 'motion/react';
@@ -42,7 +42,7 @@ const DYNASTY_KEY: Record<string, string> = {
 export default function PoetTimeline() {
   const { t: tr } = useTranslation();
   const [selected, setSelected] = useState<PoetProfile | null>(null);
-  const progress = useProgress();
+  const poemsRead = usePoemsRead();
 
   const poetsByDynasty = useMemo(() => {
     const map: Record<string, PoetProfile[]> = {};
@@ -58,7 +58,7 @@ export default function PoetTimeline() {
     return POEMS.filter(p => p.author === selected.name);
   }, [selected]);
 
-  const readSet = useMemo(() => new Set(progress.poemsRead), [progress.poemsRead]);
+  const readSet = useMemo(() => new Set(poemsRead), [poemsRead]);
   const links = selected ? poetLinks(selected.name) : [];
 
   return (

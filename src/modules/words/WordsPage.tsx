@@ -6,7 +6,7 @@ import { PageHeader, Panel } from '@/components/ui/Card';
 import { Tabs, type TabItem } from '@/components/ui/Tabs';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { CandyButton } from '@/components/ui/Button';
-import { useProgress } from '@/store/useStore';
+import { useProgress, useMastery } from '@/store/useStore';
 import { sfxTap } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 
@@ -71,6 +71,7 @@ export default function WordsPage() {
   const [selected, setSelected] = useState<WordEntry | null>(null);
   const [sightGrade, setSightGrade] = useState<1 | 2 | 3>(1);
   const progress = useProgress();
+  const mastery = useMastery();
   const { t: tr } = useTranslation();
   const { target, clear } = useTrainingTarget('words');
 
@@ -228,7 +229,7 @@ export default function WordsPage() {
     );
   }
 
-  const learnedCount = list.filter(w => (progress.mastery[`word:${w.word}`]?.lv ?? 0) >= 1).length;
+  const learnedCount = list.filter(w => (mastery[`word:${w.word}`]?.lv ?? 0) >= 1).length;
 
   return (
     <div className="space-y-5">
@@ -325,7 +326,7 @@ export default function WordsPage() {
 
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
         {list.map(w => {
-          const learned = (progress.mastery[`word:${w.word}`]?.lv ?? 0) >= 1;
+          const learned = (mastery[`word:${w.word}`]?.lv ?? 0) >= 1;
           const t = TONE_STYLE[tone]!
           return (
             <button

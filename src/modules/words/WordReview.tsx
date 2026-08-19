@@ -6,7 +6,7 @@ import { useState, useMemo } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { WORD_THEMES, getAllWords, getWordsByLevel } from '@/data/wordIndex';
-import { useProgress, useStore } from '@/store/useStore';
+import { useProgress, useMastery, useStore } from '@/store/useStore';
 import { speak } from '@/lib/speech';
 import { sfxTap } from '@/lib/sfx';
 import { motion } from 'motion/react';
@@ -20,6 +20,7 @@ type Mode = 'browse' | 'flashcard';
 export function WordReview() {
   const { t } = useTranslation();
   const progress = useProgress();
+  const mastery = useMastery();
   const [mode, setMode] = useState<Mode>('browse');
   const [theme, setTheme] = useState(WORD_THEMES[0]!.id);
   const [level, setLevel, levelMeta] = useAdaptiveDifficultyState('word');
@@ -40,11 +41,11 @@ export function WordReview() {
     const dueWords = due.map((k) => byKey.get(k)).filter((w): w is NonNullable<typeof w> => !!w);
     const rest = getAllWords().filter((w) => {
       if (dueSet.has(`word:${w.word}`)) return false;
-      const m = progress.mastery[`word:${w.word}`];
+      const m = mastery[`word:${w.word}`];
       return !m || m.lv < 2;
     });
     return [...dueWords, ...rest].slice(0, 20);
-  }, [filter, theme, level, progress.mastery]);
+  }, [filter, theme, level, mastery]);
 
   const current = words[flashIdx]!
 
@@ -164,7 +165,7 @@ export function WordReview() {
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {words.map((w, i) => {
             const key = `word:${w.word}`;
-            const m = progress.mastery[key];
+            const m = mastery[key];
             const mastered = m && m.lv >= 3;
             return (
               <motion.div

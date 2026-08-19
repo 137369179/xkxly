@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { motion } from 'motion/react';
 import { NAV_MAP } from '@/data/nav';
 import { navigate, type RouteId } from '@/lib/router';
-import { useProgress, useStars } from '@/store/useStore';
+import { useProgress, useDailyLog, useStars } from '@/store/useStore';
 import { TONE_STYLE } from '@/lib/tones';
 import { moduleStat } from '@/lib/moduleStats';
 import { cn } from '@/lib/utils';
@@ -60,12 +60,13 @@ const GAME_GROUPS: GameGroup[] = [
 export default function GameCenterPage() {
   const { t } = useTranslation();
   const p = useProgress();
+  const dailyLog = useDailyLog();
   const stars = useStars();
 
   // 累计玩耍题量（从每日日志聚合），作为游戏中心的「投入度量」
   const playItems = useMemo(
-    () => Object.values(p.dailyLog).reduce((s, d) => s + (d?.items ?? 0), 0),
-    [p.dailyLog],
+    () => Object.values(dailyLog).reduce((s, d) => s + (d?.items ?? 0), 0),
+    [dailyLog],
   );
 
   const allGameRoutes = useMemo(() => GAME_GROUPS.flatMap((g) => g.items), []);

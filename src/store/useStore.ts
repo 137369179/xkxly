@@ -322,6 +322,22 @@ export const useSkillMastery = (skill: string) =>
   useStore((s) => s.progress.mastery[skill]);
 /** 每日学习日志（用于学习伙伴心情、总题量统计） */
 export const useDailyLog = () => useStore((s) => s.progress.dailyLog);
+/** 徽章解锁时间戳映射 */
+export const useBadgeDates = () => useStore((s) => s.progress.badgeDates);
+/** 贴纸列表 */
+export const useStickers = () => useStore((s) => s.progress.stickers);
+/** 错题本列表 */
+export const useWrongBook = () => useStore((s) => s.progress.wrongBook);
+/** 已读古诗 id 列表 */
+export const usePoemsRead = () => useStore((s) => s.progress.poemsRead);
+/** 已听数字列表 */
+export const useNumbersHeard = () => useStore((s) => s.progress.numbersHeard);
+/** 每日成长快照（家长报告趋势） */
+export const useGrowth = () => useStore((s) => s.progress.growth);
+/** 研究模式：发现收藏/笔记/行为统计 */
+export const useResearchStats = () => useStore((s) => s.progress.researchStats);
+export const useDiscoveries = () => useStore((s) => s.progress.discoveries);
+export const useResearchNotes = () => useStore((s) => s.progress.researchNotes);
 /** PK 次数 */
 export const usePkCount = () => useStore((s) => s.progress.pkCount);
 /** 创作次数 */

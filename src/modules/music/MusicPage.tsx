@@ -16,7 +16,7 @@ import { speak } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
 import { RhythmRepeat } from '@/components/RhythmRepeat';
 import MusicCreatePage from './MusicCreatePage';
-import { useStore, useProgress } from '@/store/useStore';
+import { useStore, useMastery } from '@/store/useStore';
 
 // Web Audio API 调音引擎
 const FREQS = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25];
@@ -53,7 +53,7 @@ export default function MusicPage() {
   const { t: tr } = useTranslation();
   const practice = useStore((s) => s.practice);
   const tickTime = useStore((s) => s.tickTime);
-  const progress = useProgress();
+  const mastery = useMastery();
   const [activeKey, setActiveKey] = useState<number | null>(null);
   const [quizTone, setQuizTone] = useState<{ n1: number; n2: number; ansHigh: boolean } | null>(null);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | ''>('');
@@ -63,10 +63,10 @@ export default function MusicPage() {
 
   // 听音准确率
   const pitchAccuracy = useMemo(() => {
-    const m = progress.mastery['music:pitch'];
+    const m = mastery['music:pitch'];
     if (!m || m.ok + m.ng === 0) return null;
     return Math.round((m.ok / (m.ok + m.ng)) * 100);
-  }, [progress.mastery]);
+  }, [mastery]);
 
   useEffect(() => {
     return () => {

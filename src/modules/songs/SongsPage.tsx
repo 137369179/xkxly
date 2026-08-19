@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
-import { useProgress } from '@/store/useStore';
+import { useMastery } from '@/store/useStore';
 import { sfxTap } from '@/lib/sfx';
 import { FluffyIcon } from '@/components/ui/FluffyIcon';
 import { NURSERY_RHYMES, RHYME_MAP, THEME_LABEL, type RhymeTheme } from '@/data/nurseryRhymes';
@@ -13,7 +13,7 @@ import RhymeCard from './RhymeCard';
 
 export default function SongsPage() {
   const { t } = useTranslation();
-  const progress = useProgress();
+  const mastery = useMastery();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<RhymeTheme | 'all'>('all');
 
@@ -22,13 +22,13 @@ export default function SongsPage() {
   // 已学会集合
   const learnedSet = useMemo(() => {
     const s = new Set<string>();
-    for (const k of Object.keys(progress.mastery)) {
-      if (k.startsWith('rhyme:') && progress.mastery[k]!.lv >= 1) {
+    for (const k of Object.keys(mastery)) {
+      if (k.startsWith('rhyme:') && mastery[k]!.lv >= 1) {
         s.add(k.replace('rhyme:', ''));
       }
     }
     return s;
-  }, [progress.mastery]);
+  }, [mastery]);
 
   if (selected) {
     return <RhymePlayer rhyme={selected} onBack={() => setSelectedId(null)} />;

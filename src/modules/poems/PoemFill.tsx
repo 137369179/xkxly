@@ -7,7 +7,7 @@ import { shuffle } from "@/lib/utils";
 import { Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import POEMS from '@/data/poems';
-import { useProgress } from '@/store/useStore';
+import { usePoemsRead } from '@/store/useStore';
 import { speak } from '@/lib/speech';
 import { sfxTap, sfxCorrect, sfxWrong, sfxStar } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
@@ -75,13 +75,12 @@ function makeQuestion(poem: (typeof POEMS)[number], tr: (key: string, params?: R
 
 export function PoemFill() {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
-  const readPoems = progress.poemsRead;
+  const poemsRead = usePoemsRead();
 
   const availablePoems = useMemo(() => {
-    const read = POEMS.filter(p => readPoems.includes(p.id));
+    const read = POEMS.filter(p => poemsRead.includes(p.id));
     return read.length >= 4 ? read : POEMS.slice(0, 20);
-  }, [readPoems]);
+  }, [poemsRead]);
 
   const [questions, setQuestions] = useState<FillQuestion[]>(() => {
     const qs: FillQuestion[] = [];

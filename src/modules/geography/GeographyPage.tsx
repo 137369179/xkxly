@@ -13,7 +13,7 @@ import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useStore, useProgress } from '@/store/useStore';
+import { useStore, useMastery } from '@/store/useStore';
 
 interface Continent {
   id: string;
@@ -40,13 +40,13 @@ const CONTINENTS: Continent[] = [
 export default function GeographyPage() {
   const { t: tr } = useTranslation();
   const { learnSkill, practice, tickTime } = useStore();
-  const progress = useProgress();
+  const mastery = useMastery();
   const [selected, setSelected] = useState<Continent>(CONTINENTS[0]!);
   const [quizItem, setQuizItem] = useState<{ c: Continent; options: Continent[] } | null>(null);
   const [feedback, setFeedback] = useState('');
 
   const exploredCount = CONTINENTS.filter(c => {
-    const m = progress.mastery[`geo:${c.id}`];
+    const m = mastery[`geo:${c.id}`];
     return m && m.lv >= 0;
   }).length;
 

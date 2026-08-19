@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { LetterLearn } from '@/components/LetterLearn';
 import { CandyButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useProgress, useStore } from '@/store/useStore';
+import { useMastery, useStore } from '@/store/useStore';
 import { sfxTap } from '@/lib/sfx';
 
 type CategoryFilter = 'all' | 'vowel' | 'consonant1' | 'consonant2';
@@ -22,7 +22,7 @@ export function LetterStudy({ initialUpper }: { initialUpper?: string }) {
     return LETTERS.filter((l) => l.category === filter);
   }, [filter]);
 
-  const progress = useProgress();
+  const mastery = useMastery();
 
   if (upper) {
     return (
@@ -94,8 +94,8 @@ export function LetterStudy({ initialUpper }: { initialUpper?: string }) {
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-4 md:grid-cols-5 lg:grid-cols-6">
         {filteredLetters.map((item, i) => {
           const t = TONE_STYLE[toneAt(i)]!;
-          const mastery = progress.mastery[`letter:${item.upper}`];
-          const lv = mastery?.lv ?? 0;
+          const m = mastery[`letter:${item.upper}`];
+          const lv = m?.lv ?? 0;
           return (
             <button
               key={item.upper}

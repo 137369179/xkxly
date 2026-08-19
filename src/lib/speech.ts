@@ -47,8 +47,12 @@ import {
   defaultZhPitch,
   voiceGuideEnabled,
   registerStopAction,
+  stopSpeaking,
   type SpeakPriority,
 } from './speechCore';
+
+// 本地别名：TS 不能收窄导入绑定，改用局部 const 以支持空值收窄
+const s = synth;
 
 // 引擎级停止动作注册：speech.ts 一旦加载（真实发音被调用），把 realVoice /
 // edgeNeural 的停止逻辑挂进 core，使 stopSpeaking 能完整停止所有发音通道。
@@ -81,11 +85,11 @@ let voicesCache: SpeechSynthesisVoice[] = [];
 let voicesReady: Promise<SpeechSynthesisVoice[]> | null = null;
 
 function loadVoices(): Promise<SpeechSynthesisVoice[]> {
-  if (!synth) return Promise.resolve([]);
+  if (!s) return Promise.resolve([]);
   if (voicesReady) return voicesReady;
 
   voicesReady = new Promise((resolve) => {
-    const immediate = synth.getVoices();
+    const immediate = s.getVoices();
     if (immediate.length) {
       voicesCache = immediate;
       resolve(immediate);
@@ -95,10 +99,10 @@ function loadVoices(): Promise<SpeechSynthesisVoice[]> {
     const done = () => {
       if (settled) return;
       settled = true;
-      voicesCache = synth.getVoices();
+      voicesCache = s.getVoices();
       resolve(voicesCache);
     };
-    synth.addEventListener('voiceschanged', done, { once: true });
+    s.addEventListener('voiceschanged', done, { once: true });
     // 兜底：某些 WebView 永远不触发 voiceschanged
     setTimeout(done, 1200);
   });
@@ -107,7 +111,7 @@ function loadVoices(): Promise<SpeechSynthesisVoice[]> {
 }
 
 // 预热
-if (synth) void loadVoices();
+if (s) void loadVoices();
 
 /**
  * 为指定语言挑选最合适的声音。
@@ -119,7 +123,7 @@ if (synth) void loadVoices();
  * 但 getVoices() 的默认顺序并不会把它们排在前面 —— 必须主动识别。
  */
 function pickVoice(lang: SpeakLang, preferURI?: string, teacher?: string): SpeechSynthesisVoice | undefined {
-  if (!voicesCache.length) voicesCache = synth?.getVoices() ?? [];
+  if (!voicesCache.length) voicesCache = s?.getVoices() ?? [];
   const list = voicesCache;
   if (!list.length) return undefined;
 
@@ -195,7 +199,7 @@ export interface SpeakOptions {
 // ============================================================
 // P2-7 / P2-8：全局朗读状态推送 + 优先级朗读队列
 // ------------------------------------------------------------
-// 现状：speak() 直接 synth.cancel() 打断上一条，多组件并发朗读时
+// 现状：speak() 直接 s.cancel() 打断上一条，多组件并发朗读时
 // 会出现「表扬语把古诗打断」「连击提示把讲解打断」等混乱。而且
 // ttsState 没有任何地方推送，UI 的全局朗读指示器拿不到数据。
 //
@@ -231,8 +235,8 @@ export function speak(text: string, options: SpeakOptions = {}): Promise<void> {
     pushTtsState(true, text, options.module ?? '');
     return playHanziVoice(text, onEnd)
       .catch(() => {
-        // 本地资源不可用 → 回退系统 TTS（需 synth 可用）
-        if (!synth) {
+        // 本地资源不可用 → 回退系统 TTS（需 s 可用）
+        if (!s) {
           onEnd?.();
           return;
         }
@@ -243,7 +247,7 @@ export function speak(text: string, options: SpeakOptions = {}): Promise<void> {
       });
   }
 
-  if (!synth) {
+  if (!s) {
     onEnd?.();
     return Promise.resolve();
   }
@@ -292,13 +296,13 @@ function fallbackSingleChar(
   onStart?: () => void,
 ): Promise<void> {
   const { lang = 'zh-CN', rate, pitch = 1.15, volume = 1 } = options;
-  if (!synth) {
+  if (!s) {
     onEnd?.();
     return Promise.resolve();
   }
   return new Promise<void>((resolve) => {
     try {
-      synth.cancel();
+      s.cancel();
     } catch {
       /* noop */
     }
@@ -324,11 +328,11 @@ function fallbackSingleChar(
     u.onerror = finish;
     speechState.currentUtterance = u;
     try {
-      synth.resume();
+      s.resume();
     } catch {
       /* noop */
     }
-    synth.speak(u);
+    s.speak(u);
     const est = Math.max(2500, text.length * 420 + 2000);
     setTimeout(() => {
       if (!finished) finish();
@@ -367,14 +371,14 @@ function runSpeak(
   return new Promise<void>((resolve) => {
     // 系统语音回退兜底处理函数
     const fallbackToWebSpeech = () => {
-      if (!synth) {
+      if (!s) {
         onEnd?.();
         cleanup();
         resolve();
         return;
       }
       try {
-        synth.cancel();
+        s.cancel();
       } catch {
         /* noop */
       }
@@ -406,11 +410,11 @@ function runSpeak(
       u.onerror = finish;
       speechState.currentUtterance = u;
       try {
-        synth.resume();
+        s.resume();
       } catch {
         /* noop */
       }
-      synth.speak(u);
+      s.speak(u);
       const est = Math.max(2500, text.length * 450 + 2000);
       setTimeout(() => {
         if (!finished) finish();

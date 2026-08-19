@@ -6,7 +6,7 @@ import { Tabs, type TabItem } from '@/components/ui/Tabs';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { CandyButton } from '@/components/ui/Button';
 import { QuizCard } from '@/components/QuizCard';
-import { useProgress, useStore } from '@/store/useStore';
+import { useMastery, useStore } from '@/store/useStore';
 import { sfxTap } from '@/lib/sfx';
 import { TONE_STYLE } from '@/lib/tones';
 import type { Question } from '@/types';
@@ -216,7 +216,7 @@ export default function HanziPage() {
   const [selected, setSelected] = useState<HanziEntry | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
   const [quizQuestions, setQuizQuestions] = useState<Question[]>([]);
-  const progress = useProgress();
+  const mastery = useMastery();
   const { target, clear } = useTrainingTarget('hanzi');
 
   // 深链 stroke:<字> / build:<字> → 解析出目标字，直接下发给对应子组件预选
@@ -263,23 +263,23 @@ export default function HanziPage() {
 
   const learnedInLevel = useMemo(() => {
     return getHanziByLevel(levelNum).filter(
-      (h) => (progress.mastery[`hanzi:${h.c}`]?.lv ?? 0) >= 1,
+      (h) => (mastery[`hanzi:${h.c}`]?.lv ?? 0) >= 1,
     ).length;
-  }, [levelNum, progress.mastery]);
+  }, [levelNum, mastery]);
 
   const { learnedMap: cachedLearnedMap } = useOptimizedHanziQuery();
 
   const totalLearnedCount = useMemo(() => {
-    return Object.keys(progress.mastery).filter(
-      (k) => k.startsWith('hanzi:') && (progress.mastery[k]?.lv ?? 0) >= 1,
+    return Object.keys(mastery).filter(
+      (k) => k.startsWith('hanzi:') && (mastery[k]?.lv ?? 0) >= 1,
     ).length;
-  }, [progress.mastery]);
+  }, [mastery]);
 
-  const recommended = useMemo(() => nextHanzi(progress.mastery), [progress.mastery]);
+  const recommended = useMemo(() => nextHanzi(mastery), [mastery]);
 
   const startMiniQuiz = () => {
     sfxTap();
-    const qs = buildQuiz(levelNum, progress.mastery);
+    const qs = buildQuiz(levelNum, mastery);
     if (qs.length) {
       setQuizQuestions(qs);
       setQuizOpen(true);

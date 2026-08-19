@@ -5,14 +5,14 @@
 import { useState, useMemo } from 'react';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
-import { useProgress } from '@/store/useStore';
+import { useDailyLog } from '@/store/useStore';
 import { useTranslation } from '@/i18n/useTranslation';
 
 type Period = 'day' | 'week' | 'month';
 
 export function Leaderboard() {
   const { t } = useTranslation();
-  const progress = useProgress();
+  const dailyLog = useDailyLog();
   const [period, setPeriod] = useState<Period>('week');
 
   const records = useMemo(() => {
@@ -20,7 +20,7 @@ export function Leaderboard() {
     const periodMs = period === 'day' ? 86400000 : period === 'week' ? 86400000 * 7 : 86400000 * 30;
     const cutoff = now - periodMs;
 
-    return Object.entries(progress.dailyLog)
+    return Object.entries(dailyLog)
       .filter(([date]) => {
         const t = new Date(date).getTime();
         return t >= cutoff;
@@ -37,7 +37,7 @@ export function Leaderboard() {
         if (period === 'day') return b.date.localeCompare(a.date);
         return b.stars - a.stars || b.minutes - a.minutes;
       });
-  }, [progress.dailyLog, period]);
+  }, [dailyLog, period]);
 
   const totals = useMemo(() => {
     return records.reduce(

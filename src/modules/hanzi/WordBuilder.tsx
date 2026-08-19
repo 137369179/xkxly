@@ -5,7 +5,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
-import { useProgress, useStore } from '@/store/useStore';
+import { useMastery, useStore } from '@/store/useStore';
 import { getHanziByChar } from '@/data/hanziIndex';
 import type { HanziEntry } from '@/data/hanzi';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -14,7 +14,7 @@ type Stage = 'word' | 'sentence' | 'review';
 
 export function WordBuilder({ initialChar }: { initialChar?: string }) {
   const { t: tr } = useTranslation();
-  const p = useProgress();
+  const mastery = useMastery();
   const practice = useStore((s) => s.practice);
   const [stage, setStage] = useState<Stage>('word');
   const [current, setCurrent] = useState<HanziEntry | null>(null);
@@ -40,12 +40,12 @@ export function WordBuilder({ initialChar }: { initialChar?: string }) {
   }, [initialChar]);
 
   const learned = useMemo(() => {
-    const entries = Object.entries(p.mastery);
+    const entries = Object.entries(mastery);
     return entries
       .filter(([k, m]) => k.startsWith('hanzi:') && m.lv >= 2)
       .map(([k]) => k.replace('hanzi:', ''))
       .filter(c => c !== current?.c);
-  }, [p.mastery, current]);
+  }, [mastery, current]);
 
   const nextChar = useCallback(() => {
     const pool = learned.filter(c => !doneList.includes(c));

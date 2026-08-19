@@ -14,7 +14,7 @@ import { useAiStream } from '@/lib/ai/useAi';
 import { festivalTalkTask } from '@/lib/ai/tasks/culture';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useStore, useProgress } from '@/store/useStore';
+import { useStore, useMastery } from '@/store/useStore';
 
 interface SolarTerm {
   name: string;
@@ -64,15 +64,15 @@ export default function FestivalsPage() {
   const festivalAi = useAiStream();
 
   const { learnSkill, practice, tickTime } = useStore();
-  const progress = useProgress();
+  const mastery = useMastery();
 
   // 已了解的节气数量：mastery 中存在 festival:term-{name} 且 lv>=0 即接触过
   const termsLearned = useMemo(
     () => SOLAR_TERMS.filter(t => {
-      const m = progress.mastery[`festival:term-${t.name}`];
+      const m = mastery[`festival:term-${t.name}`];
       return m !== undefined && m.lv >= 0;
     }).length,
-    [progress.mastery],
+    [mastery],
   );
 
   const handleSelectTerm = (t: SolarTerm) => {

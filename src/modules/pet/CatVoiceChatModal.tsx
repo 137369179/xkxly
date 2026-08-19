@@ -4,7 +4,7 @@ import { CyberMasterCat3D } from '@/components/CyberMasterCat3D';
 import { useAiStream } from '@/lib/ai/useAi';
 import { companionChatTask } from '@/lib/ai/tasks/companion';
 import { speak, stopSpeaking } from '@/lib/speech';
-import { speechRecog, requestMicPermission } from '@/lib/ai/speechRecog';
+import { speechRecog, requestMicPermission, isSpeechRecogSupported } from '@/lib/ai/speechRecog';
 import { guardInput } from '@/lib/ai/guard';
 import { sfxTap } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';

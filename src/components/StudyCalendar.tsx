@@ -5,7 +5,7 @@
 
 import { useMemo } from 'react';
 import { Panel, PanelTitle } from '@/components/ui/Card';
-import { useProgress } from '@/store/useStore';
+import { useDailyLog } from '@/store/useStore';
 import { dateKey } from '@/lib/dailyPlan';
 import { useTranslation } from '@/i18n/useTranslation';
 
@@ -64,8 +64,8 @@ function buildYearData(dailyLog: Record<string, { sec?: number; items?: number }
 
 export function StudyCalendar() {
   const { t } = useTranslation();
-  const progress = useProgress();
-  const weeks = useMemo(() => buildYearData(progress.dailyLog), [progress.dailyLog]);
+  const dailyLog = useDailyLog();
+  const weeks = useMemo(() => buildYearData(dailyLog), [dailyLog]);
 
   const today = dateKey(Date.now());
   const year = new Date().getFullYear();

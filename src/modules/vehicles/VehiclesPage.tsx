@@ -12,7 +12,7 @@ import { CandyButton } from '@/components/ui/Button';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useStore, useProgress } from '@/store/useStore';
+import { useStore, useMastery } from '@/store/useStore';
 
 interface Vehicle {
   id: string;
@@ -77,13 +77,13 @@ const JOB_PAIRS: JobPair[] = [
 export default function VehiclesPage() {
   const { t } = useTranslation();
   const { learnSkill, practice, tickTime } = useStore();
-  const progress = useProgress();
+  const mastery = useMastery();
   const [selectedV, setSelectedV] = useState<Vehicle>(VEHICLES[0]!);
   const [jobQuiz, setJobQuiz] = useState<{ j: JobPair; options: JobPair[] } | null>(null);
   const [feedback, setFeedback] = useState('');
 
   const vehicleLearnedCount = VEHICLES.filter(
-    (v) => progress.mastery[`vehicle:${v.id}`]?.lv !== undefined && progress.mastery[`vehicle:${v.id}`]!.lv >= 0
+    (v) => mastery[`vehicle:${v.id}`]?.lv !== undefined && mastery[`vehicle:${v.id}`]!.lv >= 0
   ).length;
 
   const handleSelectV = (v: Vehicle) => {

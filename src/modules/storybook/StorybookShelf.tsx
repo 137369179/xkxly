@@ -8,7 +8,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { StorybookCover } from './StorybookCover';
 import { StorybookReader } from './StorybookReader';
 import { THEMES } from './constants';
-import type { SavedStorybook, StorybookTheme } from './types';
+import type { SavedStorybook, StorybookTheme, StorybookStyle } from './types';
 import type { StoryBookData } from '@/lib/ai/prompts';
 import { getStorybookContent } from '@/lib/storybookStore';
 

@@ -11,7 +11,7 @@
  */
 import { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
-import { useProgress } from '@/store/useStore';
+import { useMastery } from '@/store/useStore';
 import { getHanziByLevel, HANZI_LEVELS, type HanziEntry } from '@/data/hanziIndex';
 import { sfxTap } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
@@ -32,7 +32,7 @@ interface Chapter {
 
 export function HanziTrailMap({ onSelect }: HanziTrailMapProps) {
   const { t } = useTranslation();
-  const progress = useProgress();
+  const mastery = useMastery();
 
   // 每个阶段的字（已按 freq 降序排好）
   const stages = useMemo(
@@ -40,7 +40,7 @@ export function HanziTrailMap({ onSelect }: HanziTrailMapProps) {
     [],
   );
 
-  const learned = (c: string) => progress.mastery[`hanzi:${c}`]?.lv ?? 0;
+  const learned = (c: string) => mastery[`hanzi:${c}`]?.lv ?? 0;
 
   // 阶段解锁状态：第 0 阶段永远解锁，其余需前一阶段全部通关
   const stageUnlocked = useMemo(
@@ -48,7 +48,7 @@ export function HanziTrailMap({ onSelect }: HanziTrailMapProps) {
       stages.map((_, i) =>
         i === 0 ? true : stages[i - 1]!.chars.every((h) => learned(h.c) >= 1),
       ),
-    [stages, progress.mastery],
+    [stages, mastery],
   );
 
   // 默认选中第一个「未全部通关」的阶段；全通关则停在最后一阶段
@@ -57,7 +57,7 @@ export function HanziTrailMap({ onSelect }: HanziTrailMapProps) {
       if (!stages[i]!.chars.every((h) => learned(h.c) >= 1)) return i;
     }
     return stages.length - 1;
-  }, [stages, progress.mastery]);
+  }, [stages, mastery]);
 
   const [stageIdx, setStageIdx] = useState(defaultStage);
   const stage = stages[stageIdx]!;
@@ -79,7 +79,7 @@ export function HanziTrailMap({ onSelect }: HanziTrailMapProps) {
       ch.unlocked = i === 0 || out[i - 1]!.learnedCount === out[i - 1]!.chars.length;
     });
     return out;
-  }, [stage, progress.mastery]);
+  }, [stage, mastery]);
 
   const stageLearned = chapters.reduce((s, ch) => s + ch.learnedCount, 0);
   const stageTotal = stage.chars.length;
@@ -95,7 +95,7 @@ export function HanziTrailMap({ onSelect }: HanziTrailMapProps) {
     const ch = chapters[currentChapterIdx];
     if (!ch) return null;
     return ch.chars.find((h) => learned(h.c) < 1)?.c ?? null;
-  }, [chapters, currentChapterIdx, progress.mastery]);
+  }, [chapters, currentChapterIdx, mastery]);
 
   const [expandedIdx, setExpandedIdx] = useState<number | null>(currentChapterIdx);
 

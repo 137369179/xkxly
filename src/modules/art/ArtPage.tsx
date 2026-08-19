@@ -13,7 +13,7 @@ import { ProgressBar } from '@/components/ui/ProgressBar';
 import { sfxTap, sfxCorrect } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useStore, useProgress } from '@/store/useStore';
+import { useStore, useMastery } from '@/store/useStore';
 import { ColorExplore } from '@/components/ColorExplore';
 
 /* ---------- Type definitions ---------- */
@@ -105,7 +105,7 @@ export default function ArtPage() {
   const { t } = useTranslation();
   const practice = useStore((s) => s.practice);
   const tickTime = useStore((s) => s.tickTime);
-  const p = useProgress();
+  const mastery = useMastery();
   const [selectedColors, setSelectedColors] = useState<ColorCode[]>([]);
   const [mixedResult, setMixedResult] = useState<ColorMix | null>(null);
 
@@ -122,7 +122,7 @@ export default function ArtPage() {
 
   // 统计已掌握的调色技能数（lv>=4）
   const artSkills = COLOR_MIXES.map(m => mixSkillKey(m.c1, m.c2));
-  const masteredArt = artSkills.filter(k => (p.mastery[k]?.lv ?? 0) >= 4).length;
+  const masteredArt = artSkills.filter(k => (mastery[k]?.lv ?? 0) >= 4).length;
 
   const handlePickColor = (code: ColorCode) => {
     sfxTap();

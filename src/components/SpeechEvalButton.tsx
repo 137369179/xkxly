@@ -267,12 +267,24 @@ export function SpeechEvalButton({
       }, QUIET_TIMEOUT_MS);
 
       reco.onstart = () => {
-        // 识别正常启动（触发 onstart）→ 取消「无响应快速检测」，但保留 12s 兜底
+        if (sessionRef.current !== session) return;
+        // 识别正常启动：先取消「启动前无响应」检测；但若启动后仍长时间无任何
+        // 结果/错误/结束（服务虽连上却不出字，如网络不稳），同样降级大声朗读，
+        // 避免孩子对着 12s 硬超时干等无反馈。
         if (quietTimeoutRef.current) {
           clearTimeout(quietTimeoutRef.current);
           quietTimeoutRef.current = null;
         }
-        if (sessionRef.current !== session) return;
+        quietTimeoutRef.current = setTimeout(() => {
+          if (sessionRef.current !== session || gotResult || ended) return;
+          clearListenTimeout();
+          try {
+            reco.abort();
+          } catch {
+            /* noop */
+          }
+          goLoudRead(session);
+        }, QUIET_TIMEOUT_MS);
       };
 
       reco.onresult = (event: any) => {

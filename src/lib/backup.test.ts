@@ -61,8 +61,10 @@ describe('backup · sanitizeProgress', () => {
   });
 
   it('非法输入回退初始进度', () => {
-    expect(sanitizeProgress('garbage')).toEqual(createInitialProgress());
-    expect(sanitizeProgress(null)).toEqual(createInitialProgress());
+    // lastCatUpdate 为 Date.now()，两次调用时间戳不同，用 expect.any 归一化
+    const expectInit = () => ({ ...createInitialProgress(), lastCatUpdate: expect.any(Number) });
+    expect(sanitizeProgress('garbage')).toEqual(expectInit());
+    expect(sanitizeProgress(null)).toEqual(expectInit());
   });
 });
 

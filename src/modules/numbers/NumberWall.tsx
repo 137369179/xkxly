@@ -5,7 +5,7 @@ import { cn, range } from '@/lib/utils';
 import { speak } from '@/lib/speech';
 import { sfxTap } from '@/lib/sfx';
 import { toChineseNumber, toNumberPinyin } from '@/lib/chineseNumber';
-import { useProgress, useStore } from '@/store/useStore';
+import { useNumbersHeard, useStore } from '@/store/useStore';
 import { Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
@@ -20,7 +20,7 @@ const RANGES = [
 
 export function NumberWall() {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
+  const numbersHeard = useNumbersHeard();
   const heardNumber = useStore((s) => s.heardNumber);
   const [rangeId, setRangeId] = useState<(typeof RANGES)[number]['id']>('0-20');
   const [active, setActive] = useState<number | null>(null);
@@ -39,13 +39,13 @@ export function NumberWall() {
       <Panel className="!py-4">
         <div className="mb-2 flex items-center justify-between">
           <span className="text-sm font-extrabold text-ink-soft">
-            {tr('numbers.learned', { known: progress.numbersHeard.length, total: 101 })}
+            {tr('numbers.learned', { known: numbersHeard.length, total: 101 })}
           </span>
-          {progress.numbersHeard.length >= 101 && (
+          {numbersHeard.length >= 101 && (
             <span className="text-sm font-extrabold text-candy-green-deep">{tr('numbers.allKnown')} 🎉</span>
           )}
         </div>
-        <ProgressBar value={progress.numbersHeard.length} max={101} tone="yellow" />
+        <ProgressBar value={numbersHeard.length} max={101} tone="yellow" />
       </Panel>
 
       {/* 区间切换 */}
@@ -68,7 +68,7 @@ export function NumberWall() {
       <div className="grid grid-cols-5 gap-2.5 sm:grid-cols-7 sm:gap-3 md:grid-cols-10">
         {nums.map((n) => {
           const t = TONE_STYLE[toneAt(n)]!
-          const learned = progress.numbersHeard.includes(n);
+          const learned = numbersHeard.includes(n);
           return (
             <motion.button
               key={n}

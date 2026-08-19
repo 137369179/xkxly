@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { motion } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
-import { useProgress } from '@/store/useStore';
+import { useMastery } from '@/store/useStore';
 import { sfxTap } from '@/lib/sfx';
 import { TONE_STYLE } from '@/lib/tones';
 import { RHYME_MAP } from '@/data/nurseryRhymes';
@@ -11,19 +11,19 @@ import { useTranslation } from '@/i18n/useTranslation';
 
 function RecommendCard({ onPick }: { onPick: (id: string) => void }) {
   const { t: translate } = useTranslation();
-  const progress = useProgress();
+  const mastery = useMastery();
   const age = 5; // 默认 5 岁
 
   // 获取已学过的儿歌 id
   const learnedIds = useMemo(() => {
     const ids: string[] = [];
-    for (const k of Object.keys(progress.mastery)) {
-      if (k.startsWith('rhyme:') && progress.mastery[k]!.lv >= 1) {
+    for (const k of Object.keys(mastery)) {
+      if (k.startsWith('rhyme:') && mastery[k]!.lv >= 1) {
         ids.push(k.replace('rhyme:', ''));
       }
     }
     return ids;
-  }, [progress.mastery]);
+  }, [mastery]);
 
   const hour = new Date().getHours();
 
