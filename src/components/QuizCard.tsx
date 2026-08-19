@@ -393,7 +393,7 @@ export function QuizCard({
       {/* 大号展示区 */}
       {question.display && (
         <div className="mt-5 mb-1 text-center">
-          <span className="inline-block rounded-[1.6rem] bg-white/70 px-8 py-5 text-5xl font-extrabold tracking-wide text-candy-purple-deep shadow-candy-sm sm:text-6xl">
+          <span className="inline-block rounded-[1.6rem] bg-white/70 px-10 py-6 text-8xl font-extrabold tracking-wide text-candy-purple-deep shadow-candy-sm sm:text-9xl">
             {question.display}
           </span>
         </div>

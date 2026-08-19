@@ -56,36 +56,36 @@ export function HanziLearn({ hanzi, onDone }: { hanzi: HanziEntry; onDone: () =>
             <div className="inline-block rounded-full bg-candy-orange-deep/10 px-3 py-1 text-xs font-black text-candy-orange-deep mb-2">
               ✨ 象形探秘 · 汉字起源
             </div>
-            <div className="flex items-center justify-center gap-6 my-2">
+            <div className="flex flex-wrap items-center justify-center gap-4 my-3 sm:gap-8">
               <div className="flex flex-col items-center">
-                <div className="grid h-24 w-24 place-items-center rounded-2xl border-2 border-dashed border-candy-orange-deep/40 bg-white/90 shadow-sm">
+                <div className="grid h-44 w-44 place-items-center rounded-3xl border-2 border-dashed border-candy-orange-deep/40 bg-white/90 shadow-sm sm:h-48 sm:w-48">
                   <img
                     src={`/hanzi-imgs/${hanzi.c}.png`}
                     alt={hanzi.c}
-                    className="h-20 w-20 object-contain"
+                    className="h-36 w-36 object-contain sm:h-40 sm:w-40"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
                       const parent = (e.target as HTMLElement).parentElement;
                       if (parent && !parent.querySelector('.fallback-glyph')) {
                         const span = document.createElement('span');
-                        span.className = 'fallback-glyph text-4xl';
+                        span.className = 'fallback-glyph text-7xl';
                         span.innerText = '📜';
                         parent.appendChild(span);
                       }
                     }}
                   />
                 </div>
-                <span className="mt-1 text-xs font-bold text-ink-soft">古代物象</span>
+                <span className="mt-2 text-lg font-bold text-ink-soft sm:text-xl">古代物象</span>
               </div>
-              <div className="text-2xl font-black text-candy-orange-deep animate-pulse">➔</div>
+              <div className="text-3xl font-black text-candy-orange-deep animate-pulse sm:text-5xl">➔</div>
               <div className="flex flex-col items-center">
-                <div className="grid h-24 w-24 place-items-center rounded-2xl bg-white shadow-md border-2 border-candy-orange-soft">
-                  <span className="text-5xl font-black text-ink">{hanzi.c}</span>
+                <div className="grid h-44 w-44 place-items-center rounded-3xl bg-white shadow-md border-2 border-candy-orange-soft sm:h-48 sm:w-48">
+                  <span className="text-8xl font-black text-ink sm:text-9xl">{hanzi.c}</span>
                 </div>
-                <span className="mt-1 text-xs font-bold text-candy-orange-deep">{hanzi.pd}</span>
+                <span className="mt-2 text-lg font-bold text-candy-orange-deep sm:text-xl">{hanzi.pd}</span>
               </div>
             </div>
-            <p className="mt-3 text-sm font-semibold text-ink leading-relaxed max-w-md mx-auto">
+            <p className="mt-4 text-base font-semibold text-ink leading-relaxed max-w-md mx-auto sm:text-lg">
               {hanzi.origin || `古代人根据物体的形状创造了“${hanzi.c}”字，快来听听它的有趣故事吧！`}
             </p>
           </div>
@@ -126,31 +126,31 @@ export function HanziLearn({ hanzi, onDone }: { hanzi: HanziEntry; onDone: () =>
           <div className="space-y-4">
             <Panel>
               <div className="text-center">
-                <div className="text-7xl font-black text-ink tracking-wide">{hanzi.c}</div>
-                <p className="mt-1 text-2xl font-bold text-candy-purple-deep">{hanzi.pd}</p>
+                <div className="text-[10rem] leading-tight font-black text-ink tracking-wide">{hanzi.c}</div>
+                <p className="mt-2 text-4xl font-bold text-candy-purple-deep">{hanzi.pd}</p>
                 {liushu && (
-                  <div className="mt-2 flex justify-center">
-                    <LiushuBadge liushu={liushu} size="sm" />
+                  <div className="mt-4 flex justify-center">
+                    <LiushuBadge liushu={liushu} />
                   </div>
                 )}
               </div>
-              <div className="mt-4 grid grid-cols-3 gap-3 text-center">
-                <div className="rounded-xl bg-candy-blue-soft p-3 shadow-sm">
-                  <div className="text-xs font-bold text-ink-soft">{t('hanzi.radical')}</div>
-                  <div className="text-xl font-extrabold text-candy-blue-deep">{hanzi.radical}</div>
+              <div className="mt-6 grid grid-cols-3 gap-3 text-center">
+                <div className="rounded-xl bg-candy-blue-soft p-4 shadow-sm">
+                  <div className="text-base font-bold text-ink-soft">{t('hanzi.radical')}</div>
+                  <div className="mt-1 text-3xl font-extrabold text-candy-blue-deep">{hanzi.radical}</div>
                 </div>
-                <div className="rounded-xl bg-candy-green-soft p-3 shadow-sm">
-                  <div className="text-xs font-bold text-ink-soft">笔画数</div>
-                  <div className="text-xl font-extrabold text-candy-green-deep">{t('hanzi.strokesCount', { count: hanzi.strokes })}</div>
+                <div className="rounded-xl bg-candy-green-soft p-4 shadow-sm">
+                  <div className="text-base font-bold text-ink-soft">笔画数</div>
+                  <div className="mt-1 text-3xl font-extrabold text-candy-green-deep">{t('hanzi.strokesCount', { count: hanzi.strokes })}</div>
                 </div>
-                <div className="rounded-xl bg-candy-orange-soft p-3 shadow-sm">
-                  <div className="text-xs font-bold text-ink-soft">声调</div>
-                  <div className="text-xl font-extrabold text-candy-orange-deep">{t('hanzi.toneN', { tone: hanzi.tone })}</div>
+                <div className="rounded-xl bg-candy-orange-soft p-4 shadow-sm">
+                  <div className="text-base font-bold text-ink-soft">声调</div>
+                  <div className="mt-1 text-3xl font-extrabold text-candy-orange-deep">{t('hanzi.toneN', { tone: hanzi.tone })}</div>
                 </div>
               </div>
-              <div className="mt-4 space-y-2 rounded-2xl bg-white/70 p-3.5 border border-candy-purple-soft/30">
-                <p className="text-xs font-bold text-candy-purple-deep">📖 字形演变与解析</p>
-                <p className="text-sm font-semibold text-ink leading-relaxed">{hanzi.evolve || hanzi.origin}</p>
+              <div className="mt-5 space-y-2 rounded-2xl bg-white/70 p-4 border border-candy-purple-soft/30">
+                <p className="text-base font-bold text-candy-purple-deep">📖 字形演变与解析</p>
+                <p className="text-base font-semibold text-ink leading-relaxed">{hanzi.evolve || hanzi.origin}</p>
               </div>
               <div className="mt-4">
                 <p className="text-sm font-bold text-ink-soft">{t('hanzi.words')}</p>

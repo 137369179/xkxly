@@ -59,6 +59,7 @@ export default function IdiomsPage() {
     const pool = quizPoolRef.current;
     if (!pool.length) return null;
     const chosen = pool[Math.floor(Math.random() * pool.length)] ?? pool[0];
+    if (!chosen) return null;
     const samePool = pool.filter(i => i.word !== chosen.word);
     const wrongs = shuffle(
       samePool.length >= 3 ? samePool : IDIOMS.filter(i => i.word !== chosen.word),

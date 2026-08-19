@@ -43,7 +43,7 @@ export function Sidebar({ active }: { active: RouteId }) {
     return (
       <button
         key={item.id}
-        ref={(el) => { btnRefs.current.set(item.id, el); }}
+        ref={(el) => { if (el) btnRefs.current.set(item.id, el); }}
         onClick={() => {
           sfxTap();
           navigate(item.id);

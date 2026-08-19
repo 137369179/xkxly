@@ -34,7 +34,7 @@ export function useOptimizedHanziQuery() {
  * 延迟 delay ms 后返回最新值，避免每次按键都触发重渲染
  */
 export function useDebounceSearch<T>(value: T, delay: number): T {
-  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const debouncedRef = useRef(value);
 
   useEffect(() => {
