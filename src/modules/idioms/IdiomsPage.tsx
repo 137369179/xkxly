@@ -260,10 +260,10 @@ function IdiomDetail({ idiom, onBack, onLearn }: { idiom: Idiom; onBack: () => v
         {/* 基础操作按钮 */}
         <div className="mt-4 flex flex-wrap gap-2">
           <CandyButton tone="blue" variant="soft" size="sm" onClick={() => speak(idiom.word, { rate: 0.7 })}>
-            🔊 {t('idioms.read')}
+            {t('idioms.read')}
           </CandyButton>
           <CandyButton tone="green" variant="soft" size="sm" onClick={onLearn}>
-            ✅ {t('idioms.learned')}
+            {t('idioms.learned')}
           </CandyButton>
           <CandyButton
             tone="purple"
@@ -279,7 +279,7 @@ function IdiomDetail({ idiom, onBack, onLearn }: { idiom: Idiom; onBack: () => v
             size="sm"
             onClick={handleAiSentence}
           >
-            ✨ {t('idioms.aiSentence')}
+            {t('idioms.aiSentence')}
           </CandyButton>
         </div>
       </Panel>
@@ -371,7 +371,7 @@ function IdiomDetail({ idiom, onBack, onLearn }: { idiom: Idiom; onBack: () => v
                       size="sm"
                       onClick={() => speak(favoriteSentence, { rate: 0.8 })}
                     >
-                      🔊 {t('idioms.read')}
+                      {t('idioms.read')}
                     </CandyButton>
                   </div>
                 </motion.div>

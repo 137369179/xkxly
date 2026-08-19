@@ -154,7 +154,7 @@ export function CreativeExpress() {
               />
               <div className="flex gap-2">
                 <CandyButton tone="pink" size="sm" disabled={!userText.trim()} onClick={() => { speak_(userText); celebrateSmall(); useStore.getState().incCreativeCount(); }}>
-                  📢 {t('creative.readToMe')}
+                  {t('creative.readToMe')}
                 </CandyButton>
                 <CandyButton tone="purple" size="sm" onClick={() => setUserText('')}>
                   {t('creative.clear')}
@@ -223,7 +223,7 @@ export function CreativeExpress() {
               />
               <div className="flex gap-2">
                 <CandyButton tone="pink" size="sm" disabled={!userText.trim()} onClick={() => { speak_(userText); celebrateSmall(); useStore.getState().incCreativeCount(); }}>
-                  📢 {t('creative.readToMe')}
+                  {t('creative.readToMe')}
                 </CandyButton>
                 <CandyButton tone="purple" size="sm" onClick={() => setUserText('')}>
                   {t('creative.clear')}

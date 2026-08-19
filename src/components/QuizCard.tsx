@@ -385,7 +385,7 @@ export function QuizCard({
             aria-label={translate('quiz.listenAgainBtn')}
             data-replay="audio"
           >
-            🔊 {translate('quiz.listenAgainBtn')}
+            {translate('quiz.listenAgainBtn')}
           </button>
         </div>
       )}

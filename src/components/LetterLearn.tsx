@@ -197,7 +197,7 @@ export function LetterLearn({ upper, onDone }: { upper: string; onDone?: () => v
                 void speak(item.word, { lang: 'en-US', rate: 0.7, module: 'letter' });
               }}
             >
-              🔊 {tr('common.listen')}
+              {tr('common.listen')}
             </CandyButton>
             <CandyButton
               tone="orange"

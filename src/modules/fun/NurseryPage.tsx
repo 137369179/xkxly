@@ -144,11 +144,11 @@ export function NurseryPage() {
       <div className="flex justify-center gap-2">
         {!playing ? (
           <CandyButton tone="pink" size="lg" onClick={() => playRhyme(selected)}>
-            🎵 {t('nurseryPage.play')}
+            {t('nurseryPage.play')}
           </CandyButton>
         ) : (
           <CandyButton tone="orange" size="lg" onClick={stop}>
-            ⏹️ {t('nurseryPage.stop')}
+            {t('nurseryPage.stop')}
           </CandyButton>
         )}
       </div>
