@@ -6,7 +6,7 @@ import { useState, useMemo } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import POEMS from '@/data/poems';
-import { useProgress, useStore } from '@/store/useStore';
+import { usePoemNotes, useStore } from '@/store/useStore';
 import { sfxTap, sfxStar } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 import { motion } from 'motion/react';
@@ -14,16 +14,16 @@ import { useTranslation } from '@/i18n/useTranslation';
 
 export default function PoemNotes() {
   const { t } = useTranslation();
-  const progress = useProgress();
+  const poemNotes = usePoemNotes();
   const setPoemNote = useStore(s => s.setPoemNote);
   const [selectedPoemId, setSelectedPoemId] = useState<string | null>(null);
   const [noteText, setNoteText] = useState('');
 
   const notesPoems = useMemo(() => {
-    return Object.entries(progress.poemNotes)
+    return Object.entries(poemNotes)
       .map(([id, note]) => ({ poem: POEMS.find(p => p.id === id), note }))
       .filter(item => item.poem);
-  }, [progress.poemNotes]);
+  }, [poemNotes]);
 
   const currentPoem = selectedPoemId ? POEMS.find(p => p.id === selectedPoemId) : null;
 

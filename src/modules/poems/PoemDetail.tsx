@@ -7,7 +7,7 @@
 import { useMemo, useState } from 'react';
 import type { DeepPoem } from '@/types';
 import DEEP_POEMS from '@/data/poems-deep';
-import { useStore, useProgress, useSettings } from '@/store/useStore';
+import { useStore, usePoemFavorites, usePoemNote, useSettings } from '@/store/useStore';
 import { CandyButton, IconButton } from '@/components/ui/Button';
 import { MarkPanel, LineGloss, ProsodyGrid, PoetCard } from './PoemStudy';
 import { ChantBar, QuizRunner, ReciteRunner, PlanSummary } from './PoemTrain';
@@ -42,8 +42,8 @@ export default function PoemDetail({
 }) {
   const { t: tr } = useTranslation();
   const { showPinyin } = useSettings();
-  const progress = useProgress();
-  const favSet = useMemo(() => new Set(progress.poemFavorites), [progress.poemFavorites]);
+  const favorites = usePoemFavorites();
+  const favSet = useMemo(() => new Set(favorites), [favorites]);
   const togglePoemFavorite = useStore((s) => s.togglePoemFavorite);
   const [tab, setTab] = useState<DetailTab>(initialTab);
 
@@ -282,7 +282,7 @@ function StudyTab({
   onOpen: (id: string, tab?: DetailTab) => void;
 }) {
   const { t: tr } = useTranslation();
-  const note = useProgress().poemNotes[poem.id] ?? '';
+  const note = usePoemNote(poem.id);
   const setPoemNote = useStore((s) => s.setPoemNote);
   const [compareId, setCompareId] = useState<string | null>(null);
   const [picker, setPicker] = useState(false);

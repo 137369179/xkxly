@@ -7,7 +7,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { DeepPoem, ReciteStat } from '@/types';
 import { maskPoem, scoreRecite, type MaskedPoem } from '@/lib/recite';
-import { useStore, useProgress } from '@/store/useStore';
+import { useStore, usePoemReciteStat } from '@/store/useStore';
 import { cn } from '@/lib/utils';
 import { CandyButton } from '@/components/ui/Button';
 import { useAiTask } from '@/lib/ai/useAi';
@@ -22,7 +22,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 /* ---------------- 分关遮挡背诵 ---------------- */
 export function ReciteRunner({ poem }: { poem: DeepPoem }) {
   const { t: tr } = useTranslation();
-  const stat: ReciteStat | undefined = useProgress().poemRecite[poem.id];
+  const stat: ReciteStat | undefined = usePoemReciteStat(poem.id);
   const recordRecite = useStore((s) => s.recordRecite);
   const [level, setLevel] = useState<1 | 2 | 3 | 4>(((stat?.stage ?? 0) + 1 > 4 ? 4 : (stat?.stage ?? 0) + 1) as 1 | 2 | 3 | 4);
   const [mask, setMask] = useState<MaskedPoem>(() => maskPoem(poem, level));

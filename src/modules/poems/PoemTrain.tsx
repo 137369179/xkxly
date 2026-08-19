@@ -21,7 +21,7 @@ import { decodeToAnalysis, type RecordingAnalysis } from '@/lib/audioCompare';
 import { generatePoemQuiz } from '@/lib/poemQuiz';
 import { buildPlan, stepLabel, type PoemPlan } from '@/lib/poemPlan';
 import { speakChant, stopSpeaking, type SequenceController } from '@/lib/speech';
-import { useStore, useProgress } from '@/store/useStore';
+import { useStore, usePoemMark, usePoemReciteStat } from '@/store/useStore';
 import { cn } from '@/lib/utils';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap } from '@/lib/sfx';
@@ -441,9 +441,8 @@ export function QuizRunner({ poem }: { poem: DeepPoem }) {
 /* ---------------- 复习计划摘要 ---------------- */
 export function PlanSummary({ poem }: { poem: DeepPoem }) {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
-  const mark = progress.poemMarks[poem.id];
-  const recite = progress.poemRecite[poem.id];
+  const mark = usePoemMark(poem.id);
+  const recite = usePoemReciteStat(poem.id);
   const plan: PoemPlan = useMemo(() => buildPlan(poem, mark, recite), [poem, mark, recite]);
 
   const toneBg: Record<string, string> = {

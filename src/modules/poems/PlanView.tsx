@@ -8,7 +8,7 @@ import { useMemo } from 'react';
 import { motion } from 'motion/react';
 import type { DeepPoem } from '@/types';
 import DEEP_POEMS from '@/data/poems-deep';
-import { useProgress } from '@/store/useStore';
+import { usePoemMarks, usePoemRecite } from '@/store/useStore';
 import { buildPlan, stepLabel, type PoemPlan } from '@/lib/poemPlan';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
@@ -23,12 +23,13 @@ const PRI: Record<PoemPlan['priority'], { labelKey: string; cls: string }> = {
 
 export default function PlanView({ onOpen }: { onOpen: (id: string, tab?: '原文' | '注解' | '格律' | '语境' | '研读') => void }) {
   const { t } = useTranslation();
-  const progress = useProgress();
+  const poemMarks = usePoemMarks();
+  const poemRecite = usePoemRecite();
 
   const plans = useMemo(() => {
-    const ids = new Set<string>(Object.keys(progress.poemMarks));
-    Object.keys(progress.poemRecite).forEach((id) => {
-      const r = progress.poemRecite[id]!;
+    const ids = new Set<string>(Object.keys(poemMarks));
+    Object.keys(poemRecite).forEach((id) => {
+      const r = poemRecite[id]!;
       // 背诵较弱（<80）或一周未复习也纳入计划
       if (r.best < 80 || Date.now() - r.lastAt > 7 * 24 * 3600 * 1000) ids.add(id);
     });
@@ -37,11 +38,11 @@ export default function PlanView({ onOpen }: { onOpen: (id: string, tab?: '原�
       .filter(Boolean)
       .map((p) => {
         const poem = p as DeepPoem;
-        return buildPlan(poem, progress.poemMarks[poem.id], progress.poemRecite[poem.id]);
+        return buildPlan(poem, poemMarks[poem.id], poemRecite[poem.id]);
       })
       .sort((a, b) => ORDER[a.priority] - ORDER[b.priority]);
     return arr;
-  }, [progress.poemMarks, progress.poemRecite]);
+  }, [poemMarks, poemRecite]);
 
   const highCount = plans.filter((p) => p.priority === 'high').length;
 

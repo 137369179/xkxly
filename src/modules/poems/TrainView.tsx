@@ -8,39 +8,41 @@ import { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import type { DeepPoem } from '@/types';
 import DEEP_POEMS from '@/data/poems-deep';
-import { useProgress } from '@/store/useStore';
+import { usePoemMarks, usePoemMastery, usePoemRecite } from '@/store/useStore';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
 
 export default function TrainView({ onOpen }: { onOpen: (id: string, tab?: '原文' | '注解' | '格律' | '语境' | '研读') => void }) {
   const { t } = useTranslation();
-  const progress = useProgress();
+  const poemMarks = usePoemMarks();
+  const poemRecite = usePoemRecite();
+  const poemMastery = usePoemMastery();
   const [q, setQ] = useState('');
 
-  const markedIds = useMemo(() => new Set(Object.keys(progress.poemMarks)), [progress.poemMarks]);
-  const recitedIds = useMemo(() => new Set(Object.keys(progress.poemRecite)), [progress.poemRecite]);
+  const markedIds = useMemo(() => new Set(Object.keys(poemMarks)), [poemMarks]);
+  const recitedIds = useMemo(() => new Set(Object.keys(poemRecite)), [poemRecite]);
 
   const dueCount = useMemo(() => {
     const now = Date.now();
-    return Object.entries(progress.mastery).filter(([k, m]) => k.startsWith('poem:') && (m.due ?? Infinity) <= now).length;
-  }, [progress.mastery]);
+    return Object.values(poemMastery).filter((m) => (m.due ?? Infinity) <= now).length;
+  }, [poemMastery]);
 
   // 训练重点：标过难点或背过的诗，按优先级排序
   const focusList = useMemo(() => {
     const ids = new Set<string>([...markedIds, ...recitedIds]);
     const arr = [...ids].map((id) => DEEP_POEMS.find((p) => p.id === id)).filter(Boolean) as DeepPoem[];
     arr.sort((a, b) => {
-      const ma = progress.poemMarks[a.id];
-      const mb = progress.poemMarks[b.id];
-      const ra = progress.poemRecite[a.id];
-      const rb = progress.poemRecite[b.id];
+      const ma = poemMarks[a.id];
+      const mb = poemMarks[b.id];
+      const ra = poemRecite[a.id];
+      const rb = poemRecite[b.id];
       const score = (m?: { chars: string[]; lines: number[] }) => (m ? m.chars.length + m.lines.length : 0);
       const weak = (r?: { best: number }) => (r && r.best < 80 ? 1 : 0);
       return weak(rb) + score(mb) - (weak(ra) + score(ma));
     });
     return arr;
-  }, [markedIds, recitedIds, progress.poemMarks, progress.poemRecite]);
+  }, [markedIds, recitedIds, poemMarks, poemRecite]);
 
   const lib = useMemo(() => {
     const t = q.trim().toLowerCase();
@@ -73,8 +75,8 @@ export default function TrainView({ onOpen }: { onOpen: (id: string, tab?: '原�
         <div className="mt-4 space-y-2.5">
           <p className="text-sm font-extrabold text-ink-soft">{t('trainView.myFocus')}</p>
           {focusList.map((p) => {
-            const m = progress.poemMarks[p.id];
-            const r = progress.poemRecite[p.id];
+            const m = poemMarks[p.id];
+            const r = poemRecite[p.id];
             return (
               <motion.button
                 key={p.id}

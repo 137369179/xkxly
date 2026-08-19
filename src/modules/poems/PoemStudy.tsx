@@ -12,7 +12,7 @@ import { lineNotesOf, hasLineNotes } from '@/data/poemLineNotes';
 import { EXTERNAL_LINKS } from '@/lib/externalLinks';
 import { lookupAllusion } from '@/data/allusionSources';
 import { poetOf, hasPoet, poetLinks } from '@/data/poets';
-import { useStore, useProgress } from '@/store/useStore';
+import { useStore, usePoemMark } from '@/store/useStore';
 import { cn } from '@/lib/utils';
 import { CandyButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -20,7 +20,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 /* ---------------- 难点标记面板 ---------------- */
 export function MarkPanel({ poem, showPinyin = true }: { poem: DeepPoem; showPinyin?: boolean }) {
   const { t: tr } = useTranslation();
-  const mark = useProgress().poemMarks[poem.id];
+  const mark = usePoemMark(poem.id);
   const toggleChar = useStore((s) => s.togglePoemCharMark);
   const toggleLine = useStore((s) => s.togglePoemLineMark);
   const clearMarks = useStore((s) => s.clearPoemMarks);

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { Progress } from '@/types';
+import { useShallow } from 'zustand/react/shallow';
+import type { Progress, MasteryItem } from '@/types';
 import type { BackupPayload } from '@/lib/backup';
 import { setAiEnabled as aiSetEnabled } from '@/lib/ai/client';
 import { createInitialProgress } from '@/lib/progress';
@@ -330,6 +331,34 @@ export const useStickers = () => useStore((s) => s.progress.stickers);
 export const useWrongBook = () => useStore((s) => s.progress.wrongBook);
 /** 已读古诗 id 列表 */
 export const usePoemsRead = () => useStore((s) => s.progress.poemsRead);
+/** 古诗收藏 id 列表 */
+export const usePoemFavorites = () => useStore((s) => s.progress.poemFavorites);
+/** 单首诗是否收藏（布尔，仅在收藏状态变化时重渲染） */
+export const usePoemFavorite = (id: string) =>
+  useStore((s) => s.progress.poemFavorites.includes(id));
+/** 难点标记整块（列表/统计场景，页面级订阅） */
+export const usePoemMarks = () => useStore((s) => s.progress.poemMarks);
+/** 单首诗难点标记（仅该诗变化时重渲染） */
+export const usePoemMark = (id: string) => useStore((s) => s.progress.poemMarks[id]);
+/** 鉴赏笔记整块 */
+export const usePoemNotes = () => useStore((s) => s.progress.poemNotes);
+/** 单首诗鉴赏笔记（仅该诗笔记变化时重渲染） */
+export const usePoemNote = (id: string) => useStore((s) => s.progress.poemNotes[id] ?? '');
+/** 背诵记录整块 */
+export const usePoemRecite = () => useStore((s) => s.progress.poemRecite);
+/** 单首诗背诵记录（仅该诗背诵变化时重渲染） */
+export const usePoemReciteStat = (id: string) => useStore((s) => s.progress.poemRecite[id]);
+/** 古诗知识点掌握度（仅投影 poem: 前缀，避免整块 mastery 变化触发） */
+export const usePoemMastery = () =>
+  useStore(
+    useShallow((s): Record<string, MasteryItem> => {
+      const out: Record<string, MasteryItem> = {};
+      for (const [k, v] of Object.entries(s.progress.mastery)) {
+        if (k.startsWith('poem:')) out[k] = v;
+      }
+      return out;
+    }),
+  );
 /** 已听数字列表 */
 export const useNumbersHeard = () => useStore((s) => s.progress.numbersHeard);
 /** 每日成长快照（家长报告趋势） */

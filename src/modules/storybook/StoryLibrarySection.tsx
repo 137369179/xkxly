@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 import { motion } from 'motion/react';
 import { NAV_MAP } from '@/data/nav';
 import { navigate, type RouteId } from '@/lib/router';
-import { useProgress } from '@/store/useStore';
+import { useMastery, usePoemsRead } from '@/store/useStore';
+import type { Progress } from '@/types';
 import { TONE_STYLE } from '@/lib/tones';
 import { moduleStat } from '@/lib/moduleStats';
 import { sfxTap } from '@/lib/sfx';
@@ -25,7 +26,11 @@ const SHELVES: Shelf[] = [
 
 export function StoryLibrarySection() {
   const { t } = useTranslation();
-  const p = useProgress();
+  const mastery = useMastery();
+  const poemsRead = usePoemsRead();
+  // 本组件仅需 mastery（儿歌/成语前缀统计）与 poemsRead（古诗已读）：
+  // 只订阅这两个字段，其余 progress 字段变化不触发本组件重渲染。
+  const p = useMemo(() => ({ mastery, poemsRead }) as Progress, [mastery, poemsRead]);
 
   const shelves = useMemo(
     () =>

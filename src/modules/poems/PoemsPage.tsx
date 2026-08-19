@@ -10,7 +10,7 @@ import { motion } from 'motion/react';
 import POEMS from '@/data/poems';
 import { DOSSIERS } from '@/data/poemDossiers';
 import type { DeepPoem } from '@/types';
-import { useStore, useSettings, useProgress } from '@/store/useStore';
+import { useStore, useSettings, usePoemFavorites, usePoemsRead } from '@/store/useStore';
 import { sfxTap } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
 import { PageHeader, Panel } from '@/components/ui/Card';
@@ -73,9 +73,10 @@ export default function PoemsPage({ param }: { param?: string }) {
   const { showPinyin } = useSettings();
   const setShowPinyin = useStore((s) => s.setShowPinyin);
   const readPoem = useStore((s) => s.readPoem);
-  const progress = useProgress();
-  const favSet = useMemo(() => new Set(progress.poemFavorites), [progress.poemFavorites]);
-  const readSet = useMemo(() => new Set(progress.poemsRead), [progress.poemsRead]);
+  const favorites = usePoemFavorites();
+  const readList = usePoemsRead();
+  const favSet = useMemo(() => new Set(favorites), [favorites]);
+  const readSet = useMemo(() => new Set(readList), [readList]);
 
   const [view, setView] = useState<ViewKey>('lib');
   const [openId, setOpenId] = useState<string | null>(
