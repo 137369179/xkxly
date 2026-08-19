@@ -19,6 +19,10 @@
   "common": {
     "collapse": "收起"
   },
+  "tts": {
+    "loudReadListening": "🎤 大声朗读中…（读完自动通过）",
+    "loudReadMode": "识别服务暂不可用，大声朗读出来就可以通过哦～"
+  },
   "countingGame": {
     "off": "关",
     "on": "开"

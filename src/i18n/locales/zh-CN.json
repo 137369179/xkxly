@@ -1720,6 +1720,8 @@
     "listening": "🎙️ 正在听你读…（点击停止）",
     "passed": "✨ 朗读通过！",
     "tapRead": "🎤 点击跟读",
+    "loudReadListening": "🎤 大声朗读中…（读完自动通过）",
+    "loudReadMode": "识别服务暂不可用，大声朗读出来就可以通过哦～",
     "pts": "分",
     "correctChars": "正确 {correct}/{total} 字",
     "aiAdvice": "🤖 AI 老师建议",

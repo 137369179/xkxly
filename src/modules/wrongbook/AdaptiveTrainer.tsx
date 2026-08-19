@@ -286,10 +286,10 @@ export function AdaptiveTrainer() {
               })()}
             </div>
           )}
-          <div className="mt-4 flex flex-col gap-2">
+          <div className="mt-4 grid grid-cols-2 gap-2">
             <CandyButton
               tone="purple"
-              size="lg"
+              size="md"
               fullWidth
               disabled={wrongBook.length === 0}
               onClick={startChallenge}
@@ -351,8 +351,8 @@ export function AdaptiveTrainer() {
             </div>
           </div>
           <p className="mt-3 text-sm font-bold text-ink-soft">{tr('common.accuracy')} {acc}%</p>
-          <div className="mt-4 flex flex-col gap-2">
-            <CandyButton tone="purple" size="lg" fullWidth onClick={startChallenge}>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <CandyButton tone="purple" size="md" fullWidth onClick={startChallenge}>
               {tr('common.retryOnce')}
             </CandyButton>
             <CandyButton tone="blue" size="md" fullWidth onClick={handleAiAnalyze}>

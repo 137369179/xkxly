@@ -119,11 +119,11 @@ export function PinyinLearn({ entry, onDone }: { entry: PinyinEntry; onDone: () 
           <Panel className="text-center">
             <div className="text-6xl font-black text-ink">{entry.p}</div>
             <p className="mt-2 text-lg font-bold text-candy-purple-deep">{entry.rhyme}</p>
-            <div className="mt-4 space-y-2">
-              <CandyButton tone="blue" size="md" fullWidth onClick={() => speak(entry.p, { lang: 'zh-CN', rate: 0.6 })}>{tr('pinyin.readPinyin')}</CandyButton>
-              <CandyButton tone="purple" size="md" fullWidth onClick={() => speak(entry.rhyme, { lang: 'zh-CN', rate: 0.7 })}>{tr('pinyin.readRhyme')}</CandyButton>
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              <CandyButton tone="blue" size="md" onClick={() => speak(entry.p, { lang: 'zh-CN', rate: 0.6 })}>{tr('pinyin.readPinyin')}</CandyButton>
+              <CandyButton tone="purple" size="md" onClick={() => speak(entry.rhyme, { lang: 'zh-CN', rate: 0.7 })}>{tr('pinyin.readRhyme')}</CandyButton>
               {entry.syllables.map(s => (
-                <CandyButton key={s} tone="orange" size="md" variant="soft" fullWidth onClick={() => speak(s, { lang: 'zh-CN', rate: 0.7 })}>🔊 {s}</CandyButton>
+                <CandyButton key={s} tone="orange" size="md" variant="soft" onClick={() => speak(s, { lang: 'zh-CN', rate: 0.7 })}>🔊 {s}</CandyButton>
               ))}
             </div>
           </Panel>

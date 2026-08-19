@@ -55,11 +55,11 @@ export function StruggleModal({ open, wrongStreak, onContinue, onSkip }: Struggl
         <p className="mt-1 text-xs font-bold text-ink-soft/70">
           {t('struggleModal.wrongStreak', { count: wrongStreak })}
         </p>
-        <div className="mt-5 flex flex-col gap-2">
-          <CandyButton tone="green" size="lg" fullWidth onClick={onContinue}>
+        <div className="mt-5 grid grid-cols-2 gap-2">
+          <CandyButton tone="green" size="md" fullWidth onClick={onContinue}>
             {t('struggleModal.continueBtn')}
           </CandyButton>
-          <CandyButton tone="orange" size="md" fullWidth onClick={onSkip}>
+          <CandyButton tone="orange" variant="soft" size="md" fullWidth onClick={onSkip}>
             {t('struggleModal.skipBtn')}
           </CandyButton>
         </div>

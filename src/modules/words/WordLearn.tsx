@@ -200,9 +200,9 @@ export function WordLearn({ word, onDone }: { word: WordEntry; onDone: () => voi
             <div className="text-7xl">{word.emoji}</div>
             <div className="mt-1 text-4xl font-black text-ink">{word.word}</div>
             <p className="text-lg font-bold text-candy-purple-deep">{word.zh}</p>
-            <div className="mt-4 space-y-2">
-              <CandyButton tone="blue" size="md" fullWidth onClick={() => speak(word.word, { lang: 'en-US', rate: 0.72 })}>{tr('words.readWord')}</CandyButton>
-              <CandyButton tone="orange" size="md" fullWidth onClick={() => speak(word.sentence, { lang: 'en-US', rate: 0.8 })}>{tr('words.readSent')}</CandyButton>
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              <CandyButton tone="blue" size="md" onClick={() => speak(word.word, { lang: 'en-US', rate: 0.72 })}>{tr('words.readWord')}</CandyButton>
+              <CandyButton tone="orange" size="md" onClick={() => speak(word.sentence, { lang: 'en-US', rate: 0.8 })}>{tr('words.readSent')}</CandyButton>
             </div>
           </Panel>
           <div className="flex justify-center">

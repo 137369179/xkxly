@@ -24,6 +24,148 @@ export function isSpeechRecogSupported(): boolean {
 
 type RecogInstance = InstanceType<NonNullable<Window['SpeechRecognition']>>;
 
+/**
+ * 获取当前浏览器可用的 SpeechRecognition 构造器（无则 null）。
+ * 注意：Chrome/Edge 的识别走 Google 语音服务，国内网络不可达时会「点击后立即失败/
+ * 静默结束」，因此调用方必须准备「大声朗读即通过」的降级路径。
+ */
+export function getSpeechRecognitionCtor(): (new () => RecogInstance) | null {
+  if (typeof window === 'undefined') return null;
+  return (window.SpeechRecognition || window.webkitSpeechRecognition || null) as (new () => RecogInstance) | null;
+}
+
+export type MicPermission = 'granted' | 'denied' | 'unsupported';
+
+/**
+ * 预请求麦克风硬件权限（在 start() 之前调用，可提前捕获「拒绝授权」并给出友好提示，
+ * 而不是等 onerror('not-allowed') 才处理；同时确保 start 时麦克风已就绪）。
+ */
+export async function requestMicPermission(): Promise<MicPermission> {
+  if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) return 'unsupported';
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach((t) => t.stop());
+    return 'granted';
+  } catch {
+    return 'denied';
+  }
+}
+
+/** 识别失败原因归类（供 UI 选择友好提示 / 自动降级） */
+export type RecogFailure =
+  | 'no-speech' // 没听到声音（真·长时间静默）
+  | 'denied' // 麦克风权限被拒
+  | 'no-mic' // 无可用麦克风
+  | 'service-unavailable' // 识别服务不可用（网络/服务端问题，如 Google 服务被墙）
+  | 'unknown';
+
+export function classifyRecogError(errCode: string): RecogFailure {
+  switch (errCode) {
+    case 'no-speech':
+      return 'no-speech';
+    case 'not-allowed':
+      return 'denied';
+    case 'audio-capture':
+      return 'no-mic';
+    case 'network':
+    case 'service-not-allowed':
+    case 'language-not-supported':
+      return 'service-unavailable';
+    default:
+      return 'unknown';
+  }
+}
+
+/** 「大声朗读即通过」降级模式的音量检测句柄 */
+export interface VoiceDetector {
+  /** 检测完成：检测到明显人声 → true；超时/被主动 stop → false */
+  promise: Promise<boolean>;
+  /** 立即停止并释放麦克风/音频上下文，promise 会 resolve(false)。幂等，可安全重复调用 */
+  stop: () => void;
+}
+
+/**
+ * 监听麦克风音量，检测孩子是否真的开口朗读（「大声朗读即通过」降级模式的判定）。
+ * 返回 { promise, stop }：检测到明显人声 → true；超时无声音 → false。
+ * 结束（无论成功/超时/主动 stop）都会自动释放麦克风与音频上下文。
+ * 浏览器不支持时返回恒 false 且 stop 无操作的句柄。
+ */
+export function detectVoiceOnce(
+  timeoutMs = 20_000,
+  onLevel?: (level: number) => void,
+): VoiceDetector {
+  const notSupported: VoiceDetector = { promise: Promise.resolve(false), stop: () => {} };
+  if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) return notSupported;
+  const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AudioCtx) return notSupported;
+
+  let resolve!: (v: boolean) => void;
+  const done = new Promise<boolean>((r) => { resolve = r; });
+
+  let stream: MediaStream | null = null;
+  let ctx: AudioContext | null = null;
+  let cancelled = false;
+
+  const cleanup = () => {
+    if (cancelled) return;
+    cancelled = true;
+    clearTimeout(timer);
+    try { stream?.getTracks().forEach((t) => t.stop()); } catch { /* noop */ }
+    try { void ctx?.close(); } catch { /* noop */ }
+  };
+
+  const timer = setTimeout(() => {
+    cleanup();
+    resolve(false);
+  }, timeoutMs);
+
+  const stop = () => {
+    cleanup();
+    resolve(false);
+  };
+
+  (async () => {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch {
+      cleanup();
+      resolve(false);
+      return;
+    }
+    ctx = new AudioCtx();
+    const source = ctx.createMediaStreamSource(stream);
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 256;
+    analyser.smoothingTimeConstant = 0.4;
+    source.connect(analyser);
+    const data = new Uint8Array(analyser.frequencyBinCount);
+    let loudFrames = 0;
+    const check = () => {
+      if (cancelled) return;
+      analyser.getByteFrequencyData(data);
+      let sum = 0;
+      for (let i = 0; i < data.length; i++) sum += data[i] ?? 0;
+      const avg = sum / data.length;
+      onLevel?.(avg);
+      // 连续 2 帧音量达标才判定为「开口了」，避免环境噪声误判
+      if (avg > 25) {
+        loudFrames++;
+        if (loudFrames >= 2) {
+          cleanup();
+          resolve(true);
+          return;
+        }
+      } else {
+        loudFrames = Math.max(0, loudFrames - 1);
+      }
+      requestAnimationFrame(check);
+    };
+    requestAnimationFrame(check);
+  })();
+
+  return { promise: done, stop };
+}
+
 class SpeechRecogManager {
   private recognition: RecogInstance | null = null;
   private isListening = false;

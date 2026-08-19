@@ -1720,6 +1720,8 @@
     "listening": "🎙️ Listening… (tap to stop)",
     "passed": "✨ Reading passed!",
     "tapRead": "🎤 Tap to read",
+    "loudReadListening": "🎤 Read aloud… (passes automatically)",
+    "loudReadMode": "Recognition is unavailable — read aloud to pass!",
     "pts": "pts",
     "correctChars": "{correct}/{total} characters correct",
     "aiAdvice": "🤖 AI Teacher's Advice",

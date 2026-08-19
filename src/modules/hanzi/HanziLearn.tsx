@@ -224,14 +224,14 @@ export function HanziLearn({ hanzi, onDone }: { hanzi: HanziEntry; onDone: () =>
               />
             </div>
 
-            <div className="mt-4 space-y-2">
-              <CandyButton tone="blue" size="md" fullWidth onClick={() => speak(hanzi.c, { lang: 'zh-CN', rate: 0.7 })}>
+            <div className="mt-4 grid grid-cols-3 gap-2">
+              <CandyButton tone="blue" size="sm" fullWidth className="!px-2 whitespace-nowrap" onClick={() => speak(hanzi.c, { lang: 'zh-CN', rate: 0.7 })}>
                 {t('hanzi.readChar')}
               </CandyButton>
-              <CandyButton tone="purple" size="md" fullWidth onClick={() => speak(hanzi.words.join('，'), { lang: 'zh-CN', rate: 0.75 })}>
+              <CandyButton tone="purple" size="sm" fullWidth className="!px-2 whitespace-nowrap" onClick={() => speak(hanzi.words.join('，'), { lang: 'zh-CN', rate: 0.75 })}>
                 {t('hanzi.readWords')}
               </CandyButton>
-              <CandyButton tone="orange" size="md" fullWidth onClick={() => speak(hanzi.sentence, { lang: 'zh-CN', rate: 0.8 })}>
+              <CandyButton tone="orange" size="sm" fullWidth className="!px-2 whitespace-nowrap" onClick={() => speak(hanzi.sentence, { lang: 'zh-CN', rate: 0.8 })}>
                 {t('hanzi.readSentence')}
               </CandyButton>
             </div>
