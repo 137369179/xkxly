@@ -2639,7 +2639,10 @@
       "muteOn": "🎙️ Mic On",
       "hangUp": "☎️ Hang Up",
       "doneSpeaking": "⏹️ Done Speaking",
-      "speakAgain": "🗣️ Speak Again"
+      "speakAgain": "🗣️ Speak Again",
+      "close": "End voice call",
+      "micDenied": "Please allow the microphone so I can hear you~",
+      "noSpeakPaused": "I didn't hear you. Tap 🎙️ to talk to me~"
     },
     "quickPhrases": [
       "🐱 Meow, introduce yourself!",
@@ -3146,7 +3149,8 @@
     "thinking": "Xiao Zhi is thinking",
     "speaking": "Xiao Zhi is speaking",
     "speakingAgain": "Xiao Zhi is speaking... (tap again to talk)",
-    "startTalk": "Hold / Tap to start talking"
+    "startTalk": "Hold / Tap to start talking",
+    "micDenied": "Please allow the microphone so I can hear what you want to say~"
   },
   "smart": {
     "title": "🎯 Smart Practice Recommendations",

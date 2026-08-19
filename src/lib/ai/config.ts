@@ -81,7 +81,8 @@ const SCENE_CONFIG: Record<AiScene, SceneConfig> = {
   'number.story': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.9, maxTokens: 900 },
   'poem.imagine': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.85, maxTokens: 800 },
   'poem.prosody': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.5, maxTokens: 800 },
-  'quiz.extend': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.9, maxTokens: 600 },
+  // 对话类（小智语音/追问、逗趣延伸）同样走非推理模型，避免思考链吃空正文落到本地兜底
+  'quiz.extend': { model: 'deepseek-chat', fallback: ['agnes-2.5-flash'], temperature: 0.9, maxTokens: 600 },
   'adventure.encourage': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.8, maxTokens: 600 },
   'daily.summary': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.85, maxTokens: 700 },
 
@@ -118,7 +119,10 @@ const SCENE_CONFIG: Record<AiScene, SceneConfig> = {
   'path.coach': { model: DEFAULT_MODEL, fallback: ['deepseek-reasoner', 'deepseek-chat'], temperature: 0.6, maxTokens: 1200 },
 
   // —— AI 陪伴学习伙伴 ——
-  'companion.chat': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'deepseek-v4-flash', 'agnes-2.5-flash'], temperature: 0.85, maxTokens: 250 },
+  // ⚠️ 对话类场景必须走非推理模型（deepseek-chat）：这句话 AI 得直接出正文，
+  // 而 agnes/deepseek-reasoner 的思考链会吃掉大量 completion token，
+  // 曾经 maxTokens=250 被思考链吃空返回 empty_content，孩子得到的是本地兜底而不是真正的 AI 回答。
+  'companion.chat': { model: 'deepseek-chat', fallback: ['deepseek-v4-flash', 'agnes-2.5-flash'], temperature: 0.85, maxTokens: 900 },
   'companion.explain': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.8, maxTokens: 1000 },
 
   // —— S2 Companion 2.0 新增 ——

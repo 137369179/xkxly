@@ -2639,7 +2639,10 @@
       "muteOn": "🎙️ 麦克风开",
       "hangUp": "☎️ 挂断电话",
       "doneSpeaking": "⏹️ 说话完毕",
-      "speakAgain": "🗣️ 再次说话"
+      "speakAgain": "🗣️ 再次说话",
+      "close": "结束语音电话",
+      "micDenied": "先允许小猫使用麦克风，才能在电话里听到你说话哦～",
+      "noSpeakPaused": "小猫刚没听到你说话，先点一下 🎙️ 再来叫我吧～"
     },
     "quickPhrases": [
       "🐱 喵喵，介绍一下你自己！",
@@ -3146,7 +3149,8 @@
     "thinking": "小智思考中",
     "speaking": "小智回答中",
     "speakingAgain": "小智回答中… (再点一次说话)",
-    "startTalk": "长按 / 点击 开始说话"
+    "startTalk": "长按 / 点击 开始说话",
+    "micDenied": "先允许小智使用麦克风，才能听到你想说什么哦～"
   },
   "smart": {
     "title": "🎯 智能推荐练习",

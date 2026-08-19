@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSafeTimeout } from '@/lib/useTimer';
 import { useTranslation } from '@/i18n/useTranslation';
-import { isSpeechRecogSupported, speechRecog } from '@/lib/ai/speechRecog';
+import { isSpeechRecogSupported, speechRecog, requestMicPermission } from '@/lib/ai/speechRecog';
+import { guardInput } from '@/lib/ai/guard';
 import { chatStream } from '@/lib/ai/client';
 import { speak, stopSpeaking } from '@/lib/speech';
 import { sfxTap, sfxCorrect } from '@/lib/sfx';
@@ -22,6 +23,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
   const activeStreamRef = useRef<boolean>(false);
   const abortRef = useRef<AbortController | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const scheduleFocus = useSafeTimeout();
 
@@ -33,7 +35,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
   useEffect(() => {
     if (!isOpen) return;
     previousFocusRef.current = document.activeElement as HTMLElement;
-    scheduleFocus(() => modalRef.current?.focus(), 50);
+    scheduleFocus(() => closeBtnRef.current?.focus(), 60);
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         activeStreamRef.current = false;
@@ -92,9 +94,15 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
     return () => { speechRecog.stop(); };
   }, []);
 
-  const handleStartListening = () => {
+  const handleStartListening = useCallback(async () => {
     if (!supported) {
       setErrorMsg('你的浏览器暂不支持直接语音对话，试试用文字提问吧～');
+      return;
+    }
+    // 预检麦克风权限：被拒时直接给出友好提示，而非等 onerror 静默失败
+    const perm = await requestMicPermission();
+    if (perm === 'denied') {
+      setErrorMsg(tr('voice.micDenied'));
       return;
     }
     stopSpeaking();
@@ -109,7 +117,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
         setTranscript(text);
         if (isFinal && text.trim()) {
           speechRecog.stop();
-          handleSendToAi(text.trim());
+          void handleSendToAi(text.trim());
         }
       },
       onError: (err) => {
@@ -120,13 +128,13 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
         const currentStatus = statusRef.current;
         const currentTranscript = transcriptRef.current;
         if (currentStatus === 'listening' && currentTranscript.trim()) {
-          handleSendToAi(currentTranscript.trim());
+          void handleSendToAi(currentTranscript.trim());
         } else if (currentStatus === 'listening') {
           setStatus('idle');
         }
       },
     });
-  };
+  }, [supported, handleSendToAi, tr]);
 
   const handleStopListening = () => {
     speechRecog.stop();
@@ -137,7 +145,15 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
     }
   };
 
-  const handleSendToAi = async (question: string) => {
+  const handleSendToAi = useCallback(async (raw: string) => {
+    // 输入护栏：拦截异常内容，绝不直送 AI
+    const guarded = guardInput(raw);
+    if (!guarded.ok) {
+      setErrorMsg(guarded.reason || '这个问题我们换个说法聊聊吧～');
+      setStatus('idle');
+      return;
+    }
+    const question = guarded.text;
     setStatus('thinking');
     activeStreamRef.current = true;
     abortRef.current?.abort();
@@ -179,7 +195,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
       setAiResponse(fallback);
       speak(fallback);
     }
-  };
+  }, [tr]);
 
   return (
     <AnimatePresence>
@@ -204,6 +220,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
           className="relative z-10 w-full max-w-md overflow-hidden rounded-3xl bg-white p-6 shadow-2xl border-4 border-candy-yellow text-center"
         >
           <button
+            ref={closeBtnRef}
             onClick={() => { activeStreamRef.current = false; abortRef.current?.abort(); onClose(); }}
             aria-label="关闭语音对话"
             className="absolute top-4 right-4 grid h-10 w-10 place-items-center rounded-full bg-cream-dark text-ink-soft hover:bg-candy-yellow transition-colors font-bold text-xl"

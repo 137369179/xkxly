@@ -57,10 +57,10 @@ export function StarRating({
 }
 
 /** 顶部星星总数徽记 */
-export function StarCounter({ count }: { count: number }) {
+export function StarCounter({ count, className = '' }: { count: number; className?: string }) {
   const { t } = useTranslation();
   return (
-    <div className="jelly-shine flex items-center gap-1.5 rounded-full bg-candy-yellow-soft px-3.5 py-2 shadow-candy-sm" role="status" aria-label={t('stars.total', { count })}>
+    <div className={`jelly-shine flex items-center gap-1.5 rounded-full bg-candy-yellow-soft px-3.5 py-2 shadow-candy-sm ${className}`} role="status" aria-label={t('stars.total', { count })}>
       <StarIcon size={20} />
       <span className="text-base font-extrabold text-candy-yellow-deep tabular-nums" aria-live="polite">{count}</span>
     </div>
