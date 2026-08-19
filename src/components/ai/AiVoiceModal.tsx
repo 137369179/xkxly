@@ -113,7 +113,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
       const generator = chatStream({
         scene: 'quiz.extend',
         messages: [
-          { role: 'system', content: '你是一个面向5岁小朋友的智慧好朋友小智。回答要极为亲切、活泼、充满童趣，使用极其简单通俗的语言，控制在3句话以内，尽量多用比喻。' },
+          { role: 'system', content: '你是一个面向5岁小朋友的智慧好朋友小智。回答要极为亲切、活泼、充满童趣，使用极其简单通俗的语言，尽量多用比喻。最重要的是：讲的知识必须准确专业有依据，不确定就明确说「我们一起查一查吧」，绝不编造；先给出准确结论，再用比喻展开。回答控制在3句话、90字以内。' },
           { role: 'user', content: question },
         ],
         signal: ac.signal,
