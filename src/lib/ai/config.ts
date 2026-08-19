@@ -81,7 +81,9 @@ const SCENE_CONFIG: Record<AiScene, SceneConfig> = {
   'number.story': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.9, maxTokens: 900 },
   'poem.imagine': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.85, maxTokens: 800 },
   'poem.prosody': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.5, maxTokens: 800 },
-  'quiz.extend': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.9, maxTokens: 600 },
+  // 对话类场景主模型必须是已接入且可用的 Agnes（实测 deepseek 上游 fetch failed）：
+  // 保留充足的 maxTokens，让 Agnes 有时思考/完整成文，避免正文被截断落到本地兜底。
+  'quiz.extend': { model: DEFAULT_MODEL, fallback: ['agnes-2.5-flash'], temperature: 0.9, maxTokens: 700 },
   'adventure.encourage': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.8, maxTokens: 600 },
   'daily.summary': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.85, maxTokens: 700 },
 
@@ -118,7 +120,9 @@ const SCENE_CONFIG: Record<AiScene, SceneConfig> = {
   'path.coach': { model: DEFAULT_MODEL, fallback: ['deepseek-reasoner', 'deepseek-chat'], temperature: 0.6, maxTokens: 1200 },
 
   // —— AI 陪伴学习伙伴 ——
-  'companion.chat': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'deepseek-v4-flash', 'agnes-2.5-flash'], temperature: 0.85, maxTokens: 250 },
+  // 对话类必须用已接入且实测可用的 Agnes（deepseek 上游 fetch failed，别再用）：
+  // maxTokens 给足以避免 Agnes 有时思考/成文过长被截断成空、落到本地兜底。
+  'companion.chat': { model: DEFAULT_MODEL, fallback: ['agnes-2.5-flash'], temperature: 0.85, maxTokens: 900 },
   'companion.explain': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.8, maxTokens: 1000 },
 
   // —— S2 Companion 2.0 新增 ——
