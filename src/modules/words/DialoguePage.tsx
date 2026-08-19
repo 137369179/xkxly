@@ -179,7 +179,7 @@ export function DialoguePage() {
               </div>
               {mode === 'learn' || mode === 'repeat' || feedback !== 'none' ? (
                 <>
-                  <p className="text-base font-extrabold">{currentLine.en}</p>
+                  <p className="text-xl font-extrabold leading-tight sm:text-2xl">{currentLine.en}</p>
                   <p className="text-sm font-bold opacity-70">{currentLine.zh}</p>
                 </>
               ) : (

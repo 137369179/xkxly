@@ -113,7 +113,7 @@ export function HanziEvolve({ char, onClose }: { char?: string; onClose?: () => 
           animate={{ opacity: 1, y: 0 }}
           className="mt-3 rounded-2xl bg-candy-blue-soft p-4 text-center"
         >
-          <div className="text-4xl font-black text-candy-blue-deep" style={{ fontFamily: 'serif' }}>
+          <div className="text-center text-5xl font-black leading-tight text-candy-blue-deep sm:text-6xl" style={{ fontFamily: 'serif' }}>
             {data.c}
           </div>
           <p className="mt-2 text-sm font-bold text-ink">{EVOLVE_STAGES[stageIdx]!.name}</p>

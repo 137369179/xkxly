@@ -187,7 +187,7 @@ export function ClockTrainer() {
       </div>
 
       {/* 题目 */}
-      <p className="mb-4 text-center text-lg font-bold text-ink-soft">
+      <p className="mb-4 text-center text-xl font-extrabold text-ink leading-tight sm:text-2xl">
         {tr('clockTrainer.question')}
       </p>
 

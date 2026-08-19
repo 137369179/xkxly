@@ -100,7 +100,7 @@ export function PinyinGroup() {
                 key={item.p}
                 onClick={() => { sfxTap(); setDraggedItem(item.p); void speak(item.p, { lang: 'zh-CN', rate: 0.7, module: 'ai' }).catch(() => {}); }}
                 className={cn(
-                  'rounded-xl px-4 py-3 text-xl font-extrabold shadow-candy-sm transition-all',
+                  'rounded-xl px-4 py-3 text-2xl font-extrabold leading-tight shadow-candy-sm transition-all sm:text-3xl',
                   isDragging ? 'scale-110 bg-candy-purple-soft ring-2 ring-candy-purple-deep' : 'bg-white hover:bg-pink-50',
                 )}
               >
@@ -136,7 +136,7 @@ export function PinyinGroup() {
             {/* 已放入的韵母 */}
             <div className="mt-2 flex flex-wrap justify-center gap-1">
               {items.filter(i => placed[i.p] === cat.id).map(i => (
-                <span key={i.p} className="rounded-lg bg-white/80 px-2 py-0.5 text-sm font-extrabold text-ink shadow-sm">{i.p}</span>
+                <span key={i.p} className="rounded-lg bg-white/80 px-2 py-0.5 text-base font-extrabold leading-tight text-ink shadow-sm sm:text-lg">{i.p}</span>
               ))}
             </div>
           </button>

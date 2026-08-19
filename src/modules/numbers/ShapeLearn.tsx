@@ -130,8 +130,8 @@ export function ShapeLearn() {
                     : 'border-purple-200 bg-white hover:border-purple-300 hover:bg-purple-50'
                 }`}
               >
-                <span className="text-4xl mb-1">{o.emoji}</span>
-                <span className="text-base">{o.name}</span>
+                <span className="text-4xl mb-1 sm:text-5xl">{o.emoji}</span>
+                <span className="text-lg font-black leading-tight sm:text-xl">{o.name}</span>
               </motion.button>
             );
           })}

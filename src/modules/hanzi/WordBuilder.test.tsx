@@ -38,7 +38,9 @@ function renderWith(initialChar?: string) {
 }
 
 function bigChar(container: HTMLElement): string {
-  const el = container.querySelector('.text-5xl');
+  // 大字展示 span 经历响应式字号放大（text-5xl → text-6xl sm:text-7xl），
+  // 选择器与当前 UI 保持同步，仅锁定「预选目标字渲染为大字」行为本身。
+  const el = container.querySelector('.text-6xl');
   return el?.textContent?.trim() ?? '';
 }
 

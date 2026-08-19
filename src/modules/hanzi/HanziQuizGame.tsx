@@ -174,7 +174,7 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
             🔊
           </button>
           <div className="text-left">
-            <div className="text-2xl font-black text-amber-950 tracking-wider">
+            <div className="text-3xl font-black leading-tight text-amber-950 tracking-wider sm:text-4xl">
               {currentHanzi.p}
             </div>
             <div className="text-xs font-bold text-amber-700">
@@ -208,7 +208,7 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
                   : 'bg-white hover:bg-amber-50/50 border-amber-200 text-amber-950'
               }`}
             >
-              <div className="text-4xl font-black font-serif tracking-widest">
+              <div className="text-center text-5xl font-black leading-tight font-serif tracking-widest sm:text-6xl">
                 {opt.c}
               </div>
               <div className="text-xs font-bold text-amber-700 mt-1">

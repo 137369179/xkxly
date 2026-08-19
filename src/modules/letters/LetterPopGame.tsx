@@ -357,7 +357,7 @@ export function LetterPopGame() {
                     >
                       {/* 气球高光质感 */}
                       <div className="absolute top-2 left-2.5 h-4 w-2 rounded-full bg-white/60 transform -rotate-45" />
-                      <span className="text-3xl sm:text-4xl font-black drop-shadow-md">
+                      <span className="text-4xl sm:text-5xl font-black leading-tight drop-shadow-md">
                         {b.letter.upper}
                       </span>
                     </div>

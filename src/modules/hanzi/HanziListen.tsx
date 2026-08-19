@@ -248,7 +248,7 @@ export default function HanziListen() {
                 }
                 transition={{ duration: 0.4 }}
                 className={[
-                  'flex flex-col items-center justify-center gap-1 rounded-2xl py-6 text-5xl font-extrabold shadow-sm transition-colors',
+                  'flex flex-col items-center justify-center gap-1 rounded-2xl py-6 text-6xl font-extrabold leading-tight shadow-sm transition-colors sm:text-7xl',
                   correctNow
                     ? 'bg-green-200 text-green-800'
                     : wrongNow
@@ -271,7 +271,7 @@ export default function HanziListen() {
           animate={{ opacity: 1, y: 0 }}
           className="w-full rounded-3xl bg-gradient-to-br from-amber-100 to-pink-100 p-5 text-center shadow"
         >
-          <div className="text-6xl font-extrabold text-ink">{target.c}</div>
+          <div className="text-center text-7xl font-extrabold leading-tight text-ink sm:text-8xl">{target.c}</div>
           <div className="mt-1 text-lg text-ink-soft">{target.pinyin}</div>
           <div className="mt-3 text-ink">
             <span className="font-bold">{t('hanziListen.wordLabel')}：</span>

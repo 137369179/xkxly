@@ -43,7 +43,7 @@ function DinoCard({ dino, onClose }: { dino: DinoItem; onClose: () => void }) {
         </motion.div>
         <div className="flex-1 text-center sm:text-left space-y-2">
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-            <h3 className="text-2xl font-black text-green-900">{dino.nameZh}</h3>
+            <h3 className="text-4xl font-black leading-tight text-green-900 sm:text-5xl">{dino.nameZh}</h3>
             <span className="text-lg font-extrabold text-emerald-700">{dino.nameEn}</span>
             <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800">{dino.phonics}</span>
           </div>

@@ -30,7 +30,7 @@ export function NumberTrace() {
               {n}
             </span>
           </div>
-          <h3 className="text-4xl font-extrabold" style={{ color: ts.deep }}>
+          <h3 className="text-5xl font-extrabold leading-tight sm:text-6xl" style={{ color: ts.deep }}>
             {toChineseNumber(n)}
           </h3>
           {n > 0 && (
@@ -77,8 +77,8 @@ export function NumberTrace() {
               key={num}
               onClick={() => setN(num)}
               className={cn(
-                'no-select grid min-h-[56px] place-items-center rounded-2xl text-xl font-extrabold',
-                'transition-shadow active:translate-y-[2px] sm:min-h-[62px] sm:text-2xl',
+                'no-select grid min-h-[56px] place-items-center rounded-2xl text-2xl font-extrabold',
+                'transition-shadow active:translate-y-[2px] sm:min-h-[62px] sm:text-3xl',
                 'focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-candy-yellow/70',
               )}
               style={{ background: ct.soft, color: ct.deep, boxShadow: `0 4px 0 0 ${ct.main}55` }}

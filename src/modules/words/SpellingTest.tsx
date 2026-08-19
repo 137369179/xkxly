@@ -158,7 +158,7 @@ export function SpellingTest() {
             return (
               <div
                 key={`_-${i}`}
-                className={`h-12 w-10 rounded-xl border-4 flex items-center justify-center text-2xl font-extrabold uppercase ${
+                className={`h-12 w-11 rounded-xl border-4 flex items-center justify-center text-3xl font-extrabold leading-tight uppercase sm:w-12 sm:text-4xl ${
                   showResult
                     ? isCorrect
                       ? 'border-candy-green-deep bg-candy-green-soft text-candy-green-deep'
@@ -181,14 +181,14 @@ export function SpellingTest() {
               <button
                 key={`letter-${i}`}
                 onClick={() => handleLetter(letter)}
-                className="h-12 w-10 rounded-xl border-4 border-candy-blue-soft bg-white text-lg font-extrabold uppercase text-ink active:translate-y-[1px] hover:bg-candy-blue-soft"
+                className="h-12 w-10 rounded-xl border-4 border-candy-blue-soft bg-white text-xl font-extrabold uppercase text-ink active:translate-y-[1px] hover:bg-candy-blue-soft sm:text-2xl"
               >
                 {letter}
               </button>
             ))}
             <button
               onClick={handleBackspace}
-              className="h-12 rounded-xl border-4 border-candy-orange-soft bg-white px-4 text-lg font-extrabold text-candy-orange-deep active:translate-y-[1px]"
+              className="h-12 rounded-xl border-4 border-candy-orange-soft bg-white px-4 text-xl font-extrabold text-candy-orange-deep active:translate-y-[1px] sm:text-2xl"
             >
               ⌫
             </button>

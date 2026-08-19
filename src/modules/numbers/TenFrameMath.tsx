@@ -129,7 +129,7 @@ export function TenFrameMath() {
             <span className="text-candy-orange-deep">{addProb.a}</span> + <span className="text-candy-blue-deep">{addProb.b}</span> = <span className="text-candy-green-deep">{step === 'done' ? addProb.sum : '?'}</span>
           </div>
 
-          <p className="text-xs font-bold text-ink-soft">
+          <p className="text-sm font-bold text-ink-soft leading-tight sm:text-base">
             {step === 'initial' && `第 1 步：观察十格阵，${addProb.a} 还差几个凑成 10 呢？`}
             {step === 'action' && `第 2 步：借来 ${addProb.makeTen} 个填满十格阵，还剩 ${addProb.remain} 个！`}
             {step === 'done' && `第 3 步：10 + ${addProb.remain} = ${addProb.sum}，太厉害啦！`}
@@ -210,7 +210,7 @@ export function TenFrameMath() {
             <span className="text-candy-purple-deep">{subProb.total}</span> - <span className="text-candy-pink-deep">{subProb.sub}</span> = <span className="text-candy-green-deep">{step === 'done' ? subProb.result : '?'}</span>
           </div>
 
-          <p className="text-xs font-bold text-ink-soft">
+          <p className="text-sm font-bold text-ink-soft leading-tight sm:text-base">
             {step === 'initial' && `第 1 步：把 ${subProb.total} 拆成 10 和 ${subProb.remain}，先算 10 - ${subProb.sub}`}
             {step === 'action' && `第 2 步：从 10 拿走 ${subProb.sub} 剩 ${subProb.breakTen}，再加上单出的 ${subProb.remain}`}
             {step === 'done' && `第 3 步：${subProb.breakTen} + ${subProb.remain} = ${subProb.result}，算对啦！`}

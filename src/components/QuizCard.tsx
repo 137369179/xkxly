@@ -406,7 +406,7 @@ export function QuizCard({
             <span
               key={`shape-${s}-${i}`}
               className={cn(
-                'text-4xl sm:text-5xl',
+                'text-5xl sm:text-6xl',
                 s === '❓' && 'animate-bounce-soft rounded-2xl bg-candy-yellow-soft px-2',
               )}
             >

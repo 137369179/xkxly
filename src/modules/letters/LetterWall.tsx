@@ -203,7 +203,7 @@ export function LetterWall() {
               </span>
 
               <span
-                className="mt-1 text-3xl leading-none font-extrabold sm:text-4xl"
+                className="mt-1 text-4xl leading-tight font-extrabold sm:text-5xl text-center"
                 style={{ color: t.deep }}
               >
                 {caseMode === 'both' ? (

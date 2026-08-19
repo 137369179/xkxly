@@ -213,7 +213,7 @@ export function FractionLearn() {
           </div>
 
           <div className="rounded-2xl bg-amber-50/80 p-3 max-w-sm mx-auto border border-amber-200">
-            <p className="text-3xl font-black text-candy-orange-deep">
+            <p className="text-5xl font-black text-candy-orange-deep leading-tight sm:text-6xl">
               {eatenSlices.length}/{f.slices}
             </p>
             <p className="text-sm font-bold text-ink-soft mt-1">

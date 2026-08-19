@@ -212,11 +212,11 @@ export function SkipCounting() {
           </p>
 
           <div className="flex items-center justify-center gap-3">
-            <span className="rounded-2xl bg-emerald-100 px-4 py-2 text-2xl font-black text-emerald-800 border-2 border-emerald-300">
+            <span className="rounded-2xl bg-emerald-100 px-4 py-2 text-3xl font-black text-emerald-800 border-2 border-emerald-300 leading-tight sm:text-4xl">
               {quizStart}
             </span>
-            <span className="text-2xl font-black text-emerald-600">➔ +{step} ➔</span>
-            <span className="rounded-2xl bg-amber-100 px-4 py-2 text-2xl font-black text-amber-800 border-2 border-dashed border-amber-400 animate-pulse">
+            <span className="text-3xl font-black text-emerald-600 leading-tight sm:text-4xl">➔ +{step} ➔</span>
+            <span className="rounded-2xl bg-amber-100 px-4 py-2 text-3xl font-black text-amber-800 border-2 border-dashed border-amber-400 animate-pulse leading-tight sm:text-4xl">
               ❓
             </span>
           </div>

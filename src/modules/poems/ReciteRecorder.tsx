@@ -134,7 +134,7 @@ export function ReciteRecorder({ poem }: ReciteRecorderProps) {
       {/* 诗文展示 */}
       <div className="mb-4 rounded-2xl bg-candy-pink-soft p-3">
         {lines.map((line, i) => (
-          <p key={`line-${i}`} className="text-center text-lg font-bold text-ink">{line}</p>
+          <p key={`line-${i}`} className="text-center text-3xl font-extrabold leading-tight text-ink sm:text-4xl">{line}</p>
         ))}
       </div>
 

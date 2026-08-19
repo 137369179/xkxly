@@ -218,7 +218,7 @@ export function MathLadder() {
         <div className="mb-2 text-sm font-bold text-ink-soft">
           {tr('mathLadder.questionProgress', { current: qIdx + 1, total: Q_PER_LEVEL })} · ✅{correct} ❌{wrong}
         </div>
-        <div className="my-6 text-6xl font-black text-ink">{currentQ.text}</div>
+        <div className="my-6 text-6xl font-black text-ink leading-tight sm:text-7xl">{currentQ.text}</div>
         <input
           ref={inputRef}
           value={input}

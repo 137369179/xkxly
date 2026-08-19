@@ -181,7 +181,7 @@ export function HanziFlashReview() {
             style={{ transform: 'rotateY(180deg)' }}
           >
             <div className="text-center">
-              <span className="text-4xl font-black text-ink">{current.c}</span>
+              <span className="text-5xl font-black leading-tight text-ink sm:text-6xl">{current.c}</span>
               <span className="ml-2 text-lg font-bold text-candy-purple-deep">{current.pd}</span>
             </div>
             <p className="text-sm font-semibold text-ink">{current.origin}</p>

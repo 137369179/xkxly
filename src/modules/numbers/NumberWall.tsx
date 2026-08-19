@@ -76,7 +76,7 @@ export function NumberWall() {
               whileTap={{ scale: 0.9 }}
               className={cn(
                 'no-select relative grid min-h-[56px] place-items-center rounded-2xl',
-                'text-xl font-extrabold transition-shadow sm:min-h-[62px] sm:text-2xl',
+                'text-2xl font-extrabold transition-shadow sm:min-h-[62px] sm:text-3xl',
                 'focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-candy-yellow/70',
               )}
               style={{

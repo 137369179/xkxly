@@ -128,7 +128,7 @@ function WeatherGenerator() {
             className="flex flex-col items-center"
           >
             <div className="text-6xl">{result.weather.emoji}</div>
-            <p className="mt-2 text-lg font-black text-orange-900">{result.weather.nameZh}</p>
+            <p className="mt-2 text-4xl font-black leading-tight text-orange-900 sm:text-5xl">{result.weather.nameZh}</p>
             <p className="text-xs font-bold text-orange-600">{result.weather.nameEn}</p>
             <p className="mt-1 text-xs text-ink-soft">{result.message}</p>
             <p className="mt-1 text-[10px] text-ink-muted">💡 {result.weather.formation}</p>

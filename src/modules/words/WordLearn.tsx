@@ -99,7 +99,7 @@ export function WordLearn({ word, onDone }: { word: WordEntry; onDone: () => voi
         <div className="space-y-4">
           <div className="text-center">
             <div className="text-8xl">{word.emoji}</div>
-            <div className="mt-2 text-5xl font-black text-ink">{word.word}</div>
+            <div className="mt-2 text-6xl font-black leading-tight text-ink sm:text-7xl">{word.word}</div>
             <p className="text-lg font-bold text-candy-purple-deep">{word.zh}</p>
           </div>
           <CandyButton tone="green" size="lg" fullWidth onClick={() => { sfxTap(); story.run(wordStoryTask({ word: word.word, meaning: word.zh })); }}>
@@ -127,7 +127,7 @@ export function WordLearn({ word, onDone }: { word: WordEntry; onDone: () => voi
           <Panel>
             <div className="text-center">
               <div className="text-7xl">{word.emoji}</div>
-              <div className="mt-1 text-4xl font-black text-ink">{word.word}</div>
+              <div className="mt-1 text-5xl font-black leading-tight text-ink sm:text-6xl">{word.word}</div>
               <p className="text-base font-bold text-candy-purple-deep">{word.phonetic}</p>
               <p className="text-lg font-bold text-candy-orange-deep">{word.zh}</p>
             </div>
@@ -183,7 +183,7 @@ export function WordLearn({ word, onDone }: { word: WordEntry; onDone: () => voi
       render: (api) => (
         <div className="space-y-4">
           <div className="text-center">
-            <div className="text-5xl font-black text-ink">{word.word}</div>
+            <div className="text-6xl font-black leading-tight text-ink sm:text-7xl">{word.word}</div>
             <p className="mt-1 text-sm font-bold text-ink-soft">{tr('words.letterCount', { count: word.len })}</p>
           </div>
           <TraceCanvas char={word.word[0]!} tone="blue" onPass={() => { markTraced(`word:${word.word}`); api.ready(); }} />
@@ -198,7 +198,7 @@ export function WordLearn({ word, onDone }: { word: WordEntry; onDone: () => voi
         <div className="space-y-4">
           <Panel className="text-center">
             <div className="text-7xl">{word.emoji}</div>
-            <div className="mt-1 text-4xl font-black text-ink">{word.word}</div>
+            <div className="mt-1 text-5xl font-black leading-tight text-ink sm:text-6xl">{word.word}</div>
             <p className="text-lg font-bold text-candy-purple-deep">{word.zh}</p>
             <div className="mt-4 flex flex-wrap justify-center gap-2">
               <CandyButton tone="blue" size="md" onClick={() => speak(word.word, { lang: 'en-US', rate: 0.72 })}>{tr('words.readWord')}</CandyButton>

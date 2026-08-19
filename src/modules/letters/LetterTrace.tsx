@@ -71,7 +71,7 @@ export function LetterTrace({ initialLetter }: { initialLetter?: string }) {
       {/* 当前字母卡片与发音示范 */}
       <Panel className="text-center !py-4">
         <div className="flex items-center justify-center gap-4">
-          <div className="text-7xl font-black text-ink">{char}</div>
+          <div className="text-7xl font-black leading-tight text-ink sm:text-8xl">{char}</div>
           {letter && (
             <div className="text-left space-y-1.5">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-candy-blue-soft px-3 py-1 text-xs font-black text-candy-blue-deep">

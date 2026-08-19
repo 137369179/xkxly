@@ -129,7 +129,7 @@ export default function SentencePage() {
             key={quizSent.id}
             initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="text-2xl font-extrabold text-ink"
+            className="text-3xl font-extrabold leading-tight text-ink sm:text-4xl"
           >
             {quizSent.en}
           </motion.p>
@@ -208,7 +208,7 @@ export default function SentencePage() {
                       <span
                         key={`w-${i}`}
                         className={cn(
-                          'rounded-lg px-2 py-1 text-lg font-extrabold transition',
+                          'rounded-lg px-2 py-1 text-xl font-extrabold leading-tight transition sm:text-2xl',
                           hi === i ? 'bg-candy-yellow-soft text-candy-orange-deep scale-110' : 'text-ink'
                         )}
                       >
@@ -216,7 +216,7 @@ export default function SentencePage() {
                       </span>
                     ))}
                   </div>
-                  <p className="mt-1 text-sm font-bold text-ink-soft">{s.zh}</p>
+                  <p className="mt-1 text-base font-bold leading-tight text-ink-soft sm:text-lg">{s.zh}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     <CandyButton
                       tone="blue"

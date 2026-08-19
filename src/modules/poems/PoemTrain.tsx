@@ -397,7 +397,7 @@ export function QuizRunner({ poem }: { poem: DeepPoem }) {
         return (
           <div key={q.id} className="rounded-2xl bg-white/70 p-3">
             <p className="mb-2 text-sm font-bold text-ink">{qi + 1}. {q.prompt}</p>
-            {q.display && <p className="mb-2 text-center text-lg font-extrabold text-candy-purple-deep">{q.display}</p>}
+            {q.display && <p className="mb-2 text-center text-2xl font-extrabold leading-tight text-candy-purple-deep sm:text-3xl">{q.display}</p>}
             <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
               {q.options.map((o) => {
                 const isAns = o.id === q.answerId;

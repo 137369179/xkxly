@@ -153,7 +153,7 @@ export function MoneyLearn() {
           <div className="mx-auto max-w-sm rounded-3xl border-2 border-dashed border-purple-300 bg-white/90 p-3.5 shadow-inner">
             <div className="flex items-center justify-between px-2">
               <span className="text-xs font-bold text-ink-soft">收银托盘:</span>
-              <span className="text-xl font-black text-candy-purple-deep">
+              <span className="text-2xl font-black text-candy-purple-deep leading-tight sm:text-3xl">
                 已放入: ¥{paid} 元
               </span>
             </div>

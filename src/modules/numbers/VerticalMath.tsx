@@ -122,7 +122,7 @@ export function VerticalMath() {
 
       {/* 竖式展示 */}
       <Panel className="text-center !py-6">
-        <div className="mx-auto inline-block font-mono text-3xl font-bold">
+        <div className="mx-auto inline-block font-mono text-5xl font-black leading-tight sm:text-6xl">
           {/* 进位/借位标记行 */}
           <div className="text-right text-xs font-black text-candy-pink-deep h-4" style={{ minWidth: `${maxLen + 2}ch` }}>
             {op === 'add' && (a % 10) + (b % 10) >= 10 && showSteps && (

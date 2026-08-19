@@ -35,7 +35,7 @@ function PlanetDetail({ planet, onClose }: { planet: PlanetItem; onClose: () => 
         </motion.div>
         <div className="flex-1 text-center sm:text-left space-y-2">
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-            <h3 className="text-2xl font-black text-blue-900">{planet.nameZh}</h3>
+            <h3 className="text-4xl font-black leading-tight text-blue-900 sm:text-5xl">{planet.nameZh}</h3>
             <span className="text-lg font-extrabold text-indigo-700">{planet.nameEn}</span>
             <span className="rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-bold text-indigo-800">{planet.phonics}</span>
           </div>

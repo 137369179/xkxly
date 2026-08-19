@@ -257,7 +257,7 @@ export function TonePractice() {
         {/* 核心音节展示区 */}
         <div className="mt-4 mb-2 flex justify-center">
           <div className="rounded-3xl bg-gradient-to-b from-amber-50 to-orange-100/60 border-3 border-amber-200 px-10 py-6 shadow-inner">
-            <div className="text-7xl sm:text-8xl font-black text-ink tracking-wide">
+            <div className="text-7xl sm:text-8xl font-black leading-tight text-ink tracking-wide">
               {picked === null ? q.base : q.display}
             </div>
             <p className="mt-2 text-xs font-bold text-amber-800">
@@ -294,7 +294,7 @@ export function TonePractice() {
                 className={`relative flex flex-col items-center justify-between rounded-2xl p-4 border-2 transition-all text-left ${cardStateClass}`}
               >
                 <div className="w-full flex items-center justify-between">
-                  <span className="text-3xl font-black text-ink">{tc.symbol}</span>
+                  <span className="text-4xl font-black leading-tight text-ink sm:text-5xl">{tc.symbol}</span>
                   <span className="text-xl">{tc.icon}</span>
                 </div>
                 <div className="my-2 text-center w-full">

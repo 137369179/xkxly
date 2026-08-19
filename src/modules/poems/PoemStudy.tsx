@@ -80,7 +80,7 @@ export function MarkPanel({ poem, showPinyin = true }: { poem: DeepPoem; showPin
                   const isHan = ch.p && /[一-龥]/.test(ch.c);
                   if (!isHan) {
                     return (
-                      <span key={k} className="px-0.5 text-2xl font-bold text-ink sm:text-[1.7rem]">
+                      <span key={k} className="px-0.5 text-4xl font-extrabold leading-tight text-ink sm:text-5xl">
                         {ch.c}
                       </span>
                     );
@@ -97,9 +97,9 @@ export function MarkPanel({ poem, showPinyin = true }: { poem: DeepPoem; showPin
                       )}
                     >
                       {showPinyin && (
-                        <span className="mb-0.5 text-[11px] font-semibold text-candy-blue-deep">{ch.p}</span>
+                        <span className="mb-0.5 text-sm font-semibold text-candy-blue-deep sm:text-base">{ch.p}</span>
                       )}
-                      <span className="text-2xl font-bold text-ink sm:text-[1.7rem]">{ch.c}</span>
+                      <span className="text-4xl font-extrabold leading-tight text-ink sm:text-5xl">{ch.c}</span>
                     </button>
                   );
                 })}
@@ -139,7 +139,7 @@ export function LineGloss({ poem }: { poem: DeepPoem }) {
           <div className="space-y-3">
             {notes.map((nt, i) => (
               <div key={`nt-${i}`} className="rounded-2xl bg-white/70 p-3">
-                <p className="mb-1 text-base font-extrabold text-ink">{poem.lines[i]?.text}</p>
+                <p className="mb-1 text-xl font-extrabold leading-tight text-ink sm:text-2xl">{poem.lines[i]?.text}</p>
                 <p className="text-sm leading-relaxed text-ink-soft">{nt.gloss}</p>
                 {nt.keys && nt.keys.length > 0 && (
                   <div className="mt-1.5 flex flex-wrap gap-1.5">

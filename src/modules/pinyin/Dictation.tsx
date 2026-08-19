@@ -147,7 +147,7 @@ export function Dictation() {
                 key={opt.p}
                 onClick={() => handlePick(opt.p)}
                 disabled={!!picked}
-                className={`rounded-2xl border-4 p-4 text-center text-2xl font-black transition-all ${
+                className={`rounded-2xl border-4 p-4 text-center text-3xl font-black leading-tight transition-all sm:text-4xl ${
                   picked
                     ? isAnswer
                       ? 'border-candy-green-deep bg-candy-green-soft text-candy-green-deep'

@@ -186,7 +186,7 @@ function OrganInfo({
       <div className="flex items-center gap-2">
         <span className="text-3xl">{organ.emoji}</span>
         <div>
-          <p className="text-sm font-black text-ink">{organ.nameZh}</p>
+          <p className="text-3xl font-black leading-tight text-ink sm:text-4xl">{organ.nameZh}</p>
           <p className="text-[10px] font-bold text-ink-muted">{organ.nameEn}</p>
         </div>
         <button
@@ -245,7 +245,7 @@ function SystemDetail({
           <div className="flex items-center gap-2">
             <span className="text-4xl">{system.emoji}</span>
             <div>
-              <h3 className="text-xl font-black text-ink">{system.nameZh}</h3>
+              <h3 className="text-4xl font-black leading-tight text-ink sm:text-5xl">{system.nameZh}</h3>
               <p className="text-xs font-bold text-ink-muted">{system.nameEn} · {system.phonics}</p>
             </div>
           </div>
@@ -312,7 +312,7 @@ function SystemGrid({ onSelect }: { onSelect: (s: BodySystemItem) => void }) {
           style={{ borderColor: `${SYSTEM_COLORS[sys.system]}60` }}
         >
           <span className="text-5xl">{sys.emoji}</span>
-          <span className="mt-2 text-base font-black text-ink">{sys.nameZh}</span>
+          <span className="mt-2 text-2xl font-black leading-tight text-ink sm:text-3xl">{sys.nameZh}</span>
           
           <span className="text-[10px] font-bold" style={{ color: SYSTEM_COLORS[sys.system] }}>
             {tr('science.organsCount', { count: sys.organs.length })}

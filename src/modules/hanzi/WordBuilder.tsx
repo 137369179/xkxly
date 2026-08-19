@@ -140,7 +140,7 @@ export function WordBuilder({ initialChar }: { initialChar?: string }) {
       {/* 大字展示 */}
       <div className="mb-5 text-center">
         <div className="inline-block rounded-2xl bg-candy-green-soft px-8 py-6">
-          <span className="text-5xl font-extrabold text-candy-green-deep sm:text-6xl">{current.c}</span>
+          <span className="text-6xl font-extrabold leading-tight text-candy-green-deep sm:text-7xl">{current.c}</span>
         </div>
         <p className="mt-1 text-xs font-bold text-ink-soft">{current.pd} · {current.radical}部</p>
       </div>

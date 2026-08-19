@@ -135,7 +135,7 @@ export function CvcWordBuilder() {
               onClick={() => isSlotFilled && handleRemoveSlot(i)}
               whileHover={isSlotFilled ? { scale: 1.05 } : {}}
               whileTap={isSlotFilled ? { scale: 0.95 } : {}}
-              className={`flex h-20 w-20 flex-col items-center justify-center rounded-2xl border-3 text-3xl font-black shadow-md transition-all ${
+              className={`flex h-20 w-20 flex-col items-center justify-center rounded-2xl border-3 text-4xl font-black leading-tight shadow-md transition-all sm:text-5xl ${
                 isSlotFilled
                   ? 'border-candy-pink-deep bg-gradient-to-b from-candy-pink-deep to-pink-500 text-white'
                   : 'border-dashed border-pink-300 bg-white/90 text-gray-300'
@@ -180,7 +180,7 @@ export function CvcWordBuilder() {
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.92 }}
             onClick={() => handlePickLetter(opt)}
-            className="flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-purple-200 bg-white text-2xl font-black text-purple-900 shadow-md hover:bg-purple-50 active:bg-purple-100"
+            className="flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-purple-200 bg-white text-3xl font-black leading-tight text-purple-900 shadow-md hover:bg-purple-50 active:bg-purple-100 sm:text-4xl"
           >
             {opt}
           </motion.button>

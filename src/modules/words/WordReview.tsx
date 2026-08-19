@@ -66,12 +66,12 @@ export function WordReview() {
           className="cursor-pointer rounded-3xl bg-gradient-to-br from-candy-blue-soft to-candy-purple-soft p-8 text-center shadow-lg"
         >
           <div className="text-6xl">{current.emoji}</div>
-          <h2 className="mt-3 text-3xl font-black text-ink">{current.word}</h2>
+          <h2 className="mt-3 text-4xl font-black leading-tight text-ink sm:text-5xl">{current.word}</h2>
           <p className="text-sm font-bold text-ink-soft">/{current.phonetic}/</p>
 
           {showZh && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4">
-              <p className="text-xl font-black text-candy-purple-deep">{current.zh}</p>
+              <p className="text-2xl font-black leading-tight text-candy-purple-deep sm:text-3xl">{current.zh}</p>
               <p className="mt-1 text-sm font-bold text-ink-soft">{current.sentence}</p>
               <p className="text-xs font-bold text-ink-soft">{current.sentenceZh}</p>
             </motion.div>
@@ -175,7 +175,7 @@ export function WordReview() {
               >
                 <Panel className="text-center">
                   <div className="text-3xl">{w.emoji}</div>
-                  <div className="mt-1 text-sm font-black text-ink">{w.word}</div>
+                  <div className="mt-1 text-base font-black leading-tight text-ink sm:text-lg">{w.word}</div>
                   <div className="text-xs font-bold text-ink-soft">{w.zh}</div>
                   <div className="mt-1 flex items-center justify-center gap-1">
                     <button aria-label="🔊"

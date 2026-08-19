@@ -126,7 +126,7 @@ export function LetterStudy({ initialUpper }: { initialUpper?: string }) {
                 {item.phonicsSound}
               </span>
 
-              <span className="text-3xl font-extrabold sm:text-4xl" style={{ color: t.deep }}>
+              <span className="text-4xl font-extrabold leading-tight sm:text-5xl text-center" style={{ color: t.deep }}>
                 {item.upper}
                 <span className="opacity-70">{item.lower}</span>
               </span>

@@ -53,7 +53,7 @@ export default function PoemDetail({
     <div className="max-h-[82vh] overflow-y-auto">
       {/* 标题 */}
       <div className="mb-3 text-center">
-        <h2 className="text-3xl font-extrabold text-candy-pink-deep">{poem.title}</h2>
+        <h2 className="text-4xl font-extrabold leading-tight text-candy-pink-deep sm:text-5xl">{poem.title}</h2>
         <p className="mt-1 text-base font-bold text-ink-soft">
           {poem.dynasty} · {poem.author} · {poem.genre}
         </p>

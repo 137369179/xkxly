@@ -234,7 +234,7 @@ export function BlendPractice() {
             onClick={playShengmu}
             className="flex flex-col items-center justify-center rounded-3xl bg-gradient-to-br from-blue-50 to-indigo-100 border-3 border-blue-300 px-6 py-5 shadow-sm active:scale-95 transition"
           >
-            <span className="text-4xl sm:text-5xl font-black text-blue-900">{round!.combo.shengmu}</span>
+            <span className="text-5xl sm:text-6xl font-black leading-tight text-blue-900">{round!.combo.shengmu}</span>
             <span className="text-[11px] font-extrabold text-blue-600 mt-1">🔊 点击听声母</span>
           </motion.button>
 
@@ -247,14 +247,14 @@ export function BlendPractice() {
             onClick={playYunmu}
             className="flex flex-col items-center justify-center rounded-3xl bg-gradient-to-br from-purple-50 to-pink-100 border-3 border-purple-300 px-6 py-5 shadow-sm active:scale-95 transition"
           >
-            <span className="text-4xl sm:text-5xl font-black text-purple-900">{round!.combo.yunmu}</span>
+            <span className="text-5xl sm:text-6xl font-black leading-tight text-purple-900">{round!.combo.yunmu}</span>
             <span className="text-[11px] font-extrabold text-purple-600 mt-1">🔊 点击听韵母</span>
           </motion.button>
 
           <span className="text-3xl font-black text-slate-400">＝</span>
 
           <div className="flex flex-col items-center justify-center rounded-3xl bg-amber-50 border-3 border-dashed border-amber-300 px-6 py-5 shadow-inner">
-            <span className="text-4xl sm:text-5xl font-black text-amber-900">
+            <span className="text-5xl sm:text-6xl font-black leading-tight text-amber-900">
               {chosen ? round!.answer : '❓'}
             </span>
             <span className="text-[11px] font-extrabold text-amber-700 mt-1">
@@ -294,7 +294,7 @@ export function BlendPractice() {
                 disabled={chosen !== null}
                 className={`flex flex-col items-center justify-center rounded-2xl p-4 border-2 transition-all ${btnClass}`}
               >
-                <span className="text-3xl font-black text-ink">{opt}</span>
+                <span className="text-4xl font-black leading-tight text-ink sm:text-5xl">{opt}</span>
                 {chosen !== null && isAnswer && (
                   <span className="mt-1 text-[11px] font-black text-emerald-600">✅ 拼对啦</span>
                 )}

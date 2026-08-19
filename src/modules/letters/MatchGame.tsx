@@ -246,7 +246,7 @@ export function MatchGame() {
                   whileTap={!isMatched ? { scale: 0.94 } : undefined}
                   className={cn(
                     'no-select relative flex min-h-[64px] w-full items-center justify-center gap-2',
-                    'rounded-[1.3rem] text-3xl font-extrabold transition-all duration-150 sm:min-h-[72px] sm:text-4xl',
+                    'rounded-[1.3rem] text-4xl font-extrabold leading-tight transition-all duration-150 sm:min-h-[80px] sm:text-5xl',
                     'focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-candy-blue/60',
                     isMatched && 'opacity-55',
                     isPicked && 'ring-4 ring-candy-purple ring-offset-2',
@@ -285,7 +285,7 @@ export function MatchGame() {
                   whileTap={!isMatched ? { scale: 0.94 } : undefined}
                   className={cn(
                     'no-select relative flex min-h-[64px] w-full items-center justify-center gap-2',
-                    'rounded-[1.3rem] text-3xl font-extrabold transition-all duration-150 sm:min-h-[72px] sm:text-4xl',
+                    'rounded-[1.3rem] text-4xl font-extrabold leading-tight transition-all duration-150 sm:min-h-[80px] sm:text-5xl',
                     'focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-candy-pink/60',
                     isMatched && 'opacity-55',
                   )}

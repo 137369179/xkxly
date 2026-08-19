@@ -202,7 +202,7 @@ export function LetterOrder() {
             initial={{ scale: 0.6, rotate: -10 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 18 }}
-            className="mx-auto flex h-32 w-32 items-center justify-center rounded-[2.2rem] border-4 border-white bg-gradient-to-br from-candy-pink-soft to-pink-200 text-6xl font-black text-candy-pink-deep shadow-pop cursor-pointer active:scale-95 transition"
+            className="mx-auto flex h-32 w-32 items-center justify-center rounded-[2.2rem] border-4 border-white bg-gradient-to-br from-candy-pink-soft to-pink-200 text-6xl font-black leading-tight text-candy-pink-deep shadow-pop cursor-pointer active:scale-95 transition sm:h-36 sm:w-36 sm:text-7xl"
             onClick={() => goLearn(current)}
           >
             {ALPHABET[current]}
@@ -249,7 +249,7 @@ export function LetterOrder() {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => filledLetter && undoLetter(filledLetter)}
                     className={cn(
-                      'flex h-14 w-14 items-center justify-center rounded-2xl text-2xl font-black shadow-fluffy transition-all cursor-pointer',
+                      'flex h-14 w-14 items-center justify-center rounded-2xl text-2xl font-black leading-tight shadow-fluffy transition-all cursor-pointer sm:text-3xl',
                       filledLetter
                         ? 'bg-gradient-to-b from-candy-green-soft to-green-100 text-candy-green-deep border-2 border-green-300'
                         : 'border-2 border-dashed border-pink-200 bg-white/70 text-ink-soft/40'
@@ -275,7 +275,7 @@ export function LetterOrder() {
                   whileHover={{ scale: 1.08 }}
                   whileTap={{ scale: 0.92 }}
                   onClick={() => pickLetter(l)}
-                  className="flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-pink-200 bg-white text-2xl font-black text-candy-pink-deep shadow-pop transition-all hover:bg-pink-50"
+                  className="flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-pink-200 bg-white text-2xl font-black leading-tight text-candy-pink-deep shadow-pop transition-all hover:bg-pink-50 sm:text-3xl"
                 >
                   {l}
                 </motion.button>
@@ -303,7 +303,7 @@ export function LetterOrder() {
                 initial={{ scale: 0.9 }}
                 animate={{ scale: 1 }}
                 className={cn(
-                  'flex h-16 w-16 items-center justify-center rounded-2xl text-3xl font-black shadow-fluffy transition-all',
+                  'flex h-16 w-16 items-center justify-center rounded-2xl text-3xl font-black leading-tight shadow-fluffy transition-all sm:h-20 sm:w-20 sm:text-5xl',
                   c === '?'
                     ? 'border-3 border-candy-pink-deep bg-candy-pink-soft text-candy-pink-deep animate-pulse'
                     : 'border-2 border-white bg-white text-ink'

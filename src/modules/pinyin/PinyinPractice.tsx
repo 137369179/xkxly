@@ -25,15 +25,15 @@ export function PinyinPractice() {
               onClick={() => { sfxTap(); setSelected(combo); }}
               className="flex w-full items-center gap-3 rounded-2xl bg-white/70 p-3 text-left transition-all active:translate-y-[1px]"
             >
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-candy-blue-soft text-lg font-black text-candy-blue-deep">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-candy-blue-soft text-xl font-black leading-tight text-candy-blue-deep">
                 {combo.shengmu}
               </span>
               <span className="text-lg font-bold text-ink-soft">+</span>
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-candy-pink-soft text-lg font-black text-candy-pink-deep">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-candy-pink-soft text-xl font-black leading-tight text-candy-pink-deep">
                 {combo.yunmu}
               </span>
               <span className="text-lg font-bold text-ink-soft">=</span>
-              <span className="grid h-12 min-w-[60px] shrink-0 place-items-center rounded-xl bg-candy-green-soft text-xl font-black text-candy-green-deep px-3">
+              <span className="grid h-12 min-w-[60px] shrink-0 place-items-center rounded-xl bg-candy-green-soft text-2xl font-black leading-tight text-candy-green-deep px-3">
                 {combo.result}
               </span>
               <span className="ml-auto text-sm font-bold text-ink/40">{tr('pinyin.tapToPractice')}</span>
