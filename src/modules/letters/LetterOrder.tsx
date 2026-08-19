@@ -2,7 +2,7 @@
  * 字母排序 🅰️ (LetterOrder)
  * 26字母 ABC 顺序排列与填空练习 · 彩虹小火车主题
  */
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { Panel } from '@/components/ui/Card';
@@ -28,6 +28,20 @@ export function LetterOrder() {
   const [score, setScore] = useState(0);
   const lockRef = useRef(false);
   const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 组件卸载时清理重开定时器，避免切 tab 后仍在已卸载组件上触发 setState
+  useEffect(() => {
+    return () => {
+      if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
+    };
+  }, []);
+
+  // 切换模式时清理残留的重开定时器，避免旧模式的定时器在新模式里触发
+  useEffect(() => {
+    return () => {
+      if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
+    };
+  }, [mode]);
 
   // learn: 逐个认识字母顺序
   const goLearn = (i: number) => {

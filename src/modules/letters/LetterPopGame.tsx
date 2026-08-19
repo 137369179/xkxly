@@ -97,6 +97,22 @@ export function LetterPopGame() {
   const [wobbleId, setWobbleId] = useState<string | null>(null);
   const [particles, setParticles] = useState<Particle[]>([]);
   const lockRef = useRef(false);
+  /** 统一管理各类 setTimeout，重开/卸载时一次性清理，避免定时器叠加与卸载后 setState */
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const setTimer = (fn: () => void, ms: number) => {
+    const t = setTimeout(() => {
+      timersRef.current = timersRef.current.filter((x) => x !== t);
+      fn();
+    }, ms);
+    timersRef.current.push(t);
+    return t;
+  };
+  const clearAllTimers = useCallback(() => {
+    timersRef.current.forEach((t) => clearTimeout(t));
+    timersRef.current = [];
+  }, []);
+
+  useEffect(() => clearAllTimers, [clearAllTimers]);
 
   // 播放标准目标发音
   const speakTarget = useCallback(async (item: LetterItem) => {
@@ -126,7 +142,7 @@ export function LetterPopGame() {
       });
     }
     setParticles(newParticles);
-    setTimeout(() => setParticles([]), 700);
+    setTimer(() => setParticles([]), 700);
   };
 
   // 生成下一题
@@ -156,13 +172,15 @@ export function LetterPopGame() {
 
   // 初始化游戏
   const startNewGame = useCallback(() => {
+    clearAllTimers(); // 取消上一局残留的晋级/粒子/抖动定时器
+    lockRef.current = false;
     setCurrentRound(1);
     setScore(0);
     setCombo(0);
     setShowComboPill(false);
     setIsGameOver(false);
     nextTarget();
-  }, [nextTarget]);
+  }, [clearAllTimers, nextTarget]);
 
   useEffect(() => {
     startNewGame();
@@ -189,10 +207,10 @@ export function LetterPopGame() {
       if (nextCombo >= 2) {
         setShowComboPill(true);
         sfxStar();
-        setTimeout(() => setShowComboPill(false), 1200);
+        setTimer(() => setShowComboPill(false), 1200);
       }
 
-      setTimeout(() => {
+      setTimer(() => {
         if (currentRound >= ROUNDS_PER_GAME) {
           // 游戏通关
           sfxWin();
@@ -211,7 +229,7 @@ export function LetterPopGame() {
       setCombo(0);
       setShowComboPill(false);
       setWobbleId(balloon.id);
-      setTimeout(() => setWobbleId(null), 500);
+      setTimer(() => setWobbleId(null), 500);
 
       practice(`letter:${target.upper}`, false, 1, 1);
       void playLetterVoice(balloon.letter.upper).catch(() => {

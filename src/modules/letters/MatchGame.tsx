@@ -64,8 +64,11 @@ export function MatchGame() {
   const [mistakes, setMistakes] = useState(0);
   const [combo, setCombo] = useState(0);
   const wrongTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** AI 推荐请求序号：让过期请求的回调失效，杜绝 AI on/off 快速切换时的竞态覆盖 */
+  const aiReqSeqRef = useRef(0);
 
   const reset = useCallback(() => {
+    const reqSeq = ++aiReqSeqRef.current; // 使之前所有 AI 请求回调失效
     if (aiMode && aiOn) {
       // AI 模式：让小智推荐字母
       setAiLoading(true);
@@ -77,10 +80,17 @@ export function MatchGame() {
         .filter((x): x is string => !!x && /^[A-Z]$/.test(x));
       genLetterMatch(unlearned, weak, learned)
         .then((r) => {
+          if (reqSeq !== aiReqSeqRef.current) return; // 过期请求丢弃
           setRound(makeRound(r.ok ? r.data : undefined));
         })
-        .catch(() => setRound(makeRound()))
-        .finally(() => setAiLoading(false));
+        .catch(() => {
+          if (reqSeq !== aiReqSeqRef.current) return;
+          setRound(makeRound());
+        })
+        .finally(() => {
+          if (reqSeq !== aiReqSeqRef.current) return;
+          setAiLoading(false);
+        });
     } else {
       setRound(makeRound());
     }

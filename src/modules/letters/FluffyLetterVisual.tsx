@@ -41,13 +41,13 @@ export const FluffyLetterVisual: React.FC<FluffyLetterVisualProps> = ({
       <div className="absolute inset-2 border-2 border-dashed border-pink-300/60 rounded-[1.8rem] pointer-events-none" />
 
       {/* 3D 羊毛毡专属插画视觉展现区 */}
-      <div className="relative w-full h-36 sm:h-44 overflow-hidden rounded-2xl border-2 border-white shadow-md mb-2 shrink-0 group">
+      <div className="relative w-full h-36 sm:h-44 overflow-hidden rounded-2xl border-2 border-white shadow-md mb-2 shrink-0 group bg-white/40">
         <img
           src={itemData.src}
           alt={`${upper} for ${word}`}
           loading="lazy"
           decoding="async"
-          className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+          className="w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500 p-2"
         />
         <div
           className={cn(

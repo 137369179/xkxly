@@ -1,9 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { LETTERS, type LetterItem } from '@/data/letters';
 import { TONE_STYLE, toneAt } from '@/lib/tones';
 import { cn } from '@/lib/utils';
-import { speak, speakLetter, speakPhonics, playWordVoice } from '@/lib/speech';
+import { speakLetter, speakPhonics, playWordVoice } from '@/lib/speech';
 import { sfxTap, sfxStar } from '@/lib/sfx';
 import { useProgress, useStore } from '@/store/useStore';
 import { Panel } from '@/components/ui/Card';
@@ -28,6 +28,8 @@ export function LetterWall() {
   const [active, setActive] = useState<LetterItem | null>(null);
   const [filter, setFilter] = useState<CategoryFilter>('all');
   const [caseMode, setCaseMode] = useState<CaseDisplay>('both');
+  /** 发音播放锁：防止快速连点不同字母时本地音频重叠 */
+  const playingRef = useRef(false);
 
   const filteredLetters = useMemo(() => {
     if (filter === 'all') return LETTERS;
@@ -35,12 +37,18 @@ export function LetterWall() {
   }, [filter]);
 
   const play = async (item: LetterItem) => {
-    sfxTap();
-    heardLetter(item.upper);
-    setActive(item);
-    // 3段式离线纯正发音：Letter Name -> Word 例词
-    await speakLetter(item.upper);
-    await playWordVoice(item.upper);
+    if (playingRef.current) return;
+    playingRef.current = true;
+    try {
+      sfxTap();
+      heardLetter(item.upper);
+      setActive(item);
+      // 3段式离线纯正发音：Letter Name -> Word 例词
+      await speakLetter(item.upper);
+      await playWordVoice(item.upper);
+    } finally {
+      playingRef.current = false;
+    }
   };
 
   const playPhonics = async (item: LetterItem) => {
@@ -258,7 +266,7 @@ export function LetterWall() {
                 </span>
               </div>
 
-              <div className="mt-4 grid grid-cols-2 gap-2">
+              <div className="mt-4">
                 <CandyButton
                   tone="pink"
                   size="md"
@@ -268,20 +276,7 @@ export function LetterWall() {
                     void speakLetter(active.upper);
                   }}
                 >
-                  🔊 {tr('letters.readLetter')} ({active.upper})
-                </CandyButton>
-                <CandyButton
-                  tone="green"
-                  size="md"
-                  fullWidth
-                  onClick={() => {
-                    sfxTap();
-                    void playWordVoice(active.upper).catch(() => {
-                      void speak(active.word, { lang: 'en-US', rate: 0.7, module: 'letter' });
-                    });
-                  }}
-                >
-                  🗣️ {tr('letters.readWord')} ({active.word})
+                  {tr('letters.readLetter')} ({active.upper})
                 </CandyButton>
               </div>
 
