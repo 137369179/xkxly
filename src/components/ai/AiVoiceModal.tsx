@@ -94,57 +94,6 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
     return () => { speechRecog.stop(); };
   }, []);
 
-  const handleStartListening = useCallback(async () => {
-    if (!supported) {
-      setErrorMsg('你的浏览器暂不支持直接语音对话，试试用文字提问吧～');
-      return;
-    }
-    // 预检麦克风权限：被拒时直接给出友好提示，而非等 onerror 静默失败
-    const perm = await requestMicPermission();
-    if (perm === 'denied') {
-      setErrorMsg(tr('voice.micDenied'));
-      return;
-    }
-    stopSpeaking();
-    setTranscript('');
-    setAiResponse('');
-    setErrorMsg('');
-    setStatus('listening');
-    sfxTap();
-    speechRecog.start({
-      interimResults: true,
-      onResult: (text, isFinal) => {
-        setTranscript(text);
-        if (isFinal && text.trim()) {
-          speechRecog.stop();
-          void handleSendToAi(text.trim());
-        }
-      },
-      onError: (err) => {
-        setStatus('idle');
-        setErrorMsg(err);
-      },
-      onEnd: () => {
-        const currentStatus = statusRef.current;
-        const currentTranscript = transcriptRef.current;
-        if (currentStatus === 'listening' && currentTranscript.trim()) {
-          void handleSendToAi(currentTranscript.trim());
-        } else if (currentStatus === 'listening') {
-          setStatus('idle');
-        }
-      },
-    });
-  }, [supported, handleSendToAi, tr]);
-
-  const handleStopListening = () => {
-    speechRecog.stop();
-    if (transcript.trim() && status === 'listening') {
-      handleSendToAi(transcript.trim());
-    } else {
-      setStatus('idle');
-    }
-  };
-
   const handleSendToAi = useCallback(async (raw: string) => {
     // 输入护栏：拦截异常内容，绝不直送 AI
     const guarded = guardInput(raw);
@@ -196,6 +145,57 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
       speak(fallback);
     }
   }, [tr]);
+
+  const handleStartListening = useCallback(async () => {
+    if (!supported) {
+      setErrorMsg('你的浏览器暂不支持直接语音对话，试试用文字提问吧～');
+      return;
+    }
+    // 预检麦克风权限：被拒时直接给出友好提示，而非等 onerror 静默失败
+    const perm = await requestMicPermission();
+    if (perm === 'denied') {
+      setErrorMsg(tr('voice.micDenied'));
+      return;
+    }
+    stopSpeaking();
+    setTranscript('');
+    setAiResponse('');
+    setErrorMsg('');
+    setStatus('listening');
+    sfxTap();
+    speechRecog.start({
+      interimResults: true,
+      onResult: (text, isFinal) => {
+        setTranscript(text);
+        if (isFinal && text.trim()) {
+          speechRecog.stop();
+          void handleSendToAi(text.trim());
+        }
+      },
+      onError: (err) => {
+        setStatus('idle');
+        setErrorMsg(err);
+      },
+      onEnd: () => {
+        const currentStatus = statusRef.current;
+        const currentTranscript = transcriptRef.current;
+        if (currentStatus === 'listening' && currentTranscript.trim()) {
+          void handleSendToAi(currentTranscript.trim());
+        } else if (currentStatus === 'listening') {
+          setStatus('idle');
+        }
+      },
+    });
+  }, [supported, handleSendToAi, tr]);
+
+  const handleStopListening = () => {
+    speechRecog.stop();
+    if (transcript.trim() && status === 'listening') {
+      handleSendToAi(transcript.trim());
+    } else {
+      setStatus('idle');
+    }
+  };
 
   return (
     <AnimatePresence>
