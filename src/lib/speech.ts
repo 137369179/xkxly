@@ -32,24 +32,39 @@ export {
 export type { SpeakLang };
 
 /* ------------------------------------------------------------------ */
-/* Store 桥接（解耦：lib 不反向依赖 store）                            */
+/* 朗读调度核心已拆至 ./speechCore（Part B）：                           */
+/*   优先级队列 / 停止 / store 桥接 / SpeechSynthesis 句柄 不再依赖任何  */
+/*   TTS 引擎，主包引用 stopSpeaking / registerTtsBridge 不会拖入整套    */
+/*   发音引擎。此处仅保留「实际发音」的重路径（speak/runSpeak 等）。      */
 /* ------------------------------------------------------------------ */
-export interface TtsReport {
-  isSpeaking: boolean;
-  snippet: string;
-  startedAt: number;
-  module: string;
-}
-type TtsStateReporter = (report: TtsReport) => void;
-type VoiceGuideChecker = () => boolean;
-let ttsStateReporter: TtsStateReporter | null = null;
-let voiceGuideChecker: VoiceGuideChecker | null = null;
-/** 由 store 层在初始化时调用，把 TTS 状态推送与语音引导开关判断接回全局 store，
- *  从而让 lib/speech 保持对 store 的零依赖（消除 lib→store 层倒置循环依赖）。 */
-export function registerTtsBridge(reporter: TtsStateReporter, checker: VoiceGuideChecker): void {
-  ttsStateReporter = reporter;
-  voiceGuideChecker = checker;
-}
+import {
+  synth,
+  speechState,
+  PRIORITY_RANK,
+  pushTtsState,
+  moduleToPriority,
+  defaultZhRate,
+  defaultZhPitch,
+  voiceGuideEnabled,
+  registerStopAction,
+  type SpeakPriority,
+} from './speechCore';
+
+// 引擎级停止动作注册：speech.ts 一旦加载（真实发音被调用），把 realVoice /
+// edgeNeural 的停止逻辑挂进 core，使 stopSpeaking 能完整停止所有发音通道。
+registerStopAction(stopRealVoice);
+registerStopAction(stopEdgeNeuralAudio);
+
+// 兼容 re-export（既有 import 均来自 '@/lib/speech'，保持 API 不变）
+export {
+  registerTtsBridge,
+  stopSpeaking,
+  clearPendingQueue,
+  speechSupported,
+  pushTtsState,
+  type SpeakPriority,
+  type TtsReport,
+} from './speechCore';
 
 // 表扬/鼓励语库已拆至 ./praise（保持 re-export 兼容既有 import）
 export {
@@ -61,12 +76,6 @@ export {
   skillToEncourageScene,
 } from './praise';
 // PraiseScene, EncourageScene from ./praise
-
-
-const synth: SpeechSynthesis | null =
-  typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null;
-
-export const speechSupported = !!synth;
 
 let voicesCache: SpeechSynthesisVoice[] = [];
 let voicesReady: Promise<SpeechSynthesisVoice[]> | null = null;
@@ -183,8 +192,6 @@ export interface SpeakOptions {
   onStart?: () => void;
 }
 
-let currentUtterance: SpeechSynthesisUtterance | null = null;
-
 // ============================================================
 // P2-7 / P2-8：全局朗读状态推送 + 优先级朗读队列
 // ------------------------------------------------------------
@@ -197,94 +204,10 @@ let currentUtterance: SpeechSynthesisUtterance | null = null;
 //     高优先级打断低优先级；同/低优先级排队，避免重叠；
 //  2. speak() 在真正开始/结束时把状态推给 store.ttsState，
 //     UI 可订阅 isSpeaking 显示全局指示器、自动停止按钮。
+//
+// ⚠️ 该队列/停止逻辑已搬迁至 ./speechCore（Part B），本文件通过
+//    speechState / PRIORITY_RANK / pushTtsState 等共享同一份状态。
 // ============================================================
-
-/** 朗读优先级：数值越大越优先；高优先级会打断当前低优先级朗读 */
-export type SpeakPriority = 'praise' | 'quiz' | 'poem' | 'story' | 'general';
-const PRIORITY_RANK: Record<SpeakPriority, number> = {
-  praise: 5, // 表扬/鼓励语最高，孩子答对瞬间立即反馈
-  quiz: 4, // 答题反馈次之
-  poem: 3, // 古诗范读
-  story: 2, // 故事/讲解
-  general: 1, // 一般朗读最低
-};
-
-/** 把模块 key 推断为优先级 */
-function moduleToPriority(module?: string): SpeakPriority {
-  if (module === 'praise') return 'praise';
-  if (module === 'quiz') return 'quiz';
-  if (module === 'poem') return 'poem';
-  if (module === 'story' || module === 'ai') return 'story';
-  return 'general';
-}
-
-/** 默认中文语速（按声优） */
-function defaultZhRate(teacher: string): number {
-  if (teacher === 'xiaoxiao') return 0.92;
-  if (teacher === 'yunxi') return 0.90;
-  return 0.88;
-}
-
-/** 默认中文音调（按声优） */
-function defaultZhPitch(teacher: string): number {
-  if (teacher === 'xiaoxiao') return 1.25;
-  if (teacher === 'yunxi') return 0.95;
-  return 1.05;
-}
-
-interface QueueItem {
-  text: string;
-  options: SpeakOptions;
-  priority: SpeakPriority;
-  resolve: () => void;
-}
-
-/** 当前正在朗读项的优先级（用于判断新请求是否可打断） */
-let currentPriority: SpeakPriority | null = null;
-/** 排队等待的低优先级朗读（FIFO，仅在当前朗读结束后才会处理） */
-const pendingQueue: QueueItem[] = [];
-
-/** 推送朗读状态到全局 store（UI 订阅用），经桥接注入，lib 不依赖 store */
-function pushTtsState(isSpeaking: boolean, snippet = '', module = ''): void {
-  ttsStateReporter?.({
-    isSpeaking,
-    snippet: snippet ? snippet.slice(0, 20) : '',
-    startedAt: isSpeaking ? Date.now() : 0,
-    module,
-  });
-}
-
-/** 立刻停止所有朗读，并清空排队项 */
-export function stopSpeaking(): void {
-  // 清空等待队列，避免停止后又被队列里的项触发
-  while (pendingQueue.length) {
-    const item = pendingQueue.shift();
-    item?.resolve();
-  }
-  currentPriority = null;
-  currentUtterance = null;
-  stopRealVoice();
-  stopEdgeNeuralAudio();
-  if (synth) {
-    try {
-      synth.cancel();
-    } catch {
-      /* noop */
-    }
-  }
-  pushTtsState(false);
-}
-
-/** 仅清空等待队列（不打断当前朗读），返回被丢弃的项数 */
-export function clearPendingQueue(): number {
-  let n = 0;
-  while (pendingQueue.length) {
-    const item = pendingQueue.shift();
-    item?.resolve();
-    n++;
-  }
-  return n;
-}
 
 /**
  * 朗读一段文本。返回 Promise，在朗读结束 / 被取消 / 出错时 resolve。
@@ -341,14 +264,17 @@ export function speak(text: string, options: SpeakOptions = {}): Promise<void> {
   const priority = moduleToPriority(options.module);
 
   // 优先级调度：若当前有更高优先级朗读在进行，且本项优先级更低 → 排队
-  if (currentPriority !== null && PRIORITY_RANK[priority] < PRIORITY_RANK[currentPriority]) {
+  if (
+    speechState.currentPriority !== null &&
+    PRIORITY_RANK[priority] < PRIORITY_RANK[speechState.currentPriority]
+  ) {
     return new Promise<void>((resolve) => {
       // 队列上限 1：丢弃最旧的低优先级排队项，防止堆积后孩子听到一长串过时内容
-      if (pendingQueue.length >= 1) {
-        const dropped = pendingQueue.shift();
+      if (speechState.pendingQueue.length >= 1) {
+        const dropped = speechState.pendingQueue.shift();
         dropped?.resolve();
       }
-      pendingQueue.push({ text, options, priority, resolve });
+      speechState.pendingQueue.push({ text, options, priority, resolve });
     });
   }
 
@@ -389,14 +315,14 @@ function fallbackSingleChar(
     const finish = () => {
       if (finished) return;
       finished = true;
-      if (currentUtterance === u) currentUtterance = null;
+      if (speechState.currentUtterance === u) speechState.currentUtterance = null;
       onEnd?.();
       resolve();
     };
     u.onstart = () => onStart?.();
     u.onend = finish;
     u.onerror = finish;
-    currentUtterance = u;
+    speechState.currentUtterance = u;
     try {
       synth.resume();
     } catch {
@@ -419,20 +345,22 @@ function runSpeak(
   onStart?: () => void,
 ): Promise<void> {
   const { lang = 'zh-CN', rate, pitch = 1.15, volume = 1 } = options;
-  currentPriority = priority;
+  speechState.currentPriority = priority;
   pushTtsState(true, text, options.module ?? '');
 
   /** 朗读结束的统一收尾：触发回调、推送状态、处理排队项 */
   const cleanup = () => {
-    if (currentPriority === priority) {
-      currentPriority = null;
+    if (speechState.currentPriority === priority) {
+      speechState.currentPriority = null;
       pushTtsState(false);
     }
     // 处理排队项：取最早一个继续播放（其优先级必然 <= 本项，否则不会进队列）
-    const next = pendingQueue.shift();
+    const next = speechState.pendingQueue.shift();
     if (next) {
       // 排队项可能在等待期间已不再需要（如页面切换），但 resolve 由其自身播放完成触发
-      void loadVoices().then(() => runSpeak(next.text, next.options, next.priority).then(next.resolve));
+      void loadVoices().then(() =>
+        runSpeak(next.text, next.options as SpeakOptions, next.priority).then(next.resolve),
+      );
     }
   };
 
@@ -468,7 +396,7 @@ function runSpeak(
       const finish = () => {
         if (finished) return;
         finished = true;
-        currentUtterance = null;
+        speechState.currentUtterance = null;
         onEnd?.();
         cleanup();
         resolve();
@@ -476,7 +404,7 @@ function runSpeak(
       u.onstart = () => onStart?.();
       u.onend = finish;
       u.onerror = finish;
-      currentUtterance = u;
+      speechState.currentUtterance = u;
       try {
         synth.resume();
       } catch {
@@ -718,11 +646,6 @@ export type EncourageScene = 'general' | 'hanzi' | 'pinyin' | 'number' | 'poem' 
      不在模块加载阶段访问。
    - 引导语短促、语速略快于跟读，避免抢内容焦点。
    ============================================================ */
-
-/** 是否允许朗读语音引导（受静音与语音引导开关双重约束），经桥接注入 */
-function voiceGuideEnabled(): boolean {
-  return voiceGuideChecker ? voiceGuideChecker() : true;
-}
 
 /** 页面引导语：进入新页面时朗读 */
 export function announcePage(title: string, subtitle?: string): void {

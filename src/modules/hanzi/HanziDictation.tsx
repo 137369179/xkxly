@@ -15,10 +15,10 @@ import { QuizCard } from '@/components/QuizCard';
 import { getHanziByLevel, getHanziByChar, type HanziEntry } from '@/data/hanziIndex';
 import { makeHanziListenQuestion, makeHanziSimilarQuestion } from '@/lib/hanziQuestions';
 import { dueSkills } from '@/lib/srs';
-import { useStore, useMastery } from '@/store/useStore';
+import { useStore } from '@/store/useStore';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
 import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
-import type { Progress } from '@/types';
+import type { Progress, MasteryItem } from '@/types';
 import { sfxTap, sfxCorrect } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { celebrateBig } from '@/lib/celebrate';
@@ -37,12 +37,11 @@ export function HanziDictation() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [idx, setIdx] = useState(0);
   const [score, setScore] = useState(0);
-  const mastery = useMastery();
   const practice = useStore((s) => s.practice);
   const wrongBook = useStore((s) => s.progress.wrongBook);
 
-  /** 抽题：到期复习 > 错题本 > 新字补充 */
-  const pickRound = (lv: number): HanziEntry[] => {
+  /** 抽题：到期复习 > 错题本 > 新字补充（P1-2：mastery 改为开赛时从 store 快照读取，不做全局订阅） */
+  const pickRound = (lv: number, mastery: Record<string, MasteryItem>): HanziEntry[] => {
     const pool = getHanziByLevel(lv);
     const chosen = new Map<string, HanziEntry>();
 
@@ -70,7 +69,8 @@ export function HanziDictation() {
 
   const start = () => {
     sfxTap();
-    const targets = pickRound(level);
+    const mastery = useStore.getState().progress.mastery;
+    const targets = pickRound(level, mastery);
     if (!targets.length) return;
     const pool = getHanziByLevel(level);
     // 前 2/3 听音选字，后 1/3 形近字辨析（难度递增）

@@ -29,6 +29,47 @@ let currentAbortCtrl: AbortController | null = null;
 const audioCache = new Map<string, string>();
 const MAX_CACHE_SIZE = 120;
 
+/* ------------------------------------------------------------------ */
+/* 磁盘音频缓存（P1-4）：CacheStorage 跨会话复用，弱网/离线更稳          */
+/* ------------------------------------------------------------------ */
+/** 真人语音磁盘缓存桶名 */
+const VOICE_CACHE_NAME = 'tts-voices-v1';
+/** 只在缓存短文本（≤200 字）：长文/故事一次性内容不入盘，防止磁盘无限膨胀 */
+const DISK_CACHE_MAX_CHARS = 200;
+const voiceCacheAvailable = typeof caches !== 'undefined';
+
+/** 从磁盘缓存取音频，命中返回 objectURL（调用方负责释放） */
+async function getCachedVoiceUrl(url: string): Promise<string | null> {
+  if (!voiceCacheAvailable) return null;
+  try {
+    const cache = await caches.open(VOICE_CACHE_NAME);
+    const hit = await cache.match(url);
+    if (!hit) return null;
+    const blob = await hit.blob();
+    if (!blob || !blob.size) return null;
+    return URL.createObjectURL(blob);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 抓取音频并写入磁盘缓存；CORS 不可用时返回 null（交由原生 Audio 直接播，无需 CORS）。
+ */
+async function fetchAndCacheVoice(url: string): Promise<string | null> {
+  if (!voiceCacheAvailable) return null;
+  try {
+    const resp = await fetch(url, { mode: 'cors' });
+    if (!resp.ok) return null;
+    const cache = await caches.open(VOICE_CACHE_NAME);
+    await cache.put(url, resp.clone());
+    const blob = await resp.blob();
+    return URL.createObjectURL(blob);
+  } catch {
+    return null;
+  }
+}
+
 function getSharedAudio(): HTMLAudioElement {
   if (!sharedAudio) {
     sharedAudio = new Audio();
@@ -228,21 +269,45 @@ export async function playMultiChannelRealVoice(
 
   // 获取该角色支持的全部候选音频流
   const urls = buildVoiceStreamUrls(text, lang, teacher);
+  // 长文本不写盘（一次性内容），只走内存缓存
+  const allowDiskCache = text.length <= DISK_CACHE_MAX_CHARS;
 
   let lastError: Error | null = null;
   for (const url of urls) {
     if (abortCtrl.signal.aborted) return;
+    // P1-4：磁盘缓存命中 → 复用；否则尝试抓取落盘；CORS 不可用才回退原生直播
+    let playableUrl: string;
+    let cachedBlobUrl = false;
+    if (allowDiskCache) {
+      const disk = await getCachedVoiceUrl(url);
+      if (disk) {
+        playableUrl = disk;
+        cachedBlobUrl = true;
+      } else {
+        const fetched = await fetchAndCacheVoice(url);
+        if (fetched) {
+          playableUrl = fetched;
+          cachedBlobUrl = true;
+        } else {
+          playableUrl = url;
+        }
+      }
+    } else {
+      playableUrl = url;
+    }
     try {
-      await playAudioUrl(url, volume, abortCtrl.signal, onStart, onEnd);
-      // 成功播放后写入缓存
+      await playAudioUrl(playableUrl, volume, abortCtrl.signal, onStart, onEnd);
+      // 成功播放后写入内存缓存（blob URL 存活整个会话，复用免再抓取）
       if (audioCache.size >= MAX_CACHE_SIZE) {
         const firstKey = audioCache.keys().next().value;
         if (firstKey) audioCache.delete(firstKey);
       }
-      audioCache.set(cacheKey, url);
+      audioCache.set(cacheKey, playableUrl);
       return;
     } catch (err) {
       lastError = err as Error;
+      // 播放失败且未入内存缓存：释放临时 objectURL，避免泄漏
+      if (cachedBlobUrl) URL.revokeObjectURL(playableUrl);
       if (abortCtrl.signal.aborted) return;
       // 尝试下一个音源
     }

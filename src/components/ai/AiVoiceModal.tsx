@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useSafeTimeout } from '@/lib/useTimer';
 import { useTranslation } from '@/i18n/useTranslation';
 import { isSpeechRecogSupported, speechRecog, requestMicPermission } from '@/lib/ai/speechRecog';
-import { guardInput } from '@/lib/ai/guard';
+import { guardInput, guardOutput, guardForScene } from '@/lib/ai/guard';
 import { chatStream } from '@/lib/ai/client';
 import { speak, stopSpeaking } from '@/lib/speech';
 import { sfxTap, sfxCorrect } from '@/lib/sfx';
@@ -125,15 +125,24 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
           setAiResponse(fullText);
         }
       }
-      if (fullText.trim() && activeStreamRef.current) {
+      // 出口护栏（P0-4）：最终展示/朗读的内容必须过 quiz.extend 场景 guardOutput，
+      // 不通过则替换为安全话术，绝不把孩子没过滤的内容念出来。
+      const guardedOut = guardOutput(fullText, guardForScene('quiz.extend'));
+      const safeText = guardedOut.ok ? guardedOut.text : '';
+      if (safeText && activeStreamRef.current) {
+        setAiResponse(safeText);
         setStatus('speaking');
         sfxCorrect();
-        speak(fullText, {
+        speak(safeText, {
           lang: 'zh-CN', rate: 0.8, pitch: 1.2,
           onEnd: () => { if (activeStreamRef.current) setStatus('idle'); },
         });
       } else {
         setStatus('idle');
+        if (fullText.trim()) {
+          const fallback = '小智没听懂这个问题，我们换个问题问吧～';
+          setAiResponse(fallback);
+        }
       }
     } catch (err) {
       // 主动取消（关闭弹窗/重新提问）不算失败，静默退出即可

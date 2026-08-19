@@ -1441,6 +1441,7 @@
     "yourIdea": "宝贝的特别想法 (支持语音输入)",
     "ideaPlaceholder": "例如：我想让小熊坐着彩虹去月球踢足球...",
     "voiceInput": "语音输入想法",
+    "voiceUnsupported": "不支持语音，请打字",
     "quickIdeas": "快捷灵感",
     "generateBtn": "AI 魔法生成儿童绘本",
     "creating": "小智正在灵感创作中…",
@@ -2633,6 +2634,7 @@
       "muted": "🔇 麦克风已静音",
       "connected": "🟢 电话连线成功·随时直接说话！",
       "sttError": "没听到清晰语音，请直接对我说话或点击下方词卡哦～",
+      "unsupported": "当前浏览器不支持语音识别，请用下方输入框打字提问哦～",
       "replay": "🔊 重听声音",
       "organizing": "喵~ (组织语言中)",
       "unmute": "🔇 取消静音",
@@ -4809,7 +4811,8 @@
     "fav": "❤️ 收藏",
     "favEmpty": "还没有收藏的绘本，点绘本左上角 ❤️ 收藏吧！",
     "catEmpty": "这个分类还没有绘本哦～",
-    "deleteConfirm": "再点一次删除"
+    "deleteConfirm": "再点一次删除",
+    "opening": "正在打开绘本…"
   },
   "nurseryPage": {
     "title": "儿歌乐园",

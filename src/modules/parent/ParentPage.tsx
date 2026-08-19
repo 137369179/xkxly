@@ -46,6 +46,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { ParentPosterSection } from './ParentPosterSection';
 import { ParentBackupSection } from './ParentBackupSection';
 import { ParentSettingsSection } from './ParentSettingsSection';
+import { ParentPrivacySection } from './ParentPrivacySection';
 import { ParentTtsDiagPanel } from './ParentTtsDiagPanel';
 import { ParentAiLogsPanel } from './ParentAiLogsPanel';
 import { ParentTodayLogPanel } from './ParentTodayLogPanel';
@@ -444,6 +445,9 @@ export default function ParentPage() {
 
       {/* 数据备份与恢复 */}
       <ParentBackupSection />
+
+      {/* 隐私与数据管理（P0-1/P0-3：声明 / 同意 / 留存 / 清除） */}
+      <ParentPrivacySection />
 
       <button onClick={() => setUnlocked(false)} className="mx-auto block text-sm font-bold text-ink-soft">
         {translate('parent.exit')}

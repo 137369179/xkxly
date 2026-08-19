@@ -11,6 +11,7 @@ import { useStore } from '@/store/useStore';
 import { sfxTap, sfxCorrect, sfxWrong, sfxStar } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { randomPraise, randomEncourage } from '@/lib/speech';
+import { starsByRate } from '@/lib/stars';
 import { useTranslation } from '@/i18n/useTranslation';
 
 interface Level {
@@ -164,7 +165,7 @@ export function MathLadder() {
   if (phase === 'result') {
     const total = correct + wrong;
     const rate = total > 0 ? Math.round((correct / total) * 100) : 0;
-    const stars = rate >= 90 ? 3 : rate >= 70 ? 2 : 1;
+    const stars = starsByRate(rate / 100);
     const passed = stars >= 2;
     return (
       <div className="space-y-4">

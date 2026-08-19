@@ -6,7 +6,7 @@ import { setAiEnabled as aiSetEnabled } from '@/lib/ai/client';
 import { createInitialProgress } from '@/lib/progress';
 import { useSettingsStore } from './useSettingsStore';
 import { useTtsStore } from './useTtsStore';
-import { registerTtsBridge } from '@/lib/speech';
+import { registerTtsBridge } from '@/lib/speechCore';
 import { createThrottledStorage } from './storeHelpers';
 
 import { createBasicsSlice } from './storeSlices/basicsSlice';
@@ -119,8 +119,6 @@ export interface StoreState {
   incCreativeCount: () => void;
   /** 增加小鱼干 */
   addFish: (count: number) => void;
-  /** 喂食小鱼干 (Legacy 废弃, 改用 feedCatStats) */
-  feedCat: (cost: number) => boolean;
   /** 增加饱食度 (消耗鱼干) */
   feedCatStats: (amount: number, cost: number) => boolean;
   /** 洗澡增加清洁度 (不消耗鱼干，或者随便设个花费) */
@@ -314,6 +312,14 @@ export const useUnlockedLevel = () => useStore((s) => s.progress.unlockedLevel);
 export const useLevelStars = () => useStore((s) => s.progress.levelStars);
 /** 知识点掌握度（高频写，需独立订阅） */
 export const useMastery = () => useStore((s) => s.progress.mastery);
+/**
+ * 单知识点掌握度（P1-2）：只订阅指定 skill 的 mastery 项。
+ * 任意 skill 的 practice 都会重建整个 mastery 对象，导致 useMastery 全量
+ * 消费者重渲染；改用本选择器后，仅当该 skill 变化时才重渲染调用组件。
+ * 例：useSkillMastery(question.skill)
+ */
+export const useSkillMastery = (skill: string) =>
+  useStore((s) => s.progress.mastery[skill]);
 /** 每日学习日志（用于学习伙伴心情、总题量统计） */
 export const useDailyLog = () => useStore((s) => s.progress.dailyLog);
 /** PK 次数 */

@@ -112,6 +112,26 @@
   "poetArchive": {
     "dynastyCount": "{dynasty} · {n} 位诗人"
   },
+  "privacy": {
+    "summary": "学习进度、昵称与年龄段仅保存在本设备（localStorage），不会上传服务器。AI 对话会发送文本与年龄段（用于内容适龄），但不会发送孩子姓名。",
+    "voiceNotice": "跟读与语音功能使用浏览器本地语音识别，语音不上传、不存储到服务器。",
+    "consentLabel": "我已阅读并同意《隐私与数据说明》",
+    "needAgree": "请先勾选同意，才能开始学习哦～",
+    "title": "隐私与数据管理",
+    "subtitle": "我们如何收集、存储与保护宝贝的数据",
+    "collectTitle": "我们收集什么",
+    "collectDesc": "仅在本设备保存：学习进度、孩子昵称、头像、年龄段。AI 对话会发送文本与年龄段到服务端用于生成内容，但不会发送孩子姓名。",
+    "voiceTitle": "语音说明（父母须知）",
+    "voiceFull": "跟读评测与语音对话使用浏览器本地语音识别（Web Speech API），语音数据只在设备本地处理，不上传、不存储。若未来接入云端语音服务，会另行征得您的同意。",
+    "retainTitle": "数据留存",
+    "retainDesc": "数据默认保存在本设备，可随时在下方一键清除。备份文件由家长自行导出保管，其中不包含孩子姓名与口令。",
+    "consentGiven": "已获得父母隐私同意",
+    "consentPending": "尚未确认隐私说明（首启引导时可确认）",
+    "clearTitle": "清除全部学习数据",
+    "clearDesc": "将删除本设备的全部学习进度、档案与设置（含备份签名），此操作不可恢复。",
+    "clearBtn": "清除全部数据",
+    "clearConfirm": "确认清除（不可恢复）"
+  },
   "rabbitRunMath": {
     "correctMsg": "答对啦，小兔前进！",
     "tryAgain": "答错了，再试一次吧！"

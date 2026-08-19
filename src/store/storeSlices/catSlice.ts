@@ -6,7 +6,6 @@ export const createCatSlice: SliceCreator<
   Pick<
     StoreState,
     | 'addFish'
-    | 'feedCat'
     | 'feedCatStats'
     | 'cleanCatStats'
     | 'tickCatStats'
@@ -23,22 +22,6 @@ export const createCatSlice: SliceCreator<
     set((s) => ({
       progress: { ...s.progress, fishCount: (s.progress.fishCount ?? 0) + count },
     })),
-
-  feedCat: (cost) => {
-    let ok = false;
-    set((s) => {
-      const cur = s.progress.fishCount ?? 0;
-      if (cur >= cost) {
-        ok = true;
-        const nextAffection = Math.min(100, (s.progress.catAffection ?? 20) + cost * 5);
-        return {
-          progress: { ...s.progress, fishCount: cur - cost, catAffection: nextAffection },
-        };
-      }
-      return s;
-    });
-    return ok;
-  },
 
   feedCatStats: (amount, cost) => {
     let ok = false;

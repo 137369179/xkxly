@@ -22,9 +22,14 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: true,
     allowedHosts: true,
-    // 开发态把 AI 请求转给 BFF，密钥始终留在服务端、不进 bundle
+    // 开发态把 AI / 内容中心请求转给 BFF，密钥始终留在服务端、不进 bundle
     proxy: {
       '/api/ai': {
+        target: 'http://localhost:8787',
+        changeOrigin: true,
+      },
+      // P0-3：内容中心端点（/api/content/*）同样由 BFF 提供，dev/生产行为一致
+      '/api/content': {
         target: 'http://localhost:8787',
         changeOrigin: true,
       },
@@ -102,6 +107,11 @@ export default defineConfig(({ mode }) => ({
           }
           // 静态大型语料库分包（按需加载，避免首屏主 chunk 过大）
           if (id.includes('/src/data/') || id.includes('\\src\\data\\')) {
+            // P1-1：徽章/勋章语料独立 chunk —— BadgeUnlock 已 lazy，store 侧
+            // findNewBadges/applyMedalReward 仍同步依赖，拆独立 chunk 便于缓存隔离
+            if (id.includes('badges') || id.includes('medals')) {
+              return 'data-badges';
+            }
             if (id.includes('hanzi') || id.includes('hanziSentences') || id.includes('hanzi500') || id.includes('hanziEtymology')) {
               return 'data-hanzi';
             }

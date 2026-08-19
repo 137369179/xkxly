@@ -7,6 +7,8 @@ export interface NavItem {
   short: string;
   emoji: string;
   imageIcon?: string;
+  /** P1-9 响应式：小尺寸变体（-480，供 srcset 移动端/小卡使用，省流量） */
+  imageIconSmall?: string;
   tone: Tone;
   desc: string;
   /** 是否出现在移动端底部 Tab（保持 ≤6 个，避免拥挤） */
@@ -30,15 +32,15 @@ export const NAV_ITEMS: NavItem[] = [
   { id: 'gamecenter', label: '游戏中心', short: '游戏', emoji: '🎮', imageIcon: '/icons/fun.jpg', tone: 'purple', desc: '闯关 · 对战 · 脑力 · 创意' },
   { id: 'fun', label: '趣味乐园', short: '趣味', emoji: '🎪', imageIcon: '/icons/cover-fun.png', tone: 'purple', desc: '对战 · 听力 · 创意', hiddenInSidebar: true },
   { id: 'idioms', label: '成语故事', short: '成语', emoji: '🏯', imageIcon: '/icons/cover-idioms.png', tone: 'purple', desc: '60 个成语故事' },
-  { id: 'songs', label: '儿歌乐园', short: '儿歌', emoji: '🎵', imageIcon: '/icons/cover-songs.jpg', tone: 'pink', desc: '10 首经典儿歌' },
+  { id: 'songs', label: '儿歌乐园', short: '儿歌', emoji: '🎵', imageIcon: '/icons/cover-songs.jpg', imageIconSmall: '/icons/cover-songs-480.jpg', tone: 'pink', desc: '10 首经典儿歌' },
   { id: 'science', label: '自然百科', short: '百科', emoji: '🦖', imageIcon: '/icons/cover-science.png', tone: 'green', desc: '恐龙 · 太空 · 天气' },
-  { id: 'music', label: '音乐律动', short: '音乐', emoji: '🎹', imageIcon: '/icons/cover-music.jpg', tone: 'pink', desc: '彩虹琴 · 视唱练耳' },
+  { id: 'music', label: '音乐律动', short: '音乐', emoji: '🎹', imageIcon: '/icons/cover-music.jpg', imageIconSmall: '/icons/cover-music-480.jpg', tone: 'pink', desc: '彩虹琴 · 视唱练耳' },
   { id: 'art', label: '艺术色彩', short: '艺术', emoji: '🎨', imageIcon: '/icons/cover-art.png', tone: 'pink', desc: '魔法调色盘 · 色彩' },
-  { id: 'safety', label: '安全防护', short: '安全', emoji: '🩺', imageIcon: '/icons/cover-safety.jpg', tone: 'blue', desc: '刷牙伴读 · 110/119' },
+  { id: 'safety', label: '安全防护', short: '安全', emoji: '🩺', imageIcon: '/icons/cover-safety.jpg', imageIconSmall: '/icons/cover-safety-480.jpg', tone: 'blue', desc: '刷牙伴读 · 110/119' },
   { id: 'geography', label: '世界地理', short: '地理', emoji: '🌏', imageIcon: '/icons/cover-geography.png', tone: 'green', desc: '七大洲 · 世界动物' },
   { id: 'vehicles', label: '交通职业', short: '交通', emoji: '🚗', imageIcon: '/icons/cover-vehicles.png', tone: 'orange', desc: '消防车 · 职业对对碰' },
   { id: 'festivals', label: '节气文化', short: '节气', emoji: '🏮', imageIcon: '/icons/cover-festivals.png', tone: 'pink', desc: '二十四节气 · 节日风俗' },
-  { id: 'plants', label: '奇妙植物', short: '植物', emoji: '🪴', imageIcon: '/icons/cover-plants.jpg', tone: 'green', desc: '向日葵 · 浇水光合作用' },
+  { id: 'plants', label: '奇妙植物', short: '植物', emoji: '🪴', imageIcon: '/icons/cover-plants.jpg', imageIconSmall: '/icons/cover-plants-480.jpg', tone: 'green', desc: '向日葵 · 浇水光合作用' },
   { id: 'cat_house', label: '伴读猫屋', short: '猫咪', emoji: '🐱', imageIcon: '/icons/pink_felt_cat.png', tone: 'pink', desc: '2D/3D 梦幻猫咪 · 伴读互动' },
   { id: 'realistic_cat', label: '写实猫咪3D', short: '写实猫', emoji: '🐈', imageIcon: '/icons/unified_3d_cats.jpg', tone: 'orange', desc: '真实毛发 · PBR渲染 · 品种切换', hiddenInSidebar: true },
   { id: 'storybook', label: '奇妙故事岛', short: '绘本', emoji: '📚', imageIcon: '/icons/cover-storybook.png', tone: 'pink', desc: 'AI 绘本创作 · 经典故事分馆' },
@@ -46,7 +48,7 @@ export const NAV_ITEMS: NavItem[] = [
   { id: 'growth', label: '成长荣誉馆', short: '荣誉', emoji: '🏆', imageIcon: '/icons/felt_album.jpg', tone: 'green', desc: '成长树 · 勋章荣誉 · 贴纸百宝箱', bottom: true },
   { id: 'wrongbook', label: '错题本', short: '错题', emoji: '📝', imageIcon: '/icons/felt_wand.jpg', tone: 'orange', desc: 'AI 自适应复习 · 消灭错题' },
   { id: 'content', label: 'AI 内容站', short: '内容', emoji: '📡', imageIcon: '/icons/felt_phonics.jpg', tone: 'purple', desc: 'AI 生成 · 故事谜语科普' },
-  { id: 'research', label: '研究乐园', short: '研究', emoji: '🔬', imageIcon: '/icons/cover-research.jpg', tone: 'blue', desc: '选题探索 · 记录发现' },
+  { id: 'research', label: '研究乐园', short: '研究', emoji: '🔬', imageIcon: '/icons/cover-research.jpg', imageIconSmall: '/icons/cover-research-480.jpg', tone: 'blue', desc: '选题探索 · 记录发现' },
   { id: 'discoveries', label: '发现画廊', short: '画廊', emoji: '🖼️', imageIcon: '/icons/cover-discoveries.png', tone: 'blue', desc: '探索记录 · 知识卡片' },
   { id: 'adventure', label: '闯关冒险', short: '闯关', emoji: '🚀', imageIcon: '/icons/adventure.jpg', tone: 'purple', desc: '闯关拿星星徽章' },
   { id: 'rewards', label: '奖励中心', short: '奖励', emoji: '🎁', imageIcon: '/icons/felt_box.jpg', tone: 'pink', desc: '贴纸册 · 徽章墙', hiddenInSidebar: true },

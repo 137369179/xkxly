@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { getCombo, subscribeCombo } from '@/lib/combo';
 import { TONE_STYLE } from '@/lib/tones';
-import { speak } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
 
 /**
@@ -23,7 +22,15 @@ export function ComboIndicator() {
     // 连击中断（从 >=2 掉到 <2）时温柔提示
     if (prev >= 2 && count < 2) {
       setHint(true);
-      void speak('差一点就连击啦，继续加油！', { lang: 'zh-CN', rate: 0.95, module: 'praise' });
+      // Part B · Step 4：动态导入 speak，让 TTS 引擎只在「连击中断」这一
+      // 低频事件首次触发时才加载（之后走浏览器模块缓存），离开首屏主包。
+      void import('@/lib/speech')
+        .then((m) =>
+          m.speak('差一点就连击啦，继续加油！', { lang: 'zh-CN', rate: 0.95, module: 'praise' }),
+        )
+        .catch(() => {
+          /* 语音失败不影响连击提示展示 */
+        });
       const t = setTimeout(() => setHint(false), 2200);
       return () => clearTimeout(t);
     }

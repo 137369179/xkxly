@@ -111,7 +111,7 @@ export default function PoetArchive() {
           <Panel>
             <h4 className="mb-2 text-sm font-extrabold text-ink">{t('poetArchive.count', { n: poetPoems.length })}</h4>
             <div className="space-y-1">
-              {poetPoems.map((p: any) => (
+              {poetPoems.map((p: Poem) => (
                 <div key={p.id} className="rounded-lg bg-white/60 p-2">
                   <span className="text-sm font-extrabold text-ink">《{p.title}》</span>
                   <span className="ml-2 text-xs font-bold text-ink-soft">{p.lines.join('\n').slice(0, 20)}…</span>

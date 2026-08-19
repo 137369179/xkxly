@@ -108,6 +108,26 @@
   "poetArchive": {
     "dynastyCount": "{dynasty} · {n} poets"
   },
+  "privacy": {
+    "summary": "Learning progress, nickname and age range are stored only on this device (localStorage) and never uploaded. AI chats send text and age range (for age-appropriate content), but never the child's name.",
+    "voiceNotice": "Read-aloud & voice features use the browser's local speech recognition; voice is never uploaded or stored on servers.",
+    "consentLabel": "I have read and agree to the Privacy & Data Notice",
+    "needAgree": "Please check the box to agree before you start ~",
+    "title": "Privacy & Data",
+    "subtitle": "How we collect, store and protect your child's data",
+    "collectTitle": "What we collect",
+    "collectDesc": "Stored only on this device: learning progress, nickname, avatar, age range. AI chats send text and age range to the server to generate content, but never the child's name.",
+    "voiceTitle": "Voice notice (for parents)",
+    "voiceFull": "Read-aloud assessment and voice chat use the browser's local speech recognition (Web Speech API); voice is processed locally only and never uploaded or stored. If we ever add cloud voice services, we will ask for your separate consent.",
+    "retainTitle": "Data retention",
+    "retainDesc": "Data stays on this device by default and can be cleared in one tap below. Backup files are exported by you and never contain the child's name or PIN.",
+    "consentGiven": "Parental privacy consent recorded",
+    "consentPending": "Privacy notice not yet confirmed (can confirm in first-run setup)",
+    "clearTitle": "Clear all learning data",
+    "clearDesc": "Deletes all learning progress, profiles and settings on this device (including backup signature). This cannot be undone.",
+    "clearBtn": "Clear all data",
+    "clearConfirm": "Confirm clear (cannot be undone)"
+  },
   "rabbitRunMath": {
     "correctMsg": "Correct! The bunny hops forward!",
     "tryAgain": "Oops! Try again!"
@@ -168,6 +188,10 @@
     "done": "Done!",
     "nextQ": "Next",
     "showResult": "See Results"
+  },
+  "tts": {
+    "loudReadListening": "🎤 Keep reading aloud… (it will pass automatically)",
+    "loudReadMode": "Speech recognition is unavailable — just read it aloud to pass!"
   },
   "wordReview": {
     "empty": "No words added yet~",

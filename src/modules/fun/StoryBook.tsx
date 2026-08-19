@@ -6,6 +6,7 @@ import { StoryCanvas } from '@/components/StoryCanvas';
 import { storybookTask, fallbackStorybook } from '@/lib/ai/tasks';
 import { generateStorybookPdf } from '@/lib/pdfBookGenerator';
 import { chatStream } from '@/lib/ai/client';
+import { guardInput, guardOutput, guardForScene } from '@/lib/ai/guard';
 import { safeParseJSON } from '@/lib/safeStorage';
 
 import type { StoryBookData } from '@/lib/ai/prompts';
@@ -49,6 +50,7 @@ export function StoryBook() {
   const [bookData, setBookData] = useState<StoryBookData | null>(null);
   const [currentPage, setCurrentPage] = useState(0); // 0 为封面，1-4 为正文
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [ideaNotice, setIdeaNotice] = useState('');
 
   const activeStreamRef = useRef(false);
   const abortRef = useRef<AbortController | null>(null);
@@ -98,7 +100,12 @@ export function StoryBook() {
       abortRef.current?.abort();
       const ac = new AbortController();
       abortRef.current = ac;
-      const task = storybookTask(character, theme, userPrompt.trim());
+      // 入口护栏（P0-4）：孩子自定义点子先过 guardInput，不通过则不携带自定义点子
+      const ideaRaw = userPrompt.trim();
+      const idea = guardInput(ideaRaw, 80);
+      const safeIdea = idea.ok ? idea.text : '';
+      setIdeaNotice(ideaRaw && !idea.ok ? (idea.reason ?? '这个点子我们换一个说法，先用默认主题生成吧～') : '');
+      const task = storybookTask(character, theme, safeIdea);
       const generator = chatStream({ ...task, signal: ac.signal });
       let rawJson = '';
 
@@ -112,8 +119,18 @@ export function StoryBook() {
       if (rawJson.trim() && activeStreamRef.current) {
         const parsed = safeParseJSON<StoryBookData | null>(rawJson, null);
         if (parsed?.pages?.length) {
-          setBookData(parsed);
-          sfxWin();
+          // 出口护栏（P0-4）：绘本全文过 storybook 场景 guardOutput，不通过则回退默认绘本
+          const joined =
+            (parsed.bookTitle || '') + ' ' +
+            (parsed.moral || '') + ' ' +
+            parsed.pages.map((p) => `${p.title || ''} ${p.content || ''}`).join(' ');
+          const guardedOut = guardOutput(joined, guardForScene('storybook.generate'));
+          if (guardedOut.ok) {
+            setBookData(parsed);
+            sfxWin();
+          } else {
+            setBookData(fallbackStorybook(character, theme));
+          }
         } else {
           setBookData(fallbackStorybook(character, theme));
         }
@@ -235,7 +252,7 @@ export function StoryBook() {
                 placeholder={tr('storybook.ideaPlaceholder')}
                 className="w-full rounded-2xl border-2 border-candy-purple/40 bg-white px-4 py-3 text-sm font-bold text-ink outline-none focus:border-candy-purple"
               />
-              {isSpeechRecogSupported() && (
+              {isSpeechRecogSupported() ? (
                 <button aria-label="🎤"
                   type="button"
                   onClick={handleVoiceInput}
@@ -246,8 +263,21 @@ export function StoryBook() {
                 >
                   🎤
                 </button>
+              ) : (
+                // B/C：Safari 等无语音识别 → 隐藏可用的麦克风按钮，改为提示用文字输入
+                <span
+                  className="absolute right-2 grid h-9 place-items-center rounded-xl px-2 text-xs font-bold text-ink/40"
+                  title={tr('storybook.voiceUnsupported')}
+                >
+                  {tr('storybook.voiceUnsupported')}
+                </span>
               )}
             </div>
+            {ideaNotice && (
+              <p className="mb-2 text-xs font-bold text-candy-orange-deep">
+                🙈 {ideaNotice}
+              </p>
+            )}
 
             {/* 灵感快捷点选 */}
             <div className="flex flex-wrap gap-1.5 mt-2">

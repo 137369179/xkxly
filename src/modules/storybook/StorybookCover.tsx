@@ -70,7 +70,7 @@ export function StorybookCover({ book, onOpen, onDelete, onToggleFavorite }: Sto
           className="text-sm font-bold text-center line-clamp-2"
           style={{ color: tone.deep }}
         >
-          {book.data.bookTitle}
+          {book.title ?? book.data?.bookTitle ?? ''}
         </span>
         <div className="flex items-center gap-1 text-xs text-gray-500">
           <span>{dateStr}</span>

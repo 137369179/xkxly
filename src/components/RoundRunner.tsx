@@ -15,6 +15,7 @@ import { useStruggle } from '@/lib/struggle';
 import { useTranslation } from '@/i18n/useTranslation';
 import { StruggleModal } from '@/components/StruggleModal';
 import { calibrateDifficulty } from '@/lib/difficulty';
+import { starsByMistakes } from '@/lib/stars';
 
 interface RoundRunnerProps {
   /** 生成下一题（难度由本组件透传） */
@@ -126,8 +127,7 @@ export function RoundRunner({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [difficulty]);
 
-  const computeStars = (m: number): number =>
-    m === 0 ? 3 : m <= Math.ceil(questionsPerRound / 3) ? 2 : 1;
+  const computeStars = (m: number): number => starsByMistakes(m, questionsPerRound);
 
   const handleAnswer = (correct: boolean) => {
     // C: 传出本题实际出题难度，供调用方做难度感知复习

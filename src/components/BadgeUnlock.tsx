@@ -11,7 +11,7 @@ import { celebrateBig } from '@/lib/celebrate';
 import { sfxWin } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { useAiStream } from '@/lib/ai/useAi';
-import { praiseTask } from '@/lib/ai/tasks';
+import { praiseTask } from '@/lib/ai/tasks/report';
 import { AiPanel } from '@/components/ai';
 import { useTranslation } from '@/i18n/useTranslation';
 

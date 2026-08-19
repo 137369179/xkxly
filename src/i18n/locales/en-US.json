@@ -1441,6 +1441,7 @@
     "yourIdea": "Your special idea (voice input supported)",
     "ideaPlaceholder": "e.g. I want the bear to ride a rainbow to the moon and play soccer...",
     "voiceInput": "Voice input idea",
+    "voiceUnsupported": "Voice unsupported, type instead",
     "quickIdeas": "Quick ideas",
     "generateBtn": "AI Magic Storybook Generator",
     "creating": "Buddy is creating…",
@@ -2633,6 +2634,7 @@
       "muted": "🔇 Microphone muted",
       "connected": "🟢 Call connected! Talk anytime!",
       "sttError": "I didn't hear clearly. Talk to me or tap a phrase below~",
+      "unsupported": "Your browser doesn't support voice recognition. Please type your question below~",
       "replay": "🔊 Replay",
       "organizing": "Meow~ (thinking of words)",
       "unmute": "🔇 Unmute",
@@ -4809,7 +4811,8 @@
     "fav": "❤️ Favorites",
     "favEmpty": "No favorites yet, tap ❤️ on a book cover!",
     "catEmpty": "No storybooks in this category yet～",
-    "deleteConfirm": "Tap again to delete"
+    "deleteConfirm": "Tap again to delete",
+    "opening": "Opening storybook…"
   },
   "nurseryPage": {
     "title": "Nursery Rhymes",

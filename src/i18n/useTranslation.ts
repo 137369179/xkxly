@@ -54,28 +54,31 @@ function deepMergeLocale(base: any, extra: any): any {
 
 type TranslationData = typeof zhCN;
 
-/** 深度获取嵌套对象属性的工具函数 */
+/** 深度获取嵌套对象属性的工具函数。
+ * 兼容两种键风格（P4-1 修复）：
+ *   - 嵌套键：'wrongbook.tab.overview' → { wrongbook: { tab: { overview } } }
+ *   - 扁平带点键：'mathExtra.subTabs.mul' → { mathExtra: { 'subTabs.mul' } }
+ * 优先把「剩余段合并为字面量键」直查，找不到再逐层下钻——
+ * 否则 'mathExtra.subTabs.mul' 会被按 3 层下钻，永远命中不了扁平键
+ * （此前导致 MathExtra/VerticalMath 的 Tab 标签在 UI 渲染成原始 key 路径）。 */
 function getNestedValue(obj: any, path: string): string {
-  const keys = path.split('.');
-  let current = obj;
-
-  for (const key of keys) {
-    if (current === undefined || current === null) {
-      return path; // 找不到则返回原始键名
-    }
-    current = current[key]!;
+  const raw = resolvePath(obj, path.split('.'));
+  if (raw === undefined || raw === null) return path;
+  if (typeof raw === 'string') return raw;
+  if (typeof raw === 'object') {
+    return raw.string || Object.values(raw)[0] || path;
   }
-
-  if (typeof current === 'string') {
-    return current;
-  }
-
-  // 如果是对象（如 plural/context），返回默认值或第一个值
-  if (typeof current === 'object' && current !== null) {
-    return current.string || Object.values(current)[0] || path;
-  }
-
   return path;
+}
+
+/** 逐层下钻：每层先试「剩余段整体作为字面量键」，命中即返回 */
+function resolvePath(obj: any, segments: string[]): unknown {
+  if (!obj || typeof obj !== 'object') return undefined;
+  const literal = segments.join('.');
+  const viaLiteral = obj[literal];
+  if (viaLiteral !== undefined && viaLiteral !== null) return viaLiteral;
+  if (segments.length === 1) return undefined;
+  return resolvePath(obj[segments[0]], segments.slice(1));
 }
 
 /** 执行插值替换 */

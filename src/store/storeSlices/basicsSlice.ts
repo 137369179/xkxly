@@ -1,6 +1,7 @@
 import type { ReciteStat } from '@/types';
 import { dateKey } from '@/lib/dailyPlan';
 import { createInitialProgress } from '@/lib/progress';
+import { sanitizeProgress } from '@/lib/backup';
 import { useSettingsStore } from '../useSettingsStore';
 import {
   applyProgress as _applyProgress,
@@ -203,17 +204,27 @@ export const createBasicsSlice: SliceCreator<
   resetAll: () => set(() => ({ progress: createInitialProgress(), pendingBadges: [] })),
 
   restoreProgress: (progress, settings) => {
+    // 安全（扫描 P0-1）：导入的进度一律经过白名单 + 数值钳位净化，
+    // 即便绕过 UI 直接调用，也无法注入未知字段 / 超大数值破坏状态。
+    const safe = sanitizeProgress(progress);
     if (settings) {
       const s = useSettingsStore.getState();
-      if (settings.parentPin) s.setParentPin(settings.parentPin);
-      s.setSound(settings.sound);
-      s.setShowPinyin(settings.showPinyin);
-      s.setDailyLimit(settings.dailyLimitMin);
-      s.setEyeCare(settings.eyeCareMin);
-      s.setAiEnabled(settings.aiEnabled);
+      // settings 白名单校验：只接受合法取值，防止伪造数据写入
+      if (typeof settings.parentPin === 'string' && /^\d{4}$/.test(settings.parentPin)) {
+        s.setParentPin(settings.parentPin);
+      }
+      if (typeof settings.sound === 'boolean') s.setSound(settings.sound);
+      if (typeof settings.showPinyin === 'boolean') s.setShowPinyin(settings.showPinyin);
+      if (typeof settings.dailyLimitMin === 'number') {
+        s.setDailyLimit(Math.max(0, Math.min(1440, Math.round(settings.dailyLimitMin))));
+      }
+      if (typeof settings.eyeCareMin === 'number') {
+        s.setEyeCare(Math.max(0, Math.min(120, Math.round(settings.eyeCareMin))));
+      }
+      if (typeof settings.aiEnabled === 'boolean') s.setAiEnabled(settings.aiEnabled);
     }
     set(() => ({
-      progress: deepMergeProgress(initialProgress, progress),
+      progress: deepMergeProgress(initialProgress, safe),
       pendingBadges: [],
     }));
   },

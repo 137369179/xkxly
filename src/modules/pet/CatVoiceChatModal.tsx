@@ -134,6 +134,13 @@ export function CatVoiceChatModal({ isOpen, onClose }: { isOpen: boolean; onClos
   const startListening = useCallback(async () => {
     if (!isOpenRef.current || isMutedRef.current) return;
 
+    // C：严格能力检测 —— Safari 无 SpeechRecognition，直接提示用文字，不开麦
+    if (!isSpeechRecogSupported()) {
+      setSttNotice(t('catCompanion.voice.unsupported'));
+      setIsListening(false);
+      return;
+    }
+
     // 预检麦克风权限：被拒时给友好提示且不开麦，而不是等 onerror 沉默
     const perm = await requestMicPermission();
     if (perm === 'denied') {

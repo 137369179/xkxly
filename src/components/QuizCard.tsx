@@ -7,7 +7,7 @@ import { sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { celebrateBig, celebrateSmall, celebrateStars } from '@/lib/celebrate';
 import { recordCombo, COMBO_THRESHOLDS } from '@/lib/combo';
 import { recordAttempt } from '@/lib/adaptChain';
-import { useMastery } from '@/store/useStore';
+import { useSkillMastery } from '@/store/useStore';
 import { useTranslation } from '@/i18n/useTranslation';
 import { errorAnalyzer, WEAKNESS_LABEL } from '@/lib/ai/smart-practice';
 import { speak, stopSpeaking, praiseByScene, encourageByScene, skillToPraiseScene, skillToEncourageScene } from '@/lib/speech';
@@ -17,7 +17,7 @@ import { AiButton, AiPanel } from '@/components/ai';
 import { useAiStream } from '@/lib/ai/useAi';
 import type { StreamTask } from '@/lib/ai/tasks';
 import { quizExtendTask } from '@/lib/ai/tasks';
-import { wrongReason } from '@/lib/questions';
+import { wrongReason } from '@/lib/questions/wrongReason';
 
 /** 把选项渲染成一段可以喂给模型的纯文本 */
 function optionText(o: { label?: string; emoji?: string; shapes?: string[] } | undefined): string {
@@ -88,11 +88,11 @@ export function QuizCard({
   });
   const cardRef = useRef<HTMLDivElement>(null);
   const explain = useAiStream();
-  /** 读取全局掌握度，用于跨题薄弱诊断（区别于单题 wrongReason） */
-  const mastery = useMastery();
+  /** 读取当前题目的掌握度，用于跨题薄弱诊断（P1-2：细粒度订阅，避免全局 mastery 重渲染） */
+  const mastery = useSkillMastery(question.skill ?? '');
   const skillDiag = useMemo(() => {
     if (!question.skill) return null;
-    return errorAnalyzer.diagnoseSkill(question.skill, mastery[question.skill]);
+    return errorAnalyzer.diagnoseSkill(question.skill, mastery);
   }, [question.skill, mastery]);
   /** 抖动动画的复位定时器：不清理的话，快速连点会在卸载后触发 setState */
   const shakeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

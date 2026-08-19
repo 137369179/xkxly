@@ -24,7 +24,11 @@ export interface StylePreset {
 
 export interface SavedStorybook {
   id: string;
-  data: StoryBookData;
+  /** 完整内容（P1-10 迁移后存 IndexedDB，progress 中不再携带以控制 localStorage 体积；
+   *  老数据（迁移前）仍在 progress 内，读取方以 title/data 双路兼容） */
+  data?: StoryBookData;
+  /** 反规范化标题（封面/列表展示用，避免读取重数据） */
+  title?: string;
   theme: StorybookTheme;
   style: StorybookStyle;
   character: string;

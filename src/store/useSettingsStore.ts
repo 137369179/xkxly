@@ -34,6 +34,8 @@ export interface Settings {
   aiEnabled: boolean;
   /** 语音引导开关（页面/步骤切换时的引导朗读），默认开；仍受 sound 总开关约束 */
   voiceGuide: boolean;
+  /** 是否已确认「隐私与数据说明」（P0-1 合规：首启引导要求父母确认后才可继续） */
+  privacyAccepted: boolean;
 }
 
 interface SettingsStoreState {
@@ -50,6 +52,7 @@ interface SettingsStoreState {
   setEyeCare: (min: number) => void;
   setAiEnabled: (v: boolean) => void;
   setVoiceGuide: (v: boolean) => void;
+  setPrivacyAccepted: (v: boolean) => void;
 }
 
 const initialSettings: Settings = {
@@ -62,6 +65,7 @@ const initialSettings: Settings = {
   eyeCareMin: 20,
   aiEnabled: true,
   voiceGuide: true,
+  privacyAccepted: false,
 };
 
 export const useSettingsStore = create<SettingsStoreState>()(
@@ -119,6 +123,9 @@ export const useSettingsStore = create<SettingsStoreState>()(
 
       setVoiceGuide: (v) =>
         set((s) => ({ settings: { ...s.settings, voiceGuide: v } })),
+
+      setPrivacyAccepted: (v) =>
+        set((s) => ({ settings: { ...s.settings, privacyAccepted: v } })),
     }),
     {
       name: 'baby-learning-settings',

@@ -146,6 +146,10 @@ export default function HomePage() {
                   src={m.imageIcon}
                   alt={m.label}
                   loading="lazy"
+                  decoding="async"
+                  // P1-9 响应式：1920px 原图只在宽屏/高清设备下载，移动端/小卡走 480px 变体
+                  srcSet={m.imageIconSmall ? `${m.imageIcon} 1920w, ${m.imageIconSmall} 480w` : undefined}
+                  sizes="(min-width: 640px) 20vw, 33vw"
                   className="aspect-square w-full object-cover"
                 />
                 <span

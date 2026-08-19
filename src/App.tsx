@@ -5,27 +5,37 @@ import { NAV_MAP } from '@/data/nav';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { BottomTabs } from '@/components/layout/BottomTabs';
 import { TopBar } from '@/components/layout/TopBar';
-import { BadgeUnlock } from '@/components/BadgeUnlock';
 import { ComboIndicator } from '@/components/ComboIndicator';
 import { StudyGuard } from '@/components/StudyGuard';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { OfflineToast } from '@/components/OfflineIndicator';
-import { FriendlyLoading } from '@/components/FriendlyLoading';
+import { RouteSkeleton } from '@/components/RouteSkeleton';
 import { useTtsStore } from '@/store/useTtsStore';
 import { useProfilesStore } from '@/store/useProfilesStore';
 import { OnboardingModal } from '@/components/OnboardingModal';
-import { stopSpeaking } from '@/lib/speech';
+import { stopSpeaking } from '@/lib/speechCore';
 import { useTranslation } from '@/i18n/useTranslation';
-import { AiVoiceModal } from '@/components/ai/AiVoiceModal';
 import { PwaInstallBanner } from '@/components/PwaInstallBanner';
 import { SwUpdateToast } from '@/components/SwUpdateToast';
 import { BackupRestorePanel, useBackupDetection } from '@/components/BackupRestorePanel';
 import { startAutoBackup } from '@/lib/autoBackup';
 import { useStore } from '@/store/useStore';
+import { putStorybookContent } from '@/lib/storybookStore';
 import { announceToScreenReader } from '@/components/Accessibility';
 import { useSoundSync } from '@/hooks/useSoundSync';
 const CatCompanion = lazy(() =>
   import('@/modules/companion/CatCompanion').then((m) => ({ default: m.CatCompanion })) as Promise<{ default: React.ComponentType<any> }>
+);
+// P1-1：BadgeUnlock 仅「徽章解锁」低频事件才需要，懒加载使整套 TTS + AI 任务
+// 库 + badges/medals 语料不再随首屏主包加载（解锁时按需拉取）。
+// ⚠️ BadgeUnlock 仅命名导出，必须 .then 映射 default，否则 React.lazy 初始化抛错白屏。
+const BadgeUnlock = lazy(() =>
+  import('@/components/BadgeUnlock').then((m) => ({ default: m.BadgeUnlock })),
+);
+// Part B · Step 3：AiVoiceModal 仅打开语音对话时才需要，懒加载使整套
+// speech(真实语音) + speechRecog + AI 流式链路离开首屏主包。
+const AiVoiceModal = lazy(() =>
+  import('@/components/ai/AiVoiceModal').then((m) => ({ default: m.AiVoiceModal })),
 );
 
 const HomePage = lazy(() => import('@/modules/home/HomePage'));
@@ -134,7 +144,8 @@ function Page() {
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.22, ease: 'easeOut' }}
         >
-          <Suspense fallback={<FriendlyLoading />}>{page}</Suspense>
+          {/* P1-7：路由级轻量骨架屏（内容骨架占位，替代全屏 Loading，减少 CLS） */}
+          <Suspense fallback={<RouteSkeleton />}>{page}</Suspense>
         </motion.div>
       </AnimatePresence>
     </ErrorBoundary>
@@ -175,13 +186,45 @@ export function App() {
     // P1-2：多档案启动迁移 —— 首次把当前进度转为「宝贝」档案，老数据零丢失；
     // 之后每次启动把运行时最新进度同步回 active 仓库，保证两份持久化一致。
     useProfilesStore.getState().ensureInit();
+
+    // P1-10：一次性迁移 —— 老版本 progress 携带的绘本全文迁入 IndexedDB，
+    // 并从 progress 剥离（只留轻量元数据，控制 localStorage 体积）。幂等：无 data 即跳过。
+    // ⚠️ 仅剥离「写入成功」的条目：写失败保留 data，下次启动自动重试，杜绝数据丢失。
+    const migrateStorybooks = async () => {
+      const p = useStore.getState().progress;
+      const list = p.storybooks ?? [];
+      if (!list.some((b) => b.data)) return;
+      const results = await Promise.all(
+        list.filter((b) => b.data).map(async (b) => [b, await putStorybookContent(b)] as const),
+      );
+      const failedIds = new Set(results.filter(([, ok]) => !ok).map(([b]) => b.id));
+      const stripped = list.map((b) => {
+        if (!b.data || failedIds.has(b.id)) return b;
+        return {
+          id: b.id,
+          title: b.title ?? b.data.bookTitle,
+          theme: b.theme,
+          style: b.style,
+          character: b.character,
+          createdAt: b.createdAt,
+          readCount: b.readCount,
+          favorite: b.favorite,
+        };
+      });
+      if (stripped.some((b, i) => b !== list[i])) {
+        useStore.setState({ progress: { ...p, storybooks: stripped } });
+      }
+    };
+    void migrateStorybooks();
   }, []);
 
   // SEO（规格十五）：按路由动态更新 document.title，提升各页可识别度与分享体验
+  // P0-2 隐私：标题不再拼入儿童真实姓名（避免姓名进入浏览器标签页/历史记录），
+  // 改用默认称呼「宝贝」+ 头像 emoji 保留个性化又不含 PII。
   useEffect(() => {
     const st = useProfilesStore.getState();
     const meta = st.meta[st.activeProfileId];
-    const child = meta?.name && meta.name !== t('app.defaultProfileName') ? ` · ${meta.name}` : '';
+    const child = meta?.avatar ? ` · ${meta.avatar}` : '';
     const item = NAV_MAP.get(route);
     if (route === 'home') {
       document.title = `${t('app.name')} · ${t('app.tagline')}${child}`;
@@ -209,7 +252,7 @@ export function App() {
         <ErrorBoundary>
           <Suspense fallback={null}><CatCompanion /></Suspense>
         </ErrorBoundary>
-        <BadgeUnlock />
+        <Suspense fallback={null}><BadgeUnlock /></Suspense>
         <ComboIndicator />
         <StudyGuard />
         <OfflineToast />
@@ -218,7 +261,9 @@ export function App() {
         {showRestorePanel && (
           <BackupRestorePanel onRestoreComplete={handleRestoreComplete} />
         )}
-        <AiVoiceModal isOpen={voiceModalOpen} onClose={closeVoiceModal} />
+        <Suspense fallback={null}>
+          <AiVoiceModal isOpen={voiceModalOpen} onClose={closeVoiceModal} />
+        </Suspense>
         {!onboarded && (
           <OnboardingModal
             onComplete={(n, a, c, age) => completeOnboarding(n, a, c, age)}

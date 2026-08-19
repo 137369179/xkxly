@@ -28,8 +28,8 @@ export function ParentBackupSection() {
   }, []);
 
   /* —— 备份导出 —— */
-  const handleExport = () => {
-    const payload = buildBackup(progress, settings);
+  const handleExport = async () => {
+    const payload = await buildBackup(progress, settings);
     downloadBackup(payload);
     setImportMsg({ ok: true, text: translate('parent.backupDownloaded') });
     if (importMsgTimerRef.current) clearTimeout(importMsgTimerRef.current);
@@ -41,7 +41,7 @@ export function ParentBackupSection() {
     if (!file) return;
     try {
       const text = await readBackupFile(file);
-      const payload = parseBackup(text);
+      const payload = await parseBackup(text);
       if (!payload) {
         setImportMsg({ ok: false, text: translate('parent.backupInvalid') });
         return;

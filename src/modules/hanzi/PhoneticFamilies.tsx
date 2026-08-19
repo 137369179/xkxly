@@ -13,7 +13,9 @@ import { HANZI_DATA } from '@/data/hanzi';
 import { type HanziEntry } from '@/data/hanziIndex';
 import { speak } from '@/lib/speech';
 import { sfxTap } from '@/lib/sfx';
-import { useMastery, useStore } from '@/store/useStore';
+import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
+import type { MasteryItem } from '@/types';
 import { TONE_STYLE } from '@/lib/tones';
 import { useTranslation } from '@/i18n/useTranslation';
 
@@ -25,7 +27,16 @@ interface Family {
 
 export function PhoneticFamilies({ onLearn }: { onLearn?: (h: HanziEntry) => void }) {
   const { t } = useTranslation();
-  const mastery = useMastery();
+  // P1-2：只订阅 hanzi 相关的 mastery 项（useShallow 浅比较），
+  // 其它学科任意 practice 不再触发本组件重渲染。
+  const mastery = useStore(
+    useShallow((s): Record<string, MasteryItem> => {
+      const m = s.progress.mastery;
+      const out: Record<string, MasteryItem> = {};
+      for (const k of Object.keys(m)) if (k.startsWith('hanzi:')) out[k] = m[k]!;
+      return out;
+    }),
+  );
   const learnSkill = useStore((s) => s.learnSkill);
   const [open, setOpen] = useState<string | null>(null);
 

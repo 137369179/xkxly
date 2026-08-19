@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { sfxTap } from '@/lib/sfx';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import {
   useActiveProfileMeta,
   PROFILE_AVATARS,
@@ -27,9 +28,13 @@ export function OnboardingModal({ onComplete }: { onComplete: (name: string, ava
   const [avatar, setAvatar] = useState(active?.avatar ?? PROFILE_AVATARS[0] ?? '👦');
   const [color, setColor] = useState(active?.color ?? PROFILE_COLORS[0]?.key ?? 'pink');
   const [ageRange, setAgeRange] = useState<AgeRangeKey>(active?.ageRange ?? '7-8');
+  // P0-1 合规：父母需先确认《隐私与数据说明》才可进入
+  const [privacyAgreed, setPrivacyAgreed] = useState(false);
 
   const start = () => {
     sfxTap();
+    // 记录隐私同意（本地持久化），家长中心可随时查阅完整说明
+    useSettingsStore.getState().setPrivacyAccepted(true);
     onComplete(name.trim() || '宝贝', avatar, color, ageRange);
   };
 
@@ -139,14 +144,38 @@ export function OnboardingModal({ onComplete }: { onComplete: (name: string, ava
             </div>
           </div>
 
+          {/* P0-1 合规：隐私与数据说明告知 + 父母同意勾选 */}
+          <div className="flex flex-col gap-1 rounded-2xl border-2 border-candy-blue/25 bg-blue-50/60 p-3">
+            <p className="text-xs font-bold leading-relaxed text-gray-600">
+              {t('privacy.summary')}
+            </p>
+            <p className="text-xs font-bold leading-relaxed text-gray-500">
+              {t('privacy.voiceNotice')}
+            </p>
+            <label className="mt-1 flex cursor-pointer items-start gap-2 rounded-xl bg-white/80 p-2">
+              <input
+                type="checkbox"
+                checked={privacyAgreed}
+                onChange={(e) => setPrivacyAgreed(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-candy-blue"
+                aria-label={t('privacy.consentLabel')}
+              />
+              <span className="text-xs font-extrabold text-gray-700">{t('privacy.consentLabel')}</span>
+            </label>
+          </div>
+
           <motion.button
             type="button"
             onClick={start}
+            disabled={!privacyAgreed}
             whileTap={{ scale: 0.96 }}
-            className="mt-1 rounded-2xl bg-candy-purple py-3 text-base font-extrabold text-white shadow-candy active:translate-y-[1px]"
+            className="mt-1 rounded-2xl bg-candy-purple py-3 text-base font-extrabold text-white shadow-candy active:translate-y-[1px] disabled:opacity-40"
           >
             🚀 {t('onboarding.start')}
           </motion.button>
+          {!privacyAgreed && (
+            <p className="text-center text-xs font-bold text-candy-orange-deep">{t('privacy.needAgree')}</p>
+          )}
           <p className="text-center text-xs text-gray-400">{t('onboarding.tip')}</p>
         </div>
       </motion.div>

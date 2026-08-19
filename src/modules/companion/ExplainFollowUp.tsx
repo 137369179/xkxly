@@ -13,6 +13,7 @@ import { useSafeTimeout } from '@/lib/useTimer';
 import { AiAvatar } from '@/components/ai/AiAvatar';
 import { useAiStream } from '@/lib/ai/useAi';
 import { companionFollowUpTask } from '@/lib/ai/tasks';
+import { guardInput } from '@/lib/ai/guard';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { TONE_STYLE } from '@/lib/tones';
 import { sfxTap } from '@/lib/sfx';
@@ -43,6 +44,7 @@ export function ExplainFollowUp({
   const [turns, setTurns] = useState<ChatTurn[]>([]);
   const [input, setInput] = useState('');
   const [phase, setPhase] = useState<'asking' | 'answering' | 'done'>('asking');
+  const [guardMsg, setGuardMsg] = useState('');
   const startedRef = useRef(false);
   const explainRef = useRef(explainText ?? '');
   const schedule = useSafeTimeout();
@@ -97,13 +99,20 @@ export function ExplainFollowUp({
   const handleSubmit = () => {
     const text = input.trim();
     if (!text || phase !== 'answering') return;
+    // 入口护栏（P0-4）：孩子追问的自由文本必须先过 guardInput，再进 AI
+    const guarded = guardInput(text, 80);
+    if (!guarded.ok) {
+      setGuardMsg(guarded.reason ?? '这个问题我们换一个说法聊聊吧～');
+      return;
+    }
+    setGuardMsg('');
     sfxTap();
-    setTurns((prev) => [...prev, { role: 'user', content: text }]);
+    setTurns((prev) => [...prev, { role: 'user', content: guarded.text }]);
     setInput('');
 
     // 构建历史上下文
     answerStream.run(
-      companionFollowUpTask(topicTitle, explainRef.current, text),
+      companionFollowUpTask(topicTitle, explainRef.current, guarded.text),
     );
   };
 
@@ -179,7 +188,7 @@ export function ExplainFollowUp({
         >
           <input
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => { setInput(e.target.value); if (guardMsg) setGuardMsg(''); }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && input.trim() && !busy) handleSubmit();
             }}
@@ -200,6 +209,11 @@ export function ExplainFollowUp({
             回答
           </button>
         </motion.div>
+      )}
+      {guardMsg && phase === 'answering' && (
+        <p className="mt-1 text-xs font-bold" style={{ color: tone.deep }}>
+          🙈 {guardMsg}
+        </p>
       )}
 
       {/* 全部结束 */}

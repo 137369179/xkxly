@@ -12,14 +12,18 @@ export interface SpeechRecogOptions {
   onStart?: () => void;
 }
 
-/** 检查浏览器是否支持语音识别 */
+/**
+ * 严格能力检测：是否具备【真正的语音识别】能力（Safari 只有麦克风、无 SpeechRecognition，
+ * 旧实现因 getUserMedia 存在而误报 true，导致语音按钮"看似可用实则假"）。
+ * 需要麦克风但不需要识别能力的场景请用 isMicAvailable()。
+ */
 export function isSpeechRecogSupported(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!(
-    window.SpeechRecognition ||
-    window.webkitSpeechRecognition ||
-    (navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
-  );
+  return getSpeechRecognitionCtor() !== null;
+}
+
+/** 仅检测麦克风可用性（与识别能力解耦，Safari 也支持） */
+export function isMicAvailable(): boolean {
+  return typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia;
 }
 
 type RecogInstance = InstanceType<NonNullable<Window['SpeechRecognition']>>;
@@ -133,6 +137,10 @@ export function detectVoiceOnce(
       return;
     }
     ctx = new AudioCtx();
+    // A(高)：iOS Safari 的 AudioContext 创建即 suspended，必须 resume 才能产出音频数据；
+    // 此处 ctx 在 await getUserMedia 之后创建，用户手势窗口通常已关闭，best-effort resume，
+    // 失败则音量恒为 0 → 走超时分支（报"没有听到声音"），绝不挂起。
+    void ctx.resume().catch(() => {});
     const source = ctx.createMediaStreamSource(stream);
     const analyser = ctx.createAnalyser();
     analyser.fftSize = 256;
@@ -336,29 +344,25 @@ class SpeechRecogManager {
     await this.requestMicPermission();
 
     const instance = this.init(options);
-    if (instance) {
-      try {
-        instance.start();
-        return;
-      } catch (e) {
-        if (import.meta.env.DEV) console.warn('SpeechRecog start error:', e);
-      }
+    if (!instance) {
+      // C：Web Speech API 不可用（Safari 等）→ 不再产生 2.5s 假结果，
+      // 直接提示用文字输入（调用方已用严格能力检测拦截，这里是最后一道兜底）。
+      this.isListening = false;
+      options.onError?.('当前浏览器不支持语音识别，请用文字输入～');
+      options.onEnd?.();
+      return;
+    }
+    try {
+      instance.start();
+      return;
+    } catch (e) {
+      if (import.meta.env.DEV) console.warn('SpeechRecog start error:', e);
     }
 
-    // Web Speech API unavailable fallback: activate volume sensing & fallback prompt
-    this.isListening = true;
-    options.onStart?.();
-    this.startVolumeSensing(options);
-
-    // Auto trigger fallback after 2.5s if child spoke
-    setTimeout(() => {
-      if (this.isListening) {
-        this.isListening = false;
-        this.stopVolumeSensing();
-        options.onResult?.('喵喵，我想和你说话呀！', true);
-        options.onEnd?.();
-      }
-    }, 2500);
+    // start 抛异常（状态冲突等）→ 没有 onerror/onend 会触发，直接提示用文字输入
+    this.isListening = false;
+    options.onError?.('语音识别暂时不可用，请用文字输入～');
+    options.onEnd?.();
   }
 
   public stop() {

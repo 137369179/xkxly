@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { navigate } from '@/lib/router';
 import { sfxTap } from '@/lib/sfx';
 import { useStars, useBadgeCount } from '@/store/useStore';
@@ -9,7 +9,12 @@ import { useTranslation } from '@/i18n/useTranslation';
 import type { Locale } from '@/i18n/config';
 import { ProfileSwitcher } from './ProfileSwitcher';
 import { CategorySheet } from './CategorySheet';
-import { SoundMuteToggle } from '@/components/SoundMuteToggle';
+
+// Part B · 懒加载 SoundMuteToggle：其依赖的 sound.ts（真实语音引擎链）只在
+// 首帧之后按需拉取，不再进入首屏主包（TopBar 仍即时渲染，仅静音钮稍后出现）。
+const SoundMuteToggle = lazy(() =>
+  import('@/components/SoundMuteToggle').then((m) => ({ default: m.SoundMuteToggle })),
+);
 
 export function TopBar() {
   const stars = useStars();
@@ -62,7 +67,9 @@ export function TopBar() {
         <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
           {/* 工具组：静音 · 语言 · 分类 */}
           <div className="hidden items-center gap-0.5 rounded-full bg-white/60 p-0.5 shadow-inner sm:flex">
-            <SoundMuteToggle className="[&>button]:h-9 [&>button]:px-2 [&>button]:py-0" />
+            <Suspense fallback={null}>
+              <SoundMuteToggle className="[&>button]:h-9 [&>button]:px-2 [&>button]:py-0" />
+            </Suspense>
             <button
               type="button"
               onClick={toggleLocale}
@@ -94,7 +101,9 @@ export function TopBar() {
             >
               🔎
             </button>
-            <SoundMuteToggle className="sm:hidden [&>button]:h-9 [&>button]:w-9 [&>button]:px-0" />
+            <Suspense fallback={null}>
+              <SoundMuteToggle className="sm:hidden [&>button]:h-9 [&>button]:w-9 [&>button]:px-0" />
+            </Suspense>
           </div>
 
           {/* 身份组视觉分隔（桌面） */}

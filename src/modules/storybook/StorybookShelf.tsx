@@ -9,6 +9,8 @@ import { StorybookCover } from './StorybookCover';
 import { StorybookReader } from './StorybookReader';
 import { THEMES } from './constants';
 import type { SavedStorybook, StorybookTheme } from './types';
+import type { StoryBookData } from '@/lib/ai/prompts';
+import { getStorybookContent } from '@/lib/storybookStore';
 
 const EMPTY_STORYBOOKS: readonly SavedStorybook[] = Object.freeze([]);
 
@@ -36,7 +38,14 @@ export function StorybookShelf({ showFilters = false }: { showFilters?: boolean 
   const ageRange = useProfilesStore(
     (s) => s.meta[s.activeProfileId]?.ageRange ?? '7-8',
   );
-  const [reading, setReading] = useState<SavedStorybook | null>(null);
+  const [reading, setReading] = useState<{
+    data: StoryBookData;
+    id: string;
+    theme: StorybookTheme;
+    style: StorybookStyle;
+    character: string;
+  } | null>(null);
+  const [openingId, setOpeningId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [filter, setFilter] = useState<ShelfFilter>('all');
 
@@ -49,6 +58,23 @@ export function StorybookShelf({ showFilters = false }: { showFilters?: boolean 
   }, [storybooks, filter]);
 
   const favCount = useMemo(() => storybooks.filter((b) => b.favorite).length, [storybooks]);
+
+  // P1-10：绘本完整内容存 IndexedDB，打开时异步取回（老数据 data 仍在 progress 内兜底）
+  const openBook = async (book: SavedStorybook) => {
+    sfxTap();
+    setOpeningId(book.id);
+    const full = await getStorybookContent(book.id);
+    setOpeningId(null);
+    const data = full?.data ?? book.data;
+    if (!data) return;
+    setReading({
+      data,
+      id: book.id,
+      theme: book.theme,
+      style: book.style,
+      character: book.character,
+    });
+  };
 
   if (reading) {
     return (
@@ -110,7 +136,15 @@ export function StorybookShelf({ showFilters = false }: { showFilters?: boolean 
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        <>
+          {/* 打开中指示（IndexedDB 异步取回完整内容） */}
+          {openingId && (
+            <p className="mb-2 flex items-center gap-1.5 text-xs font-bold text-candy-purple-deep" role="status">
+              <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-candy-purple border-t-transparent" />
+              {t('storybookShelf.opening')}
+            </p>
+          )}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {filtered.map((book) => (
             <motion.div
               key={book.id}
@@ -121,10 +155,7 @@ export function StorybookShelf({ showFilters = false }: { showFilters?: boolean 
             >
               <StorybookCover
                 book={book}
-                onOpen={() => {
-                  sfxTap();
-                  setReading(book);
-                }}
+                onOpen={() => void openBook(book)}
                 onToggleFavorite={() => toggleStorybookFavorite(book.id)}
                 onDelete={() => {
                   if (confirmDelete === book.id) {
@@ -141,7 +172,8 @@ export function StorybookShelf({ showFilters = false }: { showFilters?: boolean 
               )}
             </motion.div>
           ))}
-        </div>
+          </div>
+        </>
       )}
     </div>
   );
