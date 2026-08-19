@@ -61,7 +61,7 @@ import { dailySummaryTask } from '@/lib/ai/tasks';
 import { useAiStream as useAiStreamSummary } from '@/lib/ai/useAi';
 import { AiPanel as AiPanelSummary } from '@/components/ai';
 
-export function DailySummary({ progress, plan }: { progress: Progress; plan: ReturnType<typeof buildDailyPlan> }) {
+export function DailySummary({ plan }: { plan: ReturnType<typeof buildDailyPlan> }) {
   const learnedItems = plan.sections
     .filter((s) => s.kind !== 'review' && s.kind !== 'quiz')
     .map((s) => {
@@ -74,9 +74,11 @@ export function DailySummary({ progress, plan }: { progress: Progress; plan: Ret
       return s.kind;
     })
     .join('、');
+  const stars = useStars();
+  const streak = useStreak();
   const task = useMemo(
-    () => dailySummaryTask(learnedItems || '今日课程', progress.stars, progress.streak),
-    [learnedItems, progress.stars, progress.streak],
+    () => dailySummaryTask(learnedItems || '今日课程', stars, streak),
+    [learnedItems, stars, streak],
   );
   const ai = useAiStreamSummary(task);
   return (
@@ -98,7 +100,7 @@ import { HANZI_DATA } from '@/data/hanzi';
 import { getAllPinyin } from '@/data/pinyinIndex';
 import { WORD_THEMES } from '@/data/words';
 import { speakSequence, speak } from '@/lib/speech';
-import { useStore } from '@/store/useStore';
+import { useStore, useStars, useStreak } from '@/store/useStore';
 import POEMS from '@/data/poems';
 import { makePoemQuestion, makeMathQuestion } from '@/lib/questions';
 

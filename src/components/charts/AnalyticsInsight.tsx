@@ -7,7 +7,7 @@
  * 零第三方依赖，纯 SVG + Tailwind，风格与 StudyCharts 一致。
  */
 import { useMemo } from 'react';
-import { useProgress } from '@/store/useStore';
+import { useDailyLog, useMastery, useChatHistory } from '@/store/useStore';
 import { useTranslation } from '@/i18n/useTranslation';
 import { cn } from '@/lib/utils';
 
@@ -27,10 +27,12 @@ function recentDays(n: number): string[] {
 
 export function AnalyticsInsight() {
   const { t } = useTranslation();
-  const progress = useProgress();
+  const dailyLog = useDailyLog();
+  const mastery = useMastery();
+  const chatHistory = useChatHistory();
 
   const stats = useMemo(() => {
-    const log = progress.dailyLog;
+    const log = dailyLog;
 
     // —— 活跃天数（近 7/14/30 天，items>0 或 sec>0 记活跃） ——
     const active = (n: number) =>
@@ -65,19 +67,19 @@ export function AnalyticsInsight() {
 
     // —— AI 互动 ——
     const aiDay = (n: number) =>
-      recentDays(n).reduce((s, d) => s + ((progress.chatHistory?.[`chatCount_${d}`] as number | undefined) ?? 0), 0);
+      recentDays(n).reduce((s, d) => s + ((chatHistory?.[`chatCount_${d}`] as number | undefined) ?? 0), 0);
     const aiToday = aiDay(1);
     const aiWeek = aiDay(7);
-    const aiTotal = Object.entries(progress.chatHistory ?? {}).reduce(
+    const aiTotal = Object.entries(chatHistory ?? {}).reduce(
       (s, [k, v]) => (k.startsWith('chatCount_') && typeof v === 'number' ? s + v : s),
       0,
     );
-    const aiLast7 = recentDays(7).map((d) => (progress.chatHistory?.[`chatCount_${d}`] as number | undefined) ?? 0);
+    const aiLast7 = recentDays(7).map((d) => (chatHistory?.[`chatCount_${d}`] as number | undefined) ?? 0);
 
     // —— 总览 ——
     const totalItems = Object.values(log).reduce((s, v) => s + (v?.items ?? 0), 0);
     const totalSec = Object.values(log).reduce((s, v) => s + (v?.sec ?? 0), 0);
-    const masteryVals = Object.values(progress.mastery);
+    const masteryVals = Object.values(mastery);
     const okSum = masteryVals.reduce((s, m) => s + (m?.ok ?? 0), 0);
     const ngSum = masteryVals.reduce((s, m) => s + (m?.ng ?? 0), 0);
     const accuracy = okSum + ngSum > 0 ? Math.round((okSum / (okSum + ngSum)) * 100) : 0;
@@ -87,7 +89,7 @@ export function AnalyticsInsight() {
       aiToday, aiWeek, aiTotal, aiLast7,
       totalItems, totalSec, accuracy,
     };
-  }, [progress]);
+  }, [dailyLog, mastery, chatHistory]);
 
   const aiMax = Math.max(...stats.aiLast7, 1);
   const todayActive = stats.active7 > 0;

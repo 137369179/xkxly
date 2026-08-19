@@ -265,7 +265,11 @@ export const useStore = create<StoreState>()(
   ),
 );
 
-/** 选择器：便捷读取 */
+/**
+ * @deprecated 请改用细粒度 selector（useStars / useMastery / useDailyLog / useBadges /
+ * usePoemMark 等）。全仓唯一保留使用点是 ParentBackupSection —— 备份导出需要完整
+ * 序列化整个 progress，无法拆分字段。其余组件均已迁移，勿新增使用。
+ */
 export const useProgress = () => useStore((s) => s.progress);
 
 /**
@@ -329,6 +333,62 @@ export const useBadgeDates = () => useStore((s) => s.progress.badgeDates);
 export const useStickers = () => useStore((s) => s.progress.stickers);
 /** 错题本列表 */
 export const useWrongBook = () => useStore((s) => s.progress.wrongBook);
+/** 错题本清除/累计历史 */
+export const useWrongHistory = () => useStore((s) => s.progress.wrongHistory);
+/** 已听字母列表 */
+export const useLettersHeard = () => useStore((s) => s.progress.lettersHeard);
+/**
+ * 徽章计量器字段投影（badge.meter 读取的字段全集，见 src/data/badges.ts）：
+ * 徽章页只订阅这些字段，30s dailyLog tick / 养宠状态等变化不再触发徽章页重渲染。
+ * 传给 badge.meter 时需 `as Progress` 断言（meter 声明为 Progress 全量入参）。
+ */
+export const useBadgeMetricProgress = () =>
+  useStore(
+    useShallow(
+      (s): Pick<
+        Progress,
+        | 'lettersHeard'
+        | 'matchGamesWon'
+        | 'poemsRead'
+        | 'numbersHeard'
+        | 'mathCorrect'
+        | 'countCorrect'
+        | 'logicCorrect'
+        | 'levelStars'
+        | 'stars'
+        | 'streak'
+        | 'mastery'
+        | 'pkCount'
+        | 'poemRecite'
+        | 'speedCorrect'
+        | 'wrongHistory'
+        | 'wrongBook'
+        | 'ownedEquipment'
+        | 'researchStats'
+        | 'researchNotes'
+      > => ({
+        lettersHeard: s.progress.lettersHeard,
+        matchGamesWon: s.progress.matchGamesWon,
+        poemsRead: s.progress.poemsRead,
+        numbersHeard: s.progress.numbersHeard,
+        mathCorrect: s.progress.mathCorrect,
+        countCorrect: s.progress.countCorrect,
+        logicCorrect: s.progress.logicCorrect,
+        levelStars: s.progress.levelStars,
+        stars: s.progress.stars,
+        streak: s.progress.streak,
+        mastery: s.progress.mastery,
+        pkCount: s.progress.pkCount,
+        poemRecite: s.progress.poemRecite,
+        speedCorrect: s.progress.speedCorrect,
+        wrongHistory: s.progress.wrongHistory,
+        wrongBook: s.progress.wrongBook,
+        ownedEquipment: s.progress.ownedEquipment,
+        researchStats: s.progress.researchStats,
+        researchNotes: s.progress.researchNotes,
+      }),
+    ),
+  );
 /** 已读古诗 id 列表 */
 export const usePoemsRead = () => useStore((s) => s.progress.poemsRead);
 /** 古诗收藏 id 列表 */
@@ -371,6 +431,12 @@ export const useResearchNotes = () => useStore((s) => s.progress.researchNotes);
 export const usePkCount = () => useStore((s) => s.progress.pkCount);
 /** 创作次数 */
 export const useCreativeCount = () => useStore((s) => s.progress.creativeCount);
+/** 小智陪伴对话历史（explained_ 与 chatCount_ 混合键） */
+export const useChatHistory = () => useStore((s) => s.progress.chatHistory);
+/** 当日课程完成日期 */
+export const useLessonDate = () => useStore((s) => s.progress.lessonDate);
+/** 当日课程进行步骤 */
+export const useLessonStep = () => useStore((s) => s.progress.lessonStep);
 
 
 // Standalone re-exports of instance methods so they can be imported as named exports

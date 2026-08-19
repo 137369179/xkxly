@@ -9,7 +9,7 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
-import { useProgress } from '@/store/useStore';
+import { useWrongBook, useMastery } from '@/store/useStore';
 import { isDue } from '@/lib/srs';
 import { sfxTap } from '@/lib/sfx';
 import { navigate } from '@/lib/router';
@@ -37,17 +37,18 @@ const TABS: { id: TabId; label: string; emoji: string }[] = [
 
 export default function WrongBookDashboard() {
   const { t } = useTranslation();
-  const progress = useProgress();
+  const wrongBook = useWrongBook();
+  const mastery = useMastery();
   const [tab, setTab] = useState<TabId>('overview');
   const [trainMode, setTrainMode] = useState<'adaptive' | 'speed'>('adaptive');
 
   // 到期错题提醒
   const dueWrongCount = useMemo(() => {
-    return progress.wrongBook.filter((s) => {
-      const m = progress.mastery[s];
+    return wrongBook.filter((s) => {
+      const m = mastery[s];
       return m && isDue(m);
     }).length;
-  }, [progress.wrongBook, progress.mastery]);
+  }, [wrongBook, mastery]);
 
   return (
     <div className="mx-auto max-w-2xl space-y-4 p-3">
@@ -156,7 +157,7 @@ export default function WrongBookDashboard() {
       </AnimatePresence>
 
       {/* 空状态引导 */}
-      {progress.wrongBook.length === 0 && tab !== 'badges' && tab !== 'causes' && (
+      {wrongBook.length === 0 && tab !== 'badges' && tab !== 'causes' && (
         <Panel className="text-center">
           <div className="text-5xl">🎉</div>
           <h3 className="mt-2 text-lg font-extrabold text-ink">{t('wrongbook.emptyTitle')}</h3>
@@ -208,8 +209,8 @@ function OverviewTab() {
 /* ------------------------------------------------------------------ */
 function CausesTab() {
   const { t } = useTranslation();
-  const progress = useProgress();
-  const clusters = useMemo(() => clusterWrongBook(progress), [progress]);
+  const wrongBook = useWrongBook();
+  const clusters = useMemo(() => clusterWrongBook({ wrongBook }), [wrongBook]);
 
   return (
     <div className="space-y-4">
@@ -218,7 +219,7 @@ function CausesTab() {
           <h3 className="text-lg font-extrabold text-ink">🧩 {t('wrongbook.causes.title')}</h3>
           {clusters.length > 0 && (
             <span className="text-sm font-bold text-ink-soft">
-              {t('wrongbook.causes.summary', { groups: clusters.length, total: progress.wrongBook.length })}
+              {t('wrongbook.causes.summary', { groups: clusters.length, total: wrongBook.length })}
             </span>
           )}
         </div>

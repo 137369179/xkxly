@@ -1,13 +1,26 @@
 import { useState } from 'react';
+import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useProgress } from '@/store/useStore';
+import type { Progress } from '@/types';
 import { generateAchievementPoster } from '@/lib/posterGenerator';
 import { Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 
 export function ParentPosterSection() {
   const { t: translate } = useTranslation();
-  const progress = useProgress();
+  // generateAchievementPoster 仅读取 streak / stars / badges / poemsRead
+  const progress = useStore(
+    useShallow(
+      (s) =>
+        ({
+          streak: s.progress.streak,
+          stars: s.progress.stars,
+          badges: s.progress.badges,
+          poemsRead: s.progress.poemsRead,
+        }) as Progress,
+    ),
+  );
   const [posterUrl, setPosterUrl] = useState<string | null>(null);
   const [isGeneratingPoster, setIsGeneratingPoster] = useState(false);
 

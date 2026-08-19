@@ -9,7 +9,8 @@
  */
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { useProgress } from '@/store/useStore';
+import { useDailyLog, useMastery } from '@/store/useStore';
+import type { Progress } from '@/types';
 import { useActiveProfileMeta, AGE_RANGES } from '@/store/useProfilesStore';
 import { navigate } from '@/lib/router';
 import { dateKey, buildDailyPlan } from '@/lib/dailyPlan';
@@ -19,15 +20,16 @@ import { AiAvatar } from '@/components/ai/AiAvatar';
 
 export function HomeHero() {
   const { t } = useTranslation();
-  const p = useProgress();
+  const dailyLog = useDailyLog();
+  const mastery = useMastery();
   const meta = useActiveProfileMeta();
 
   const name = meta?.name && meta.name !== '宝贝' ? meta.name : '';
   const ageLabel = AGE_RANGES.find((a) => a.key === meta?.ageRange)?.label ?? '';
 
   const today = dateKey();
-  const lessonDone = !!p.dailyLog[today]?.lesson;
-  const plan = useMemo(() => buildDailyPlan(p, Date.now()), [p, today]);
+  const lessonDone = !!dailyLog[today]?.lesson;
+  const plan = useMemo(() => buildDailyPlan({ mastery } as Progress, Date.now()), [mastery, today]);
   const lessonCount = plan.sections.length;
 
   const greeting = name ? t('home.heroGreeting', { name }) : t('onboarding.welcome');

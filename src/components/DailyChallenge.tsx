@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo, useSyncExternalStore } from 'react';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
-import { useProgress, useStore } from '@/store/useStore';
+import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { useProfilesStore } from '@/store/useProfilesStore';
 import { dateKey } from '@/lib/dailyPlan';
 import { getBestToday, getCombo, subscribeCombo } from '@/lib/combo';
@@ -141,7 +142,20 @@ function getDailyChallenges(ageRange?: string): Challenge[] {
 
 export function DailyChallenge({ compact = false }: { compact?: boolean } = {}) {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
+  // 各任务 check() 仅读取 dailyLog / mathTotal / poemsRead / logicTotal / countCorrect / mastery
+  const progress = useStore(
+    useShallow(
+      (s) =>
+        ({
+          dailyLog: s.progress.dailyLog,
+          mathTotal: s.progress.mathTotal,
+          poemsRead: s.progress.poemsRead,
+          logicTotal: s.progress.logicTotal,
+          countCorrect: s.progress.countCorrect,
+          mastery: s.progress.mastery,
+        }) as Progress,
+    ),
+  );
   const addStars = useStore((s) => s.addStars);
   const ageRange = useProfilesStore((s) => s.meta[s.activeProfileId]?.ageRange);
   // 订阅全局连击变化：连击任务依赖 bestToday，需在连击变化时触发重渲染

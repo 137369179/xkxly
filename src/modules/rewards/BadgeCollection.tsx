@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
-import { useProgress } from '@/store/useStore';
+import { useBadges, useBadgeDates, useStars, useStreak } from '@/store/useStore';
 import { BADGES } from '@/data/badges';
 import { TONE_STYLE } from '@/lib/tones';
 import { motion } from 'motion/react';
@@ -17,11 +17,14 @@ import { useTranslation } from '@/i18n/useTranslation';
 
 export function BadgeCollection() {
   const { t } = useTranslation();
-  const progress = useProgress();
+  const badges = useBadges();
+  const badgeDates = useBadgeDates();
+  const stars = useStars();
+  const streak = useStreak();
   const [page, setPage] = useState(0);
   const PER_PAGE = 6;
 
-  const owned = new Set(progress.badges);
+  const owned = new Set(badges);
   const ownedBadges = BADGES.filter(b => owned.has(b.id));
   const lockedBadges = BADGES.filter(b => !owned.has(b.id));
   const allSorted = [...ownedBadges, ...lockedBadges];
@@ -47,8 +50,8 @@ export function BadgeCollection() {
           <FluffyIcon type="medal" size="md" className="border-amber-300 shadow-md" />
         </div>
         <div className="mt-3 flex gap-4 text-xs font-black opacity-95 relative z-10">
-          <span className="bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full border border-white/30">⭐ {progress.stars} 金星</span>
-          <span className="bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full border border-white/30">🔥 {progress.streak} 天连胜</span>
+          <span className="bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full border border-white/30">⭐ {stars} 金星</span>
+          <span className="bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full border border-white/30">🔥 {streak} 天连胜</span>
           <span className="bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full border border-white/30">🏅 {ownedBadges.length}/{BADGES.length} 勋章</span>
         </div>
       </div>
@@ -64,8 +67,8 @@ export function BadgeCollection() {
           className="grid grid-cols-2 gap-3 sm:grid-cols-3"
         >
           {pageItems.map(b => {
-            const owned = progress.badges.includes(b.id);
-            const date = progress.badgeDates?.[b.id];
+            const owned = badges.includes(b.id);
+            const date = badgeDates?.[b.id];
             const t = TONE_STYLE[b.tone] ?? TONE_STYLE.purple;
             return (
               <div

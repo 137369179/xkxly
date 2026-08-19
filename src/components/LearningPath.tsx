@@ -6,7 +6,9 @@
  * 失败静默降级到本地文案，绝不让孩子看到错误。
  */
 import { useMemo } from 'react';
-import { useProgress } from '@/store/useStore';
+import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
+import type { Progress } from '@/types';
 import { buildLearningPath } from '@/lib/learningPath';
 import { pathNarrateTask, pathWeeklyTask, pathCoachTask } from '@/lib/ai/tasks';
 import { useAiTask } from '@/lib/ai/useAi';
@@ -15,13 +17,27 @@ import { Panel, PanelTitle } from '@/components/ui/Card';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
 
+/** buildLearningPath 及 path 系列 AI 任务仅读取 dailyLog / mastery / streak */
+function useLearningPathProgress(): Progress {
+  return useStore(
+    useShallow(
+      (s) =>
+        ({
+          dailyLog: s.progress.dailyLog,
+          mastery: s.progress.mastery,
+          streak: s.progress.streak,
+        }) as Progress,
+    ),
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /* 今日焦点                                                            */
 /* ------------------------------------------------------------------ */
 
 function FocusCard() {
   const { t: tr } = useTranslation();
-  const p = useProgress();
+  const p = useLearningPathProgress();
   const path = useMemo(() => buildLearningPath(p), [p]);
 
   // AI 叙事增强（失败降级本地文案）
@@ -89,7 +105,7 @@ function FocusCard() {
 
 function WeeklyCard() {
   const { t: tr } = useTranslation();
-  const p = useProgress();
+  const p = useLearningPathProgress();
   const path = useMemo(() => buildLearningPath(p), [p]);
 
   // AI 周计划文案（失败降级）
@@ -125,7 +141,7 @@ function WeeklyCard() {
 
 function CoachCard() {
   const { t: tr } = useTranslation();
-  const p = useProgress();
+  const p = useLearningPathProgress();
   const path = useMemo(() => buildLearningPath(p), [p]);
   const coach = useAiTask<{ text: string }>(() => pathCoachTask(p), true);
   const text = coach.result?.data?.text ?? path.coach.suggestion;

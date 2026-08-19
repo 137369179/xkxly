@@ -6,7 +6,8 @@ import { useState, useMemo } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { WORD_THEMES, getAllWords, getWordsByLevel } from '@/data/wordIndex';
-import { useProgress, useMastery, useStore } from '@/store/useStore';
+import { useMastery, useStore } from '@/store/useStore';
+import type { Progress } from '@/types';
 import { speak } from '@/lib/speech';
 import { sfxTap } from '@/lib/sfx';
 import { motion } from 'motion/react';
@@ -19,7 +20,6 @@ type Mode = 'browse' | 'flashcard';
 
 export function WordReview() {
   const { t } = useTranslation();
-  const progress = useProgress();
   const mastery = useMastery();
   const [mode, setMode] = useState<Mode>('browse');
   const [theme, setTheme] = useState(WORD_THEMES[0]!.id);
@@ -35,7 +35,7 @@ export function WordReview() {
     });
     if (filter === 'level') return getWordsByLevel(level);
     // weak: SRS 间隔复习——到期词（lv 低/错误率高/逾期久）优先，未到期未掌握词兜底
-    const due = dueSkills(progress, Date.now(), 999).filter((k) => k.startsWith('word:'));
+    const due = dueSkills({ mastery } as Progress, Date.now(), 999).filter((k) => k.startsWith('word:'));
     const dueSet = new Set(due);
     const byKey = new Map(getAllWords().map((w) => [`word:${w.word}`, w]));
     const dueWords = due.map((k) => byKey.get(k)).filter((w): w is NonNullable<typeof w> => !!w);

@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useProgress } from '@/store/useStore';
+import { useGrowth, useWrongBook, useMastery, useWrongHistory } from '@/store/useStore';
 import { dateKey } from '@/lib/dailyPlan';
 import { SUBJECTS } from '@/lib/srs';
 
@@ -31,20 +31,21 @@ function recentDays(n: number, anchorKey?: string): string[] {
 /* ------------------------------------------------------------------ */
 export function WrongTrendChart() {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
+  const growth = useGrowth();
+  const wrongBook = useWrongBook();
   const today = dateKey();
   const days = useMemo(() => recentDays(7, today), [today]);
 
   const data = useMemo(() => {
     return days.map((d) => {
-      const snap = progress.growth.find((s) => s.date === d);
+      const snap = growth.find((s) => s.date === d);
       return {
         date: d,
-        total: snap?.wrongCount ?? progress.wrongBook.length,
+        total: snap?.wrongCount ?? wrongBook.length,
         new: snap?.wrongNew ?? 0,
       };
     });
-  }, [days, progress.growth, progress.wrongBook.length]);
+  }, [days, growth, wrongBook.length]);
 
   const maxVal = Math.max(...data.map((d) => d.total), 5);
   const W = 100;
@@ -171,13 +172,14 @@ const RADAR_KEYS = ['math', 'hanzi', 'pinyin', 'poem', 'word', 'logic'];
 
 export function WeaknessRadar() {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
+  const wrongBook = useWrongBook();
+  const mastery = useMastery();
 
   const dims = useMemo(() => {
     return RADAR_KEYS.map((key) => {
       const subject = SUBJECTS.find((s) => s.key === key);
-      const wrong = progress.wrongBook.filter((s) => s.startsWith(key + ':')).length;
-      const total = Object.keys(progress.mastery).filter((k) => k.startsWith(key + ':')).length;
+      const wrong = wrongBook.filter((s) => s.startsWith(key + ':')).length;
+      const total = Object.keys(mastery).filter((k) => k.startsWith(key + ':')).length;
       const ratio = total > 0 ? wrong / total : 0;
       return {
         key,
@@ -188,7 +190,7 @@ export function WeaknessRadar() {
         ratio,
       };
     });
-  }, [progress.wrongBook, progress.mastery]);
+  }, [wrongBook, mastery]);
 
   const cx = 50;
   const cy = 50;
@@ -283,16 +285,17 @@ export function WeaknessRadar() {
 /* ------------------------------------------------------------------ */
 export function KillProgressRing() {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
+  const wrongHistory = useWrongHistory();
+  const wrongBook = useWrongBook();
 
   const { cleared, current, pct } = useMemo(() => {
-    const wh = progress.wrongHistory;
+    const wh = wrongHistory;
     const cleared = wh?.cleared ?? 0;
-    const current = progress.wrongBook.length;
+    const current = wrongBook.length;
     const total = cleared + current;
     const pct = total > 0 ? Math.round((cleared / total) * 100) : 0;
     return { cleared, current, pct };
-  }, [progress.wrongHistory, progress.wrongBook.length]);
+  }, [wrongHistory, wrongBook.length]);
 
   const cx = 50;
   const cy = 50;
@@ -348,25 +351,28 @@ export function KillProgressRing() {
 /* ------------------------------------------------------------------ */
 export function WrongBookStatCards() {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
+  const growth = useGrowth();
+  const wrongBook = useWrongBook();
+  const mastery = useMastery();
+  const wrongHistory = useWrongHistory();
 
   const stats = useMemo(() => {
     const today = dateKey();
-    const todaySnap = progress.growth.find((s) => s.date === today);
+    const todaySnap = growth.find((s) => s.date === today);
     const todayNew = todaySnap?.wrongNew ?? 0;
-    const due = progress.wrongBook.filter((s) => {
-      const m = progress.mastery[s];
+    const due = wrongBook.filter((s) => {
+      const m = mastery[s];
       return m && (m.due ?? Infinity) <= Date.now();
     }).length;
-    const cleared = progress.wrongHistory?.cleared ?? 0;
+    const cleared = wrongHistory?.cleared ?? 0;
 
     return [
-      { label: tr('wrongbook.totalWrong'), value: progress.wrongBook.length, emoji: '📝', color: '#ff5c7a' },
+      { label: tr('wrongbook.totalWrong'), value: wrongBook.length, emoji: '📝', color: '#ff5c7a' },
       { label: tr('wrongbook.killed'), value: cleared, emoji: '✅', color: '#33a863' },
       { label: tr('wrongbook.toReview'), value: due, emoji: '⏰', color: '#e5ac2e' },
       { label: tr('wrongbook.todayNew'), value: todayNew, emoji: '🆕', color: '#2e93c9' },
     ];
-  }, [progress.wrongBook, progress.mastery, progress.growth, progress.wrongHistory, tr]);
+  }, [wrongBook, mastery, growth, wrongHistory, tr]);
 
   return (
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">

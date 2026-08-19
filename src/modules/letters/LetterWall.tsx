@@ -5,7 +5,7 @@ import { TONE_STYLE, toneAt } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 import { speakLetter, speakPhonics, playWordVoice } from '@/lib/speech';
 import { sfxTap, sfxStar } from '@/lib/sfx';
-import { useProgress, useStore } from '@/store/useStore';
+import { useLettersHeard, useMastery, useStore } from '@/store/useStore';
 import { Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
@@ -22,7 +22,8 @@ type CaseDisplay = 'both' | 'upper' | 'lower';
 
 export function LetterWall() {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
+  const lettersHeard = useLettersHeard();
+  const mastery = useMastery();
   const heardLetter = useStore((s) => s.heardLetter);
   const practice = useStore((s) => s.practice);
   const [active, setActive] = useState<LetterItem | null>(null);
@@ -76,9 +77,9 @@ export function LetterWall() {
       <Panel className="!py-4 border-2 border-pink-200 bg-white/90 space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-sm font-extrabold text-ink-soft">
-            {tr('letters.knownCount', { current: progress.lettersHeard.length, total: 26 })}
+            {tr('letters.knownCount', { current: lettersHeard.length, total: 26 })}
           </span>
-          {progress.lettersHeard.length >= 26 ? (
+          {lettersHeard.length >= 26 ? (
             <span className="text-sm font-extrabold text-candy-pink-deep">🎉 {tr('letters.allKnown')}</span>
           ) : (
             <span className="text-xs font-bold text-candy-blue-deep">
@@ -86,7 +87,7 @@ export function LetterWall() {
             </span>
           )}
         </div>
-        <ProgressBar value={progress.lettersHeard.length} max={26} tone="pink" />
+        <ProgressBar value={lettersHeard.length} max={26} tone="pink" />
 
         {/* 阶段分类筛选与大小写模式切换 */}
         <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-pink-100">
@@ -173,10 +174,10 @@ export function LetterWall() {
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-4 md:grid-cols-5 lg:grid-cols-6">
         {filteredLetters.map((item, i) => {
           const t = TONE_STYLE[toneAt(i)]!;
-          const mastery = progress.mastery[`letter:${item.upper}`];
-          const lv = mastery?.lv ?? 0;
+          const skill = mastery[`letter:${item.upper}`];
+          const lv = skill?.lv ?? 0;
           const isMastered = lv >= 5;
-          const learned = progress.lettersHeard.includes(item.upper) || lv > 0;
+          const learned = lettersHeard.includes(item.upper) || lv > 0;
           return (
             <motion.button
               key={item.upper}

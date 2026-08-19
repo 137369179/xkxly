@@ -10,7 +10,8 @@ import { makeResearchQuestion } from '@/lib/research/questions';
 import { dueSkills } from '@/lib/srs';
 import { celebrateBig } from '@/lib/celebrate';
 import { useActiveProfileMeta } from '@/store/useProfilesStore';
-import { useProgress, useStore } from '@/store/useStore';
+import { useBadges, useMastery, useStore } from '@/store/useStore';
+import type { Progress } from '@/types';
 import { BADGE_MAP } from '@/data/badges';
 import { navigate } from '@/lib/router';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -44,7 +45,8 @@ export default function ResearchModePage() {
   const ageRange = profile?.ageRange ?? '5-6';
 
   const completeResearchSession = useStore((s) => s.completeResearchSession);
-  const p = useProgress();
+  const badges = useBadges();
+  const mastery = useMastery();
 
   const { session, emit, diff, ddaMeta, recordQuizAttempt } = useResearchSession(ageRange);
 
@@ -52,12 +54,12 @@ export default function ResearchModePage() {
 
   // —— Sprint 4-D：记录进入页时的徽章快照，REVIEW 时 diff 出新解锁研究徽章 ——
   const badgesAtMountRef = useRef<string[] | null>(null);
-  if (badgesAtMountRef.current === null) badgesAtMountRef.current = p.badges;
+  if (badgesAtMountRef.current === null) badgesAtMountRef.current = badges;
   const newBadges = useMemo(() => {
     if (session.status !== 'REVIEW') return [];
     const before = new Set(badgesAtMountRef.current ?? []);
-    return p.badges.filter((id) => !before.has(id));
-  }, [session.status, p.badges]);
+    return badges.filter((id) => !before.has(id));
+  }, [session.status, badges]);
 
   // —— Sprint 4-D：进入 COMPLETE 触发全屏彩带庆祝（F19 行为型奖励）——
   useEffect(() => {
@@ -67,7 +69,7 @@ export default function ResearchModePage() {
   }, [session.status]);
 
   // —— Sprint 4-C：SRS 到期项（跨主题复习混入数据源）——
-  const due = useMemo(() => dueSkills(p), [p]);
+  const due = useMemo(() => dueSkills({ mastery } as Progress), [mastery]);
 
   // —— 事件派发闭包（稳定引用，避免重渲染）——
   const onRevealMore = useCallback(() => emit({ type: 'REVEAL_MORE' }), [emit]);

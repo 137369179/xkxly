@@ -7,7 +7,8 @@
  */
 
 import { useMemo } from 'react';
-import { useProgress } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
+import { useStore, useGrowth, useMastery } from '@/store/useStore';
 import type { Progress } from '@/types';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { SUBJECTS } from '@/lib/srs';
@@ -33,12 +34,12 @@ export { SUBJECTS };
 /* ============================================================ */
 export function GrowthTrend() {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
+  const growth = useGrowth();
 
   const { series, latest, first } = useMemo(() => {
     const days = recentDays(14);
-    const byDate = new Map(progress.growth.map((s) => [s.date, s]));
-    let last: (typeof progress.growth)[number] | null = null;
+    const byDate = new Map(growth.map((s) => [s.date, s]));
+    let last: (typeof growth)[number] | null = null;
     const arr = days.map((d) => {
       const snap = byDate.get(d);
       if (snap) last = snap;
@@ -49,9 +50,9 @@ export function GrowthTrend() {
       latest: arr[arr.length - 1] ?? 0,
       first: arr[0] ?? 0,
     };
-  }, [progress.growth]);
+  }, [growth]);
 
-  const hasData = progress.growth.length >= 2;
+  const hasData = growth.length >= 2;
 
   return (
     <Panel>
@@ -161,18 +162,18 @@ function SubjectRadar({ data }: { data: { label: string; color: string; pct: num
 
 export function SubjectBalance({ onPracticeSubject }: { onPracticeSubject?: (subject: string) => void }) {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
+  const mastery = useMastery();
 
   const data = useMemo(
     () =>
       SUBJECTS.map((s) => {
-        const items = Object.entries(progress.mastery).filter(([k]) => k.startsWith(s.key + ':'));
+        const items = Object.entries(mastery).filter(([k]) => k.startsWith(s.key + ':'));
         const pct = items.length
           ? items.reduce((sum, [, m]) => sum + (m.lv ?? 0), 0) / (items.length * 5)
           : 0;
         return { ...s, pct, count: items.length };
       }),
-    [progress.mastery],
+    [mastery],
   );
 
   const touched = data.filter((d) => d.count > 0).length;
@@ -220,9 +221,20 @@ export function SubjectBalance({ onPracticeSubject }: { onPracticeSubject?: (sub
 /* ============================================================ */
 export function StudyTips({ onPracticeSubject }: { onPracticeSubject?: (subject: string) => void }) {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
+  // buildTips 仅读取 mastery / wrongBook / growth / streak
+  const tipsP = useStore(
+    useShallow(
+      (s) =>
+        ({
+          mastery: s.progress.mastery,
+          wrongBook: s.progress.wrongBook,
+          growth: s.progress.growth,
+          streak: s.progress.streak,
+        }) as Progress,
+    ),
+  );
 
-  const tips = useMemo(() => buildTips(progress), [progress]);
+  const tips = useMemo(() => buildTips(tipsP), [tipsP]);
 
   return (
     <Panel>

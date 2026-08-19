@@ -16,7 +16,7 @@ import { useAiStream } from '@/lib/ai/useAi';
 import { safetySceneTask } from '@/lib/ai/tasks/culture';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useStore, useProgress } from '@/store/useStore';
+import { useStore, useMastery } from '@/store/useStore';
 
 /** 新增场景（scene9–scene12）的内置默认中文文案：当 i18n 缺失时作为 fallback。 */
 const DEFAULT_TEXTS: Record<string, { scene: string; safe: string; danger: string }> = {
@@ -81,7 +81,7 @@ export default function SafetyPage() {
   const { t: translate } = useTranslation();
   const practice = useStore((s) => s.practice);
   const tickTime = useStore((s) => s.tickTime);
-  const mastery = useProgress().mastery;
+  const mastery = useMastery();
   // 刷牙计时
   const [brushing, setBrushing] = useState(false);
   const [timeLeft, setTimeLeft] = useState(120);

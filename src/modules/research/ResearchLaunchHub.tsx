@@ -3,7 +3,8 @@ import { CandyButton } from '@/components/ui/Button';
 import { TONE_STYLE } from '@/lib/tones';
 import { RESEARCH_TOPICS } from '@/lib/research/researchTopics';
 import { topicResearchState, launchSummary, MAX_MASTERY } from '@/lib/research/launchHub';
-import { useProgress } from '@/store/useStore';
+import { useDiscoveries, useMastery, useResearchNotes, useResearchStats } from '@/store/useStore';
+import type { Progress } from '@/types';
 import { useTranslation } from '@/i18n/useTranslation';
 
 /**
@@ -40,9 +41,19 @@ function MasteryBar({ lv, tone }: { lv: number; tone: keyof typeof TONE_STYLE })
 
 export function ResearchLaunchHub({ onSelectTopic, onOpenGallery }: ResearchLaunchHubProps) {
   const { t } = useTranslation();
-  const p = useProgress();
+  const researchStats = useResearchStats();
+  const discoveries = useDiscoveries();
+  const researchNotes = useResearchNotes();
+  const mastery = useMastery();
 
-  const summary = useMemo(() => launchSummary(p), [p]);
+  const summary = useMemo(
+    () => launchSummary({ researchStats, discoveries, researchNotes } as Progress),
+    [researchStats, discoveries, researchNotes],
+  );
+  const stateP = useMemo(
+    () => ({ researchStats, researchNotes, mastery }) as Progress,
+    [researchStats, researchNotes, mastery],
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -68,7 +79,7 @@ export function ResearchLaunchHub({ onSelectTopic, onOpenGallery }: ResearchLaun
       {/* 主题网格：掌握度 + 继续探索 */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {RESEARCH_TOPICS.map((tp) => {
-          const st = topicResearchState(p, tp.id);
+          const st = topicResearchState(stateP, tp.id);
           const { main, soft, deep, on } = TONE_STYLE[tp.tone];
           return (
             <button

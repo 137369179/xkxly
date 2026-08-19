@@ -6,7 +6,8 @@ import { PageHeader, Panel } from '@/components/ui/Card';
 import { Tabs, type TabItem } from '@/components/ui/Tabs';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { CandyButton } from '@/components/ui/Button';
-import { useProgress, useMastery } from '@/store/useStore';
+import { useMastery } from '@/store/useStore';
+import type { Progress } from '@/types';
 import { sfxTap } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 
@@ -70,7 +71,6 @@ export default function WordsPage() {
   const [gradeFilter, setGradeFilter] = useState<GradeFilter>('all');
   const [selected, setSelected] = useState<WordEntry | null>(null);
   const [sightGrade, setSightGrade] = useState<1 | 2 | 3>(1);
-  const progress = useProgress();
   const mastery = useMastery();
   const { t: tr } = useTranslation();
   const { target, clear } = useTrainingTarget('words');
@@ -113,8 +113,8 @@ export default function WordsPage() {
 
   /* ============ 课程板块 ============ */
   if (mainTab === 'course') {
-    const cur = currentStage(progress);
-    const overview = stageOverview(progress);
+    const cur = currentStage({ mastery } as Progress);
+    const overview = stageOverview({ mastery } as Progress);
     return (
       <div className="space-y-5">
         <PageHeader iconType="town" title={tr('words.courseTitle')} subtitle={tr('words.courseSubtitle')} tone="purple" />

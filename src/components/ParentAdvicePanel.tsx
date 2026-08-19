@@ -3,7 +3,9 @@
  */
 import { useMemo } from 'react';
 import { motion } from 'motion/react';
-import { useProgress } from '@/store/useStore';
+import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
+import type { Progress } from '@/types';
 import { generateAdvice } from '@/lib/parentAdvice';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -16,10 +18,18 @@ const KIND_STYLE: Record<string, string> = {
 
 export function ParentAdvicePanel() {
   const { t } = useTranslation();
-  const p = useProgress();
-  const advices = useMemo(() => generateAdvice(p), [
-    p.stars, p.streak, p.mastery, p.dailyLog, p.badges,
-  ]);
+  // generateAdvice 仅读取 mastery / streak / dailyLog
+  const p = useStore(
+    useShallow(
+      (s) =>
+        ({
+          mastery: s.progress.mastery,
+          streak: s.progress.streak,
+          dailyLog: s.progress.dailyLog,
+        }) as Progress,
+    ),
+  );
+  const advices = useMemo(() => generateAdvice(p), [p]);
 
   if (advices.length === 0) return null;
 

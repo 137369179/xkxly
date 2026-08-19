@@ -185,10 +185,44 @@ re-export 全量保留（兼容既有 import）
 
 ## 验收标准（全部完成后）
 
-- [ ] `useProgress()` 标记 `@deprecated` 且全仓 0 使用
-- [ ] 主包 index chunk 不再包含 realVoice / edgeNeuralTts 等 TTS 引擎符号
-- [ ] `npx tsc --noEmit` 通过
-- [ ] 全量测试通过（`npx vitest run`）
-- [ ] ESLint 预算门禁通过（`node scripts/lint-warn-budget.mjs`）
-- [ ] 生产构建成功（`npx vite build`）
+- [x] `useProgress()` 标记 `@deprecated`，全仓 0 使用（唯一保留点 ParentBackupSection：
+      备份导出需完整序列化整个 progress，已注释说明）
+- [x] 主包 index chunk 不再包含 realVoice / edgeNeuralTts 等 TTS 引擎符号
+- [x] `npx tsc --noEmit` 通过（本项目用 `tsc -b --force`）
+- [x] 全量测试通过（`npx vitest run`，687 个用例）
+- [x] ESLint 预算门禁通过（`node scripts/lint-warn-budget.mjs`）
+- [x] 生产构建成功（`npx vite build`）
 - [ ] B3 回归清单 6 项人工验证通过
+
+---
+
+## 执行记录（2026-08-20）
+
+### Part A · useProgress 细粒度迁移（已完成）
+
+分 4 批完成，新增 selector：`useStars/useSpent/useBadges/useBadgeDates/useStickers/
+useWrongBook/useWrongHistory/useLettersHeard/useStreak/useUnlockedLevel/useLevelStars/
+useMastery/useSkillMastery/useDailyLog/usePoemsRead/usePoemFavorites/usePoemFavorite/
+usePoemMarks/usePoemMark/usePoemNotes/usePoemNote/usePoemRecite/usePoemReciteStat/
+usePoemMastery/useNumbersHeard/useGrowth/useResearchStats/useDiscoveries/useResearchNotes/
+usePkCount/useCreativeCount/useChatHistory/useLessonDate/useLessonStep/
+useBadgeMetricProgress/useAvailableStars`。
+
+- 批1：`adaptiveDifficulty.ts` 改 useShallow 投影（20+ 模块受益）
+- 批2：单字段直换（badges/mastery/dailyLog/growth/wrongBook/lettersHeard 等 ~40 文件）
+- 批3：poems 模块按 id 细粒度（poemMarks/poemNotes/poemRecite/poemFavorites/poemsRead）
+- 批4：整对象透传用 useShallow 按下游函数实际字段投影（LearningPath/HomeHero/DailyGoal/
+  DailyChallenge/ParentAdvicePanel/PdfExport/ReportExporter/ParentPosterSection/GameCenterPage/
+  AdventurePage/ResearchLaunchHub 等）；AiReport/WrongAnalyzeCard 改为点击时 getState() 快照
+  （一次性 AI 任务无需响应式订阅）
+- 唯一保留 `useProgress()`：ParentBackupSection（备份导出全量序列化）
+
+### Part B · speech.ts 拆分（已完成）
+
+4 个主包锚点全部消除，主包不再含 TTS 引擎符号。
+
+### 遗留后续项
+
+- P2-3：拆分巨型组件（QuizCard / CatVoiceChatModal）+ 核心模块单测（tts / ai/client）
+- P2-4：82 个顶层组件按域归文件夹（games / quiz / feedback）
+

@@ -3,7 +3,7 @@
  * 从 ParentPage.tsx 提取的 AI 报告 / 错题分析 / 统计组件
  */
 import { useMemo } from 'react';
-import type { Progress } from '@/types';
+import { useStore, useGrowth } from '@/store/useStore';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { parentDeepReportTask, wrongAnalyzeTask } from '@/lib/ai/tasks';
@@ -12,9 +12,14 @@ import type { WrongAnalyze, DeepReport } from '@/lib/ai/prompts';
 import { useTranslation } from '@/i18n/useTranslation';
 
 /* AI 学情周报 */
-export function AiReport({ progress }: { progress: Progress }) {
+export function AiReport() {
   const { t: tr } = useTranslation();
-  const { loading, result, run } = useAiTaskWA<DeepReport>(() => parentDeepReportTask(progress), false);
+  // 深度报告是「点击才生成」的一次性任务，无需响应式订阅；
+  // 运行瞬间取一次 progress 快照即可（避免整块 progress 订阅）
+  const { loading, result, run } = useAiTaskWA<DeepReport>(
+    () => parentDeepReportTask(useStore.getState().progress),
+    false,
+  );
   const data = result?.data;
 
   return (
@@ -63,7 +68,7 @@ export function AiReport({ progress }: { progress: Progress }) {
               <span className="text-sm font-extrabold text-candy-blue-deep">趋势</span>
             </div>
             <p className="text-sm font-bold text-ink">{data.trend}</p>
-            <DeepSparkline progress={progress} />
+            <DeepSparkline />
           </div>
           <ReportSection emoji="📌" title={tr('parent.suggestions')} color="text-candy-purple-deep" items={data.suggestions} />
         </div>
@@ -91,7 +96,8 @@ export function ReportSection({ emoji, title, color, items }: { emoji: string; t
   );
 }
 
-export function DeepSparkline({ progress }: { progress: Progress }) {
+export function DeepSparkline() {
+  const growth = useGrowth();
   const { pts, has } = useMemo(() => {
     const days: string[] = [];
     const now = Date.now();
@@ -99,8 +105,8 @@ export function DeepSparkline({ progress }: { progress: Progress }) {
       const d = new Date(now - i * 86400000);
       days.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`);
     }
-    const byDate = new Map(progress.growth.map((s) => [s.date, s]));
-    let last: (typeof progress.growth)[number] | null = null;
+    const byDate = new Map(growth.map((s) => [s.date, s]));
+    let last: (typeof growth)[number] | null = null;
     const arr = days.map((dd) => {
       const s = byDate.get(dd);
       if (s) last = s;
@@ -112,8 +118,8 @@ export function DeepSparkline({ progress }: { progress: Progress }) {
       const y = 40 - Math.max(0, Math.min(1, r)) * 36;
       return [x, y] as const;
     });
-    return { pts: p, has: progress.growth.length >= 2 };
-  }, [progress.growth]);
+    return { pts: p, has: growth.length >= 2 };
+  }, [growth]);
 
   if (!has) return null;
   const line = pts.map((p) => p.join(',')).join(' ');
@@ -138,10 +144,11 @@ export function Stat({ label, value }: { label: string; value: string }) {
 }
 
 /* AI 错题分析 */
-export function WrongAnalyzeCard({ progress }: { progress: Progress }) {
+export function WrongAnalyzeCard() {
   const { t: tr } = useTranslation();
+  // 错题分析同样是「点击才生成」的一次性任务，运行瞬间取快照即可
   const { result, loading, run } = useAiTaskWA<WrongAnalyze>(
-    () => wrongAnalyzeTask(progress),
+    () => wrongAnalyzeTask(useStore.getState().progress),
     false,
   );
   const data = result?.data;

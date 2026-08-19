@@ -30,7 +30,9 @@ import { getHanziByLevel } from '@/data/hanziIndex';
 import { makeSpacedDrill } from '@/lib/drill';
 import { rampDifficulty } from '@/lib/difficulty';
 import { sample, cn } from '@/lib/utils';
-import { useStore, useProgress } from '@/store/useStore';
+import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
+import type { Progress } from '@/types';
 import { TONE_STYLE, type Tone } from '@/lib/tones';
 import { PageHeader } from '@/components/ui/Card';
 import { Panel, PanelTitle } from '@/components/ui/Card';
@@ -67,7 +69,22 @@ function makeAdventureQuestion(level: LevelDef, d: Difficulty): Question {
 
 export default function AdventurePage(_: { param?: string }) {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
+  // 仅订阅本页读取的字段：badges / mastery(rampDifficulty) / 冒险装备进度
+  const progress = useStore(
+    useShallow(
+      (s) =>
+        ({
+          badges: s.progress.badges,
+          mastery: s.progress.mastery,
+          ownedFragments: s.progress.ownedFragments,
+          ownedEquipment: s.progress.ownedEquipment,
+          equippedItems: s.progress.equippedItems,
+          unlockedLevel: s.progress.unlockedLevel,
+          levelStars: s.progress.levelStars,
+          bossRecords: s.progress.bossRecords,
+        }) as Progress,
+    ),
+  );
   const completeLevel = useStore((s) => s.completeLevel);
   const [level, setLevel] = useState<LevelDef | null>(null);
   const [storyUnlockId, setStoryUnlockId] = useState<number | null>(null);

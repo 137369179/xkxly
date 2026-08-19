@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
 import { motion } from 'motion/react';
+import { useShallow } from 'zustand/react/shallow';
 import { NAV_MAP } from '@/data/nav';
 import { navigate, type RouteId } from '@/lib/router';
-import { useProgress, useDailyLog, useStars } from '@/store/useStore';
+import { useStore, useDailyLog, useStars } from '@/store/useStore';
+import type { Progress } from '@/types';
 import { TONE_STYLE } from '@/lib/tones';
 import { moduleStat } from '@/lib/moduleStats';
 import { cn } from '@/lib/utils';
@@ -59,9 +61,22 @@ const GAME_GROUPS: GameGroup[] = [
 
 export default function GameCenterPage() {
   const { t } = useTranslation();
-  const p = useProgress();
   const dailyLog = useDailyLog();
   const stars = useStars();
+  // moduleStat 仅读取这 6 个字段（本页游戏分组 adventure/vehicles/fun/logic/music/art）
+  const p = useStore(
+    useShallow(
+      (s) =>
+        ({
+          mastery: s.progress.mastery,
+          levelStars: s.progress.levelStars,
+          pkCount: s.progress.pkCount,
+          creativeCount: s.progress.creativeCount,
+          gameBest: s.progress.gameBest,
+          logicCorrect: s.progress.logicCorrect,
+        }) as Progress,
+    ),
+  );
 
   // 累计玩耍题量（从每日日志聚合），作为游戏中心的「投入度量」
   const playItems = useMemo(

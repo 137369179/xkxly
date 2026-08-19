@@ -13,7 +13,8 @@
  */
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useProgress, useStore } from '@/store/useStore';
+import { useMastery, useStore } from '@/store/useStore';
+import type { Progress } from '@/types';
 import { dueSkills, weakSkills } from '@/lib/srs';
 import { getHanziByChar, type HanziEntry } from '@/data/hanziIndex';
 import { CandyButton } from '@/components/ui/Button';
@@ -25,7 +26,7 @@ import { useSwipe } from '@/lib/useSwipe';
 
 export function HanziFlashReview() {
   const { t } = useTranslation();
-  const progress = useProgress();
+  const mastery = useMastery();
   const practice = useStore((s) => s.practice);
 
   const [idx, setIdx] = useState(0);
@@ -35,10 +36,10 @@ export function HanziFlashReview() {
 
   // 复习队列：到期优先 + 薄弱补位，去重并过滤到字表内
   const queue = useMemo<HanziEntry[]>(() => {
-    const due = dueSkills(progress, Date.now(), 200)
+    const due = dueSkills({ mastery } as Progress, Date.now(), 200)
       .filter((k) => k.startsWith('hanzi:'))
       .map((k) => k.slice('hanzi:'.length));
-    const weak = weakSkills(progress, 40)
+    const weak = weakSkills({ mastery } as Progress, 40)
       .filter((x) => x.skill.startsWith('hanzi:'))
       .map((x) => x.skill.slice('hanzi:'.length));
     const seen = new Set<string>();
@@ -52,7 +53,7 @@ export function HanziFlashReview() {
       }
     }
     return out;
-  }, [progress]);
+  }, [mastery]);
 
   const current = queue[idx];
 

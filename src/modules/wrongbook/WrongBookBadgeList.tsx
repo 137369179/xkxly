@@ -9,7 +9,7 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
-import { useProgress } from '@/store/useStore';
+import { useBadges, useBadgeDates, useBadgeMetricProgress } from '@/store/useStore';
 import { BADGE_MAP } from '@/data/badges';
 import { TONE_STYLE } from '@/lib/tones';
 import { sfxTap } from '@/lib/sfx';
@@ -37,35 +37,36 @@ const WRONG_BADGE_IDS = [
 /* ------------------------------------------------------------------ */
 export function WrongBookBadgeList() {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
+  const badges = useBadges();
+  const metric = useBadgeMetricProgress();
   const [selected, setSelected] = useState<string | null>(null);
 
-  const badges = useMemo(() => {
+  const badgeItems = useMemo(() => {
     return WRONG_BADGE_IDS.map((id) => BADGE_MAP.get(id))
       .filter((b): b is BadgeDef => !!b)
       .map((b) => {
-        const unlocked = progress.badges.includes(b.id);
-        const meter = b.meter ? b.meter(progress) : [unlocked ? 1 : 0, 1];
+        const unlocked = badges.includes(b.id);
+        const meter = b.meter ? b.meter(metric as Progress) : [unlocked ? 1 : 0, 1];
         const current = meter[0]!;
         const target = meter[1]!;
         const pct = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
         return { ...b, unlocked, current, target, pct };
       });
-  }, [progress]);
+  }, [badges, metric]);
 
-  const unlockedCount = badges.filter((b) => b.unlocked).length;
+  const unlockedCount = badgeItems.filter((b) => b.unlocked).length;
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-extrabold text-ink">{tr('wrongBookBadge.title')}</h3>
         <span className="text-sm font-bold text-ink-soft">
-          {tr('wrongBookBadge.unlockedCount', { count: String(unlockedCount), total: String(badges.length) })}
+          {tr('wrongBookBadge.unlockedCount', { count: String(unlockedCount), total: String(badgeItems.length) })}
         </span>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {badges.map((b) => {
+        {badgeItems.map((b) => {
           const tone = TONE_STYLE[b.tone];
           return (
             <motion.button
@@ -139,8 +140,7 @@ export function WrongBookBadgeList() {
               className="mx-4 w-full max-w-sm"
             >
               <BadgeDetail
-                badge={badges.find((b) => b.id === selected)!}
-                progress={progress}
+                badge={badgeItems.find((b) => b.id === selected)!}
                 onClose={() => setSelected(null)}
               />
             </motion.div>
@@ -156,16 +156,14 @@ export function WrongBookBadgeList() {
 /* ------------------------------------------------------------------ */
 function BadgeDetail({
   badge,
-  progress,
   onClose,
 }: {
   badge: BadgeDef & { unlocked: boolean; current: number; target: number; pct: number };
-  progress: Progress;
   onClose: () => void;
 }) {
   const { t: tr } = useTranslation();
   const tone = TONE_STYLE[badge.tone];
-  const badgeDate = progress.badgeDates?.[badge.id];
+  const badgeDate = useBadgeDates()?.[badge.id];
 
   return (
     <div style={{ background: tone.soft }}><Panel className="space-y-3 text-center">

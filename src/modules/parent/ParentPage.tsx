@@ -1,6 +1,14 @@
 import { useMemo, useState, useEffect } from 'react';
 import { WorksheetGenerator } from '@/components/WorksheetGenerator';
-import { useStore, useProgress } from '@/store/useStore';
+import {
+  useStore,
+  useMastery,
+  useDailyLog,
+  useResearchStats,
+  useDiscoveries,
+  useResearchNotes,
+} from '@/store/useStore';
+import type { Progress } from '@/types';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { dateKey } from '@/lib/dailyPlan';
 import {
@@ -56,7 +64,11 @@ const poemTitle = (id: string) => POEMS.find((p) => p.id === id)?.title;
 
 export default function ParentPage() {
   const { t: translate } = useTranslation();
-  const progress = useProgress();
+  const mastery = useMastery();
+  const dailyLog = useDailyLog();
+  const researchStats = useResearchStats();
+  const discoveries = useDiscoveries();
+  const researchNotes = useResearchNotes();
   const settings = useSettingsStore((s) => s.settings);
   const setParentPin = useStore((s) => s.setParentPin);
   const recordPinFail = useStore((s) => s.recordPinFail);
@@ -78,11 +90,11 @@ export default function ParentPage() {
     return () => clearInterval(t);
   }, [settings.parentPin, unlocked]);
 
-  const weak = useMemo(() => weakSkills(progress, 8), [progress]);
+  const weak = useMemo(() => weakSkills({ mastery } as Progress, 8), [mastery]);
   const grid = useMemo(
     () =>
-      Object.entries(progress.mastery).map(([skill, m]) => ({ skill, m })),
-    [progress.mastery],
+      Object.entries(mastery).map(([skill, m]) => ({ skill, m })),
+    [mastery],
   );
 
   /* —— 未设置密码：引导设置 —— */
@@ -258,10 +270,10 @@ export default function ParentPage() {
       {/* 概览 */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          { label: translate('parent.touched'), value: touchedCount(progress), tone: 'blue' as const },
-          { label: translate('parent.mastered'), value: masteredCount(progress), tone: 'green' as const },
-          { label: translate('parent.masteryRate'), value: `${Math.round(masteryRate(progress) * 100)}%`, tone: 'purple' as const },
-          { label: translate('parent.todayPractice'), value: progress.dailyLog[dateKey()]?.items ?? 0, tone: 'orange' as const },
+          { label: translate('parent.touched'), value: touchedCount({ mastery } as Progress), tone: 'blue' as const },
+          { label: translate('parent.mastered'), value: masteredCount({ mastery } as Progress), tone: 'green' as const },
+          { label: translate('parent.masteryRate'), value: `${Math.round(masteryRate({ mastery } as Progress) * 100)}%`, tone: 'purple' as const },
+          { label: translate('parent.todayPractice'), value: dailyLog[dateKey()]?.items ?? 0, tone: 'orange' as const },
         ].map((c) => {
           const t = TONE_STYLE[c.tone]!;
           return (
@@ -285,10 +297,10 @@ export default function ParentPage() {
         </p>
         <div className="grid grid-cols-4 gap-2 text-center">
           {[
-            { label: translate('research.growthBlock.explored'), value: `${progress.researchStats?.topicsExplored.length ?? 0}`, emoji: '🗺️' },
-            { label: translate('research.growthBlock.actions'), value: `${progress.researchStats?.exploreActions ?? 0}`, emoji: '🔍' },
-            { label: translate('research.gallery.savedCards'), value: `${progress.discoveries?.length ?? 0}`, emoji: '⭐' },
-            { label: translate('research.gallery.notes'), value: `${Object.keys(progress.researchNotes ?? {}).length}`, emoji: '📝' },
+            { label: translate('research.growthBlock.explored'), value: `${researchStats?.topicsExplored.length ?? 0}`, emoji: '🗺️' },
+            { label: translate('research.growthBlock.actions'), value: `${researchStats?.exploreActions ?? 0}`, emoji: '🔍' },
+            { label: translate('research.gallery.savedCards'), value: `${discoveries?.length ?? 0}`, emoji: '⭐' },
+            { label: translate('research.gallery.notes'), value: `${Object.keys(researchNotes ?? {}).length}`, emoji: '📝' },
           ].map((c) => (
             <div key={c.label} className="rounded-2xl bg-blue-50 px-1 py-2">
               <div className="text-lg">{c.emoji}</div>
@@ -297,9 +309,9 @@ export default function ParentPage() {
             </div>
           ))}
         </div>
-        {Object.entries(progress.researchNotes ?? {}).filter(([, v]) => v?.trim()).length > 0 && (
+        {Object.entries(researchNotes ?? {}).filter(([, v]) => v?.trim()).length > 0 && (
           <div className="mt-3 space-y-1.5">
-            {Object.entries(progress.researchNotes ?? {})
+            {Object.entries(researchNotes ?? {})
               .filter(([, v]) => v?.trim())
               .slice(0, 4)
               .map(([topicId, text]) => (
@@ -318,7 +330,7 @@ export default function ParentPage() {
       </Panel>
 
       {/* AI 学情分析 */}
-      <AiReport progress={progress} />
+      <AiReport />
 
       {/* 学习统计图表 */}
       <Panel>
@@ -410,7 +422,7 @@ export default function ParentPage() {
       </Panel>
 
       {/* v6: AI 错题分析 */}
-      <WrongAnalyzeCard progress={progress} />
+      <WrongAnalyzeCard />
 
       {/* 报告导出 */}
       <ReportExporter />

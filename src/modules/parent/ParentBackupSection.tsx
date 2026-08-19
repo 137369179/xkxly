@@ -14,6 +14,8 @@ import {
 
 export function ParentBackupSection() {
   const { t: translate } = useTranslation();
+  // buildBackup 需要完整序列化整个 progress（所有学习字段），无法拆成细粒度 selector，
+  // 是 useProgress() 的全仓唯一保留使用点（已标 @deprecated）。
   const progress = useProgress();
   const settings = useSettingsStore((s) => s.settings);
   const restoreProgress = useStore((s) => s.restoreProgress);

@@ -14,7 +14,7 @@
 import { useMemo } from 'react';
 import { motion } from 'motion/react';
 import type { Progress } from '@/types';
-import { useProgress } from '@/store/useStore';
+import { useMastery } from '@/store/useStore';
 import { TONE_STYLE } from '@/lib/tones';
 import { subjectLabel, subjectEmoji, subjectTone } from '@/lib/srs';
 import { cn } from '@/lib/utils';
@@ -180,8 +180,8 @@ function buildMap(p: Progress): MapRegion[] {
 
 export function MapView() {
   const { t } = useTranslation();
-  const p = useProgress();
-  const regions = useMemo(() => buildMap(p), [p.mastery]);
+  const mastery = useMastery();
+  const regions = useMemo(() => buildMap({ mastery } as Progress), [mastery]);
 
   // P1：阶段化 —— 前一阶段平均节点等级 ≥ 2 才解锁下一阶段
   const stages = useMemo(() => {

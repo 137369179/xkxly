@@ -5,8 +5,8 @@ import { TONE_STYLE, type Tone } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
-import { useProgress } from '@/store/useStore';
-import type { BadgeDef } from '@/types';
+import { useBadges, useBadgeDates, useBadgeMetricProgress } from '@/store/useStore';
+import type { BadgeDef, Progress } from '@/types';
 import { useTranslation } from '@/i18n/useTranslation';
 
 /**
@@ -65,8 +65,10 @@ function fmtDate(ts: number | undefined): string {
 
 export function AchievementWall() {
   const { t: translate } = useTranslation();
-  const progress = useProgress();
-  const owned = useMemo(() => new Set(progress.badges), [progress.badges]);
+  const badges = useBadges();
+  const badgeDates = useBadgeDates();
+  const metric = useBadgeMetricProgress();
+  const owned = useMemo(() => new Set(badges), [badges]);
 
   // 按档位分组
   const grouped = useMemo(() => {
@@ -99,8 +101,8 @@ export function AchievementWall() {
                   key={b.id}
                   badge={b}
                   unlocked={owned.has(b.id)}
-                  date={fmtDate(progress.badgeDates[b.id])}
-                  meter={b.meter?.(progress)}
+                  date={fmtDate(badgeDates[b.id])}
+                  meter={b.meter?.(metric as Progress)}
                   tier={tier}
                 />
               ))}

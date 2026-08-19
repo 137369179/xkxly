@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
-import { useProgress } from '@/store/useStore';
+import { useBadges, useBadgeDates, useBadgeMetricProgress, useStars } from '@/store/useStore';
 import { MEDALS, REWARD_META, type MedalDef, type MedalCategory } from '@/data/medals';
 import { TONE_STYLE, type Tone } from '@/lib/tones';
 import { cn } from '@/lib/utils';
@@ -28,8 +28,11 @@ const TABS: { key: Tab; labelKey: string; tone: Tone; emoji: string }[] = [
 
 export default function AchievementCenter() {
   const { t } = useTranslation();
-  const progress = useProgress();
-  const owned = useMemo(() => new Set(progress.badges), [progress.badges]);
+  const badges = useBadges();
+  const badgeDates = useBadgeDates();
+  const stars = useStars();
+  const metric = useBadgeMetricProgress();
+  const owned = useMemo(() => new Set(badges), [badges]);
   const [tab, setTab] = useState<Tab>('all');
 
   const total = MEDALS.length;
@@ -59,7 +62,7 @@ export default function AchievementCenter() {
       {/* 统计卡：已收集勋章 + 累计星星 */}
       <div className="grid grid-cols-2 gap-3">
         <StatCard tone="pink" emoji="🏅" value={`${doneCount}/${total}`} label={t('achievementCenter.statCollected')} />
-        <StatCard tone="blue" emoji="⭐" value={String(progress.stars ?? 0)} label={t('achievementCenter.statStars')} />
+        <StatCard tone="blue" emoji="⭐" value={String(stars ?? 0)} label={t('achievementCenter.statStars')} />
       </div>
 
       {/* 分类 Tab */}
@@ -94,8 +97,8 @@ export default function AchievementCenter() {
               key={m.id}
               medal={m}
               unlocked={owned.has(m.id)}
-              date={progress.badgeDates[m.id]}
-              progress={progress}
+              date={badgeDates[m.id]}
+              progress={metric as Progress}
             />
           ))}
         </div>

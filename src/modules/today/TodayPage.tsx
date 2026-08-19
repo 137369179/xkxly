@@ -1,7 +1,14 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import type { LessonSection, Question } from '@/types';
-import { useProgress, useStore } from '@/store/useStore';
+import type { LessonSection, Question, Progress } from '@/types';
+import {
+  useStore,
+  useMastery,
+  useWrongBook,
+  useDailyLog,
+  useLessonDate,
+  useLessonStep,
+} from '@/store/useStore';
 import { buildDailyPlan, dateKey } from '@/lib/dailyPlan';
 import { rampDifficulty } from '@/lib/difficulty';
 
@@ -107,7 +114,7 @@ function SectionRunner({
  * ===================================================================== */
 function ReviewActivity({ refs, onDone }: { refs: string[]; onDone: () => void }) {
   const { t } = useTranslation();
-  const progress = useProgress();
+  const mastery = useMastery();
   const practice = useStore((s) => s.practice);
   const iRef = useRef(0);
   const count = Math.max(2, Math.min(8, refs.length));
@@ -116,12 +123,12 @@ function ReviewActivity({ refs, onDone }: { refs: string[]; onDone: () => void }
     const skill = refs[iRef.current % refs.length] ?? 'math:add';
     iRef.current += 1;
     const cat = skill.split(':')[0] ?? 'math';
-    const d = rampDifficulty(progress, cat) as Difficulty;
+    const d = rampDifficulty({ mastery } as Progress, cat) as Difficulty;
     const q = questionForSkill(skill, d) ?? makeMathQuestion(d);
     // P1-3: 标注出题难度，供 SRS 难度感知复习
     if (q) q.difficulty = d;
     return q;
-  }, [refs, progress]);
+  }, [refs, mastery]);
 
   return (
     <SectionRunner
@@ -137,22 +144,23 @@ function ReviewActivity({ refs, onDone }: { refs: string[]; onDone: () => void }
 
 function QuizActivity({ todaySkills, onDone }: { todaySkills: string[]; onDone: () => void }) {
   const { t } = useTranslation();
-  const progress = useProgress();
+  const mastery = useMastery();
+  const wrongBook = useWrongBook();
   const practice = useStore((s) => s.practice);
 
   const gen = useCallback((): Question => {
     // 综合小挑战按优先级回扣：错题本 > 薄弱知识点 > 当天内容 > 全题型混合
     // 让孩子每天打开就能先拣回最需要巩固的内容，而不是完全随机出题
-    const weak = weakSkills(progress, 6).map((w) => w.skill);
-    const d = smartDifficulty(progress);
+    const weak = weakSkills({ mastery } as Progress, 6).map((w) => w.skill);
+    const d = smartDifficulty({ mastery } as Progress);
     const q = makeDailyMixedQuestion(todaySkills, d, {
-      wrongBook: progress.wrongBook,
+      wrongBook,
       weakSkills: weak,
     });
     // P1-3: 标注出题难度，供 SRS 难度感知复习
     if (q) q.difficulty = d;
     return q;
-  }, [progress, todaySkills]);
+  }, [mastery, wrongBook, todaySkills]);
 
   return (
     <SectionRunner
@@ -184,7 +192,8 @@ const FOCUS_SUBJECTS: Record<string, string> = {
 
 function FocusActivity({ subject, onDone }: { subject: string; onDone: () => void }) {
   const { t } = useTranslation();
-  const progress = useProgress();
+  const mastery = useMastery();
+  const wrongBook = useWrongBook();
   const practice = useStore((s) => s.practice);
   const iRef = useRef(0);
   const COUNT = 8;
@@ -193,21 +202,21 @@ function FocusActivity({ subject, onDone }: { subject: string; onDone: () => voi
 
   const gen = useCallback((): Question => {
     // 优先练该学科薄弱点(lv<3)与错题本，再退回到全部已接触知识点，无重复
-    const weak = weakSkills(progress, 40)
+    const weak = weakSkills({ mastery } as Progress, 40)
       .map((w) => w.skill)
       .filter((s) => s.startsWith(subject + ':'));
-    const wrong = progress.wrongBook.filter((s) => s.startsWith(subject + ':'));
-    const all = Object.keys(progress.mastery).filter((k) => k.startsWith(subject + ':'));
+    const wrong = wrongBook.filter((s) => s.startsWith(subject + ':'));
+    const all = Object.keys(mastery).filter((k) => k.startsWith(subject + ':'));
     const pool = Array.from(new Set([...weak, ...wrong, ...all]));
     const skill = pool.length ? pool[iRef.current % pool.length] : `${subject}:${subject}`;
     iRef.current += 1;
     const targetSkill = skill ?? `${subject}:${subject}`;
-    const d = rampDifficulty(progress, subject) as Difficulty;
+    const d = rampDifficulty({ mastery } as Progress, subject) as Difficulty;
     const q = questionForSkill(targetSkill, d) ?? makeDailyMixedQuestion([], d, { weakSkills: weak.slice(0, 1) });
     // P1-3: 标注出题难度，供 SRS 难度感知复习
     if (q) q.difficulty = d;
     return q;
-  }, [progress, subject]);
+  }, [mastery, wrongBook, subject]);
 
   return (
     <div className="space-y-5">
@@ -280,7 +289,10 @@ export default function TodayPage() {
   // 普通分支与焦点学科分支（today/letter ↔ today）必须保持完全一致的 hook 顺序与数量，
   // 否则 <TodayPage/> 因 key 固定不卸载重挂载，会触发 "Rendered fewer hooks than expected" 白屏。
   const { t } = useTranslation();
-  const progress = useProgress();
+  const mastery = useMastery();
+  const dailyLog = useDailyLog();
+  const lessonDate = useLessonDate();
+  const lessonStep = useLessonStep();
   const { param } = useRoute();
   const setLessonStep = useStore((s) => s.setLessonStep);
   const finishLesson = useStore((s) => s.finishLesson);
@@ -289,13 +301,13 @@ export default function TodayPage() {
   // 课程包按「天」稳定生成：当天内不随进度变化重排
   // intentional: plan is stable per day, ignore progress changes to avoid daily plan regeneration
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const plan = useMemo(() => buildDailyPlan(progress, Date.now()), [today]);
+  const plan = useMemo(() => buildDailyPlan({ mastery } as Progress, Date.now()), [today]);
 
-  const done = !!progress.dailyLog[today]?.lesson;
+  const done = !!dailyLog[today]?.lesson;
   const step = done
     ? plan.sections.length
-    : progress.lessonDate === today
-      ? Math.min(progress.lessonStep, plan.sections.length)
+    : lessonDate === today
+      ? Math.min(lessonStep, plan.sections.length)
       : 0;
 
   const handleDone = useCallback(() => {
@@ -373,7 +385,7 @@ export default function TodayPage() {
           <h2 className="mt-3 text-3xl font-black text-pink-600 tracking-wide">{t('today.allDone')}</h2>
           <p className="mt-2 text-base font-extrabold text-ink-soft">{t('today.allDoneDesc')}</p>
           {/* AI 每日总结 */}
-          <DailySummary progress={progress} plan={plan} />
+          <DailySummary plan={plan} />
           <div className="mt-6 flex gap-3">
             <CandyButton tone="pink" size="lg" fullWidth onClick={restart}>
               {t('today.restartRoute')}

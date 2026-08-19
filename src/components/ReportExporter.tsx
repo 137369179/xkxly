@@ -9,7 +9,8 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
-import { useProgress } from '@/store/useStore';
+import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import type { Progress } from '@/types';
 import { dateKey } from '@/lib/dailyPlan';
 import { touchedCount, masteredCount, masteryRate, weakSkills, skillLabel } from '@/lib/srs';
@@ -277,7 +278,19 @@ function dataToPdf(d: ReportData, t: (k: string, p?: Record<string, string | num
 
 export function ReportExporter() {
   const { t } = useTranslation();
-  const progress = useProgress();
+  // buildReportData 仅读取 dailyLog / mastery / streak / badges / stars
+  const progress = useStore(
+    useShallow(
+      (s) =>
+        ({
+          dailyLog: s.progress.dailyLog,
+          mastery: s.progress.mastery,
+          streak: s.progress.streak,
+          badges: s.progress.badges,
+          stars: s.progress.stars,
+        }) as Progress,
+    ),
+  );
   const [period, setPeriod] = useState<ReportPeriod>('week');
   const [copied, setCopied] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);

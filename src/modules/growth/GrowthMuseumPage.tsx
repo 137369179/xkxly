@@ -2,7 +2,21 @@ import { Suspense, lazy, useMemo, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BADGES } from '@/data/badges';
 import { ALBUMS, albumStickers, STICKER_MAP } from '@/data/stickers';
-import { useProgress, useStars, useStreak, useAvailableStars, useStore } from '@/store/useStore';
+import {
+  useBadges,
+  useBadgeDates,
+  useStickers,
+  useResearchStats,
+  useDiscoveries,
+  useResearchNotes,
+  useStars,
+  useSpent,
+  useStreak,
+  useMastery,
+  useAvailableStars,
+  useStore,
+} from '@/store/useStore';
+import type { Progress } from '@/types';
 import { masteryRate } from '@/lib/srs';
 import { mapProgress } from '@/components/MapView';
 import { TONE_STYLE, type Tone } from '@/lib/tones';
@@ -36,39 +50,45 @@ export type GrowthTab = 'tree' | 'badges' | 'stickers';
 export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?: GrowthTab }) {
   const { t } = useTranslation();
   const [tab, setTab] = useState<GrowthTab>(initialTab);
-  const p = useProgress();
+  const badges = useBadges();
+  const stickerList = useStickers();
+  const badgeDates = useBadgeDates();
+  const researchStats = useResearchStats();
+  const discoveries = useDiscoveries();
+  const researchNotes = useResearchNotes();
   const stars = useStars();
+  const spent = useSpent();
   const streak = useStreak();
+  const mastery = useMastery();
   const available = useAvailableStars();
   const buySticker = useStore((s) => s.buySticker);
 
-  const ownedBadges = useMemo(() => new Set(p.badges), [p.badges]);
-  const ownedStickers = useMemo(() => new Set(p.stickers), [p.stickers]);
+  const ownedBadges = useMemo(() => new Set(badges), [badges]);
+  const ownedStickers = useMemo(() => new Set(stickerList), [stickerList]);
 
   const [album, setAlbum] = useState(ALBUMS[0] ?? '');
   const [justGot, setJustGot] = useState<string | null>(null);
   const justGotTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const badgeDates = useMemo(
+  const sortedBadgeDates = useMemo(
     () =>
-      Object.entries(p.badgeDates ?? {})
+      Object.entries(badgeDates ?? {})
         .filter(([, ts]) => ts > 0)
         .sort((a, b) => b[1] - a[1]),
-    [p.badgeDates],
+    [badgeDates],
   );
 
-  const researchStats = p.researchStats;
-  const discoveryCount = p.discoveries?.length ?? 0;
-  const noteCount = Object.keys(p.researchNotes ?? {}).filter((k) => p.researchNotes?.[k]?.trim()).length;
+  const discoveryCount = discoveries?.length ?? 0;
+  const noteCount = Object.keys(researchNotes ?? {}).filter((k) => researchNotes?.[k]?.trim()).length;
 
   const statCards = [
     { emoji: '⭐', label: t('growth.stars'), value: String(stars), tone: 'yellow' as Tone },
     { emoji: '🔥', label: t('growth.streak'), value: `${streak} 天`, tone: 'orange' as Tone },
     { emoji: '🏅', label: t('growth.badges'), value: `${ownedBadges.size}/${BADGES.length}`, tone: 'purple' as Tone },
-    { emoji: '📈', label: t('growth.mastery'), value: `${Math.round(masteryRate(p) * 100)}%`, tone: 'green' as Tone },
+    { emoji: '📈', label: t('growth.mastery'), value: `${Math.round(masteryRate({ mastery } as Progress) * 100)}%`, tone: 'green' as Tone },
   ];
 
-  const levelPct = Math.round(mapProgress(p) * 20); // 平均掌握度 0-5 → 0-100
+  const levelPct = Math.round(mapProgress({ mastery } as Progress) * 20); // 平均掌握度 0-5 → 0-100
   const stickerItems = albumStickers(album);
 
   useEffect(() => {
@@ -205,12 +225,12 @@ export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?:
             {/* 学习护照成就时间线 */}
             <Panel>
               <PanelTitle emoji="⏳" title={t('growth.timeline')} subtitle="每一次点滴进步，都为你记录在荣誉档案中" tone="orange" />
-              {badgeDates.length === 0 ? (
+              {sortedBadgeDates.length === 0 ? (
                 <p className="py-6 text-center text-sm font-bold text-ink-soft">✨ {t('growth.timelineEmpty')}</p>
               ) : (
                 <div className="relative space-y-4 pl-6">
                   <div className="absolute bottom-2 left-[9px] top-2 w-1 rounded-full bg-gradient-to-b from-yellow-300 via-pink-300 to-purple-300" />
-                  {badgeDates.slice(0, 20).map(([id, ts], i) => {
+                  {sortedBadgeDates.slice(0, 20).map(([id, ts], i) => {
                     const badge = BADGES.find((b) => b.id === id);
                     const tone = TONE_STYLE[((badge?.tone ?? 'blue') as Tone)];
                     return (
@@ -271,7 +291,7 @@ export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?:
                   <div>
                     <span className="text-sm font-extrabold text-pink-900">{t('rewards.wallet')}</span>
                     <p className="text-[11px] font-bold text-pink-600">
-                      {t('rewards.walletSummary', { stars: p.stars, spent: p.spent })}
+                      {t('rewards.walletSummary', { stars, spent })}
                     </p>
                   </div>
                 </div>

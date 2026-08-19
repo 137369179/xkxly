@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
 import { motion } from 'motion/react';
-import { useProgress } from '@/store/useStore';
+import { useBadges, useBadgeDates, useBadgeMetricProgress } from '@/store/useStore';
 import { BADGE_MAP } from '@/data/badges';
 import { TONE_STYLE, type Tone } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 import { PageHeader, Panel, PanelTitle } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { AchievementWall } from '@/components/AchievementWall';
-import type { BadgeDef } from '@/types';
+import type { BadgeDef, Progress } from '@/types';
 import { useTranslation } from '@/i18n/useTranslation';
 
 /**
@@ -80,8 +80,10 @@ function fmtDate(ts: number | undefined): string {
 
 export default function StudyPassport() {
   const { t } = useTranslation();
-  const progress = useProgress();
-  const ownedBadges = useMemo(() => new Set(progress.badges), [progress.badges]);
+  const badges = useBadges();
+  const badgeDates = useBadgeDates();
+  const metric = useBadgeMetricProgress();
+  const ownedBadges = useMemo(() => new Set(badges), [badges]);
 
   // 总盖章数
   const stampedCount = useMemo(
@@ -117,8 +119,8 @@ export default function StudyPassport() {
                 const badge = BADGE_MAP.get(badgeId);
                 if (!badge) return null;
                 const stamped = ownedBadges.has(badgeId);
-                const date = progress.badgeDates[badgeId];
-                const meter = badge.meter?.(progress);
+                const date = badgeDates[badgeId];
+                const meter = badge.meter?.(metric as Progress);
                 return (
                   <Stamp
                     key={badgeId}

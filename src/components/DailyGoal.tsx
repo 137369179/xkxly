@@ -6,7 +6,9 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { Panel, PanelTitle } from '@/components/ui/Card';
-import { useProgress, useStore } from '@/store/useStore';
+import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
+import type { Progress } from '@/types';
 import { dateKey } from '@/lib/dailyPlan';
 import { sfxStar } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
@@ -18,7 +20,7 @@ interface DailyGoal {
   emoji: string;
   labelKey: string;
   target: number;
-  current: (p: ReturnType<typeof useProgress>) => number;
+  current: (p: Progress) => number;
   reward: number;
 }
 
@@ -45,7 +47,18 @@ function pickGoals(dateStr: string): DailyGoal[] {
 
 export function DailyGoal() {
   const { t } = useTranslation();
-  const progress = useProgress();
+  // 各目标 current() 仅读取 dailyLog / mastery / poemsRead / mathCorrect
+  const progress = useStore(
+    useShallow(
+      (s) =>
+        ({
+          dailyLog: s.progress.dailyLog,
+          mastery: s.progress.mastery,
+          poemsRead: s.progress.poemsRead,
+          mathCorrect: s.progress.mathCorrect,
+        }) as Progress,
+    ),
+  );
   const addStars = useStore(s => s.addStars);
   const today = dateKey();
   const goals = useMemo(() => pickGoals(today), [today]);

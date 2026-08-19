@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PageHeader, Panel, PanelTitle } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
-import { useProgress, useStore } from '@/store/useStore';
+import { useDiscoveries, useResearchNotes, useStore } from '@/store/useStore';
 import { navigate } from '@/lib/router';
 import { speak } from '@/lib/speech';
 import { sfxTap, sfxStar } from '@/lib/sfx';
@@ -49,7 +49,8 @@ function formatDate(ts: number): string {
  */
 export default function DiscoveryGallery() {
   const { t } = useTranslation();
-  const p = useProgress();
+  const discoveriesRaw = useDiscoveries();
+  const researchNotes = useResearchNotes();
   const removeDiscovery = useStore((s) => s.removeDiscovery);
   const setResearchNote = useStore((s) => s.setResearchNote);
   const removeResearchNote = useStore((s) => s.removeResearchNote);
@@ -61,10 +62,10 @@ export default function DiscoveryGallery() {
   const [noteDraft, setNoteDraft] = useState('');
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const discoveries = useMemo(() => p.discoveries ?? [], [p.discoveries]);
+  const discoveries = useMemo(() => discoveriesRaw ?? [], [discoveriesRaw]);
   const noteEntries = useMemo(
-    () => Object.entries(p.researchNotes ?? {}).filter(([, v]) => v?.trim()),
-    [p.researchNotes],
+    () => Object.entries(researchNotes ?? {}).filter(([, v]) => v?.trim()),
+    [researchNotes],
   );
 
   // —— 拉取 KV 收藏卡（列表按 id 匹配 discoveries）——

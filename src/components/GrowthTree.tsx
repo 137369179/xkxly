@@ -4,7 +4,7 @@ import { Panel, PanelTitle } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { Modal } from '@/components/ui/Modal';
 import { CandyButton } from '@/components/ui/Button';
-import { useProgress } from '@/store/useStore';
+import { useMastery, useDailyLog, useStreak } from '@/store/useStore';
 import { navigate, type RouteId } from '@/lib/router';
 import { skillLabel } from '@/lib/srs';
 import POEMS from '@/data/poems';
@@ -75,21 +75,23 @@ const poemTitle = (id: string) => POEMS.find((p) => p.id === id)?.title;
 
 export function GrowthTree() {
   const { t } = useTranslation();
-  const progress = useProgress();
+  const mastery = useMastery();
+  const dailyLog = useDailyLog();
+  const streak = useStreak();
   const season = useMemo(() => getSeason(), []);
   const s = SEASON_STYLE[season] ?? SEASON_STYLE.spring;
   const [picked, setPicked] = useState<string | null>(null);
 
   // 统计：总题数、完成课数、连续天数
   const totalAnswered = useMemo(() => {
-    return Object.values(progress.mastery).reduce((sum, m) => sum + (m?.ok ?? 0) + (m?.ng ?? 0), 0);
-  }, [progress.mastery]);
+    return Object.values(mastery).reduce((sum, m) => sum + (m?.ok ?? 0) + (m?.ng ?? 0), 0);
+  }, [mastery]);
 
   const lessonsDone = useMemo(() => {
-    return Object.values(progress.dailyLog).filter((d) => d?.lesson).length;
-  }, [progress.dailyLog]);
+    return Object.values(dailyLog).filter((d) => d?.lesson).length;
+  }, [dailyLog]);
 
-  const streak = progress.streak ?? 0;
+  const streakValue = streak ?? 0;
 
   // 计算成长阶段
   const leaves = Math.floor(totalAnswered / 10);     // 每 10 题一片叶子
@@ -101,18 +103,18 @@ export function GrowthTree() {
 
   // 已掌握的知识点（lv >= 3）作为果实
   const masteredFruits = useMemo(() => {
-    const items = Object.entries(progress.mastery)
+    const items = Object.entries(mastery)
       .filter(([, m]) => m && m.lv >= 3)
       .map(([skill, m]) => ({ skill, lastAt: m.last ?? m.lastAt ?? 0 }))
       .sort((a, b) => b.lastAt - a.lastAt);
     // 超过 FRUIT_SHOW_MAX 时只显示最近 FRUIT_RENDER_MAX 个
     if (items.length > FRUIT_SHOW_MAX) return items.slice(0, FRUIT_RENDER_MAX);
     return items;
-  }, [progress.mastery]);
+  }, [mastery]);
 
   const masteredTotal = useMemo(
-    () => Object.values(progress.mastery).filter((m) => m && m.lv >= 3).length,
-    [progress.mastery],
+    () => Object.values(mastery).filter((m) => m && m.lv >= 3).length,
+    [mastery],
   );
 
   // 生成树上的装饰位置（伪随机但稳定）
@@ -297,9 +299,9 @@ export function GrowthTree() {
         <div>
           <div className="flex justify-between text-xs font-bold text-ink-soft">
             <span>{t('growth.nextFruit')}</span>
-            <span>{streak % 7}/7 {t('growth.days')}</span>
+            <span>{streakValue % 7}/7 {t('growth.days')}</span>
           </div>
-          <ProgressBar value={streak % 7} max={7} tone="orange" height={8} />
+          <ProgressBar value={streakValue % 7} max={7} tone="orange" height={8} />
         </div>
       </div>
 

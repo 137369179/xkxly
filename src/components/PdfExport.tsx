@@ -10,7 +10,9 @@
 import { useState } from 'react';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
-import { useProgress } from '@/store/useStore';
+import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
+import type { Progress } from '@/types';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { sfxTap, sfxStar } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
@@ -22,7 +24,18 @@ import { SUBJECTS } from '@/components/charts/ParentEnhance';
 
 export function PdfExport() {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
+  // generateReport 仅读取 mastery / badges / stars / streak（含 touchedCount/masteryRate → mastery）
+  const progress = useStore(
+    useShallow(
+      (s) =>
+        ({
+          mastery: s.progress.mastery,
+          badges: s.progress.badges,
+          stars: s.progress.stars,
+          streak: s.progress.streak,
+        }) as Progress,
+    ),
+  );
   const settings = useSettingsStore((s) => s.settings);
   const [loading, setLoading] = useState(false);
   const [url, setUrl] = useState<string | null>(null);
@@ -84,7 +97,7 @@ export function PdfExport() {
 }
 
 async function generateReport(
-  progress: ReturnType<typeof useProgress>,
+  progress: Progress,
   _sound: boolean,
 ): Promise<string> {
   const W = 820;

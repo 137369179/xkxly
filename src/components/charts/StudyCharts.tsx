@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useProgress } from '@/store/useStore';
+import { useDailyLog, useMastery, useWrongBook } from '@/store/useStore';
 import { dateKey } from '@/lib/dailyPlan';
 import { SUBJECTS, subjectLabel, subjectColor } from '@/lib/srs';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -31,12 +31,12 @@ function recentDays(n: number): string[] {
 /* ------------------------------------------------------------------ */
 export function StudyTimeChart() {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
+  const dailyLog = useDailyLog();
   const today = dateKey();
   const days = useMemo(() => recentDays(14), [today]);
   const data = days.map((d) => ({
     date: d,
-    sec: progress.dailyLog[d]?.sec ?? 0,
+    sec: dailyLog[d]?.sec ?? 0,
   }));
   const maxSec = Math.max(...data.map((d) => d.sec), 600);
   const barWidth = 100 / data.length;
@@ -93,16 +93,16 @@ const RADAR_DIMS = SUBJECTS.slice(0, 8);
 
 export function MasteryRadar() {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
+  const mastery = useMastery();
 
   const values = useMemo(() => {
     return RADAR_DIMS.map((dim) => {
-      const items = Object.entries(progress.mastery).filter(([k]) => k.startsWith(dim.key + ':'));
+      const items = Object.entries(mastery).filter(([k]) => k.startsWith(dim.key + ':'));
       if (items.length === 0) return 0;
       const avg = items.reduce((s, [, m]) => s + m.lv, 0) / items.length;
       return (avg / 5) * 100;
     });
-  }, [progress.mastery]);
+  }, [mastery]);
 
   const cx = 50;
   const cy = 50;
@@ -190,11 +190,11 @@ export function MasteryRadar() {
 /* ------------------------------------------------------------------ */
 export function WrongDistribution() {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
+  const wrongBook = useWrongBook();
 
   const data = useMemo(() => {
     const cats: Record<string, number> = {};
-    for (const skill of progress.wrongBook) {
+    for (const skill of wrongBook) {
       const cat = skill.split(':')[0] ?? 'other';
       cats[cat] = (cats[cat] ?? 0) + 1;
     }
@@ -209,7 +209,7 @@ export function WrongDistribution() {
         label: subjectLabel(cat),
       }))
       .sort((a, b) => b.count - a.count);
-  }, [progress.wrongBook]);
+  }, [wrongBook]);
 
   if (data.length === 0) {
     return (
@@ -227,7 +227,7 @@ export function WrongDistribution() {
 
   return (
     <div className="space-y-2">
-      <span className="text-sm font-bold text-ink-soft">{tr('charts.wrongDistCount', { count: progress.wrongBook.length })}</span>
+      <span className="text-sm font-bold text-ink-soft">{tr('charts.wrongDistCount', { count: wrongBook.length })}</span>
       <div className="flex items-center gap-3">
         <svg viewBox="0 0 100 100" style={{ width: 120, height: 120 }} className="shrink-0">
           {data.map((d) => {
@@ -252,7 +252,7 @@ export function WrongDistribution() {
           })}
           <circle cx={cx} cy={cy} r={14} fill="#fff" />
           <text x={cx} y={cy - 1} fontSize={5} textAnchor="middle" fill="#5b3f49" fontWeight="bold">
-            {progress.wrongBook.length}
+            {wrongBook.length}
           </text>
           <text x={cx} y={cy + 4} fontSize={2.5} textAnchor="middle" fill="#cda6b0">
             {tr('charts.wrongCount')}
@@ -278,7 +278,7 @@ export function WrongDistribution() {
 /* ------------------------------------------------------------------ */
 export function StudyHeatmap() {
   const { t: tr } = useTranslation();
-  const progress = useProgress();
+  const dailyLog = useDailyLog();
 
   const weeks = useMemo(() => {
     const now = Date.now();
@@ -288,7 +288,7 @@ export function StudyHeatmap() {
     for (let i = 83; i >= 0; i--) {
       const d = new Date(today.getTime() - i * 86400000);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      const sec = progress.dailyLog[key]?.sec ?? 0;
+      const sec = dailyLog[key]?.sec ?? 0;
       const level = sec === 0 ? 0 : sec < 300 ? 1 : sec < 600 ? 2 : sec < 1200 ? 3 : 4;
       days.push({ date: key, sec, level });
     }
@@ -298,7 +298,7 @@ export function StudyHeatmap() {
       w.push(days.slice(i, i + 7));
     }
     return w;
-  }, [progress.dailyLog]);
+  }, [dailyLog]);
 
   const levelColors = ['#f0dde2', '#b8f0d8', '#5fd68b', '#33a863', '#047857'];
 

@@ -1,6 +1,7 @@
 import { useState, lazy, Suspense, useEffect } from 'react';
 import { navigate } from '@/lib/router';
-import { useProgress } from '@/store/useStore';
+import { useMastery } from '@/store/useStore';
+import type { Progress } from '@/types';
 import { masteredCount } from '@/lib/englishCurriculum';
 import { useTranslation } from '@/i18n/useTranslation';
 import { PageHeader } from '@/components/ui/Card';
@@ -24,10 +25,10 @@ type ArcadeMode = 'pop' | 'match';
 export default function LettersPage() {
   const [tab, setTab] = useState<TabId>('wall');
   const [arcadeMode, setArcadeMode] = useState<ArcadeMode>('pop');
-  const progress = useProgress();
+  const mastery = useMastery();
   const { t } = useTranslation();
   const { target, clear } = useTrainingTarget('letters');
-  const lettersDone = masteredCount(progress, 'letter:');
+  const lettersDone = masteredCount({ mastery } as Progress, 'letter:');
   const unlockedPhonics = lettersDone >= 8;
   // 深链预选目标：trace:<A> 描红预选字母；单字母 A 预选精学字母
   const [traceLetter, setTraceLetter] = useState<string | undefined>(undefined);
