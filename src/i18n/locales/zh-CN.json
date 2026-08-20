@@ -2764,7 +2764,12 @@
     "allKnown": "全部认识啦",
     "moreCount": "… 一共 {count} 个",
     "readAgain": "🔊 再读一遍",
-    "gotIt": "知道啦"
+    "gotIt": "知道啦",
+    "funFactTitle": "数字小知识",
+    "recommendTitle": "✨ 猜你接下来想练",
+    "recommendWeak": "薄弱点优先 · {label}",
+    "recommendGo": "去练习 →",
+    "recommendFallback": "先练一练数数乐"
   },
   "adventure": {
     "title": "羊毛毡小镇 3D 闯关大冒险",
