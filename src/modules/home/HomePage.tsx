@@ -12,7 +12,7 @@ import { HomeHero } from '@/modules/home/HomeHero';
 import ExploreMore from '@/modules/home/ExploreMore';
 import { CategorySheet } from '@/components/layout/CategorySheet';
 import type { NavCategory } from '@/data/nav';
-import { DailyChallenge } from '@/components/DailyChallenge';
+import { DailyChallenge } from '@/components/quiz/DailyChallenge';
 import { AiAvatar } from '@/components/ai/AiAvatar';
 
 export default function HomePage() {

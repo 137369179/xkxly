@@ -18,7 +18,7 @@ import {
 } from '@/store/useStore';
 import type { Progress } from '@/types';
 import { masteryRate } from '@/lib/srs';
-import { mapProgress } from '@/components/MapView';
+import { mapProgress } from '@/components/games/MapView';
 import { TONE_STYLE, type Tone } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 import { PageHeader, Panel, PanelTitle } from '@/components/ui/Card';
@@ -27,17 +27,17 @@ import { CandyButton } from '@/components/ui/Button';
 import { StarCounter } from '@/components/ui/Stars';
 import { BigPraise } from '@/components/ui/Feedback';
 import { celebrateBig } from '@/lib/celebrate';
-import { FriendlyLoading } from '@/components/FriendlyLoading';
+import { FriendlyLoading } from '@/components/feedback/FriendlyLoading';
 import { navigate } from '@/lib/router';
 import { useTranslation } from '@/i18n/useTranslation';
 import { FluffyIcon } from '@/components/ui/FluffyIcon';
 import { BadgeCollection } from '@/modules/rewards/BadgeCollection';
 
 const GrowthTree = lazy(() =>
-  import('@/components/GrowthTree').then((m) => ({ default: m.GrowthTree })),
+  import('@/components/quiz/GrowthTree').then((m) => ({ default: m.GrowthTree })),
 );
 const StickerScene = lazy(() =>
-  import('@/components/StickerScene').then((m) => ({ default: m.StickerScene })),
+  import('@/components/feedback/StickerScene').then((m) => ({ default: m.StickerScene })),
 );
 
 function formatDate(ts: number): string {

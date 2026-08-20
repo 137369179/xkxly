@@ -5,9 +5,9 @@ import { LEVELS, TOTAL_LEVELS } from '@/data/levels';
 import { STORY_MAP } from '@/data/adventureStory';
 import POEMS from '@/data/poems';
 import { BADGES } from '@/data/badges';
-import { StoryUnlock } from '@/components/StoryUnlock';
+import { StoryUnlock } from '@/components/games/StoryUnlock';
 import { CHAPTERS, findChapterByLevel, isBossLevel } from '@/data/adventureChapters';
-import { BossBattle } from '@/components/BossBattle';
+import { BossBattle } from '@/components/games/BossBattle';
 import { EquipmentPanel } from '@/components/EquipmentPanel';
 import { calcTotalBonus } from '@/data/equipment';
 import {
@@ -38,7 +38,7 @@ import { PageHeader } from '@/components/ui/Card';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { StarRating } from '@/components/ui/Stars';
-import { RoundRunner } from '@/components/RoundRunner';
+import { RoundRunner } from '@/components/quiz/RoundRunner';
 import { useTranslation } from '@/i18n/useTranslation';
 
 const MAKERS: Record<string, (d: Difficulty) => Question> = {

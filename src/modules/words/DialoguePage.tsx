@@ -11,7 +11,7 @@ import { sfxTap, sfxCorrect, sfxWrong, sfxStar } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 import { randomPraise, randomEncourage } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
-import { SpeechEvalButton } from '@/components/SpeechEvalButton';
+import { SpeechEvalButton } from '@/components/feedback/SpeechEvalButton';
 
 import { DIALOGUES, type Dialogue } from '@/data/dialogues';
 

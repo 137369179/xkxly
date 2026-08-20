@@ -23,7 +23,7 @@ vi.mock('@/components/ui/Button', () => ({
 }));
 
 const EMOJIS = ['🐱', '🐶', '🐰'];
-const { MiniSudoku, genBoard } = await import('@/components/MiniSudoku');
+const { MiniSudoku, genBoard } = await import('@/components/games/MiniSudoku');
 
 function render() {
   const container = document.createElement('div');

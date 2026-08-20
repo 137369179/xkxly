@@ -14,7 +14,7 @@ import { sfxTap, sfxCorrect } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useStore, useMastery } from '@/store/useStore';
-import { ColorExplore } from '@/components/ColorExplore';
+import { ColorExplore } from '@/components/games/ColorExplore';
 
 /* ---------- Type definitions ---------- */
 

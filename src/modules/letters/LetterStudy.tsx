@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { LETTERS } from '@/data/letters';
 import { TONE_STYLE, toneAt } from '@/lib/tones';
 import { cn } from '@/lib/utils';
-import { LetterLearn } from '@/components/LetterLearn';
+import { LetterLearn } from '@/components/games/LetterLearn';
 import { CandyButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useMastery, useStore } from '@/store/useStore';

@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
-import { RoundRunner } from '@/components/RoundRunner';
+import { RoundRunner } from '@/components/quiz/RoundRunner';
 import { makeSpacedDrill } from '@/lib/drill';
 import type { Question } from '@/types';
 import type { Difficulty } from '@/lib/questions';
@@ -9,7 +9,7 @@ import { makeMulQuestion, makeDivQuestion, makeShapeQuestion, makeTimeQuestion, 
 import { useStore } from '@/store/useStore';
 import { sfxTap } from '@/lib/sfx';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
-import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
+import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHint';
 import { useTranslation } from '@/i18n/useTranslation';
 
 type SubTab = 'mul' | 'div' | 'shape' | 'time' | 'coin';

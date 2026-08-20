@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
-import { RoundRunner } from '@/components/RoundRunner';
+import { RoundRunner } from '@/components/quiz/RoundRunner';
 import { CandyButton } from '@/components/ui/Button';
 import { AiAvatar } from '@/components/ai';
 import { makeMathQuestion, type Difficulty } from '@/lib/questions';
@@ -10,7 +10,7 @@ import type { Question } from '@/types';
 import { useStore } from '@/store/useStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
-import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
+import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHint';
 
 const MAX_OF: Record<Difficulty, number> = { 1: 10, 2: 15, 3: 20 };
 

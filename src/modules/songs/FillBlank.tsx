@@ -16,7 +16,7 @@ import type { Tone } from '@/lib/tones';
 import type { NurseryRhyme } from '@/data/nurseryRhymes';
 import { recordAttempt } from '@/lib/adaptChain';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
-import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
+import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHint';
 import { useTranslation } from '@/i18n/useTranslation';
 
 type Difficulty = 1 | 2 | 3;

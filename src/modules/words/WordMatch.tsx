@@ -14,7 +14,7 @@ import { motion } from 'motion/react';
 import { useStore } from '@/store/useStore';
 import { shuffle } from '@/lib/utils';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
-import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
+import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHint';
 
 type Phase = 'playing' | 'result';
 type Side = 'en' | 'zh';

@@ -10,7 +10,7 @@ import { CandyButton } from '@/components/ui/Button';
 import { Tabs, type TabItem } from '@/components/ui/Tabs';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useStore } from '@/store/useStore';
-import { SpeechEvalButton } from '@/components/SpeechEvalButton';
+import { SpeechEvalButton } from '@/components/feedback/SpeechEvalButton';
 import { speak } from '@/lib/speech';
 import { sfxTap, sfxWin } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';

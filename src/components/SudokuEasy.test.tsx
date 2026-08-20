@@ -21,7 +21,7 @@ vi.mock('@/components/ui/Button', () => ({
   CandyButton: (props: any) => createElement('button', { onClick: props.onClick, className: props.className }, props.children),
 }));
 
-const { SudokuEasy, isCorrect, PUZZLES, SOLUTIONS } = await import('@/components/SudokuEasy');
+const { SudokuEasy, isCorrect, PUZZLES, SOLUTIONS } = await import('@/components/games/SudokuEasy');
 
 function render() {
   const container = document.createElement('div');

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
-import { CyberMasterCat3D } from '@/components/CyberMasterCat3D';
+import { CyberMasterCat3D } from '@/components/games/CyberMasterCat3D';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { speak } from '@/lib/speech';

@@ -17,7 +17,7 @@ import { HETERONYMS } from '@/lib/tts/g2p';
 import type { TtsPlayHandle, TtsSettings } from '@/lib/tts/types';
 import DEEP_POEMS from '@/data/poems-deep';
 import { CandyButton } from '@/components/ui/Button';
-import { FollowRead } from '@/components/FollowRead';
+import { FollowRead } from '@/components/feedback/FollowRead';
 import { cn } from '@/lib/utils';
 
 /** 模拟儿歌数据（简短，便于测试跟读评测流程） */

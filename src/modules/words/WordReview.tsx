@@ -12,7 +12,7 @@ import { speak } from '@/lib/speech';
 import { sfxTap } from '@/lib/sfx';
 import { motion } from 'motion/react';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
-import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
+import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHint';
 import { useTranslation } from '@/i18n/useTranslation';
 import { dueSkills } from '@/lib/srs';
 

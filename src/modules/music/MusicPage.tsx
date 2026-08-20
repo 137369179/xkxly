@@ -14,7 +14,7 @@ import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { getAudioContext } from '@/lib/audioContext';
 import { speak } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
-import { RhythmRepeat } from '@/components/RhythmRepeat';
+import { RhythmRepeat } from '@/components/games/RhythmRepeat';
 import MusicCreatePage from './MusicCreatePage';
 import { useStore, useMastery } from '@/store/useStore';
 

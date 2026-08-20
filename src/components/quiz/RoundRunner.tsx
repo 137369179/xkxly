@@ -13,7 +13,7 @@ import { celebrateStars, celebrateBig } from '@/lib/celebrate';
 import { sfxWin } from '@/lib/sfx';
 import { useStruggle } from '@/lib/struggle';
 import { useTranslation } from '@/i18n/useTranslation';
-import { StruggleModal } from '@/components/StruggleModal';
+import { StruggleModal } from '@/components/feedback/StruggleModal';
 import { calibrateDifficulty } from '@/lib/difficulty';
 import { starsByMistakes } from '@/lib/stars';
 

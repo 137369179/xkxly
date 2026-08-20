@@ -147,7 +147,7 @@ class FakeSpeechRecognition {
   }
 }
 
-const { SpeechEvalButton } = await import('@/components/SpeechEvalButton');
+const { SpeechEvalButton } = await import('@/components/feedback/SpeechEvalButton');
 
 function setupWindow() {
   (window as any).SpeechRecognition = FakeSpeechRecognition;

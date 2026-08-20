@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { WorksheetGenerator } from '@/components/WorksheetGenerator';
+import { WorksheetGenerator } from '@/components/study/WorksheetGenerator';
 import {
   useStore,
   useMastery,
@@ -28,15 +28,15 @@ import { CandyButton } from '@/components/ui/Button';
 import { StudyTimeChart, MasteryRadar, WrongDistribution, StudyHeatmap } from '@/components/charts/StudyCharts';
 import { AnalyticsInsight } from '@/components/charts/AnalyticsInsight';
 import { GrowthTrend, SubjectBalance, StudyTips } from '@/components/charts/ParentEnhance';
-import { StudyCalendar } from '@/components/StudyCalendar';
-import { ReportExporter } from '@/components/ReportExporter';
-import { WeekCompare } from '@/components/WeekCompare';
-import { PdfExport } from '@/components/PdfExport';
-import { Leaderboard } from '@/components/Leaderboard';
-import { ChainDashboard } from '@/components/ChainDashboard';
-import { ParentAdvicePanel } from '@/components/ParentAdvicePanel';
-import { LearningCoach } from '@/components/LearningPath';
-import { StudyReminder } from '@/components/StudyReminder';
+import { StudyCalendar } from '@/components/study/StudyCalendar';
+import { ReportExporter } from '@/components/study/ReportExporter';
+import { WeekCompare } from '@/components/study/WeekCompare';
+import { PdfExport } from '@/components/study/PdfExport';
+import { Leaderboard } from '@/components/study/Leaderboard';
+import { ChainDashboard } from '@/components/study/ChainDashboard';
+import { ParentAdvicePanel } from '@/components/study/ParentAdvicePanel';
+import { LearningCoach } from '@/components/study/LearningPath';
+import { StudyReminder } from '@/components/study/StudyReminder';
 import VoiceSettings from './VoiceSettings';
 import { AiReport, WrongAnalyzeCard } from './ParentSections';
 import {

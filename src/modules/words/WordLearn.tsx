@@ -1,5 +1,5 @@
 import { LearnFlow, type FlowStep } from '@/components/LearnFlow';
-import { SpeechEvalButton } from '@/components/SpeechEvalButton';
+import { SpeechEvalButton } from '@/components/feedback/SpeechEvalButton';
 
 
 import { TraceCanvas } from '@/components/TraceCanvas';

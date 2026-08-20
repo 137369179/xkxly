@@ -4,7 +4,7 @@
  * 纯展示组件：监听光圈 + CyberMasterCat3D + 实时状态胶囊 + STT 提示。
  */
 import { motion } from 'motion/react';
-import { CyberMasterCat3D } from '@/components/CyberMasterCat3D';
+import { CyberMasterCat3D } from '@/components/games/CyberMasterCat3D';
 import { CatPurrIcon } from '@/modules/pet/PetIcons';
 import type { AiStatus } from '@/lib/ai/useAi';
 import { useTranslation } from '@/i18n/useTranslation';

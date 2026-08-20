@@ -14,7 +14,7 @@ import { speak } from '@/lib/speech';
 import { type HanziEntry } from '@/data/hanzi';
 import { getHanziByLevel } from '@/data/hanziIndex';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
-import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
+import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHint';
 import { useTranslation } from '@/i18n/useTranslation';
 
 

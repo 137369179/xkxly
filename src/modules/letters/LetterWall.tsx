@@ -15,7 +15,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { letterStoryTask } from '@/lib/ai/tasks';
 import { useAiStream } from '@/lib/ai/useAi';
 import { AiPanel } from '@/components/ai';
-import { SpeechEvalButton } from '@/components/SpeechEvalButton';
+import { SpeechEvalButton } from '@/components/feedback/SpeechEvalButton';
 
 type CategoryFilter = 'all' | 'vowel' | 'consonant1' | 'consonant2';
 type CaseDisplay = 'both' | 'upper' | 'lower';

@@ -19,7 +19,7 @@ interface SpeechRecognitionEvent {
   resultIndex: number;
 }
 
-import { VoiceScoreModal } from '@/components/VoiceScoreModal';
+import { VoiceScoreModal } from '@/components/feedback/VoiceScoreModal';
 
 export function VoiceRecite({ poem }: { poem: DeepPoem }) {
   const { t } = useTranslation();

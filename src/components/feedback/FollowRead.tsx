@@ -13,8 +13,8 @@
  */
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { KaraokeReader } from './KaraokeReader';
-import { SpeechEvalButton } from './SpeechEvalButton';
+import { KaraokeReader } from '@/components/games/KaraokeReader';
+import { SpeechEvalButton } from '@/components/feedback/SpeechEvalButton';
 import { CandyButton } from '@/components/ui/Button';
 import { speak, stopSpeaking, type SpeakLang } from '@/lib/speech';
 import { sfxTap } from '@/lib/sfx';

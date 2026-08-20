@@ -8,7 +8,7 @@ import { useStore } from '@/store/useStore';
 import { PinyinLearn } from './PinyinLearn';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useTrainingTarget } from '@/hooks/useTrainingTarget';
-import { TrainingBanner } from '@/components/TrainingBanner';
+import { TrainingBanner } from '@/components/study/TrainingBanner';
 
 // ── 懒加载各练习与闯关组件 ──
 const PinyinPractice = lazy(() => import('./PinyinPractice').then((m) => ({ default: m.PinyinPractice })));

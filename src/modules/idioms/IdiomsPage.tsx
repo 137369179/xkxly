@@ -19,8 +19,8 @@ import { idiomStoryTask, idiomSentenceTask, type IdiomSentenceData } from '@/lib
 import { TONE_STYLE } from '@/lib/tones';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
-import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
-import { QuizSessionRunner } from '@/components/QuizSessionRunner';
+import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHint';
+import { QuizSessionRunner } from '@/components/quiz/QuizSessionRunner';
 import { AllusionBrowser } from '@/modules/poems/AllusionBrowser';
 import type { Question } from '@/types';
 

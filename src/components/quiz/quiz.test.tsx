@@ -16,7 +16,7 @@ vi.mock('@/i18n/useTranslation', () => ({
 }));
 vi.mock('@/lib/sfx', () => ({ sfxTap: vi.fn() }));
 vi.mock('@/lib/speech', () => ({ speak: vi.fn(() => Promise.resolve()), stopSpeaking: vi.fn() }));
-vi.mock('@/components/CyberMasterCat3D', () => ({
+vi.mock('@/components/games/CyberMasterCat3D', () => ({
   CyberMasterCat3D: () => null,
 }));
 vi.mock('@/modules/pet/PetIcons', () => ({ CatPurrIcon: () => null }));

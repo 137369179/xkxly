@@ -3,7 +3,7 @@ import { PageHeader } from '@/components/ui/Card';
 import { useTranslation } from '@/i18n/useTranslation';
 import { sfxTap } from '@/lib/sfx';
 import { useTrainingTarget } from '@/hooks/useTrainingTarget';
-import { TrainingBanner } from '@/components/TrainingBanner';
+import { TrainingBanner } from '@/components/study/TrainingBanner';
 
 // ── 子组件全部懒加载以实现极优的首屏性能 ──
 const NumberWall = lazy(() => import('./NumberWall').then((m) => ({ default: m.NumberWall })));

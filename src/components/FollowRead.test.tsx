@@ -76,7 +76,7 @@ vi.mock('@/components/ui/Button', () => ({
 
 // 4. KaraokeReader —— 简化为带 data-testid 的占位 div，校验透传 props
 const karaokeRenderSpy = vi.fn();
-vi.mock('@/components/KaraokeReader', () => ({
+vi.mock('@/components/games/KaraokeReader', () => ({
   KaraokeReader: (props: any) => {
     karaokeRenderSpy(props);
     return createElement(
@@ -90,7 +90,7 @@ vi.mock('@/components/KaraokeReader', () => ({
 // 5. SpeechEvalButton —— 简化为带 data-testid 的占位 div，并把 onPass/onResult
 //    暴露到 window 上，便于测试用例手动触发（模拟语音识别完成）
 let speechEvalPropsRef: any = null;
-vi.mock('@/components/SpeechEvalButton', () => ({
+vi.mock('@/components/feedback/SpeechEvalButton', () => ({
   SpeechEvalButton: (props: any) => {
     speechEvalPropsRef = props;
     return createElement(
@@ -116,7 +116,7 @@ vi.mock('@/lib/utils', () => ({
 // ============================================================
 
 // 延迟 import FollowRead 到所有 mock 完成后
-const { FollowRead } = await import('@/components/FollowRead');
+const { FollowRead } = await import('@/components/feedback/FollowRead');
 
 /** 构造一个完整的 PronunciationResult（通过） */
 function makePassResult(overrides: Partial<PronunciationResult> = {}): PronunciationResult {

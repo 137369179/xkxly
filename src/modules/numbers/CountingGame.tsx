@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { RoundRunner } from '@/components/RoundRunner';
+import { RoundRunner } from '@/components/quiz/RoundRunner';
 import { CandyButton } from '@/components/ui/Button';
 import { AiAvatar } from '@/components/ai';
 import { makeCountQuestion, type Difficulty } from '@/lib/questions';
@@ -9,7 +9,7 @@ import type { Question } from '@/types';
 import { useStore } from '@/store/useStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
-import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
+import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHint';
 import { useTranslation } from '@/i18n/useTranslation';
 
 const DIFFS: { id: Difficulty; labelKey: string }[] = [

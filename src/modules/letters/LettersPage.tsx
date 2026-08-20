@@ -9,7 +9,7 @@ import { Tabs } from '@/components/ui/Tabs';
 import { sfxTap } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
 import { useTrainingTarget } from '@/hooks/useTrainingTarget';
-import { TrainingBanner } from '@/components/TrainingBanner';
+import { TrainingBanner } from '@/components/study/TrainingBanner';
 
 // 按需懒加载子模块
 const LetterWall = lazy(() => import('./LetterWall').then((m) => ({ default: m.LetterWall })));

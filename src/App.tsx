@@ -5,8 +5,8 @@ import { NAV_MAP } from '@/data/nav';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { BottomTabs } from '@/components/layout/BottomTabs';
 import { TopBar } from '@/components/layout/TopBar';
-import { ComboIndicator } from '@/components/ComboIndicator';
-import { StudyGuard } from '@/components/StudyGuard';
+import { ComboIndicator } from '@/components/feedback/ComboIndicator';
+import { StudyGuard } from '@/components/study/StudyGuard';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { OfflineToast } from '@/components/OfflineIndicator';
 import { RouteSkeleton } from '@/components/RouteSkeleton';
@@ -30,7 +30,7 @@ const CatCompanion = lazy(() =>
 // 库 + badges/medals 语料不再随首屏主包加载（解锁时按需拉取）。
 // ⚠️ BadgeUnlock 仅命名导出，必须 .then 映射 default，否则 React.lazy 初始化抛错白屏。
 const BadgeUnlock = lazy(() =>
-  import('@/components/BadgeUnlock').then((m) => ({ default: m.BadgeUnlock })),
+  import('@/components/feedback/BadgeUnlock').then((m) => ({ default: m.BadgeUnlock })),
 );
 // Part B · Step 3：AiVoiceModal 仅打开语音对话时才需要，懒加载使整套
 // speech(真实语音) + speechRecog + AI 流式链路离开首屏主包。

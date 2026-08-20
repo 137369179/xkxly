@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { RoundRunner } from '@/components/RoundRunner';
+import { RoundRunner } from '@/components/quiz/RoundRunner';
 import { CandyButton } from '@/components/ui/Button';
 import { ResearchCanvas } from '@/modules/research/ResearchCanvas';
 import { KnowledgeCardPanel } from '@/modules/research/KnowledgeCardPanel';

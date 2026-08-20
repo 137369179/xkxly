@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { Panel, PanelTitle } from '@/components/ui/Card';
-import { StoryCanvas } from '@/components/StoryCanvas';
+import { StoryCanvas } from '@/components/games/StoryCanvas';
 import { storybookTask, fallbackStorybook } from '@/lib/ai/tasks';
 import { generateStorybookPdf } from '@/lib/pdfBookGenerator';
 import { chatStream } from '@/lib/ai/client';

@@ -7,7 +7,7 @@
  * 并借 QuizCard 的 🔊 重听按钮可手动复听。答对后揭示「发音 / 例词」(hint)。
  */
 import { useCallback, useState } from 'react';
-import { QuizSessionRunner } from '@/components/QuizSessionRunner';
+import { QuizSessionRunner } from '@/components/quiz/QuizSessionRunner';
 import { CandyButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { getAllPhonicsRules } from '@/data/phonics';

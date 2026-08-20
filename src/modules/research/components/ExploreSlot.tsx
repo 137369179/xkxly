@@ -18,9 +18,9 @@ import type { ExploreSlotKey } from '@/lib/research/types';
 
 /** lazy 注册表：槽位键 → 组件（具名导出，实测全部 memo 组件） */
 const SLOT_REGISTRY: Record<ExploreSlotKey, React.LazyExoticComponent<React.ComponentType>> = {
-  color: lazy(() => import('@/components/ColorExplore').then((m) => ({ default: m.ColorExplore }))),
-  vehicle: lazy(() => import('@/components/VehicleExplore').then((m) => ({ default: m.VehicleExplore }))),
-  job: lazy(() => import('@/components/JobExplore').then((m) => ({ default: m.JobExplore }))),
+  color: lazy(() => import('@/components/games/ColorExplore').then((m) => ({ default: m.ColorExplore }))),
+  vehicle: lazy(() => import('@/components/games/VehicleExplore').then((m) => ({ default: m.VehicleExplore }))),
+  job: lazy(() => import('@/components/games/JobExplore').then((m) => ({ default: m.JobExplore }))),
   dino: lazy(() => import('@/modules/science/components/DinoWorld').then((m) => ({ default: m.DinoWorld }))),
   space: lazy(() => import('@/modules/science/components/SpaceExplorer').then((m) => ({ default: m.SpaceExplorer }))),
   body: lazy(() => import('@/modules/science/components/BodyAdventure').then((m) => ({ default: m.BodyAdventure }))),

@@ -13,7 +13,7 @@ import { CategorySheet } from './CategorySheet';
 // Part B · 懒加载 SoundMuteToggle：其依赖的 sound.ts（真实语音引擎链）只在
 // 首帧之后按需拉取，不再进入首屏主包（TopBar 仍即时渲染，仅静音钮稍后出现）。
 const SoundMuteToggle = lazy(() =>
-  import('@/components/SoundMuteToggle').then((m) => ({ default: m.SoundMuteToggle })),
+  import('@/components/feedback/SoundMuteToggle').then((m) => ({ default: m.SoundMuteToggle })),
 );
 
 export function TopBar() {

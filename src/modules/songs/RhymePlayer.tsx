@@ -10,7 +10,7 @@ import { sfxTap, sfxWin } from '@/lib/sfx';
 import { celebrateBig } from '@/lib/celebrate';
 import { TONE_STYLE, type Tone } from '@/lib/tones';
 import { THEME_LABEL, type NurseryRhyme } from '@/data/nurseryRhymes';
-import { FollowRead } from '@/components/FollowRead';
+import { FollowRead } from '@/components/feedback/FollowRead';
 import { FillBlank } from './FillBlank';
 import { BeatTap } from './BeatTap';
 import { useTranslation } from '@/i18n/useTranslation';

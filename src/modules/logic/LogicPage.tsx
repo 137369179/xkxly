@@ -3,18 +3,18 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { PageHeader } from '@/components/ui/Card';
 import { Tabs } from '@/components/ui/Tabs';
 import { CandyButton } from '@/components/ui/Button';
-import { RoundRunner } from '@/components/RoundRunner';
+import { RoundRunner } from '@/components/quiz/RoundRunner';
 import { makeLogicQuestion, type Difficulty, type LogicKind } from '@/lib/questions';
 import { makeSpacedDrill } from '@/lib/drill';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
-import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
+import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHint';
 import { logicExplainTask } from '@/lib/ai/tasks';
 import { useStore } from '@/store/useStore';
 import { CodeBot } from './CodeBot';
 import { MazeGame } from './MazeGame';
 import { KidSudoku } from './KidSudoku';
 import { useTrainingTarget } from '@/hooks/useTrainingTarget';
-import { TrainingBanner } from '@/components/TrainingBanner';
+import { TrainingBanner } from '@/components/study/TrainingBanner';
 
 type TabId = 'pattern' | 'match' | 'order' | 'mixed' | 'code' | 'maze' | 'sudoku';
 

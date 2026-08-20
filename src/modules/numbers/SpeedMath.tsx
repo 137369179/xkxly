@@ -14,7 +14,7 @@ import { addSpeedRecord, SpeedRankings } from './SpeedRankings';
 import { cn } from '@/lib/utils';
 import type { Question } from '@/types';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
-import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
+import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHint';
 import { useTranslation } from '@/i18n/useTranslation';
 
 const CHALLENGE_SEC = 60;

@@ -16,7 +16,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { ENGLISH_STAGES, currentStage, stageOverview, type EnglishStage } from '@/lib/englishCurriculum';
 import { WordLearn } from './WordLearn';
 import { useTrainingTarget } from '@/hooks/useTrainingTarget';
-import { TrainingBanner } from '@/components/TrainingBanner';
+import { TrainingBanner } from '@/components/study/TrainingBanner';
 
 const PhonicsPage = lazy(() => import('./PhonicsPage').then((m) => ({ default: m.PhonicsPage })));
 const SpellingTest = lazy(() => import('./SpellingTest').then((m) => ({ default: m.SpellingTest })));

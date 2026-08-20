@@ -17,7 +17,7 @@ import { makeHanziListenQuestion, makeHanziSimilarQuestion } from '@/lib/hanziQu
 import { dueSkills } from '@/lib/srs';
 import { useStore, useMastery } from '@/store/useStore';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
-import { AdaptiveDifficultyHint } from '@/components/AdaptiveDifficultyHint';
+import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHint';
 import type { Progress, MasteryItem } from '@/types';
 import { sfxTap, sfxCorrect } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
