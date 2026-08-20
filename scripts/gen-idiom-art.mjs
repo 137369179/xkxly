@@ -1,12 +1,16 @@
 /**
- * 批量生成本地成语插画 · 待网络恢复后运行
+ * 批量生成本地成语插画
  * ============================================================
- * 用法：node scripts/gen-idiom-art.mjs
+ * 用法：node scripts/gen-idiom-art.mjs [id...]
  *
  * 职责：
  *   1. 从内置精选成语清单读取插画描述（与 src/data/idioms.ts 的 imagePrompt 保持同步）
- *   2. 逐一调用 text_to_image 生成并下载到 public/idioms/<id>.jpg（本地资源，避免外部链接）
+ *   2. 调用生图引擎生成并下载到 public/idioms/<id>.jpg（本地资源，避免外部链接）
  *   3. 用 macOS sips 重采样压缩（-Z 640 限制最长边），优化文件体积适应当地网络
+ *
+ * 引擎：默认 pollinations（免费、无需 key、GET 直连生成）。
+ *   当前环境本地代理对多数图源不通，node fetch 直连（不走代理）可直达 pollinations。
+ *   如需换回旧 trae 引擎，把下面 ENGINE 改为 'trae' 即可。
  *
  * 幂等：重复运行会覆盖同名文件；已存在且可用的图不受影响。
  */
@@ -17,10 +21,34 @@ import { resolve } from 'node:path';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const OUT_DIR = resolve(ROOT, 'public', 'idioms');
-const API = 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image';
+
+/** 生图引擎：'pollinations'（推荐） | 'trae'（旧，已被降级为默认图） */
+const ENGINE = 'pollinations';
 const IMAGE_SIZE = 'square_hd';
+/** Pollinations 输出宽高（契合 sips 压缩到 640） */
+const IMG_W = 640;
+const IMG_H = 640;
 /** 压缩后最长边（px） */
 const MAX_EDGE = 640;
+
+/** 由 id 派生稳定种子：同 id 可复现、不同 id 图不同 */
+function seedFromId(id) {
+  let h = 0;
+  for (const c of id) h = (((h * 31) | 0) + c.charCodeAt(0)) >>> 0;
+  return h & 0x7fffffff;
+}
+
+/** 构造生图 URL（无需认证） */
+function imageUrl(id, prompt) {
+  if (ENGINE === 'trae') {
+    const p = new URLSearchParams({ prompt, image_size: IMAGE_SIZE });
+    return `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?${p.toString()}`;
+  }
+  return (
+    `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}` +
+    `?width=${IMG_W}&height=${IMG_H}&nologo=true&seed=${seedFromId(id)}`
+  );
+}
 
 const ARTS = [
   { id: 'i2', prompt: '儿童水彩插画，软萌果冻风，夜色下农夫正在修补小羊圈的栅栏，两三只圆滚滚的小羊羔在一旁好奇张望，暖黄马灯照明，柔和糖果色背景。' },
@@ -63,8 +91,7 @@ const targets = only.length ? ARTS.filter(a => only.includes(a.id)) : ARTS;
 
 let ok = 0;
 for (const { id, prompt } of targets) {
-  const params = new URLSearchParams({ prompt, image_size: IMAGE_SIZE });
-  const url = `${API}?${params.toString()}`;
+  const url = imageUrl(id, prompt);
   const out = resolve(OUT_DIR, `${id}.jpg`);
   process.stdout.write(`生成 ${id}.jpg ... `);
   try {
