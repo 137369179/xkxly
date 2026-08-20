@@ -16,12 +16,6 @@ import { VoiceTitle, VoiceCatStage } from '@/modules/pet/voice/VoiceCatStage';
 import { VoiceMessageList, type VoiceMessage } from '@/modules/pet/voice/VoiceMessageList';
 import { VoiceControls, QuickPhrases } from '@/modules/pet/voice/VoiceControls';
 
-interface MessageItem {
-  id: string;
-  sender: 'user' | 'cat';
-  text: string;
-}
-
 const EMPTY_OUTFITS: Record<string, string> = {};
 
 /** 连续静默达到该次数后自动暂停「回复完接着听」的免提模式，防止无人对话时反复占麦 */
@@ -34,7 +28,7 @@ export function CatVoiceChatModal({ isOpen, onClose }: { isOpen: boolean; onClos
   const equippedOutfits = useStore((s) => s.progress.equippedOutfits ?? EMPTY_OUTFITS);
   const isTtsSpeaking = useTtsStore((s) => s.isSpeaking);
 
-  const [messages, setMessages] = useState<MessageItem[]>([
+  const [messages, setMessages] = useState<VoiceMessage[]>([
     {
       id: 'init',
       sender: 'cat',
@@ -64,7 +58,7 @@ export function CatVoiceChatModal({ isOpen, onClose }: { isOpen: boolean; onClos
   const [sttNotice, setSttNotice] = useState<string>('');
 
   // 最新消息快照：供提交查询时取上下文（函数式更新推开渲染闭包）
-  const messagesRef = useRef<MessageItem[]>(messages);
+  const messagesRef = useRef<VoiceMessage[]>(messages);
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
@@ -107,7 +101,7 @@ export function CatVoiceChatModal({ isOpen, onClose }: { isOpen: boolean; onClos
       const text = guarded.text;
       silentStreakRef.current = 0; // 有真实发言，重置静默计数
 
-      const userMsg: MessageItem = { id: String(Date.now()), sender: 'user', text };
+      const userMsg: VoiceMessage = { id: String(Date.now()), sender: 'user', text };
       setMessages((prev) => [...prev, userMsg]);
       setTranscript('');
       setSttNotice('');
@@ -370,7 +364,7 @@ export function CatVoiceChatModal({ isOpen, onClose }: { isOpen: boolean; onClos
 
             {/* 对话列表 */}
             <VoiceMessageList
-              messages={messages as VoiceMessage[]}
+              messages={messages}
               streaming={status === 'streaming'}
               streamingText={aiStreamText}
               endRef={chatEndRef}
