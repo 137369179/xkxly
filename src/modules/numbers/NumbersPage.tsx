@@ -213,7 +213,7 @@ export default function NumbersPage() {
               data-testid={`sub-${sub.id}`}
               aria-pressed={isSubAct}
               onClick={() => handleSelectSubTab(sub.id)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-black transition-all ${
+              className={`flex min-h-11 items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-black transition-all ${
                 isSubAct
                   ? 'bg-candy-yellow-deep text-white shadow-candy-sm scale-105'
                   : 'bg-white/80 text-ink-soft hover:bg-white hover:text-ink'
