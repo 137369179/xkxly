@@ -16,7 +16,7 @@ import { KidSudoku } from './KidSudoku';
 import { useTrainingTarget } from '@/hooks/useTrainingTarget';
 import { TrainingBanner } from '@/components/study/TrainingBanner';
 
-type TabId = 'pattern' | 'match' | 'order' | 'condition' | 'mixed' | 'code' | 'maze' | 'sudoku';
+type TabId = 'pattern' | 'match' | 'order' | 'condition' | 'steps' | 'mixed' | 'code' | 'maze' | 'sudoku';
 
 /** 深链 param → 逻辑页 tab（codebot 映射到 code，condition 为条件判断） */
 const LOGIC_PARAM_MAP: Record<string, TabId> = {
@@ -24,6 +24,7 @@ const LOGIC_PARAM_MAP: Record<string, TabId> = {
   match: 'match',
   order: 'order',
   condition: 'condition',
+  steps: 'steps',
   mixed: 'mixed',
   code: 'code',
   codebot: 'code',
@@ -42,6 +43,7 @@ export default function LogicPage() {
     { id: 'match', label: t('logic.tabMatch'), emoji: '🧩' },
     { id: 'order', label: t('logic.tabOrder'), emoji: '🔢' },
     { id: 'condition', label: t('logic.tabCondition'), emoji: '🚦' },
+    { id: 'steps', label: t('logic.tabSteps'), emoji: '🧭' },
     { id: 'mixed', label: t('logic.tabMixed'), emoji: '🎲' },
     { id: 'code', label: t('logic.tabCode'), emoji: '🤖' },
     { id: 'maze', label: t('logic.tabMaze'), emoji: '🗺️' },

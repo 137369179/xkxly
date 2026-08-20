@@ -2741,7 +2741,8 @@
     "nextLevel": "Next →",
     "failMsg": "So close! Try again",
     "aiHelp": "🤖 Help me",
-    "aiHint": "Xiao Zhi Hint"
+    "aiHint": "Xiao Zhi Hint",
+    "tabSteps": "Step Order"
   },
   "levels": {
     "begin": "Starter",

@@ -6,7 +6,7 @@ import type { Question } from '@/types';
 import { makeNumberOptions, randInt, sample, sampleMany, shuffle } from '@/lib/utils';
 import { ALL_POOLS, type Difficulty, nextId, opt } from './_shared';
 
-export type LogicKind = 'pattern' | 'match' | 'order' | 'condition';
+export type LogicKind = 'pattern' | 'match' | 'order' | 'condition' | 'steps';
 
 /** 5-1 找规律 */
 export function makePatternQuestion(difficulty: Difficulty = 1): Question {
@@ -227,11 +227,139 @@ export function makeOrderQuestion(difficulty: Difficulty = 1): Question {
 }
 
 export function makeLogicQuestion(kind: LogicKind | 'mixed', difficulty: Difficulty = 1): Question {
-  const k = kind === 'mixed' ? sample(['pattern', 'match', 'order', 'condition'] as const) : kind;
+  const k = kind === 'mixed' ? sample(['pattern', 'match', 'order', 'condition', 'steps'] as const) : kind;
   if (k === 'pattern') return makePatternQuestion(difficulty);
   if (k === 'match') return makeMatchQuestion(difficulty);
   if (k === 'condition') return makeConditionQuestion(difficulty);
+  if (k === 'steps') return makeStepsQuestion(difficulty);
   return makeOrderQuestion(difficulty);
+}
+
+/* ============================================================
+   5-5 步骤排序（🧭 新增题型，2026-08-21）
+   对齐 Code.org「sequencing（顺序编排）」核心概念：
+   把生活流程的正确步骤顺序排出来——先做什么、再做什么。
+     L1 三步流程（洗手 / 起床 / 跳绳）—— 3-4 岁
+     L2 四步流程（刷牙 / 做三明治）—— 5-6 岁
+     L3 四步细节流程（种花 / 寄信）—— 7 岁+
+   ============================================================ */
+
+interface StepFlow {
+  flow: string;
+  emoji: string;
+  steps: string[];
+  hint: string;
+  why: string;
+}
+
+const STEP_FLOWS: Record<Difficulty, StepFlow[]> = {
+  1: [
+    {
+      flow: '洗手',
+      emoji: '🧼',
+      steps: ['开水龙头', '抹肥皂', '冲干净'],
+      hint: '先开水的开关，再抹肥皂搓一搓，最后冲掉泡泡',
+      why: '洗手要先 🚰 开水龙头，再 🧼 抹肥皂搓出泡泡，最后 🫧 冲干净，这样手就洗好啦。',
+    },
+    {
+      flow: '起床',
+      emoji: '🌅',
+      steps: ['穿衣服', '洗脸', '吃早饭'],
+      hint: '起床先穿好衣服，再去洗洗脸，然后吃早饭',
+      why: '起床要 👕 先穿好衣服，再 🧴 去洗脸，最后 🥣 吃早饭，一步一步来。',
+    },
+    {
+      flow: '跳绳',
+      emoji: '🪢',
+      steps: ['拿绳子', '甩起来', '跳过去'],
+      hint: '先把绳子拿在手里，再甩起来，等绳子到脚下就跳',
+      why: '跳绳要先 🪢 拿好绳子，再 ⭕ 把绳子甩过头顶，绳子到脚下 🦶 时跳过去。',
+    },
+  ],
+  2: [
+    {
+      flow: '刷牙',
+      emoji: '🪥',
+      steps: ['接水', '挤牙膏', '刷牙', '漱口'],
+      hint: '先接水，再挤牙膏，上下刷一刷，最后漱口',
+      why: '刷牙要先 💧 接一杯水，再 🪥 挤上牙膏，然后 🦷 上下刷干净，最后 💦 漱口吐掉。',
+    },
+    {
+      flow: '做三明治',
+      emoji: '🥪',
+      steps: ['拿面包', '放生菜', '夹火腿', '盖上面包'],
+      hint: '从一片面包开始，一层一层往上叠，最后盖上面包',
+      why: '做三明治要 🍞 先拿一片面包，放 🥬 生菜，夹 🍖 火腿，最后 🍞 盖上一片面包。',
+    },
+  ],
+  3: [
+    {
+      flow: '种花',
+      emoji: '🌻',
+      steps: ['挖土洞', '放种子', '盖上土', '浇水'],
+      hint: '先挖个小洞，把种子放进去，盖好土，再浇水',
+      why: '种花要 🕳️ 先挖一个土洞，把 🌱 种子放进去，再 🪨 盖上土，最后 💧 浇水，小花就能长大。',
+    },
+    {
+      flow: '寄信',
+      emoji: '✉️',
+      steps: ['写信', '装进信封', '贴邮票', '投进邮筒'],
+      hint: '先写内容，再装信封，贴上邮票，最后投邮筒',
+      why: '寄信要 📝 先写好内容，装进 ✉️ 信封，贴上 🏷️ 邮票，最后 📮 投进邮筒寄出去。',
+    },
+  ],
+};
+
+/** 5-5 步骤排序：按难度档取生活流程，生成 4 个排列（正确 + 3 个打乱，去重） */
+export function makeStepsQuestion(difficulty: Difficulty = 1): Question {
+  const pool = STEP_FLOWS[difficulty] ?? STEP_FLOWS[1];
+  const item = sample(pool);
+  const correct = item.steps;
+  const correctKey = correct.join('>');
+  const wrongs: string[][] = [];
+  const seen = new Set<string>([correctKey]);
+  let guard = 0;
+  while (wrongs.length < 3 && guard++ < 120) {
+    const cand = shuffle(correct);
+    const key = cand.join('>');
+    if (!seen.has(key) && cand.join('') !== correct.join('')) {
+      seen.add(key);
+      wrongs.push(cand);
+    }
+  }
+  // 兜底：确定性相邻交换补齐（保证恒 4 选项）
+  let fillGuard = 0;
+  while (wrongs.length < 3 && fillGuard++ < 40) {
+    const cand = correct.slice();
+    if (cand.length >= 2) {
+      const first = cand[0];
+      const second = cand[1];
+      if (first !== undefined && second !== undefined) {
+        [cand[0], cand[1]] = [second, first];
+      }
+    }
+    const key = cand.join('>');
+    if (!seen.has(key)) {
+      seen.add(key);
+      wrongs.push(cand);
+    }
+  }
+
+  const all = shuffle([correct, ...wrongs]);
+  const options = all.map((g) => opt({ label: g.join(' → ') }));
+  const answerId = options[all.findIndex((g) => g.join('>') === correctKey)]?.id ?? '';
+  return {
+    id: nextId('steps'),
+    kind: 'logic',
+    prompt: `下面哪个是「${item.flow}」的正确顺序？`,
+    displayShapes: [item.emoji, '❓'],
+    speak: `想一想，「${item.flow}」应该先做什么、再做什么呀？`,
+    options,
+    answerId,
+    hint: item.hint,
+    skill: 'logic:steps',
+    why: item.why,
+  };
 }
 
 /* ============================================================

@@ -1,8 +1,9 @@
 // @vitest-environment node
 /**
- * 逻辑出题器契约测试（找规律 / 配对 / 排序 / 条件判断）
+ * 逻辑出题器契约测试（找规律 / 配对 / 排序 / 条件判断 / 步骤排序）
  * ------------------------------------------------------------
  * 覆盖：条件判断三档难度（L1 分类 / L2 规则 / L3 推理）、
+ * 步骤排序三档（L1 三步 / L2 四步 / L3 细节流程）、
  * 既有题型回归、makeLogicQuestion 路由与 mixed 全覆盖。
  */
 import { describe, it, expect } from 'vitest';
@@ -14,6 +15,7 @@ import {
   makeMatchQuestion,
   makeOrderQuestion,
   makeConditionQuestion,
+  makeStepsQuestion,
 } from './logic';
 
 const ROUNDS = 40;
@@ -90,6 +92,54 @@ describe('makeConditionQuestion 条件判断（新增题型）', () => {
   });
 });
 
+describe('makeStepsQuestion 步骤排序（新增题型）', () => {
+  it('L1 三步流程：恒 4 选项且契约完整（40 轮）', () => {
+    for (let i = 0; i < ROUNDS; i++) {
+      const q = makeStepsQuestion(1);
+      expect(q.options.length).toBe(4);
+      assertValidQuestion(q, 'logic:steps');
+    }
+  });
+
+  it('L2 四步流程：恒 4 选项且契约完整（40 轮）', () => {
+    for (let i = 0; i < ROUNDS; i++) {
+      const q = makeStepsQuestion(2);
+      expect(q.options.length).toBe(4);
+      assertValidQuestion(q, 'logic:steps');
+    }
+  });
+
+  it('L3 细节流程：恒 4 选项且契约完整（40 轮）', () => {
+    for (let i = 0; i < ROUNDS; i++) {
+      const q = makeStepsQuestion(3);
+      expect(q.options.length).toBe(4);
+      assertValidQuestion(q, 'logic:steps');
+    }
+  });
+
+  it('prompt 指向具体生活流程且答案含正确顺序', () => {
+    for (let i = 0; i < 30; i++) {
+      const q = makeStepsQuestion(2);
+      expect(q.prompt).toContain('正确顺序');
+      const answer = q.options.find((o) => o.id === q.answerId);
+      expect(answer?.label).toBeTruthy();
+      // 选项 label 用箭头连接步骤，至少有 3 个步骤片段
+      const segments = (answer?.label ?? '').split(' → ');
+      expect(segments.length).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it('三档流程池互异（L1 三步 / L2-L3 四步）', () => {
+    const l1 = makeStepsQuestion(1);
+    const l2 = makeStepsQuestion(2);
+    const l3 = makeStepsQuestion(3);
+    const seg = (q: Question) => (q.options.find((o) => o.id === q.answerId)?.label ?? '').split(' → ').length;
+    expect(seg(l1)).toBe(3);
+    expect(seg(l2)).toBe(4);
+    expect(seg(l3)).toBe(4);
+  });
+});
+
 describe('既有题型契约回归', () => {
   it('pattern：40 轮契约完整（覆盖 L1-L3）', () => {
     for (let i = 0; i < ROUNDS; i++) {
@@ -119,12 +169,21 @@ describe('makeLogicQuestion 路由', () => {
     }
   });
 
-  it('mixed 覆盖全部四种题型', () => {
+  it('steps 直达：skill 恒为 logic:steps', () => {
+    for (let i = 0; i < 20; i++) {
+      const q = makeLogicQuestion('steps', cycleDiff(i));
+      expect(q.skill).toBe('logic:steps');
+      assertValidQuestion(q, 'logic:steps');
+    }
+  });
+
+  it('mixed 覆盖全部五种题型', () => {
     const seen = new Set<string>();
-    for (let i = 0; i < 120; i++) seen.add(makeLogicQuestion('mixed', 2).skill);
+    for (let i = 0; i < 150; i++) seen.add(makeLogicQuestion('mixed', 2).skill);
     expect(seen.has('logic:pattern')).toBe(true);
     expect(seen.has('logic:match')).toBe(true);
     expect(seen.has('logic:order')).toBe(true);
     expect(seen.has('logic:condition')).toBe(true);
+    expect(seen.has('logic:steps')).toBe(true);
   });
 });
