@@ -2,7 +2,7 @@
  * 成语故事屋 · 看故事学成语 + 猜成语游戏 + AI 讲故事 + AI 造句
  */
 
-import { useState, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'motion/react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
@@ -11,12 +11,12 @@ import { AiPanel } from '@/components/ai/AiPanel';
 import { useStore } from '@/store/useStore';
 import { speak } from '@/lib/speech';
 import { sfxTap, sfxWin, sfxStar } from '@/lib/sfx';
-import { IDIOMS, getIdiomsByLevel, type Idiom } from '@/data/idioms';
+import { IDIOMS, getIdiomsByLevel, IDIOM_CATEGORIES, type Idiom, type IdiomCategory } from '@/data/idioms';
 import { IdiomChain } from './IdiomChain';
 import { shuffle } from '@/lib/utils';
 import { useAiStream, useAiTask } from '@/lib/ai/useAi';
 import { idiomStoryTask, idiomSentenceTask, type IdiomSentenceData } from '@/lib/ai/tasks/idiom';
-import { TONE_STYLE } from '@/lib/tones';
+import { TONE_STYLE, type Tone } from '@/lib/tones';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
 import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHint';
@@ -25,6 +25,78 @@ import { AllusionBrowser } from '@/modules/poems/AllusionBrowser';
 import type { Question } from '@/types';
 
 type Tab = 'library' | 'guess' | 'chain' | 'allusion';
+
+/** 主题 → 糖果色（与 TONES 对齐） */
+const CAT_TONE: Record<IdiomCategory, Tone> = {
+  study: 'purple',
+  wisdom: 'blue',
+  nature: 'green',
+  character: 'pink',
+  fable: 'orange',
+};
+
+function CategoryBadge({ category }: { category: IdiomCategory }) {
+  const t = TONE_STYLE[CAT_TONE[category]];
+  const meta = IDIOM_CATEGORIES.find(c => c.id === category);
+  return (
+    <span
+      className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-extrabold"
+      style={{ background: t.soft, color: t.deep }}
+    >
+      <span>{meta?.emoji}</span>
+      <span>{categoryLabel(category)}</span>
+    </span>
+  );
+}
+
+/** 主题中文标签（避免在数据/组件里散落文案，集中在此） */
+function categoryLabel(category: IdiomCategory): string {
+  const labels: Record<IdiomCategory, string> = {
+    study: '勤学',
+    wisdom: '智慧',
+    nature: '自然',
+    character: '品格',
+    fable: '寓言',
+  };
+  return labels[category];
+}
+
+/**
+ * 成语插图（本地资源 + 加载优化）：
+ *  - 读本地 public/idioms/<id>.png，不依赖任何外部链接
+ *  - 详情大图设置 fetchpriority="high"、列表 keep lazy 并降优先级
+ *  - 加载完成前先显示 emoji 兜底，图就绪后淡入，避免白屏
+ */
+function IdiomArt({ idiom, size }: { idiom: Idiom; size: 'list' | 'detail' }) {
+  const [loaded, setLoaded] = useState(!idiom.image);
+  const src = idiom.image ?? null;
+
+  useEffect(() => {
+    setLoaded(!idiom.image);
+  }, [idiom.image]);
+
+  if (!src) {
+    return <span className={size === 'detail' ? 'text-6xl' : 'text-4xl'}>{idiom.emoji}</span>;
+  }
+
+  return (
+    <>
+      {!loaded && <span className={size === 'detail' ? 'text-6xl' : 'text-4xl'}>{idiom.emoji}</span>}
+      <img
+        src={src}
+        alt={idiom.word}
+        loading={size === 'detail' ? 'eager' : 'lazy'}
+        fetchPriority={size === 'detail' ? 'high' : 'low'}
+        decoding="async"
+        onLoad={() => setLoaded(true)}
+        onError={() => setLoaded(false)}
+        className={`h-full w-full object-cover transition-opacity duration-300 ${
+          loaded ? 'opacity-100' : 'opacity-0'
+        }`}
+      />
+    </>
+  );
+}
 
 export default function IdiomsPage() {
   const { t } = useTranslation();
@@ -38,13 +110,19 @@ export default function IdiomsPage() {
   ], [t]);
   const [tab, setTab] = useState<Tab>('library');
   const [level, setLevel, levelMeta] = useAdaptiveDifficultyState('idiom');
+  const [category, setCategory] = useState<'all' | IdiomCategory>('all');
   const [selected, setSelected] = useState<Idiom | null>(null);
   const learnSkill = useStore(s => s.learnSkill);
 
   // 猜成语：用统一 QuizSessionRunner 驱动（出题循环/进度/连对/结算由 Runner 托管）
   const [guessStarted, setGuessStarted] = useState(false);
 
-  const list = useMemo(() => getIdiomsByLevel(level), [level]);
+  // 库列表按「难度 + 主题」双维筛选；猜成语池仍只按难度（不随主题筛选变化）
+  const levelList = useMemo(() => getIdiomsByLevel(level), [level]);
+  const shown = useMemo(
+    () => (category === 'all' ? levelList : levelList.filter(i => i.category === category)),
+    [levelList, category],
+  );
 
   /**
    * 猜成语的题库。以前这里直接从全量 IDIOMS 随机抽，等于难度选择器
@@ -52,7 +130,7 @@ export default function IdiomsPage() {
    * 现在跟着自适应难度走，池子太小（凑不出 4 个选项）才退回全量。
    */
   const quizPoolRef = useRef<Idiom[]>(IDIOMS);
-  quizPoolRef.current = list.length >= 4 ? list : IDIOMS;
+  quizPoolRef.current = levelList.length >= 4 ? levelList : IDIOMS;
 
   /** 由当前难度池构造一道「看释义猜成语」题目（Question 契约对接 QuizCard） */
   const genIdiomQuestion = (): Question | null => {
@@ -166,6 +244,36 @@ export default function IdiomsPage() {
             </CandyButton>
           ))}
         </div>
+
+        {/* 主题分类 Chip：难度之上再加一层主题筛选 */}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => { sfxTap(); setCategory('all'); }}
+            className={`rounded-full px-3 py-1.5 text-xs font-extrabold transition-all active:scale-95 ${
+              category === 'all' ? 'bg-purple-600 text-white shadow-md' : 'bg-white/70 text-ink-soft'
+            }`}
+          >
+            🌟 {t('idioms.categoryAll')}
+          </button>
+          {IDIOM_CATEGORIES.map(c => {
+            const color = TONE_STYLE[CAT_TONE[c.id]];
+            const active = category === c.id;
+            return (
+              <button
+                key={c.id}
+                onClick={() => { sfxTap(); setCategory(c.id); }}
+                className="rounded-full px-3 py-1.5 text-xs font-extrabold transition-all active:scale-95"
+                style={{
+                  background: active ? color.main : color.soft,
+                  color: active ? color.on : color.deep,
+                  boxShadow: active ? `0 3px 0 0 ${color.deep}55` : 'none',
+                }}
+              >
+                <span>{c.emoji}</span> {categoryLabel(c.id)}
+              </button>
+            );
+          })}
+        </div>
         <AdaptiveDifficultyHint
           meta={levelMeta}
           labels={{ 1: t('idioms.level1'), 2: t('idioms.level2'), 3: t('idioms.level3') }}
@@ -173,21 +281,33 @@ export default function IdiomsPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {list.map(i => (
+        {shown.map(i => (
           <motion.div key={i.id} initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
             <button
               onClick={() => { sfxTap(); setSelected(i); }}
-              className="flex w-full items-center gap-3 rounded-2xl bg-white/70 p-3 text-left shadow-candy-sm transition-all active:translate-y-[2px]"
+              className="group flex w-full items-center gap-3 rounded-2xl bg-white/70 p-3 text-left shadow-candy-sm transition-all active:translate-y-[2px]"
             >
-              <span className="text-3xl">{i.emoji}</span>
-              <div className="min-w-0 flex-1">
-                <div className="text-lg font-black text-ink">{i.word}</div>
-                <div className="truncate text-xs font-bold text-ink-soft">{i.meaning}</div>
+              {/* 插图（精选）或主题色 emoji 牌（其余） */}
+              <div
+                className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-xl border-2 border-white shadow-sm"
+                style={{ background: TONE_STYLE[CAT_TONE[i.category]].soft }}
+              >
+                <IdiomArt idiom={i} size="list" />
               </div>
-              <span className="text-ink-soft">›</span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-lg font-black text-ink">{i.word}</span>
+                  <CategoryBadge category={i.category} />
+                </div>
+                <div className="mt-0.5 line-clamp-2 text-xs font-bold text-ink-soft">{i.meaning}</div>
+              </div>
+              <span className="shrink-0 text-ink-soft">›</span>
             </button>
           </motion.div>
         ))}
+        {shown.length === 0 && (
+          <p className="col-span-full py-8 text-center text-sm font-bold text-ink-soft">{t('idioms.noInCategory')}</p>
+        )}
       </div>
     </div>
   );
@@ -238,9 +358,21 @@ function IdiomDetail({ idiom, onBack, onLearn }: { idiom: Idiom; onBack: () => v
 
       <Panel>
         <div className="text-center">
-          <span className="text-6xl">{idiom.emoji}</span>
-          <h2 className="mt-2 text-3xl font-black text-ink">{idiom.word}</h2>
-          <p className="text-sm font-bold text-ink-soft">{idiom.pinyin}</p>
+          {/* 精选成语：大图主视觉；其余用主题色 emoji 大牌 */}
+          <div
+            className={`overflow-hidden rounded-[1.75rem] border-4 border-white shadow-lg ${
+              idiom.imagePrompt ? 'h-44 sm:h-56' : 'grid place-items-center py-8'
+            }`}
+          >
+            <IdiomArt idiom={idiom} size="detail" />
+          </div>
+          <div className="mt-3 flex flex-col items-center gap-1.5">
+            <div className="flex items-center gap-2.5">
+              <h2 className="text-4xl font-black tracking-wide text-ink">{idiom.word}</h2>
+              <CategoryBadge category={idiom.category} />
+            </div>
+            <p className="text-sm font-bold text-ink-soft">{idiom.pinyin}</p>
+          </div>
         </div>
         <div className="mt-4 space-y-3">
           <div>
@@ -256,6 +388,21 @@ function IdiomDetail({ idiom, onBack, onLearn }: { idiom: Idiom; onBack: () => v
             <p className="mt-1 text-sm text-ink">{idiom.example}</p>
           </div>
         </div>
+
+        {/* 精选成语：讲故事 → 懂道理 的教育启示高亮 */}
+        {idiom.lesson && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-4 rounded-2xl p-3 text-center"
+            style={{ background: TONE_STYLE.yellow.soft }}
+          >
+            <p className="text-sm font-extrabold" style={{ color: TONE_STYLE.yellow.deep }}>
+              🌟 {t('idioms.lessonLabel')}
+            </p>
+            <p className="mt-1 text-lg font-extrabold leading-relaxed" style={{ color: '#3B3355' }}>{idiom.lesson}</p>
+          </motion.div>
+        )}
 
         {/* 基础操作按钮 */}
         <div className="mt-4 flex flex-wrap gap-2">

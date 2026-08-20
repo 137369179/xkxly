@@ -2591,7 +2591,10 @@
     "favSuccess": "⭐ Saved! This is your favorite",
     "correct": "✅ Correct!",
     "answerIs": "❌ The answer is: {answer}",
-    "progress": "✅ {ok} · ❌ {ng}"
+    "progress": "✅ {ok} · ❌ {ng}",
+    "categoryAll": "All",
+    "noInCategory": "No idioms here yet — try another theme!",
+    "lessonLabel": "Little Lesson"
   },
   "catCompanion": {
     "welcome": "Meow~ Pet the pink kitty’s head!",

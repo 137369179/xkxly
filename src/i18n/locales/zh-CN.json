@@ -2591,7 +2591,10 @@
     "favSuccess": "⭐ 收藏成功！这是宝贝觉得最有趣的一句",
     "correct": "✅ 答对了！",
     "answerIs": "❌ 答案是：{answer}",
-    "progress": "✅ {ok} · ❌ {ng}"
+    "progress": "✅ {ok} · ❌ {ng}",
+    "categoryAll": "全部",
+    "noInCategory": "这个分类还没有成语，换个主题看看哦",
+    "lessonLabel": "小道理"
   },
   "catCompanion": {
     "welcome": "喵呜~ 摸摸粉色小猫的头头吧！",
