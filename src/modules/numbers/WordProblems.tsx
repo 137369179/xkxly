@@ -12,6 +12,7 @@ import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { randomPraise, randomEncourage } from '@/lib/speech';
 import { getProblemsByLevel } from '@/data/wordProblems';
 import { useTranslation } from '@/i18n/useTranslation';
+import { StreakBar } from '@/components/study/StreakBar';
 
 
 type Level = 1 | 2 | 3;
@@ -29,6 +30,8 @@ export function WordProblems() {
   const [picked, setPicked] = useState<number | null>(null);
   const [wrong, setWrong] = useState<Set<string>>(new Set());
   const [done, setDone] = useState(false);
+  /** 连续答对里程碑：答对 +1、答错归零，形成闯关目标感 */
+  const [streak, setStreak] = useState(0);
   const practice = useStore(s => s.practice);
 
   const problems = useMemo(() => getProblemsByLevel(level), [level]);
@@ -43,11 +46,13 @@ export function WordProblems() {
       sfxCorrect();
       celebrateSmall();
       randomPraise();
+      setStreak(s => s + 1);
       practice('math:word', true, 1);
     } else {
       sfxWrong();
       setWrong(prev => new Set(prev).add(p.id));
       randomEncourage();
+      setStreak(0);
       practice('math:word', false, 0);
     }
   };
@@ -69,6 +74,7 @@ export function WordProblems() {
     setPicked(null);
     setDone(false);
     setWrong(new Set());
+    setStreak(0);
   };
 
   const changeLevel = (l: Level) => {
@@ -78,6 +84,7 @@ export function WordProblems() {
     setPicked(null);
     setDone(false);
     setWrong(new Set());
+    setStreak(0);
   };
 
   if (done) {
@@ -123,6 +130,9 @@ export function WordProblems() {
       </div>
 
       <ProgressBar value={idx + 1} max={problems.length} tone={info.tone} />
+
+      {/* 闯关里程碑：连续答对 3 题点亮，形成目标感 */}
+      <StreakBar streak={streak} target={3} tone={info.tone} />
 
       <Panel key={p.id} className="space-y-4">
         <div className="flex items-start gap-3">
