@@ -18,7 +18,7 @@ interface Props {
 export function NumberRecommend({ emoji, label, weakness, onGo }: Props) {
   const { t } = useTranslation();
   return (
-    <div className="flex items-center justify-between gap-3 rounded-2xl border-2 border-candy-yellow-soft bg-gradient-to-r from-amber-50 to-yellow-50/70 px-4 py-3">
+    <div data-testid="number-recommend" className="flex items-center justify-between gap-3 rounded-2xl border-2 border-candy-yellow-soft bg-gradient-to-r from-amber-50 to-yellow-50/70 px-4 py-3">
       <div className="flex items-center gap-3">
         <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-2xl shadow-sm">
           {emoji}

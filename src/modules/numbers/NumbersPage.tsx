@@ -184,6 +184,9 @@ export default function NumbersPage() {
           return (
             <button
               key={cat.id}
+              type="button"
+              data-testid={`cat-${cat.id}`}
+              aria-pressed={isAct}
               onClick={() => handleSelectCategory(cat.id)}
               className={`group relative flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all text-center ${
                 isAct
@@ -206,6 +209,9 @@ export default function NumbersPage() {
           return (
             <button
               key={sub.id}
+              type="button"
+              data-testid={`sub-${sub.id}`}
+              aria-pressed={isSubAct}
               onClick={() => handleSelectSubTab(sub.id)}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-black transition-all ${
                 isSubAct
