@@ -181,7 +181,7 @@ export function FractionLearn() {
               }).catch(() => {});
             }}
             className={cn(
-              'rounded-xl px-3 py-1.5 text-xs font-black border transition-all',
+              'rounded-xl px-3 py-2.5 text-base font-black border transition-all',
               current === i && mode === 'learn'
                 ? 'bg-candy-orange-deep text-white border-orange-600 shadow-sm scale-105'
                 : 'bg-white text-ink-soft border-orange-200 hover:bg-orange-50'

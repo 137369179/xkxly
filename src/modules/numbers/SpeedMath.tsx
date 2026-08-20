@@ -247,7 +247,7 @@ export function SpeedMath() {
             </motion.div>
           )}
         </div>
-        <button onClick={() => { if (timer.current) clearInterval(timer.current); setActive(false); setDone(true); }} className="text-xs font-bold text-ink-soft">
+        <button onClick={() => { if (timer.current) clearInterval(timer.current); setActive(false); setDone(true); }} className="text-base font-bold text-ink-soft">
           {tr('common.end')}
         </button>
       </div>

@@ -123,7 +123,7 @@ export function SkipCounting() {
               setMode('learn');
             }}
             className={cn(
-              'rounded-2xl px-4 py-2 text-xs font-black transition-all',
+              'rounded-2xl px-4 py-2.5 text-base font-black transition-all',
               step === s.step
                 ? 'bg-candy-green-deep text-white shadow-sm scale-105'
                 : 'bg-white text-ink-soft border border-green-100 hover:bg-green-50'
