@@ -20,12 +20,16 @@ interface Props {
   onExit: () => void;
 }
 
+/** 每日完成一次复习的星星奖励 */
+const REVIEW_STARS = 2;
+
 type Phase = 'recall' | 'reveal' | 'judge' | 'done';
 
 export function IdiomReviewCenter({ onExit }: Props) {
   const { t } = useTranslation();
   const practice = useStore((s) => s.practice);
   const learnSkill = useStore((s) => s.learnSkill);
+  const completeDailyReview = useStore((s) => s.completeDailyReview);
 
   const dueSkills = useDueIdiomSkills();
   // 由 skill -> 成语；skills 全为 'idiom:' 前缀，故能一一对应
@@ -88,6 +92,8 @@ export function IdiomReviewCenter({ onExit }: Props) {
     idrLog('progress.next', { from: index, total: queue.length });
     if (index + 1 >= queue.length) {
       idrLog('progress.done', { completed: queue.length });
+      completeDailyReview(REVIEW_STARS); // 每日首次完成发放星星（store 内防重复）
+      idrLog('reward.award', { stars: REVIEW_STARS });
       setPhase('done');
     } else {
       setIndex((i) => i + 1);
@@ -120,6 +126,11 @@ export function IdiomReviewCenter({ onExit }: Props) {
         <div className="text-5xl">🎉</div>
         <p className="mt-2 text-lg font-black text-ink">{t('idioms.reviewDone')}</p>
         <p className="mt-1 text-sm font-bold text-ink-soft">{queue.length ? t('idioms.reviewDoneCount', { count: queue.length }) : t('idioms.reviewEmpty')}</p>
+        {queue.length > 0 && (
+          <p className="mt-2 inline-block rounded-full bg-yellow-100 px-3 py-1 text-sm font-extrabold text-yellow-700">
+            ⭐ +{REVIEW_STARS} {t('idioms.reviewDoneReward')}
+          </p>
+        )}
         <div className="mt-4">
           <CandyButton tone="purple" size="lg" fullWidth onClick={onExit}>
             {t('idioms.reviewBack')}

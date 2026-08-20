@@ -2607,7 +2607,8 @@
     "reviewSelfTip": "Were you right?",
     "reviewEntry": "Review Center",
     "reviewEntryDue": "{count} idioms to review",
-    "reviewEntryNone": "All reviews done today"
+    "reviewEntryNone": "All reviews done today",
+    "reviewDoneReward": "Daily review reward"
   },
   "catCompanion": {
     "welcome": "Meow~ Pet the pink kitty’s head!",

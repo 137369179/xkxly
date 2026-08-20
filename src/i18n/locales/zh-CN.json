@@ -2607,7 +2607,8 @@
     "reviewSelfTip": "你回忆对了吗？",
     "reviewEntry": "复习中心",
     "reviewEntryDue": "有 {count} 个成语待复习",
-    "reviewEntryNone": "今日复习已全部完成"
+    "reviewEntryNone": "今日复习已全部完成",
+    "reviewDoneReward": "今日复习奖励"
   },
   "catCompanion": {
     "welcome": "喵呜~ 摸摸粉色小猫的头头吧！",

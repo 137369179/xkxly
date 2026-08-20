@@ -30,12 +30,26 @@ export const createLearningSlice: SliceCreator<
     | 'practiceWrong'
     | 'updateWrongHistory'
     | 'clearWrongBook'
+    | 'completeDailyReview'
   >
 > = (set, get) => ({
   practice: (skill, correct, star = 1, difficulty) =>
     set((s) => _applyProgress(s, (p) => _applyPractice(p, skill, correct, star, difficulty))),
 
   learnSkill: (skill) => set((s) => _applyProgress(s, (p) => _applyLearn(p, skill))),
+
+  // 每日成语复习完成奖励（每日一次；重复完成不再加星，防刷）
+  completeDailyReview: (stars) =>
+    set((s) => {
+      const today = todayStr();
+      if (s.progress.reviewDate === today) return s;
+      return _applyProgress(s, (p) => ({
+        ...p,
+        reviewDate: today,
+        stars: p.stars + stars,
+        dailyLog: _bumpLog(p, { stars }),
+      }));
+    }),
 
   tickTime: (sec) =>
     set((s) => {

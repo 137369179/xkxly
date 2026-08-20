@@ -108,6 +108,8 @@ export interface StoreState {
   setLessonStep: (n: number) => void;
   /** 标记今日课程已完成（幂等：当天重复调用不会重复发放星星） */
   finishLesson: (bonus: number) => void;
+  /** 每日成语复习完成奖励（幂等：当天仅首次发放星星） */
+  completeDailyReview: (stars: number) => void;
   /** 重置今日课程完成状态，允许重新学习 */
   resetTodayLesson: () => void;
   /** 记录一次描红完成 */

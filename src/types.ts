@@ -253,6 +253,8 @@ export interface Progress {
   stickers: string[];
   lessonDate: string;
   lessonStep: number;
+  /** 每日成语复习奖励发放日期（当天完成一次 SRS 复习后置为今日） */
+  reviewDate?: string;
   pkCount: number;
   creativeCount: number;
   /** 速算挑战累计答对数（专门用于 speed-20 徽章） */
