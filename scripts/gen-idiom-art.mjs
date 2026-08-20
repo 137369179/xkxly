@@ -22,7 +22,6 @@ const IMAGE_SIZE = 'square_hd';
 /** 压缩后最长边（px） */
 const MAX_EDGE = 640;
 
-/** 精选成语插画描述（与 data/idioms.ts 的 imagePrompt 一一对应） */
 const ARTS = [
   { id: 'i2', prompt: '儿童水彩插画，软萌果冻风，夜色下农夫正在修补小羊圈的栅栏，两三只圆滚滚的小羊羔在一旁好奇张望，暖黄马灯照明，柔和糖果色背景。' },
   { id: 'i3', prompt: '儿童水彩插画，软萌果冻风，圆脸农夫靠着一棵大树干打瞌睡，旁边长满野草的空田里有一只呆萌小兔子，柔和的绿与米色糖果色背景。' },
@@ -36,6 +35,11 @@ const ARTS = [
   { id: 'i20', prompt: '儿童水彩插画，软萌果冻风，粉粉的桃花瓣随风飘落，花开满树，草地上蝴蝶飞舞、溪水泛光，远处蓝天白云，粉与薄荷绿的糖果色背景。' },
   { id: 'i36', prompt: '儿童水彩插画，软萌果冻风，一位圆脸小画家举着毛笔给墙上的胖青龙点眼睛，青龙眼睛一亮、腾空飞起，周围祥云朵朵，蓝与金黄的糖果色背景。' },
   { id: 'i42', prompt: '儿童水彩插画，软萌果冻风，大雪纷飞的暖橙色屋子里，圆脸大叔把一捆炭火递给瑟瑟发抖的一家人，炉火映红他们的笑脸，冷蓝与暖橙对比的糖果色背景。' },
+  { id: 'i61', prompt: '儿童水彩插画，软萌果冻风，一排圆脸乐手整齐排排坐吹着圆圆的古代排箫，中间一个手忙脚乱学着吹的冒牌乐手，暖橘与米色糖果色背景。' },
+  { id: 'i62', prompt: '儿童水彩插画，软萌果冻风，圆脸少年深夜在柴草铺上读竹简，身旁放着一小碟深色苦胆，窗外星光点点，深蓝与暖黄对比的糖果色背景。' },
+  { id: 'i63', prompt: '儿童水彩插画，软萌果冻风，一只可爱的小精卫鸟衔着一小段树枝，拍着翅膀飞向波光粼粼的蓝色大海，远处升起暖阳，蓝与橙的糖果色背景。' },
+  { id: 'i64', prompt: '儿童水彩插画，软萌果冻风，一位白胡子圆脸老爷爷站在栅栏旁，温柔地摸着归来的棕色骏马，远处是夕阳下的边塞草原，暖色与薄荷绿糖果色背景。' },
+  { id: 'i65', prompt: '儿童水彩插画，软萌果冻风，一队圆脸小士兵排着队行军，领头的大将军挥手指向前方的梅林，光秃的土坡上冒出几棵挂着红果的果树，暖黄色阳光糖果色背景。' },
 ];
 
 function compress(id) {
@@ -53,8 +57,12 @@ function compress(id) {
   }
 }
 
+// 可选：仅生成指定 id（如 `node scripts/gen-idiom-art.mjs i61 i62`）；无参数则全部
+const only = process.argv.slice(2);
+const targets = only.length ? ARTS.filter(a => only.includes(a.id)) : ARTS;
+
 let ok = 0;
-for (const { id, prompt } of ARTS) {
+for (const { id, prompt } of targets) {
   const params = new URLSearchParams({ prompt, image_size: IMAGE_SIZE });
   const url = `${API}?${params.toString()}`;
   const out = resolve(OUT_DIR, `${id}.jpg`);
@@ -78,5 +86,5 @@ for (const { id, prompt } of ARTS) {
     console.log(`FAIL ${e?.message ?? e}`);
   }
 }
-console.log(`\n完成：成功 ${ok}/${ARTS.length}`);
+console.log(`\n完成：成功 ${ok}/${targets.length}`);
 if (ok === 0) console.log('提示：可能网络未恢复，稍后重跑 `node scripts/gen-idiom-art.mjs`。');
