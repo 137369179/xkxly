@@ -2777,6 +2777,8 @@
     "readAgain": "🔊 再读一遍",
     "gotIt": "知道啦",
     "funFactTitle": "数字小知识",
+    "storyOfflineTitle": "离线小童谣",
+    "storyOffline": "小智连不上，先听这首离线小童谣～",
     "recommendTitle": "✨ 猜你接下来想练",
     "recommendWeak": "薄弱点优先 · {label}",
     "recommendGo": "去练习 →",

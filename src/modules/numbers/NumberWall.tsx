@@ -177,14 +177,45 @@ export function NumberWall() {
   );
 }
 
-/* v6: AI 数字儿歌 */
+/* v6: AI 数字儿歌（含弱网降级：骨架屏 + 离线静态兜底） */
 import { numberStoryTask } from '@/lib/ai/tasks';
 import { useAiStream } from '@/lib/ai/useAi';
 import { AiPanel } from '@/components/ai';
+import { numberRhyme } from '@/data/numberRhymes';
 
 function NumberStory({ n }: { n: number }) {
+  const { t } = useTranslation();
   const task = useMemo(() => numberStoryTask(n), [n]);
   const ai = useAiStream(task);
+
+  // 弱网/AI 不可用：useAiStream 会把 fallback 置真并切到本地文本 → 静态兜底童谣（即时、离线）
+  if (ai.fallback) {
+    return (
+      <div className="mt-4 rounded-2xl bg-white/80 p-3 text-left">
+        <p className="text-xs font-extrabold text-amber-600">{t('numbers.storyOfflineTitle')}</p>
+        <p className="mt-1 text-sm font-bold leading-relaxed text-ink">🎵 {numberRhyme(n)}</p>
+        <p className="mt-1 text-[11px] text-ink-soft">{t('numbers.storyOffline')}</p>
+      </div>
+    );
+  }
+
+  // AI 思考中：骨架屏占位，稳定布局、弱网下不闪跳
+  if (ai.status === 'thinking') {
+    return (
+      <div className="mt-4 rounded-2xl border-2 border-amber-100 bg-amber-50/60 p-3">
+        <div className="flex items-center gap-2">
+          <span className="h-6 w-6 animate-pulse rounded-full bg-amber-200/60" />
+          <span className="h-3 w-28 animate-pulse rounded bg-amber-200/60" />
+        </div>
+        <div className="mt-3 space-y-2">
+          <span className="block h-3 w-full animate-pulse rounded bg-amber-200/60" />
+          <span className="block h-3 w-11/12 animate-pulse rounded bg-amber-200/60" />
+          <span className="block h-3 w-8/12 animate-pulse rounded bg-amber-200/60" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-4 text-left">
       <AiPanel state={ai} tone="yellow" compact />

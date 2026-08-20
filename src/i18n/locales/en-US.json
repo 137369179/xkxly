@@ -2777,6 +2777,8 @@
     "readAgain": "🔊 Read again",
     "gotIt": "Got it",
     "funFactTitle": "Number fun fact",
+    "storyOfflineTitle": "Offline nursery rhyme",
+    "storyOffline": "XiaoZhi can't connect — enjoy this offline rhyme!",
     "recommendTitle": "✨ Try this next",
     "recommendWeak": "Weak spot first · {label}",
     "recommendGo": "Go →",
