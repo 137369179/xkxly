@@ -6,7 +6,7 @@ import type { Question } from '@/types';
 import { makeNumberOptions, randInt, sample, sampleMany, shuffle } from '@/lib/utils';
 import { ALL_POOLS, type Difficulty, nextId, opt } from './_shared';
 
-export type LogicKind = 'pattern' | 'match' | 'order';
+export type LogicKind = 'pattern' | 'match' | 'order' | 'condition';
 
 /** 5-1 找规律 */
 export function makePatternQuestion(difficulty: Difficulty = 1): Question {
@@ -227,8 +227,287 @@ export function makeOrderQuestion(difficulty: Difficulty = 1): Question {
 }
 
 export function makeLogicQuestion(kind: LogicKind | 'mixed', difficulty: Difficulty = 1): Question {
-  const k = kind === 'mixed' ? sample(['pattern', 'match', 'order'] as const) : kind;
+  const k = kind === 'mixed' ? sample(['pattern', 'match', 'order', 'condition'] as const) : kind;
   if (k === 'pattern') return makePatternQuestion(difficulty);
   if (k === 'match') return makeMatchQuestion(difficulty);
+  if (k === 'condition') return makeConditionQuestion(difficulty);
   return makeOrderQuestion(difficulty);
+}
+
+/* ============================================================
+   5-4 条件判断（🚦 新增题型，2026-08-21）
+   阶梯式难度（对齐分龄认知发展）：
+     L1 生活分类 —— 会飞吗 / 是水果吗 / 是红色吗（3-4 岁）
+     L2 真假判断 + 场景规则 —— 哪句对 / 红灯该怎么做（5-6 岁）
+     L3 多条件推理 —— 既是…又是… / 大小传递 / 数量推理（7 岁+）
+   ============================================================ */
+
+interface ClassifyItem {
+  prompt: string;
+  speak: string;
+  answer: string;
+  wrongs: [string, string, string];
+  hint: string;
+  why: string;
+}
+
+const CLASSIFY_ITEMS: ClassifyItem[] = [
+  {
+    prompt: '下面哪个会飞呀？',
+    speak: '想一想，下面哪一个会飞呀？',
+    answer: '🐦',
+    wrongs: ['🐟', '🚗', '🐶'],
+    hint: '小鸟有翅膀，可以飞到天上',
+    why: '🐦 小鸟有翅膀会飞；🐟 小鱼在水里游，🚗 汽车在地上跑，🐶 小狗也不会飞，所以选 🐦。',
+  },
+  {
+    prompt: '下面哪个是水果？',
+    speak: '找一找，下面哪一个是我们吃的水果？',
+    answer: '🍎',
+    wrongs: ['🥕', '🍚', '🥚'],
+    hint: '红红的、甜甜的，早上吃它最健康',
+    why: '🍎 苹果是水果；🥕 胡萝卜是蔬菜，🍚 米饭是主食，🥚 鸡蛋是蛋类，所以选 🍎。',
+  },
+  {
+    prompt: '下面哪个是动物？',
+    speak: '看一看，下面哪一个是有生命的动物？',
+    answer: '🐰',
+    wrongs: ['🌸', '⚽', '🚗'],
+    hint: '它会蹦蹦跳跳，爱吃胡萝卜',
+    why: '🐰 小兔子是动物；🌸 花朵是植物，⚽ 皮球和 🚗 汽车都是物品，所以选 🐰。',
+  },
+  {
+    prompt: '下面哪个是红色的？',
+    speak: '找一找，下面哪一个颜色是红色的？',
+    answer: '🔴',
+    wrongs: ['🟢', '🔵', '🟡'],
+    hint: '像苹果、像小红旗的颜色',
+    why: '🔴 是红色，像苹果和小红旗；🟢 是绿色，🔵 是蓝色，🟡 是黄色，所以选 🔴。',
+  },
+  {
+    prompt: '下面哪个可以吃？',
+    speak: '哪个是可以放进嘴里吃掉的呀？',
+    answer: '🍉',
+    wrongs: ['📚', '✏️', '🧦'],
+    hint: '夏天吃它最解渴，是水果哦',
+    why: '🍉 西瓜是水果可以吃；📚 书本、✏️ 铅笔、🧦 袜子都不能吃，所以选 🍉。',
+  },
+  {
+    prompt: '下面哪个会游泳？',
+    speak: '想一想，下面哪一个可以在水里游来游去？',
+    answer: '🐟',
+    wrongs: ['🐱', '🚗', '🎈'],
+    hint: '它在水里生活，摇摇尾巴游呀游',
+    why: '🐟 小鱼生活在水里会游泳；🐱 小猫不会游泳，🚗 汽车和 🎈 气球也不会，所以选 🐟。',
+  },
+];
+
+/** L1 生活分类：从生活经验出发的属性归类（答案唯一、图形直观、低门槛） */
+function makeClassifyQuestion(): Question {
+  const item = sample(CLASSIFY_ITEMS);
+  const all = shuffle([item.answer, ...item.wrongs]);
+  const options = all.map((s) => opt({ emoji: s }));
+  const answerId = options[all.indexOf(item.answer)]?.id ?? '';
+  return {
+    id: nextId('cond'),
+    kind: 'logic',
+    prompt: item.prompt,
+    displayShapes: [item.answer, '❓'],
+    speak: item.speak,
+    options,
+    answerId,
+    hint: item.hint,
+    skill: 'logic:condition',
+    why: item.why,
+  };
+}
+
+const TRUE_STATEMENTS = [
+  '太阳从东边升起',
+  '一天有 24 个小时',
+  '3 比 2 大',
+  '小猫是动物',
+  '夏天很热',
+  '人有两只手',
+];
+const FALSE_STATEMENTS = [
+  '鱼会飞',
+  '冬天很热',
+  '5 比 10 大',
+  '汽车会游泳',
+  '太阳从西边升起',
+  '人有 5 只手',
+];
+
+/** L2 真假判断：辨别说法对错（练条件判断中的「真/假」分支） */
+function makeTrueFalseQuestion(): Question {
+  const askTrue = Math.random() < 0.5;
+  const correct = sample(askTrue ? TRUE_STATEMENTS : FALSE_STATEMENTS);
+  const wrongPool = shuffle(askTrue ? FALSE_STATEMENTS : TRUE_STATEMENTS).slice(0, 3);
+  const prompt = askTrue ? '下面哪句话是对的？' : '下面哪句话是错的？';
+  const hint = askTrue ? '想一想这句话符不符合我们平时的生活常识' : '找一找哪句话和平时看到的完全不一样';
+  const all = shuffle([correct, ...wrongPool]);
+  const options = all.map((s) => opt({ label: s }));
+  const answerId = options[all.indexOf(correct)]?.id ?? '';
+  const why = askTrue
+    ? `因为「${correct}」符合生活常识，是真的；其它三句都和常识相反，所以选它。`
+    : `因为「${correct}」和常识完全相反，是错的；其它三句都是对的，所以选它。`;
+  return {
+    id: nextId('cond'),
+    kind: 'logic',
+    prompt,
+    displayShapes: [],
+    speak: askTrue ? '哪一句话是对的呀？仔细想一想。' : '哪一句话是错的呀？要找出不对的那一句。',
+    options,
+    answerId,
+    hint,
+    skill: 'logic:condition',
+    why,
+  };
+}
+
+interface RuleItem {
+  prompt: string;
+  speak: string;
+  answer: string;
+  wrongs: [string, string, string];
+  hint: string;
+  why: string;
+}
+
+const RULE_ITEMS: RuleItem[] = [
+  {
+    prompt: '红灯亮了，应该怎么做？',
+    speak: '过马路看到红灯亮了，应该怎么做呀？',
+    answer: '🛑 停下来',
+    wrongs: ['🚶 走过去', '🏃 跑过去', '🚲 骑过去'],
+    hint: '红灯停，绿灯行，黄灯等一等',
+    why: '交通规则说「红灯停、绿灯行」。红灯亮了要 🛑 停下来等一等，不能过马路，所以选「停下来」。',
+  },
+  {
+    prompt: '下雨天出门，应该带什么？',
+    speak: '外面下雨了，出门应该带什么呀？',
+    answer: '🌂 带雨伞',
+    wrongs: ['🕶️ 带墨镜', '⚽ 带皮球', '🍦 带冰淇淋'],
+    hint: '下雨的时候，要用它挡雨',
+    why: '下雨天要带 🌂 雨伞挡雨；墨镜是太阳大时戴，皮球是玩的时候带，冰淇淋下雨吃会化，所以选「带雨伞」。',
+  },
+  {
+    prompt: '到了睡觉时间，应该怎么做？',
+    speak: '晚上到睡觉的时间了，应该怎么做呀？',
+    answer: '🛏️ 上床睡觉',
+    wrongs: ['🎮 继续玩游戏', '🍬 吃很多糖', '📺 熬夜看电视'],
+    hint: '按时睡觉才能长高高、身体棒',
+    why: '到了睡觉时间要 🛏️ 上床睡觉，身体才能休息好；继续玩游戏、吃糖、看电视都会影响休息，所以选「上床睡觉」。',
+  },
+  {
+    prompt: '天气很冷，出门应该穿什么？',
+    speak: '冬天外面很冷，出门应该穿什么呀？',
+    answer: '🧥 穿外套',
+    wrongs: ['🩱 穿泳衣', '🩴 穿拖鞋', '🍉 抱个大西瓜'],
+    hint: '穿得暖暖的，才不怕冷风',
+    why: '天冷要穿 🧥 外套保暖；泳衣是游泳时穿，拖鞋在家穿，西瓜是吃的不是穿的，所以选「穿外套」。',
+  },
+];
+
+/** L2 真假判断 + 场景规则：生活规则「如果…那么…」的行为分支与真假辨别（两者轮换保持新鲜感） */
+function makeRuleQuestion(): Question {
+  // 50% 真假判断（辨别说法对错），50% 场景规则（执行生活规则）
+  if (Math.random() < 0.5) return makeTrueFalseQuestion();
+  const item = sample(RULE_ITEMS);
+  const all = shuffle([item.answer, ...item.wrongs]);
+  const options = all.map((s) => opt({ label: s }));
+  const answerId = options[all.indexOf(item.answer)]?.id ?? '';
+  return {
+    id: nextId('cond'),
+    kind: 'logic',
+    prompt: item.prompt,
+    displayShapes: [],
+    speak: item.speak,
+    options,
+    answerId,
+    hint: item.hint,
+    skill: 'logic:condition',
+    why: item.why,
+  };
+}
+
+/** L3 多条件推理：属性交集 / 大小传递 / 数量推理（同时满足多个条件） */
+function makeReasonQuestion(): Question {
+  const mode = sample(['intersect', 'transfer', 'count'] as const);
+  if (mode === 'intersect') {
+    const items = [
+      { prompt: '下面哪个既是动物，又会游泳？', speak: '哪一个既是动物，又会游泳呀？', answer: '🐟', wrongs: ['🌸', '🚗', '🐱'], hint: '先找动物，再看它会不会游泳', why: '条件是「既是动物又会游泳」：🐟 小鱼是动物也会游泳；🌸 花不是动物，🚗 车不会游泳，🐱 小猫虽然是动物但不会游泳，所以选 🐟。' },
+      { prompt: '下面哪个既是水果，又是红色的？', speak: '哪一个既是水果，颜色又是红色的呀？', answer: '🍎', wrongs: ['🍌', '🍇', '🍊'], hint: '先找水果，再看颜色是不是红红的', why: '条件是「既是水果又是红色」：🍎 苹果是水果而且是红色；🍌 香蕉是黄色，🍇 葡萄是紫色，🍊 橘子是橙色，所以选 🍎。' },
+      { prompt: '下面哪个既是动物，又有四条腿？', speak: '哪一个既是动物，又有四条腿呀？', answer: '🐶', wrongs: ['🐟', '🐦', '🚗'], hint: '先找动物，再数一数有几条腿', why: '条件是「既是动物又有四条腿」：🐶 小狗是动物而且有四条腿；🐟 小鱼没有腿，🐦 小鸟有两条腿，🚗 汽车不是动物，所以选 🐶。' },
+    ];
+    const item = sample(items);
+    const all = shuffle([item.answer, ...item.wrongs]);
+    const options = all.map((s) => opt({ emoji: s }));
+    const answerId = options[all.indexOf(item.answer)]?.id ?? '';
+    return {
+      id: nextId('cond'),
+      kind: 'logic',
+      prompt: item.prompt,
+      displayShapes: [item.answer, '❓'],
+      speak: item.speak,
+      options,
+      answerId,
+      hint: item.hint,
+      skill: 'logic:condition',
+      why: item.why,
+    };
+  }
+  if (mode === 'transfer') {
+    const items = [
+      { prompt: '大象比小狗大，小狗比小猫大，谁最大？', answer: '🐘 大象', wrongs: ['🐶 小狗', '🐱 小猫', '🐰 小兔子'], hint: '排排队：最大 > 中间 > 最小', why: '大象 > 小狗 > 小猫，所以 🐘 大象最大，这就是「一个比一个大」的推理。' },
+      { prompt: '小猫比小鱼大，小鱼比蚂蚁大，谁最小？', answer: '🐜 蚂蚁', wrongs: ['🐱 小猫', '🐟 小鱼', '🐦 小鸟'], hint: '反过来想：最小的在最下面', why: '小猫 > 小鱼 > 蚂蚁，所以 🐜 蚂蚁最小，最小的排最后。' },
+      { prompt: '皮球比积木大，积木比弹珠大，谁排在中间？', answer: '🧱 积木', wrongs: ['⚽ 皮球', '🔴 弹珠', '🎈 气球'], hint: '最大的和最小的都不在中间哦', why: '皮球 > 积木 > 弹珠，所以 🧱 积木不大不小，正好排在中间。' },
+    ];
+    const item = sample(items);
+    const all = shuffle([item.answer, ...item.wrongs]);
+    const options = all.map((s) => opt({ label: s }));
+    const answerId = options[all.indexOf(item.answer)]?.id ?? '';
+    return {
+      id: nextId('cond'),
+      kind: 'logic',
+      prompt: item.prompt,
+      displayShapes: [],
+      speak: '比一比大小，想一想谁最大、谁最小。',
+      options,
+      answerId,
+      hint: item.hint,
+      skill: 'logic:condition',
+      why: item.why,
+    };
+  }
+  // mode === 'count'：数量推理（每组 × 份数）
+  const items = [
+    { prompt: '每个小朋友吃 2 块饼干，3 个小朋友一共吃几块？', answer: '6', wrongs: ['5', '8', '9'], hint: '2、4、6，数一数三个小朋友的饼干', why: '3 个小朋友，每个 2 块：2 + 2 + 2 = 6，一共 6 块。' },
+    { prompt: '每个小朋友拿 1 个气球，4 个小朋友一共拿几个？', answer: '4', wrongs: ['3', '5', '6'], hint: '1、2、3、4，数一数小朋友手里的气球', why: '4 个小朋友，每个 1 个：1 + 1 + 1 + 1 = 4，一共 4 个。' },
+    { prompt: '每辆自行车有 2 个轮子，2 辆自行车一共有几个轮子？', answer: '4', wrongs: ['2', '3', '6'], hint: '一辆 2 个，两辆就是 2 + 2', why: '2 辆自行车，每辆 2 个轮子：2 + 2 = 4，一共 4 个轮子。' },
+  ];
+  const item = sample(items);
+  const values = shuffle([item.answer, ...item.wrongs]);
+  const options = values.map((v) => opt({ label: v }));
+  const answerId = options[values.indexOf(item.answer)]?.id ?? '';
+  return {
+    id: nextId('cond'),
+    kind: 'logic',
+    prompt: item.prompt,
+    displayShapes: [],
+    speak: '数一数、算一算，一共是多少呀？',
+    options,
+    answerId,
+    hint: item.hint,
+    skill: 'logic:condition',
+    why: item.why,
+  };
+}
+
+/** 5-4 条件判断入口：按难度档路由（L1 分类 / L2 规则 / L3 推理） */
+export function makeConditionQuestion(difficulty: Difficulty = 1): Question {
+  if (difficulty <= 1) return makeClassifyQuestion();
+  if (difficulty === 2) return makeRuleQuestion();
+  return makeReasonQuestion();
 }
