@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from 'motion/react';
-import { CyberMasterCat3D } from '@/components/CyberMasterCat3D';
 import { useAiStream } from '@/lib/ai/useAi';
 import { companionChatTask } from '@/lib/ai/tasks/companion';
 import { speak, stopSpeaking } from '@/lib/speech';
@@ -11,23 +10,17 @@ import { celebrateSmall } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 import { useTtsStore } from '@/store/useTtsStore';
 import { useTranslation } from '@/i18n/useTranslation';
-import { CatPurrIcon } from '@/modules/pet/PetIcons';
 import type { AiMessage } from '@/lib/ai/types';
+import { VoiceHeader } from '@/modules/pet/voice/VoiceHeader';
+import { VoiceTitle, VoiceCatStage } from '@/modules/pet/voice/VoiceCatStage';
+import { VoiceMessageList, type VoiceMessage } from '@/modules/pet/voice/VoiceMessageList';
+import { VoiceControls, QuickPhrases } from '@/modules/pet/voice/VoiceControls';
 
 interface MessageItem {
   id: string;
   sender: 'user' | 'cat';
   text: string;
 }
-
-const QUICK_PHRASE_KEYS = [
-  'catCompanion.quickPhrases.0',
-  'catCompanion.quickPhrases.1',
-  'catCompanion.quickPhrases.2',
-  'catCompanion.quickPhrases.3',
-  'catCompanion.quickPhrases.4',
-  'catCompanion.quickPhrases.5',
-];
 
 const EMPTY_OUTFITS: Record<string, string> = {};
 
@@ -303,10 +296,30 @@ export function CatVoiceChatModal({ isOpen, onClose }: { isOpen: boolean; onClos
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, aiStreamText, transcript]);
 
-  const formatTime = (totalSeconds: number) => {
-    const mins = Math.floor(totalSeconds / 60);
-    const secs = totalSeconds % 60;
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  const toggleMute = () => {
+    sfxTap();
+    const next = !isMuted;
+    setIsMuted(next);
+    if (next) {
+      speechRecog.stop();
+      setIsListening(false);
+    } else {
+      void startListening();
+    }
+  };
+
+  const toggleListen = () => {
+    if (isListening) {
+      speechRecog.stop();
+      setIsListening(false);
+      const pendingText = latestTranscriptRef.current.trim() || transcript.trim();
+      if (pendingText && !hasSubmittedRef.current) {
+        hasSubmittedRef.current = true;
+        handleSendQuery(pendingText);
+      }
+    } else {
+      void startListening();
+    }
   };
 
   return (
@@ -338,216 +351,42 @@ export function CatVoiceChatModal({ isOpen, onClose }: { isOpen: boolean; onClos
             transition={{ type: 'spring', damping: 24, stiffness: 320 }}
             className="relative z-10 w-full sm:max-w-lg rounded-t-[1.75rem] sm:rounded-[1.75rem] border-t-4 sm:border-4 border-amber-300 bg-gradient-to-b from-slate-900 via-amber-950/90 to-slate-950 text-white shadow-2xl flex flex-col overflow-hidden max-h-[94vh] sm:max-h-[90vh]"
           >
-            {/* ---- 顶部通话栏：状态徽标 + 关闭按钮 ---- */}
-            <div className="flex items-center justify-between px-4 sm:px-5 pt-3.5 pb-1">
-              <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 border border-emerald-400/40 px-3 py-1 text-xs font-black tracking-wide text-emerald-300 shadow-xs">
-                <span className="inline-block h-2 w-2 animate-ping rounded-full bg-emerald-400" />
-                {t('catCompanion.voice.callStatus', { time: formatTime(callSeconds) })}
-              </span>
-              <button
-                ref={closeBtnRef}
-                type="button"
-                onClick={handleClose}
-                aria-label={t('catCompanion.voice.close')}
-                className="grid h-9 w-9 place-items-center rounded-full border border-white/25 bg-white/10 text-base font-bold text-amber-100 transition-all hover:bg-white/20 active:scale-90"
-              >
-                ✕
-              </button>
-            </div>
+            {/* 顶部通话栏 */}
+            <VoiceHeader seconds={callSeconds} onClose={handleClose} closeBtnRef={closeBtnRef} />
 
-            {/* ---- 标题区 ---- */}
-            <div className="px-4 pb-2 text-center">
-              <h2 className="flex items-center justify-center gap-2 text-xl font-black text-amber-200">
-                <CatPurrIcon size={26} /> {t('catCompanion.voice.title')}
-              </h2>
-              <div className="mt-0.5 text-[10px] font-bold text-amber-300/80">
-                {t('catCompanion.voice.engine')}
-              </div>
-            </div>
+            {/* 标题区 */}
+            <VoiceTitle />
 
-            {/* ---- 猫咪 3D 舞台 ---- */}
-            <div className="relative mx-4 flex flex-col items-center justify-center rounded-2xl border border-white/20 bg-white/10 p-3 shadow-inner backdrop-blur-md">
-              {isListening && (
-                <motion.div
-                  animate={{ scale: [1, 1.25, 1], opacity: [0.2, 0.6, 0.2] }}
-                  transition={{ repeat: Infinity, duration: 1.2 }}
-                  className="pointer-events-none absolute inset-0 rounded-2xl border-2 border-emerald-400 bg-emerald-400/20"
-                />
-              )}
+            {/* 猫咪 3D 舞台 */}
+            <VoiceCatStage
+              isListening={isListening}
+              isTtsSpeaking={isTtsSpeaking}
+              isMuted={isMuted}
+              status={status}
+              expression={expression}
+              outfits={equippedOutfits}
+              sttNotice={sttNotice}
+            />
 
-              <CyberMasterCat3D
-                size={112}
-                expression={isTtsSpeaking ? 'excited' : status === 'streaming' ? 'excited' : isListening ? 'cute' : expression}
-                hat={equippedOutfits['hat']}
-                neck={equippedOutfits['neck']}
-              />
+            {/* 对话列表 */}
+            <VoiceMessageList
+              messages={messages as VoiceMessage[]}
+              streaming={status === 'streaming'}
+              streamingText={aiStreamText}
+              endRef={chatEndRef}
+            />
 
-              {/* 实时通话状态 */}
-              <div className="mt-1.5 flex flex-col items-center gap-1">
-                <span
-                  className={`flex items-center gap-2 rounded-full px-3.5 py-1 text-xs font-black shadow-md ${
-                    isTtsSpeaking
-                      ? 'bg-purple-600 text-white'
-                      : status === 'streaming'
-                      ? 'bg-amber-500 text-white'
-                      : isListening
-                      ? 'bg-emerald-500 text-white'
-                      : 'bg-indigo-600 text-white'
-                  }`}
-                >
-                  {(isListening || isTtsSpeaking) && (
-                    <span className="flex h-3 items-center gap-0.5">
-                      {[0, 1, 2, 3].map((i) => (
-                        <motion.span
-                          key={i}
-                          animate={{ height: ['4px', '14px', '4px'] }}
-                          transition={{ repeat: Infinity, duration: isTtsSpeaking ? 0.35 : 0.5, delay: i * 0.1 }}
-                          className="inline-block w-0.5 rounded-full bg-white"
-                        />
-                      ))}
-                    </span>
-                  )}
-                  <span>
-                    {isTtsSpeaking
-                      ? t('catCompanion.voice.speaking')
-                      : status === 'streaming'
-                      ? t('catCompanion.voice.thinking')
-                      : isListening
-                      ? t('catCompanion.voice.listening')
-                      : isMuted
-                      ? t('catCompanion.voice.muted')
-                      : t('catCompanion.voice.connected')}
-                  </span>
-                </span>
+            {/* 快速提问词组 */}
+            <QuickPhrases onSend={handleSendQuery} />
 
-                {sttNotice && (
-                  <span className="rounded-full border border-amber-500/40 bg-amber-900/80 px-3 py-0.5 text-[10px] font-bold text-amber-200">
-                    {sttNotice}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* ---- 对话列表 ---- */}
-            <div className="mx-4 mt-3 flex min-h-[130px] max-h-[200px] flex-1 flex-col gap-3 overflow-y-auto rounded-2xl border border-white/10 bg-black/40 p-3">
-              {messages.map((m) => (
-                <div
-                  key={m.id}
-                  className={`flex items-start gap-2 ${m.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
-                >
-                  <div
-                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black ${
-                      m.sender === 'user' ? 'bg-indigo-500 text-white' : 'bg-amber-500 text-white'
-                    }`}
-                  >
-                    {m.sender === 'user' ? '🧑‍🎓' : '🐱'}
-                  </div>
-                  <div className={`flex max-w-[80%] flex-col gap-1 ${m.sender === 'user' ? 'items-end' : 'items-start'}`}>
-                    <div
-                      className={`rounded-2xl px-3 py-2 text-xs font-bold shadow-xs ${
-                        m.sender === 'user'
-                          ? 'rounded-tr-none bg-indigo-600 text-white'
-                          : 'rounded-tl-none bg-amber-100 text-amber-950'
-                      }`}
-                    >
-                      {m.text}
-                    </div>
-                    {m.sender === 'cat' && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          sfxTap();
-                          speak(m.text, { lang: 'zh-CN' });
-                        }}
-                        className="flex items-center gap-1 self-start rounded-full border border-amber-500/30 bg-amber-900/60 px-2 py-0.5 text-[10px] font-bold text-amber-300 transition-transform active:scale-95"
-                      >
-                        {t('catCompanion.voice.replay')}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-
-              {status === 'streaming' && (
-                <div className="flex items-start gap-2">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-500 text-xs font-black text-white">
-                    🐱
-                  </div>
-                  <div className="max-w-[80%] animate-pulse rounded-2xl rounded-tl-none bg-amber-100 px-3 py-2 text-xs font-bold text-amber-950">
-                    {aiStreamText || t('catCompanion.voice.organizing')}
-                  </div>
-                </div>
-              )}
-
-              <div ref={chatEndRef} />
-            </div>
-
-            {/* ---- 快速提问词组 ---- */}
-            <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto px-4 pb-1 pt-2">
-              {QUICK_PHRASE_KEYS.map((phrase, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => handleSendQuery(t(phrase).replace(/^[\p{Emoji}\s]+/u, ''))}
-                  className="flex-shrink-0 rounded-full border border-white/20 bg-white/20 px-3 py-1 text-[11px] font-extrabold text-amber-100 shadow-xs transition-all hover:bg-white/30 active:scale-95"
-                >
-                  {t(phrase)}
-                </button>
-              ))}
-            </div>
-
-            {/* ---- 通话控制台 ---- */}
-            <div className="grid grid-cols-3 gap-2 border-t border-white/10 px-4 pb-3 pt-2 sm:px-5 sm:pb-4">
-              <button
-                type="button"
-                onClick={() => {
-                  sfxTap();
-                  const next = !isMuted;
-                  setIsMuted(next);
-                  if (next) {
-                    speechRecog.stop();
-                    setIsListening(false);
-                  } else {
-                    void startListening();
-                  }
-                }}
-                className={`flex items-center justify-center gap-1.5 rounded-2xl py-2.5 text-xs font-black transition-all active:scale-95 ${
-                  isMuted
-                    ? 'border border-amber-400 bg-amber-600 text-white'
-                    : 'border border-white/20 bg-white/10 text-amber-100 hover:bg-white/20'
-                }`}
-              >
-                {isMuted ? t('catCompanion.voice.unmute') : t('catCompanion.voice.muteOn')}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleClose}
-                className="flex items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-rose-600 to-red-600 py-2.5 text-xs font-black text-white shadow-lg transition-all hover:from-rose-700 hover:to-red-700 active:scale-95"
-              >
-                {t('catCompanion.voice.hangUp')}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (isListening) {
-                    speechRecog.stop();
-                    setIsListening(false);
-                    const pendingText = latestTranscriptRef.current.trim() || transcript.trim();
-                    if (pendingText && !hasSubmittedRef.current) {
-                      hasSubmittedRef.current = true;
-                      handleSendQuery(pendingText);
-                    }
-                  } else {
-                    void startListening();
-                  }
-                }}
-                className="flex items-center justify-center gap-1.5 rounded-2xl bg-emerald-600 py-2.5 text-xs font-black text-white shadow-md transition-all hover:bg-emerald-700 active:scale-95"
-              >
-                {isListening ? t('catCompanion.voice.doneSpeaking') : t('catCompanion.voice.speakAgain')}
-              </button>
-            </div>
+            {/* 通话控制台 */}
+            <VoiceControls
+              isMuted={isMuted}
+              isListening={isListening}
+              onToggleMute={toggleMute}
+              onHangUp={handleClose}
+              onToggleListen={toggleListen}
+            />
           </motion.div>
         </motion.div>
       )}

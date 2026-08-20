@@ -2,14 +2,13 @@ import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { motion } from 'motion/react';
 import type { Question } from '@/types';
 import { cn } from '@/lib/utils';
-import { TONE_STYLE, toneAt } from '@/lib/tones';
 import { sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { celebrateBig, celebrateSmall, celebrateStars } from '@/lib/celebrate';
 import { recordCombo, COMBO_THRESHOLDS } from '@/lib/combo';
 import { recordAttempt } from '@/lib/adaptChain';
 import { useSkillMastery } from '@/store/useStore';
 import { useTranslation } from '@/i18n/useTranslation';
-import { errorAnalyzer, WEAKNESS_LABEL } from '@/lib/ai/smart-practice';
+import { errorAnalyzer } from '@/lib/ai/smart-practice';
 import { speak, stopSpeaking, praiseByScene, encourageByScene, skillToPraiseScene, skillToEncourageScene } from '@/lib/speech';
 import { CandyButton } from '@/components/ui/Button';
 import { FeedbackBanner, type FeedbackKind } from '@/components/ui/Feedback';
@@ -17,7 +16,11 @@ import { AiButton, AiPanel } from '@/components/ai';
 import { useAiStream } from '@/lib/ai/useAi';
 import type { StreamTask } from '@/lib/ai/tasks';
 import { quizExtendTask } from '@/lib/ai/tasks';
-import { wrongReason } from '@/lib/questions/wrongReason';
+import { OptionGrid } from '@/components/quiz/OptionGrid';
+import { ReplayButton } from '@/components/quiz/ReplayButton';
+import { StuckHintBar } from '@/components/quiz/StuckHintBar';
+import { BossTimerBar } from '@/components/quiz/BossTimerBar';
+import { WrongReasonBox } from '@/components/quiz/WrongReasonBox';
 
 /** 把选项渲染成一段可以喂给模型的纯文本 */
 function optionText(o: { label?: string; emoji?: string; shapes?: string[] } | undefined): string {
@@ -359,10 +362,6 @@ export function QuizCard({
     }
   };
 
-  const optionCount = shuffledOptions.length;
-  const gridCols =
-    optionCount <= 2 ? 'grid-cols-2' : optionCount === 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4';
-
   return (
     <div ref={cardRef} className="card-candy p-5 sm:p-8">
       {meta && (
@@ -374,20 +373,12 @@ export function QuizCard({
 
       {/* 听音类题目：提供手动重听按钮（与 autoSpeak 自动朗读互补，对所有听音游戏可复用） */}
       {question.speak && (
-        <div className="mt-2 flex justify-center">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              void speak(question.speak ?? '', { lang: question.speakLang ?? 'zh-CN', module: 'quiz' });
-            }}
-            className="flex items-center gap-1.5 rounded-full bg-candy-purple-soft px-4 py-1.5 text-sm font-extrabold text-candy-purple-deep shadow-candy-sm transition active:translate-y-[1px]"
-            aria-label={translate('quiz.listenAgainBtn')}
-            data-replay="audio"
-          >
-            {translate('quiz.listenAgainBtn')}
-          </button>
-        </div>
+        <ReplayButton
+          onClick={(e) => {
+            e?.stopPropagation();
+            void speak(question.speak ?? '', { lang: question.speakLang ?? 'zh-CN', module: 'quiz' });
+          }}
+        />
       )}
 
       {/* 大号展示区 */}
@@ -417,125 +408,36 @@ export function QuizCard({
       )}
 
       {/* P3: 超时干预提示——60s 未作答时温和浮现，吸引注意 */}
-      {showStuckHint && !solved && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-4 flex items-center justify-between rounded-2xl bg-candy-pink-soft px-4 py-3 shadow-candy-sm"
-        >
-          <span className="text-sm font-extrabold text-candy-purple-deep">
-{translate('quiz.stuckHint')}
-          </span>
-          <button
-            onClick={handleReplayPrompt}
-            className="rounded-full bg-candy-purple-deep px-4 py-1.5 text-sm font-extrabold text-white shadow-candy-sm active:translate-y-[1px]"
-          >
-            {translate('quiz.listenAgainBtn')}
-          </button>
-        </motion.div>
-      )}
+      {showStuckHint && !solved && <StuckHintBar onReplay={handleReplayPrompt} />}
 
       {/* Boss战：倒计时进度条 */}
       {timeLimitMs && timeLimitMs > 0 && timeRemaining !== null && (
-        <div className="mb-3 h-2 w-full overflow-hidden rounded-full bg-candy-pink-soft">
-          <div
-            className="h-full rounded-full bg-red-500 transition-[width] duration-100 ease-linear"
-            style={{ width: `${(timeRemaining / (timeLimitRef.current ?? timeLimitMs)) * 100}%` }}
-          />
-        </div>
+        <BossTimerBar remaining={timeRemaining} total={timeLimitRef.current ?? timeLimitMs} />
       )}
 
       {/* 选项 */}
-      <div className={cn('mt-6 grid gap-3 sm:gap-4', gridCols)}>
-        {shuffledOptions.map((opt, i) => {
-          const isWrong = wrongIds.includes(opt.id);
-          const isRight = solved && opt.id === question.answerId;
-          const t = TONE_STYLE[toneAt(i)] ?? TONE_STYLE.pink;
-          return (
-            <motion.button
-              key={opt.id}
-              onClick={() => handlePick(opt.id)}
-              disabled={solved || isWrong}
-              animate={shakeId === opt.id ? { x: [0, -9, 9, -6, 6, 0] } : { x: 0 }}
-              transition={{ duration: 0.42 }}
-              whileTap={!solved && !isWrong ? { scale: 0.94 } : undefined}
-              className={cn(
-                'no-select relative grid min-h-[88px] place-items-center gap-1 rounded-[1.5rem] px-3 py-4',
-                'text-2xl font-extrabold transition-all duration-150 sm:min-h-[104px] sm:text-3xl',
-                'focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-candy-purple/60',
-                isWrong && 'opacity-40 grayscale',
-                isRight && 'ring-4 ring-candy-green ring-offset-2',
-              )}
-              style={{
-                background: isRight ? TONE_STYLE.green.soft : t.soft,
-                color: isRight ? TONE_STYLE.green.deep : t.deep,
-                boxShadow: solved || isWrong ? 'none' : `0 5px 0 0 ${t.main}55`,
-              }}
-            >
-              {opt.emoji && <span className="text-4xl sm:text-5xl">{opt.emoji}</span>}
-              {opt.shapes && (
-                <span className="flex flex-wrap items-center justify-center gap-1">
-                  {opt.shapes.map((s: string, k: number) => (
-                    <span key={`optshape-${s}-${k}`} className="text-3xl sm:text-4xl">
-                      {s}
-                    </span>
-                  ))}
-                </span>
-              )}
-              {opt.label && <span className="leading-tight break-all">{opt.label}</span>}
-
-              {isRight && (
-                <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="absolute -top-2 -right-2 grid h-9 w-9 place-items-center rounded-full bg-candy-green text-lg text-white shadow-candy-sm"
-                >
-                  ✓
-                </motion.span>
-              )}
-              {isWrong && (
-                <span className="absolute -top-2 -right-2 grid h-9 w-9 place-items-center rounded-full bg-candy-orange text-lg text-white">
-                  ✕
-                </span>
-              )}
-            </motion.button>
-          );
-        })}
-      </div>
+      <OptionGrid
+        options={shuffledOptions}
+        wrongIds={wrongIds}
+        solved={solved}
+        answerId={question.answerId}
+        shakeId={shakeId}
+        onPick={handlePick}
+      />
 
       {/* 反馈 */}
       <div className="mt-5 min-h-[68px]">
         <FeedbackBanner kind={feedback.kind} text={feedback.text} />
       </div>
 
-      {/* M4 智能错因：答错后展示具体为什么错 */}
-      {wrongIds.length > 0 && !solved && (() => {
-        const lastWrongOpt = question.options.find((o) => o.id === wrongIds[wrongIds.length - 1]);
-        const reason = lastWrongOpt
-          ? wrongReason(question, lastWrongOpt.label ?? lastWrongOpt.emoji ?? '')
-          : null;
-        if (!reason) return null;
-        return (
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-2 rounded-2xl bg-candy-orange-soft/60 px-4 py-2.5 text-sm font-bold text-candy-orange-deep"
-          >
-            💭 <span className="text-ink">{reason}</span>
-          </motion.div>
-        );
-      }      )()}
-
-      {/* 智能复习小贴士：基于该技能累计掌握度的跨题薄弱诊断（区别于单题错因 wrongReason） */}
-      {skillDiag && wrongIds.length > 0 && !solved && (
-        <motion.div
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-2 rounded-2xl bg-candy-pink-soft px-4 py-2.5 text-sm font-bold text-candy-purple-deep"
-        >
-          🧠 小智发现：你在这类题上{WEAKNESS_LABEL[skillDiag.weaknessType]}，试试{skillDiag.recommendedActions[0]}
-        </motion.div>
-      )}
+      {/* M4 智能错因 + 跨题薄弱诊断（答错后展示） */}
+      <WrongReasonBox
+        question={question}
+        options={question.options}
+        wrongIds={wrongIds}
+        solved={solved}
+        skillDiag={skillDiag}
+      />
 
       {solved && question.hint && !hideHint && (
         <p className="mt-1 text-center text-sm font-semibold text-ink-soft">💡 {question.hint}</p>
