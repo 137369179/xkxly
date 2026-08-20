@@ -1,0 +1,212 @@
+/**
+ * 成语 SRS 复习中心（T-3.2 / T-3.5）
+ * ------------------------------------------------------------
+ * 交互：「先回忆，后揭示」的主动提取复习。
+ *   A 回忆：展示含义线索 → 儿童先在心里回忆成语
+ *   B 揭晓：点「揭晓答案」展示 成语 + 图 + 拼音 + 释义
+ *   C 自评：✅「我记住了」 / ❌「又忘了」 → practice 回写 mastery
+ * 复习结果为「记得」即标记一轮学习/掌握（复用 learnSkill），随后进入下一条。
+ */
+import { useMemo, useRef, useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Panel } from '@/components/ui/Card';
+import { CandyButton } from '@/components/ui/Button';
+import { useStore } from '@/store/useStore';
+import { IDIOMS, IDIOM_CATEGORIES, type Idiom } from '@/data/idioms';
+import { useDueIdiomSkills, idiomSkill, idrLog } from './idiomSrs';
+import { useTranslation } from '@/i18n/useTranslation';
+
+interface Props {
+  onExit: () => void;
+}
+
+type Phase = 'recall' | 'reveal' | 'judge' | 'done';
+
+export function IdiomReviewCenter({ onExit }: Props) {
+  const { t } = useTranslation();
+  const practice = useStore((s) => s.practice);
+  const learnSkill = useStore((s) => s.learnSkill);
+
+  const dueSkills = useDueIdiomSkills();
+  // 由 skill -> 成语；skills 全为 'idiom:' 前缀，故能一一对应
+  const queue = useMemo(
+    () => dueSkills.map((sk) => IDIOMS.find((i) => `idiom:${i.id}` === sk)).filter(Boolean) as Idiom[],
+    [dueSkills],
+  );
+
+  const [index, setIndex] = useState(0);
+  const [phase, setPhase] = useState<Phase>(queue.length ? 'recall' : 'done');
+  const phaseRef = useRef<Phase>(phase);
+  phaseRef.current = phase;
+
+  const current: Idiom | undefined = queue[index];
+
+  // —— 渲染探针（性能排查用，`idiomReview_debug=1` 开启，默认零开销）——
+  // 记录每次渲染的序号、自上次渲染间隔与当前所处状态，便于识别
+  // 因 practice 回写/队列变化等因素触发的重渲染是否属预期。
+  const renderNRef = useRef(0);
+  const lastRenderMsRef = useRef(0);
+  renderNRef.current += 1;
+  const nowMs = typeof performance !== 'undefined' ? performance.now() : Date.now();
+  const sinceMs = lastRenderMsRef.current ? Math.round(nowMs - lastRenderMsRef.current) : -1;
+  lastRenderMsRef.current = nowMs;
+  idrLog('render', {
+    n: renderNRef.current,
+    since_ms: sinceMs,
+    phase,
+    index,
+    current: current?.id ?? null,
+    queueLength: queue.length,
+  });
+
+  // —— 关键链路日志（默认关闭，`idiomReview_debug=1` 开启，见 idiomSrs.ts）——
+  useEffect(() => {
+    idrLog('mount', { dueSkills: dueSkills.length, queue: queue.length });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    idrLog('queue.ready', { queue: queue.map((i) => i.id).join(',') });
+    setIndex(0);
+    setPhase(queue.length ? 'recall' : 'done');
+  }, [queue]);
+
+  const next = () => {
+    if (!current) return;
+    idrLog('progress.next', { from: index, total: queue.length });
+    if (index + 1 >= queue.length) {
+      idrLog('progress.done', { completed: queue.length });
+      setPhase('done');
+    } else {
+      setIndex((i) => i + 1);
+      setPhase('recall');
+    }
+  };
+
+  const onReveal = () => {
+    if (!current) return;
+    idrLog('stage.reveal', { word: current.word });
+    setPhase('reveal');
+  };
+  const onCorrect = () => {
+    if (!current) return;
+    idrLog('judge.remember', { skill: idiomSkill(current.id), word: current.word, level: current.level });
+    practice(idiomSkill(current.id), true, 0, current.level);
+    learnSkill(idiomSkill(current.id));
+    next();
+  };
+  const onWrong = () => {
+    if (!current) return;
+    idrLog('judge.forgot', { skill: idiomSkill(current.id), word: current.word, level: current.level });
+    practice(idiomSkill(current.id), false, 0, current.level);
+    next();
+  };
+
+  if (phase === 'done') {
+    return (
+      <Panel className="text-center">
+        <div className="text-5xl">🎉</div>
+        <p className="mt-2 text-lg font-black text-ink">{t('idioms.reviewDone')}</p>
+        <p className="mt-1 text-sm font-bold text-ink-soft">{queue.length ? t('idioms.reviewDoneCount', { count: queue.length }) : t('idioms.reviewEmpty')}</p>
+        <div className="mt-4">
+          <CandyButton tone="purple" size="lg" fullWidth onClick={onExit}>
+            {t('idioms.reviewBack')}
+          </CandyButton>
+        </div>
+      </Panel>
+    );
+  }
+
+  if (!current) return null;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-extrabold text-ink-soft">
+          {t('idioms.reviewProgress', { cur: index + 1, total: queue.length })}
+        </span>
+        <button type="button" onClick={onExit} className="text-sm font-bold text-ink-soft">
+          ✕
+        </button>
+      </div>
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`${current.id}-${phase}`}
+          initial={{ opacity: 0, x: 24 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -24 }}
+          transition={{ duration: 0.2 }}
+        >
+          {/* 线索区：回忆阶段显示含义；揭晓阶段显示完整卡片 */}
+          <Panel className="text-center">
+            {phase === 'recall' ? (
+              <>
+                <p className="text-sm font-extrabold text-ink-soft">{t('idioms.reviewRecallTip')}</p>
+                <p className="mt-3 text-xl font-black leading-relaxed text-ink">{current.meaning}</p>
+                <div className="mt-4">
+                  <CandyButton tone="purple" size="lg" fullWidth onClick={onReveal}>
+                    {t('idioms.reviewReveal')}
+                  </CandyButton>
+                </div>
+              </>
+            ) : (
+              <ReviewCard idiom={current} />
+            )}
+          </Panel>
+
+          {/* 自评区：仅在揭示后出现 */}
+          {phase === 'reveal' && (
+            <div className="grid grid-cols-2 gap-3 pt-1">
+              <CandyButton tone="green" size="lg" onClick={onCorrect}>
+                ✅ {t('idioms.reviewRemember')}
+              </CandyButton>
+              <CandyButton tone="orange" size="lg" onClick={onWrong}>
+                ❌ {t('idioms.reviewForgot')}
+              </CandyButton>
+            </div>
+          )}
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/** 展示完整成语卡片（图 + 词面 + 拼音 + 主题徽章） */
+function ReviewCard({ idiom }: { idiom: Idiom }) {
+  const { t } = useTranslation();
+  return (
+    <div className="text-center">
+      {idiom.image ? (
+        <div className="mx-auto h-32 w-32 overflow-hidden rounded-2xl border-2 border-white shadow-sm">
+          <img src={idiom.image} alt={idiom.word} className="h-full w-full object-cover" loading="lazy" decoding="async" />
+        </div>
+      ) : (
+        <div className="text-5xl">{idiom.emoji}</div>
+      )}
+      <div className="mt-3 flex items-center justify-center gap-2">
+        <h3 className="text-3xl font-black text-ink">{idiom.word}</h3>
+        {idiom.category && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-pink-100 px-2.5 py-0.5 text-[11px] font-extrabold text-pink-700">
+            <span>{IDIOM_CATEGORIES.find((c) => c.id === idiom.category)?.emoji}</span>
+            <span>{categoryLabel(idiom.category)}</span>
+          </span>
+        )}
+      </div>
+      <p className="mt-0.5 text-sm font-bold text-ink-soft">{idiom.pinyin}</p>
+      <p className="mt-2 text-sm font-medium leading-relaxed text-ink">{idiom.meaning}</p>
+      <p className="mt-2 text-xs font-bold text-ink-soft">{t('idioms.reviewSelfTip')}</p>
+    </div>
+  );
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  study: '勤学',
+  wisdom: '智慧',
+  nature: '自然',
+  character: '品格',
+  fable: '寓言',
+};
+
+function categoryLabel(category: string): string {
+  return CATEGORY_LABELS[category] ?? category;
+}

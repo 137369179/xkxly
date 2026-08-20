@@ -24,6 +24,7 @@ export const SKILL = {
   hanzi: (c: string) => `hanzi:${c}`,
   pinyin: (p: string) => `pinyin:${p}`,
   word: (w: string) => `word:${w}`,
+  idiom: (id: string) => `idiom:${id}`,
 } as const;
 
 /** 掌握度等级 -> 下次复习间隔（天）。lv0 当天再练，lv5 视为长期记忆 */

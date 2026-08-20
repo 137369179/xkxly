@@ -2594,7 +2594,20 @@
     "progress": "✅ {ok} · ❌ {ng}",
     "categoryAll": "全部",
     "noInCategory": "这个分类还没有成语，换个主题看看哦",
-    "lessonLabel": "小道理"
+    "lessonLabel": "小道理",
+    "reviewDone": "🎉 今日复习完成！",
+    "reviewDoneCount": "共复习 {count} 个成语",
+    "reviewEmpty": "今天没有待复习的成语",
+    "reviewBack": "返回",
+    "reviewProgress": "复习 {cur} / {total}",
+    "reviewRecallTip": "线索 · 根据下面的意思，先在心里想一想是哪个成语",
+    "reviewReveal": "揭晓答案",
+    "reviewRemember": "我记住了",
+    "reviewForgot": "又忘了",
+    "reviewSelfTip": "你回忆对了吗？",
+    "reviewEntry": "复习中心",
+    "reviewEntryDue": "有 {count} 个成语待复习",
+    "reviewEntryNone": "今日复习已全部完成"
   },
   "catCompanion": {
     "welcome": "喵呜~ 摸摸粉色小猫的头头吧！",

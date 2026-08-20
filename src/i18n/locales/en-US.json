@@ -2594,7 +2594,20 @@
     "progress": "✅ {ok} · ❌ {ng}",
     "categoryAll": "All",
     "noInCategory": "No idioms here yet — try another theme!",
-    "lessonLabel": "Little Lesson"
+    "lessonLabel": "Little Lesson",
+    "reviewDone": "🎉 Review complete today!",
+    "reviewDoneCount": "Reviewed {count} idioms",
+    "reviewEmpty": "Nothing to review today",
+    "reviewBack": "Back",
+    "reviewProgress": "Review {cur} / {total}",
+    "reviewRecallTip": "Clue · think of the idiom in your mind first",
+    "reviewReveal": "Reveal answer",
+    "reviewRemember": "I remember",
+    "reviewForgot": "Forgot",
+    "reviewSelfTip": "Were you right?",
+    "reviewEntry": "Review Center",
+    "reviewEntryDue": "{count} idioms to review",
+    "reviewEntryNone": "All reviews done today"
   },
   "catCompanion": {
     "welcome": "Meow~ Pet the pink kitty’s head!",

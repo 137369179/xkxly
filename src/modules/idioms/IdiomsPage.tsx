@@ -13,6 +13,8 @@ import { speak } from '@/lib/speech';
 import { sfxTap, sfxWin, sfxStar } from '@/lib/sfx';
 import { IDIOMS, getIdiomsByLevel, IDIOM_CATEGORIES, type Idiom, type IdiomCategory } from '@/data/idioms';
 import { IdiomChain } from './IdiomChain';
+import { IdiomReviewCenter } from './IdiomReviewCenter';
+import { useDueIdiomSkills } from './idiomSrs';
 import { shuffle } from '@/lib/utils';
 import { useAiStream, useAiTask } from '@/lib/ai/useAi';
 import { idiomStoryTask, idiomSentenceTask, type IdiomSentenceData } from '@/lib/ai/tasks/idiom';
@@ -112,6 +114,7 @@ export default function IdiomsPage() {
   const [level, setLevel, levelMeta] = useAdaptiveDifficultyState('idiom');
   const [category, setCategory] = useState<'all' | IdiomCategory>('all');
   const [selected, setSelected] = useState<Idiom | null>(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
   const learnSkill = useStore(s => s.learnSkill);
 
   // 猜成语：用统一 QuizSessionRunner 驱动（出题循环/进度/连对/结算由 Runner 托管）
@@ -123,6 +126,8 @@ export default function IdiomsPage() {
     () => (category === 'all' ? levelList : levelList.filter(i => i.category === category)),
     [levelList, category],
   );
+  // SRS 待复习数量（细粒度订阅，仅成语类 mastery 变化时重算）
+  const dueCount = useDueIdiomSkills().length;
 
   /**
    * 猜成语的题库。以前这里直接从全量 IDIOMS 随机抽，等于难度选择器
@@ -225,10 +230,37 @@ export default function IdiomsPage() {
     return <IdiomDetail idiom={selected} onBack={() => setSelected(null)} onLearn={() => { learnSkill(`idiom:${selected.id}`); sfxWin(); }} />;
   }
 
+  // SRS 复习中心（从成语库页点击「复习」进入，聚焦独立视图）
+  if (reviewOpen) {
+    return (
+      <div className="space-y-5">
+        <IdiomReviewCenter onExit={() => setReviewOpen(false)} />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5">
       <PageHeader emoji="🏯" title={t('idioms.storyHouse')} subtitle={t('idioms.storyCount', { count: IDIOMS.length })} tone="purple" />
       <Tabs items={TABS} value={tab} onChange={setTab} tone="purple" layoutId="idiom-tabs" />
+
+      {/* SRS 复习中心入口 */}
+      <button
+        onClick={() => { sfxTap(); setReviewOpen(true); }}
+        className="flex w-full items-center gap-3 rounded-2xl border-2 border-purple-200 bg-purple-50 p-3 text-left shadow-candy-sm transition-all active:translate-y-[2px]"
+      >
+        <span className="text-2xl">🔁</span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-black text-ink">{t('idioms.reviewEntry')}</span>
+          <span className="block text-xs font-bold text-ink-soft">
+            {dueCount > 0 ? t('idioms.reviewEntryDue', { count: dueCount }) : t('idioms.reviewEntryNone')}
+          </span>
+        </span>
+        <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-extrabold ${dueCount > 0 ? 'bg-purple-600 text-white' : 'bg-white/70 text-ink-soft'}`}>
+          {dueCount > 0 ? `${dueCount}` : '✓'}
+        </span>
+        <span className="shrink-0 text-ink-soft">›</span>
+      </button>
 
       <div className="space-y-2">
         <div className="flex gap-2">
