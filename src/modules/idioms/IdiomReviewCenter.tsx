@@ -59,6 +59,19 @@ export function IdiomReviewCenter({ onExit }: Props) {
     queueLength: queue.length,
   });
 
+  // —— commit 耗时观测（每次渲染提交到屏幕后执行）——
+  // lastRenderMsRef 在每次渲染起点被刷新，故此刻 dur_ms≈渲染+提交耗时，
+  // 用于定位"单次交互是否触发慢渲染或过多重渲染"。
+  useEffect(() => {
+    idrLog('render.commit', {
+      n: renderNRef.current,
+      dur_ms: Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - lastRenderMsRef.current),
+      phase,
+      index,
+      current: current?.id ?? null,
+    });
+  });
+
   // —— 关键链路日志（默认关闭，`idiomReview_debug=1` 开启，见 idiomSrs.ts）——
   useEffect(() => {
     idrLog('mount', { dueSkills: dueSkills.length, queue: queue.length });
@@ -174,6 +187,11 @@ export function IdiomReviewCenter({ onExit }: Props) {
 /** 展示完整成语卡片（图 + 词面 + 拼音 + 主题徽章） */
 function ReviewCard({ idiom }: { idiom: Idiom }) {
   const { t } = useTranslation();
+  // 渲染计数：连续序号上升但 word 未变，说明该卡片被父级重渲染重复触发
+  const cardNRef = useRef(0);
+  cardNRef.current += 1;
+  idrLog('render.card', { word: idiom.word, n: cardNRef.current });
+
   return (
     <div className="text-center">
       {idiom.image ? (
