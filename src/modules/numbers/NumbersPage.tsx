@@ -1,9 +1,14 @@
-import { useState, lazy, Suspense, useEffect } from 'react';
+import { useState, lazy, Suspense, useEffect, useMemo } from 'react';
 import { PageHeader } from '@/components/ui/Card';
 import { useTranslation } from '@/i18n/useTranslation';
 import { sfxTap } from '@/lib/sfx';
+import { useStore } from '@/store/useStore';
 import { useTrainingTarget } from '@/hooks/useTrainingTarget';
 import { TrainingBanner } from '@/components/study/TrainingBanner';
+import { recommendNumberSkill } from './recommendNumbers';
+
+// 推荐卡懒加载：随用随取，弱网下不阻塞首屏关键内容
+const NumberRecommendCard = lazy(() => import('./NumberRecommend').then((m) => ({ default: m.NumberRecommend })));
 
 // ── 子组件全部懒加载以实现极优的首屏性能 ──
 const NumberWall = lazy(() => import('./NumberWall').then((m) => ({ default: m.NumberWall })));
@@ -109,6 +114,18 @@ export default function NumbersPage() {
   const [activeSubTab, setActiveSubTab] = useState<string>('wall');
   const { target, clear } = useTrainingTarget('numbers');
 
+  // 页面内「猜你接下来想练」个性化推荐（基于 SRS 掌握度）
+  const mastery = useStore((s) => s.progress.mastery);
+  const recommendation = useMemo(() => recommendNumberSkill(mastery), [mastery]);
+  const recDef = useMemo(() => {
+    if (!recommendation) return null;
+    for (const c of CATEGORIES) {
+      const def = c.subTabs.find((s) => s.id === recommendation.game);
+      if (def) return { cat: c.id, def };
+    }
+    return null;
+  }, [recommendation]);
+
   // 深链 param → 打开对应数学子游戏
   useEffect(() => {
     const p = target?.param;
@@ -144,6 +161,22 @@ export default function NumbersPage() {
       />
 
       <TrainingBanner target={target} onClose={clear} />
+
+      {/* ✨ 页面内智能推荐：懒加载独立 chunk；弱网下由 Suspense 的 shimmer 兜底，快网直出 */}
+      {!target && recDef && recommendation && (
+        <Suspense fallback={<NumberRecSkeleton />}>
+          <NumberRecommendCard
+            emoji={recDef.def.emoji}
+            label={recDef.def.label}
+            weakness={(mastery[recommendation.skill]?.ng ?? 0) > 0}
+            onGo={() => {
+              sfxTap();
+              setActiveCategory(recDef.cat);
+              setActiveSubTab(recDef.def.id);
+            }}
+          />
+        </Suspense>
+      )}
 
       {/* 👑 一级大分类导航卡片 */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -211,6 +244,20 @@ export default function NumbersPage() {
         {activeSubTab === 'fraction' && <FractionLearn />}
         {activeSubTab === 'money' && <MoneyLearn />}
       </Suspense>
+    </div>
+  );
+}
+
+/** 推荐卡 shimmer 占位：与真实卡片同高，弱网/懒加载时先稳住布局、避免 CLS */
+function NumberRecSkeleton() {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-2xl border-2 border-candy-yellow-soft bg-gradient-to-r from-amber-50 to-yellow-50/70 px-4 py-3">
+      <span className="h-11 w-11 shrink-0 animate-pulse rounded-2xl bg-amber-200/60" />
+      <div className="flex-1 space-y-2">
+        <span className="block h-3 w-24 animate-pulse rounded bg-amber-200/60" />
+        <span className="block h-4 w-40 animate-pulse rounded bg-amber-200/60" />
+      </div>
+      <span className="h-8 w-16 animate-pulse rounded-full bg-amber-200/60" />
     </div>
   );
 }

@@ -2764,7 +2764,12 @@
     "allKnown": "All learned!",
     "moreCount": "… {count} total",
     "readAgain": "🔊 Read again",
-    "gotIt": "Got it"
+    "gotIt": "Got it",
+    "funFactTitle": "Number fun fact",
+    "recommendTitle": "✨ Try this next",
+    "recommendWeak": "Weak spot first · {label}",
+    "recommendGo": "Go →",
+    "recommendFallback": "Start with counting"
   },
   "adventure": {
     "title": "Felt Town 3D Adventure",

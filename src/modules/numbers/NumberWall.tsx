@@ -5,6 +5,7 @@ import { cn, range } from '@/lib/utils';
 import { speak } from '@/lib/speech';
 import { sfxTap } from '@/lib/sfx';
 import { toChineseNumber, toNumberPinyin } from '@/lib/chineseNumber';
+import { numberFact } from '@/data/numberFacts';
 import { useNumbersHeard, useStore } from '@/store/useStore';
 import { Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
@@ -156,6 +157,14 @@ export function NumberWall() {
                   >
                     {tr('numbers.gotIt')}
                   </CandyButton>
+                </div>
+
+                {/* 数字小知识（离线即时） */}
+                <div className="mt-4 rounded-2xl bg-white/80 p-3 text-left">
+                  <p className="text-xs font-extrabold text-amber-600">{tr('numbers.funFactTitle')}</p>
+                  <p className="mt-1 text-sm font-medium leading-relaxed text-ink">
+                    💡 {numberFact(active)}
+                  </p>
                 </div>
 
                 {/* v6: AI 数字儿歌 */}
