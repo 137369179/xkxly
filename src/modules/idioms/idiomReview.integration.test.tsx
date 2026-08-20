@@ -109,6 +109,10 @@ describe('从成语页点击「复习」进入复习中心 · 完整流程', () 
     const m12 = useStore.getState().progress.mastery['idiom:i12'];
     expect(m3?.ok).toBeGreaterThanOrEqual(1);
     expect(m12?.ng).toBeGreaterThanOrEqual(1);
+
+    // ⑧ 每日复习奖励：完成一次复习后发放星星 + 置 reviewDate
+    expect(useStore.getState().progress.reviewDate).toBeTruthy();
+    expect(useStore.getState().progress.stars).toBeGreaterThanOrEqual(1);
   });
 
   it('队列为空时直接进入完成空态，不走逐题', () => {
