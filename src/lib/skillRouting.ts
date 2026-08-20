@@ -45,6 +45,8 @@ export const SUB_LABELS: Partial<Record<RouteId, Record<string, string>>> = {
     pattern: '找规律',
     match: '图形配对',
     order: '排排序',
+    condition: '条件判断',
+    steps: '步骤排序',
     mixed: '综合挑战',
     code: '编程机器人',
     codebot: '编程机器人',

@@ -722,6 +722,15 @@ export const BADGES: BadgeDef[] = [
     check: (p) => Object.keys(p.researchNotes ?? {}).length >= 5,
     meter: (p) => [Math.min(Object.keys(p.researchNotes ?? {}).length, 5), 5],
   },
+  {
+    id: 'logic-150',
+    name: '逻辑大师',
+    desc: '答对 150 道逻辑题',
+    emoji: '🏆',
+    tone: 'orange',
+    check: (p) => p.logicCorrect >= 150,
+    meter: (p) => [Math.min(p.logicCorrect, 150), 150],
+  },
 ];
 
 export const BADGE_MAP = new Map(BADGES.map((b) => [b.id, b]));

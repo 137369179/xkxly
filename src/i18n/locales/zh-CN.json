@@ -2752,7 +2752,8 @@
     "nextLevel": "下一关 →",
     "failMsg": "差一点！再试试吧",
     "aiHelp": "🤖 小智帮帮我",
-    "aiHint": "小智提示"
+    "aiHint": "小智提示",
+    "tabSteps": "步骤排序"
   },
   "levels": {
     "begin": "启蒙",
