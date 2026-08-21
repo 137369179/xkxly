@@ -4921,5 +4921,17 @@
     "progress": "勋章收集进度",
     "unlocked": "已解锁",
     "notStarted": "未开始"
+  },
+  "scienceQuiz": {
+    "title": "科学小考官",
+    "dino1": "认恐龙",
+    "dino2": "分食性",
+    "dino3": "比身高",
+    "animal1": "认动物",
+    "animal2": "分食性",
+    "animal3": "找最大",
+    "space1": "认行星",
+    "space2": "找卫星",
+    "space3": "比远近"
   }
 }

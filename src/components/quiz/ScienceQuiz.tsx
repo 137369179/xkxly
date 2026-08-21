@@ -15,12 +15,6 @@ import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
 import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/i18n/useTranslation';
 
-const DIFF_LABELS = {
-  dino: { 1: '认恐龙', 2: '分食性', 3: '比身高' },
-  animal: { 1: '认动物', 2: '分食性', 3: '找最大' },
-  space: { 1: '认行星', 2: '找卫星', 3: '比远近' },
-} as const;
-
 const DIFF_EMOJIS = { 1: '🌱', 2: '🌿', 3: '🌟' } as const;
 
 export function ScienceQuiz({ category }: { category: ScienceCategory }) {
@@ -33,13 +27,18 @@ export function ScienceQuiz({ category }: { category: ScienceCategory }) {
     [category],
   );
 
-  const labels = DIFF_LABELS[category] as Record<1 | 2 | 3, string>;
+  // 难度标签走 i18n（按类别区分）
+  const labels: Record<1 | 2 | 3, string> = {
+    1: t(`scienceQuiz.${category}1`),
+    2: t(`scienceQuiz.${category}2`),
+    3: t(`scienceQuiz.${category}3`),
+  };
 
   return (
     <Panel className="border-2 border-candy-purple-soft bg-gradient-to-br from-purple-50 via-white to-sky-50">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <div className="text-base font-extrabold text-ink">
-          🧐 {t('scienceQuiz.title') ?? '科学小考官'}
+          🧐 {t('scienceQuiz.title')}
         </div>
         <div className="flex gap-1.5">
           {([1, 2, 3] as const).map((d) => (

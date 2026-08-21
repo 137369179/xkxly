@@ -4921,5 +4921,17 @@
     "progress": "Badge Progress",
     "unlocked": "Unlocked",
     "notStarted": "Not Started"
+  },
+  "scienceQuiz": {
+    "title": "Science Quiz",
+    "dino1": "Identify",
+    "dino2": "Diet",
+    "dino3": "Height",
+    "animal1": "Identify",
+    "animal2": "Diet",
+    "animal3": "Biggest",
+    "space1": "Identify",
+    "space2": "Moons",
+    "space3": "Distance"
   }
 }

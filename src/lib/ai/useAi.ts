@@ -23,6 +23,8 @@ export interface AiStreamState {
   /** 是否为本地兜底内容 */
   fallback: boolean;
   error?: AiError;
+  /** 思考分片进度计数：驱动「小智在想」动画的圆点，不展示思考文本 */
+  thought: number;
   /** 发起（或重发）一次生成；doneCb 在流结束后（非 abort）触发 */
   run: (task: StreamTask, opts?: { onDone?: () => void }) => void;
   /** 中断当前生成 */
@@ -43,6 +45,8 @@ export function useAiStream(autoTask?: StreamTask): AiStreamState {
   const [fallback, setFallback] = useState(false);
   const [error, setError] = useState<AiError | undefined>();
   const [task, setTask] = useState<StreamTask | undefined>(autoTask);
+  /** 思考分片计数（仅作进度信号，不展示啰嗦文本） */
+  const [thoughtCount, setThoughtCount] = useState(0);
 
   const abortRef = useRef<AbortController | null>(null);
   const aliveRef = useRef(true);
@@ -64,6 +68,7 @@ export function useAiStream(autoTask?: StreamTask): AiStreamState {
     setText('');
     setError(undefined);
     setFallback(false);
+    setThoughtCount(0);
 
     // 全局开关关闭时直接给本地内容，不发请求
     if (!isAiEnabled()) {
@@ -96,8 +101,11 @@ export function useAiStream(autoTask?: StreamTask): AiStreamState {
             setStatus('streaming');
           } else if (chunk.type === 'error') {
             failed = chunk.error;
+          } else if (chunk.type === 'thinking') {
+            // 思考文本仍不展示给孩子（啰嗦且可能有术语），
+            // 仅递增计数，驱动 AiThinking 的进度圆点，让孩子感知“在思考”。
+            setThoughtCount((n) => n + 1);
           }
-          // thinking 分片故意不展示给孩子 —— 思考链啰嗦且可能出现术语
         }
       } catch {
         failed = { code: 'unknown', message: '生成失败', retryable: true };
@@ -164,7 +172,7 @@ export function useAiStream(autoTask?: StreamTask): AiStreamState {
     // intentional: run when autoKey changes, autoRef is intentionally excluded
   }, [autoKey]);
 
-  return { status, text, fallback, error, run, stop, reset, task };
+  return { status, text, fallback, error, thought: thoughtCount, run, stop, reset, task };
 }
 
 /** 便宜的字符串哈希（FNV-1a 变体），用于给任务生成稳定指纹 */

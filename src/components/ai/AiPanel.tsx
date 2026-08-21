@@ -9,7 +9,8 @@
  */
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
-import { AiAvatar, AiDots } from './AiAvatar';
+import { AiAvatar } from './AiAvatar';
+import { AiThinking } from './AiThinking';
 import type { AiStreamState } from '@/lib/ai/useAi';
 import { TONE_STYLE, type Tone } from '@/lib/tones';
 import { speak, speechSupported, stopSpeaking } from '@/lib/speech';
@@ -54,7 +55,7 @@ export function AiPanel({
 }) {
   const { t: tr } = useTranslation();
   const t = TONE_STYLE[tone]!
-  const { status, text, fallback, task, run } = state;
+  const { status, text, fallback, task, run, thought } = state;
   const [speaking, setSpeaking] = useState(false);
   /**
    * ⚠️ stopSpeaking 是全局的。旧代码在卸载时无条件调用，
@@ -105,20 +106,18 @@ export function AiPanel({
         <span className="text-base font-extrabold sm:text-lg" style={{ color: t.deep }}>
           {heading}
         </span>
-        {thinking && <AiDots color={t.main} />}
       </header>
 
       <AnimatePresence mode="wait">
         {thinking ? (
-          <motion.p
+          <motion.div
             key="hint"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="text-base leading-relaxed text-ink-soft"
           >
-            {task?.hint ?? '小智正在思考…'}
-          </motion.p>
+            <AiThinking thought={thought} hint={task?.hint} bubble={false} tone={tone} />
+          </motion.div>
         ) : (
           <motion.div key="body" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <p

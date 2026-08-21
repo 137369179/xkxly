@@ -8,8 +8,9 @@
  */
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { AiAvatar, AiDots } from './AiAvatar';
+import { AiAvatar } from './AiAvatar';
 import { AiPanel } from './AiPanel';
+import { AiThinking } from './AiThinking';
 import { useAiStream } from '@/lib/ai/useAi';
 import type { StreamTask } from '@/lib/ai/tasks';
 import { guardInput } from '@/lib/ai/guard';
@@ -138,9 +139,8 @@ export function AiChat({
             面板同步消失，也就不会出现"面板 + 历史"各显示一遍的重影。
           */}
           {stream.status === 'thinking' ? (
-            <div className="flex items-center gap-2 pl-1">
-              <AiAvatar size={30} mood="thinking" />
-              <AiDots color={t.main} />
+            <div className="pl-1">
+              <AiThinking thought={stream.thought} compact />
             </div>
           ) : (
             <AiPanel state={stream} tone={tone} compact showActions={false} />
