@@ -39,6 +39,15 @@ describe('praise 分场景语料', () => {
     expect(praiseByScene('math').length).toBeGreaterThan(0);
     expect(encourageByScene('hanzi').length).toBeGreaterThan(0);
   });
+
+  it('idiom 表扬/鼓励语非空且贴合成语语境', () => {
+    const p = praiseByScene('idiom');
+    expect(p.length).toBeGreaterThan(0);
+    expect(p).toMatch(/成语|接龙|字/);
+    const e = encourageByScene('idiom');
+    expect(e.length).toBeGreaterThan(0);
+    expect(e).toMatch(/成语|字/);
+  });
 });
 
 describe('skill → 场景映射', () => {
@@ -56,6 +65,12 @@ describe('skill → 场景映射', () => {
     expect(skillToPraiseScene('hanzi:山')).toBe('hanzi');
     expect(skillToPraiseScene('pinyin:a')).toBe('pinyin');
     expect(skillToPraiseScene('math:add')).toBe('math');
+  });
+
+  it('idiom:xxx → idiom', () => {
+    expect(skillToPraiseScene('idiom:chain')).toBe('idiom');
+    expect(skillToPraiseScene('idiom-chain')).toBe('idiom');
+    expect(skillToEncourageScene('idiom:chain')).toBe('idiom');
   });
 
   it('未知 skill → general', () => {

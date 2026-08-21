@@ -62,6 +62,8 @@ vi.mock('@/store/useStore', () => ({
 import { YUNMU, CATEGORIES, PinyinGroup } from './PinyinGroup';
 import { makeQuestion, Dictation } from './Dictation';
 import { PinyinPractice } from './PinyinPractice';
+import { TonePractice } from './TonePractice';
+import { BlendPractice } from './BlendPractice';
 import { ALL_COMBOS, getAllPinyin } from '@/data/pinyinIndex';
 
 const CAT_LABEL_KEY: Record<string, string> = {
@@ -288,5 +290,42 @@ describe('PinyinGroup 韵母归类交互', () => {
     await act(async () => {
       vi.advanceTimersByTime(1300);
     });
+  });
+});
+
+describe('TonePractice / BlendPractice 闯关里程碑条（R53 游戏化接入）', () => {
+  it('TonePractice 渲染 3 圆点闯关条（连对可视化）', async () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(createElement(TonePractice));
+    });
+    const dots = container.querySelectorAll('[data-testid^="streak-dot-"]');
+    expect(dots.length).toBe(3);
+    // 初始无点亮
+    dots.forEach((d) => expect(d.getAttribute('data-on')).toBe('0'));
+    await act(async () => root.unmount());
+    document.body.removeChild(container);
+  });
+
+  it('BlendPractice 进入游戏后渲染 3 圆点闯关条（连对可视化）', async () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(createElement(BlendPractice));
+    });
+    // 开始面板：无闯关条（游戏未开始）
+    expect(container.querySelectorAll('[data-testid^="streak-dot-"]').length).toBe(0);
+    // 点击「开始」进入游戏
+    const startBtn = [...container.querySelectorAll('button')].find((b) => (b.textContent || '').includes('blendPractice.start'));
+    await act(async () => {
+      startBtn!.click();
+    });
+    const dots = container.querySelectorAll('[data-testid^="streak-dot-"]');
+    expect(dots.length).toBe(3);
+    await act(async () => root.unmount());
+    document.body.removeChild(container);
   });
 });
