@@ -11,7 +11,21 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { celebrateSmall } from '@/lib/celebrate';
+import { safeGetItem } from '@/lib/safeStorage';
 import { cn } from '@/lib/utils';
+
+/**
+ * StreakBar 达标庆祝调试日志。
+ * 运行时通过 `localStorage.setItem('sb_debug','1')` 开启（无需刷新即生效），
+ * 关闭则 `localStorage.removeItem('sb_debug')`。用于排查动画触发问题的关键节点：
+ * 渲染/达标判定/庆祝触发/计时器/归零重置。默认零开销。
+ */
+const SB_DEBUG = 'sb_debug';
+function sbLog(stage: string, extra?: Record<string, unknown>): void {
+  if (safeGetItem(SB_DEBUG) !== '1') return;
+  // eslint-disable-next-line no-console
+  console.log(`%c[StreakBar] ${stage}`, 'color:#f59e0b;font-weight:bold', { ...extra });
+}
 
 interface Props {
   /** 当前连续答对数（0..target） */
@@ -49,19 +63,34 @@ export function StreakBar({
   const [celebrating, setCelebrating] = useState(false);
   const hasCelebratedRef = useRef(false);
 
+  sbLog('render', { streak, target, celebrating });
   const justHit = streak === target && streak > 0 && !hasCelebratedRef.current;
+  sbLog('judge.justHit', { streak, target, justHit, hasCelebrated: hasCelebratedRef.current });
   // 达标庆祝：仅触发一次；组件卸载时清理计时器
   useEffect(() => {
-    if (!justHit) return;
+    if (!justHit) {
+      sbLog('celebrate.skipped', { streak, target, hasCelebrated: hasCelebratedRef.current });
+      return;
+    }
     hasCelebratedRef.current = true;
     setCelebrating(true);
+    sbLog('celebrate.small', { streak, target });
     void celebrateSmall();
-    const t = setTimeout(() => setCelebrating(false), 1600);
-    return () => clearTimeout(t);
+    const t = setTimeout(() => {
+      sbLog('celebrate.end', { streak, target });
+      setCelebrating(false);
+    }, 1600);
+    return () => {
+      sbLog('celebrate.cleanup', { streak, target });
+      clearTimeout(t);
+    };
   }, [justHit]);
   // streak 归零时重置"已庆祝"信号，允许下一轮再次庆祝
   useEffect(() => {
-    if (streak === 0) hasCelebratedRef.current = false;
+    if (streak === 0) {
+      if (hasCelebratedRef.current) sbLog('reset.celebrated', { target });
+      hasCelebratedRef.current = false;
+    }
   }, [streak]);
 
   return (
