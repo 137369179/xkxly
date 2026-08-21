@@ -27,8 +27,8 @@ export const SKILL = {
   idiom: (id: string) => `idiom:${id}`,
 } as const;
 
-/** 掌握度等级 -> 下次复习间隔（天）。lv0 当天再练，lv5 视为长期记忆 */
-export const INTERVALS = [0, 1, 2, 4, 7, 15] as const;
+/** 掌握度等级 -> 下次复习间隔（天）。lv0 当天再练，lv5 视为长期记忆、每 30 天保温复习 */
+export const INTERVALS = [0, 1, 2, 4, 7, 30] as const;
 
 export const MAX_LEVEL = 5;
 
@@ -73,13 +73,13 @@ export function review(
   return { lv, due: now + intervalMs, ok: cur.ok, ng: cur.ng + 1, last: now };
 }
 
-/** 某知识点是否到期待复习（lv5 也有保温复习，间隔为 30 天） */
+/**
+ * 某知识点是否到期待复习。
+ * 到期点就是 review() 排定的 due（lv5 的保温间隔由 INTERVALS[5]=30 天统一决定），
+ * 不再对最高级额外叠加间隔——修复了先前 due(15天) 与判定(30天) 分裂成 45 天的口径不一致。
+ */
 export function isDue(m: MasteryItem | undefined, now = Date.now()): boolean {
   if (!m) return false;
-  if (m.lv >= MAX_LEVEL) {
-    // 已掌握的知识点每 30 天保温复习一次，防止长期遗忘
-    return (m.due ?? 0) + 30 * DAY <= now;
-  }
   return (m.due ?? Infinity) <= now;
 }
 

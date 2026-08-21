@@ -52,6 +52,9 @@ export function SpeedMath() {
 
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const advanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 单题作答锁（P0-#1）：用同步 ref 即时锁住，避免快速连点时
+  // chosen(state) 尚未刷新导致同一题重复计分 / 重复写 SRS、排行榜。
+  const answeringRef = useRef(false);
 
   /**
    * 本局锁定的难度。开局时冻结一次，之后整局不再变——限时挑战途中换难度
@@ -96,7 +99,9 @@ export function SpeedMath() {
   }, [active]);
 
   const handle = (opt: string) => {
-    if (chosen || !q) return;
+    // 同步上锁：同一渲染帧内的连点（chosen 尚未刷新）也会被拦下
+    if (answeringRef.current || chosen || !q) return;
+    answeringRef.current = true;
     setChosen(opt);
     const correct = opt === q.answerId;
     recordMath(correct, q.skill);
@@ -118,8 +123,12 @@ export function SpeedMath() {
       setStreak(0);
       if (q.skill) practice(q.skill, false, 0, runDiffRef.current);
     }
-    // next 身份稳定（难度走 runDiffRef），setTimeout 里拿到的永远是本局锁定难度
-    advanceRef.current = setTimeout(() => next(), 400);
+    // next 身份稳定（难度走 runDiffRef），setTimeout 里拿到的永远是本局锁定难度；
+    // 换题时释放锁，保证下一题可正常作答。
+    advanceRef.current = setTimeout(() => {
+      answeringRef.current = false;
+      next();
+    }, 400);
   };
 
   // 卸载时清理定时器

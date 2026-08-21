@@ -65,6 +65,8 @@ export function MathLadder() {
   const [streak, setStreak] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const advanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 单题提交锁（P0-#2）：同步 ref，拦截 Enter 与「确认」并发的重复提交。
+  const submittingRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const practice = useStore(s => s.practice);
   const recordSpeed = useStore(s => s.recordSpeed);
@@ -110,7 +112,9 @@ export function MathLadder() {
   }, [qIdx]);
 
   const submitAnswer = () => {
+    if (submittingRef.current) return; // 单题只接受一次提交
     if (!input.trim()) return;
+    submittingRef.current = true;
     const ans = parseInt(input, 10);
     const isRight = ans === currentQ.answer;
     setFeedback(isRight ? 'right' : 'wrong');
@@ -134,6 +138,7 @@ export function MathLadder() {
       answerWrong('math');
     }
     advanceRef.current = setTimeout(() => {
+      submittingRef.current = false; // 换题后释放锁，允许下一题提交
       if (qIdx + 1 >= Q_PER_LEVEL) {
         stopTimer();
         setPhase('result');

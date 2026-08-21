@@ -68,8 +68,9 @@
     <!-- 性能优化：关键资源提前加载 -->
     <!-- 字体预加载：避免 FOIT，字体与 JS 并行下载，LCP 提前 -->
     <link rel="preload" as="font" href="/fonts/baloo-2.woff2" type="font/woff2" crossorigin />
-    <!-- 首屏 hero 图片预加载：HomePage 一进入就可见 -->
-    <link rel="preload" as="image" href="/hero_banner.jpg" fetchpriority="high" />
+    <!-- 首屏 hero 图片预加载：HomePage 一进入就可见（P0-#4：改为实际 LCP 图 hero_jelly.png，
+         hero_banner.jpg 仅作 og:image 分享图，不应参与 preload） -->
+    <link rel="preload" as="image" href="/hero_jelly.png" fetchpriority="high" />
   </head>
   <body>
     <div id="root"></div>
