@@ -12,6 +12,7 @@ import { sfxTap } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
 import { SCIENCE_ITEMS } from '@/data/scienceIndex';
+import { ScienceQuiz } from '@/components/quiz/ScienceQuiz';
 
 // 懒加载 5 大模块
 const DinoWorld = lazy(() => import('./components/DinoWorld').then(m => ({ default: m.DinoWorld })));
@@ -120,6 +121,9 @@ export default function SciencePage() {
         {tab === 'animal' && <AnimalWorld />}
         {tab === 'body' && <BodyAdventure />}
       </Suspense>
+
+      {/* 🧪 科学小考官：探索后 3 连对闯关问答（游戏化） */}
+      <ScienceQuiz category={tab === 'space' ? 'space' : tab === 'animal' ? 'animal' : 'dino'} />
     </div>
   );
 }
