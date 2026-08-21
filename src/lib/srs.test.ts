@@ -89,12 +89,12 @@ describe('srs · isDue()', () => {
     expect(isDue({ lv: 2, due: NOW - 1000, ok: 1, ng: 0, last: 0 }, NOW)).toBe(true);
   });
 
-  it('已掌握（lv=MAX_LEVEL）30 天内不算到期', () => {
-    expect(isDue({ lv: MAX_LEVEL, due: NOW, ok: 10, ng: 0, last: 0 }, NOW)).toBe(false);
+  it('已掌握（lv=MAX_LEVEL）保温未满：距下次复习还早不算到期', () => {
+    expect(isDue({ lv: MAX_LEVEL, due: NOW + 10 * DAY, ok: 10, ng: 0, last: 0 }, NOW)).toBe(false);
   });
 
-  it('已掌握（lv=MAX_LEVEL）超过 30 天需要保温复习', () => {
-    expect(isDue({ lv: MAX_LEVEL, due: NOW - 31 * DAY, ok: 10, ng: 0, last: 0 }, NOW)).toBe(true);
+  it('已掌握（lv=MAX_LEVEL）到下次复习时间(due)即保温复习', () => {
+    expect(isDue({ lv: MAX_LEVEL, due: NOW - 1, ok: 10, ng: 0, last: 0 }, NOW)).toBe(true);
   });
 
   it('undefined 不算到期', () => {
@@ -107,7 +107,7 @@ describe('srs · dueSkills()', () => {
     const p = makeProgress({
       'letter:A': { lv: 3, due: NOW - 2000, ok: 2, ng: 0, last: 0 },
       'letter:B': { lv: 1, due: NOW - 5000, ok: 1, ng: 1, last: 0 },
-      'letter:C': { lv: 5, due: NOW, ok: 10, ng: 0, last: 0 }, // 已掌握且刚复习，30天内不到期
+      'letter:C': { lv: 5, due: NOW + DAY, ok: 10, ng: 0, last: 0 }, // 已掌握且刚复习，下次复习在未来，未到期
       'letter:D': { lv: 1, due: NOW + DAY, ok: 0, ng: 0, last: 0 }, // 未到期
     });
     const due = dueSkills(p, NOW);
@@ -206,6 +206,25 @@ describe('srs · emptyMastery()', () => {
     expect(m.ok).toBe(0);
     expect(m.ng).toBe(0);
     expect(m.due).toBe(NOW);
+  });
+});
+
+describe('srs · review 与 isDue 口径一致（P0-#3）', () => {
+  it('答对升至 MAX_LEVEL 后，到 due 时刻即应判定到期（与成语等所有科目同口径）', () => {
+    const next = review({ lv: MAX_LEVEL - 1, due: 0, ok: 3, ng: 0, last: 0 }, true, NOW, 1);
+    expect(next.lv).toBe(MAX_LEVEL);
+
+    // 一致性不变量：review 安排哪天复习，isDue 就在哪天判到期。
+    expect(isDue(next, next.due ?? 0)).toBe(true);
+    expect(isDue(next, (next.due ?? 0) - 1)).toBe(false);
+  });
+
+  it('MAX_LEVEL 的保温间隔由 INTERVALS[5]=30 天统一决定（P0-#3）', () => {
+    expect(MAX_LEVEL).toBe(5);
+    expect(INTERVALS[5]).toBe(30);
+    // 复习到 lv5 时，下次复习恰好安排在 30 天后
+    const next = review({ lv: MAX_LEVEL - 1, due: 0, ok: 3, ng: 0, last: 0 }, true, NOW, 1);
+    expect(next.due).toBe(NOW + INTERVALS[5] * DAY);
   });
 });
 

@@ -186,10 +186,10 @@ export function WordLearn({ word, onDone }: { word: WordEntry; onDone: () => voi
                   celebrateBig();
                   api.ready();
                 } else {
-                  answerCorrect('pinyin');
+                  answerCorrect('word');
                 }
               } else {
-                answerWrong('pinyin');
+                answerWrong('word');
                 setStreak(0);
               }
             }}

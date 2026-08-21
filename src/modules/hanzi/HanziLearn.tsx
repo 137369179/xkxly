@@ -15,6 +15,7 @@ import { useAiStream } from '@/lib/ai/useAi';
 import { hanziStoryTask, hanziSentenceTask } from '@/lib/ai/tasks';
 import { speak } from '@/lib/speech';
 import { answerCorrect, answerWrong } from '@/lib/feedback';
+import { streakTargetForLevel } from '@/lib/difficulty';
 import { StreakBar } from '@/components/study/StreakBar';
 import { sfxTap, sfxCorrect, sfxWin } from '@/lib/sfx';
 import { celebrateBig } from '@/lib/celebrate';
@@ -273,8 +274,8 @@ export function HanziLearn({ hanzi, onDone }: { hanzi: HanziEntry; onDone: () =>
             labels={{ 1: t('hanzi.qPinyin'), 2: t('hanzi.qHanzi'), 3: t('hanzi.qWords') }}
             className="justify-center"
           />
-          {/* 闯关里程碑：连续答对 3 题点亮「识字小达人」目标感；答错归零温和引导 */}
-          <StreakBar streak={streak} target={3} tone="green" />
+          {/* 闯关里程碑：连续答对（目标随难度爬坡）点亮「识字小达人」目标感；答错归零温和引导 */}
+          <StreakBar streak={streak} target={streakTargetForLevel(difficulty)} tone="green" />
           <QuizCard
             key={q.id}
             question={q}
@@ -283,7 +284,7 @@ export function HanziLearn({ hanzi, onDone }: { hanzi: HanziEntry; onDone: () =>
               if (correct) {
                 const next = streak + 1;
                 setStreak(next);
-                if (next >= 3) {
+                if (next >= streakTargetForLevel(difficulty)) {
                   // 3 连对闯关成功：庆祝 + 进入下一步
                   sfxCorrect();
                   celebrateBig();
@@ -298,7 +299,7 @@ export function HanziLearn({ hanzi, onDone }: { hanzi: HanziEntry; onDone: () =>
             }}
             onNext={() => {
               // 未满 3 连对：换下一题继续挑战；已通关则不再触发（onAnswer 已 ready）
-              if (streak < 3) {
+              if (streak < streakTargetForLevel(difficulty)) {
                 setQ(makeHanziQuestion(hanzi, difficulty, t));
               }
             }}

@@ -2,8 +2,8 @@
  * 表扬 / 鼓励语库（从 speech.ts 拆分）
  * ------------------------------------------------------------
  * 幼儿学习场景的分场景话术库：
- * - 表扬语（答对）：分 7 个场景（general/hanzi/pinyin/number/poem/math/combo）
- * - 鼓励语（答错）：分 6 个场景（无 combo）
+ * - 表扬语（答对）：分 9 个场景（general/hanzi/pinyin/word/letter/number/poem/math/combo）
+ * - 鼓励语（答错）：分 8 个场景（无 combo）
  * 附 skill id → 场景映射工具，让话术带"题型语境"。
  */
 
@@ -11,15 +11,15 @@
    场景类型
    ============================================================ */
 /** 表扬场景：按学习模块区分 */
-export type PraiseScene = 'general' | 'hanzi' | 'pinyin' | 'number' | 'poem' | 'math' | 'combo';
+export type PraiseScene = 'general' | 'hanzi' | 'pinyin' | 'word' | 'letter' | 'number' | 'poem' | 'math' | 'combo';
 /** 鼓励场景：不含 combo（连击鼓励不用于答错场景） */
-export type EncourageScene = 'general' | 'hanzi' | 'pinyin' | 'number' | 'poem' | 'math';
+export type EncourageScene = 'general' | 'hanzi' | 'pinyin' | 'word' | 'letter' | 'number' | 'poem' | 'math';
 
 /* ============================================================
    表扬语库（按场景分类）
    ------------------------------------------------------------
    - general：通用夸奖
-   - hanzi/pinyin/number/poem/math：具体学科语境
+   - hanzi/pinyin/word/letter/number/poem/math：具体学科语境
    - combo：连击表扬（连续答对时使用）
    ============================================================ */
 const PRAISES_BY_SCENE: Record<PraiseScene, string[]> = {
@@ -45,6 +45,8 @@ const PRAISES_BY_SCENE: Record<PraiseScene, string[]> = {
     '笔顺写对了！',
   ],
   pinyin: ['拼音读得很准！', '声调记得牢！', '韵母认得真清楚！', '拼音拼对了！'],
+  word: ['这个单词拼得对！', '发音真标准！', '单词记得真牢！', '这个单词读得真准！', '拼写完全正确！'],
+  letter: ['字母认得很准！', '这个字母读得对！', '字母顺序记得牢！', '大小写分得清！', '字母写得很漂亮！'],
   number: ['数字写得很漂亮！', '数数真准确！', '这个数字认得对！', '数字记得真牢！'],
   poem: ['古诗背得真流利！', '诗句记得牢！', '背得真有感情！', '整首诗都背对了！'],
   math: ['算得真快！', '答案正确！', '算式列得真清楚！', '算得真准确！'],
@@ -54,7 +56,7 @@ const PRAISES_BY_SCENE: Record<PraiseScene, string[]> = {
 /**
  * 鼓励语库（按场景分类）
  * - general：温柔鼓励
- * - hanzi/pinyin/number/poem/math：具体引导
+ * - hanzi/pinyin/word/letter/number/poem/math：具体引导
  */
 const ENCOURAGES_BY_SCENE: Record<EncourageScene, string[]> = {
   general: [
@@ -73,6 +75,8 @@ const ENCOURAGES_BY_SCENE: Record<EncourageScene, string[]> = {
   ],
   hanzi: ['看看这个字再想想', '笔顺再回想一下', '部首仔细看看', '这个字再认认'],
   pinyin: ['听听拼音再试试', '声调再想一想', '韵母再看看', '拼音再读一遍'],
+  word: ['听听发音再试试', '字母再拼一拼', '这个单词再看看', '跟着读一遍再试'],
+  letter: ['字母再认一认', '顺序再想一想', '这个字母再看看', '跟着读一遍试试'],
   number: ['数一数再试试', '数字再看看', '慢慢数清楚', '这个数字再认认'],
   poem: ['听听古诗再想想', '下一句再回忆一下', '慢慢背不着急', '这句诗再想想'],
   math: ['算式再算一遍', '换个方法试试', '数数看再算一次', '再算一遍好吗'],
@@ -121,7 +125,9 @@ export function encourageByScene(scene: EncourageScene): string {
  *   - hanzi:山 → 'hanzi'（"笔顺记对了！"比"真棒！"更有针对性）
  *   - math:add → 'math'（"算得真快！"）
  *   - poem:xxx → 'poem'（"古诗背得真流利！"）
- *   - letter:A / word:cat / pinyin:a 等都映射到对应场景
+ *   - word:cat → 'word'（"这个单词拼得对！"）
+ *   - letter:A → 'letter'（"字母认得很准！"）
+ *   - pinyin:a → 'pinyin'
  *   - 未知/通用 skill → 'general'
  * 这样孩子每次答对都能听到与当前学习内容相关的鼓励，
  * 而不是千篇一律的"真棒"，强化正向反馈的具体性。
@@ -136,6 +142,11 @@ export function skillToPraiseScene(skill?: string): PraiseScene {
     case 'pinyin':
     case 'rhyme':
       return 'pinyin';
+    case 'word':
+      return 'word';
+    case 'letter':
+    case 'letter-order':
+      return 'letter';
     case 'number':
     case 'count':
       return 'number';

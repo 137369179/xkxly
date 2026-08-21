@@ -11,6 +11,7 @@ import {
   idiomSkill,
   MAX_DAILY,
 } from './idiomSrs';
+import { review, isDue, MAX_LEVEL } from '@/lib/srs';
 import type { MasteryItem } from '@/types';
 
 const now = 1_000_000;
@@ -55,5 +56,18 @@ describe('idiomSrs 纯逻辑', () => {
     expect(idiomSkill('i7')).toBe('idiom:i7');
     expect(idiomIdOfSkill('idiom:i7')).toBe('i7');
     expect(idiomIdOfSkill('poem:p1')).toBe('');
+  });
+
+  it('lv5 已掌握成语的复习时机与全局 SRS 口径一致（P0-#3）', () => {
+    // 某个成语答对升至 MAX_LEVEL（复习引擎会按 INTERVALS[lv] 排下次复习）
+    const afterReview = review({ lv: MAX_LEVEL - 1, due: 0, ok: 4, ng: 0, last: 0 }, true, now, 1);
+    expect(afterReview.lv).toBe(MAX_LEVEL);
+
+    // 到达 review 安排的复习时刻时，成语句应把它视为到期
+    const idiomDue = selectDueIdiomSkills({ 'idiom:i1': afterReview }, afterReview.due ?? 0).includes('idiom:i1');
+    expect(idiomDue).toBe(true);
+    // 全局 SRS 在同一时刻也必须判定到期——修复前 isDue 对 lv5 额外 +30 天，
+    // 会与成语侧互相矛盾，由此断言暴露分叉。
+    expect(isDue(afterReview, afterReview.due ?? 0)).toBe(true);
   });
 });

@@ -57,5 +57,23 @@ export function calibrateDifficulty(
   return base;
 }
 
+/**
+ * 闯关里程碑「目标连对数」随难度爬坡（R48 · 渐进式难度）。
+ * ------------------------------------------------------------------
+ * 设计依据：洪恩识字 / 宝宝巴士的关卡设计中，难度越高、单关目标越长，
+ * 孩子在「再对几题就通关」的目标感中保持持续投入；过低难度易乏味、
+ * 过高难度易挫败。这里把固定 3 连对升级为按难度动态推导：
+ *   - 难度 1（入门）：2 连对
+ *   - 难度 2（进阶）：3 连对
+ *   - 难度 3（挑战）：4 连对
+ * 调用方（RoundRunner 的 leveled 模式、各模块自有 StreakBar）据此渲染圆点
+ * 并同步「通关阈值」，保证视觉进度与判定一致。
+ */
+export function streakTargetForLevel(level: 1 | 2 | 3): number {
+  if (level <= 1) return 2;
+  if (level === 2) return 3;
+  return 4;
+}
+
 /** 等级上限常量再导出，方便调用方引用 */
 export { MAX_LEVEL };
