@@ -13,6 +13,7 @@ import {
   idiomHintMessages,
 } from '../prompts';
 import { chat } from '@/lib/ai/client';
+import { sanitizeStructuredText } from '@/lib/ai/guard';
 import { safeParseJSON } from '@/lib/safeStorage';
 import type { StreamTask, TaskResult } from './types';
 import type { Idiom } from '@/data/idioms';
@@ -75,7 +76,9 @@ export async function idiomSentenceTask(idiom: Idiom): Promise<TaskResult<IdiomS
     if (!r.ok) {
       return { ok: false, data: fallbackData, fallback: true, ...(r.error ? { error: r.error } : {}), ...(r.ms !== undefined ? { ms: r.ms } : {}) };
     }
-    const parsed = safeParseJSON<{ sentences?: Array<{ scene?: string; text?: string }> }>(r.text, {});
+    const parsed = sanitizeStructuredText<
+      { sentences?: Array<{ scene?: string; text?: string }> }
+    >(safeParseJSON<{ sentences?: Array<{ scene?: string; text?: string }> }>(r.text, {}));
     const sentences = (parsed.sentences ?? [])
       .filter((s) => s && typeof s.text === 'string' && s.text.length > 0)
       .slice(0, 3)
@@ -154,7 +157,9 @@ export async function idiomHintTask(lastChar: string, usedIdioms?: string[]): Pr
     if (!r.ok) {
       return { ok: false, data: fallbackData, fallback: true, ...(r.error ? { error: r.error } : {}), ...(r.ms !== undefined ? { ms: r.ms } : {}) };
     }
-    const parsed = safeParseJSON<{ char?: string; pinyin?: string; emoji?: string; clue?: string }>(r.text, {});
+    const parsed = sanitizeStructuredText<
+      { char?: string; pinyin?: string; emoji?: string; clue?: string }
+    >(safeParseJSON<{ char?: string; pinyin?: string; emoji?: string; clue?: string }>(r.text, {}));
     if (!parsed.char || !parsed.clue) return { ok: true, data: fallbackData, fallback: true, ...(r.ms !== undefined ? { ms: r.ms } : {}) };
     return {
       ok: true,

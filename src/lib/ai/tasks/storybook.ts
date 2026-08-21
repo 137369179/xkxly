@@ -6,6 +6,7 @@
  */
 
 import { chat } from '../client';
+import { sanitizeStructuredText } from '../guard';
 import { safeParseJSON } from '@/lib/safeStorage';
 import { storybookMessages, type StoryBookData, type StoryBookPageData } from '../prompts';
 import type { ChatOptions } from '../types';
@@ -47,7 +48,9 @@ export function createStorybookTask(
         throw new Error(result.error?.message ?? 'AI 生成失败');
       }
 
-      const parsed = safeParseJSON<StoryBookData>(result.text, null as unknown as StoryBookData);
+      const parsed = sanitizeStructuredText(
+        safeParseJSON<StoryBookData>(result.text, null as unknown as StoryBookData),
+      );
       // 校验
       if (!parsed.pages || parsed.pages.length !== 4) {
         throw new Error('Invalid page count');

@@ -13,8 +13,12 @@
  * 4. 2.5s 超时与断网自动降级熔断机制：若网络不可用或超时，自动无缝切换到本地语音，绝不卡死界面。
  */
 
+// 微软 Edge 朗读公共客户端令牌（非本应用密钥，属公开复用令牌）。
+// 可用 VITE_EDGE_TTS_TOKEN 覆盖，便于自建代理/升级时替换；默认回退公共令牌。
+const DEFAULT_EDGE_TOKEN = '6A5AA1D4EAFF4E9FB37E23D68491D6F4';
+const EDGE_TOKEN = ((import.meta.env.VITE_EDGE_TTS_TOKEN as string | undefined) || DEFAULT_EDGE_TOKEN);
 const EDGE_WS_URL =
-  'wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=6A5AA1D4EAFF4E9FB37E23D68491D6F4';
+  `wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=${EDGE_TOKEN}`;
 
 export interface EdgeTtsOptions {
   voice?: string;

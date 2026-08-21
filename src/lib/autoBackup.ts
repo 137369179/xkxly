@@ -23,6 +23,19 @@ export interface BackupRecord {
   settings?: Record<string, unknown>;
 }
 
+/**
+ * 备份落盘前剥离家长 PIN 相关字段，与 backup.buildBackup 的导出口径一致：
+ * PIN 为 4 位数字，哈希+盐同文件亦可离线穷举，故自动备份同样不落任何 PIN 信息。
+ */
+function sanitizeSettings(settings?: Record<string, unknown>): Record<string, unknown> | undefined {
+  if (!settings) return settings;
+  const { parentPin, pinFails, pinLockUntil, ...rest } = settings;
+  void parentPin;
+  void pinFails;
+  void pinLockUntil;
+  return rest;
+}
+
 /** 获取所有历史备份 */
 export function getBackupHistory(): BackupRecord[] {
   const backups: BackupRecord[] = [];
@@ -40,7 +53,7 @@ export function createBackup(progress: Progress, settings?: Record<string, unkno
     id: `backup_${Date.now()}`,
     timestamp: Date.now(),
     progress,
-    settings,
+    settings: sanitizeSettings(settings),
   };
 
   // 保存为新备份

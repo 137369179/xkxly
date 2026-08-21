@@ -14,12 +14,14 @@ interface ToneStyle {
 }
 
 export const TONE_STYLE: Record<Tone, ToneStyle> = {
-  pink: { main: '#ff6b96', deep: '#e05a80', soft: '#ffe4ee', on: '#FFFFFF' },
-  blue: { main: '#55aee0', deep: '#2e93c9', soft: '#dcecfa', on: '#FFFFFF' },
+  // P1-6 对比度修复：实心按钮 white-on-bright 低对比(≈2.0-3.8:1)，改为同相位深色前景
+  // 字(全部 ≥3:1, 部分 ≥4:1)，保留糖果亮色背景，最小化视觉风格变化。
+  pink: { main: '#ff6b96', deep: '#e05a80', soft: '#ffe4ee', on: '#8a1f4a' },
+  blue: { main: '#55aee0', deep: '#2e93c9', soft: '#dcecfa', on: '#1f4b78' },
   yellow: { main: '#ffc93c', deep: '#e5ac2e', soft: '#fff4d6', on: '#5a4408' },
-  green: { main: '#5fd68b', deep: '#33a863', soft: '#f0faf4', on: '#FFFFFF' },
-  purple: { main: '#8b6ef0', deep: '#6631c7', soft: '#ece5ff', on: '#FFFFFF' },
-  orange: { main: '#ff9f5a', deep: '#c2410c', soft: '#fff3ec', on: '#FFFFFF' },
+  green: { main: '#5fd68b', deep: '#33a863', soft: '#f0faf4', on: '#1e6b3c' },
+  purple: { main: '#8b6ef0', deep: '#6631c7', soft: '#ece5ff', on: '#2f1a72' },
+  orange: { main: '#ff9f5a', deep: '#c2410c', soft: '#fff3ec', on: '#8f3d0d' },
 };
 
 /** 按索引循环取色，用于列表着色 */

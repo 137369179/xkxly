@@ -5,6 +5,44 @@
 
 ---
 
+## [Unreleased] · 2026-08-21 · P1 审计第二批（待提交）
+
+> 全站审计 P1 批次剩余项补充处理，4 项（对比度 / AI 输出过滤 / 备份 / Edge TTS）。
+
+### P1-6 · 主按钮对比度修复（亮背景 + 深色前景字）
+- `src/lib/tones.ts`：实心按钮前景字从白色改为同相位深色，全部达 WCAG ≥3:1
+  （pink `#8a1f4a` 3.31 / blue `#1f4b78` 3.63 / green `#1e6b3c` 3.50 / purple `#2f1a72` 3.71 /
+   orange `#8f3d0d` 3.68；yellow 原深字 5.96 不变），保留糖果亮色背景、视觉风格最小变化。
+- 新增回归测试：`src/lib/tones.test.ts` 断言每种 tone 的 `on`/`main` 对比度 ≥3。
+
+### P1-8 · 结构化 AI 输出内容过滤
+- `src/lib/ai/guard.ts`：新增 `sanitizeStructuredText`——递归清洗解码 JSON 的所有字符串字段
+  （去零宽/控制字符、去跑偏开场、命中儿童敏感词置空），**不做长度截断**以保护故事/报告文本；
+  并接入 `extractJson` 解码路径（generate/grade/report 等全部结构化 task 自动生效）。
+- `src/lib/ai/tasks/{storybook,idiom}.ts`：`safeParseJSON` 路径同步接入同一过滤器。
+- 新增回归测试：`src/lib/ai/guard.test.ts`。
+
+### P1-9 · 自动备份去 PIN（与导出口径一致）
+- `src/lib/autoBackup.ts`：`createBackup` 落盘前剥离 `parentPin/pinFails/pinLockUntil`，
+  不再让 PIN 字段在 6 个备份键中冗余。
+
+### P1-10 · Edge Neural TTS 令牌可注入 + WSS 域入 CSP
+- `src/lib/tts/edgeNeuralTts.ts`：朗读令牌改为 `VITE_EDGE_TTS_TOKEN` 可覆盖，默认回退公开客户端令牌；
+  `.env.example` 补充该项说明。
+- `public/_headers` 与 `shared/aiProxyCore.mjs`：`connect-src` 加入 `wss://speech.platform.bing.com`（Edge TTS 实际在用，避免生产被 CSP 拦截）。
+
+### 验证
+以下结果待最终确认后更新：
+- `npx tsc -b` ✓
+- `npm run build`（约 45s）+ `npm run test`（全量）— 本轮验证中
+
+**受影响文件**：`src/lib/tones.ts`、`src/lib/ai/guard.ts`、`src/lib/ai/tasks/storybook.ts`、
+`src/lib/ai/tasks/idiom.ts`、`src/lib/autoBackup.ts`、`src/lib/tts/edgeNeuralTts.ts`、
+`public/_headers`、`shared/aiProxyCore.mjs`、`.env.example`
+**新增测试**：`src/lib/tones.test.ts`、`src/lib/ai/guard.test.ts`
+
+---
+
 ## [Unreleased] · 2026-08-21 · 分支 `学习乐园`（基于 R47 = `ca803cd`）
 
 > 本批次为**待提交**改动，共 18 个修改文件 + 3 个新增测试文件（+205 −55），

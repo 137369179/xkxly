@@ -245,8 +245,47 @@ function balancedSlice(s: string): string | null {
 }
 
 /**
+ * 结构化输出内容过滤（P1-8）：递归清洗解码后 JSON 的所有字符串字段。
+ * 仅做「儿童安全 + 去跑偏开场 + 去零宽字符」的保守清洗，**不做长度截断**，
+ * 以免破坏故事/报告等长文本的完整性。命中敏感词时将字段置空（保持结构，不炸 JSON）。
+ */
+export function sanitizeStructuredText<T>(data: T): T {
+  return sanitizeWalk(data) as T;
+}
+function sanitizeWalk(v: unknown): unknown {
+  if (typeof v === 'string') return sanitizeStructuredStr(v);
+  if (Array.isArray(v)) return v.map(sanitizeWalk);
+  if (v && typeof v === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const k of Object.keys(v as Record<string, unknown>)) out[k] = sanitizeWalk((v as Record<string, unknown>)[k]);
+    return out;
+  }
+  return v;
+}
+function sanitizeStructuredStr(s: string): string {
+  const clean = s
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u001f\u007f\u200b-\u200f\u2028\u2029\ufeff]/g, '')
+    .trim();
+  if (!clean) return clean;
+  // 儿童敏感内容：命中即置空（如书籍正文出现不当表述时丢弃该字段）
+  if (hitBlocked(clean, 'child')) return '';
+  // 去掉「作为AI…」这类跑偏开场
+  let t = clean;
+  for (let i = 0; i < 3; i++) {
+    const p = BAD_OPENER.find((x) => t.startsWith(x));
+    if (!p) break;
+    const cut = t.indexOf('。');
+    if (cut <= 0 || cut >= t.length - 1) break;
+    t = t.slice(cut + 1).trim();
+  }
+  return t;
+}
+
+/**
  * 从模型输出里稳健地抠出 JSON。
  * 即使开了 response_format，也可能偶发带围栏、前后缀或尾逗号，这里全兜住。
+ * 解码后统一经 sanitizeStructuredText 做输出内容过滤（P1-8）。
  */
 export function extractJson<T>(raw: string): T | null {
   if (!raw || typeof raw !== 'string') return null;
@@ -264,13 +303,14 @@ export function extractJson<T>(raw: string): T | null {
     }
   };
 
-  return (
+  const parsed: T | null =
     tryParse(s) ??
     (() => {
       const sliced = balancedSlice(s);
       if (!sliced) return null;
       // 修掉尾逗号：{"a":1,} / [1,2,]
       return tryParse(sliced) ?? tryParse(sliced.replace(/,\s*([}\]])/g, '$1'));
-    })()
-  );
+    })();
+
+  return parsed ? sanitizeStructuredText(parsed) : null;
 }
