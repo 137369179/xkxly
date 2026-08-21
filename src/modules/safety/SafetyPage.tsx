@@ -292,7 +292,7 @@ export default function SafetyPage() {
               className="mx-auto max-w-lg rounded-2xl border-2 border-blue-200 bg-blue-50 p-3 text-left"
             >
               <div className="mb-1 flex items-center gap-2 text-xs font-black text-blue-700">
-                <span>🤖</span> 小智说
+                <span>🤖</span> 小茜说
                 {safetyAi.status === 'thinking' && <span className="text-blue-400">正在想…</span>}
               </div>
               <p className="text-sm font-bold leading-relaxed text-blue-900">

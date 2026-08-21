@@ -30,9 +30,8 @@ export const DEFAULT_SETTINGS: TtsSettings = {
   modulePresets: {},
   // 家长保存的专属场景（P7 / P9 · ④ 多槽位）：数组，互不复盖
   customScenes: [],
-  // 神经网络引擎：默认指向上游多语言模型（浏览器首次按需加载并缓存，
-  // 之后可离线复读）。该仓库已含中文音色（zf_*/zm_*），开箱即可读中文。
-  kokoroModelUrl: 'onnx-community/Kokoro-82M-v1.0',
+  // 神经网络引擎：用户配置自托管 R2/CDN 地址后启用，默认留空避免未认证直接请求 HuggingFace 报错 401
+  kokoroModelUrl: '',
   kokoroLibUrl: 'https://cdn.jsdelivr.net/npm/kokoro-js/dist/kokoro.web.js',
   kokoroVoice: 'zf_xiaoxiao',
   kokoroDtype: 'q4f16',
@@ -64,20 +63,27 @@ export const BASE_PITCH = 1.1;
 function read(): TtsSettings {
   try {
     const raw = safeGetItem(SETTINGS_KEY);
-  if (raw) {
-    const parsed = JSON.parse(raw) as Partial<TtsSettings> & {
-      customScene?: { rate: number; pitch: number; volume: number; modulePresets?: unknown };
-    };
-    // P9 · ④ 迁移：旧版单 customScene 升级为多槽位 customScenes（slot 1）
-    if ((parsed as { customScene?: unknown }).customScene && !parsed.customScenes) {
-      const old = (parsed as { customScene: { rate: number; pitch: number; volume: number; modulePresets?: unknown } }).customScene;
-      parsed.customScenes = [
-        { slot: 1, name: '我的场景', emoji: '🎚️', rate: old.rate, pitch: old.pitch, volume: old.volume, modulePresets: (old.modulePresets as TtsModulePresets) ?? {} },
-      ];
-      delete (parsed as { customScene?: unknown }).customScene;
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<TtsSettings> & {
+        customScene?: { rate: number; pitch: number; volume: number; modulePresets?: unknown };
+      };
+      // P9 · ④ 迁移：旧版单 customScene 升级为多槽位 customScenes（slot 1）
+      if ((parsed as { customScene?: unknown }).customScene && !parsed.customScenes) {
+        const old = (parsed as { customScene: { rate: number; pitch: number; volume: number; modulePresets?: unknown } }).customScene;
+        parsed.customScenes = [
+          { slot: 1, name: '我的场景', emoji: '🎚️', rate: old.rate, pitch: old.pitch, volume: old.volume, modulePresets: (old.modulePresets as TtsModulePresets) ?? {} },
+        ];
+        delete (parsed as { customScene?: unknown }).customScene;
+      }
+      // 自动迁移：清理历史缓存中无法直接免鉴权请求的 HuggingFace 默认地址
+      if (parsed.kokoroModelUrl === 'onnx-community/Kokoro-82M-v1.0') {
+        parsed.kokoroModelUrl = '';
+      }
+      if (parsed.engine === 'kokoro' && !parsed.kokoroModelUrl) {
+        parsed.engine = 'edge';
+      }
+      return { ...DEFAULT_SETTINGS, ...parsed };
     }
-    return { ...DEFAULT_SETTINGS, ...parsed };
-  }
   } catch (e) {
     if (import.meta.env.DEV) console.warn('[tts/settings] 解析/操作失败，已回退默认', e);
   }

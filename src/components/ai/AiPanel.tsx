@@ -1,5 +1,5 @@
 /**
- * AI 内容面板 —— 全站所有「小智说话」的唯一容器
+ * AI 内容面板 —— 全站所有「小茜说话」的唯一容器
  * ------------------------------------------------------------------
  * 交互一致性靠这一个组件保证：
  *   思考中 → 头像抖动 + 三点动画 + 场景化提示语
@@ -11,6 +11,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { AiAvatar } from './AiAvatar';
 import { AiThinking } from './AiThinking';
+import { RubyText } from './RubyText';
 import type { AiStreamState } from '@/lib/ai/useAi';
 import { TONE_STYLE, type Tone } from '@/lib/tones';
 import { speak, speechSupported, stopSpeaking } from '@/lib/speech';
@@ -57,6 +58,7 @@ export function AiPanel({
   const t = TONE_STYLE[tone]!
   const { status, text, fallback, task, run, thought } = state;
   const [speaking, setSpeaking] = useState(false);
+  const [showPinyin, setShowPinyin] = useState(false);
   /**
    * ⚠️ stopSpeaking 是全局的。旧代码在卸载时无条件调用，
    * 页面上任何一个 AiPanel 消失都会掐断别处正在进行的朗读（比如古诗范读）。
@@ -74,7 +76,7 @@ export function AiPanel({
 
   if (status === 'idle') return null;
 
-  const heading = title ?? task?.title ?? '小智说';
+  const heading = title ?? task?.title ?? '小茜说';
   const thinking = status === 'thinking';
   const mood = thinking ? 'thinking' : status === 'streaming' ? 'talking' : 'idle';
 
@@ -101,11 +103,28 @@ export function AiPanel({
       className={cn('rounded-[1.4rem] border-2', compact ? 'p-3' : 'p-4 sm:p-5', className)}
       style={{ background: t.soft, borderColor: `${t.main}55` }}
     >
-      <header className="mb-2 flex items-center gap-2.5">
-        <AiAvatar size={compact ? 32 : 38} mood={mood} />
-        <span className="text-base font-extrabold sm:text-lg" style={{ color: t.deep }}>
-          {heading}
-        </span>
+      <header className="mb-2 flex items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2.5">
+          <AiAvatar size={compact ? 32 : 38} mood={mood} />
+          <span className="text-base font-extrabold sm:text-lg" style={{ color: t.deep }}>
+            {heading}
+          </span>
+        </div>
+        {status === 'done' && (
+          <button
+            type="button"
+            onClick={() => {
+              sfxTap();
+              setShowPinyin((v) => !v);
+            }}
+            className={cn(
+              'rounded-xl px-2.5 py-1 text-xs font-black transition active:scale-95 border',
+              showPinyin ? 'bg-pink-500 text-white border-pink-600' : 'bg-white text-pink-700 border-pink-200',
+            )}
+          >
+            {showPinyin ? '🔤 纯汉字' : '拼 拼音'}
+          </button>
+        )}
       </header>
 
       <AnimatePresence mode="wait">
@@ -120,14 +139,14 @@ export function AiPanel({
           </motion.div>
         ) : (
           <motion.div key="body" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <p
+            <div
               className={cn(
                 'whitespace-pre-wrap break-words font-medium',
                 compact ? 'text-base leading-relaxed' : 'text-lg leading-8',
               )}
               style={{ color: '#5c2e3d' }}
             >
-              {text}
+              {showPinyin ? <RubyText text={text} /> : text}
               {status === 'streaming' && (
                 <motion.span
                   className="ml-0.5 inline-block h-[1em] w-[3px] translate-y-[2px] rounded-full"
@@ -136,7 +155,7 @@ export function AiPanel({
                   transition={{ duration: 0.85, repeat: Infinity }}
                 />
               )}
-            </p>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -170,7 +189,7 @@ export function AiPanel({
             </button>
           )}
           {fallback && (
-            <span className="text-xs text-ink-soft">小智暂时连不上，这是离线小提示</span>
+            <span className="text-xs text-ink-soft">小茜暂时连不上，这是离线小提示</span>
           )}
         </footer>
       )}

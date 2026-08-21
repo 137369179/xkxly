@@ -20,7 +20,7 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { id: 'home', label: '我的乐园', short: '首页', emoji: '🏡', imageIcon: '/icons/icon-192.png', tone: 'orange', desc: '看看今天学了什么', bottom: true },
   { id: 'today', label: '今日课程', short: '今日', emoji: '📅', imageIcon: '/icons/felt_town.jpg', tone: 'purple', desc: '跟着课程一步步学', bottom: true },
-  { id: 'companion', label: '小智伙伴', short: '伙伴', emoji: '🤖', imageIcon: '/icons/felt_room.jpg', tone: 'purple', desc: '拟人讲解 · 陪娃聊天' },
+  { id: 'companion', label: '小茜伙伴', short: '伙伴', emoji: '🤖', imageIcon: '/icons/felt_room.jpg', tone: 'purple', desc: '拟人讲解 · 陪娃聊天' },
   { id: 'letters', label: '字母乐园', short: '字母', emoji: '🔤', imageIcon: '/icons/letters.jpg', tone: 'blue', desc: '26 个字母大冒险', bottom: true },
   { id: 'poems', label: '古诗花园', short: '古诗', emoji: '🌸', imageIcon: '/icons/poem.jpg', tone: 'pink', desc: '385 首经典古诗' },
   { id: 'numbers', label: '数字王国', short: '数字', emoji: '🔢', imageIcon: '/icons/math.jpg', tone: 'yellow', desc: '认数字 · 学算术', bottom: true },

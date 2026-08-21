@@ -248,8 +248,8 @@ export const MEDALS: MedalDef[] = [
   },
   {
     id: 'medal-companion-friend',
-    name: '小智好朋友',
-    desc: '与小智聊天 20 轮',
+    name: '小茜好朋友',
+    desc: '与小茜聊天 20 轮',
     emoji: '💬',
     tone: 'purple',
     category: 'behavior',

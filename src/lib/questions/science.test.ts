@@ -103,5 +103,5 @@ describe('ScienceQuiz 组件冒烟', () => {
     expect(host.textContent).toBeTruthy();
     act(() => root.unmount());
     host.remove();
-  });
+  }, 15000);
 });

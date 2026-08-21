@@ -182,7 +182,7 @@ export function FillBlank({ rhyme, tone }: FillBlankProps) {
 
   const handleNext = () => {
     sfxTap();
-    // 出下一题是安全边界：让小智把最新建议应用上来
+    // 出下一题是安全边界：让小茜把最新建议应用上来
     diffMeta.syncNow();
     newQuestion();
   };

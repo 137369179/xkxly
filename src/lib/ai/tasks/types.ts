@@ -21,7 +21,7 @@ export interface StreamTask {
   cacheTtl?: number;
   /** AI 不可用时展示的本地内容，必填 —— 没有兜底就不该上 AI */
   fallback: string;
-  /** 面板标题，例：小智讲一讲 */
+  /** 面板标题，例：小茜讲一讲 */
   title: string;
   /** 面板上的提示语，例：正在想怎么讲给你听… */
   hint?: string;

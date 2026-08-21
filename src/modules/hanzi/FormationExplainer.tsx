@@ -1,5 +1,6 @@
 import { explainFormation } from '@/lib/hanziEtymology';
 import { useTranslation } from '@/i18n/useTranslation';
+import { ExploreReward } from '@/components/study/ExploreReward';
 
 /**
  * 字理讲解：直接复用查询层 explainFormation 生成的、经过教学正确性把关的讲解句。
@@ -14,6 +15,7 @@ export function FormationExplainer({ char }: { char: string }) {
     <div className="rounded-2xl bg-gradient-to-br from-candy-green-soft/70 to-candy-blue-soft/50 p-3.5">
       <p className="mb-1 text-xs font-extrabold text-candy-green-deep">{t('hanzi.formationTitle')}</p>
       <p className="text-base font-semibold leading-relaxed text-ink">{text}</p>
-    </div>
+    
+      <ExploreReward rewardKey="hanzi-formation" scene="hanzi" tone="blue" /></div>
   );
 }

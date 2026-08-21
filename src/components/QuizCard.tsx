@@ -41,7 +41,7 @@ export interface QuizCardProps {
   /** 顶部附加信息，如「第 3 / 5 题」 */
   meta?: string;
   /**
-   * 答错后提供「小智讲一讲」。返回流式任务；不传则不显示 AI 入口。
+   * 答错后提供「小茜讲一讲」。返回流式任务；不传则不显示 AI 入口。
    * 由各模块决定怎么描述这道题，答题卡只负责统一的展示与交互。
    */
   aiExplain?: (q: Question, chosenText: string, correctText: string) => StreamTask;
@@ -260,7 +260,7 @@ export function QuizCard({
       }
       setShowStuckHint(true);
       // 温和语音提醒，吸引注意
-      void speak('需要小智再读一遍题目吗？', { lang: 'zh-CN', rate: 0.9, module: 'praise' });
+      void speak('需要小茜再读一遍题目吗？', { lang: 'zh-CN', rate: 0.9, module: 'praise' });
     }, 60_000);
     return () => clearStuckTimer('new-question');
   // intentional: only re-arm when question changes or solved status changes

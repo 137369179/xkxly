@@ -23,7 +23,7 @@ export interface AiStreamState {
   /** 是否为本地兜底内容 */
   fallback: boolean;
   error?: AiError;
-  /** 思考分片进度计数：驱动「小智在想」动画的圆点，不展示思考文本 */
+  /** 思考分片进度计数：驱动「小茜在想」动画的圆点，不展示思考文本 */
   thought: number;
   /** 发起（或重发）一次生成；doneCb 在流结束后（非 abort）触发 */
   run: (task: StreamTask, opts?: { onDone?: () => void }) => void;

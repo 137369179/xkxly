@@ -7,6 +7,7 @@ import { TraceCanvas } from '@/components/TraceCanvas';
 import { CandyButton } from '@/components/ui/Button';
 import { speak } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
+import { ExploreReward } from '@/components/study/ExploreReward';
 
 /** 数字王国 · 描红：选一个数字，描一描、听一听 */
 export function NumberTrace() {
@@ -88,6 +89,7 @@ export function NumberTrace() {
           );
         })}
       </div>
-    </div>
+    
+      <ExploreReward rewardKey="number-trace" scene="number" tone="green" /></div>
   );
 }

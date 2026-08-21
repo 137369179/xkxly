@@ -159,7 +159,7 @@ export function MathQuiz() {
                     ? poolSize > 0
                     ? t('numbers.aiPoolReady', { poolSize })
                     : t('numbers.aiPoolEmpty')
-                    : '让小智把算式编成买水果、分糖果的小故事'}
+                    : '让小茜把算式编成买水果、分糖果的小故事'}
                 </span>
               </span>
               <span

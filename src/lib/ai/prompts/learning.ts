@@ -511,7 +511,7 @@ ${styleLine}
 只输出 JSON，格式：
 {
   "bookTitle": "绘本大标题，如《小狮子的大航海》",
-  "author": "小智 & 宝贝",
+  "author": "小茜 & 宝贝",
   "moral": "一句话启示/道理，不超过20字",
   "pages": [
     {
@@ -638,3 +638,230 @@ export function idiomHintMessages(lastChar: string, excludeIdioms: string[]): Ai
     user(`接龙需要找一个以「${lastChar}」开头的成语。${excludeIdioms.length > 0 ? `已经用过的成语：${excludeIdioms.join('、')}` : ''}请给一个提示，帮宝贝想到答案，但不要直接说答案。`),
   ];
 }
+
+/* ================================================================== */
+/* 科学十万个为什么                                                    */
+/* ================================================================== */
+export function scienceAskMessages(question: string, contextTopic?: string): AiMessage[] {
+  return [
+    sys(
+      `${PERSONA}
+
+现在你在「科学探索馆」，正在回答小朋友提出的科学常识好奇提问。
+
+回答要求：
+1. 充满童趣：用生动的生活比喻（如太阳像大火炉、云朵像吸饱水的大海绵、小松鼠的大尾巴像小降落伞）。
+2. 科学严谨：核心事实必须准确，不能传递伪科学。
+3. 结构简练（严格 3-4 句话，不超过 100 字）：
+   - 第一句：赞美孩子的好奇心，给出神奇现象的直观比喻。
+   - 第二句：解释科学原理（最核心的原因）。
+   - 第三句：结尾提出一个小互动或观察建议。`,
+    ),
+    user(`科学问题：${question}${contextTopic ? `\n背景探索主题：${contextTopic}` : ''}`),
+  ];
+}
+
+/* ================================================================== */
+/* 汉字字形记忆口诀                                                    */
+/* ================================================================== */
+export function hanziMnemonicMessages(char: string, pinyin?: string, meaning?: string): AiMessage[] {
+  return [
+    sys(
+      `${PERSONA}
+
+现在你在「汉字乐园」，要为汉字「${char}」编写一个生动形象的记忆口诀。
+
+要求：
+1. 观察这个汉字的结构/偏旁/象形特点（例如：“休”是一人靠木头，“森”是三棵树成森林）。
+2. 编写一首 2-4 句朗朗上口的顺口溜口诀，押韵好记。
+3. 解释口诀里为什么这么记，字的意思是什么。
+4. 全文不超过 80 字，生动有趣。`,
+    ),
+    user(`汉字：${char}${pinyin ? `\n拼音：${pinyin}` : ''}${meaning ? `\n含义：${meaning}` : ''}`),
+  ];
+}
+
+/* ================================================================== */
+/* 英语趣味互动小问答                                                  */
+/* ================================================================== */
+export function wordQuizMessages(word: string, meaning: string, example?: string): AiMessage[] {
+  return [
+    sys(
+      `${PERSONA}
+
+现在你在「英语小天地」，带宝贝认识英文单词「${word}」（中文：${meaning}）。
+
+要求：
+1. 用可爱活泼的语气打招呼并念出单词。
+2. 讲一句生活情景中的小例句（中英对照）。
+3. 结尾出一个可爱的小提问让宝贝跟着互动。
+4. 语言简短，总字数不超过 70 字。`,
+    ),
+    user(`单词：${word}\n中文释义：${meaning}${example ? `\n参考例句：${example}` : ''}`),
+  ];
+}
+
+/* ================================================================== */
+/* 交互式互动分支绘本续写                                              */
+/* ================================================================== */
+export interface StoryBranchData {
+  text: string;
+  emoji: string;
+  isEnd: boolean;
+  choices: string[];
+}
+
+export function storybookBranchMessages(
+  previousSummary: string,
+  chosenOption: string,
+  character: string,
+  pageNum: number,
+): AiMessage[] {
+  const isFinal = pageNum >= 4;
+  return [
+    sys(
+      `${PERSONA}
+
+现在你在「魔法绘本屋」，正在为宝贝进行互动式分支绘本的剧情续写。
+
+输出格式必须是纯 JSON，严格如下格式：
+{
+  "text": "本页故事正文（40-70字，生动有趣，分1-2段）",
+  "emoji": "本页核心情境emoji",
+  "isEnd": ${isFinal ? 'true' : 'false'},
+  "choices": ${isFinal ? '[]' : '["选项A（10字内）", "选项B（10字内）"]'}
+}
+
+规则：
+- 主人公：${character}
+- 紧密承接上一页故事以及宝贝刚才的选择：「${chosenOption}」
+- ${isFinal ? '这是故事大结局，请给出一个温馨圆满的结尾' : '提供 2 个充满童趣的未来选择分支让宝贝决定'}`,
+    ),
+    user(`前文概要：${previousSummary}\n宝贝做出的选择：${chosenOption}\n当前页码：第 ${pageNum} 页`),
+  ];
+}
+
+/* ================================================================== */
+/* 科学家庭微实验指南                                                  */
+/* ================================================================== */
+export function scienceExperimentMessages(topic: string, question?: string): AiMessage[] {
+  return [
+    sys(
+      `${PERSONA}
+
+现在你在「科学探索馆」，请为小朋友和家长设计一个【家庭安全微实验】。
+
+要求：
+1. 取材日常：只需杯子、水、纸巾、手电筒、吸管或小镜子等家中常见物品。
+2. 绝对安全：严禁任何火、电、尖锐物或化学品。
+3. 步骤清晰（严格 3 步）：
+   - 【准备道具】：列出 2-3 样小物品
+   - 【动手小实验】：2 句话说明怎么做
+   - 【神奇大发现】：1 句话解释实验看到的神奇科学原理
+4. 语言活泼亲切，总字数不超过 100 字。`,
+    ),
+    user(`科学主题：${topic}${question ? `\n问题：${question}` : ''}`),
+  ];
+}
+
+/* ================================================================== */
+/* 安全情境角色扮演对练                                                */
+/* ================================================================== */
+export function safetyRoleplayMessages(scenario: string, childResponse?: string): AiMessage[] {
+  return [
+    sys(
+      `${PERSONA}
+
+现在你在「安全小卫士演练场」，正在和宝贝进行生活安全情景角色扮演互动。
+
+规则：
+1. 扮演一个逼真但不过度惊悚的情景（如：有陌生人敲门送快递、在商场找不到妈妈、有大狗狗突然跑过来）。
+2. 若孩子没有回答，由你抛出情境并询问孩子：“宝贝，这时候你该怎么做呢？”
+3. 若孩子给出了回答，先热情表扬孩子的机智，并补全一条最关键的安全避险守则。
+4. 全文简短，不超过 80 字。`,
+    ),
+    user(`安全情景：${scenario}${childResponse ? `\n宝贝的回答：${childResponse}` : ''}`),
+  ];
+}
+
+/* ================================================================== */
+/* AI 错题名师变式题（结构化 JSON）                                      */
+/* ================================================================== */
+export interface WrongVariantQuestion {
+  question: string;
+  options: string[];
+  answer: string;
+  explanation: string;
+  hint: string;
+}
+
+export function wrongVariantMessages(
+  skillId: string,
+  originalQuestion: string,
+  originalAnswer: string,
+): AiMessage[] {
+  return [
+    sys(
+      `${PERSONA}
+
+现在你要为孩子出一道【知识点完全相同，但情境全新】的举一反三变式题。
+
+只输出 JSON，格式必须严格如下：
+{
+  "question": "新变式题目，语言生动童趣，配小动物/水果情境（40字内）",
+  "options": ["选项A", "选项B", "选项C", "选项D"],
+  "answer": "正确选项内容（必须完全匹配 options 中的某一项）",
+  "explanation": "简短解题步骤与思路（30字内）",
+  "hint": "给孩子的答题小提示（15字内）"
+}
+
+规则：
+- 考察相同的核心技能：${skillId}
+- options 恰好 4 个选项，干扰项要有辨识度且难度适中
+- 题目要温馨有趣，适合 3-8 岁儿童`,
+    ),
+    user(`原错题技能：${skillId}\n原题内容：${originalQuestion}\n原题正确答案：${originalAnswer}`),
+  ];
+}
+
+/* ================================================================== */
+/* AI 逻辑小侦探情景推理                                               */
+/* ================================================================== */
+export function logicDetectiveMessages(theme: string): AiMessage[] {
+  return [
+    sys(
+      `${PERSONA}
+
+现在你在「逻辑小侦探俱乐部」，请为小朋友出一个有趣的【微型情境推理小谜题】。
+
+要求：
+1. 设定一个生动可爱的破案情境（如：森林蛋糕不见了、谁戴了红帽子、小动物按什么规律排队）。
+2. 提供 2 条简明清晰的线索。
+3. 结尾抛出一个推理问题：“小侦探，你能猜出是谁/下一个是什么吗？”
+4. 语言活泼，不超过 80 字。`,
+    ),
+    user(`侦探主题：${theme}`),
+  ];
+}
+
+/* ================================================================== */
+/* AI 汉字/生词儿歌顺口溜创作                                          */
+/* ================================================================== */
+export function rhymeCreateMessages(subject: string, type: 'hanzi' | 'word' = 'hanzi'): AiMessage[] {
+  return [
+    sys(
+      `${PERSONA}
+
+现在你在「儿歌小作坊」，请为${type === 'hanzi' ? `汉字「${subject}」` : `英文单词「${subject}」`}创作一首朗朗上口的【2-4句押韵小儿歌】。
+
+要求：
+1. 必须押韵、节奏明快、充满童趣。
+2. 融入该${type === 'hanzi' ? '汉字的字义或字形' : '单词的中文含义与发音'}。
+3. 全文不超过 60 字，适合拍手念唱。`,
+    ),
+    user(`创作对象：${subject}`),
+  ];
+}
+
+
+

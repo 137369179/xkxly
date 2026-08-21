@@ -7,6 +7,7 @@ import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap } from '@/lib/sfx';
 import { useTranslation } from '@/i18n/useTranslation';
+import { ExploreReward } from '@/components/study/ExploreReward';
 
 type Op = 'add' | 'sub' | 'mul' | 'div';
 
@@ -172,6 +173,7 @@ export function VerticalMath() {
           </div>
         </Panel>
       )}
-    </div>
+    
+      <ExploreReward rewardKey="number-vertical" scene="number" tone="green" /></div>
   );
 }

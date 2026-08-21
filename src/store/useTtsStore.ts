@@ -25,7 +25,7 @@ interface TtsStoreState extends TtsState {
   setTtsState: (s: Partial<TtsState>) => void;
   /** 重置朗读状态 */
   resetTts: () => void;
-  /** 全局「小智语音对话」模态框是否打开（AiVoiceModal） */
+  /** 全局「小茜语音对话」模态框是否打开（AiVoiceModal） */
   voiceModalOpen: boolean;
   /** 打开语音对话模态框（App.tsx 全局挂载，任何组件可触发） */
   openVoiceModal: () => void;

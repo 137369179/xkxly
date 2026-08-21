@@ -17,8 +17,8 @@ import type { PoemCtx, PoemCompareInput } from '@/lib/ai/prompts';
 import { useAiStream } from '@/lib/ai/useAi';
 import { useTranslation } from '@/i18n/useTranslation';
 
-export type DetailTab = '原文' | '注解' | '格律' | '语境' | '研读' | '问小智';
-const TABS: DetailTab[] = ['原文', '注解', '格律', '语境', '研读', '问小智'];
+export type DetailTab = '原文' | '注解' | '格律' | '语境' | '研读' | '问小茜';
+const TABS: DetailTab[] = ['原文', '注解', '格律', '语境', '研读', '问小茜'];
 
 const TAB_KEYS: Record<DetailTab, string> = {
   '原文': 'poem.detail.tabOriginal',
@@ -26,7 +26,7 @@ const TAB_KEYS: Record<DetailTab, string> = {
   '格律': 'poem.detail.tabProsody',
   '语境': 'poem.detail.tabContext',
   '研读': 'poem.detail.tabStudy',
-  '问小智': 'poem.detail.tabAsk',
+  '问小茜': 'poem.detail.tabAsk',
 };
 
 export default function PoemDetail({
@@ -117,7 +117,7 @@ export default function PoemDetail({
             <PlanSummary poem={poem} />
           </div>
         )}
-        {tab === '问小智' && (
+        {tab === '问小茜' && (
           <div className="space-y-3">
             <p className="font-extrabold text-candy-pink-deep">{tr('poem.detail.aiTutorTitle')}</p>
             <PoemTutor poem={poem} />

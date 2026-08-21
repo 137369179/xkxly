@@ -4,7 +4,7 @@
  * 讲解完一个主题后，孩子可以继续追问：
  *   1. 调用 companionFollowUpTask 流式获取追问问题
  *   2. 显示追问问题 + AiChat 输入框
- *   3. 孩子回答后流式显示小智反馈
+ *   3. 孩子回答后流式显示小茜反馈
  *   4. 支持多轮（3 轮后结束）
  */
 import { useState, useEffect, useCallback, useRef } from 'react';

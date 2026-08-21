@@ -250,13 +250,13 @@ export default function MusicCreatePage() {
             <Panel className="border-2 border-blue-300 bg-blue-50">
               <div className="mb-2 flex items-center gap-2">
                 <span className="text-xl">🤖</span>
-                <span className="font-black text-blue-900">{tr('music.aiSays', { defaultValue: '小智说' })}</span>
+                <span className="font-black text-blue-900">{tr('music.aiSays', { defaultValue: '小茜说' })}</span>
                 {aiStream.status === 'thinking' && (
                   <span className="text-xs text-blue-500">{tr('music.thinking', { defaultValue: '正在点评…' })}</span>
                 )}
               </div>
               <div className="min-h-10 rounded-xl bg-white p-3 text-sm leading-relaxed text-gray-700">
-                {aiStream.text || tr('music.aiHint', { defaultValue: '点击「AI 点评」让小智来听你的创作！' })}
+                {aiStream.text || tr('music.aiHint', { defaultValue: '点击「AI 点评」让小茜来听你的创作！' })}
               </div>
             </Panel>
           </motion.div>

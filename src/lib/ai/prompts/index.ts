@@ -22,6 +22,7 @@ export type {
   WordPhonicsCtx,
   StoryBookPageData,
   StoryBookData,
+  StoryBranchData,
   GenCountQuestion,
   GenLetterMatch,
 } from './learning';
@@ -47,11 +48,21 @@ export {
   wordStoryMessages,
   wordPhonicsMessages,
   storybookMessages,
+  storybookBranchMessages,
   quizExtendMessages,
   adventureEncourageMessages,
   idiomStoryMessages,
   idiomSentenceMessages,
   idiomHintMessages,
+  scienceAskMessages,
+  scienceExperimentMessages,
+  hanziMnemonicMessages,
+  wordQuizMessages,
+  safetyRoleplayMessages,
+  wrongVariantMessages,
+  logicDetectiveMessages,
+  rhymeCreateMessages,
+  type WrongVariantQuestion,
 } from './learning';
 
 // Path & Companion
@@ -79,10 +90,11 @@ export {
 } from './path-companion';
 
 // Parent reports
-export type { DeepReport, WrongAnalyze, RecommendPractice } from './parent';
+export type { DeepReport, WrongAnalyze, RecommendPractice, ParentActionCard, ParentActionPlan } from './parent';
 export {
   parentReportMessages,
   deepReportMessages,
   wrongAnalyzeMessages,
   recommendPracticeMessages,
+  parentActionsMessages,
 } from './parent';

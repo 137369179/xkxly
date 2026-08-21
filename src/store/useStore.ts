@@ -433,7 +433,7 @@ export const useResearchNotes = () => useStore((s) => s.progress.researchNotes);
 export const usePkCount = () => useStore((s) => s.progress.pkCount);
 /** 创作次数 */
 export const useCreativeCount = () => useStore((s) => s.progress.creativeCount);
-/** 小智陪伴对话历史（explained_ 与 chatCount_ 混合键） */
+/** 小茜陪伴对话历史（explained_ 与 chatCount_ 混合键） */
 export const useChatHistory = () => useStore((s) => s.progress.chatHistory);
 /** 当日课程完成日期 */
 export const useLessonDate = () => useStore((s) => s.progress.lessonDate);

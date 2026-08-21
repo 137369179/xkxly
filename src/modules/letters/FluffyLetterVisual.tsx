@@ -1,6 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { LETTER_ICON_MAP } from '@/data/letters';
+import { ExploreReward } from '@/components/study/ExploreReward';
 
 export interface FluffyLetterVisualProps {
   upper: string;
@@ -71,6 +72,7 @@ export const FluffyLetterVisual: React.FC<FluffyLetterVisualProps> = ({
           {zh} {emoji}
         </div>
       </div>
-    </div>
+    
+      <ExploreReward rewardKey="letter-visual" scene="letter" tone="purple" /></div>
   );
 };

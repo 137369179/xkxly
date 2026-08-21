@@ -1,8 +1,8 @@
 /**
  * StudyBuddyMode —— 学习搭子模式
  * ------------------------------------------------------------------
- * 小智出题，先给出自己的答案（可能故意答错），
- * 孩子判断小智对不对 → buddyJudge(correct)
+ * 小茜出题，先给出自己的答案（可能故意答错），
+ * 孩子判断小茜对不对 → buddyJudge(correct)
  *
  * - 连续 3 题判断正确升难度，答错降难度
  * - 显示统计：判断次数 / 正确率 / 连击
@@ -71,13 +71,13 @@ export function StudyBuddyMode() {
     }
   }, [result]);
 
-  // 孩子判断小智对错
+  // 孩子判断小茜对错
   const handleJudge = (correct: boolean) => {
     if (!quiz || phase !== 'question') return;
     sfxTap();
     setPhase('reveal');
 
-    // 孩子判断是否正确 = 孩子说的和小智实际是否一致
+    // 孩子判断是否正确 = 孩子说的和小茜实际是否一致
     const childCorrect = correct === quiz.isCorrect;
     buddyJudge(childCorrect);
 
@@ -205,7 +205,7 @@ export function StudyBuddyMode() {
               </p>
             </div>
 
-            {/* 小智的答案 */}
+            {/* 小茜的答案 */}
             <div className="flex items-start gap-3">
               <AiAvatar size={36} mood="talking" />
               <div className="flex-1 rounded-2xl bg-white px-4 py-3 shadow-sm">

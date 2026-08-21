@@ -146,8 +146,20 @@ const SCENE_CONFIG: Record<AiScene, SceneConfig> = {
   'music.rhythm': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.7, maxTokens: 500 },
 
   // —— B3/B4 节气与安全 ——
-  'festival.talk': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.8, maxTokens: 700 },
-  'safety.scene': { model: DEFAULT_MODEL, fallback: ['deepseek-chat', 'agnes-2.5-flash'], temperature: 0.8, maxTokens: 600 },
+  'festival.talk': { model: DEFAULT_MODEL, fallback: ['step-3.7-flash', 'deepseek-chat', 'agnes-2.5-flash'], temperature: 0.8, maxTokens: 700 },
+  'safety.scene': { model: DEFAULT_MODEL, fallback: ['step-3.7-flash', 'deepseek-chat', 'agnes-2.5-flash'], temperature: 0.8, maxTokens: 600 },
+
+  // —— 深度拓展场景 ——
+  'science.ask': { model: DEFAULT_MODEL, fallback: ['step-3.7-flash', 'deepseek-chat', 'agnes-2.5-flash'], temperature: 0.85, maxTokens: 800 },
+  'hanzi.mnemonic': { model: DEFAULT_MODEL, fallback: ['step-3.7-flash', 'deepseek-chat', 'agnes-2.5-flash'], temperature: 0.85, maxTokens: 700 },
+  'word.quiz': { model: DEFAULT_MODEL, fallback: ['step-3.7-flash', 'deepseek-chat', 'agnes-2.5-flash'], temperature: 0.8, maxTokens: 600 },
+  'storybook.branch': { model: DEFAULT_MODEL, fallback: ['step-3.7-flash', 'agnes-2.5-flash'], temperature: 0.85, maxTokens: 1800, json: true },
+  'science.experiment': { model: DEFAULT_MODEL, fallback: ['step-3.7-flash', 'deepseek-chat', 'agnes-2.5-flash'], temperature: 0.8, maxTokens: 800 },
+  'safety.roleplay': { model: DEFAULT_MODEL, fallback: ['step-3.7-flash', 'deepseek-chat', 'agnes-2.5-flash'], temperature: 0.85, maxTokens: 700 },
+  'parent.actions': { model: DEFAULT_MODEL, fallback: ['step-3.7-flash', 'deepseek-chat', 'agnes-2.5-flash'], temperature: 0.7, maxTokens: 1200, json: true },
+  'wrong.variant': { model: DEFAULT_MODEL, fallback: ['step-3.7-flash', 'deepseek-chat', 'agnes-2.5-flash'], temperature: 0.7, maxTokens: 800, json: true },
+  'logic.detective': { model: DEFAULT_MODEL, fallback: ['step-3.7-flash', 'deepseek-chat', 'agnes-2.5-flash'], temperature: 0.85, maxTokens: 600 },
+  'rhyme.create': { model: DEFAULT_MODEL, fallback: ['step-3.7-flash', 'deepseek-chat', 'agnes-2.5-flash'], temperature: 0.9, maxTokens: 500 },
 };
 
 export function sceneConfig(scene: AiScene): SceneConfig {

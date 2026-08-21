@@ -119,7 +119,7 @@ export function generateAchievementPoster({
     ctx.fillStyle = '#8b6ef0';
     ctx.font = 'bold 22px sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText('🤖 小智 AI 学情导师点评：', gridX + 24, remarkY + 44);
+    ctx.fillText('🤖 小茜 AI 学情导师点评：', gridX + 24, remarkY + 44);
 
     ctx.fillStyle = '#5c2e3d';
     ctx.font = 'bold 20px sans-serif';

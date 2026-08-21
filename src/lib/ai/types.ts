@@ -48,8 +48,8 @@ export type AiScene =
   | 'path.weekly' // 本周目标规划文案
   | 'path.coach' // 家长教练点评
   // —— AI 陪伴学习伙伴 ——
-  | 'companion.chat' // 小智自由对话（陪伴学习伙伴）
-  | 'companion.explain' // 小智拟人化讲解
+  | 'companion.chat' // 小茜自由对话（陪伴学习伙伴）
+  | 'companion.explain' // 小茜拟人化讲解
   // —— S2 Companion 2.0 新增 ——
   | 'companion.buddyQuiz'    // 学习搭子出题（结构化）
   | 'companion.dailyQuest'   // 每日任务生成（结构化）
@@ -68,7 +68,18 @@ export type AiScene =
   | 'music.rhythm'    // AI 节奏模仿评判（流式）
   // —— B3/B4 节气与安全 ——
   | 'festival.talk'   // 节气传统节日 AI 讲解（流式）
-  | 'safety.scene';   // 安全教育情景对话（流式）
+  | 'safety.scene'    // 安全教育情景对话（流式）
+  // —— 深度拓展场景 ——
+  | 'science.ask'         // 科学十万个为什么（流式）
+  | 'hanzi.mnemonic'      // 汉字象形字形记忆口诀（流式）
+  | 'word.quiz'           // 英语趣味互动小问答（流式）
+  | 'storybook.branch'    // 互动分支绘本续写（结构化 JSON）
+  | 'science.experiment'  // 科学家庭微实验指南（流式）
+  | 'safety.roleplay'     // 安全情景互动对练（流式）
+  | 'parent.actions'      // 家长亲子行动指南卡（结构化 JSON）
+  | 'wrong.variant'       // AI 错题名师变式题（结构化 JSON）
+  | 'logic.detective'     // AI 逻辑小侦探情景推理（流式）
+  | 'rhyme.create';       // AI 汉字/生词儿歌顺口溜创作（流式）
 
 /** 流式分片：思考链与正文分离 */
 export type AiChunk =

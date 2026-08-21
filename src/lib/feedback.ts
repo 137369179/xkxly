@@ -11,6 +11,8 @@ import { sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 import { praiseByScene, encourageByScene, type PraiseScene, type EncourageScene } from '@/lib/praise';
 
+export type { PraiseScene, EncourageScene };
+
 /**
  * 答对反馈：音效 + 彩带 + 场景表扬，返回话术文本（非空）。
  * @param scene 表扬场景；可按 skill 用 skillToPraiseScene 换算

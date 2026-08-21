@@ -16,6 +16,7 @@ import { letterStoryTask } from '@/lib/ai/tasks';
 import { useAiStream } from '@/lib/ai/useAi';
 import { AiPanel } from '@/components/ai';
 import { SpeechEvalButton } from '@/components/feedback/SpeechEvalButton';
+import { ExploreReward } from '@/components/study/ExploreReward';
 
 type CategoryFilter = 'all' | 'vowel' | 'consonant1' | 'consonant2';
 type CaseDisplay = 'both' | 'upper' | 'lower';
@@ -335,6 +336,7 @@ function LetterStory({ upper, word, zh }: { upper: string; word: string; zh: str
   return (
     <div className="mt-4 text-left">
       <AiPanel state={ai} tone="pink" compact />
-    </div>
+    
+      <ExploreReward rewardKey="letter-wall" scene="letter" tone="purple" /></div>
   );
 }

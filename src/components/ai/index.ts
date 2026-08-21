@@ -3,3 +3,4 @@ export { AiAvatar, AiDots } from './AiAvatar';
 export { AiButton } from './AiButton';
 export { AiChat } from './AiChat';
 export { AiPanel } from './AiPanel';
+export { RubyText } from './RubyText';

@@ -15,6 +15,7 @@ import { speak } from '@/lib/speech';
 import { sfxTap } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
+import { ExploreReward } from '@/components/study/ExploreReward';
 
 export function RadicalBrowser() {
   const { t } = useTranslation();
@@ -130,6 +131,7 @@ export function RadicalBrowser() {
           )}
         </>
       )}
-    </div>
+    
+      <ExploreReward rewardKey="hanzi-radical" scene="hanzi" tone="blue" /></div>
   );
 }

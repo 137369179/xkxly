@@ -164,7 +164,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. 小智伙伴与每日挑战 (Companion & Daily Challenge) */}
+      {/* 3. 小茜伙伴与每日挑战 (Companion & Daily Challenge) */}
       <section className="space-y-4">
         <motion.button
           initial={{ opacity: 0, scale: 0.97 }}

@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------
  * 之前任何一个模块抛未捕获异常，整个 SPA 直接白屏，孩子只能看到空白页，
  * 家长也拿不到任何线索。现在兜住渲染期异常：
- *   - 孩子端看到的是一只"小智摔倒了"的友好卡片 + 重试按钮
+ *   - 孩子端看到的是一只"小茜摔倒了"的友好卡片 + 重试按钮
  *   - 错误详情折叠在下面，家长展开就能看到堆栈，便于反馈
  *
  * 两种用法：
@@ -90,7 +90,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
       <div className="grid min-h-[55vh] place-items-center px-4">
         <div className="w-full max-w-md rounded-[1.8rem] bg-white p-6 text-center shadow-lg">
           <div className="text-6xl">🙈</div>
-          <h2 className="mt-3 text-2xl font-extrabold text-ink">哎呀，小智绊了一跤</h2>
+          <h2 className="mt-3 text-2xl font-extrabold text-ink">哎呀，小茜绊了一跤</h2>
           <p className="mt-2 text-base font-medium text-ink-soft">
             这一页出了点小问题，点下面的按钮再试一次就好啦。
           </p>

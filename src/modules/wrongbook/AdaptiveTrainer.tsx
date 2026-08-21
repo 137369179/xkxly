@@ -230,7 +230,7 @@ export function AdaptiveTrainer() {
     };
   }, [current, mastery, difficulty]);
 
-  // 错因驱动内容（P1-3）：统计错题本覆盖的薄弱题型总数，供家长/孩子一眼看到「小智在针对练什么」
+  // 错因驱动内容（P1-3）：统计错题本覆盖的薄弱题型总数，供家长/孩子一眼看到「小茜在针对练什么」
   const weakSummary = useMemo(() => {
     const cats = new Set(
       wrongBook.map((s: string) => s.split(':')[0]).filter(Boolean) as string[],

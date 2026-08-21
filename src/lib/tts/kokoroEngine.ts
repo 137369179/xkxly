@@ -115,6 +115,9 @@ export class KokoroEngine implements TtsEngine {
   private async doLoad(): Promise<void> {
     try {
       if (!this.libUrl) throw new Error('未配置 kokoro-js 库地址');
+      if (!this.modelUrl || this.modelUrl === 'onnx-community/Kokoro-82M-v1.0') {
+        throw new Error('未配置自托管 Kokoro 模型地址（请在设置页填写 Cloudflare R2 或可达 CDN 地址）');
+      }
       assertSafeLibUrl(this.libUrl);
       const mod = (await import(/* @vite-ignore */ this.libUrl)) as KokoroLibModule;
       const KokoroTTS = mod?.KokoroTTS ?? mod?.default?.KokoroTTS ?? mod?.default;

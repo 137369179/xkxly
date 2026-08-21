@@ -10,7 +10,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
-import { sfxTap, sfxCorrect } from '@/lib/sfx';
+import { sfxTap, sfxMagic, sfxPraise } from '@/lib/sfx';
+import { celebrateSmall } from '@/lib/celebrate';
 import { speak } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useStore, useMastery } from '@/store/useStore';
@@ -143,7 +144,8 @@ export default function ArtPage() {
              (m.c1 === c1 && m.c2 === c0)
       );
       if (match) {
-        sfxCorrect();
+        sfxMagic();
+        celebrateSmall();
         setMixedResult(match);
         practice(skill, true, 1, 2);
         speak(t('art.mixSuccess', {
@@ -376,8 +378,20 @@ export default function ArtPage() {
             />
           </div>
 
-          {/* 清除按钮 */}
-          <div className="flex justify-center">
+          {/* 画作赏析与清除按钮 */}
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <CandyButton
+              tone="pink"
+              variant="solid"
+              size="sm"
+              onClick={() => {
+                sfxPraise();
+                celebrateSmall();
+                speak('哇！宝贝画得真有创意！线条像快乐跳舞的小精灵，颜色像梦幻彩虹，太棒啦！', { lang: 'zh-CN' });
+              }}
+            >
+              ✨ 请小茜为画作讲故事
+            </CandyButton>
             <CandyButton tone="purple" variant="soft" size="sm" onClick={handleClearCanvas}>
               {t('art.clearCanvas')}
             </CandyButton>

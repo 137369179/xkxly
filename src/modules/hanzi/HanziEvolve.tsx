@@ -11,6 +11,7 @@ import { speak } from '@/lib/speech';
 import { sfxTap } from '@/lib/sfx';
 import { motion } from 'motion/react';
 import { useTranslation } from '@/i18n/useTranslation';
+import { ExploreReward } from '@/components/study/ExploreReward';
 
 interface EvolveStage {
   name: string;
@@ -148,6 +149,7 @@ export function HanziEvolve({ char, onClose }: { char?: string; onClose?: () => 
           </button>
         ))}
       </div>
-    </div>
+    
+      <ExploreReward rewardKey="hanzi-evolve" scene="hanzi" tone="blue" /></div>
   );
 }

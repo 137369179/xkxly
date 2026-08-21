@@ -43,6 +43,7 @@ import {
   SECURITY_HEADERS,
   defaultMediaLimit,
 } from '../shared/aiProxyCore.mjs';
+import { createTokenBudget } from './tokenBudget.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -112,9 +113,22 @@ const ALLOW_ORIGIN = (process.env.AI_ALLOW_ORIGIN || '*')
 // 是否提供静态文件服务；线上已有独立静态托管时可设 0，BFF 只留 API
 const SERVE_STATIC = String(process.env.AI_SERVE_STATIC ?? '1') !== '0';
 
-if (!API_KEY && !STEPFUN_API_KEY) {
-  console.error('[ai-proxy] 缺少 AGNES_API_KEY / STEPFUN_API_KEY，请在 .env.local 中配置');
-  process.exit(1);
+// —— 每日 token 成本预算（cost cap）——
+// AI_DAILY_TOKEN_BUDGET > 0 时，当日累计「完成 token(text+reasoning)+prompt」达此值即拒绝新请求
+// （前端会整体降级到本地兜底，孩子无感）。默认 0 = 不设限。
+const AI_DAILY_TOKEN_BUDGET = Number(process.env.AI_DAILY_TOKEN_BUDGET || 0);
+const tokenBudget = createTokenBudget({ dailyLimit: AI_DAILY_TOKEN_BUDGET });
+
+/** 上游 usage → 计入预算的成本（prompt + text/reasoning completion），无 usage 记 0 */
+function usageCost(u) {
+  if (!u) return 0;
+  const completion =
+    (u.completion_tokens_details?.text_tokens ?? 0) + (u.completion_tokens_details?.reasoning_tokens ?? 0);
+  return (u.prompt_tokens ?? 0) + completion;
+}
+
+if (!API_KEY && !STEPFUN_API_KEY && !DEEPSEEK_API_KEY && !XUNFEI_MAAS_API_KEY) {
+  console.warn('[ai-proxy] 提示：未在 .env.local 中检测到任何 AI API Key (AGNES / STEPFUN / DEEPSEEK / XUNFEI)，所有 AI 请求将自动切到本地规则兜底');
 }
 
 /* ------------------------------------------------------------------ */
@@ -390,6 +404,13 @@ async function handleChat(req, res) {
     return sendJson(res, 429, { error: { code: 'rate_limited', message: '请求太频繁，稍后再试' } });
   }
 
+  // 成本预算封顶：当日已达上限则拒绝新请求（前端会整体降级到本地兜底）
+  if (tokenBudget.enabled && tokenBudget.overBudget()) {
+    return sendJson(res, 429, {
+      error: { code: 'budget_exceeded', message: '今天已经用很多啦，明天再来继续学习吧～' },
+    });
+  }
+
   const scene = String(payload.scene || 'unknown');
   const stream = payload.stream !== false;
   // 模型白名单解析（同构核心，防高价模型盗用）：回落默认→内置默认
@@ -411,22 +432,60 @@ async function handleChat(req, res) {
   }
   let messages = guarded.messages;
 
-  // 模型族判定：唯一定义在此处，下面选供应商候选时直接复用（避免重复声明后两处漂移）
-  const isStep = model.startsWith('step');
-  const isXunfei = model.startsWith('xop') || model.includes('qwen');
-  const isDeepSeek = model.startsWith('deepseek');
+  // 多供应商自适应候选池：优先当前模型对应的供应商，若无 Key 或失败则平滑转移至其它已配置的供应商
+  const allProviders = [
+    {
+      name: 'stepfun',
+      match: (m) => m.startsWith('step'),
+      model: isStep ? model : 'step-3.7-flash',
+      urls: [STEPFUN_BASE_URL],
+      key: STEPFUN_API_KEY,
+    },
+    {
+      name: 'deepseek',
+      match: (m) => m.startsWith('deepseek'),
+      model: isDeepSeek ? model : 'deepseek-chat',
+      urls: [DEEPSEEK_BASE_URL],
+      key: DEEPSEEK_API_KEY,
+    },
+    {
+      name: 'xunfei',
+      match: (m) => m.startsWith('xop') || m.includes('qwen'),
+      model: isXunfei ? model : 'xopqwen36v35b',
+      urls: [XUNFEI_MAAS_BASE_URL],
+      key: XUNFEI_MAAS_API_KEY,
+    },
+    {
+      name: 'agnes',
+      match: (m) => m.startsWith('agnes'),
+      model: model.startsWith('agnes') ? model : 'agnes-2.5-flash',
+      urls: [...new Set([BASE_URL, 'https://api.agnes-ai.cn/v1', 'https://apihub.agnes-ai.cn/v1'])],
+      key: API_KEY,
+    },
+  ];
 
-  // DeepSeek 校验强化：当指定 response_format 为 json_object 时，prompt 内必须包含 "json" 单词
-  if (isDeepSeek && payload.response_format?.type === 'json_object') {
-    const hasJsonWord = messages.some((m) => typeof m.content === 'string' && /json/i.test(m.content));
-    if (!hasJsonWord) {
-      messages = messages.map((m, i) =>
-        i === messages.length - 1 ? { ...m, content: m.content + '\n\n请输出 JSON 格式。' } : m,
-      );
-    }
+  // 1. 过滤有 Key 的候选
+  const availableProviders = allProviders.filter((p) => Boolean(p.key));
+  // 2. 将命中当前模型的排在最前，其余按顺序作为兜底
+  const matched = availableProviders.filter((p) => p.match(model));
+  const fallbacks = availableProviders.filter((p) => !p.match(model));
+  const prioritizedProviders = [...matched, ...fallbacks];
+
+  // 展平为单个 candidateConfigs (含多 URL 重试)
+  const candidateConfigs = prioritizedProviders.flatMap((p) =>
+    p.urls.map((url) => ({
+      provider: p.name,
+      model: p.model,
+      url,
+      key: p.key,
+    })),
+  );
+
+  if (candidateConfigs.length === 0) {
+    return sendJson(res, 500, {
+      error: { code: 'no_key', message: '服务端未配置任何 AI API Key，请在 .env.local 中配置' },
+    });
   }
-
-  const upstreamBody = buildUpstreamBody(payload, model, { messages });
 
   await acquire();
   const ac = new AbortController();
@@ -444,20 +503,25 @@ async function handleChat(req, res) {
   });
 
   try {
-    const candidateConfigs = isStep
-      ? [{ url: STEPFUN_BASE_URL, key: STEPFUN_API_KEY }]
-      : isXunfei
-      ? [{ url: XUNFEI_MAAS_BASE_URL, key: XUNFEI_MAAS_API_KEY }]
-      : isDeepSeek
-      ? [{ url: DEEPSEEK_BASE_URL, key: DEEPSEEK_API_KEY }]
-      : [...new Set([BASE_URL, 'https://api.agnes-ai.cn/v1', 'https://apihub.agnes-ai.cn/v1'])].map((url) => ({ url, key: API_KEY }));
-
     let upstream = null;
     let lastErrorParsed = null;
     let lastStatus = 500;
+    let actualUsedModel = model;
 
-    for (const { url, key } of candidateConfigs) {
+    for (const { provider, model: candModel, url, key } of candidateConfigs) {
       try {
+        let candMessages = messages;
+        // DeepSeek 校验强化：当指定 response_format 为 json_object 时，prompt 内必须包含 "json" 单词
+        if (provider === 'deepseek' && payload.response_format?.type === 'json_object') {
+          const hasJsonWord = candMessages.some((m) => typeof m.content === 'string' && /json/i.test(m.content));
+          if (!hasJsonWord) {
+            candMessages = candMessages.map((m, i) =>
+              i === candMessages.length - 1 ? { ...m, content: m.content + '\n\n请输出 JSON 格式。' } : m,
+            );
+          }
+        }
+
+        const candidateBody = buildUpstreamBody(payload, candModel, { messages: candMessages });
         const targetUrl = url.endsWith('/chat/completions') ? url : `${url}/chat/completions`;
         const resp = await fetch(targetUrl, {
           method: 'POST',
@@ -466,12 +530,13 @@ async function handleChat(req, res) {
             'Content-Type': 'application/json',
             Accept: stream ? 'text/event-stream' : 'application/json',
           },
-          body: JSON.stringify(upstreamBody),
+          body: JSON.stringify(candidateBody),
           signal: ac.signal,
         });
 
         if (resp.ok) {
           upstream = resp;
+          actualUsedModel = candModel;
           break;
         } else {
           lastStatus = resp.status;
@@ -507,13 +572,14 @@ async function handleChat(req, res) {
       pushLog({
         at: Date.now(),
         scene,
-        model,
+        model: actualUsedModel,
         ms: Date.now() - started,
         ok: true,
         status: 200,
         textTokens: u?.completion_tokens_details?.text_tokens ?? null,
         reasoningTokens: u?.completion_tokens_details?.reasoning_tokens ?? null,
       });
+      tokenBudget.charge(usageCost(u));
       // 返回前脱敏（屏蔽可能泄露的儿童手机号/外部链接），与 Worker 行为一致；
       // 直接对对象做深度脱敏，sendJson 内再统一序列化一次即可
       return sendJson(res, 200, redactDeep(data));
@@ -588,13 +654,14 @@ async function handleChat(req, res) {
     pushLog({
       at: Date.now(),
       scene,
-      model,
+      model: actualUsedModel,
       ms: Date.now() - started,
       ok: true,
       status: 200,
       textTokens: usage?.completion_tokens_details?.text_tokens ?? null,
       reasoningTokens: usage?.completion_tokens_details?.reasoning_tokens ?? null,
     });
+    tokenBudget.charge(usageCost(usage));
   } catch (err) {
     const aborted = err?.name === 'AbortError';
     pushLog({

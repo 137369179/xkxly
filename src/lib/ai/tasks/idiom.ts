@@ -34,7 +34,7 @@ export function idiomStoryTask(idiom: Idiom): StreamTask {
     messages: idiomStoryMessages(idiom),
     cacheKey: `idiomStory:${idiom.id}`,
     cacheTtl: 7 * 24 * 60 * 60 * 1000,
-    title: `小智讲「${idiom.word}」`,
+    title: `小茜讲「${idiom.word}」`,
     hint: `正在给宝贝讲「${idiom.word}」的故事…`,
     fallback: localIdiomStory(idiom),
   };

@@ -53,12 +53,12 @@ function makeDescribeTask(picture: string, label: string): StreamTask {
   return {
     scene: 'praise',
     messages: [
-      { role: 'system' as const, content: '你是小智，一个温暖的儿童学习伙伴。请用简单温馨的语言引导孩子描述图片。' },
+      { role: 'system' as const, content: '你是小茜，一个温暖的儿童学习伙伴。请用简单温馨的语言引导孩子描述图片。' },
       { role: 'user' as const, content: `图片是${label}（${picture}）。请引导孩子说说看到了什么，给一个小提示和开头。50字以内。` },
     ],
     fallback: `看看这幅图（${picture}），${label}。你看到了什么呀？试着说一两句话吧！`,
     title: '看图说话',
-    hint: '小智正在看图...',
+    hint: '小茜正在看图...',
   };
 }
 
@@ -66,12 +66,12 @@ function makeStoryTask(theme: string): StreamTask {
   return {
     scene: 'praise',
     messages: [
-      { role: 'system' as const, content: '你是小智，一个温暖的儿童故事讲述者。请用简单生动的语言编一个很短的小故事（100字内），适合5-6岁孩子。' },
+      { role: 'system' as const, content: '你是小茜，一个温暖的儿童故事讲述者。请用简单生动的语言编一个很短的小故事（100字内），适合5-6岁孩子。' },
       { role: 'user' as const, content: `请以"${theme}"为主题编一个小故事。` },
     ],
     fallback: `从前，${theme}。有一天它遇到了一件有趣的事情……你想接下来会发生什么呢？`,
     title: '编故事',
-    hint: '小智在编故事...',
+    hint: '小茜在编故事...',
   };
 }
 

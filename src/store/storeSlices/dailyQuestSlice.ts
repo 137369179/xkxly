@@ -1,4 +1,5 @@
-import { localDailyQuestPlan } from '@/lib/ai/tasks';
+import { dailyQuestTask } from '@/lib/ai/tasks';
+import { weakSkills as collectWeak } from '@/lib/srs';
 import type { DailyQuest } from '@/types';
 import { applyProgress as _applyProgress, bumpLog as _bumpLog } from '../storeHelpers';
 import { todayStr, type SliceCreator } from '../storeShared';
@@ -17,19 +18,31 @@ export const createDailyQuestSlice: SliceCreator<
     const existing = get().progress.dailyQuests?.[today];
     if (existing && existing.length > 0) return;
 
-    const streak = get().progress.streak;
-    const plan = localDailyQuestPlan(streak, 0);
-    const quests: DailyQuest[] = plan.quests.map((q) => ({
-      ...q,
-      currentCount: 0,
-      completed: false,
-    }));
-    set((s) =>
-      _applyProgress(s, (p) => ({
-        ...p,
-        dailyQuests: { ...(p.dailyQuests ?? {}), [today]: quests },
-      })),
-    );
+    const p = get().progress;
+    const streak = p.streak;
+    const itemsToday = p.dailyLog?.[today]?.items ?? 0;
+    // 薄弱点摘要：让 AI 按孩子真正的薄弱科目生成今日任务（非固定模板）
+    const weak = collectWeak(p, 5)
+      .map((w) => w.skill)
+      .join(',');
+
+    // 异步接线（P0-2）：先发 AI 生成个性化每日任务，失败/无结果则本次不写入（下次进入再试）
+    void dailyQuestTask(streak, weak, itemsToday).then((res) => {
+      if (!res.ok || !res.data?.quests?.length) return;
+      const st = todayStr();
+      if (get().progress.dailyQuests?.[st]?.length) return; // 期间已生成则跳过
+      const quests: DailyQuest[] = res.data.quests.map((q) => ({
+        ...q,
+        currentCount: 0,
+        completed: false,
+      }));
+      set((s) =>
+        _applyProgress(s, (pp) => ({
+          ...pp,
+          dailyQuests: { ...(pp.dailyQuests ?? {}), [st]: quests },
+        })),
+      );
+    });
   },
 
   checkQuestCompletion: () => {

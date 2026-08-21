@@ -5,6 +5,7 @@
  */
 import {
   logicExplainMessages,
+  logicDetectiveMessages,
   mathExplainMessages,
   poemTutorAsk,
   poemTutorOpening,
@@ -17,6 +18,10 @@ import {
   hanziStoryMessages,
   pinyinTutorMessages,
   wordPhonicsMessages,
+  scienceAskMessages,
+  scienceExperimentMessages,
+  hanziMnemonicMessages,
+  wordQuizMessages,
   type PoemCtx,
   type PoemCompareInput,
   type HanziStoryCtx,
@@ -53,7 +58,7 @@ export function mathExplainTask(
     // 同一道题 + 同一个错选项，讲解可以复用
     cacheKey: `${display}|${correct}|${chosen}`,
     fallback: mathFallback(display, correct),
-    title: '小智讲一讲',
+    title: '小茜讲一讲',
     hint: '正在想怎么讲给你听…',
   };
 }
@@ -78,7 +83,7 @@ export function logicExplainTask(
     cacheKey: `${seq}|${correct}`,
     fallback: `${pick(LOGIC_FALLBACK, seq.length)}正确答案是 ${correct}。`,
     title: '规律大揭秘',
-    hint: '小智正在找规律…',
+    hint: '小茜正在找规律…',
   };
 }
 
@@ -88,7 +93,7 @@ export function logicExplainTask(
 
 /**
  * @param history 之前的对话（不含 system），用于多轮追问
- * @param question 本轮提问；不传表示开场，让小智主动讲这首诗
+ * @param question 本轮提问；不传表示开场，让小茜主动讲这首诗
  */
 export function poemTutorTask(
   ctx: PoemCtx,
@@ -104,8 +109,8 @@ export function poemTutorTask(
     fallback:
       ctx.reference?.slice(0, 120) ||
       `这首《${ctx.title}》是${ctx.dynasty}朝${ctx.author}写的。你先跟着读一遍，念出来就能感觉到它的画面啦！`,
-    title: '问问小智',
-    hint: '小智正在读这首诗…',
+    title: '问问小茜',
+    hint: '小茜正在读这首诗…',
   };
 }
 
@@ -126,7 +131,7 @@ export function poemImagineTask(
       reference?.slice(0, 60) ||
       `闭上眼睛，想象一下诗里的画面，${text.slice(0, 30)}……多美呀！`,
     title: '想象画面',
-    hint: '小智正在描绘画面…',
+    hint: '小茜正在描绘画面…',
   };
 }
 
@@ -139,8 +144,8 @@ export function poemCompareTask(input: PoemCompareInput): StreamTask {
     messages: poemCompareMessages(input),
     cacheKey: `compare:${input.titleA}:${input.titleB}`,
     fallback: `两首诗都在写自然景色。《${input.titleA}》和《${input.titleB}》各有各的美，你更喜欢哪一首呢？`,
-    title: '小智讲异同',
-    hint: '小智正在对比两首诗…',
+    title: '小茜讲异同',
+    hint: '小茜正在对比两首诗…',
   };
 }
 
@@ -157,8 +162,8 @@ export function poemProsodyTask(
     messages: poemProsodyMessages(title, author, prosodyInfo),
     cacheKey: `prosody:${title}:${author}`,
     fallback: '这首诗读起来很好听，因为句尾的字声音相近，像唱歌一样有节奏！',
-    title: '小智说格律',
-    hint: '小智正在想这首诗为什么好听…',
+    title: '小茜说格律',
+    hint: '小茜正在想这首诗为什么好听…',
   };
 }
 
@@ -176,7 +181,7 @@ export function poetStoryTask(
     cacheKey: `poet:${poetName}`,
     fallback: `${poetName}是${dynasty}朝的大诗人，他写的诗到现在还有很多人在读呢！`,
     title: '听诗人故事',
-    hint: '小智正在讲故事…',
+    hint: '小茜正在讲故事…',
   };
 }
 
@@ -192,8 +197,8 @@ export function quizExtendTask(
     scene: 'quiz.extend',
     messages: quizExtendMessages(prompt, correct, skill),
     fallback: `你知道吗？${correct} 这个答案其实还有很多有趣的秘密哦！`,
-    title: '小智说你知道吗',
-    hint: '小智正在想一个小知识…',
+    title: '小茜说你知道吗',
+    hint: '小茜正在想一个小知识…',
   };
 }
 
@@ -209,7 +214,7 @@ export function hanziStoryTask(ctx: HanziStoryCtx): StreamTask {
       [ctx.origin, ctx.evolve].filter(Boolean).join('') ||
       `这个「${ctx.char}」字${ctx.meaning ? `表示${ctx.meaning}` : ''}，仔细看看它的样子，是不是很有趣呀？`,
     title: '汉字小故事',
-    hint: '小智正在编故事…',
+    hint: '小茜正在编故事…',
   };
 }
 
@@ -252,9 +257,9 @@ export function pinyinTutorTask(ctx: PinyinTutorCtx): StreamTask {
     messages: pinyinTutorMessages(ctx),
     fallback:
       PINYIN_FALLBACKS[ctx.symbol] ||
-      `跟着小智一起念：${ctx.symbol} ${ctx.symbol} ${ctx.symbol}！多念几遍就会啦！`,
+      `跟着小茜一起念：${ctx.symbol} ${ctx.symbol} ${ctx.symbol}！多念几遍就会啦！`,
     title: '拼音辅导',
-    hint: '小智正在教发音…',
+    hint: '小茜正在教发音…',
   };
 }
 
@@ -280,8 +285,81 @@ export function wordPhonicsTask(ctx: WordPhonicsCtx): StreamTask {
     messages: wordPhonicsMessages(ctx),
     fallback:
       PHONICS_FALLBACKS[ctx.letters.toLowerCase()] ||
-      `字母组合 ${ctx.letters} 的发音，跟着小智念几遍就好啦！${ctx.examples?.length ? `比如 ${ctx.examples.join(', ')} 都有这个音。` : ''}`,
+      `字母组合 ${ctx.letters} 的发音，跟着小茜念几遍就好啦！${ctx.examples?.length ? `比如 ${ctx.examples.join(', ')} 都有这个音。` : ''}`,
     title: '拼读小课堂',
-    hint: '小智正在讲拼读…',
+    hint: '小茜正在讲拼读…',
   };
 }
+
+/* ================================================================== */
+/* 科学十万个为什么                                                    */
+/* ================================================================== */
+export function scienceAskTask(question: string, contextTopic?: string): StreamTask {
+  return {
+    scene: 'science.ask',
+    messages: scienceAskMessages(question, contextTopic),
+    cacheKey: `science:${question.trim()}`,
+    fallback: `好棒的问题！大自然里藏着很多奇妙的秘密，让我们多观察、多提问，探索更多有趣的科学知识吧！🌟`,
+    title: '科学小问号',
+    hint: '小茜正在探索科学秘密…',
+  };
+}
+
+/* ================================================================== */
+/* 汉字记忆口诀                                                        */
+/* ================================================================== */
+export function hanziMnemonicTask(char: string, pinyin?: string, meaning?: string): StreamTask {
+  return {
+    scene: 'hanzi.mnemonic',
+    messages: hanziMnemonicMessages(char, pinyin, meaning),
+    cacheKey: `mnemonic:${char}`,
+    fallback: `「${char}」${pinyin ? `读作 ${pinyin}。` : ''}观察它的形状，记住它的小故事，汉字就会牢牢印在脑海里啦！`,
+    title: '生字记忆口诀',
+    hint: '小茜正在编顺口溜…',
+  };
+}
+
+/* ================================================================== */
+/* 英语趣味互动小问答                                                  */
+/* ================================================================== */
+export function wordQuizTask(word: string, meaning: string, example?: string): StreamTask {
+  return {
+    scene: 'word.quiz',
+    messages: wordQuizMessages(word, meaning, example),
+    cacheKey: `wordquiz:${word.toLowerCase()}`,
+    fallback: `Hello! 单词 ${word} 的意思就是「${meaning}」哦！跟小茜大声念一遍：${word}！🎈`,
+    title: '单词趣味互动',
+    hint: '小茜正在准备英文小互动…',
+  };
+}
+
+/* ================================================================== */
+/* 科学家庭微实验指南                                                  */
+/* ================================================================== */
+export function scienceExperimentTask(topic: string, question?: string): StreamTask {
+  return {
+    scene: 'science.experiment',
+    messages: scienceExperimentMessages(topic, question),
+    cacheKey: `experiment:${topic}`,
+    title: '家庭科学微实验',
+    hint: '小茜正在设计安全微实验…',
+    fallback: `【准备道具】：一个装满清水的透明玻璃杯、一支手电筒。\n【动手做】：在较暗的房间里，用手电筒斜着照射水杯。\n【神奇发现】：在白墙上能看到像彩虹一样美丽的折射光斑哦！🌈`,
+  };
+}
+
+/* ================================================================== */
+/* AI 逻辑小侦探情景推理                                               */
+/* ================================================================== */
+export function logicDetectiveTask(theme: string): StreamTask {
+  return {
+    scene: 'logic.detective',
+    messages: logicDetectiveMessages(theme),
+    cacheKey: `detective:${theme}`,
+    title: '逻辑小侦探',
+    hint: '小茜正在搜集破案线索…',
+    fallback: `🕵️‍♂️【案情通报】：小熊、小兔和小松鼠在排队买冰淇淋。\n【线索一】：小兔排在小熊的前面；\n【线索二】：小松鼠既不是第一个也不是最后一个。\n【请推理】：小侦探，谁排在第一个呢？（答案：小兔！🐰）`,
+  };
+}
+
+
+

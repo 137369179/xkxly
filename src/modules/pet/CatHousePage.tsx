@@ -14,7 +14,8 @@ import { CatStudyHelpCard } from '@/modules/pet/CatStudyHelpCard';
 import { CatVoiceChatModal } from '@/modules/pet/CatVoiceChatModal';
 import { CatMiniGameModal } from '@/modules/pet/CatMiniGameModal';
 import { useTranslation } from '@/i18n/useTranslation';
-import { sfxTap, sfxCorrect } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxPurr, sfxBubble, sfxMagic, sfxBoing, sfxMeow, sfxStar } from '@/lib/sfx';
+import { celebrateSmall } from '@/lib/celebrate';
 import { speak } from '@/lib/speech';
 import {
   EMPTY_OUTFITS, EMPTY_UNLOCKED, EMPTY_QUESTS, EMPTY_MASTERY,
@@ -114,20 +115,20 @@ export default function CatHousePage({ initialRealisticMode = false }: { initial
   };
 
   const handlePetCat = () => {
-    sfxTap();
+    sfxPurr();
     petCat();
     triggerMotion('purr', t('pet.petSuccess'));
   };
 
   const handleBath = () => {
-    sfxTap();
+    sfxBubble();
     bathCat();
     setFeedback(t('pet.bathSuccess'));
     speak(t('pet.speakBath'), { lang: 'zh-CN' });
   };
 
   const handleEquip = (o: Outfit) => {
-    sfxTap();
+    sfxMagic();
     const wasEquipped = equippedOutfits[o.type] === o.id;
     equipOutfit(o.type, o.id);
     if (wasEquipped) {
@@ -144,7 +145,8 @@ export default function CatHousePage({ initialRealisticMode = false }: { initial
       handleEquip(o);
     } else if (buyOutfit(o.id, o.cost)) {
       // 购买成功后自动装备，形成购买→穿戴闭环
-      sfxCorrect();
+      sfxStar();
+      sfxMagic();
       equipOutfit(o.type, o.id);
       setFeedback(t('pet.buySuccess', { name: t(o.name) }));
       speak(t('pet.buySpeak', { name: t(o.name) }), { lang: 'zh-CN' });
@@ -170,7 +172,15 @@ export default function CatHousePage({ initialRealisticMode = false }: { initial
   };
 
   const handleToy = (act: CatAction) => {
-    sfxCorrect();
+    if (act === 'roll') {
+      sfxBoing();
+    } else if (act === 'jump') {
+      sfxMeow();
+    } else if (act === 'purr') {
+      sfxPurr();
+    } else {
+      sfxCorrect();
+    }
     setCatAction(act);
     const key = TOY_SPEAK[act];
     if (key) speak(t(key), { lang: 'zh-CN' });
@@ -181,7 +191,8 @@ export default function CatHousePage({ initialRealisticMode = false }: { initial
     if (catLevel < 4 && threshold && stars >= threshold.stars && catAffection >= threshold.affection) {
       const ok = evolveCat();
       if (ok) {
-        sfxCorrect();
+        sfxMagic();
+        celebrateSmall();
         setCatAction('dance');
         setFeedback(t('pet.evolveSuccess', { level: catLevel + 1, title: t(EVOLVE_INFO[catLevel + 1]?.title ?? '') }));
         speak(t('pet.evolveSpeak', { title: t(EVOLVE_INFO[catLevel + 1]?.title ?? '') }), { lang: 'zh-CN' });

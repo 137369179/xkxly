@@ -3,15 +3,17 @@
  * 实际渲染委托给 FlatCat2D（统一风格二维动画猫咪）
  * 所有调用方接口不变，零改动
  */
-import { FlatCat2D, type FlatCatColor } from './FlatCat2D';
+import { FlatCat2D, type FlatCatColor, type PetTouchZone, type CatExpressionType } from './FlatCat2D';
 
 export interface CyberMasterCat3DProps {
   size?: number;
-  expression?: 'happy' | 'cute' | 'thinking' | 'sleepy' | 'love' | 'excited' | 'blinking';
+  expression?: CatExpressionType;
   hat?: string;
   neck?: string;
   envLighting?: 'sunlight' | 'nebula' | 'starry';
   onPet?: (e: React.MouseEvent) => void;
+  onInteractZone?: (zone: PetTouchZone, e: React.MouseEvent) => void;
+  interactive?: boolean;
   className?: string;
 }
 
@@ -29,6 +31,8 @@ export function CyberMasterCat3D({
   neck,
   envLighting = 'nebula',
   onPet,
+  onInteractZone,
+  interactive = true,
   className = '',
 }: CyberMasterCat3DProps) {
   return (
@@ -39,6 +43,8 @@ export function CyberMasterCat3D({
       neck={neck}
       color={lightingToColor[envLighting] ?? 'candy-pink'}
       onPet={onPet}
+      onInteractZone={onInteractZone}
+      interactive={interactive}
       className={className}
     />
   );

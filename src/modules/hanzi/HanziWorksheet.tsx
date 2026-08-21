@@ -16,6 +16,7 @@ import { getHanziByLevel } from '@/data/hanziIndex';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
 import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHint';
 import { useTranslation } from '@/i18n/useTranslation';
+import { ExploreReward } from '@/components/study/ExploreReward';
 
 
 type Tab = 'worksheet' | 'picker';
@@ -205,6 +206,7 @@ export function HanziWorksheet() {
           );
         })}
       </div>
-    </div>
+    
+      <ExploreReward rewardKey="hanzi-worksheet" scene="hanzi" tone="blue" /></div>
   );
 }

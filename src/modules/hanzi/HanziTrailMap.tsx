@@ -16,6 +16,7 @@ import { getHanziByLevel, HANZI_LEVELS, type HanziEntry } from '@/data/hanziInde
 import { sfxTap } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
+import { ExploreReward } from '@/components/study/ExploreReward';
 
 interface HanziTrailMapProps {
   /** 点击可学习/复习的字时回调 */
@@ -274,6 +275,7 @@ export function HanziTrailMap({ onSelect }: HanziTrailMapProps) {
         <span className="flex items-center gap-1">⭐ {t('hanzi.trailMapLegendAvailable')}</span>
         <span className="flex items-center gap-1">🔒 {t('hanzi.trailMapLegendLocked')}</span>
       </div>
-    </div>
+    
+      <ExploreReward rewardKey="hanzi-trail" scene="hanzi" tone="blue" /></div>
   );
 }

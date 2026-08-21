@@ -281,7 +281,7 @@ export interface Progress {
   unlockedOutfits?: string[];
   /** 学习养宠：当前佩戴的装扮 (key: type, value: outfitId) */
   equippedOutfits?: Record<string, string>;
-  /** 小智陪伴伙伴：
+  /** 小茜陪伴伙伴：
    * - key = `explained_YYYY-MM-DD`，value = string[]（当天已讲解的主题 ID）
    * - key = `chatCount_YYYY-MM-DD`，value = number（当天聊天轮数）
    * 用于进度感知（已讲主题 ✓）+ 成就系统（聊天达人徽章）

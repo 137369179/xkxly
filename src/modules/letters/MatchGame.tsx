@@ -70,7 +70,7 @@ export function MatchGame() {
   const reset = useCallback(() => {
     const reqSeq = ++aiReqSeqRef.current; // 使之前所有 AI 请求回调失效
     if (aiMode && aiOn) {
-      // AI 模式：让小智推荐字母
+      // AI 模式：让小茜推荐字母
       setAiLoading(true);
       const progress = useStore.getState().progress;
       const learned = progress.lettersHeard;

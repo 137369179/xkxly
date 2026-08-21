@@ -4,7 +4,7 @@
  * festivalTalkTask —— 节气/传统节日讲解（流式）
  * safetySceneTask  —— 安全情景对话（流式）
  */
-import { festivalTalkMessages, safetySceneMessages } from '../prompts';
+import { festivalTalkMessages, safetySceneMessages, safetyRoleplayMessages } from '../prompts';
 import type { StreamTask } from './types';
 
 /** 本地兜底：节气讲解 */
@@ -24,7 +24,7 @@ export function festivalTalkTask(name: string, season: string, chant: string, cu
   return {
     scene: 'festival.talk',
     messages: festivalTalkMessages(name, season, chant, custom),
-    title: `小智讲${name}`,
+    title: `小茜讲${name}`,
     hint: '正在讲节气小知识…',
     fallback: localFestivalTalk(name, chant, custom),
   };
@@ -40,3 +40,15 @@ export function safetySceneTask(scene: string, option: string): StreamTask {
     fallback: localSafetyScene(scene, option),
   };
 }
+
+/** 安全情景角色扮演互动对练（流式） */
+export function safetyRoleplayTask(scenario: string, childResponse?: string): StreamTask {
+  return {
+    scene: 'safety.roleplay',
+    messages: safetyRoleplayMessages(scenario, childResponse),
+    title: '安全模拟小剧场',
+    hint: '小茜正在开启情境演练…',
+    fallback: `宝贝记住哦：遇到「${scenario}」时，一定要先保护好自己，大声向信任的爸爸妈妈或警察叔叔求助！`,
+  };
+}
+

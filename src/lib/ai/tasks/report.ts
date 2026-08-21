@@ -14,9 +14,11 @@ import {
   adventureEncourageMessages,
   wrongAnalyzeMessages,
   recommendPracticeMessages,
+  parentActionsMessages,
   type WrongAnalyze,
   type RecommendPractice,
   type DeepReport,
+  type ParentActionPlan,
 } from '../prompts';
 import { chat } from '../client';
 import { extractJson } from '../guard';
@@ -33,7 +35,7 @@ const REPORT_SUBJECTS = REPORT_KEYS.map((key) => {
 /* AI 夸夸                                                             */
 /* ================================================================== */
 const PRAISE_FALLBACK = [
-  '哇，你真的做到了，小智给你竖大拇指！',
+  '哇，你真的做到了，小茜给你竖大拇指！',
   '这么难都被你搞定了，太厉害啦！',
   '每天进步一点点，你已经很棒了！',
   '坚持下来的人最帅气，就是你！',
@@ -47,8 +49,8 @@ export function praiseTask(achievement: string): StreamTask {
     scene: 'praise',
     messages: praiseMessages(achievement),
     fallback: pick(PRAISE_FALLBACK, achievement.length),
-    title: '小智夸夸你',
-    hint: '小智正在想夸你的话…',
+    title: '小茜夸夸你',
+    hint: '小茜正在想夸你的话…',
   };
 }
 
@@ -271,7 +273,7 @@ export function dailySummaryTask(
     cacheTtl: 24 * 60 * 60 * 1000,
     fallback: `今天又学会了新本领，真棒！已经连续学习 ${streak} 天了，明天继续加油！`,
     title: '今日总结',
-    hint: '小智在总结今天的收获…',
+    hint: '小茜在总结今天的收获…',
   };
 }
 
@@ -293,8 +295,8 @@ export function adventureEncourageTask(
     scene: 'adventure.encourage',
     messages: adventureEncourageMessages(levelTitle, weakTypes, stars),
     fallback: pick(ENCOURAGE_FALLBACK, levelTitle.length + stars),
-    title: '小智鼓励你',
-    hint: '小智正在给你加油…',
+    title: '小茜鼓励你',
+    hint: '小茜正在给你加油…',
   };
 }
 
@@ -410,3 +412,78 @@ export async function recommendPracticeTask(p: Progress): Promise<TaskResult<Rec
     ms: r.ms,
   };
 }
+
+/* ================================================================== */
+/* 家长 5 分钟亲子行动指南卡任务                                        */
+/* ================================================================== */
+export function localParentActions(_p: Progress): ParentActionPlan {
+  return {
+    greeting: `陪伴是最好的教育，每天 5 分钟游戏，宝贝进步看得见！🌟`,
+    cards: [
+      {
+        title: '餐桌上的反义词大挑战',
+        tag: '思维游戏',
+        duration: '5分钟',
+        guide: '家长说“大碗”，宝贝接“小碗”；家长说“多”，宝贝接“少”，轮流接龙。',
+        benefit: '锻炼语言反应力与对立概念理解。',
+      },
+      {
+        title: '生字寻宝大探险',
+        tag: '汉字识字',
+        duration: '5分钟',
+        guide: '在绘本或食品包装上找出今天学过的生字，找到了就击掌庆祝！',
+        benefit: '将静态识字融入生活场景，提升观察力。',
+      },
+      {
+        title: '睡前悄悄话故事接龙',
+        tag: '习惯表达',
+        duration: '5分钟',
+        guide: '家长开头：“森林里住着一只小动物…”，宝贝接下一句，一人一句编故事。',
+        benefit: '激发天马行空的想象力与亲子亲密感。',
+      },
+    ],
+  };
+}
+
+export async function parentActionsTask(p: Progress): Promise<TaskResult<ParentActionPlan>> {
+  const fallback = localParentActions(p);
+  const summary = buildDeepReportData(p);
+
+  const r = await chat({
+    scene: 'parent.actions',
+    messages: parentActionsMessages(summary),
+    json: true,
+    cacheKey: `parent_actions:${dateKey()}|${p.stars}|${p.wrongBook.length}`,
+    cacheTtl: 24 * 60 * 60 * 1000,
+  });
+
+  if (!r.ok) return { ok: false, data: fallback, fallback: true, error: r.error, ms: r.ms };
+
+  const parsed = extractJson<ParentActionPlan>(r.text);
+  if (!parsed || !Array.isArray(parsed.cards) || parsed.cards.length === 0) {
+    return {
+      ok: false,
+      data: fallback,
+      fallback: true,
+      error: { code: 'bad_output', message: '行动卡格式不对', retryable: true },
+      ms: r.ms,
+    };
+  }
+
+  return {
+    ok: true,
+    data: {
+      greeting: String(parsed.greeting || '').slice(0, 30),
+      cards: parsed.cards.slice(0, 3).map((c) => ({
+        title: String(c.title || '亲子互动小游戏').slice(0, 25),
+        tag: String(c.tag || '习惯').slice(0, 10),
+        duration: String(c.duration || '5分钟').slice(0, 10),
+        guide: String(c.guide || '').slice(0, 60),
+        benefit: String(c.benefit || '').slice(0, 30),
+      })),
+    },
+    fallback: false,
+    ms: r.ms,
+  };
+}
+

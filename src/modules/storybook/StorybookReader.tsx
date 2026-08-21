@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { speak, stopSpeaking } from '@/lib/speech';
-import { sfxTap, sfxStar } from '@/lib/sfx';
+import { sfxTap, sfxStar, sfxFlip, sfxWin } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 import { AiAvatar } from '@/components/ai/AiAvatar';
+import { RubyText } from '@/components/ai/RubyText';
 import { PageIllustration } from './PageIllustration';
 import type { StoryBookData } from '@/lib/ai/prompts';
 import type { StorybookTheme, StorybookStyle, SavedStorybook } from './types';
@@ -33,6 +34,7 @@ export function StorybookReader({
   const [direction, setDirection] = useState(1);
   const [autoPlay, setAutoPlay] = useState(true);
   const [saved, setSaved] = useState(!!existingId);
+  const [showPinyin, setShowPinyin] = useState(false);
 
   const saveStorybook = useStore((s) => s.saveStorybook);
   const addStars = useStore((s) => s.addStars);
@@ -105,15 +107,21 @@ export function StorybookReader({
 
   const goNext = () => {
     if (currentPage < totalPages - 1) {
-      sfxTap();
+      sfxFlip();
       setDirection(1);
-      setCurrentPage((p) => p + 1);
+      const nextP = currentPage + 1;
+      setCurrentPage(nextP);
+      if (nextP === totalPages - 1) {
+        celebrateSmall();
+        sfxWin();
+        addStars(2);
+      }
     }
   };
 
   const goPrev = () => {
     if (currentPage > 0) {
-      sfxTap();
+      sfxFlip();
       setDirection(-1);
       setCurrentPage((p) => p - 1);
     }
@@ -141,18 +149,32 @@ export function StorybookReader({
           <span className="text-sm text-purple-400 font-bold">{book.bookTitle}</span>
         </div>
 
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={saved}
-          className={`px-4 py-1.5 rounded-full text-sm font-bold transition-colors ${
-            saved
-              ? 'bg-gray-200 text-gray-400'
-              : 'bg-purple-400 text-white shadow-md hover:bg-purple-500'
-          }`}
-        >
-          {saved ? tr('storybookReader.saved') : tr('storybookReader.save')}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              sfxTap();
+              setShowPinyin((v) => !v);
+            }}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
+              showPinyin ? 'bg-pink-500 text-white border-pink-600 shadow-sm' : 'bg-pink-50 text-pink-600 border-pink-200'
+            }`}
+          >
+            {showPinyin ? '🔤 纯汉字' : '拼 拼音'}
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saved}
+            className={`px-4 py-1.5 rounded-full text-sm font-bold transition-colors ${
+              saved
+                ? 'bg-gray-200 text-gray-400'
+                : 'bg-purple-400 text-white shadow-md hover:bg-purple-500'
+            }`}
+          >
+            {saved ? tr('storybookReader.saved') : tr('storybookReader.save')}
+          </button>
+        </div>
       </header>
 
       {/* 翻页区域 */}
@@ -192,9 +214,9 @@ export function StorybookReader({
                     {page.title}
                   </h3>
                 </div>
-                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-                  {page.content}
-                </p>
+                <div className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  {showPinyin ? <RubyText text={page.content} clickable={true} /> : <p>{page.content}</p>}
+                </div>
                 {currentPage === totalPages - 1 && (
                   <p className="mt-3 text-center text-sm text-purple-400 font-bold">
                     ✨ {book.moral} ✨

@@ -310,7 +310,7 @@ export function IdiomChain() {
                     animate={{ scale: [1, 1.4, 1] }}
                     transition={{ duration: 0.8, repeat: Infinity }}
                   />
-                  <span className="text-base text-ink-soft">小智正在想提示…</span>
+                  <span className="text-base text-ink-soft">小茜正在想提示…</span>
                 </div>
               )}
 

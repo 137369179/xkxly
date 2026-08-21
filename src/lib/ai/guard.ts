@@ -128,6 +128,18 @@ const SCENE_GUARD: Record<AiScene, Required<GuardOptions>> = {
   'music.rhythm': { mode: 'child', maxLen: 400 },
   'festival.talk': { mode: 'literary', maxLen: 600 },
   'safety.scene': { mode: 'child', maxLen: 500 },
+
+  // —— 科学 / 汉字记忆 / 单词小测 ——
+  'science.ask': { mode: 'child', maxLen: 300 },
+  'hanzi.mnemonic': { mode: 'child', maxLen: 300 },
+  'word.quiz': { mode: 'child', maxLen: 400 },
+  'storybook.branch': { mode: 'child', maxLen: 1000 },
+  'science.experiment': { mode: 'child', maxLen: 400 },
+  'safety.roleplay': { mode: 'child', maxLen: 300 },
+  'parent.actions': { mode: 'adult', maxLen: 1200 },
+  'wrong.variant': { mode: 'child', maxLen: 800 },
+  'logic.detective': { mode: 'child', maxLen: 400 },
+  'rhyme.create': { mode: 'child', maxLen: 300 },
 };
 
 export function guardForScene(scene: AiScene): Required<GuardOptions> {

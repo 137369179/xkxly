@@ -164,3 +164,83 @@ export function sfxWin(): void {
 export function sfxFlip(): void {
   playTones([{ freq: 660, dur: 0.06, type: 'square', gain: 0.05 }]);
 }
+
+/** 气泡轻弹/气泡音（发送消息、轻触反馈） */
+export function sfxPop(): void {
+  playTones([
+    { freq: 440, at: 0, dur: 0.03, type: 'sine', gain: 0.08 },
+    { freq: 880, at: 0.02, dur: 0.06, type: 'sine', gain: 0.12 },
+  ]);
+}
+
+/** 小猫呼噜/亲昵音效（摸头、喂食、送爱心） */
+export function sfxPurr(): void {
+  playTones([
+    { freq: 220, at: 0, dur: 0.12, type: 'triangle', gain: 0.1 },
+    { freq: 240, at: 0.08, dur: 0.14, type: 'sine', gain: 0.12 },
+    { freq: 260, at: 0.16, dur: 0.18, type: 'sine', gain: 0.1 },
+  ]);
+  haptic([30, 20]);
+}
+
+/** 互动夸夸与点赞小风铃 */
+export function sfxPraise(): void {
+  playTones([
+    { freq: 987.77, at: 0, dur: 0.12, type: 'sine', gain: 0.1 },
+    { freq: 1318.51, at: 0.08, dur: 0.14, type: 'sine', gain: 0.12 },
+    { freq: 1760.0, at: 0.16, dur: 0.22, type: 'sine', gain: 0.14 },
+  ]);
+  haptic(45);
+}
+
+/** 魔法变身/星光闪烁音效（换装、奇迹变身） */
+export function sfxMagic(): void {
+  playTones([
+    { freq: 1046.5, at: 0, dur: 0.09, type: 'triangle', gain: 0.12 },
+    { freq: 1318.51, at: 0.05, dur: 0.09, type: 'sine', gain: 0.13 },
+    { freq: 1567.98, at: 0.1, dur: 0.1, type: 'triangle', gain: 0.14 },
+    { freq: 2093.0, at: 0.16, dur: 0.18, type: 'sine', gain: 0.15 },
+    { freq: 2637.0, at: 0.22, dur: 0.25, type: 'sine', gain: 0.12 },
+  ]);
+  haptic([30, 40, 50]);
+}
+
+/** 弹簧蹦跳/毛线球弹跳音效 */
+export function sfxBoing(): void {
+  playTones([
+    { freq: 260, at: 0, dur: 0.06, type: 'sine', gain: 0.16 },
+    { freq: 520, at: 0.04, dur: 0.08, type: 'triangle', gain: 0.15 },
+    { freq: 380, at: 0.1, dur: 0.12, type: 'sine', gain: 0.12 },
+  ]);
+  haptic(35);
+}
+
+/** 吹泡泡/戳破水泡音效 */
+export function sfxBubble(): void {
+  playTones([
+    { freq: 650, at: 0, dur: 0.04, type: 'sine', gain: 0.12 },
+    { freq: 1100, at: 0.02, dur: 0.07, type: 'sine', gain: 0.15 },
+  ]);
+  haptic(25);
+}
+
+/** 小猫咪开心叫声合成音 */
+export function sfxMeow(): void {
+  playTones([
+    { freq: 600, at: 0, dur: 0.08, type: 'triangle', gain: 0.12 },
+    { freq: 780, at: 0.06, dur: 0.14, type: 'sine', gain: 0.15 },
+    { freq: 520, at: 0.18, dur: 0.16, type: 'sine', gain: 0.1 },
+  ]);
+  haptic([40, 30]);
+}
+
+/** 小八音盒/童年摇篮曲清脆音阶 */
+export function sfxMusicBox(): void {
+  playTones([
+    { freq: 1046.5, at: 0, dur: 0.18, type: 'sine', gain: 0.14 },
+    { freq: 1174.66, at: 0.14, dur: 0.18, type: 'sine', gain: 0.14 },
+    { freq: 1318.51, at: 0.28, dur: 0.22, type: 'sine', gain: 0.15 },
+    { freq: 1567.98, at: 0.44, dur: 0.35, type: 'sine', gain: 0.16 },
+  ]);
+  haptic([30, 30, 40]);
+}

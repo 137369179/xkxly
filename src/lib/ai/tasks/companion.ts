@@ -5,7 +5,18 @@
  * companionExplainTask —— 拟人化讲解（主题卡，走缓存：同主题 7 天内不重复问）
  * 本地兜底永远可用：AI 挂了孩子也绝不冷场。
  */
-import { companionChatMessages, companionExplainMessages, companionComfortMessages, companionCelebrateMessages, companionFollowUpMessages } from '../prompts';
+import {
+  companionChatMessages,
+  companionExplainMessages,
+  companionComfortMessages,
+  companionCelebrateMessages,
+  companionFollowUpMessages,
+  buddyQuizMessages,
+  dailyQuestMessages,
+} from '../prompts';
+import { chat } from '../client';
+import { sanitizeStructuredText } from '../guard';
+import { safeParseJSON } from '@/lib/safeStorage';
 import type { AiMessage } from '../types';
 import type { StreamTask, TaskResult } from './types';
 import { pick } from './types';
@@ -14,28 +25,33 @@ import type { CompanionTopic } from '@/data/companionTopics';
 /** 本地兜底：关键词匹配的猫猫式回答（AI 失败时使用） */
 export function localChatReply(q: string): string {
   if (q.includes('名字') || q.includes('你是谁'))
-    return '我是小智呀！你的 AI 学习小伙伴，最喜欢陪你读书、数数、看星星啦！';
+    return '我是小茜呀！你的 AI 学习小伙伴，最喜欢陪你读书、数数、看星星啦！';
   if (q.includes('夸') || q.includes('棒') || q.includes('厉害'))
-    return '你当然超棒啦！每天认真学习的小勇士，小智给你一个大大的赞 👍！';
+    return '你当然超棒啦！每天认真学习的小勇士，小茜给你一个大大的赞 👍！';
   if (q.includes('故事'))
     return '好呀！从前有一只小兔子，它每天都会读一本书…宝贝猜猜它读的是什么？';
   if (q.includes('唱') || q.includes('歌'))
-    return '喵喵喵～小智唱给你听：一闪一闪亮晶晶，满天都是小星星～宝贝会唱吗？';
+    return '喵喵喵～小茜唱给你听：一闪一闪亮晶晶，满天都是小星星～宝贝会唱吗？';
   if (q.includes('恐龙'))
     return '恐龙呀，它们是很久很久以前的大朋友，后来变成化石藏在地下啦。科学家挖出来就能看到它们的样子哦！';
   if (q.includes('数'))
-    return '数数啦！1、2、3、4、5…小智和你一起数，数到 20 就有小星星！';
+    return '数数啦！1、2、3、4、5…小茜和你一起数，数到 20 就有小星星！';
   if (q.includes('刷牙'))
     return '刷牙是为了赶走嘴巴里的小细菌，不然牙齿会疼的！早晚各刷一次，牙齿白又亮 ✨';
-  return '哇，这个问题真有趣！小智觉得，我们可以一边玩一边找到答案，要不要一起试试？';
+  return '哇，这个问题真有趣！小茜觉得，我们可以一边玩一边找到答案，要不要一起试试？';
 }
 
 /** 自由对话任务（流式）：question 已通过 guardInput，history 为最近几轮上下文 */
-export function companionChatTask(question: string, history: AiMessage[]): StreamTask {
+export function companionChatTask(question: string, history: AiMessage[], context = ''): StreamTask {
+  const base = companionChatMessages(question, history);
+  // 个性化上下文（P0-4）：有则前置一条 system 画像，让 AI 延续孩子状态；默认空 = 零破坏
+  const messages = context.trim().length > 0
+    ? [{ role: 'system' as const, content: context.trim() }, ...base]
+    : base;
   return {
     scene: 'companion.chat',
-    messages: companionChatMessages(question, history),
-    title: '小智陪你聊',
+    messages,
+    title: '小茜陪你聊',
     hint: '正在想怎么回答你…',
     fallback: localChatReply(question),
   };
@@ -48,7 +64,7 @@ export function companionExplainTask(topic: CompanionTopic): StreamTask {
     messages: companionExplainMessages(topic.prompt),
     cacheKey: `companionExplain:${topic.id}`,
     cacheTtl: 7 * 24 * 60 * 60 * 1000,
-    title: `小智讲${topic.label}`,
+    title: `小茜讲${topic.label}`,
     hint: `正在给你讲「${topic.label}」…`,
     fallback: topic.fallback,
   };
@@ -90,14 +106,25 @@ const BUDDY_QUIZ_FALLBACKS: Record<string, BuddyQuizData[]> = {
   ],
 };
 
-export function buddyQuizTask(subject: string, _difficulty: number): Promise<TaskResult<BuddyQuizData>> {
+export async function buddyQuizTask(subject: string, difficulty: number): Promise<TaskResult<BuddyQuizData>> {
   const bank = BUDDY_QUIZ_FALLBACKS[subject] ?? BUDDY_QUIZ_FALLBACKS['数学']!;
-  const fallbackData = pick(bank);
-  return Promise.resolve({
-    ok: true,
-    data: fallbackData!,
-    fallback: true,
-  });
+  const fallbackData = pick(bank)!;
+
+  try {
+    const r = await chat({ scene: 'companion.buddyQuiz', messages: buddyQuizMessages(subject, difficulty) });
+    const text = r.text?.trim();
+    if (!r.ok || !text) {
+      return { ok: true, data: fallbackData, fallback: true };
+    }
+    const parsed = sanitizeStructuredText<BuddyQuizData>(safeParseJSON<BuddyQuizData>(text, fallbackData));
+    // 结构校验：必填字段缺失则回退本地，保证搭子永远不会抛出空题
+    if (!parsed?.question || !parsed.correctAnswer || typeof parsed.isCorrect !== 'boolean') {
+      return { ok: true, data: fallbackData, fallback: true };
+    }
+    return { ok: true, data: parsed, ms: r.ms, fallback: false };
+  } catch {
+    return { ok: true, data: fallbackData, fallback: true };
+  }
 }
 
 /** —— 每日任务生成（结构化）—— */
@@ -129,37 +156,57 @@ export function localDailyQuestPlan(streak: number, _itemsToday: number): DailyQ
   };
 }
 
-export function dailyQuestTask(streak: number, _weakSkills: string, itemsToday: number): Promise<TaskResult<DailyQuestPlan>> {
-  const plan = localDailyQuestPlan(streak, itemsToday);
-  return Promise.resolve({
-    ok: true,
-    data: plan,
-    fallback: true,
-  });
+export async function dailyQuestTask(
+  streak: number,
+  weakSkills: string,
+  itemsToday: number,
+): Promise<TaskResult<DailyQuestPlan>> {
+  const fallbackPlan = localDailyQuestPlan(streak, itemsToday);
+
+  try {
+    const r = await chat({
+      scene: 'companion.dailyQuest',
+      messages: dailyQuestMessages(streak, weakSkills, itemsToday),
+    });
+    const text = r.text?.trim();
+    if (!r.ok || !text) {
+      return { ok: true, data: fallbackPlan, fallback: true };
+    }
+    const parsed = sanitizeStructuredText<DailyQuestPlan>(
+      safeParseJSON<DailyQuestPlan>(text, fallbackPlan),
+    );
+    // 结构校验：任务列表为非空数组才采用 AI 结果
+    if (!parsed?.quests || !Array.isArray(parsed.quests) || parsed.quests.length === 0) {
+      return { ok: true, data: fallbackPlan, fallback: true };
+    }
+    return { ok: true, data: parsed, ms: r.ms, fallback: false };
+  } catch {
+    return { ok: true, data: fallbackPlan, fallback: true };
+  }
 }
 
 /** —— 情绪安抚（流式）—— */
 const COMFORT_FALLBACKS = [
-  '哎呀这几道题确实有点难呢，没关系，小智陪你一起看！',
-  '答错不可怕，小智以前也答错过好多题呢！我们再来一次吧~',
+  '哎呀这几道题确实有点难呢，没关系，小茜陪你一起看！',
+  '答错不可怕，小茜以前也答错过好多题呢！我们再来一次吧~',
   '没关系没关系，深呼吸一下，你已经很努力了！',
   '这几道题好狡猾呀，我们一起打败它们好不好？',
-  '别灰心别灰心，小智相信你，多试几次一定能学会的！',
+  '别灰心别灰心，小茜相信你，多试几次一定能学会的！',
 ];
 
 export function companionComfortTask(subject: string, count: number, weakSkill: string): StreamTask {
   return {
     scene: 'companion.comfort',
     messages: companionComfortMessages(subject, count, weakSkill),
-    title: '小智安慰你',
-    hint: '小智正在想怎么安慰你…',
+    title: '小茜安慰你',
+    hint: '小茜正在想怎么安慰你…',
     fallback: pick(COMFORT_FALLBACKS),
   };
 }
 
 /** —— 成就庆祝（流式）—— */
 const CELEBRATE_FALLBACKS: Record<string, string> = {
-  default: '哇！太厉害了！你又获得了一个新徽章！小智为你骄傲！继续加油~',
+  default: '哇！太厉害了！你又获得了一个新徽章！小茜为你骄傲！继续加油~',
   math: '数学小达人诞生啦！你的脑袋瓜跟计算器一样快！',
   poem: '诗词小明星闪亮登场！你读诗的样子真好看！',
   letter: '英语小能手来啦！26个字母都认识你啦！',
@@ -172,15 +219,15 @@ export function companionCelebrateTask(badgeName: string, badgeDesc: string, bad
   return {
     scene: 'companion.celebrate',
     messages: companionCelebrateMessages(badgeName, badgeDesc, badgeEmoji),
-    title: '小智庆祝你',
-    hint: '小智正在为你欢呼…',
+    title: '小茜庆祝你',
+    hint: '小茜正在为你欢呼…',
     fallback,
   };
 }
 
 /** —— 知识追问（流式）—— */
 export function companionFollowUpTask(topicLabel: string, explainText: string, question: string): StreamTask {
-  let fallback = `你问得真好！小智觉得${topicLabel}很有趣呢，我们一起想想吧！`;
+  let fallback = `你问得真好！小茜觉得${topicLabel}很有趣呢，我们一起想想吧！`;
   if (question.includes('什么意思') || question.includes('不懂')) {
     fallback = `简单来说呢，${topicLabel}就是这样一个有趣的东西，你能明白吗？`;
   } else if (question.includes('例子') || question.includes('比如')) {
@@ -191,8 +238,8 @@ export function companionFollowUpTask(topicLabel: string, explainText: string, q
   return {
     scene: 'companion.followUp',
     messages: companionFollowUpMessages(topicLabel, explainText, question),
-    title: '小智回答你',
-    hint: '小智正在想怎么回答…',
+    title: '小茜回答你',
+    hint: '小茜正在想怎么回答…',
     fallback,
   };
 }

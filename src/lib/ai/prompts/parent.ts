@@ -119,3 +119,50 @@ export interface RecommendPractice {
   greeting: string;
   items: { skill: string; reason: string }[];
 }
+
+/* ================================================================== */
+/* 家长 5 分钟亲子行动指南卡                                           */
+/* ================================================================== */
+export interface ParentActionCard {
+  title: string;
+  tag: string;
+  duration: string;
+  guide: string;
+  benefit: string;
+}
+
+export interface ParentActionPlan {
+  greeting: string;
+  cards: ParentActionCard[];
+}
+
+export function parentActionsMessages(statsSummary: string): AiMessage[] {
+  return [
+    sys(
+      `${PERSONA_PARENT}
+
+现在你要为家长生成 3 张【5分钟亲子行动指南卡】，帮助家长在日常生活与睡前游戏中陪伴孩子巩固学习。
+
+只输出 JSON，严格如下格式：
+{
+  "greeting": "给家长的温暖问候（20字内）",
+  "cards": [
+    {
+      "title": "行动卡名称（如：餐桌上的反义词大作战）",
+      "tag": "汉字/数学/思维/习惯",
+      "duration": "5分钟",
+      "guide": "具体怎么玩/怎么做，步骤清晰（40字内）",
+      "benefit": "对孩子有什么帮助（20字内）"
+    }
+  ]
+}
+
+规则：
+- cards 必须恰好 3 张，覆盖不同学科或习惯
+- 简单好操作，随手取材（如筷子、积木、睡前故事）
+- 严禁空洞说教，必须是具体的互动小游戏`,
+    ),
+    user(`孩子近期学情概要：\n${statsSummary}`),
+  ];
+}
+

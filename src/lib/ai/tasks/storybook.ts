@@ -167,7 +167,7 @@ export function fallbackStorybook(
 
   return {
     bookTitle: book.title.replace('小', character[0] ?? '小'),
-    author: '小智 & 宝贝',
+    author: '小茜 & 宝贝',
     moral: styleMorals[style],
     pages: book.pages.map((p, i) => ({
       pageNumber: i + 1,
@@ -179,3 +179,67 @@ export function fallbackStorybook(
     })) as StoryBookPageData[],
   };
 }
+
+/* ================================================================
+ * 互动分支绘本动态续写任务
+ * ================================================================ */
+import { storybookBranchMessages, type StoryBranchData } from '../prompts';
+
+export function fallbackStoryBranch(character: string, chosenOption: string, pageNum: number): StoryBranchData {
+  const isEnd = pageNum >= 4;
+  return {
+    text: isEnd
+      ? `${character}开心地完成了这次美妙的冒险，回到了温暖的家。今天真是充实又快乐的一天！🌟`
+      : `${character}选择了「${chosenOption}」，前面出现了一条开满鲜花的小路，还有许多小蝴蝶在跳舞呢！🦋`,
+    emoji: isEnd ? '🏰' : '🌈',
+    isEnd,
+    choices: isEnd ? [] : ['往左边花园走', '往右边彩虹桥走'],
+  };
+}
+
+export function createStoryBranchTask(
+  previousSummary: string,
+  chosenOption: string,
+  character: string,
+  pageNum: number,
+): () => Promise<TaskResult<StoryBranchData>> {
+  return async () => {
+    const opts: ChatOptions = {
+      scene: 'storybook.branch',
+      json: true,
+      messages: storybookBranchMessages(previousSummary, chosenOption, character, pageNum),
+      cacheKey: `branch:${character}:${pageNum}:${chosenOption}`,
+    };
+
+    try {
+      const result = await chat(opts);
+      if (!result.ok || !result.text.trim()) {
+        throw new Error(result.error?.message ?? 'AI 分支生成失败');
+      }
+      const parsed = sanitizeStructuredText(
+        safeParseJSON<StoryBranchData>(result.text, null as unknown as StoryBranchData),
+      );
+      if (!parsed.text) throw new Error('Invalid branch text');
+
+      return {
+        ok: true,
+        data: {
+          text: parsed.text,
+          emoji: parsed.emoji || '✨',
+          isEnd: Boolean(parsed.isEnd || pageNum >= 4),
+          choices: Array.isArray(parsed.choices) ? parsed.choices : [],
+        },
+        fallback: false,
+        ms: result.ms,
+      };
+    } catch {
+      return {
+        ok: false,
+        data: fallbackStoryBranch(character, chosenOption, pageNum),
+        fallback: true,
+        ms: 0,
+      };
+    }
+  };
+}
+

@@ -12,6 +12,7 @@ import { useStore } from '@/store/useStore';
 import { cn, shuffle } from '@/lib/utils';
 import type { Tone } from '@/lib/tones';
 import { useTranslation } from '@/i18n/useTranslation';
+import { ExploreReward } from '@/components/study/ExploreReward';
 
 type CompareType = 'length' | 'height' | 'weight' | 'size';
 
@@ -172,6 +173,7 @@ export function MeasureCompare() {
       </AnimatePresence>
 
       <div className="mt-4 text-center text-xs font-bold text-ink-soft">{t('measure.score', { score })}</div>
-    </div>
+    
+      <ExploreReward rewardKey="number-measure" scene="number" tone="green" /></div>
   );
 }

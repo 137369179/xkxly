@@ -5,7 +5,7 @@ import { companionChatTask } from '@/lib/ai/tasks/companion';
 import { speak, stopSpeaking } from '@/lib/speech';
 import { speechRecog, requestMicPermission, isSpeechRecogSupported } from '@/lib/ai/speechRecog';
 import { guardInput } from '@/lib/ai/guard';
-import { sfxTap } from '@/lib/sfx';
+import { sfxTap, sfxPurr, sfxPraise, sfxStar } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 import { useTtsStore } from '@/store/useTtsStore';
@@ -14,7 +14,8 @@ import type { AiMessage } from '@/lib/ai/types';
 import { VoiceHeader } from '@/modules/pet/voice/VoiceHeader';
 import { VoiceTitle, VoiceCatStage } from '@/modules/pet/voice/VoiceCatStage';
 import { VoiceMessageList, type VoiceMessage } from '@/modules/pet/voice/VoiceMessageList';
-import { VoiceControls, QuickPhrases } from '@/modules/pet/voice/VoiceControls';
+import { QuickPhrases } from '@/modules/pet/voice/VoiceControls';
+import { VoiceChatInput } from '@/modules/pet/voice/VoiceChatInput';
 
 const EMPTY_OUTFITS: Record<string, string> = {};
 
@@ -25,6 +26,9 @@ export function CatVoiceChatModal({ isOpen, onClose }: { isOpen: boolean; onClos
   const { t } = useTranslation();
   const addFish = useStore((s) => s.addFish);
   const petCat = useStore((s) => s.petCat);
+  const feedCatStats = useStore((s) => s.feedCatStats);
+  const equipOutfit = useStore((s) => s.equipOutfit);
+  const fishCount = useStore((s) => s.progress.fishCount ?? 0);
   const equippedOutfits = useStore((s) => s.progress.equippedOutfits ?? EMPTY_OUTFITS);
   const isTtsSpeaking = useTtsStore((s) => s.isSpeaking);
 
@@ -282,8 +286,96 @@ export function CatVoiceChatModal({ isOpen, onClose }: { isOpen: boolean; onClos
   const handleClose = useCallback(() => {
     speechRecog.stop();
     setIsListening(false);
+    stopSpeaking();
     onClose();
   }, [onClose]);
+
+  const handleClearHistory = useCallback(() => {
+    sfxTap();
+    stopSpeaking();
+    speechRecog.stop();
+    setIsListening(false);
+    setMessages([
+      {
+        id: String(Date.now()),
+        sender: 'cat',
+        text: '喵呜~ 我们开始聊一个新话题吧！你想和小茜聊什么呢？',
+      },
+    ]);
+  }, []);
+
+  const handlePet = useCallback(() => {
+    sfxPurr();
+    petCat();
+    celebrateSmall();
+    setExpression('cute');
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: String(Date.now()),
+        sender: 'cat',
+        text: '喵呜~ 摸摸头好舒服呀！小茜最喜欢宝贝啦！💖',
+      },
+    ]);
+  }, [petCat]);
+
+  const handleFeed = useCallback(() => {
+    const success = feedCatStats(20, 1);
+    if (success) {
+      sfxStar();
+      celebrateSmall();
+      setExpression('excited');
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: String(Date.now()),
+          sender: 'cat',
+          text: '嗷呜~ 甜甜小鱼干真香脆！饱食度满满，谢谢小主人喵！🐟',
+        },
+      ]);
+    } else {
+      sfxTap();
+      setExpression('thinking');
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: String(Date.now()),
+          sender: 'cat',
+          text: '喵呜~ 小鱼干吃光光啦！做做功课答对几道题就能赚到小鱼干哦！⭐',
+        },
+      ]);
+    }
+  }, [feedCatStats]);
+
+  const handlePraise = useCallback(() => {
+    sfxPraise();
+    celebrateSmall();
+    setExpression('happy');
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: String(Date.now()),
+        sender: 'cat',
+        text: '🎉 哇！谢谢小主人的鼓励掌声！小茜陪你一起快乐成长、天天进步喵！',
+      },
+    ]);
+  }, []);
+
+  const handleEquipOutfit = useCallback((category: 'hat' | 'neck', outfitId: string) => {
+    equipOutfit(category, outfitId);
+  }, [equipOutfit]);
+
+  const handleCatAction = useCallback((msg: string, nextExpr: 'excited' | 'happy' | 'cute') => {
+    setExpression(nextExpr);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: String(Date.now()),
+        sender: 'cat',
+        text: msg,
+      },
+    ]);
+  }, []);
 
   // Scroll to bottom on update
   useEffect(() => {
@@ -297,6 +389,7 @@ export function CatVoiceChatModal({ isOpen, onClose }: { isOpen: boolean; onClos
     if (next) {
       speechRecog.stop();
       setIsListening(false);
+      stopSpeaking();
     } else {
       void startListening();
     }
@@ -329,29 +422,36 @@ export function CatVoiceChatModal({ isOpen, onClose }: { isOpen: boolean; onClos
           aria-label={t('catCompanion.voice.title')}
           className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-0 sm:p-4 outline-none"
         >
-          {/* 遮罩：点击关闭。整层淡入淡出由外层承担 */}
+          {/* 遮罩：点击关闭 */}
           <div
             onClick={handleClose}
             aria-hidden="true"
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 backdrop-blur-md"
           />
 
-          {/* 面板：移动端底部弹层，桌面居中卡片 */}
+          {/* 面板：移动端底部弹层，桌面居中果冻卡片 */}
           <motion.div
             ref={panelRef}
-            initial={{ scale: 0.92, opacity: 0, y: 40 }}
+            initial={{ scale: 0.94, opacity: 0, y: 35 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.94, opacity: 0, y: 32 }}
-            transition={{ type: 'spring', damping: 24, stiffness: 320 }}
-            className="relative z-10 w-full sm:max-w-lg rounded-t-[1.75rem] sm:rounded-[1.75rem] border-t-4 sm:border-4 border-amber-300 bg-gradient-to-b from-slate-900 via-amber-950/90 to-slate-950 text-white shadow-2xl flex flex-col overflow-hidden max-h-[94vh] sm:max-h-[90vh]"
+            exit={{ scale: 0.94, opacity: 0, y: 25 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 340 }}
+            className="relative z-10 w-full sm:max-w-lg rounded-t-[2rem] sm:rounded-[2rem] border-t-4 sm:border-4 border-pink-300 bg-gradient-to-b from-white via-pink-50/95 to-purple-50/95 text-ink shadow-2xl flex flex-col overflow-hidden max-h-[94vh] sm:max-h-[90vh]"
           >
-            {/* 顶部通话栏 */}
-            <VoiceHeader seconds={callSeconds} onClose={handleClose} closeBtnRef={closeBtnRef} />
+            {/* 顶部通话栏（包含清空、静音、关闭） */}
+            <VoiceHeader
+              seconds={callSeconds}
+              onClose={handleClose}
+              onClear={handleClearHistory}
+              isMuted={isMuted}
+              onToggleMute={toggleMute}
+              closeBtnRef={closeBtnRef}
+            />
 
             {/* 标题区 */}
             <VoiceTitle />
 
-            {/* 猫咪 3D 舞台 */}
+            {/* 猫咪 3D 舞台与互动百宝箱 */}
             <VoiceCatStage
               isListening={isListening}
               isTtsSpeaking={isTtsSpeaking}
@@ -360,6 +460,12 @@ export function CatVoiceChatModal({ isOpen, onClose }: { isOpen: boolean; onClos
               expression={expression}
               outfits={equippedOutfits}
               sttNotice={sttNotice}
+              onPet={handlePet}
+              onFeed={handleFeed}
+              onPraise={handlePraise}
+              onEquipOutfit={handleEquipOutfit}
+              onCatAction={handleCatAction}
+              fishCount={fishCount}
             />
 
             {/* 对话列表 */}
@@ -370,16 +476,15 @@ export function CatVoiceChatModal({ isOpen, onClose }: { isOpen: boolean; onClos
               endRef={chatEndRef}
             />
 
-            {/* 快速提问词组 */}
+            {/* 智能探索提问词组（分类词卡） */}
             <QuickPhrases onSend={handleSendQuery} />
 
-            {/* 通话控制台 */}
-            <VoiceControls
-              isMuted={isMuted}
+            {/* 现代化文本+语音综合输入栏 */}
+            <VoiceChatInput
+              onSend={handleSendQuery}
               isListening={isListening}
-              onToggleMute={toggleMute}
-              onHangUp={handleClose}
               onToggleListen={toggleListen}
+              disabled={status === 'thinking' || status === 'streaming'}
             />
           </motion.div>
         </motion.div>

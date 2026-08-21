@@ -105,19 +105,3 @@ export function BackupRestorePanel({ onRestoreComplete }: { onRestoreComplete: (
     </div>
   );
 }
-
-/**
- * 集成到主应用的入口
- */
-export function useBackupDetection() {
-  const [showRestorePanel, setShowRestorePanel] = useState(false);
-
-  useEffect(() => {
-    const { corrupted, lastBackup } = detectStorageCorruption();
-    if (corrupted && lastBackup) {
-      setShowRestorePanel(true);
-    }
-  }, []);
-
-  return { showRestorePanel, handleRestoreComplete: () => setShowRestorePanel(false) };
-}

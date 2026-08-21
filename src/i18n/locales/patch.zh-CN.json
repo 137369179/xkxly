@@ -1,8 +1,12 @@
 {
+  "exploreReward": {
+    "claim": "完成探索 +{n}⭐",
+    "claimed": "已探索 +{n}⭐"
+  },
   "badge": {
     "takeIt": "领取",
     "unlockNew": "解锁新徽章",
-    "xiaozhiPraise": "小智夸夸"
+    "xiaozhiPraise": "小茜夸夸"
   },
   "codeMaze": {
     "emptyHint": "拖入指令，开始你的编程吧！",
@@ -86,8 +90,8 @@
   },
   "music": {
     "aiFeedback": "🤖 AI 点评",
-    "aiHint": "点击「AI 点评」让小智来听你的创作！",
-    "aiSays": "小智说",
+    "aiHint": "点击「AI 点评」让小茜来听你的创作！",
+    "aiSays": "小茜说",
     "clear": "🗑 清除",
     "createKeys": "🎵 彩色小琴键",
     "createSubtitle": "自由创作 · 录制回放 · AI 点评",

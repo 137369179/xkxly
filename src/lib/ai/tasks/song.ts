@@ -5,7 +5,10 @@
  * songExplainTask   —— 逐句解释歌词含义（流式文本）
  * 本地兜底永远可用：AI 挂了孩子也绝不冷场。
  */
-import { songExplainMessages } from '../prompts';
+import { songExplainMessages, songRecommendMessages } from '../prompts';
+import { chat } from '../client';
+import { sanitizeStructuredText } from '../guard';
+import { safeParseJSON } from '@/lib/safeStorage';
 import type { StreamTask, TaskResult } from './types';
 import { pick } from './types';
 import { NURSERY_RHYMES } from '@/data/nurseryRhymes';
@@ -64,18 +67,35 @@ function localRecommend(age: number, learnedIds: string[], hour: number): SongRe
  * AI 歌曲推荐任务（结构化 JSON）
  * 根据孩子年龄/学习进度/时间段推荐适合的儿歌
  */
-export function songRecommendTask(
+export async function songRecommendTask(
   age: number,
   learnedIds: string[],
   hour: number,
 ): Promise<TaskResult<SongRecommendData>> {
   const fallbackData = localRecommend(age, learnedIds, hour);
 
-  return Promise.resolve({
-    ok: true,
-    data: fallbackData,
-    fallback: true,
-  });
+  try {
+    const rhymeList = NURSERY_RHYMES.map((r) => `${r.id}:${r.title}`).join(';');
+    const r = await chat({
+      scene: 'song.recommend',
+      messages: songRecommendMessages(age, learnedIds, hour, rhymeList),
+    });
+    const text = r.text?.trim();
+    if (!r.ok || !text) {
+      return { ok: true, data: fallbackData, fallback: true };
+    }
+    const parsed = sanitizeStructuredText<SongRecommendData>(
+      safeParseJSON<SongRecommendData>(text, fallbackData),
+    );
+    // 校验：推荐的 rhymeId 必须真实存在，否则回退本地选歌
+    const valid = !!parsed?.rhymeId && NURSERY_RHYMES.some((x) => x.id === parsed.rhymeId);
+    if (!valid) {
+      return { ok: true, data: fallbackData, fallback: true };
+    }
+    return { ok: true, data: { rhymeId: parsed.rhymeId, reason: parsed.reason || fallbackData.reason }, ms: r.ms, fallback: false };
+  } catch {
+    return { ok: true, data: fallbackData, fallback: true };
+  }
 }
 
 /**
@@ -102,8 +122,8 @@ export function songExplainTask(rhyme: NurseryRhyme): StreamTask {
   return {
     scene: 'song.explain',
     messages: songExplainMessages(rhyme.title, rhyme.lyrics),
-    title: '小智讲歌词',
-    hint: '小智正在给宝贝讲歌词…',
+    title: '小茜讲歌词',
+    hint: '小茜正在给宝贝讲歌词…',
     fallback,
   };
 }

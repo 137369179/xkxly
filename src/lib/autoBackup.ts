@@ -8,6 +8,7 @@
  *   4. 保留最近5个历史备份
  */
 
+import { useState, useEffect } from 'react';
 import type { Progress } from '@/types';
 import { safeGetJSON, safeSetJSON, safeStorage } from './safeStorage';
 
@@ -167,4 +168,20 @@ export function clearAllBackups(): void {
   for (let i = 1; i <= MAX_BACKUPS; i++) {
     safeStorage.removeItem(`${BACKUP_KEY_PREFIX}${i}`);
   }
+}
+
+/**
+ * 集成到主应用的入口 Hook
+ */
+export function useBackupDetection() {
+  const [showRestorePanel, setShowRestorePanel] = useState(false);
+
+  useEffect(() => {
+    const { corrupted, lastBackup } = detectStorageCorruption();
+    if (corrupted && lastBackup) {
+      setShowRestorePanel(true);
+    }
+  }, []);
+
+  return { showRestorePanel, handleRestoreComplete: () => setShowRestorePanel(false) };
 }

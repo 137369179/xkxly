@@ -13,10 +13,11 @@ import { useStore } from '@/store/useStore';
 import { CodeBot } from './CodeBot';
 import { MazeGame } from './MazeGame';
 import { KidSudoku } from './KidSudoku';
+import { LogicDetective } from './LogicDetective';
 import { useTrainingTarget } from '@/hooks/useTrainingTarget';
 import { TrainingBanner } from '@/components/study/TrainingBanner';
 
-type TabId = 'pattern' | 'match' | 'order' | 'condition' | 'steps' | 'mixed' | 'code' | 'maze' | 'sudoku';
+type TabId = 'pattern' | 'match' | 'order' | 'condition' | 'steps' | 'mixed' | 'code' | 'maze' | 'sudoku' | 'detective';
 
 /** 深链 param → 逻辑页 tab（codebot 映射到 code，condition 为条件判断） */
 const LOGIC_PARAM_MAP: Record<string, TabId> = {
@@ -30,6 +31,7 @@ const LOGIC_PARAM_MAP: Record<string, TabId> = {
   codebot: 'code',
   maze: 'maze',
   sudoku: 'sudoku',
+  detective: 'detective',
 };
 
 export default function LogicPage() {
@@ -45,6 +47,7 @@ export default function LogicPage() {
     { id: 'condition', label: t('logic.tabCondition'), emoji: '🚦' },
     { id: 'steps', label: t('logic.tabSteps'), emoji: '🧭' },
     { id: 'mixed', label: t('logic.tabMixed'), emoji: '🎲' },
+    { id: 'detective', label: '小侦探', emoji: '🕵️' },
     { id: 'code', label: t('logic.tabCode'), emoji: '🤖' },
     { id: 'maze', label: t('logic.tabMaze'), emoji: '🗺️' },
     { id: 'sudoku', label: t('logic.tabSudoku'), emoji: '🧩' },
@@ -88,7 +91,7 @@ export default function LogicPage() {
         items={TABS}
       />
 
-      {tab !== 'code' && (
+      {tab !== 'code' && tab !== 'maze' && tab !== 'sudoku' && tab !== 'detective' && (
         <>
           {/* 🎮 阶梯式难度：三档对应分龄认知（对齐帮帮识字/洪恩分龄体系） */}
           <div className="mb-2 flex gap-2.5">
@@ -130,6 +133,7 @@ export default function LogicPage() {
           />
         </>
       )}
+      {tab === 'detective' && <LogicDetective />}
       {tab === 'code' && <CodeBot />}
       {tab === 'maze' && <MazeGame />}
       {tab === 'sudoku' && <KidSudoku />}

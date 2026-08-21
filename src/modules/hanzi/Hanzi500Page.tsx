@@ -11,6 +11,7 @@ import { speak } from '@/lib/speech';
 import { sfxTap } from '@/lib/sfx';
 import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/i18n/useTranslation';
+import { ExploreReward } from '@/components/study/ExploreReward';
 
 const CATEGORIES: { id: HanziItem['category'] | 'all'; labelKey: string; emoji: string }[] = [
   { id: 'all', labelKey: 'hanzi500Page.all', emoji: '📚' },
@@ -163,6 +164,7 @@ export function Hanzi500Page() {
         {t('hanzi500Page.shown', { shown: visible.length, total: filtered.length })}
         {hasMore && <span className="ml-1 text-candy-purple">{t('hanzi500Page.loadMore')}</span>}
       </p>
-    </div>
+    
+      <ExploreReward rewardKey="hanzi-500" scene="hanzi" tone="blue" /></div>
   );
 }

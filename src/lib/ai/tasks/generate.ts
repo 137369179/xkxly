@@ -17,12 +17,15 @@ import {
   letterMatchMessages,
   hanziSentenceMessages,
   wordStoryMessages,
+  rhymeCreateMessages,
+  wrongVariantMessages,
   type GenMathQuestion,
   type GenCountQuestion,
   type GenLetterMatch,
   type TodayPlan,
   type HanziSentenceCtx,
   type WordStoryCtx,
+  type WrongVariantQuestion,
 } from '../prompts';
 import { pick, type StreamTask, type TaskResult } from './types';
 
@@ -37,7 +40,7 @@ export function letterStoryTask(letter: string, word: string, zh: string): Strea
     cacheKey: `letter:${letter}`,
     fallback: `${letter} 像小拱门，站得稳又直。\n${word} 就是${zh}，跟着念一遍！`,
     title: '字母顺口溜',
-    hint: '小智正在编顺口溜…',
+    hint: '小茜正在编顺口溜…',
   };
 }
 
@@ -129,7 +132,7 @@ function localPlan(streak: number, weak: string[]): TodayPlan {
       { title: '学新内容', reason: '每天进步一点点' },
       { title: '闯关挑战', reason: '检验今天的成果' },
     ],
-    cheer: '小智在这里陪着你，加油！',
+    cheer: '小茜在这里陪着你，加油！',
   };
 }
 
@@ -190,7 +193,7 @@ export function numberStoryTask(n: number): StreamTask {
     cacheKey: `number:${n}`,
     fallback: NUMBER_FALLBACKS[n] || `${n} 个东西排一排，数一数真好玩。\n记住 ${n} 这个数，生活中到处都有它！`,
     title: '数字儿歌',
-    hint: '小智正在编儿歌…',
+    hint: '小茜正在编儿歌…',
   };
 }
 
@@ -324,8 +327,8 @@ export function hanziSentenceTask(ctx: HanziSentenceCtx): StreamTask {
       (ctx.words?.length
         ? ctx.words.map((w) => `${w}真好玩。`).join('\n')
         : `用「${ctx.char}」字可以说好多话，你也试试看！`),
-    title: '小智造句',
-    hint: '小智正在想句子…',
+    title: '小茜造句',
+    hint: '小茜正在想句子…',
   };
 }
 
@@ -339,6 +342,81 @@ export function wordStoryTask(ctx: WordStoryCtx): StreamTask {
     cacheKey: `word:${ctx.word}`,
     fallback: `The ${ctx.word} is here. ${ctx.meaning}就在身边，你也找找看吧！`,
     title: '单词小故事',
-    hint: '小智正在编故事…',
+    hint: '小茜正在编故事…',
   };
 }
+
+/* ================================================================== */
+/* AI 汉字/生词顺口溜创作（流式）                                      */
+/* ================================================================== */
+export function rhymeCreateTask(subject: string, type: 'hanzi' | 'word' = 'hanzi'): StreamTask {
+  return {
+    scene: 'rhyme.create',
+    messages: rhymeCreateMessages(subject, type),
+    cacheKey: `rhyme:${type}:${subject}`,
+    fallback: type === 'hanzi'
+      ? `「${subject}」字真奇妙，仔细观察记得牢。天天向上多练习，写得端正顶呱呱！🌟`
+      : `Word "${subject}", cute and bright! Say it clearly, say it right! 🎈`,
+    title: '顺口溜小儿歌',
+    hint: '小茜正在创作儿歌顺口溜…',
+  };
+}
+
+/* ================================================================== */
+/* AI 错题名师变式题（结构化 JSON）                                      */
+/* ================================================================== */
+export function localWrongVariant(
+  skillId: string,
+  originalQuestion: string,
+  originalAnswer: string,
+): WrongVariantQuestion {
+  return {
+    question: `【名师变式题】小松鼠在收集松果，考察知识点「${skillId}」：${originalQuestion}`,
+    options: [originalAnswer, '选项B', '选项C', '选项D'],
+    answer: originalAnswer,
+    explanation: '看清题目的关键数量关系，一步一步推导即可得出答案！',
+    hint: '仔细读题，找找题目里的数字朋友哦！',
+  };
+}
+
+export async function wrongVariantTask(
+  skillId: string,
+  originalQuestion: string,
+  originalAnswer: string,
+): Promise<TaskResult<WrongVariantQuestion>> {
+  const fallback = localWrongVariant(skillId, originalQuestion, originalAnswer);
+
+  const r = await chat({
+    scene: 'wrong.variant',
+    messages: wrongVariantMessages(skillId, originalQuestion, originalAnswer),
+    json: true,
+    cacheKey: `variant:${skillId}:${originalQuestion}`,
+  });
+
+  if (!r.ok) return { ok: false, data: fallback, fallback: true, error: r.error, ms: r.ms };
+
+  const parsed = extractJson<WrongVariantQuestion>(r.text);
+  if (!parsed || !parsed.question || !Array.isArray(parsed.options) || !parsed.answer) {
+    return {
+      ok: false,
+      data: fallback,
+      fallback: true,
+      error: { code: 'bad_output', message: '变式题格式不对', retryable: true },
+      ms: r.ms,
+    };
+  }
+
+  return {
+    ok: true,
+    data: {
+      question: String(parsed.question).slice(0, 60),
+      options: parsed.options.slice(0, 4).map((o) => String(o).slice(0, 25)),
+      answer: String(parsed.answer).slice(0, 25),
+      explanation: String(parsed.explanation || '仔细分析题意即可解出').slice(0, 50),
+      hint: String(parsed.hint || '认真思考').slice(0, 25),
+    },
+    fallback: false,
+    ms: r.ms,
+  };
+}
+

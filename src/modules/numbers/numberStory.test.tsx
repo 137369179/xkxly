@@ -54,7 +54,7 @@ beforeEach(() => {
 
 describe('NumberStory 离线兜底', () => {
   it('fallback=true 时渲染离线童谣卡，并输出对应数字的童谣', () => {
-    stateRef.current = { status: 'done', fallback: true, text: '小智离线文案' };
+    stateRef.current = { status: 'done', fallback: true, text: '小茜离线文案' };
     renderStory(1);
     expect(byTestId('story-offline')).toBeTruthy();
     expect(text()).toContain(numberRhyme(1));

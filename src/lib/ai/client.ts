@@ -394,11 +394,6 @@ export async function* chatStream(opts: ChatOptions): AsyncGenerator<AiChunk> {
       if (!err.retryable) break;
       if (attempt < RETRY_MAX) await sleep(RETRY_BASE_MS * 2 ** attempt);
     }
-
-    // 这个模型彻底不行，换下一个
-    if (lastError && (lastError.code === 'unauthorized' || lastError.code === 'invalid_request')) {
-      break; // 换模型也救不了
-    }
   }
 
   const err = lastError ?? { code: 'unknown' as const, message: '未知错误', retryable: false };

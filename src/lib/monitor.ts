@@ -176,12 +176,31 @@ export function initMonitor(): void {
   });
 
   // 2. Promise 未捕获拒绝
-  window.addEventListener('unhandledrejection', (e) => {
-    const reason = e.reason;
-    const msg = reason instanceof Error ? reason.message : String(reason);
-    const stack = reason instanceof Error ? reason.stack : undefined;
-    reportError('promise', msg, stack);
-  });
+  window.addEventListener(
+    'unhandledrejection',
+    (e) => {
+      const reason = e.reason;
+      const msg = (reason instanceof Error ? reason.message || reason.name : String(reason ?? '')).trim();
+      // 过滤由浏览器插件/DevTools扩展（如 Qoder/React DevTools）注入引起的外部通信噪音及空错误
+      if (
+        !msg ||
+        msg === 'undefined' ||
+        msg === 'null' ||
+        msg === '[object Object]' ||
+        msg.includes('message channel closed before a response was received') ||
+        msg.includes('Could not establish connection') ||
+        msg.includes('Extension context invalidated') ||
+        msg.includes('ResizeObserver loop')
+      ) {
+        e.preventDefault?.();
+        e.stopImmediatePropagation?.();
+        return;
+      }
+      const stack = reason instanceof Error ? reason.stack : undefined;
+      reportError('promise', msg, stack);
+    },
+    true,
+  );
 
   // 3. Web Vitals：LCP（最大内容绘制）
   try {

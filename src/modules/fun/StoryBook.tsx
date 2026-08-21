@@ -19,7 +19,7 @@ const CHARACTERS = [
   { id: '🦁 狮子小豆', name: '狮子小豆', emoji: '🦁' },
   { id: '🐰 兔子米菲', name: '兔子米菲', emoji: '🐰' },
   { id: '🚀 飞天小狗', name: '飞天小狗', emoji: '🐶' },
-  { id: '🤖 机器人小智', name: '机器人小智', emoji: '🤖' },
+  { id: '🤖 机器人小茜', name: '机器人小茜', emoji: '🤖' },
   { id: '🐱 喵喵队长', name: '喵喵队长', emoji: '🐱' },
 ];
 

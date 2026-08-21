@@ -46,7 +46,7 @@ export const WEAKNESS_LABEL: Record<WeaknessType, string> = {
 
 /** 薄弱类型 → 复习行动建议（儿童友好、可操作） */
 const RECOMMENDATIONS: Record<WeaknessType, string[]> = {
-  conceptual: ['先看小智讲一讲', '从更简单的内容练起', '多听几遍例题'],
+  conceptual: ['先看小茜讲一讲', '从更简单的内容练起', '多听几遍例题'],
   calculation: ['慢慢算，别跳步', '用草稿纸列算式', '算完再检查一遍'],
   memory: ['多读几遍记一记', '用卡片帮记忆', '隔一会儿再复习'],
   application: ['读清题目要求', '想想解题步骤', '做完说说思路'],

@@ -29,7 +29,7 @@ export function musicCreateTask(notes: string): StreamTask {
   return {
     scene: 'music.create',
     messages: musicCreateMessages(notes),
-    title: '小智听你的创作',
+    title: '小茜听你的创作',
     hint: '正在听你的旋律…',
     fallback: localMusicCreate(notes),
   };

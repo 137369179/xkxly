@@ -69,7 +69,7 @@ export function SpeedMath() {
 
   const start = () => {
     sfxTap();
-    // 开局是安全边界：先让小智把最新建议应用上来，再锁定本局难度
+    // 开局是安全边界：先让小茜把最新建议应用上来，再锁定本局难度
     diffMeta.syncNow();
     runDiffRef.current = diffMeta.auto ? diffMeta.recommended : diff;
     setActive(true);

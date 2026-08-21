@@ -18,6 +18,7 @@ import { useShallow } from 'zustand/react/shallow';
 import type { MasteryItem } from '@/types';
 import { TONE_STYLE } from '@/lib/tones';
 import { useTranslation } from '@/i18n/useTranslation';
+import { ExploreReward } from '@/components/study/ExploreReward';
 
 interface Family {
   /** 拼音（不带声调） */
@@ -142,6 +143,7 @@ export function PhoneticFamilies({ onLearn }: { onLearn?: (h: HanziEntry) => voi
       <p className="text-center text-xs font-bold text-ink-soft">
         {t('phoneticFamilies.total', { n: families.length })}
       </p>
-    </div>
+    
+      <ExploreReward rewardKey="hanzi-phonetic" scene="hanzi" tone="blue" /></div>
   );
 }

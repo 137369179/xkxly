@@ -25,6 +25,7 @@ import { WrongBookTrainer } from '@/modules/rewards/WrongBookTrainer';
 import { WrongBookBadgeList } from './WrongBookBadgeList';
 import { clusterWrongBook, type WrongCluster } from '@/lib/wrongCluster';
 import { openTraining, skillToTarget } from '@/lib/skillRouting';
+import { AiVariantModal } from './AiVariantModal';
 
 type TabId = 'overview' | 'train' | 'badges' | 'causes';
 
@@ -211,6 +212,7 @@ function CausesTab() {
   const { t } = useTranslation();
   const wrongBook = useWrongBook();
   const clusters = useMemo(() => clusterWrongBook({ wrongBook }), [wrongBook]);
+  const [variantSkill, setVariantSkill] = useState<string | null>(null);
 
   return (
     <div className="space-y-4">
@@ -228,16 +230,30 @@ function CausesTab() {
         ) : (
           <div className="space-y-2">
             {clusters.map((c) => (
-              <CauseCard key={c.key} cluster={c} />
+              <CauseCard key={c.key} cluster={c} onOpenVariant={(s) => setVariantSkill(s)} />
             ))}
           </div>
         )}
       </Panel>
+
+      {variantSkill && (
+        <AiVariantModal
+          skillId={variantSkill}
+          isOpen={true}
+          onClose={() => setVariantSkill(null)}
+        />
+      )}
     </div>
   );
 }
 
-function CauseCard({ cluster }: { cluster: WrongCluster }) {
+function CauseCard({
+  cluster,
+  onOpenVariant,
+}: {
+  cluster: WrongCluster;
+  onOpenVariant: (skill: string) => void;
+}) {
   const { t } = useTranslation();
   const firstSkill = cluster.skills[0];
   const canTrain = firstSkill !== undefined && skillToTarget(firstSkill) !== null;
@@ -245,24 +261,38 @@ function CauseCard({ cluster }: { cluster: WrongCluster }) {
 
   return (
     <div className="rounded-2xl bg-white/70 p-3">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2">
           <span className="text-base font-extrabold text-ink">{cluster.label}</span>
           <span className="rounded-full bg-candy-purple-soft px-2 py-0.5 text-xs font-bold text-candy-purple-deep">
             {t('wrongbook.causes.count', { count: cluster.count })}
           </span>
         </div>
-        {canTrain && firstSkill && (
-          <CandyButton
-            tone="blue"
-            size="sm"
-            onClick={() => {
-              openTraining(firstSkill);
-            }}
-          >
-            🎯 {t('wrongbook.causes.practice')}
-          </CandyButton>
-        )}
+        <div className="flex items-center gap-1.5">
+          {firstSkill && (
+            <CandyButton
+              tone="purple"
+              size="sm"
+              onClick={() => {
+                sfxTap();
+                onOpenVariant(firstSkill);
+              }}
+            >
+              ✨ AI 变式题
+            </CandyButton>
+          )}
+          {canTrain && firstSkill && (
+            <CandyButton
+              tone="blue"
+              size="sm"
+              onClick={() => {
+                openTraining(firstSkill);
+              }}
+            >
+              🎯 {t('wrongbook.causes.practice')}
+            </CandyButton>
+          )}
+        </div>
       </div>
       {sampleSkills.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">

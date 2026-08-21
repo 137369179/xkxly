@@ -6,7 +6,7 @@
  *
  * 流程：
  *   comfortingActive=true → 弹出遮罩 → 调用 companionComfortTask 流式获取安抚文本
- *   → AiAvatar mood="talking" + 流式文本展示 → 结束后显示"谢谢小智"按钮
+ *   → AiAvatar mood="talking" + 流式文本展示 → 结束后显示"谢谢小茜"按钮
  *   → 点击按钮 → setComforting(false) + resetWrongStreak()
  */
 import { useEffect, useRef } from 'react';

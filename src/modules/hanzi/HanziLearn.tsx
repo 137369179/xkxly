@@ -12,7 +12,7 @@ import { AiPanel } from '@/components/ai';
 import { CandyButton } from '@/components/ui/Button';
 import { Panel } from '@/components/ui/Card';
 import { useAiStream } from '@/lib/ai/useAi';
-import { hanziStoryTask, hanziSentenceTask } from '@/lib/ai/tasks';
+import { hanziStoryTask, hanziSentenceTask, rhymeCreateTask } from '@/lib/ai/tasks';
 import { speak } from '@/lib/speech';
 import { answerCorrect, answerWrong } from '@/lib/feedback';
 import { streakTargetForLevel } from '@/lib/difficulty';
@@ -42,6 +42,7 @@ export function HanziLearn({ hanzi, onDone }: { hanzi: HanziEntry; onDone: () =>
   const markTraced = useStore(s => s.markTraced);
   const story = useAiStream();
   const sentence = useAiStream();
+  const rhyme = useAiStream();
 
   // 进入学习页即后台预载笔顺数据，到「写」环节时秒开
   useEffect(() => {
@@ -190,12 +191,16 @@ export function HanziLearn({ hanzi, onDone }: { hanzi: HanziEntry; onDone: () =>
             <AssemblyAnimation char={hanzi.c} />
             <HanziFamilyTree char={hanzi.c} />
 
-            <div className="flex justify-center gap-3">
+            <div className="flex flex-wrap justify-center gap-2.5">
               <CandyButton tone="purple" size="sm" variant="soft" onClick={() => { sfxTap(); sentence.run(hanziSentenceTask({ char: hanzi.c, words: hanzi.words, sentence: hanzi.sentence })); }}>
                 {t('hanzi.aiSentence')}
               </CandyButton>
+              <CandyButton tone="pink" size="sm" variant="soft" onClick={() => { sfxTap(); rhyme.run(rhymeCreateTask(hanzi.c, 'hanzi')); }}>
+                ✨ 编儿歌顺口溜
+              </CandyButton>
             </div>
             <AiPanel state={sentence} tone="purple" title={t('hanzi.aiSentenceTitle')} />
+            <AiPanel state={rhyme} tone="pink" title="🎶 汉字儿歌顺口溜" />
             <div className="flex justify-center">
               <CandyButton tone="green" size="lg" onClick={() => { learnSkill(skill); api.ready(); }}>
                 {t('hanzi.knowIt')}
@@ -217,7 +222,7 @@ export function HanziLearn({ hanzi, onDone }: { hanzi: HanziEntry; onDone: () =>
             <p className="mt-1 text-2xl font-bold text-candy-purple-deep">{hanzi.pd}</p>
 
             <div className="my-5 rounded-2xl bg-gradient-to-r from-candy-blue-soft/30 via-candy-purple-soft/30 to-candy-pink-soft/30 p-4">
-              <p className="text-xs font-bold text-ink-soft mb-2">🎙️ 点击下方大声跟读，小智为你评分：</p>
+              <p className="text-xs font-bold text-ink-soft mb-2">🎙️ 点击下方大声跟读，小茜为你评分：</p>
               <SpeechEvalButton
                 targetText={hanzi.c}
                 lang="zh-CN"
@@ -264,7 +269,7 @@ export function HanziLearn({ hanzi, onDone }: { hanzi: HanziEntry; onDone: () =>
                   {[t('hanzi.qPinyin'), t('hanzi.qHanzi'), t('hanzi.qWords')][d - 1]}
                 </CandyButton>
                 {d === diffMeta.recommended && (
-                  <span className="text-[10px] font-extrabold leading-none text-candy-purple-deep">🌟 小智建议</span>
+                  <span className="text-[10px] font-extrabold leading-none text-candy-purple-deep">🌟 小茜建议</span>
                 )}
               </div>
             ))}

@@ -37,6 +37,9 @@ export interface WordSub {
 }
 
 export const WORD_SUBS: WordSub[] = [
+  // 茜 xī
+  { from: '小茜', to: '小西' },
+  { from: '茜茜', to: '西西' },
   // 行 háng
   { from: '银行', to: '银航' },
   { from: '行业', to: '航业' },

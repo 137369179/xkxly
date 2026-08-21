@@ -1,6 +1,6 @@
 /**
- * 「问问小智」触发按钮 —— 全站 AI 入口的统一样式
- * 与 CandyButton 保持一致的按压手感，但带小智头像，让孩子一眼认出这是 AI。
+ * 「问问小茜」触发按钮 —— 全站 AI 入口的统一样式
+ * 与 CandyButton 保持一致的按压手感，但带小茜头像，让孩子一眼认出这是 AI。
  */
 import { AiAvatar } from './AiAvatar';
 import { TONE_STYLE, type Tone } from '@/lib/tones';

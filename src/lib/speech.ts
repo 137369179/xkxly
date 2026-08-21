@@ -282,7 +282,12 @@ export function speak(text: string, options: SpeakOptions = {}): Promise<void> {
     });
   }
 
-  return loadVoices().then(() => runSpeak(text, options, priority, onEnd, onStart));
+  return loadVoices()
+    .then(() => runSpeak(text, options, priority, onEnd, onStart))
+    .catch((err) => {
+      if (import.meta.env.DEV) console.warn('[speech] speak 降级兜底:', err);
+      onEnd?.();
+    });
 }
 
 /**
@@ -421,15 +426,23 @@ function runSpeak(
       }, est);
     };
 
-    // 1. 全域多通道真人语音路径（默认首选：有道少儿名师真人录音 + 微软 Neural 晓晓/云希 + 百度少儿真人流）
+    // 1. 全域高保真 Neural 真人语音（默认首选：微软 Edge Neural 晓晓/云希/安娜美音）
     const settings = getSettings();
-    const useRealVoice = settings.engine === 'edge' || settings.engine === 'webspeech' || !settings.engine;
-    if (useRealVoice) {
+    const useEdgeNeural = settings.engine === 'edge' || !settings.engine;
+    if (useEdgeNeural) {
       const base = rate ?? 0.85;
       const prefs = applyUserPrefs({ rate: base, pitch, volume, lang, module: options.module });
+      const voice =
+        lang === 'en-US'
+          ? 'en-US-AnaNeural'
+          : options.module === 'quiz' || options.module === 'praise'
+            ? 'zh-CN-YunxiNeural'
+            : 'zh-CN-XiaoxiaoNeural';
 
-      playMultiChannelRealVoice(text, {
-        lang: lang as 'zh-CN' | 'en-US',
+      playEdgeNeuralVoice(text, {
+        voice,
+        rate: prefs.rate ?? base,
+        pitch: prefs.pitch ?? pitch,
         volume: prefs.volume ?? volume,
         onStart,
         onEnd: () => {
@@ -438,8 +451,8 @@ function runSpeak(
           resolve();
         },
       }).catch((err) => {
-        // 多通道失败时静默平滑降级至系统 WebSpeech
-        if (import.meta.env.DEV) console.warn('[speech] 真人语音多通道降级到系统语音:', err);
+        // Neural 失败/离线时静默平滑降级至系统 WebSpeech
+        if (import.meta.env.DEV) console.warn('[speech] Neural 语音降级到系统语音:', err);
         fallbackToWebSpeech();
       });
       return;

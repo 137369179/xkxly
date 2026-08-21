@@ -313,7 +313,7 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
         )}
       </div>
 
-      {/* AI 小智汉字微故事 */}
+      {/* AI 小茜汉字微故事 */}
       <div className="pt-2 border-t border-candy-pink-soft">
         {!showAiStory ? (
           <button

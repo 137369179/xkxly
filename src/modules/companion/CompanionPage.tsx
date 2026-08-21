@@ -19,7 +19,7 @@ import { AiAvatar } from '@/components/ai/AiAvatar';
 import { AiPanel } from '@/components/ai/AiPanel';
 import { AiChat } from '@/components/ai/AiChat';
 import { useAiStream } from '@/lib/ai/useAi';
-import { companionChatTask, companionExplainTask } from '@/lib/ai/tasks';
+import { companionChatTask, companionExplainTask, masteryCue } from '@/lib/ai/tasks';
 // S2 Companion 2.0 新增组件
 import { EmotionPop } from '@/modules/companion/EmotionPop';
 import { StudyBuddyMode } from '@/modules/companion/StudyBuddyMode';
@@ -184,7 +184,7 @@ export default function CompanionPage() {
         <button
           type="button"
           onClick={() => { sfxTap(); openVoiceModal(); }}
-          aria-label="打开语音对话，跟小智说话"
+          aria-label="打开语音对话，跟小茜说话"
           className="flex shrink-0 flex-col items-center gap-1 rounded-2xl border-2 border-white bg-gradient-to-b from-candy-purple to-candy-blue px-3 py-2.5 text-white shadow-md transition-transform active:scale-95"
         >
           <span className="text-2xl leading-none">🎤</span>
@@ -226,7 +226,7 @@ export default function CompanionPage() {
         >
           <span className="text-3xl">💡</span>
           <div className="min-w-0 flex-1">
-            <div className="text-xs font-bold text-yellow-700">✨ 小智今日推荐</div>
+            <div className="text-xs font-bold text-yellow-700">✨ 小茜今日推荐</div>
             <div className="mt-0.5 text-base font-extrabold text-orange-800">
               {RECOMMENDED.emoji} {RECOMMENDED.label}
               <span className="ml-2 text-xs font-bold text-orange-500">
@@ -249,7 +249,7 @@ export default function CompanionPage() {
             onClick={() => pickTopic(RECOMMENDED)}
             className="shrink-0 rounded-full bg-yellow-400 px-4 py-2.5 text-sm font-extrabold text-orange-900 shadow active:translate-y-[2px]"
           >
-            听小智讲 →
+            听小茜讲 →
           </button>
         </motion.div>
       )}
@@ -286,12 +286,12 @@ export default function CompanionPage() {
         })}
       </div>
 
-      {/* ── 小智讲一讲（讲解 Tab） ── */}
+      {/* ── 小茜讲一讲（讲解 Tab） ── */}
       {activeTab === 'explain' && (
       <Panel>
         <PanelTitle
           emoji="📖"
-          title="小智讲一讲"
+          title="小茜讲一讲"
           subtitle={i18nT('companion.explainSubtitle')}
           tone="purple"
         />
@@ -372,7 +372,7 @@ export default function CompanionPage() {
               <div className="mb-2 flex items-center gap-2">
                 <AiAvatar size={30} mood={mood} />
                 <span className="text-sm font-extrabold" style={{ color: toneStyle?.deep }}>
-                  小智讲 {topic.emoji} {topic.label}
+                  小茜讲 {topic.emoji} {topic.label}
                 </span>
                 <DifficultyStars stars={topic.stars} />
               </div>
@@ -403,7 +403,7 @@ export default function CompanionPage() {
                 >
                   {i18nT('companion.retry')}
                 </button>
-                {/* 听小智讲（语音朗读） */}
+                {/* 听小茜讲（语音朗读） */}
                 <button
                   type="button"
                   onClick={() => handleRecite(topic)}
@@ -452,7 +452,7 @@ export default function CompanionPage() {
             <PanelTitle
               emoji="🤔"
               title="知识追问"
-              subtitle="先选一个主题，小智来考考你！"
+              subtitle="先选一个主题，小茜来考考你！"
               tone="pink"
             />
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -484,16 +484,18 @@ export default function CompanionPage() {
         )
       )}
 
-      {/* ── 和小智聊天（常驻底部） ── */}
+      {/* ── 和小茜聊天（常驻底部） ── */}
       <Panel>
         <PanelTitle
           emoji="💬"
-          title="和小智聊天"
+          title="和小茜聊天"
           subtitle={i18nT('companion.chatSubtitle')}
           tone="pink"
         />
         <AiChat
-          buildTask={(q, history) => companionChatTask(q ?? '', history)}
+          buildTask={(q, history) =>
+            companionChatTask(q ?? '', history, masteryCue(useStore.getState().progress, 4))
+          }
           quickQuestions={QUICK_QUESTIONS}
           tone="purple"
           placeholder={i18nT('companion.placeholder')}

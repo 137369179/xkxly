@@ -1,5 +1,5 @@
 /**
- * 小智问答（多轮）—— 目前用于古诗花园的「AI 导师」
+ * 小茜问答（多轮）—— 目前用于古诗花园的「AI 导师」
  * ------------------------------------------------------------------
  * 儿童向对话的三个取舍：
  *   1. 以「快捷问题」为主，输入框为辅 —— 5 岁孩子打字很慢
@@ -11,12 +11,14 @@ import { AnimatePresence, motion } from 'motion/react';
 import { AiAvatar } from './AiAvatar';
 import { AiPanel } from './AiPanel';
 import { AiThinking } from './AiThinking';
+import { RubyText } from './RubyText';
 import { useAiStream } from '@/lib/ai/useAi';
 import type { StreamTask } from '@/lib/ai/tasks';
 import { guardInput } from '@/lib/ai/guard';
 import type { AiMessage } from '@/lib/ai/types';
 import { TONE_STYLE, type Tone } from '@/lib/tones';
-import { sfxTap } from '@/lib/sfx';
+import { sfxTap, sfxPop } from '@/lib/sfx';
+import { speak, stopSpeaking } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
 
 /** 保留的历史轮数（1 轮 = 一问一答） */
@@ -47,11 +49,9 @@ export function AiChat({
   const [turns, setTurns] = useState<ChatTurn[]>([]);
   const [input, setInput] = useState('');
   const [tip, setTip] = useState('');
-  /**
-   * 当前这一轮的问题。空串 = 没有进行中的轮次。
-   * ⚠️ 原来这里用的是 useRef —— ref 改了不触发渲染，
-   * 「当前轮」的显隐全靠别的 setState 顺带刷新，时序一乱就白屏。改为 state。
-   */
+  const [showPinyin, setShowPinyin] = useState(false);
+  const [speakingIndex, setSpeakingIndex] = useState<number | null>(null);
+
   const [asked, setAsked] = useState('');
   const stream = useAiStream();
 
@@ -83,17 +83,67 @@ export function AiChat({
       setTip(g.reason ?? translate('companion.rephrase'));
       return;
     }
+    sfxPop();
     setTip('');
     setInput('');
     setAsked(g.text);
     stream.run(buildTask(g.text, history()));
   };
 
+  const playTurnSpeech = (text: string, idx: number) => {
+    sfxTap();
+    if (speakingIndex === idx) {
+      stopSpeaking();
+      setSpeakingIndex(null);
+      return;
+    }
+    stopSpeaking();
+    setSpeakingIndex(idx);
+    speak(text, { lang: 'zh-CN', rate: 0.9, module: 'ai' }).finally(() => {
+      setSpeakingIndex(null);
+    });
+  };
+
   // 卸载时停掉在途请求，避免离开页面后还在烧代理并发额度
-  useEffect(() => () => stream.stop(), []); // intentional: only cleanup on unmount
+  useEffect(() => () => {
+    stream.stop();
+    stopSpeaking();
+  }, []);
 
   return (
     <div className="space-y-3">
+      {/* 历史头部工具条 */}
+      {turns.length > 0 && (
+        <div className="flex items-center justify-between px-1 text-xs font-bold text-ink-soft">
+          <span>对话记录 ({turns.length} 轮)</span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                sfxTap();
+                setShowPinyin((v) => !v);
+              }}
+              className={`rounded-lg px-2 py-0.5 text-xs transition border ${
+                showPinyin ? 'bg-pink-500 text-white border-pink-600' : 'bg-white text-pink-600 border-pink-200'
+              }`}
+            >
+              {showPinyin ? '🔤 纯汉字' : '拼 拼音'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                sfxTap();
+                stopSpeaking();
+                setTurns([]);
+              }}
+              className="hover:text-candy-red transition"
+            >
+              🧹 清空
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 历史对话 */}
       <AnimatePresence initial={false}>
         {turns.map((x, i) => (
@@ -113,9 +163,20 @@ export function AiChat({
             </div>
             <div className="flex items-start gap-2">
               <AiAvatar size={30} />
-              <span className="max-w-[85%] whitespace-pre-wrap rounded-[1.1rem] rounded-tl-md bg-white px-4 py-2.5 text-base leading-relaxed font-medium text-[#5c2e3d] shadow-sm">
-                {x.a}
-              </span>
+              <div className="max-w-[85%] rounded-[1.1rem] rounded-tl-md bg-white p-3.5 shadow-sm">
+                <div className="text-base leading-relaxed font-medium text-[#5c2e3d]">
+                  {showPinyin ? <RubyText text={x.a} clickable /> : <span>{x.a}</span>}
+                </div>
+                <div className="mt-2 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => playTurnSpeech(x.a, i)}
+                    className="inline-flex items-center gap-1 rounded-xl bg-pink-50 px-2 py-1 text-xs font-bold text-pink-600 hover:bg-pink-100 transition active:scale-95"
+                  >
+                    {speakingIndex === i ? '⏹️ 停止' : '🔊 听一听'}
+                  </button>
+                </div>
+              </div>
             </div>
           </motion.div>
         ))}

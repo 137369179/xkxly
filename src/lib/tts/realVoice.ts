@@ -53,23 +53,6 @@ async function getCachedVoiceUrl(url: string): Promise<string | null> {
   }
 }
 
-/**
- * 抓取音频并写入磁盘缓存；CORS 不可用时返回 null（交由原生 Audio 直接播，无需 CORS）。
- */
-async function fetchAndCacheVoice(url: string): Promise<string | null> {
-  if (!voiceCacheAvailable) return null;
-  try {
-    const resp = await fetch(url, { mode: 'cors' });
-    if (!resp.ok) return null;
-    const cache = await caches.open(VOICE_CACHE_NAME);
-    await cache.put(url, resp.clone());
-    const blob = await resp.blob();
-    return URL.createObjectURL(blob);
-  } catch {
-    return null;
-  }
-}
-
 function getSharedAudio(): HTMLAudioElement {
   if (!sharedAudio) {
     sharedAudio = new Audio();
@@ -276,24 +259,14 @@ export async function playMultiChannelRealVoice(
   for (const url of urls) {
     if (abortCtrl.signal.aborted) return;
     // P1-4：磁盘缓存命中 → 复用；否则尝试抓取落盘；CORS 不可用才回退原生直播
-    let playableUrl: string;
+    let playableUrl = url;
     let cachedBlobUrl = false;
     if (allowDiskCache) {
       const disk = await getCachedVoiceUrl(url);
       if (disk) {
         playableUrl = disk;
         cachedBlobUrl = true;
-      } else {
-        const fetched = await fetchAndCacheVoice(url);
-        if (fetched) {
-          playableUrl = fetched;
-          cachedBlobUrl = true;
-        } else {
-          playableUrl = url;
-        }
       }
-    } else {
-      playableUrl = url;
     }
     try {
       await playAudioUrl(playableUrl, volume, abortCtrl.signal, onStart, onEnd);

@@ -113,7 +113,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
       const generator = chatStream({
         scene: 'quiz.extend',
         messages: [
-          { role: 'system', content: '你是一个面向5岁小朋友的智慧好朋友小智。回答要极为亲切、活泼、充满童趣，使用极其简单通俗的语言，尽量多用比喻。最重要的是：讲的知识必须准确专业有依据，不确定就明确说「我们一起查一查吧」，绝不编造；先给出准确结论，再用比喻展开。回答控制在3句话、90字以内。' },
+          { role: 'system', content: '你是一个面向5岁小朋友的智慧好朋友小茜。回答要极为亲切、活泼、充满童趣，使用极其简单通俗的语言，尽量多用比喻。最重要的是：讲的知识必须准确专业有依据，不确定就明确说「我们一起查一查吧」，绝不编造；先给出准确结论，再用比喻展开。回答控制在3句话、90字以内。' },
           { role: 'user', content: question },
         ],
         signal: ac.signal,
@@ -140,7 +140,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
       } else {
         setStatus('idle');
         if (fullText.trim()) {
-          const fallback = '小智没听懂这个问题，我们换个问题问吧～';
+          const fallback = '小茜没听懂这个问题，我们换个问题问吧～';
           setAiResponse(fallback);
         }
       }
@@ -149,7 +149,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
       if (ac.signal.aborted) return;
       if (import.meta.env.DEV) console.error('AI Voice error:', err);
       setStatus('idle');
-      const fallback = '小智刚刚走神啦，宝贝再问我一次好不好呀？';
+      const fallback = '小茜刚刚走神啦，宝贝再问我一次好不好呀？';
       setAiResponse(fallback);
       speak(fallback);
     }
@@ -213,7 +213,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
         ref={modalRef}
         role="dialog"
         aria-modal="true"
-        aria-label="小智语音对话"
+        aria-label="小茜语音对话"
         tabIndex={-1}
         className="fixed inset-0 z-50 flex items-center justify-center p-4 outline-none"
       >
@@ -259,8 +259,8 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
               )}
             </motion.div>
           </div>
-          <h3 className="text-2xl font-black text-ink-main">小智语音好朋友</h3>
-          <p className="mt-1 text-sm font-bold text-ink-soft">按住下方大按钮，跟小智说话吧！</p>
+          <h3 className="text-2xl font-black text-ink-main">小茜语音好朋友</h3>
+          <p className="mt-1 text-sm font-bold text-ink-soft">按住下方大按钮，跟小茜说话吧！</p>
           <div className="mt-5 min-h-[100px] max-h-[160px] overflow-y-auto rounded-2xl bg-cream-light p-4 text-left border-2 border-dashed border-candy-blue/30">
             {transcript && (
               <div className="mb-3 text-right">
@@ -271,7 +271,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
             )}
             {status === 'thinking' && (
               <div className="text-left font-bold text-candy-purple animate-pulse flex items-center gap-2">
-                <span>💭 小智正在动脑筋思考中…</span>
+                <span>💭 小茜正在动脑筋思考中…</span>
               </div>
             )}
             {aiResponse && (
@@ -291,27 +291,56 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
             )}
           </div>
           <div className="mt-6 flex flex-col items-center gap-3">
+            {status === 'listening' && (
+              <div className="flex items-center justify-center gap-1.5 py-1">
+                {[0.4, 0.8, 1, 0.7, 0.3].map((h, i) => (
+                  <motion.div
+                    key={i}
+                    className="w-1.5 rounded-full bg-candy-red"
+                    animate={{ height: ['8px', `${h * 28}px`, '8px'] }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 0.6,
+                      delay: i * 0.1,
+                      ease: 'easeInOut',
+                    }}
+                  />
+                ))}
+              </div>
+            )}
             <button
-              onPointerDown={(e) => { e.preventDefault(); handleStartListening(); }}
-              onPointerUp={(e) => { e.preventDefault(); handleStopListening(); }}
+              onPointerDown={(e) => {
+                e.preventDefault();
+                if (status === 'speaking') {
+                  stopSpeaking();
+                  setStatus('idle');
+                } else {
+                  handleStartListening();
+                }
+              }}
+              onPointerUp={(e) => {
+                e.preventDefault();
+                if (status === 'listening') handleStopListening();
+              }}
               onPointerCancel={handleStopListening}
               aria-label={
                 status === 'listening' ? tr('voice.listeningSend')
                 : status === 'thinking' ? tr('voice.thinking')
-                : status === 'speaking' ? tr('voice.speaking')
+                : status === 'speaking' ? '点击打断小茜播报'
                 : tr('voice.startTalk')
               }
               className={`relative flex h-20 w-full items-center justify-center gap-3 rounded-full text-xl font-black text-white shadow-xl transition-all active:scale-95 ${
                 status === 'listening' ? 'bg-gradient-to-r from-candy-red to-pink-500 animate-pulse'
                 : status === 'thinking' ? 'bg-candy-purple opacity-80 cursor-wait'
+                : status === 'speaking' ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-105'
                 : 'bg-gradient-to-r from-candy-green via-candy-blue to-candy-purple hover:brightness-105'
               }`}
             >
-              <span className="text-3xl">{status === 'listening' ? '🎙️' : '🎤'}</span>
+              <span className="text-3xl">{status === 'listening' ? '🎙️' : status === 'speaking' ? '⏹️' : '🎤'}</span>
               <span>
                 {status === 'listening' ? tr('voice.listeningSend')
                 : status === 'thinking' ? tr('voice.thinking')
-                : status === 'speaking' ? tr('voice.speakingAgain')
+                : status === 'speaking' ? '点击打断播报 🛑'
                 : tr('voice.startTalk')}
               </span>
             </button>

@@ -3,6 +3,7 @@ import { getComponents, hasDecomposition } from '@/lib/hanziEtymology';
 import { useTranslation } from '@/i18n/useTranslation';
 import { Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
+import { ExploreReward } from '@/components/study/ExploreReward';
 
 /**
  * 拼字动画：把部件「飞入 + 组装」成完整汉字的过程做成动效，
@@ -57,7 +58,8 @@ export function AssemblyAnimation({ char }: { char: string }) {
             {char}
           </div>
           <p className="text-xs font-semibold text-ink-soft">{t('hanzi.wholeCharNote')}</p>
-        </div>
+        
+      <ExploreReward rewardKey="hanzi-assembly" scene="hanzi" tone="blue" /></div>
       )}
     </Panel>
   );

@@ -50,7 +50,7 @@ export function BadgeUnlock() {
     return () => clearTimeout(t);
   }, [badge]);
 
-  // 徽章解锁时，小智顺带夸一句（AI 挂了静默走本地兜底，不打断庆祝）
+  // 徽章解锁时，小茜顺带夸一句（AI 挂了静默走本地兜底，不打断庆祝）
   const praise = useAiStream(badge ? praiseTask(`获得${badge.name}勋章：${badge.desc}`) : undefined);
 
   if (!badge) return null;

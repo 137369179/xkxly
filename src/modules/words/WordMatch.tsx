@@ -75,7 +75,7 @@ export function WordMatch() {
   }, [start]);
 
   useEffect(() => {
-    // 开局用小智推荐的档位（而不是恒定最简单那档）
+    // 开局用小茜推荐的档位（而不是恒定最简单那档）
     startById(diff);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [diff, startById]);
@@ -156,7 +156,7 @@ export function WordMatch() {
           size="sm"
           className="mt-4"
           onClick={() => {
-            // 一局结束是安全边界：让小智把最新建议应用上来
+            // 一局结束是安全边界：让小茜把最新建议应用上来
             diffMeta.syncNow();
             const nextDiff = (diffMeta.auto ? diffMeta.recommended : diff) as 1 | 2 | 3;
             startById(nextDiff);

@@ -9,6 +9,7 @@
 import { useState, Suspense, lazy } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { sfxTap } from '@/lib/sfx';
+import { speak } from '@/lib/speech';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
 import { SCIENCE_ITEMS } from '@/data/scienceIndex';
@@ -84,6 +85,7 @@ export default function SciencePage() {
               )}
               onClick={() => {
                 sfxTap();
+                speak(`${item.nameZh}。${item.nameEn}`, { lang: 'zh-CN' });
                 const tabMap: Record<string, SciTab> = { dino: 'dino', space: 'space', weather: 'weather' };
                 setTab(tabMap[item.category] ?? 'dino');
               }}

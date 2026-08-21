@@ -7,6 +7,7 @@ import { CandyButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useMastery, useStore } from '@/store/useStore';
 import { sfxTap } from '@/lib/sfx';
+import { ExploreReward } from '@/components/study/ExploreReward';
 
 type CategoryFilter = 'all' | 'vowel' | 'consonant1' | 'consonant2';
 
@@ -144,6 +145,7 @@ export function LetterStudy({ initialUpper }: { initialUpper?: string }) {
           );
         })}
       </div>
-    </div>
+    
+      <ExploreReward rewardKey="letter-study" scene="letter" tone="purple" /></div>
   );
 }

@@ -38,7 +38,7 @@ import { ParentAdvicePanel } from '@/components/study/ParentAdvicePanel';
 import { LearningCoach } from '@/components/study/LearningPath';
 import { StudyReminder } from '@/components/study/StudyReminder';
 import VoiceSettings from './VoiceSettings';
-import { AiReport, WrongAnalyzeCard } from './ParentSections';
+import { AiReport, WrongAnalyzeCard, ParentActionCardsSection } from './ParentSections';
 import {
   hashPin,
   verifyPin,
@@ -331,6 +331,9 @@ export default function ParentPage() {
 
       {/* AI 学情分析 */}
       <AiReport />
+
+      {/* AI 亲子行动指南卡 */}
+      <ParentActionCardsSection />
 
       {/* 学习统计图表 */}
       <Panel>

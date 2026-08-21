@@ -9,11 +9,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStore } from '@/store/useStore';
-import { sfxCorrect } from '@/lib/sfx';
-
-
-
-
+import { sfxCorrect, sfxPurr } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { useSafeTimeout } from '@/lib/useTimer';
 import { useAiStream } from '@/lib/ai/useAi';
@@ -116,7 +112,7 @@ export function CatCompanion() {
   // 摸头/抚摸小猫反馈
   const handlePetCat = (e: React.MouseEvent) => {
     e.stopPropagation();
-    sfxCorrect();
+    sfxPurr();
 
     // 产生爱心飘升特效
     const rect = e.currentTarget.getBoundingClientRect();
@@ -213,15 +209,20 @@ export function CatCompanion() {
           </div>
 
           {/* 打开直接聊天 Modal 按钮 */}
-          <button aria-label="💬"
+          <button
+            type="button"
+            aria-label={t('catCompanion.chatTitle')}
             onClick={(e) => {
               e.stopPropagation();
               setShowChatModal(true);
             }}
-            className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-gradient-to-r from-purple-500 to-pink-500 text-xs font-bold text-white shadow-lg hover:scale-110"
+            className="absolute -bottom-1 -right-1 flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border-2 border-white bg-gradient-to-tr from-purple-600 via-pink-500 to-rose-400 text-sm font-bold text-white shadow-lg transition-all hover:scale-115 active:scale-90"
             title={t('catCompanion.chatTitle')}
           >
-            💬
+            <span className="relative flex items-center justify-center">
+              💬
+              <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-emerald-400 ring-2 ring-white animate-pulse" />
+            </span>
           </button>
         </motion.div>
       </div>

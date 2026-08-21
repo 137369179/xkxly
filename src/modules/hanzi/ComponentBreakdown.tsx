@@ -6,6 +6,7 @@ import {
 } from '@/lib/hanziEtymology';
 import { useTranslation } from '@/i18n/useTranslation';
 import { Panel } from '@/components/ui/Card';
+import { ExploreReward } from '@/components/study/ExploreReward';
 
 type Role = 'semantic' | 'phonetic' | 'component';
 
@@ -75,7 +76,8 @@ export function ComponentBreakdown({ char }: { char: string }) {
           <span className="text-4xl font-black text-candy-purple-deep leading-none">{char}</span>
           <span className="mt-1 text-[10px] font-extrabold text-candy-purple-deep">{t('hanzi.resultChar')}</span>
         </div>
-      </div>
+      
+      <ExploreReward rewardKey="hanzi-component" scene="hanzi" tone="blue" /></div>
     </Panel>
   );
 }

@@ -162,7 +162,7 @@ export default function IdiomsPage() {
 
   const startGuess = () => {
     sfxTap();
-    // 开一局是安全边界：把小智的最新建议应用上来
+    // 开一局是安全边界：把小茜的最新建议应用上来
     levelMeta.syncNow();
     setGuessStarted(true);
   };

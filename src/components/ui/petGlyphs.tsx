@@ -208,12 +208,18 @@ export const PET_GLYPHS: Record<string, React.ReactNode> = {
   // 18. 蹭蹭卖萌
   cat_purr: (
     <>
-      <path d="M16 28 L24 16 L30 26 H34 L40 16 L48 28 C52 32 52 46 32 48 C12 46 12 32 16 28 Z" fill="#FFE0EF" />
-      <path d="M22 34 Q 26 38 30 34" stroke="#ff6b96" strokeWidth={2.5} strokeLinecap="round" fill="none" />
-      <path d="M34 34 Q 38 38 42 34" stroke="#ff6b96" strokeWidth={2.5} strokeLinecap="round" fill="none" />
-      <circle cx="20" cy="40" r="3.5" fill="#FF9CC4" opacity={0.8} />
-      <circle cx="44" cy="40" r="3.5" fill="#FF9CC4" opacity={0.8} />
-      <Glint cx={22} cy={24} rx={4} ry={2} op={0.7} />
+      <path d="M14 26 C12 18 18 12 26 18 L30 24 H34 L38 18 C46 12 52 18 50 26 C56 34 54 46 32 48 C10 46 8 34 14 26 Z" fill="#FFEBF4" stroke="#FFAAC9" strokeWidth={1.5} />
+      <path d="M18 20 C18 16 22 16 26 21" fill="#FF85A8" opacity={0.85} />
+      <path d="M46 20 C46 16 42 16 38 21" fill="#FF85A8" opacity={0.85} />
+      <circle cx="24" cy="33" r="4.5" fill="#1A0A10" />
+      <circle cx="22.5" cy="31.5" r="1.5" fill="#FFFFFF" />
+      <circle cx="40" cy="33" r="4.5" fill="#1A0A10" />
+      <circle cx="38.5" cy="31.5" r="1.5" fill="#FFFFFF" />
+      <ellipse cx="18" cy="38" rx="3.5" ry="2.2" fill="#FF85A8" opacity={0.5} />
+      <ellipse cx="46" cy="38" rx="3.5" ry="2.2" fill="#FF85A8" opacity={0.5} />
+      <polygon points="32,36 30,38 34,38" fill="#FF5C8A" />
+      <path d="M29 39 Q32 42 35 39" stroke="#FF5C8A" strokeWidth={1.5} strokeLinecap="round" fill="none" />
+      <Glint cx={22} cy={24} rx={4} ry={2} op={0.8} />
     </>
   ),
   // 19. 拼音森林探险

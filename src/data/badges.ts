@@ -479,11 +479,11 @@ export const BADGES: BadgeDef[] = [
     check: (p) => Object.keys(p.mastery).filter(k => k.startsWith('rhyme:') && (p.mastery[k]?.lv ?? 0) >= 1).length >= 10,
     meter: (p) => [Object.keys(p.mastery).filter(k => k.startsWith('rhyme:') && (p.mastery[k]?.lv ?? 0) >= 1).length, 10],
   },
-  // ── 小智伙伴徽章 ──────────────────────────────────────
+  // ── 小茜伙伴徽章 ──────────────────────────────────────
   {
     id: 'chat-buddy',
     name: '聊天达人',
-    desc: '和小智聊了 5 轮',
+    desc: '和小茜聊了 5 轮',
     emoji: '💬',
     tone: 'purple',
     check: (p) => {

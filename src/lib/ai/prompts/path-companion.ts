@@ -190,7 +190,7 @@ export function buddyQuizMessages(subject: string, difficulty: number): AiMessag
 {
   "question": "题目文字，不超过30字",
   "display": "可选的视觉展示，如算式",
-  "buddyAnswer": "小智的答案",
+  "buddyAnswer": "小茜的答案",
   "isCorrect": true/false,
   "correctAnswer": "正确答案",
   "explanation": "为什么这个答案对/错，不超过40字",

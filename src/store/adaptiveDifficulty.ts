@@ -18,7 +18,7 @@ export function useChainSlot(cat: string) {
   return useMemo(() => getSlot(cat), [cat]);
 }
 
-/** 某类学科的"小智建议难度"（响应式跟随 DDA 推荐） */
+/** 某类学科的"小茜建议难度"（响应式跟随 DDA 推荐） */
 export function useAdaptiveDifficulty(cat: string): 1 | 2 | 3 {
   // P1-6：recommendDifficulty 对 progress 的唯一读取是 adaptiveDifficulty 的 mastery
   // 按类目聚合（sum ok/ng），故只订阅本类目的 mastery 项——其它学科/进度字段变化
@@ -51,7 +51,7 @@ export function useAdaptiveDifficulty(cat: string): 1 | 2 | 3 {
  *   多数模块用 `key={`${tab}-${diff}`}` 驱动出题器，难度一变就整轮重挂，
  *   孩子做到第 4 题会被打回第 1 题——那是比"难度不自适应"更糟的体验。
  *   所以正在用的档位被锁存，只在安全边界（`syncNow()`：一轮结束 / 重新开局）
- *   或孩子主动接受建议时才切换；`meta.pending` 用来提示"小智想给你换档了"。
+ *   或孩子主动接受建议时才切换；`meta.pending` 用来提示"小茜想给你换档了"。
  */
 export function useAdaptiveDifficultyState(
   cat: string,

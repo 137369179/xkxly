@@ -10,7 +10,7 @@
  * 设计原则：
  *   1. 前缀稳定 —— 实测 Agnes 有 prompt cache（cached_tokens: 256），
  *      把不变的人格设定放最前，变量一律后置，能吃到缓存、降低延迟。
- *   2. 人格统一 —— 全站同一个角色「小智」，语气一致。
+ *   2. 人格统一 —— 全站同一个角色「小茜」，语气一致。
  *   3. 硬约束前置 —— 面向 5 岁儿童的边界写死在 system 里，不靠模型自觉。
  *   4. 输出可解析 —— 结构化任务明确给出 JSON schema 与示例。
  */
@@ -34,6 +34,7 @@ export type {
   WordPhonicsCtx,
   StoryBookPageData,
   StoryBookData,
+  StoryBranchData,
   GenCountQuestion,
   GenLetterMatch,
 } from './prompts/learning';
@@ -60,11 +61,21 @@ export {
   wordStoryMessages,
   wordPhonicsMessages,
   storybookMessages,
+  storybookBranchMessages,
   quizExtendMessages,
   adventureEncourageMessages,
   idiomStoryMessages,
   idiomSentenceMessages,
   idiomHintMessages,
+  scienceAskMessages,
+  scienceExperimentMessages,
+  hanziMnemonicMessages,
+  wordQuizMessages,
+  safetyRoleplayMessages,
+  wrongVariantMessages,
+  logicDetectiveMessages,
+  rhymeCreateMessages,
+  type WrongVariantQuestion,
 } from './prompts/learning';
 
 // ── Path & Companion domain ──────────────────────────────────
@@ -93,11 +104,12 @@ export {
 } from './prompts/path-companion';
 
 // ── Parent reports domain ────────────────────────────────────
-export type { DeepReport, WrongAnalyze, RecommendPractice } from './prompts/parent';
+export type { DeepReport, WrongAnalyze, RecommendPractice, ParentActionCard, ParentActionPlan } from './prompts/parent';
 
 export {
   parentReportMessages,
   deepReportMessages,
   wrongAnalyzeMessages,
   recommendPracticeMessages,
+  parentActionsMessages,
 } from './prompts/parent';

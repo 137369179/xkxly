@@ -43,7 +43,7 @@ export function WrongReasonBox({ question, options, wrongIds, solved, skillDiag 
           animate={{ opacity: 1, y: 0 }}
           className="mt-2 rounded-2xl bg-candy-pink-soft px-4 py-2.5 text-sm font-bold text-candy-purple-deep"
         >
-          🧠 小智发现：你在这类题上{WEAKNESS_LABEL[skillDiag.weaknessType]}，试试{skillDiag.recommendedActions[0]}
+          🧠 小茜发现：你在这类题上{WEAKNESS_LABEL[skillDiag.weaknessType]}，试试{skillDiag.recommendedActions[0]}
         </motion.div>
       )}
     </>

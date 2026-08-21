@@ -1,8 +1,12 @@
 {
+  "exploreReward": {
+    "claim": "Explore +{n}⭐",
+    "claimed": "Explored +{n}⭐"
+  },
   "badge": {
     "takeIt": "Claim",
     "unlockNew": "New badge unlocked",
-    "xiaozhiPraise": "Xiaozhi's Praise"
+    "xiaozhiPraise": "Xiaoxi's Praise"
   },
   "codeMaze": {
     "emptyHint": "Drag in commands to start coding!",

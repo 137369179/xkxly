@@ -9,6 +9,7 @@ import {
 import { useTranslation } from '@/i18n/useTranslation';
 import { Panel } from '@/components/ui/Card';
 import { speak } from '@/lib/speech';
+import { ExploreReward } from '@/components/study/ExploreReward';
 
 const ROLE_BADGE: Record<FamilyRole, string> = {
   phonetic: 'bg-candy-purple-soft text-candy-purple-deep',
@@ -98,7 +99,8 @@ export function HanziFamilyTree({ char }: { char: string }) {
             <span className="mt-0.5 text-[10px] font-semibold text-ink-soft">{m.word}</span>
           </button>
         ))}
-      </div>
+      
+      <ExploreReward rewardKey="hanzi-family" scene="hanzi" tone="blue" /></div>
     </Panel>
   );
 }
