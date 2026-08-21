@@ -15,7 +15,7 @@ import { useStruggle } from '@/lib/struggle';
 import { useTranslation } from '@/i18n/useTranslation';
 import { StruggleModal } from '@/components/feedback/StruggleModal';
 import { StreakBar } from '@/components/study/StreakBar';
-import { calibrateDifficulty } from '@/lib/difficulty';
+import { calibrateDifficulty, streakTargetForLevel } from '@/lib/difficulty';
 import { starsByMistakes } from '@/lib/stars';
 
 /** StreakBar 主题色（与 Tailwind candy 语义色一致） */
@@ -49,11 +49,14 @@ interface RoundRunnerProps {
   aiExplain?: QuizCardProps['aiExplain'];
   /**
    * 闯关里程碑条（游戏化·可选）
-   * 传入 target 后，本轮连续答对进度以圆点闯关条可视化：
-   * 连对达到 target 即「通关」；答错归零温和引导（由 StreakBar 处理展示）。
-   * 默认不渲染，零回归；仅需要闯关目标感的题卷式模块开启。
+   * 传入后，本轮连续答对进度以圆点闯关条可视化：连对达到目标即「通关」；
+   * 答错归零温和引导（由 StreakBar 处理展示）。默认不渲染，零回归。
+   *  - target：显式目标连对数（兼容旧调用）
+   *  - leveled：开启后目标随本轮难度爬坡（难度 1/2/3 → 2/3/4 连对），
+   *    实现「渐进式难度」，让孩子在更高挑战中保持投入；未给 target 时生效。
+   *  - tone：主题色
    */
-  streakBar?: { target: number; tone?: StreakTone };
+  streakBar?: { target?: number; tone?: StreakTone; leveled?: boolean };
 }
 
 export function RoundRunner({
@@ -101,6 +104,12 @@ export function RoundRunner({
   const [stars, setStars] = useState(0);
   /** 闯关里程碑条展示用连对计数（游戏化·可选开启） */
   const [streakCount, setStreakCount] = useState(0);
+
+  /** 闯关目标连对数（R48·闯关等级化）：leveled 模式按本轮难度爬坡，
+   *  否则用显式 target，都没给则默认 3，保证零回归。 */
+  const streakTarget: number | undefined = streakBar
+    ? (streakBar.target ?? (streakBar.leveled ? streakTargetForLevel(difficulty) : 3))
+    : undefined;
 
   const gen = useCallback(() => {
     // A: 根据连对/连错动态校准难度（激活原死代码 calibrateDifficulty）
@@ -213,7 +222,7 @@ export function RoundRunner({
       {streakBar && (
         <StreakBar
           streak={streakCount}
-          target={streakBar.target}
+          target={streakTarget!}
           tone={streakBar.tone}
         />
       )}

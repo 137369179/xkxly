@@ -28,8 +28,10 @@ export function LetterOrder() {
   const [answer, setAnswer] = useState<string[]>([]);
   const [feedback, setFeedback] = useState('');
   const [score, setScore] = useState(0);
-  // 连对闯关：order/fill 模式连续答对点亮里程碑（目标 3），答错归零温和引导
+  // 连对闯关：order/fill 模式连续答对点亮里程碑，答错归零温和引导
+  // 闯关目标随得分温和爬坡（R48·渐进式难度）：0-4 分→2 连对，5-9 分→3 连对，10+ 分→4 连对
   const [streak, setStreak] = useState(0);
+  const streakTarget = 2 + Math.min(2, Math.floor(score / 5));
   const lockRef = useRef(false);
   const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -104,7 +106,7 @@ export function LetterOrder() {
           addStars(1);
           practice('letter-order', true);
           void speak('Great job! ABC order is correct!', { lang: 'en-US', rate: 0.8, module: 'praise' }).catch(() => {});
-          if (streak + 1 >= 3) answerCorrect('combo');
+          if (streak + 1 >= streakTarget) answerCorrect('combo');
           else answerCorrect('general');
         } else {
           sfxWrong();
@@ -223,8 +225,8 @@ export function LetterOrder() {
         </button>
       </div>
 
-      {/* 闯关里程碑：连续答对点亮，答错归零（order/fill 模式） */}
-      {mode !== 'learn' && <StreakBar streak={streak} target={3} tone="pink" />}
+      {/* 闯关里程碑：连续答对点亮，答错归零（order/fill 模式）；目标随得分爬坡 */}
+      {mode !== 'learn' && <StreakBar streak={streak} target={streakTarget} tone="pink" />}
 
       {mode === 'learn' && (
         <div className="text-center space-y-4 py-2">

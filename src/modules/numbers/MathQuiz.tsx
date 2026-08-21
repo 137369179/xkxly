@@ -115,7 +115,7 @@ export function MathQuiz() {
       difficulty={diff}
       tone="yellow"
       questionsPerRound={5}
-      streakBar={{ target: 3, tone: 'yellow' }}
+      streakBar={{ leveled: true, tone: 'yellow' }}
       onRoundStart={diffMeta.syncNow}
       onAnswered={(q, c) => recordMath(c, q.skill)}
       aiExplain={(q, chosen, correct) =>

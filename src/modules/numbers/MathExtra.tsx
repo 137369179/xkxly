@@ -126,7 +126,7 @@ export function MathExtra() {
           onRoundStart={diffMeta.syncNow}
           onAnswered={handleAnswer}
           tone="orange"
-          streakBar={{ target: 3, tone: 'yellow' }}
+          streakBar={{ leveled: true, tone: 'yellow' }}
         />
       </Panel>
     </div>

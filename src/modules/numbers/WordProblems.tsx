@@ -13,6 +13,7 @@ import { randomPraise, randomEncourage } from '@/lib/speech';
 import { getProblemsByLevel } from '@/data/wordProblems';
 import { useTranslation } from '@/i18n/useTranslation';
 import { StreakBar } from '@/components/study/StreakBar';
+import { streakTargetForLevel } from '@/lib/difficulty';
 
 
 type Level = 1 | 2 | 3;
@@ -131,8 +132,8 @@ export function WordProblems() {
 
       <ProgressBar value={idx + 1} max={problems.length} tone={info.tone} />
 
-      {/* 闯关里程碑：连续答对 3 题点亮，形成目标感 */}
-      <StreakBar streak={streak} target={3} tone={info.tone} />
+      {/* 闯关里程碑：连续答对（目标随关卡难度爬坡）点亮，形成目标感 */}
+      <StreakBar streak={streak} target={streakTargetForLevel(level)} tone={info.tone} />
 
       <Panel key={p.id} className="space-y-4">
         <div className="flex items-start gap-3">

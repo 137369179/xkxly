@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { smartDifficulty, calibrateDifficulty, rampDifficulty, masteryToDifficulty } from './difficulty';
+import { smartDifficulty, calibrateDifficulty, rampDifficulty, masteryToDifficulty, streakTargetForLevel } from './difficulty';
 import type { Progress } from '@/types';
 
 const baseProgress: Progress = {
@@ -54,6 +54,18 @@ describe('difficulty', () => {
   describe('rampDifficulty', () => {
     it('样本不足返回1', () => {
       expect(rampDifficulty(baseProgress, 'math')).toBe(1);
+    });
+  });
+
+  describe('streakTargetForLevel', () => {
+    it('难度1→2连对', () => {
+      expect(streakTargetForLevel(1)).toBe(2);
+    });
+    it('难度2→3连对', () => {
+      expect(streakTargetForLevel(2)).toBe(3);
+    });
+    it('难度3→4连对', () => {
+      expect(streakTargetForLevel(3)).toBe(4);
     });
   });
 });
