@@ -14,8 +14,10 @@ import { Panel } from '@/components/ui/Card';
 import { useAiStream } from '@/lib/ai/useAi';
 import { hanziStoryTask, hanziSentenceTask } from '@/lib/ai/tasks';
 import { speak } from '@/lib/speech';
+import { answerCorrect, answerWrong } from '@/lib/feedback';
+import { StreakBar } from '@/components/study/StreakBar';
 import { sfxTap, sfxCorrect, sfxWin } from '@/lib/sfx';
-import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
+import { celebrateBig } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 import { makeHanziQuestion } from '@/lib/hanziQuestions';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -31,6 +33,9 @@ export function HanziLearn({ hanzi, onDone }: { hanzi: HanziEntry; onDone: () =>
   const { t } = useTranslation();
   const [difficulty, setDifficulty, diffMeta] = useAdaptiveDifficultyState('hanzi');
   const [writeMode, setWriteMode] = useState<'stroke' | 'free'>('stroke');
+  // 练习环节「3 连对闯关」：连续答对点亮里程碑，答错归零温和引导
+  const [streak, setStreak] = useState(0);
+  const [q, setQ] = useState(() => makeHanziQuestion(hanzi, 1, t));
   const learnSkill = useStore(s => s.learnSkill);
   const practice = useStore(s => s.practice);
   const markTraced = useStore(s => s.markTraced);
@@ -268,17 +273,35 @@ export function HanziLearn({ hanzi, onDone }: { hanzi: HanziEntry; onDone: () =>
             labels={{ 1: t('hanzi.qPinyin'), 2: t('hanzi.qHanzi'), 3: t('hanzi.qWords') }}
             className="justify-center"
           />
+          {/* 闯关里程碑：连续答对 3 题点亮「识字小达人」目标感；答错归零温和引导 */}
+          <StreakBar streak={streak} target={3} tone="green" />
           <QuizCard
-            question={makeHanziQuestion(hanzi, difficulty, t)}
+            key={q.id}
+            question={q}
             onAnswer={(correct: boolean) => {
               practice(skill, correct, 1, difficulty);
               if (correct) {
-                sfxCorrect();
-                celebrateSmall();
-                api.ready();
+                const next = streak + 1;
+                setStreak(next);
+                if (next >= 3) {
+                  // 3 连对闯关成功：庆祝 + 进入下一步
+                  sfxCorrect();
+                  celebrateBig();
+                  api.ready();
+                } else {
+                  answerCorrect('hanzi');
+                }
+              } else {
+                answerWrong('hanzi');
+                setStreak(0);
               }
             }}
-            onNext={() => {}}
+            onNext={() => {
+              // 未满 3 连对：换下一题继续挑战；已通关则不再触发（onAnswer 已 ready）
+              if (streak < 3) {
+                setQ(makeHanziQuestion(hanzi, difficulty, t));
+              }
+            }}
           />
         </div>
       ),

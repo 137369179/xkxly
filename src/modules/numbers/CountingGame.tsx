@@ -106,6 +106,7 @@ export function CountingGame() {
       difficulty={diff}
       tone="pink"
       questionsPerRound={5}
+      streakBar={{ target: 3, tone: 'pink' }}
       onRoundStart={diffMeta.syncNow}
       onAnswered={(_q, c) => recordCount(c)}
       header={

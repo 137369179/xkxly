@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { LearnFlow, type FlowStep } from '@/components/LearnFlow';
 import { SpeechEvalButton } from '@/components/feedback/SpeechEvalButton';
 
@@ -11,7 +12,9 @@ import { useAiStream } from '@/lib/ai/useAi';
 import { wordStoryTask, wordPhonicsTask } from '@/lib/ai/tasks';
 import { speak } from '@/lib/speech';
 import { sfxTap, sfxCorrect } from '@/lib/sfx';
-import { celebrateSmall } from '@/lib/celebrate';
+import { celebrateBig } from '@/lib/celebrate';
+import { answerCorrect, answerWrong } from '@/lib/feedback';
+import { StreakBar } from '@/components/study/StreakBar';
 import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/i18n/useTranslation';
 import type { WordEntry } from '@/data/wordIndex';
@@ -35,6 +38,9 @@ export function WordLearn({ word, onDone }: { word: WordEntry; onDone: () => voi
   const markTraced = useStore(s => s.markTraced);
   const story = useAiStream();
   const phonics = useAiStream();
+  // 练习环节「3 连对闯关」：连续答对点亮里程碑，答错归零温和引导
+  const [streak, setStreak] = useState(0);
+  const [q, setQ] = useState<Question>(() => makeQuestion());
 
   const skill = `word:${word.word}`;
 
@@ -164,13 +170,32 @@ export function WordLearn({ word, onDone }: { word: WordEntry; onDone: () => voi
       gate: true,
       render: (api) => (
         <div className="space-y-4">
+          {/* 闯关里程碑：连续答对 3 题点亮「英语小达人」目标感；答错归零温和引导 */}
+          <StreakBar streak={streak} target={3} tone="blue" />
           <QuizCard
-            question={makeQuestion()}
+            key={q.id}
+            question={q}
             onAnswer={(correct: boolean) => {
               practice(skill, correct);
-              if (correct) { sfxCorrect(); celebrateSmall(); api.ready(); }
+              if (correct) {
+                const next = streak + 1;
+                setStreak(next);
+                if (next >= 3) {
+                  // 3 连对闯关成功：庆祝 + 进入下一步
+                  sfxCorrect();
+                  celebrateBig();
+                  api.ready();
+                } else {
+                  answerCorrect('pinyin');
+                }
+              } else {
+                answerWrong('pinyin');
+                setStreak(0);
+              }
             }}
-            onNext={() => {}}
+            onNext={() => {
+              if (streak < 3) setQ(makeQuestion());
+            }}
           />
         </div>
       ),

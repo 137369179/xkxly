@@ -14,6 +14,7 @@ import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { randomPraise, randomEncourage } from '@/lib/speech';
 import { moodOfPoem } from '@/lib/chant';
 import { useTranslation } from '@/i18n/useTranslation';
+import { StreakBar } from '@/components/study/StreakBar';
 
 const QUESTIONS_PER_ROUND = 8;
 
@@ -95,6 +96,8 @@ export function PoemFill() {
   const [idx, setIdx] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
   const [correct, setCorrect] = useState(0);
+  /** 连续答对里程碑：答对 +1、答错归零，形成闯关目标感 */
+  const [streak, setStreak] = useState(0);
   const [phase, setPhase] = useState<'playing' | 'result'>('playing');
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -146,9 +149,11 @@ export function PoemFill() {
       celebrateSmall();
       randomPraise();
       setCorrect(c => c + 1);
+      setStreak(s => s + 1);
     } else {
       sfxWrong();
       randomEncourage();
+      setStreak(0);
     }
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
@@ -185,6 +190,7 @@ export function PoemFill() {
           setIdx(0);
           setPicked(null);
           setCorrect(0);
+          setStreak(0);
           setPhase('playing');
         }}>
           🔄 {tr('poemFill.again')}
@@ -195,6 +201,9 @@ export function PoemFill() {
 
   return (
     <div className="space-y-4">
+      {/* 闯关里程碑：连续答对 3 题点亮，形成目标感 */}
+      <StreakBar streak={streak} target={3} tone="pink" />
+
       <div className="flex items-center justify-between">
         <span className="text-sm font-extrabold text-ink-soft">
           {idx + 1}/{questions.length} · ✅{correct}

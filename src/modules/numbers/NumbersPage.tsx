@@ -6,11 +6,12 @@ import { useStore } from '@/store/useStore';
 import { useTrainingTarget } from '@/hooks/useTrainingTarget';
 import { TrainingBanner } from '@/components/study/TrainingBanner';
 import { recommendNumberSkill } from './recommendNumbers';
-
-// 推荐卡懒加载：随用随取，弱网下不阻塞首屏关键内容
-const NumberRecommendCard = lazy(() => import('./NumberRecommend').then((m) => ({ default: m.NumberRecommend })));
+import { NumberRecommend } from './NumberRecommend';
 
 // ── 子组件全部懒加载以实现极优的首屏性能 ──
+// 备注：NumberRecommend 保持静态导入（随 NumbersPage 主 chunk 一并加载）。
+// 它体积极小(~1KB)且无外部依赖，拆成独立懒加载 chunk 在弱网反而多一次请求，
+// 收益可忽略，故不进 Suspense 拆分。
 const NumberWall = lazy(() => import('./NumberWall').then((m) => ({ default: m.NumberWall })));
 const TenFrameMath = lazy(() => import('./TenFrameMath').then((m) => ({ default: m.TenFrameMath })));
 const CountingGame = lazy(() => import('./CountingGame').then((m) => ({ default: m.CountingGame })));
@@ -162,20 +163,18 @@ export default function NumbersPage() {
 
       <TrainingBanner target={target} onClose={clear} />
 
-      {/* ✨ 页面内智能推荐：懒加载独立 chunk；弱网下由 Suspense 的 shimmer 兜底，快网直出 */}
+      {/* ✨ 页面内智能推荐：静态打包、随用随绘，弱网下无额外请求 */}
       {!target && recDef && recommendation && (
-        <Suspense fallback={<NumberRecSkeleton />}>
-          <NumberRecommendCard
-            emoji={recDef.def.emoji}
-            label={recDef.def.label}
-            weakness={(mastery[recommendation.skill]?.ng ?? 0) > 0}
-            onGo={() => {
-              sfxTap();
-              setActiveCategory(recDef.cat);
-              setActiveSubTab(recDef.def.id);
-            }}
-          />
-        </Suspense>
+        <NumberRecommend
+          emoji={recDef.def.emoji}
+          label={recDef.def.label}
+          weakness={(mastery[recommendation.skill]?.ng ?? 0) > 0}
+          onGo={() => {
+            sfxTap();
+            setActiveCategory(recDef.cat);
+            setActiveSubTab(recDef.def.id);
+          }}
+        />
       )}
 
       {/* 👑 一级大分类导航卡片 */}
@@ -185,6 +184,9 @@ export default function NumbersPage() {
           return (
             <button
               key={cat.id}
+              type="button"
+              data-testid={`cat-${cat.id}`}
+              aria-pressed={isAct}
               onClick={() => handleSelectCategory(cat.id)}
               className={`group relative flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all text-center ${
                 isAct
@@ -207,8 +209,11 @@ export default function NumbersPage() {
           return (
             <button
               key={sub.id}
+              type="button"
+              data-testid={`sub-${sub.id}`}
+              aria-pressed={isSubAct}
               onClick={() => handleSelectSubTab(sub.id)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-black transition-all ${
+              className={`flex min-h-11 items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-black transition-all ${
                 isSubAct
                   ? 'bg-candy-yellow-deep text-white shadow-candy-sm scale-105'
                   : 'bg-white/80 text-ink-soft hover:bg-white hover:text-ink'
@@ -244,20 +249,6 @@ export default function NumbersPage() {
         {activeSubTab === 'fraction' && <FractionLearn />}
         {activeSubTab === 'money' && <MoneyLearn />}
       </Suspense>
-    </div>
-  );
-}
-
-/** 推荐卡 shimmer 占位：与真实卡片同高，弱网/懒加载时先稳住布局、避免 CLS */
-function NumberRecSkeleton() {
-  return (
-    <div className="flex items-center justify-between gap-3 rounded-2xl border-2 border-candy-yellow-soft bg-gradient-to-r from-amber-50 to-yellow-50/70 px-4 py-3">
-      <span className="h-11 w-11 shrink-0 animate-pulse rounded-2xl bg-amber-200/60" />
-      <div className="flex-1 space-y-2">
-        <span className="block h-3 w-24 animate-pulse rounded bg-amber-200/60" />
-        <span className="block h-4 w-40 animate-pulse rounded bg-amber-200/60" />
-      </div>
-      <span className="h-8 w-16 animate-pulse rounded-full bg-amber-200/60" />
     </div>
   );
 }

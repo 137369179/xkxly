@@ -98,7 +98,7 @@ export function TenFrameMath() {
         <div className="flex gap-2">
           <button
             onClick={() => { setMode('add'); setStep('initial'); }}
-            className={`rounded-2xl px-4 py-1.5 text-xs font-black transition-all ${
+            className={`rounded-2xl px-4 py-2.5 text-base font-black transition-all ${
               mode === 'add' ? 'bg-candy-orange-deep text-white shadow-sm scale-105' : 'bg-orange-100 text-orange-800'
             }`}
           >
@@ -117,7 +117,7 @@ export function TenFrameMath() {
         {/* 皮肤选择器 */}
         <button
           onClick={() => setSkinIdx((s) => (s + 1) % SKINS.length)}
-          className="rounded-full bg-white px-3 py-1 text-xs font-bold text-ink-soft border border-pink-200 shadow-xs hover:scale-105 active:scale-95"
+          className="rounded-full bg-white px-3 py-2.5 text-base font-bold text-ink-soft border border-pink-200 shadow-xs hover:scale-105 active:scale-95"
         >
           道具: {skin.label}
         </button>

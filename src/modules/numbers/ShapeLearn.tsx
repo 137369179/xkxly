@@ -219,7 +219,7 @@ export function ShapeLearn() {
                   sfxTap();
                   speak(`${ex}是${shape.name}的`, { lang: 'zh-CN', rate: 0.85 }).catch(() => {});
                 }}
-                className="rounded-full bg-white px-3 py-1 text-xs font-bold text-ink border border-amber-300 shadow-xs hover:scale-105 active:scale-95 flex items-center gap-1"
+                className="rounded-full bg-white px-3 py-2.5 text-base font-bold text-ink border border-amber-300 shadow-xs hover:scale-105 active:scale-95 flex items-center gap-1"
               >
                 <span>🔊</span>
                 <span>{ex}</span>

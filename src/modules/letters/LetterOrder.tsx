@@ -11,6 +11,8 @@ import { playLetterVoice, speak } from '@/lib/speech';
 import { cn, shuffle } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useStore } from '@/store/useStore';
+import { answerCorrect, answerWrong } from '@/lib/feedback';
+import { StreakBar } from '@/components/study/StreakBar';
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
@@ -26,6 +28,8 @@ export function LetterOrder() {
   const [answer, setAnswer] = useState<string[]>([]);
   const [feedback, setFeedback] = useState('');
   const [score, setScore] = useState(0);
+  // 连对闯关：order/fill 模式连续答对点亮里程碑（目标 3），答错归零温和引导
+  const [streak, setStreak] = useState(0);
   const lockRef = useRef(false);
   const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -96,13 +100,18 @@ export function LetterOrder() {
           sfxCorrect();
           setFeedback(`🎉 ${tr('letterOrder.perfect')}`);
           setScore((s) => s + 1);
+          setStreak((s) => s + 1);
           addStars(1);
           practice('letter-order', true);
           void speak('Great job! ABC order is correct!', { lang: 'en-US', rate: 0.8, module: 'praise' }).catch(() => {});
+          if (streak + 1 >= 3) answerCorrect('combo');
+          else answerCorrect('general');
         } else {
           sfxWrong();
           setFeedback(`❌ ${tr('letterOrder.correctSeq', { seq: correctSeq.join(' → ') })}`);
+          setStreak(0);
           practice('letter-order', false);
+          answerWrong('general');
         }
         if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
         nextTimerRef.current = setTimeout(() => {
@@ -134,15 +143,20 @@ export function LetterOrder() {
       sfxCorrect();
       setFeedback(`🎉 ${tr('letterOrder.correct')}`);
       setScore((s) => s + 1);
+      setStreak((s) => s + 1);
       addStars(1);
       practice('letter-order', true);
       void playLetterVoice(letter).catch(() => {
         void speak(letter, { lang: 'en-US', rate: 0.7, module: 'praise' }).catch(() => {});
       });
+      if (streak + 1 >= 3) answerCorrect('combo');
+      else answerCorrect('general');
     } else {
       sfxWrong();
       setFeedback(`❌ ${tr('letterOrder.wrongExp', { expected: expected ?? '' })}`);
+      setStreak(0);
       practice('letter-order', false);
+      answerWrong('general');
     }
     if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
     nextTimerRef.current = setTimeout(() => {
@@ -208,6 +222,9 @@ export function LetterOrder() {
           🎯 {tr('letterOrder.fill')}
         </button>
       </div>
+
+      {/* 闯关里程碑：连续答对点亮，答错归零（order/fill 模式） */}
+      {mode !== 'learn' && <StreakBar streak={streak} target={3} tone="pink" />}
 
       {mode === 'learn' && (
         <div className="text-center space-y-4 py-2">

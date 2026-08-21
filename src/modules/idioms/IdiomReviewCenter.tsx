@@ -7,13 +7,15 @@
  *   C 自评：✅「我记住了」 / ❌「又忘了」 → practice 回写 mastery
  * 复习结果为「记得」即标记一轮学习/掌握（复用 learnSkill），随后进入下一条。
  */
-import { useMemo, useRef, useState, useEffect } from 'react';
+import { useMemo, useRef, useState, useEffect, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { useStore } from '@/store/useStore';
 import { IDIOMS, IDIOM_CATEGORIES, type Idiom } from '@/data/idioms';
 import { useDueIdiomSkills, idiomSkill, idrLog } from './idiomSrs';
+import { variantFor, type DrillVariant } from './drill';
+import { DrillObjective } from './DrillObjective';
 import { useTranslation } from '@/i18n/useTranslation';
 
 interface Props {
@@ -43,7 +45,38 @@ export function IdiomReviewCenter({ onExit }: Props) {
   const phaseRef = useRef<Phase>(phase);
   phaseRef.current = phase;
 
+  /** 复盘形态：经典回忆（仅自评） / 趣味混合（含客观自动判题型） */
+  const [mode, setMode] = useState<'recall' | 'mixed'>('mixed');
+
   const current: Idiom | undefined = queue[index];
+
+  /**
+   * 题型稳定分配（T-3.3）：按 skill 缓存一次题型。
+   * 因每次 practice 都会把该条目的 due 推到未来、令其离开到期队列并触发
+   * queue.ready→setIndex(0)，若每个成语"每次进来都按 index 重算"，则除了首卡，
+   * 后续卡的位次恒为 0、客观题型永远不会出现。改为按成语稳定分配后，
+   * 即使队列成员不断收缩，某个成语被轮到复习时仍保持其既定题型。
+   */
+  const [variantOf, setVariantOf] = useState<Record<string, DrillVariant>>({});
+  useEffect(() => {
+    if (mode === 'recall') return; // 经典模式恒为 recallWord，不需要分配
+    setVariantOf((prev) => {
+      const next = { ...prev };
+      // 按到期队列顺序，为尚无题型的成语分配（轮回覆盖 5 种形态）
+      dueSkills.forEach((sk, i) => {
+        if (!next[sk]) next[sk] = variantFor(i, dueSkills.length, 'mixed');
+      });
+      return next;
+    });
+  }, [mode, dueSkills]);
+
+  /** 当前题题型：经典模式 recallWord；混合模式取稳定分配的题型 */
+  const variant: DrillVariant = current
+    ? mode === 'recall'
+      ? 'recallWord'
+      : variantOf[idiomSkill(current.id)] ?? variantFor(index, queue.length, mode)
+    : 'recallWord';
+  const isObjective = variant === 'fillBlank' || variant === 'contextPick';
 
   // —— 渲染探针（性能排查用，`idiomReview_debug=1` 开启，默认零开销）——
   // 记录每次渲染的序号、自上次渲染间隔与当前所处状态，便于识别
@@ -89,7 +122,7 @@ export function IdiomReviewCenter({ onExit }: Props) {
 
   const next = () => {
     if (!current) return;
-    idrLog('progress.next', { from: index, total: queue.length });
+    idrLog('progress.next', { from: index, total: queue.length, variant });
     if (index + 1 >= queue.length) {
       idrLog('progress.done', { completed: queue.length });
       completeDailyReview(REVIEW_STARS); // 每日首次完成发放星星（store 内防重复）
@@ -120,6 +153,33 @@ export function IdiomReviewCenter({ onExit }: Props) {
     next();
   };
 
+  /**
+   * 客观题自动判定：
+   *   - 对 → practice(true) 立即写回 + 下一题
+   *   - 错 → 先揭晓正确答案，但**延后写回**，等点「下一题」时再 practice(false)。
+   * 原因：practice 会让该项离开到期队列并触发 queue.ready→setIndex(0)/setPhase，
+   * 若答错时立即写回，揭晓正确词会被下一题/完成态抢先覆盖，永远看不到。
+   */
+  const onObjAnswer = (correct: boolean) => {
+    if (!current) return;
+    idrLog('judge.objective', { skill: idiomSkill(current.id), word: current.word, variant, correct });
+    if (correct) {
+      practice(idiomSkill(current.id), true, 0, current.level);
+      learnSkill(idiomSkill(current.id));
+      next();
+    } else {
+      setPhase('reveal');
+    }
+  };
+
+  /** 客观题答错后、看完正确答案时点「下一题」：补写错误并前进 */
+  const onObjContinue = () => {
+    if (!current) return;
+    idrLog('judge.objective.continue', { skill: idiomSkill(current.id), word: current.word, variant });
+    practice(idiomSkill(current.id), false, 0, current.level);
+    next();
+  };
+
   if (phase === 'done') {
     return (
       <Panel className="text-center">
@@ -145,53 +205,127 @@ export function IdiomReviewCenter({ onExit }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-extrabold text-ink-soft">
-          {t('idioms.reviewProgress', { cur: index + 1, total: queue.length })}
-        </span>
+        {/* 形态切换：经典回忆（仅自评） / 趣味混合（含客观题） */}
+        <div className="flex items-center gap-1 rounded-full bg-slate-100 p-1">
+          <button
+            type="button"
+            onClick={() => setMode('recall')}
+            className={`rounded-full px-2.5 py-1 text-xs font-extrabold transition ${mode === 'recall' ? 'bg-white text-purple-700 shadow-sm' : 'text-ink-soft'}`}
+          >
+            {t('idioms.reviewModeRecall')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('mixed')}
+            className={`rounded-full px-2.5 py-1 text-xs font-extrabold transition ${mode === 'mixed' ? 'bg-white text-purple-700 shadow-sm' : 'text-ink-soft'}`}
+          >
+            {t('idioms.reviewModeMixed')}
+          </button>
+        </div>
         <button type="button" onClick={onExit} className="text-sm font-bold text-ink-soft">
           ✕
         </button>
       </div>
 
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-extrabold text-ink-soft">
+          {t('idioms.reviewProgress', { cur: index + 1, total: queue.length })}
+        </span>
+        <span className="text-xs font-bold text-ink-soft/70">
+          {variant === 'fillBlank' || variant === 'contextPick' ? t('idioms.reviewObjTag') : ''}
+        </span>
+      </div>
+
       <AnimatePresence mode="wait">
         <motion.div
-          key={`${current.id}-${phase}`}
+          key={`${current.id}-${phase}-${variant}`}
           initial={{ opacity: 0, x: 24 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -24 }}
           transition={{ duration: 0.2 }}
         >
-          {/* 线索区：回忆阶段显示含义；揭晓阶段显示完整卡片 */}
+          {/* 线索/题干区：客观题直接作答；回忆型显示线索，揭晓阶段显示完整卡片 */}
           <Panel className="text-center">
             {phase === 'recall' ? (
-              <>
-                <p className="text-sm font-extrabold text-ink-soft">{t('idioms.reviewRecallTip')}</p>
-                <p className="mt-3 text-xl font-black leading-relaxed text-ink">{current.meaning}</p>
-                <div className="mt-4">
-                  <CandyButton tone="purple" size="lg" fullWidth onClick={onReveal}>
-                    {t('idioms.reviewReveal')}
-                  </CandyButton>
-                </div>
-              </>
+              isObjective ? (
+                <DrillObjective variant={variant as 'fillBlank' | 'contextPick'} idiom={current} onAnswer={onObjAnswer} />
+              ) : (
+                <RecallPrompt variant={variant} idiom={current} onReveal={onReveal} />
+              )
             ) : (
               <ReviewCard idiom={current} />
             )}
           </Panel>
 
-          {/* 自评区：仅在揭示后出现 */}
+          {/* 揭晓后：客观答错→「下一题」；回忆型→自评 */}
           {phase === 'reveal' && (
-            <div className="grid grid-cols-2 gap-3 pt-1">
-              <CandyButton tone="green" size="lg" onClick={onCorrect}>
-                ✅ {t('idioms.reviewRemember')}
-              </CandyButton>
-              <CandyButton tone="orange" size="lg" onClick={onWrong}>
-                ❌ {t('idioms.reviewForgot')}
-              </CandyButton>
-            </div>
+            isObjective ? (
+              <div className="pt-1">
+                <p className="mb-3 text-center text-sm font-extrabold text-amber-600">{t('idioms.reviewObjWrong')}</p>
+                <CandyButton tone="purple" size="lg" fullWidth onClick={onObjContinue}>
+                  {t('idioms.reviewNext')}
+                </CandyButton>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <CandyButton tone="green" size="lg" onClick={onCorrect}>
+                  ✅ {t('idioms.reviewRemember')}
+                </CandyButton>
+                <CandyButton tone="orange" size="lg" onClick={onWrong}>
+                  ❌ {t('idioms.reviewForgot')}
+                </CandyButton>
+              </div>
+            )
           )}
         </motion.div>
       </AnimatePresence>
     </div>
+  );
+}
+
+/** 回忆型题干：按题型展示不同线索（含义 / 词面 / 图） */
+function RecallPrompt({ variant, idiom, onReveal }: { variant: DrillVariant; idiom: Idiom; onReveal: () => void }) {
+  const { t } = useTranslation();
+
+  let prompt: ReactNode;
+  if (variant === 'recallMeaning') {
+    prompt = (
+      <>
+        <p className="text-sm font-extrabold text-ink-soft">{t('idioms.reviewRecallMeaningTip')}</p>
+        <p className="mt-3 text-3xl font-black text-ink">{idiom.word}</p>
+      </>
+    );
+  } else if (variant === 'picGuess') {
+    prompt = (
+      <>
+        <p className="text-sm font-extrabold text-ink-soft">{t('idioms.reviewPicGuessTip')}</p>
+        <div className="mx-auto mt-3 h-28 w-28 overflow-hidden rounded-2xl border-2 border-white shadow-sm">
+          {idiom.image ? (
+            <img src={idiom.image} alt={idiom.word} className="h-full w-full object-cover" loading="lazy" decoding="async" />
+          ) : (
+            <div className="grid h-full w-full place-items-center text-5xl">{idiom.emoji}</div>
+          )}
+        </div>
+      </>
+    );
+  } else {
+    prompt = (
+      <>
+        <p className="text-sm font-extrabold text-ink-soft">{t('idioms.reviewRecallTip')}</p>
+        <p className="mt-3 text-xl font-black leading-relaxed text-ink">{idiom.meaning}</p>
+      </>
+    );
+  }
+
+  return (
+    <>
+      {prompt}
+      <div className="mt-4">
+        <CandyButton tone="purple" size="lg" fullWidth onClick={onReveal}>
+          {t('idioms.reviewReveal')}
+        </CandyButton>
+      </div>
+    </>
   );
 }
 
