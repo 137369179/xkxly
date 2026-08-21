@@ -25,6 +25,7 @@ import { useStore, usePoemMark, usePoemReciteStat } from '@/store/useStore';
 import { cn } from '@/lib/utils';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap } from '@/lib/sfx';
+import { answerCorrect, answerWrong } from '@/lib/feedback';
 // 背诵相关组件已拆至 ./PoemTrainRecite（保持 re-export 兼容既有 import）
 export { ReciteRunner } from './PoemTrainRecite';
 
@@ -380,6 +381,9 @@ export function QuizRunner({ poem }: { poem: DeepPoem }) {
     sfxTap();
     setPicked((p) => ({ ...p, [qid]: optId }));
     practice(skill, correct, 1);
+    // 即时反馈：答对诗场景表扬，答错温和引导
+    if (correct) answerCorrect('poem');
+    else answerWrong('poem');
     if (answered + 1 >= questions.length) setDone(true);
   };
 

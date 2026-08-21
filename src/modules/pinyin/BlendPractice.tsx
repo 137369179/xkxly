@@ -18,6 +18,8 @@ import { speak } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
+import { answerCorrect, answerWrong } from '@/lib/feedback';
+import { StreakBar } from '@/components/study/StreakBar';
 import { shuffle } from '@/lib/utils';
 
 function pickTone(combo: SyllableCombo): string {
@@ -71,6 +73,8 @@ export function BlendPractice() {
   const [ok, setOk] = useState(0);
   const [ng, setNg] = useState(0);
   const [combo, setCombo] = useState(0);
+  // 连对闯关：连续答对点亮里程碑（目标 3），答错归零温和引导
+  const [streak, setStreak] = useState(0);
   const [finished, setFinished] = useState(false);
   const [fusing, setFusing] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -81,6 +85,7 @@ export function BlendPractice() {
     setOk(0);
     setNg(0);
     setCombo(0);
+    setStreak(0);
     setFinished(false);
     setRound(makeRound());
     setChosen(null);
@@ -112,15 +117,20 @@ export function BlendPractice() {
       setFusing(true);
       setOk((o) => o + 1);
       setCombo((c) => c + 1);
+      setStreak((s) => s + 1);
       practice(`pinyin:blend:${round.answer}`, true, 1);
+      if (streak + 1 >= 3) answerCorrect('combo');
+      else answerCorrect('pinyin');
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate([40, 50, 40]);
       }
     } else {
       sfxWrong();
       setCombo(0);
+      setStreak(0);
       setNg((n) => n + 1);
       practice(`pinyin:blend:${round.answer}`, false, 0);
+      answerWrong('pinyin');
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate([120, 80, 120]);
       }
@@ -208,6 +218,11 @@ export function BlendPractice() {
         />
 
         <ProgressBar value={idx + 1} max={TOTAL} color="blue" />
+
+        {/* 闯关里程碑：连续答对点亮，形成"再对几题就通关"目标感 */}
+        <div className="mt-2">
+          <StreakBar streak={streak} target={3} tone="blue" />
+        </div>
 
         {/* 连击 Combo 浮动徽章 */}
         <AnimatePresence>

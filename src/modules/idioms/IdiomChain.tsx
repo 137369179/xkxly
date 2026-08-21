@@ -11,6 +11,8 @@ import { CandyButton } from '@/components/ui/Button';
 import { useStore } from '@/store/useStore';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
+import { answerCorrect, answerWrong } from '@/lib/feedback';
+import { StreakBar } from '@/components/study/StreakBar';
 import { randomPraise, randomEncourage } from '@/lib/speech';
 import { IDIOMS } from '@/data/idioms';
 import { shuffle } from '@/lib/utils';
@@ -54,6 +56,8 @@ export function IdiomChain() {
   const [options, setOptions] = useState<typeof IDIOMS>([]);
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
+  // 连对闯关：连续答对点亮里程碑（目标 3），答错/跳过归零温和引导
+  const [streak, setStreak] = useState(0);
   const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
   const [phase, setPhase] = useState<'idle' | 'playing' | 'over'>('idle');
   const [hintsLeft, setHintsLeft] = useState(MAX_HINTS);
@@ -85,6 +89,7 @@ export function IdiomChain() {
     setChain([{ idiom: first.word, fromUser: false }]);
     setScore(0);
     setCombo(0);
+    setStreak(0);
     setTimeLeft(TIME_LIMIT);
     setHintsLeft(MAX_HINTS);
     setShowHint(false);
@@ -137,8 +142,12 @@ export function IdiomChain() {
       const newScore = score + 10 + combo * 2;
       setScore(newScore);
       setCombo(c => c + 1);
+      setStreak(s => s + 1);
       setChain(prev => [...prev, { idiom: idiomStr, fromUser: true }]);
       practice('idiom:chain', true, 0);
+      // 即时反馈：3 连对连击表扬，否则成语场景表扬
+      if (combo + 1 >= 3) answerCorrect('combo');
+      else answerCorrect('idiom');
       // 重置计时
       setTimeLeft(TIME_LIMIT);
       // 隐藏提示
@@ -149,7 +158,9 @@ export function IdiomChain() {
       sfxWrong();
       randomEncourage();
       setCombo(0);
+      setStreak(0);
       practice('idiom:chain', false, 0);
+      answerWrong('idiom');
       // 不结束，扣时间
       setTimeLeft(t => Math.max(0, t - 3));
     }
@@ -158,6 +169,7 @@ export function IdiomChain() {
   const handleSkip = () => {
     sfxTap();
     setCombo(0);
+    setStreak(0);
     setTimeLeft(t => Math.max(0, t - 2));
     const prevLast = lastChar(chain[chain.length - 1]!.idiom);
     generateOptions(prevLast);
@@ -238,6 +250,9 @@ export function IdiomChain() {
           ⏱️ {timeLeft}s
         </span>
       </div>
+
+      {/* 闯关里程碑：连续答对点亮，形成"再对几题就通关"目标感 */}
+      <StreakBar streak={streak} target={3} tone="purple" />
 
       {/* 接龙历史 */}
       <Panel>

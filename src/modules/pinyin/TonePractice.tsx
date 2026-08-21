@@ -15,6 +15,8 @@ import { ProgressBar } from '@/components/ui/ProgressBar';
 import { useStore } from '@/store/useStore';
 import { sfxTap, sfxCorrect, sfxWrong, sfxStar } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
+import { answerCorrect, answerWrong } from '@/lib/feedback';
+import { StreakBar } from '@/components/study/StreakBar';
 import { randomPraise, randomEncourage, speak } from '@/lib/speech';
 
 interface ToneQuestion {
@@ -103,6 +105,8 @@ export function TonePractice() {
   const [picked, setPicked] = useState<number | null>(null);
   const [correct, setCorrect] = useState(0);
   const [combo, setCombo] = useState(0);
+  // 连对闯关：连续答对点亮里程碑（目标 3），答错归零温和引导
+  const [streak, setStreak] = useState(0);
   const [done, setDone] = useState(false);
   const practice = useStore((s) => s.practice);
 
@@ -136,7 +140,10 @@ export function TonePractice() {
       randomPraise();
       setCorrect((c) => c + 1);
       setCombo((cb) => cb + 1);
+      setStreak((s) => s + 1);
       practice('pinyin:tone', true, 1);
+      if (streak + 1 >= 3) answerCorrect('combo');
+      else answerCorrect('pinyin');
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate([40, 60, 40]);
       }
@@ -144,7 +151,9 @@ export function TonePractice() {
       sfxWrong();
       randomEncourage();
       setCombo(0);
+      setStreak(0);
       practice('pinyin:tone', false, 0);
+      answerWrong('pinyin');
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate([120, 80, 120]);
       }
@@ -170,6 +179,7 @@ export function TonePractice() {
     setPicked(null);
     setCorrect(0);
     setCombo(0);
+    setStreak(0);
     setDone(false);
   };
 
@@ -225,6 +235,9 @@ export function TonePractice() {
       />
 
       <ProgressBar value={idx + 1} max={questions.length} color="orange" />
+
+      {/* 闯关里程碑：连续答对点亮，形成"再对几题就通关"目标感（orange 主题映射为 yellow 暖色） */}
+      <StreakBar streak={streak} target={3} tone="yellow" />
 
       {/* 连击 Combo 浮动徽章 */}
       <AnimatePresence>

@@ -11,9 +11,9 @@
    场景类型
    ============================================================ */
 /** 表扬场景：按学习模块区分 */
-export type PraiseScene = 'general' | 'hanzi' | 'pinyin' | 'word' | 'letter' | 'number' | 'poem' | 'math' | 'combo';
+export type PraiseScene = 'general' | 'hanzi' | 'pinyin' | 'word' | 'letter' | 'number' | 'poem' | 'idiom' | 'math' | 'combo';
 /** 鼓励场景：不含 combo（连击鼓励不用于答错场景） */
-export type EncourageScene = 'general' | 'hanzi' | 'pinyin' | 'word' | 'letter' | 'number' | 'poem' | 'math';
+export type EncourageScene = 'general' | 'hanzi' | 'pinyin' | 'word' | 'letter' | 'number' | 'poem' | 'idiom' | 'math';
 
 /* ============================================================
    表扬语库（按场景分类）
@@ -49,6 +49,7 @@ const PRAISES_BY_SCENE: Record<PraiseScene, string[]> = {
   letter: ['字母认得很准！', '这个字母读得对！', '字母顺序记得牢！', '大小写分得清！', '字母写得很漂亮！'],
   number: ['数字写得很漂亮！', '数数真准确！', '这个数字认得对！', '数字记得真牢！'],
   poem: ['古诗背得真流利！', '诗句记得牢！', '背得真有感情！', '整首诗都背对了！'],
+  idiom: ['成语接龙接得妙！', '这个成语用得准！', '成语记得真牢！', '成语含义理解得对！', '接龙接得太棒了！'],
   math: ['算得真快！', '答案正确！', '算式列得真清楚！', '算得真准确！'],
   combo: ['连续答对了！', '你真专注！', '越做越好！', '连击真厉害！', '势头真好！'],
 };
@@ -79,6 +80,7 @@ const ENCOURAGES_BY_SCENE: Record<EncourageScene, string[]> = {
   letter: ['字母再认一认', '顺序再想一想', '这个字母再看看', '跟着读一遍试试'],
   number: ['数一数再试试', '数字再看看', '慢慢数清楚', '这个数字再认认'],
   poem: ['听听古诗再想想', '下一句再回忆一下', '慢慢背不着急', '这句诗再想想'],
+  idiom: ['成语再想一想', '看看字义再试试', '这个成语再认认', '换个成语接一接'],
   math: ['算式再算一遍', '换个方法试试', '数数看再算一次', '再算一遍好吗'],
 };
 
@@ -152,6 +154,9 @@ export function skillToPraiseScene(skill?: string): PraiseScene {
       return 'number';
     case 'poem':
       return 'poem';
+    case 'idiom':
+    case 'idiom-chain':
+      return 'idiom';
     case 'math':
       return 'math';
     default:
