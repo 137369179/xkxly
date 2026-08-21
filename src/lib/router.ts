@@ -36,6 +36,7 @@ export const ROUTES = [
   'plants',
   'cat_house',
   'realistic_cat',
+  'desktop_pet',
   'storybook',
   'wrongbook',
   'gamecenter',

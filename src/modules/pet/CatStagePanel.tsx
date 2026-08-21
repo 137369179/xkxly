@@ -1,26 +1,59 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { sfxTap } from '@/lib/sfx';
+import {
+  FlatCat2D,
+  type PetActionCategory,
+  type PetExpressionCategory,
+} from '@/components/games/FlatCat2D';
 import { RealisticCat3D } from './realistic';
 import {
   CatFishIcon, CatHeartIcon, CatDanceIcon, CatStretchIcon, CatRollIcon, CatPurrIcon,
   CatCombIcon, CatBathIcon, CatGiftIcon,
 } from './PetIcons';
 import {
-  ACTION_IMG, EVOLVE_IMG, EVOLVE_INFO, STAGE_THEME, OUTFITS,
+  EVOLVE_IMG, EVOLVE_INFO, STAGE_THEME, OUTFITS,
   type CatAction,
 } from './catData';
 
-/** 羊毛毡动作 → 写实 3D 表情映射 */
-const catActionToExpression = (act: CatAction): 'happy' | 'cute' | 'excited' | 'love' | 'sleepy' => {
+const MOOD_TIPS = [
+  '你知道吗？小猫咪每天要睡14个小时哦！💤',
+  '摸摸我的小耳朵，聪明又伶俐～✨',
+  '做功课答对题目，就能喂小鱼干啦！🐟',
+  '和宝贝在一起的每一秒，小茜都好开心！💖',
+  '戳戳我的小脸蛋，变出大微笑～🌸',
+  'High Five！今天也是超棒的学习小达人！🐾',
+];
+
+/** 羊毛毡动作 → RealisticCat3D 专属表情映射 */
+const catActionToRealisticExpression = (act: CatAction): 'happy' | 'cute' | 'excited' | 'love' | 'sleepy' => {
   switch (act) {
     case 'dance': return 'excited';
     case 'purr': return 'love';
     case 'stretch': return 'cute';
     case 'jump': return 'excited';
     case 'roll': return 'happy';
+    case 'pounce': return 'excited';
+    case 'groom': return 'happy';
+    case 'highFive': return 'excited';
+    default: return 'happy';
+  }
+};
+
+/** 动作 → FlatCat2D 表情映射 */
+const catActionToExpression = (act: CatAction): PetExpressionCategory => {
+  switch (act) {
+    case 'dance': return 'excited';
+    case 'purr': return 'love';
+    case 'stretch': return 'cute';
+    case 'jump': return 'excited';
+    case 'roll': return 'happy';
+    case 'pounce': return 'curious';
+    case 'groom': return 'comforting';
+    case 'highFive': return 'cheering';
     default: return 'happy';
   }
 };
@@ -70,6 +103,15 @@ export function CatStagePanel({
   const stageTheme = STAGE_THEME[envLighting];
   const playMotion = (act: CatAction) => onTriggerMotion(act);
 
+  const [tipIndex, setTipIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTipIndex((prev) => (prev + 1) % MOOD_TIPS.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <Panel className={`text-center space-y-4 relative overflow-hidden transition-colors duration-500 ${stageTheme.panel}`}>
       {/* 氛围光晕层 */}
@@ -87,7 +129,7 @@ export function CatStagePanel({
         <span className="flex items-center gap-1.5"><CatHeartIcon size={20} /> {t('pet.affectionFull')}<strong className={`text-sm ${envLighting === 'starry' ? 'text-pink-300' : 'text-pink-600'}`}>{catAffection}</strong> / 100</span>
       </div>
 
-      {/* 统一风格 3D 羊毛毡猫咪进化天团卡片（4 级进化横幅） */}
+      {/* 4 级进化天团横幅 */}
       <div className="flex justify-center mb-2 relative z-10">
         <div className={`relative overflow-hidden rounded-3xl border-4 shadow-xl max-w-[440px] w-full ${
           envLighting === 'starry' ? 'border-indigo-400' : 'border-pink-300'
@@ -99,122 +141,111 @@ export function CatStagePanel({
                 <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent text-center">
                   <span className="text-[10px] font-black text-white">Lv.{lv}</span>
                 </div>
+                {catLevel === lv && (
+                  <div className="absolute inset-0 border-4 border-yellow-300 bg-yellow-400/20 flex items-center justify-center">
+                    <span className="bg-yellow-400 text-yellow-950 font-black text-xs px-2 py-0.5 rounded-full shadow-md">
+                      {t('pet.currentEvolve')}
+                    </span>
+                  </div>
+                )}
               </div>
             ))}
           </div>
-          <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-pink-950/80 to-transparent p-2 text-white text-xs font-black flex justify-between items-center px-4">
-            <span>{t('pet.catBadge')}</span>
-            <span className="text-[10px] bg-pink-500/80 px-2 py-0.5 rounded-full">{t('pet.catBadgeTip')}</span>
-          </div>
         </div>
       </div>
 
-      {/* 写实 / 羊毛毡 外观切换开关 */}
-      <div className="flex justify-center items-center gap-2 my-1 relative z-10">
+      {/* 3D 拟真与高保真毛绒模式切换 */}
+      <div className="flex justify-center items-center gap-3 relative z-10">
         <button
-          type="button"
-          onClick={() => { sfxTap(); setRealisticMode(!realisticMode); }}
-          className={`rounded-full px-4 py-1.5 text-xs font-black transition-colors shadow-xs ${
+          onClick={() => {
+            sfxTap();
+            setRealisticMode(!realisticMode);
+          }}
+          className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black border-2 transition-all shadow-md ${
             realisticMode
-              ? 'bg-gradient-to-r from-orange-400 to-pink-400 text-white'
-              : 'bg-white/80 text-amber-700 border-2 border-amber-300'
+              ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white border-purple-300'
+              : 'bg-gradient-to-r from-pink-400 to-rose-500 text-white border-pink-200'
           }`}
         >
-          {realisticMode ? t('pet.realisticOn') : t('pet.realisticOff')}
+          <span>{realisticMode ? '🎮 3D WebGL 写实模式' : '✨ 3D 毛绒矢量模式'}</span>
+          <span className="text-[10px] opacity-80">({t('pet.clickSwitch')})</span>
         </button>
       </div>
 
-      {realisticMode ? (
-        <div
-          className={`relative mx-auto my-4 h-56 w-56 cursor-pointer overflow-hidden rounded-3xl border-4 bg-white shadow-fluffy relative z-10 ${stageTheme.frame}`}
-          onClick={() => playMotion('jump')}
+      {/* ── 主舞台：毛绒 3D 猫咪 / WebGL 3D 猫咪 ── */}
+      <div className="relative mx-auto my-3 flex flex-col items-center justify-center">
+        {/* 心情气泡 */}
+        <motion.div
+          animate={{ y: [0, -5, 0] }}
+          transition={{ repeat: Infinity, duration: 2.4 }}
+          onClick={() => setTipIndex((prev) => (prev + 1) % MOOD_TIPS.length)}
+          className="mb-2 cursor-pointer rounded-full border border-pink-300 bg-white/95 px-3.5 py-1 text-xs font-black text-pink-700 shadow-md backdrop-blur-xs hover:scale-105"
         >
-          <RealisticCat3D
-            size={220}
-            breed="british_shorthair"
-            expression={catActionToExpression(catAction)}
-            hat={equippedOutfits['hat']}
-            neck={equippedOutfits['neck']}
-            envLighting={envLighting}
-            autoRotate={false}
-            showControls={false}
-            className="h-full w-full"
-          />
-          {/* 当前等级徽章叠加 */}
-          <div className="badge-chip badge-chip--amber" style={{ top: '0.5rem', left: '0.5rem', right: 'auto' }}>
-            Lv.{catLevel} {t(EVOLVE_INFO[catLevel]?.title ?? '')} {EVOLVE_INFO[catLevel]?.emoji ?? '🐱'}
-          </div>
-          {/* 当前装扮角标叠加 */}
-          {(equippedOutfits['hat'] || equippedOutfits['neck'] || equippedOutfits['decor']) && (
-            <div className="badge-chip badge-chip--pink" style={{ top: '0.5rem', right: '0.5rem' }}>
-              {['hat', 'neck', 'decor'].map(type => equippedOutfits[type]).filter(Boolean).map(id => {
-                const o = OUTFITS.find(x => x.id === id);
-                return o ? o.emoji : '';
-              }).join(' ')}
+          {MOOD_TIPS[tipIndex]}
+        </motion.div>
+
+        {realisticMode ? (
+          <div
+            className={`relative h-60 w-60 cursor-pointer overflow-hidden rounded-3xl border-4 bg-white/40 shadow-fluffy backdrop-blur-xs ${stageTheme.frame}`}
+            onClick={() => playMotion('jump')}
+          >
+            <RealisticCat3D
+              size={230}
+              breed="british_shorthair"
+              expression={catActionToRealisticExpression(catAction)}
+              hat={equippedOutfits['hat']}
+              neck={equippedOutfits['neck']}
+              envLighting={envLighting}
+              autoRotate={false}
+              showControls={false}
+              className="h-full w-full"
+            />
+            <div className="badge-chip badge-chip--amber" style={{ top: '0.5rem', left: '0.5rem', right: 'auto' }}>
+              Lv.{catLevel} {t(EVOLVE_INFO[catLevel]?.title ?? '')} {EVOLVE_INFO[catLevel]?.emoji ?? '🐱'}
             </div>
-          )}
-        </div>
-      ) : (
-      <motion.div
-        key={catAction}
-        initial={{ opacity: 0, scale: 0.85 }}
-        animate={{
-          opacity: 1,
-          scale: 1,
-          ...(catAction === 'dance' ? { rotate: [0, -6, 6, -6, 0], y: [0, -12, 0, -12, 0] } :
-             catAction === 'stretch' ? { scaleX: [1, 1.08, 1], scaleY: [1, 0.92, 1] } :
-             catAction === 'roll' ? { rotate: [0, 10, -10, 0], scale: [1, 1.06, 1] } :
-             catAction === 'jump' ? { y: [0, -24, 0], scaleY: [1, 1.1, 0.95, 1] } :
-             catAction === 'purr' ? { rotate: [0, 4, -4, 3, 0], x: [0, -4, 4, 0] } :
-             { y: [0, -4, 0] })
-        }}
-        transition={{
-          duration: catAction === 'roll' ? 0.9 : 0.6,
-          repeat: catAction === 'idle' ? Infinity : 1,
-          ease: 'easeOut',
-        }}
-        className={`relative mx-auto my-4 h-56 w-56 cursor-pointer overflow-hidden rounded-3xl border-4 bg-white shadow-fluffy relative z-10 ${stageTheme.frame}`}
-        onClick={() => playMotion('jump')}
-      >
-        <img
-          src={ACTION_IMG[catAction]}
-          alt={t('pet.catActionAlt', { action: catAction })}
-          className="h-full w-full object-cover"
-          loading="lazy"
-          decoding="async"
-        />
-        {/* 当前等级徽章叠加（统一 badge-chip 风格） */}
-        <div className="badge-chip badge-chip--amber" style={{ top: '0.5rem', left: '0.5rem', right: 'auto' }}>
-          Lv.{catLevel} {t(EVOLVE_INFO[catLevel]?.title ?? '')} {EVOLVE_INFO[catLevel]?.emoji ?? '🐱'}
-        </div>
-        {/* 当前装扮胶囊角标（统一 badge-chip 风格） */}
-        {(equippedOutfits['hat'] || equippedOutfits['neck'] || equippedOutfits['decor']) && (
-          <div className="badge-chip badge-chip--pink" style={{ top: '0.5rem', right: '0.5rem' }}>
-            {['hat', 'neck', 'decor'].map(type => equippedOutfits[type]).filter(Boolean).map(id => {
-              const o = OUTFITS.find(x => x.id === id);
-              return o ? o.emoji : '';
-            }).join(' ')}
+            {(equippedOutfits['hat'] || equippedOutfits['neck'] || equippedOutfits['decor']) && (
+              <div className="badge-chip badge-chip--pink" style={{ top: '0.5rem', right: '0.5rem' }}>
+                {['hat', 'neck', 'decor'].map(type => equippedOutfits[type]).filter(Boolean).map(id => {
+                  const o = OUTFITS.find(x => x.id === id);
+                  return o ? o.emoji : '';
+                }).join(' ')}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div
+            className={`relative h-60 w-60 flex items-center justify-center rounded-3xl border-4 bg-gradient-to-b from-white/95 to-pink-50/80 shadow-fluffy backdrop-blur-xs relative z-10 ${stageTheme.frame}`}
+          >
+            <FlatCat2D
+              size={220}
+              action={catAction as PetActionCategory}
+              expression={catActionToExpression(catAction)}
+              hat={equippedOutfits['hat']}
+              neck={equippedOutfits['neck']}
+              envLighting={envLighting}
+              onInteractZone={() => {
+                onPet();
+              }}
+            />
+            <div className="badge-chip badge-chip--amber" style={{ top: '0.5rem', left: '0.5rem', right: 'auto' }}>
+              Lv.{catLevel} {t(EVOLVE_INFO[catLevel]?.title ?? '')} {EVOLVE_INFO[catLevel]?.emoji ?? '🐱'}
+            </div>
+            {(equippedOutfits['hat'] || equippedOutfits['neck'] || equippedOutfits['decor']) && (
+              <div className="badge-chip badge-chip--pink" style={{ top: '0.5rem', right: '0.5rem' }}>
+                {['hat', 'neck', 'decor'].map(type => equippedOutfits[type]).filter(Boolean).map(id => {
+                  const o = OUTFITS.find(x => x.id === id);
+                  return o ? o.emoji : '';
+                }).join(' ')}
+              </div>
+            )}
           </div>
         )}
-        {/* 装扮 emoji 叠加（统一 icon-chip-xl + 位置类） */}
-        {equippedOutfits['hat'] && (() => {
-          const o = OUTFITS.find(x => x.id === equippedOutfits['hat']);
-          return o ? (
-            <div className="icon-chip icon-chip--xl icon-chip--pos-hat select-none pointer-events-none">
-              {o.emoji}
-            </div>
-          ) : null;
-        })()}
-        {equippedOutfits['neck'] && (() => {
-          const o = OUTFITS.find(x => x.id === equippedOutfits['neck']);
-          return o ? (
-            <div className="icon-chip icon-chip--xl icon-chip--pos-neck select-none pointer-events-none">
-              {o.emoji}
-            </div>
-          ) : null;
-        })()}
-      </motion.div>
-      )}
+
+        {/* 身体触控微提示 */}
+        <span className="mt-1 text-[11px] font-bold text-pink-500">
+          ✨ 戳戳耳朵、捏捏脸蛋、碰碰小爪、摸摸肚皮有惊喜动作哦～
+        </span>
+      </div>
 
       {/* 3D HDR 氛围场景模式选择 */}
       <div className={`flex justify-center items-center gap-2 my-2 text-xs font-black relative z-10 ${
@@ -248,7 +279,7 @@ export function CatStagePanel({
         </button>
       </div>
 
-      {/* 🎙️ 核心推荐：直接跟猫咪语音对话 & 🎮 接鱼干小游戏大按钮 */}
+      {/* 🎙️ 语音伴学对话 & 🎮 接鱼干小游戏大按钮 */}
       <div className="flex justify-center flex-wrap gap-3 my-3 relative z-10">
         <button
           onClick={onOpenVoice}
@@ -267,7 +298,7 @@ export function CatStagePanel({
         </button>
       </div>
 
-      {/* 动作动画手动播报控制栏 */}
+      {/* 动作动画控制栏（扩充 8 种高频动作） */}
       <div className="flex justify-center flex-wrap gap-2 my-2 relative z-10">
         <button
           onClick={() => playMotion('dance')}
@@ -292,6 +323,24 @@ export function CatStagePanel({
           className="flex items-center gap-1 rounded-xl border border-amber-300 bg-white px-3 py-1.5 text-xs font-black text-amber-900 shadow-xs hover:bg-amber-100"
         >
           <CatPurrIcon size={18} /> {t('pet.motionPurr')}
+        </button>
+        <button
+          onClick={() => playMotion('highFive')}
+          className="flex items-center gap-1 rounded-xl border border-pink-300 bg-white px-3 py-1.5 text-xs font-black text-pink-900 shadow-xs hover:bg-pink-100"
+        >
+          <span>🐾</span> 击掌
+        </button>
+        <button
+          onClick={() => playMotion('pounce')}
+          className="flex items-center gap-1 rounded-xl border border-indigo-300 bg-white px-3 py-1.5 text-xs font-black text-indigo-900 shadow-xs hover:bg-indigo-100"
+        >
+          <span>🦋</span> 抓蝴蝶
+        </button>
+        <button
+          onClick={() => playMotion('groom')}
+          className="flex items-center gap-1 rounded-xl border border-emerald-300 bg-white px-3 py-1.5 text-xs font-black text-emerald-900 shadow-xs hover:bg-emerald-100"
+        >
+          <span>🧼</span> 洗洗脸
         </button>
       </div>
 

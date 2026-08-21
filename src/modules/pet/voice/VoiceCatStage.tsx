@@ -10,19 +10,21 @@ import type { AiStatus } from '@/lib/ai/useAi';
 import { useTranslation } from '@/i18n/useTranslation';
 import { VoiceToys } from '@/modules/pet/voice/VoiceToys';
 
+import type { CatExpressionType } from '@/components/games/FlatCat2D';
+
 export interface VoiceCatStageProps {
   isListening: boolean;
   isTtsSpeaking: boolean;
   isMuted: boolean;
   status: AiStatus;
-  expression: 'thinking' | 'excited' | 'happy' | 'cute';
+  expression: CatExpressionType;
   outfits: Record<string, string>;
   sttNotice: string;
   onPet?: () => void;
   onFeed?: () => void;
   onPraise?: () => void;
   onEquipOutfit?: (category: 'hat' | 'neck', outfitId: string) => void;
-  onCatAction?: (msg: string, expression: 'excited' | 'happy' | 'cute') => void;
+  onCatAction?: (msg: string, expression: CatExpressionType) => void;
   fishCount?: number;
 }
 

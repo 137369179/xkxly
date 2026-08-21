@@ -11,7 +11,7 @@ import {
   CatHanziQuestIcon,
 } from '@/modules/pet/PetIcons';
 
-export type CatAction = 'idle' | 'dance' | 'stretch' | 'roll' | 'jump' | 'purr';
+export type CatAction = 'idle' | 'dance' | 'stretch' | 'roll' | 'jump' | 'purr' | 'pounce' | 'groom' | 'highFive';
 
 export interface Outfit {
   id: string;
@@ -38,6 +38,9 @@ export const ACTION_IMG: Record<CatAction, string> = {
   roll: '/cat/cat-roll-playful.jpg',
   jump: '/cat/cat-jump-excited.jpg',
   purr: '/cat/cat-purr-love.jpg',
+  pounce: '/cat/cat-pounce-play.jpg',
+  groom: '/cat/cat-groom-clean.jpg',
+  highFive: '/cat/cat-highfive-praise.jpg',
 };
 
 /** 猫咪进化等级 → 统一羊毛毡图片映射 */

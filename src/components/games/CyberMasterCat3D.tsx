@@ -3,11 +3,18 @@
  * 实际渲染委托给 FlatCat2D（统一风格二维动画猫咪）
  * 所有调用方接口不变，零改动
  */
-import { FlatCat2D, type FlatCatColor, type PetTouchZone, type CatExpressionType } from './FlatCat2D';
+import {
+  FlatCat2D,
+  type FlatCatColor,
+  type PetTouchZone,
+  type PetExpressionCategory,
+  type PetActionCategory,
+} from './FlatCat2D';
 
 export interface CyberMasterCat3DProps {
   size?: number;
-  expression?: CatExpressionType;
+  action?: PetActionCategory;
+  expression?: PetExpressionCategory;
   hat?: string;
   neck?: string;
   envLighting?: 'sunlight' | 'nebula' | 'starry';
@@ -26,6 +33,7 @@ const lightingToColor: Record<string, FlatCatColor> = {
 
 export function CyberMasterCat3D({
   size = 220,
+  action = 'idle',
   expression = 'happy',
   hat = 'crown',
   neck,
@@ -38,9 +46,11 @@ export function CyberMasterCat3D({
   return (
     <FlatCat2D
       size={size}
+      action={action}
       expression={expression}
       hat={hat}
       neck={neck}
+      envLighting={envLighting}
       color={lightingToColor[envLighting] ?? 'candy-pink'}
       onPet={onPet}
       onInteractZone={onInteractZone}

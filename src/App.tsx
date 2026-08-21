@@ -67,6 +67,7 @@ const FestivalsPage = lazy(() => import('@/modules/festivals/FestivalsPage'));
 const PlantsPage = lazy(() => import('@/modules/plants/PlantsPage'));
 const CatHousePage = lazy(() => import('@/modules/pet/CatHousePage'));
 const RealisticCatHousePage = lazy(() => import('@/modules/pet/realistic/RealisticCatHousePage'));
+const DesktopPetPage = lazy(() => import('@/modules/pet/desktop/DesktopPetPage'));
 const StorybookPage = lazy(() => import('@/modules/storybook/StorybookPage'));
 const WrongBookPage = lazy(() => import('@/modules/wrongbook/WrongBookDashboard'));
 const GameCenterPage = lazy(() => import('@/modules/game/GameCenterPage'));
@@ -119,6 +120,7 @@ function Page() {
       case 'plants': return <PlantsPage />;
       case 'cat_house': return <CatHousePage />;
       case 'realistic_cat': return <RealisticCatHousePage />;
+      case 'desktop_pet': return <DesktopPetPage />;
       case 'storybook': return <StorybookPage />;
       case 'wrongbook': return <WrongBookPage />;
       case 'gamecenter': return <GameCenterPage />;

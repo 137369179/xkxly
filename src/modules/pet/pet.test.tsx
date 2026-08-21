@@ -42,8 +42,10 @@ describe('catData 数据契约', () => {
     }
   });
 
-  it('ACTION_IMG：覆盖全部 6 种动作且指向 /cat/ 资源', () => {
-    expect(Object.keys(ACTION_IMG).sort()).toEqual(['dance', 'idle', 'jump', 'purr', 'roll', 'stretch']);
+  it('ACTION_IMG：覆盖全部动作且指向 /cat/ 资源', () => {
+    expect(Object.keys(ACTION_IMG).sort()).toEqual([
+      'dance', 'groom', 'highFive', 'idle', 'jump', 'pounce', 'purr', 'roll', 'stretch',
+    ]);
     for (const v of Object.values(ACTION_IMG)) {
       expect(v.startsWith('/cat/')).toBe(true);
     }

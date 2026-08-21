@@ -299,7 +299,9 @@ describe('VoiceToys', () => {
       }),
     );
     expect(text()).toContain('吹泡泡');
+    expect(text()).toContain('逗猫棒');
     expect(text()).toContain('毛线球');
+    expect(text()).toContain('摇铃铛');
     expect(text()).toContain('变装秀');
     expect(text()).toContain('八音盒');
   });
@@ -318,12 +320,12 @@ describe('VoiceToys', () => {
   it('点击毛线球与八音盒触发对应互动反馈', () => {
     const onCatAction = vi.fn();
     mount(createElement(VoiceToys, { onCatAction }));
-    // 点击「毛线球」
-    clickButton(1);
+    // 点击「毛线球」 (index 2)
+    clickButton(2);
     expect(onCatAction).toHaveBeenCalled();
 
-    // 点击「八音盒」
-    clickButton(3);
+    // 点击「八音盒」 (index 5)
+    clickButton(5);
     expect(onCatAction).toHaveBeenCalledWith(
       expect.stringContaining('八音盒'),
       'happy',
@@ -339,8 +341,8 @@ describe('VoiceToys', () => {
         onCatAction,
       }),
     );
-    // 点击「变装秀」展开
-    clickButton(2);
+    // 点击「变装秀」展开 (index 4)
+    clickButton(4);
     expect(text()).toContain('皇冠');
     expect(text()).toContain('魔法帽');
     expect(text()).toContain('蝴蝶结');

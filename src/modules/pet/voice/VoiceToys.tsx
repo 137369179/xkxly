@@ -10,9 +10,11 @@ import {
 } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 
+import type { CatExpressionType } from '@/components/games/FlatCat2D';
+
 export interface VoiceToysProps {
   onEquipOutfit?: (category: 'hat' | 'neck', outfitId: string) => void;
-  onCatAction?: (msg: string, expression: 'excited' | 'happy' | 'cute') => void;
+  onCatAction?: (msg: string, expression: CatExpressionType) => void;
   currentOutfits?: Record<string, string>;
 }
 
@@ -37,7 +39,9 @@ export function VoiceToys({
   onEquipOutfit,
   onCatAction,
 }: VoiceToysProps) {
-  const [activeToy, setActiveToy] = useState<'none' | 'bubble' | 'yarn' | 'outfit' | 'music'>('none');
+  const [activeToy, setActiveToy] = useState<
+    'none' | 'bubble' | 'wand' | 'yarn' | 'bell' | 'outfit' | 'music'
+  >('none');
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
   const [yarnBounces, setYarnBounces] = useState(0);
 
@@ -75,6 +79,21 @@ export function VoiceToys({
       sfxMeow();
       onCatAction?.('喵呜~ 抓到可爱的毛线球啦！小猫最喜欢玩这个啦！🧶', 'excited');
     }
+  };
+
+  // 逗猫棒
+  const handlePlayWand = () => {
+    sfxMagic();
+    setActiveToy('wand');
+    celebrateSmall();
+    onCatAction?.('💫 哇！闪闪发光的羽毛逗猫棒！小茜飞扑抓抓抓！', 'excited');
+  };
+
+  // 摇铃铛
+  const handlePlayBell = () => {
+    sfxMusicBox();
+    setActiveToy('bell');
+    onCatAction?.('🔔 叮叮当～清脆的铃铛声响起来啦，小耳朵在跳舞呢！', 'happy');
   };
 
   // 八音盒音乐
@@ -134,6 +153,19 @@ export function VoiceToys({
 
         <button
           type="button"
+          onClick={handlePlayWand}
+          className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-black transition-all active:scale-95 shadow-xs ${
+            activeToy === 'wand'
+              ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white'
+              : 'border border-amber-200 bg-white/90 text-amber-800 hover:bg-amber-100/70'
+          }`}
+        >
+          <span>🪄</span>
+          <span>逗猫棒</span>
+        </button>
+
+        <button
+          type="button"
           onClick={handlePlayYarn}
           className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-black transition-all active:scale-95 shadow-xs ${
             activeToy === 'yarn'
@@ -147,17 +179,30 @@ export function VoiceToys({
 
         <button
           type="button"
+          onClick={handlePlayBell}
+          className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-black transition-all active:scale-95 shadow-xs ${
+            activeToy === 'bell'
+              ? 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white'
+              : 'border border-yellow-200 bg-white/90 text-yellow-800 hover:bg-yellow-100/70'
+          }`}
+        >
+          <span>🔔</span>
+          <span>摇铃铛</span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => {
             sfxTap();
             setActiveToy((v) => (v === 'outfit' ? 'none' : 'outfit'));
           }}
           className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-black transition-all active:scale-95 shadow-xs ${
             activeToy === 'outfit'
-              ? 'bg-gradient-to-r from-amber-500 to-orange-400 text-white'
-              : 'border border-amber-200 bg-white/90 text-amber-800 hover:bg-amber-100/70'
+              ? 'bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white'
+              : 'border border-pink-200 bg-white/90 text-pink-800 hover:bg-pink-100/70'
           }`}
         >
-          <span>🪄</span>
+          <span>👑</span>
           <span>变装秀</span>
         </button>
 

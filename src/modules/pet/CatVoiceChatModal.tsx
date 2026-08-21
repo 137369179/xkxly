@@ -9,6 +9,7 @@ import { sfxTap, sfxPurr, sfxPraise, sfxStar } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 import { useTtsStore } from '@/store/useTtsStore';
+import type { CatExpressionType } from '@/components/games/FlatCat2D';
 import { useTranslation } from '@/i18n/useTranslation';
 import type { AiMessage } from '@/lib/ai/types';
 import { VoiceHeader } from '@/modules/pet/voice/VoiceHeader';
@@ -43,7 +44,7 @@ export function CatVoiceChatModal({ isOpen, onClose }: { isOpen: boolean; onClos
   const [isMuted, setIsMuted] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [callSeconds, setCallSeconds] = useState(0);
-  const [expression, setExpression] = useState<'thinking' | 'excited' | 'happy' | 'cute'>('happy');
+  const [expression, setExpression] = useState<CatExpressionType>('happy');
 
   const { status, text: aiStreamText, run: runAiStream, stop: stopAi } = useAiStream();
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -365,7 +366,7 @@ export function CatVoiceChatModal({ isOpen, onClose }: { isOpen: boolean; onClos
     equipOutfit(category, outfitId);
   }, [equipOutfit]);
 
-  const handleCatAction = useCallback((msg: string, nextExpr: 'excited' | 'happy' | 'cute') => {
+  const handleCatAction = useCallback((msg: string, nextExpr: CatExpressionType) => {
     setExpression(nextExpr);
     setMessages((prev) => [
       ...prev,

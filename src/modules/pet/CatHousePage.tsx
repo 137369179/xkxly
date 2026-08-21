@@ -33,7 +33,7 @@ import { CatMedalWallSection } from './CatMedalWallSection';
 
 const TOY_SPEAK: Record<CatAction, string> = {
   jump: 'pet.wandSpeak', roll: 'pet.yarnSpeak', purr: 'pet.catnipSpeak',
-  dance: '', stretch: '', idle: '',
+  dance: '', stretch: '', idle: '', pounce: 'pet.wandSpeak', groom: 'pet.catnipSpeak', highFive: 'pet.wandSpeak',
 };
 
 export default function CatHousePage({ initialRealisticMode = false }: { initialRealisticMode?: boolean }) {
@@ -96,8 +96,15 @@ export default function CatHousePage({ initialRealisticMode = false }: { initial
     motionTimerRef.current = setTimeout(() => setCatAction('idle'), 1600);
   };
   const motionMsg: Record<CatAction, string> = {
-    dance: t('pet.motionDanceMsg'), stretch: t('pet.motionStretchMsg'), roll: t('pet.motionRollMsg'),
-    jump: t('pet.motionJumpMsg'), purr: t('pet.motionPurrMsg'), idle: '',
+    dance: t('pet.motionDanceMsg'),
+    stretch: t('pet.motionStretchMsg'),
+    roll: t('pet.motionRollMsg'),
+    jump: t('pet.motionJumpMsg'),
+    purr: t('pet.motionPurrMsg'),
+    idle: '',
+    pounce: '喵呜！小茜飞扑抓住小彩蝶啦！🦋',
+    groom: '洗洗小脸蛋，梳理得干干净净～🧼',
+    highFive: '耶！跟小茜击个掌！High Five！🐾',
   };
   const onTriggerMotion = (act: CatAction) => triggerMotion(act, motionMsg[act]);
 
