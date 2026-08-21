@@ -100,6 +100,7 @@ const ALLOWED_MODELS = ['step-3.7-flash', 'step-3.5-flash', 'xopqwen36v35b', 'de
 /** 错误日志目录 */
 const LOG_DIR = path.resolve(ROOT, 'logs');
 const LOG_FILE = path.join(LOG_DIR, 'error.log');
+const AI_LOG_FILE = path.join(LOG_DIR, 'ai.log'); // AI 调用记录持久化（P1-审计）
 /** 单日志文件最大 2MB，超过后轮转 */
 const LOG_MAX_SIZE = 2 * 1024 * 1024;
 
@@ -143,6 +144,7 @@ const logs = [];
 function pushLog(entry) {
   logs.push(entry);
   if (logs.length > LOG_CAP) logs.shift();
+  appendAiLog(entry); // 调用记录持久化落盘
   const { scene, model, ms, ok, errCode, textTokens, reasoningTokens } = entry;
   console.log(
     `[ai] ${ok ? '✓' : '✗'} ${scene} ${model} ${ms}ms` +
@@ -169,6 +171,20 @@ function appendErrorLog(record) {
   } catch (e) {
     // 日志写入失败不能影响主流程
     console.error('[ai-proxy] log write failed:', e?.message || e);
+  }
+}
+
+/** AI 调用记录落盘：追加写入 logs/ai.log，超过上限轮转为 ai.log.1（跨重启持久化） */
+function appendAiLog(record) {
+  try {
+    if (!fs.existsSync(LOG_DIR)) fs.mkdirSync(LOG_DIR, { recursive: true });
+    if (fs.existsSync(AI_LOG_FILE)) {
+      const stat = fs.statSync(AI_LOG_FILE);
+      if (stat.size > LOG_MAX_SIZE) fs.renameSync(AI_LOG_FILE, AI_LOG_FILE + '.1');
+    }
+    fs.appendFileSync(AI_LOG_FILE, JSON.stringify(record) + '\n', 'utf8');
+  } catch (e) {
+    console.error('[ai-proxy] ai log write failed:', e?.message || e);
   }
 }
 
@@ -1044,14 +1060,12 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (url.startsWith('/api/ai/logs') || url.startsWith('/api/log/view')) {
-    // 日志查看含敏感排查信息，必须口令校验；未配置 LOG_VIEW_TOKEN 视为关闭（仅本地可用）。
+    // 日志查看含敏感排查信息，必须口令鉴权；未配置 LOG_VIEW_TOKEN 视为关闭（仅本地可用）。
+    // P1-5.1：仅接受请求头（x-log-token 或 Authorization: Bearer），
+    // 不再接受 URL query 传 token——避免口令泄漏进访问日志 / 浏览器历史。
     const token = process.env.LOG_VIEW_TOKEN;
     if (!token) return sendJson(res, 403, { error: { code: 'forbidden', message: '日志查看未开启（仅本地/开发者可用）' } });
-    const u = new URL(url, 'http://localhost');
-    const provided =
-      u.searchParams.get('token') ||
-      req.headers['x-log-token'] ||
-      (req.headers['authorization'] || '').replace(/^Bearer\s+/i, '');
+    const provided = req.headers['x-log-token'] || (req.headers['authorization'] || '').replace(/^Bearer\s+/i, '');
     if (provided !== token) return sendJson(res, 403, { error: { code: 'forbidden', message: '口令无效' } });
     return sendJson(res, 200, { logs: logs.slice(-50).reverse() });
   }
