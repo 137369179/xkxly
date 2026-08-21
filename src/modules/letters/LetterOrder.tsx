@@ -107,13 +107,13 @@ export function LetterOrder() {
           practice('letter-order', true);
           void speak('Great job! ABC order is correct!', { lang: 'en-US', rate: 0.8, module: 'praise' }).catch(() => {});
           if (streak + 1 >= streakTarget) answerCorrect('combo');
-          else answerCorrect('general');
+          else answerCorrect('letter');
         } else {
           sfxWrong();
           setFeedback(`❌ ${tr('letterOrder.correctSeq', { seq: correctSeq.join(' → ') })}`);
           setStreak(0);
           practice('letter-order', false);
-          answerWrong('general');
+          answerWrong('letter');
         }
         if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
         nextTimerRef.current = setTimeout(() => {
@@ -152,13 +152,13 @@ export function LetterOrder() {
         void speak(letter, { lang: 'en-US', rate: 0.7, module: 'praise' }).catch(() => {});
       });
       if (streak + 1 >= 3) answerCorrect('combo');
-      else answerCorrect('general');
+      else answerCorrect('letter');
     } else {
       sfxWrong();
       setFeedback(`❌ ${tr('letterOrder.wrongExp', { expected: expected ?? '' })}`);
       setStreak(0);
       practice('letter-order', false);
-      answerWrong('general');
+      answerWrong('letter');
     }
     if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
     nextTimerRef.current = setTimeout(() => {
