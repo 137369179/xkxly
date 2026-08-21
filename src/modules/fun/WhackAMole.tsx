@@ -9,13 +9,17 @@ import { sfxTap, sfxCorrect, sfxWrong, sfxWin } from '@/lib/sfx';
 import { celebrateBig, celebrateSmall } from '@/lib/celebrate';
 import { motion, AnimatePresence } from 'motion/react';
 import { safeGetItem, safeSetItem } from '@/lib/safeStorage';
+import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/i18n/useTranslation';
 
 const HOLE_COUNT = 9;
 const GAME_TIME = 30; // 秒
+/** 每击中一只地鼠换算的星星数（满分约 30 击 → 15 星，激励但不失控） */
+const STARS_PER_HIT = 0.5;
 
 export function WhackAMole() {
   const { t: tr } = useTranslation();
+  const addStars = useStore((s) => s.addStars);
   const [active, setActive] = useState(false);
   const [done, setDone] = useState(false);
   const [score, setScore] = useState(0);
@@ -96,13 +100,17 @@ export function WhackAMole() {
           } else {
             celebrateSmall();
           }
+          // 分数 → 全局星星入账（R55 游戏化：消除 localStorage 孤岛，接入全局成就体系）
+          if (score > 0) {
+            addStars(Math.max(1, Math.round(score * STARS_PER_HIT)));
+          }
           return 0;
         }
         return t - 1;
       });
     }, 1000);
     return () => { clearInterval(timerRef.current!); };
-  }, [active, score]);
+  }, [active, score, addStars]);
 
   // Spawn moles
   useEffect(() => {
@@ -226,6 +234,11 @@ export function WhackAMole() {
                 <p className="text-xs font-bold text-ink-soft">
                   {tr('whackAMole.missCount', { count: String(miss) })}
                 </p>
+                {score > 0 && (
+                  <p className="mt-1 text-sm font-extrabold text-candy-orange-deep">
+                    ⭐ 收获 {Math.max(1, Math.round(score * STARS_PER_HIT))} 颗星星！
+                  </p>
+                )}
                 <CandyButton tone="orange" size="sm" onClick={start} className="mt-3">
                   {tr('whackAMole.again')}
                 </CandyButton>
