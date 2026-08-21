@@ -28,14 +28,12 @@ import {
 import { toTraditional } from './traditional';
 
 // 导入翻译包
+// 默认语言(zh-CN)及其补丁内联进主包，保证首屏即可用；
+// en-US 套件（P1-5 分包）改为按需 import()，避免中文默认环境下打包 ~250KB 英文词典。
 import zhCN from './locales/zh-CN.json';
-import enUS from './locales/en-US.json';
 import hanziListenZh from './locales/hanziListen.zh-CN.json';
-import hanziListenEn from './locales/hanziListen.en-US.json';
 import patchZh from './locales/patch.zh-CN.json';
-import patchEn from './locales/patch.en-US.json';
 import achievementCenterZh from './locales/achievementCenter.zh-CN.json';
-import achievementCenterEn from './locales/achievementCenter.en-US.json';
 
 /** 深度合并：将模块级翻译增量并入全局字典（不改动全局 i18n 文件，规避并发 WIP 冲突） */
 function deepMergeLocale(base: any, extra: any): any {
@@ -93,11 +91,53 @@ function interpolate(template: string, params?: Record<string, string | number>)
   });
 }
 
-const translations: Record<Locale, TranslationData> = {
-  'zh-CN': deepMergeLocale(deepMergeLocale(deepMergeLocale(zhCN, hanziListenZh), patchZh), achievementCenterZh),
-  'zh-TW': deepMergeLocale(deepMergeLocale(deepMergeLocale(zhCN, hanziListenZh), patchZh), achievementCenterZh),
-  'en-US': deepMergeLocale(deepMergeLocale(deepMergeLocale(enUS, hanziListenEn), patchEn), achievementCenterEn),
+/**
+ * 语言包存储：zh-CN/zh-TW 内联（zh-TW 复用 zh 字典、运行时繁体转换），
+ * en-US 懒加载注入（见 enTranslationCache / loadEnUs）。
+ */
+const zhPack = deepMergeLocale(
+  deepMergeLocale(deepMergeLocale(zhCN, hanziListenZh), patchZh),
+  achievementCenterZh,
+);
+const translations: Partial<Record<Locale, TranslationData>> = {
+  'zh-CN': zhPack,
+  'zh-TW': zhPack,
 };
+
+/** en-US 语言包缓存：首次进入英文时按需加载；null 表示尚未就绪（t() 走 zh-CN 回退） */
+let enTranslationCache: TranslationData | null = null;
+const enLoadListeners = new Set<() => void>();
+function subscribeEnLoad(cb: () => void): () => void {
+  enLoadListeners.add(cb);
+  return () => {
+    enLoadListeners.delete(cb);
+  };
+}
+function notifyEnLoaded(): void {
+  enLoadListeners.forEach((cb) => cb());
+}
+/** 加载 en-US 全套词典（幂等）。动态 import 让 4 个英文包各自成为按需 chunk，不进主包。 */
+function loadEnUs(): Promise<void> {
+  if (enTranslationCache) return Promise.resolve();
+  return Promise.all([
+    import('./locales/en-US.json'),
+    import('./locales/hanziListen.en-US.json'),
+    import('./locales/patch.en-US.json'),
+    import('./locales/achievementCenter.en-US.json'),
+  ]).then(([enUS, hanziEn, patchEn, achEn]) => {
+    enTranslationCache = deepMergeLocale(
+      deepMergeLocale(deepMergeLocale(enUS.default, hanziEn.default), patchEn.default),
+      achEn.default,
+    );
+    notifyEnLoaded();
+  });
+}
+
+/** 取某语言已就绪的翻译数据；en-US 未加载完时返回 undefined（调用方走 zh-CN 回退） */
+function getTranslationData(locale: Locale): TranslationData | undefined {
+  if (locale === 'en-US') return enTranslationCache ?? undefined;
+  return translations[locale];
+}
 
 interface UseTranslationReturn {
   /** 翻译函数 */
@@ -120,6 +160,8 @@ export function useTranslation(): UseTranslationReturn {
     const detected = detectBrowserLocale();
     return detected;
   });
+  // en-US 词典就绪后递增 enTick 触发重渲染，让 t() 从 zh 回退切到英文（P1-5 分包）
+  const [enTick, setEnTick] = useState(0);
 
   // 初始化时设置全局状态
   useEffect(() => {
@@ -139,6 +181,13 @@ export function useTranslation(): UseTranslationReturn {
     return () => window.removeEventListener('locale-change', onLocaleChange);
   }, []);
 
+  // P1-5 i18n 分包：进入英文才按需加载 en-US 词典；加载完成后刷新 t()
+  useEffect(() => {
+    const unsub = subscribeEnLoad(() => setEnTick((v) => v + 1));
+    if (locale === 'en-US') void loadEnUs();
+    return unsub;
+  }, [locale]);
+
   const setLocaleHandler = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale);
     setLocaleFn(newLocale);
@@ -147,19 +196,20 @@ export function useTranslation(): UseTranslationReturn {
 
   const t: TranslateFn = useCallback(
     (key: string, params?: Record<string, string | number>) => {
-      const translationData = translations[locale]!;
-      let template = getNestedValue(translationData, key);
+      const translationData = getTranslationData(locale);
+      let template = translationData ? getNestedValue(translationData, key) : key;
       // 缺失键回退链：当前语言缺失 → 默认语言(zh-CN) → 原始键名。
-      // 避免 en-US 等未覆盖键在 UI 露出原始 key 路径（如 common.home）。
+      // 避免 en-US 等未覆盖键在 UI 露出原始 key 路径（如 common.home），
+      // 也覆盖 en-US 词典尚未加载完（enTranslationCache 为空）时的临时 zh 回退。
       if (template === key && locale !== i18nConfig.defaultLocale) {
-        const fallback = getNestedValue(translations[i18nConfig.defaultLocale], key);
+        const fallback = getNestedValue(getTranslationData(i18nConfig.defaultLocale), key);
         if (fallback !== key) template = fallback;
       }
       const result = interpolate(template, params);
       // 繁体模式：运行时简体 → 繁体（zh-TW 复用 zh-CN 字典）
       return locale === 'zh-TW' ? toTraditional(result) : result;
     },
-    [locale]
+    [locale, enTick]
   );
 
   return {
@@ -177,10 +227,12 @@ export function useTranslation(): UseTranslationReturn {
  */
 export function translate(key: string, params?: Record<string, string | number>): string {
   const locale = getCurrentLocale();
-  const translationData = translations[locale]!;
-  let template = getNestedValue(translationData, key);
+  // 非组件入口无法触发重渲染，此处仅发起按需加载；首次调用可能仍为 zh-CN 回退
+  if (locale === 'en-US') void loadEnUs();
+  const translationData = getTranslationData(locale);
+  let template = translationData ? getNestedValue(translationData, key) : key;
   if (template === key && locale !== i18nConfig.defaultLocale) {
-    const fallback = getNestedValue(translations[i18nConfig.defaultLocale], key);
+    const fallback = getNestedValue(getTranslationData(i18nConfig.defaultLocale), key);
     if (fallback !== key) template = fallback;
   }
   const result = interpolate(template, params);

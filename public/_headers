@@ -29,8 +29,15 @@
   Cache-Control: no-cache
 
 # 全局安全响应头（与 worker SECURITY_HEADERS 保持一致）
+# CSP 白名单说明（P1-安全收紧）：
+#   - script-src-attr 'none'：禁止内联事件属性(on*= / javascript:)，React 不依赖内联事件处理器，收紧无副作用
+#   - 'unsafe-inline' + static.cloudflareinsights.com：Cloudflare Web Analytics 信标需内联脚本注入
+#   - 'wasm-unsafe-eval'：Kokoro 神经 TTS 在浏览器端编译 WebAssembly
+#   - cdn.jsdelivr.net：Kokoro TTS 按需加载其 web 库（voice 设置页启用）
+#   - style-src 'unsafe-inline'：React 大量使用内联 style="" 属性（必需）
+#   - media/img platform-outputs / cos-platform-outputs：AI 生成媒体展示
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://static.cloudflareinsights.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://platform-outputs.agnes-ai.space; connect-src 'self' https://static.cloudflareinsights.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; media-src 'self' blob: https://platform-outputs.agnes-ai.space https://cos-platform-outputs.agnes-ai.cn; worker-src 'self' blob:; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src-attr 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://static.cloudflareinsights.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://platform-outputs.agnes-ai.space; connect-src 'self' https://static.cloudflareinsights.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; media-src 'self' blob: https://platform-outputs.agnes-ai.space https://cos-platform-outputs.agnes-ai.cn; worker-src 'self' blob:; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
