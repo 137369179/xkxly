@@ -7,10 +7,12 @@ import { useState, useEffect, useRef } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
+import { StreakBar } from '@/components/study/StreakBar';
 import { useStore } from '@/store/useStore';
 import { sfxTap, sfxCorrect, sfxWrong, sfxStar } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { randomPraise, randomEncourage } from '@/lib/speech';
+import { answerCorrect, answerWrong } from '@/lib/feedback';
 import { starsByRate } from '@/lib/stars';
 import { useTranslation } from '@/i18n/useTranslation';
 
@@ -39,6 +41,15 @@ const LEVELS: Level[] = [
 const Q_PER_LEVEL = 20;
 const TIME_LIMIT = 90;
 
+/** StreakBar 主题色（不含 orange），orange 关卡映射为 yellow 暖色保持视觉协调 */
+const STREAK_TONE: Record<Level['tone'], 'yellow' | 'green' | 'purple' | 'pink' | 'blue'> = {
+  green: 'green',
+  blue: 'blue',
+  purple: 'purple',
+  pink: 'pink',
+  orange: 'yellow',
+};
+
 export function MathLadder() {
   const { t: tr } = useTranslation();
   const [level, setLevel] = useState(1);
@@ -50,6 +61,8 @@ export function MathLadder() {
   const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
   const [feedback, setFeedback] = useState<'none' | 'right' | 'wrong'>('none');
   const [currentQ, setCurrentQ] = useState(() => LEVELS[0]!.gen());
+  // 连对闯关：连续答对点亮里程碑（目标 3），答错归零温和引导
+  const [streak, setStreak] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const advanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -69,6 +82,7 @@ export function MathLadder() {
     setQIdx(0);
     setCorrect(0);
     setWrong(0);
+    setStreak(0);
     setInput('');
     setFeedback('none');
     setTimeLeft(TIME_LIMIT);
@@ -107,12 +121,17 @@ export function MathLadder() {
       celebrateSmall();
       randomPraise();
       setCorrect(c => c + 1);
+      setStreak(s => s + 1);
       practice(`math:ladder:${level}`, true, 1);
+      if (streak + 1 >= 3) answerCorrect('combo');
+      else answerCorrect('math');
     } else {
       sfxWrong();
       randomEncourage();
       setWrong(w => w + 1);
+      setStreak(0);
       practice(`math:ladder:${level}`, false, 0);
+      answerWrong('math');
     }
     advanceRef.current = setTimeout(() => {
       if (qIdx + 1 >= Q_PER_LEVEL) {
@@ -214,6 +233,9 @@ export function MathLadder() {
           ⏱️ {timeLeft}s
         </span>
       </div>
+
+      {/* 连对闯关里程碑：连续答对点亮，形成"再对几题就通关"目标感 */}
+      <StreakBar streak={streak} target={3} tone={STREAK_TONE[lv.tone]} />
 
       <Panel className="text-center">
         <div className="mb-2 text-sm font-bold text-ink-soft">

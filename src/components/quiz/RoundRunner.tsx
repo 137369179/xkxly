@@ -14,8 +14,12 @@ import { sfxWin } from '@/lib/sfx';
 import { useStruggle } from '@/lib/struggle';
 import { useTranslation } from '@/i18n/useTranslation';
 import { StruggleModal } from '@/components/feedback/StruggleModal';
+import { StreakBar } from '@/components/study/StreakBar';
 import { calibrateDifficulty } from '@/lib/difficulty';
 import { starsByMistakes } from '@/lib/stars';
+
+/** StreakBar 主题色（与 Tailwind candy 语义色一致） */
+export type StreakTone = 'yellow' | 'green' | 'purple' | 'pink' | 'blue';
 
 interface RoundRunnerProps {
   /** 生成下一题（难度由本组件透传） */
@@ -43,6 +47,13 @@ interface RoundRunnerProps {
   header?: ReactNode;
   /** 答错后的 AI 讲解任务构造器，透传给 QuizCard */
   aiExplain?: QuizCardProps['aiExplain'];
+  /**
+   * 闯关里程碑条（游戏化·可选）
+   * 传入 target 后，本轮连续答对进度以圆点闯关条可视化：
+   * 连对达到 target 即「通关」；答错归零温和引导（由 StreakBar 处理展示）。
+   * 默认不渲染，零回归；仅需要闯关目标感的题卷式模块开启。
+   */
+  streakBar?: { target: number; tone?: StreakTone };
 }
 
 export function RoundRunner({
@@ -57,6 +68,7 @@ export function RoundRunner({
   renderSummary,
   header,
   aiExplain,
+  streakBar,
 }: RoundRunnerProps) {
   const { t: tr } = useTranslation();
   const makeRef = useRef(makeQuestion);
@@ -87,6 +99,8 @@ export function RoundRunner({
   const [mistakes, setMistakes] = useState(0);
   const [finished, setFinished] = useState(false);
   const [stars, setStars] = useState(0);
+  /** 闯关里程碑条展示用连对计数（游戏化·可选开启） */
+  const [streakCount, setStreakCount] = useState(0);
 
   const gen = useCallback(() => {
     // A: 根据连对/连错动态校准难度（激活原死代码 calibrateDifficulty）
@@ -115,6 +129,7 @@ export function RoundRunner({
     setFinished(false);
     setStars(0);
     correctStreakRef.current = 0;
+    setStreakCount(0);
     recentIdsRef.current = [];
     struggle.reset();
     setQ(gen());
@@ -136,9 +151,11 @@ export function RoundRunner({
     // A: 维护连对计数，供 gen 动态校准难度
     if (correct) {
       correctStreakRef.current += 1;
+      setStreakCount(correctStreakRef.current);
       onSolved?.();
     } else {
       correctStreakRef.current = 0;
+      setStreakCount(0);
       setMistakes((m) => m + 1);
     }
   };
@@ -191,6 +208,15 @@ export function RoundRunner({
           showLabel={false}
         />
       </div>
+
+      {/* 闯关里程碑条（游戏化·可选）：连续答对点亮，形成"再对几题就通关"目标感 */}
+      {streakBar && (
+        <StreakBar
+          streak={streakCount}
+          target={streakBar.target}
+          tone={streakBar.tone}
+        />
+      )}
 
       <QuizCard
         key={q.id}
