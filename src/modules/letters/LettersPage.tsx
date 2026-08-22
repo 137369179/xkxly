@@ -5,11 +5,12 @@ import type { Progress } from '@/types';
 import { masteredCount } from '@/lib/englishCurriculum';
 import { useTranslation } from '@/i18n/useTranslation';
 import { PageHeader } from '@/components/ui/Card';
-import { Tabs } from '@/components/ui/Tabs';
 import { sfxTap } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
 import { useTrainingTarget } from '@/hooks/useTrainingTarget';
 import { TrainingBanner } from '@/components/study/TrainingBanner';
+import { ModuleGameCard } from '@/components/study/ModuleGameCard';
+import { useStars } from '@/store/useStore';
 
 // 按需懒加载子模块
 const LetterWall = lazy(() => import('./LetterWall').then((m) => ({ default: m.LetterWall })));
@@ -30,6 +31,8 @@ export default function LettersPage() {
   const { target, clear } = useTrainingTarget('letters');
   const lettersDone = masteredCount({ mastery } as Progress, 'letter:');
   const unlockedPhonics = lettersDone >= 8;
+  const letterStars = useStars();
+  const letterProgress = Math.round((lettersDone / 26) * 100);
   // 深链预选目标：trace:<A> 描红预选字母；单字母 A 预选精学字母
   const [traceLetter, setTraceLetter] = useState<string | undefined>(undefined);
   const [studyLetter, setStudyLetter] = useState<string | undefined>(undefined);
@@ -82,19 +85,70 @@ export default function LettersPage() {
         </button>
       )}
 
-      <Tabs<TabId>
-        tone="blue"
-        layoutId="letters-tabs"
-        value={tab}
-        onChange={setTab}
-        items={[
-          { id: 'wall', label: t('letters.tabWall'), emoji: '🌳' },
-          { id: 'study', label: t('letters.tabStudy'), emoji: '🎯' },
-          { id: 'trace', label: t('letters.tabTrace'), emoji: '✍️' },
-          { id: 'order', label: t('letters.tabOrder'), emoji: '🅰️' },
-          { id: 'arcade', label: '字母游乐场', emoji: '🎮' },
-        ]}
-      />
+      {/* 🎮 游戏化功能卡入口：每个子功能独立展示进度/星星/解锁态，强化进入前的目标感 */}
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+        <ModuleGameCard
+          emoji="🌳"
+          title={t('letters.tabWall')}
+          desc="认字母 · 听发音"
+          tone="blue"
+          progress={letterProgress}
+          masteredCount={lettersDone}
+          totalCount={26}
+          stars={letterStars}
+          testId="gamecard-wall"
+          onEnter={() => { sfxTap(); setTab('wall'); }}
+        />
+        <ModuleGameCard
+          emoji="🎯"
+          title={t('letters.tabStudy')}
+          desc="字母精学 · 例词"
+          tone="blue"
+          progress={letterProgress}
+          masteredCount={lettersDone}
+          totalCount={26}
+          stars={letterStars}
+          testId="gamecard-study"
+          onEnter={() => { sfxTap(); setTab('study'); }}
+        />
+        <ModuleGameCard
+          emoji="✍️"
+          title={t('letters.tabTrace')}
+          desc="描红书写 · 笔顺"
+          tone="blue"
+          progress={letterProgress}
+          masteredCount={lettersDone}
+          totalCount={26}
+          stars={letterStars}
+          testId="gamecard-trace"
+          onEnter={() => { sfxTap(); setTab('trace'); }}
+        />
+        <ModuleGameCard
+          emoji="🅰️"
+          title={t('letters.tabOrder')}
+          desc="字母排序闯关"
+          tone="blue"
+          progress={letterProgress}
+          masteredCount={lettersDone}
+          totalCount={26}
+          stars={letterStars}
+          testId="gamecard-order"
+          onEnter={() => { sfxTap(); setTab('order'); }}
+        />
+        <ModuleGameCard
+          emoji="🎮"
+          title="字母游乐场"
+          desc={unlockedPhonics ? '戳气球 · 大小写配对' : '学会 8 个字母解锁'}
+          tone="purple"
+          progress={unlockedPhonics ? 100 : 0}
+          locked={!unlockedPhonics}
+          testId="gamecard-arcade"
+          onEnter={() => { sfxTap(); setTab('arcade'); }}
+        />
+      </div>
+
+      {/* 主入口已改为游戏化功能卡；arcade 二级切换保留在 Suspense 内按钮组，交互逻辑零回归 */}
+
 
       <Suspense
         fallback={

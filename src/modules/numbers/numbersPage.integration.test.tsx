@@ -18,8 +18,7 @@ vi.mock('motion/react', () => ({
     {},
     {
       get: (_target: any, tag: string) => {
-        return ({ children, className, style, onClick, disabled }: any) =>
-          createElement(tag, { className, style, onClick, disabled }, children);
+        return ({ children, ...rest }: any) => createElement(tag, rest, children);
       },
     }
   ),

@@ -5,6 +5,7 @@ import { sfxTap } from '@/lib/sfx';
 import { useStore } from '@/store/useStore';
 import { useTrainingTarget } from '@/hooks/useTrainingTarget';
 import { TrainingBanner } from '@/components/study/TrainingBanner';
+import { ModuleGameCard } from '@/components/study/ModuleGameCard';
 import { recommendNumberSkill } from './recommendNumbers';
 import { NumberRecommend } from './NumberRecommend';
 
@@ -117,7 +118,47 @@ export default function NumbersPage() {
 
   // 页面内「猜你接下来想练」个性化推荐（基于 SRS 掌握度）
   const mastery = useStore((s) => s.progress.mastery);
+  const mathStars = useStore((s) => s.progress.stars);
   const recommendation = useMemo(() => recommendNumberSkill(mastery), [mastery]);
+
+  // 子功能 → 掌握度进度（0-100）：优先用具体 math:<key> 回写计数，未独立回写的用分类聚合近似
+  const SUB_MATH_KEY: Record<string, string> = {
+    tenframe: 'math:tenframe',
+    trace: 'math:trace',
+    skip: 'math:skip',
+    math: 'math:add',
+    extra: 'math:mul',
+    vertical: 'math:add',
+    ladder: 'math:ladder',
+    run: 'math:rabbit',
+    word: 'math:word',
+    shape: 'math:shape',
+    fraction: 'math:fraction',
+    money: 'math:money',
+  };
+  const subProgress = useMemo(() => {
+    const calc = (subId: string, catSubIds: string[]): number => {
+      const key = SUB_MATH_KEY[subId];
+      if (key) {
+        // 该具体技能掌握计数（lv>=1）相对小目标(6)的进度
+        const done = Object.keys(mastery).filter((k) => k === key && (mastery[k]?.lv ?? 0) >= 1).length;
+        return Math.min(100, Math.round((done / 6) * 100));
+      }
+      // 分类聚合：该分类下已回写任一 math:* 的子功能占比
+      const catKeys = catSubIds
+        .map((id) => SUB_MATH_KEY[id])
+        .filter((k): k is string => Boolean(k));
+      if (catKeys.length === 0) return 0;
+      const touched = catKeys.filter((k) => (mastery[k]?.lv ?? 0) >= 1).length;
+      return Math.min(100, Math.round((touched / catKeys.length) * 100));
+    };
+    const map: Record<string, number> = {};
+    for (const c of CATEGORIES) {
+      const ids = c.subTabs.map((s) => s.id);
+      for (const s of c.subTabs) map[s.id] = calc(s.id, ids);
+    }
+    return map;
+  }, [mastery]);
   const recDef = useMemo(() => {
     if (!recommendation) return null;
     for (const c of CATEGORIES) {
@@ -202,26 +243,26 @@ export default function NumbersPage() {
         })}
       </div>
 
-      {/* 🏷️ 二级功能标签栏 */}
-      <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 rounded-2xl bg-amber-100/50 border border-amber-200/80">
+      {/* 🏷️ 二级功能：游戏化功能卡网格（每卡独立展示进度/星星，强化进入前目标感） */}
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
         {currentCategory.subTabs.map((sub) => {
           const isSubAct = sub.id === activeSubTab;
           return (
-            <button
+            <div
               key={sub.id}
-              type="button"
-              data-testid={`sub-${sub.id}`}
-              aria-pressed={isSubAct}
-              onClick={() => handleSelectSubTab(sub.id)}
-              className={`flex min-h-11 items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-black transition-all ${
-                isSubAct
-                  ? 'bg-candy-yellow-deep text-white shadow-candy-sm scale-105'
-                  : 'bg-white/80 text-ink-soft hover:bg-white hover:text-ink'
-              }`}
+              className={isSubAct ? 'ring-2 ring-amber-400 rounded-3xl' : undefined}
             >
-              <span>{sub.emoji}</span>
-              <span>{sub.label}</span>
-            </button>
+              <ModuleGameCard
+                emoji={sub.emoji}
+                title={sub.label}
+                tone="yellow"
+                progress={subProgress[sub.id] ?? 0}
+                stars={mathStars}
+                pressed={isSubAct}
+                testId={`sub-${sub.id}`}
+                onEnter={() => handleSelectSubTab(sub.id)}
+              />
+            </div>
           );
         })}
       </div>
