@@ -1,9 +1,14 @@
 {
-  "updatedAt": "2026-08-17T11:26:41.112Z",
+  "updatedAt": "2026-08-22T22:49:51.388Z",
   "rules": {
     "@typescript-eslint/no-explicit-any": 22,
-    "react-hooks/exhaustive-deps": 58,
-    "@typescript-eslint/no-non-null-assertion": 524,
-    "no-console": 6
+    "react-hooks/exhaustive-deps": 55,
+    "no-console": 6,
+    "@typescript-eslint/no-non-null-assertion": 469
+  },
+  "a11y": {
+    "A11Y-CLICK-NO-ROLE": 919,
+    "A11Y-BUTTON-DIV": 901,
+    "A11Y-ARIA-HIDDEN-FOC": 4
   }
 }

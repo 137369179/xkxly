@@ -19,6 +19,14 @@
 :root {
   /* 明确声明亮色方案，避免系统深色模式导致原生控件（autofill/scrollbar/select）反色（UI审计 P3） */
   color-scheme: light;
+
+  /* UI审计 P7 · 最小屏安全间距 token
+     用 max() 兜底，保证即使在 320px 最小屏或刘海/圆角设备，内容与视口边缘
+     始终保留可读安全边距；同时收口 iOS 安全区（避免被刘海/底部条裁切）。 */
+  --safe-gap-x: max(0.75rem, env(safe-area-inset-left), env(safe-area-inset-right));
+  --safe-gap-y: max(0.75rem, env(safe-area-inset-top), env(safe-area-inset-bottom));
+  --min-page-pad-x: var(--safe-gap-x);
+  --min-page-pad-y: var(--safe-gap-y);
 }
 
 @theme {
@@ -735,6 +743,64 @@
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================
+   UI审计 P6 · 永动密度节流（motion-density）
+   痛点：float/rainbow/bounce-soft/twinkle/jellyWobble/icon-chip 等装饰性
+   永动动画（infinite）在页面密集出现时，易引发视觉疲劳与持续 CPU/GPU 开销。
+   策略（纯 CSS、零组件改动、零逻辑变更）：
+     1) 小屏（≤480px）：装饰性永动降级为低频单次，降低最小屏渲染压力；
+     2) 用户可在根节点设 data-motion="density-low" 手动降级（家长/护眼场景）；
+     3) 尊重 prefers-reduced-motion（P5 已全局关闭）；
+     4) 交互性一次性动画（popIn/squish/jellyBounce 等）不受影响，仅节流"永动"。
+   ============================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  /* 小屏：永动装饰动画降频/转单次，避免最小屏过度闪烁 */
+  @media (max-width: 480px) {
+    .icon-chip:not(.icon-chip--static) {
+      animation-duration: 9s;
+    }
+    [class*='animate-float'],
+    [class*='animate-rainbow'],
+    [class*='animate-bounce-soft'],
+    [class*='animate-twinkle'],
+    [class*='animate-jelly-wobble'] {
+      animation-iteration-count: 1 !important;
+      animation-duration: 6s !important;
+    }
+  }
+
+  /* 手动低密度模式（data-motion="density-low"）：永动装饰转单次柔和，保留活泼感但减少永动 */
+  [data-motion='density-low'] [class*='animate-float'],
+  [data-motion='density-low'] [class*='animate-rainbow'],
+  [data-motion='density-low'] [class*='animate-bounce-soft'],
+  [data-motion='density-low'] [class*='animate-twinkle'],
+  [data-motion='density-low'] [class*='animate-jelly-wobble'],
+  [data-motion='density-low'] .icon-chip:not(.icon-chip--static) {
+    animation-iteration-count: 1 !important;
+    animation-duration: 4s !important;
+  }
+}
+
+/* ============================================================
+   UI审计 P7 · 最小屏安全间距（应用层）
+   对 App 主内容区（main / [data-page]）补强最小安全内边距，
+   即使上游 Tailwind 类在小屏仅给 px-2，也保证内容不被视口/刘海裁切。
+   ============================================================ */
+main,
+[data-page] {
+  padding-inline: max(var(--min-page-pad-x), 0.5rem);
+  padding-block: max(var(--min-page-pad-y), 0.5rem);
+}
+
+/* 仅在最小屏（≤360px）强制下限，避免影响常规布局的视觉留白 */
+@media (max-width: 360px) {
+  main,
+  [data-page] {
+    padding-inline: var(--safe-gap-x);
+    padding-block: var(--safe-gap-y);
   }
 }
 
