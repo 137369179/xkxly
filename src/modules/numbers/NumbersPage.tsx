@@ -19,6 +19,7 @@ const CountingGame = lazy(() => import('./CountingGame').then((m) => ({ default:
 const NumberTrace = lazy(() => import('./NumberTrace').then((m) => ({ default: m.NumberTrace })));
 const SkipCounting = lazy(() => import('./SkipCounting').then((m) => ({ default: m.SkipCounting })));
 
+const MathChallengeGame = lazy(() => import('@/components/numbers/MathChallengeGame').then((m) => ({ default: m.MathChallengeGame })));
 const MathQuiz = lazy(() => import('./MathQuiz').then((m) => ({ default: m.MathQuiz })));
 const MathExtra = lazy(() => import('./MathExtra').then((m) => ({ default: m.MathExtra })));
 const VerticalMath = lazy(() => import('./VerticalMath').then((m) => ({ default: m.VerticalMath })));
@@ -60,9 +61,10 @@ const CATEGORIES: { id: MathCategory; label: string; emoji: string; desc: string
     id: 'arithmetic',
     label: '算术工坊',
     emoji: '➕',
-    desc: '加减乘除 · 竖式进位 · 趣味爬梯',
+    desc: '加减乘除 · 竖式进位 · 趣味闯关',
     subTabs: [
       { id: 'math', label: '加减法', emoji: '➕' },
+      { id: 'challenge', label: '加减闯关', emoji: '🎲' },
       { id: 'extra', label: '乘除进阶', emoji: '✖️' },
       { id: 'vertical', label: '竖式进位', emoji: '📝' },
       { id: 'ladder', label: '算术梯', emoji: '🪜' },
@@ -275,6 +277,7 @@ export default function NumbersPage() {
         {activeSubTab === 'trace' && <NumberTrace />}
         {activeSubTab === 'skip' && <SkipCounting />}
 
+        {activeSubTab === 'challenge' && <MathChallengeGame />}
         {activeSubTab === 'math' && <MathQuiz />}
         {activeSubTab === 'extra' && <MathExtra />}
         {activeSubTab === 'vertical' && <VerticalMath />}
