@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion } from 'motion/react';
 import { Panel } from '@/components/ui/Card';
 import { CandyButton, IconButton } from '@/components/ui/Button';
+import { type Tone } from '@/lib/tones';
 import { speak } from '@/lib/speech';
 import { sfxTap } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
@@ -24,9 +24,9 @@ const EMOJIS = ['🍎', '🍓', '🐶', '🐱', '⭐', '🎈', '🚗', '🐥'];
 
 function generateQuestion(mode: MathMode): MathQuestion {
   const emoji = EMOJIS[Math.floor(Math.random() * EMOJIS.length)]!;
-  let num1 = 1;
-  let num2 = 1;
-  let op: '+' | '-' = Math.random() > 0.5 ? '+' : '-';
+  let num1: number;
+  let num2: number;
+  const op: '+' | '-' = Math.random() > 0.5 ? '+' : '-';
 
   if (mode === 'within10') {
     if (op === '+') {
@@ -249,24 +249,33 @@ export function MathChallengeGame() {
         {question.options.map((val) => {
           const isSelected = selected === val;
 
+          const optionTone: Tone = (isSelected
+            ? isCorrect
+              ? 'green'
+              : 'red'
+            : 'yellow') as Tone;
+
           return (
-            <motion.button
+            <CandyButton
               key={val}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => handleSelect(val)}
+              size="lg"
+              variant="soft"
+              silent
+              fullWidth
               disabled={selected !== null}
+              onClick={() => handleSelect(val)}
               aria-label={`选项 ${val}`}
-              className={`no-select jelly-shine p-5 rounded-2xl border-4 text-center text-3xl font-black transition-all shadow-md active:translate-y-[4px] active:shadow-none focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-candy-yellow/60 disabled:cursor-not-allowed disabled:opacity-45 disabled:active:translate-y-0 ${
+              className={`text-3xl font-black jelly-shine ${
                 isSelected
                   ? isCorrect
-                    ? 'bg-candy-green-soft border-candy-green-deep text-candy-green-deep'
-                    : 'bg-candy-red-soft border-candy-red-deep text-candy-red-deep'
-                  : 'bg-white hover:bg-candy-yellow-soft border-candy-yellow text-candy-yellow-deep'
+                    ? '!bg-candy-green-soft !border-candy-green-deep !text-candy-green-deep'
+                    : '!bg-candy-red-soft !border-candy-red-deep !text-candy-red-deep'
+                  : ''
               }`}
+              tone={optionTone}
             >
               {val}
-            </motion.button>
+            </CandyButton>
           );
         })}
       </div>
