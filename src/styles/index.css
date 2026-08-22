@@ -16,6 +16,11 @@
    2026-08-16 全站果冻粉化：candy-* token 映射至果冻粉家族
    主色 #FF6B96 · 浅粉 #FFB6C9 · 柔底 #FFF0F4 · 深 #E05A80
    ============================================================ */
+:root {
+  /* 明确声明亮色方案，避免系统深色模式导致原生控件（autofill/scrollbar/select）反色（UI审计 P3） */
+  color-scheme: light;
+}
+
 @theme {
   /* —— 果冻粉主色板（jelly pink）—— */
   --color-candy-pink: #ff6b96;
@@ -50,7 +55,8 @@
 
   --color-cream: #fff9fa;
   --color-ink: #5c2e3d;
-  --color-ink-soft: #8a7a7e;
+  /* UI审计 P4：由 #8a7a7e(3.9:1) 加深至 #6b5560(6.5:1)，全站满足 WCAG AA 正文 4.5:1 */
+  --color-ink-soft: #6b5560;
 
   /* —— 字体 —— */
   --font-round: 'Baloo 2', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
@@ -721,14 +727,14 @@
   opacity: 0.6;
 }
 
-/* 动效降级：尊重系统「减少动态效果」 */
+/* 动效降级：尊重系统「减少动态效果」（UI审计 P5：完全关闭动画/过渡，确保静态终态可见） */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
   }
 }
 

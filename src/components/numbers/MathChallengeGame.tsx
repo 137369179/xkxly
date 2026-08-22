@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { Panel } from '@/components/ui/Card';
+import { CandyButton, IconButton } from '@/components/ui/Button';
 import { speak } from '@/lib/speech';
 import { sfxTap } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
@@ -158,25 +159,23 @@ export function MathChallengeGame() {
       <div className="flex flex-col sm:flex-row items-center justify-between gap-2 bg-white/90 p-3 rounded-2xl border border-amber-200 shadow-xs">
         <div className="flex items-center gap-1.5">
           {(['within10', 'within20', 'within100'] as MathMode[]).map((m) => (
-            <button
+            <CandyButton
               key={m}
-              onClick={() => {
-                sfxTap();
-                setMode(m);
-              }}
-              className={`px-3 py-1 rounded-xl text-xs font-black transition-all ${
-                mode === m
-                  ? 'bg-amber-400 text-amber-950 shadow-xs'
-                  : 'bg-amber-100/60 text-amber-800 hover:bg-amber-200/60'
-              }`}
+              size="sm"
+              tone="yellow"
+              variant={mode === m ? 'solid' : 'soft'}
+              silent
+              onClick={() => setMode(m)}
             >
               {m === 'within10' ? '10以内加减' : m === 'within20' ? '20以内进退位' : '100以内速算'}
-            </button>
+            </CandyButton>
           ))}
         </div>
 
         <div className="flex items-center gap-3 text-xs font-black text-amber-900">
-          {streak > 1 && <span className="text-rose-600 animate-bounce">🔥 连胜 x{streak}</span>}
+          {streak > 1 && (
+            <span className="text-candy-red-deep animate-bounce-soft">🔥 连胜 x{streak}</span>
+          )}
           <span>⭐ 积分: {stars}</span>
         </div>
       </div>
@@ -188,12 +187,12 @@ export function MathChallengeGame() {
         </div>
 
         {/* 算式展示 */}
-        <div className="flex items-center justify-center gap-3 text-4xl sm:text-5xl font-black text-amber-950 font-mono">
+        <div className="flex items-center justify-center gap-3 text-4xl sm:text-5xl font-black text-candy-yellow-deep font-mono">
           <span>{question.num1}</span>
-          <span className="text-rose-500">{question.op}</span>
+          <span className="text-candy-red">{question.op}</span>
           <span>{question.num2}</span>
           <span>=</span>
-          <span className="text-amber-500 font-extrabold underline decoration-wavy decoration-amber-400">
+          <span className="text-candy-yellow-deep font-extrabold underline decoration-wavy decoration-candy-yellow">
             ?
           </span>
         </div>
@@ -231,16 +230,17 @@ export function MathChallengeGame() {
 
         {/* 语音重复播放 */}
         <div className="flex justify-center">
-          <button
-            onClick={() => {
-              sfxTap();
-              speak(`${question.num1} ${question.op === '+' ? '加' : '减'} ${question.num2} 等于几？`);
-            }}
-            aria-label="朗读题目"
-            className="px-4 py-1.5 bg-amber-200 hover:bg-amber-300 text-amber-900 rounded-xl text-xs font-black active:scale-95 flex items-center gap-1"
+          <CandyButton
+            size="sm"
+            tone="yellow"
+            variant="soft"
+            silent
+            onClick={() =>
+              speak(`${question.num1} ${question.op === '+' ? '加' : '减'} ${question.num2} 等于几？`)
+            }
           >
-            <span>🔊 读出题目</span>
-          </button>
+            🔊 读出题目
+          </CandyButton>
         </div>
       </Panel>
 
@@ -257,12 +257,12 @@ export function MathChallengeGame() {
               onClick={() => handleSelect(val)}
               disabled={selected !== null}
               aria-label={`选项 ${val}`}
-              className={`p-5 rounded-2xl border-4 text-center text-3xl font-black transition-all shadow-md ${
+              className={`no-select jelly-shine p-5 rounded-2xl border-4 text-center text-3xl font-black transition-all shadow-md active:translate-y-[4px] active:shadow-none focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-candy-yellow/60 disabled:cursor-not-allowed disabled:opacity-45 disabled:active:translate-y-0 ${
                 isSelected
                   ? isCorrect
-                    ? 'bg-emerald-100 border-emerald-500 text-emerald-950'
-                    : 'bg-rose-100 border-rose-500 text-rose-950'
-                  : 'bg-white hover:bg-amber-50/50 border-amber-200 text-amber-950'
+                    ? 'bg-candy-green-soft border-candy-green-deep text-candy-green-deep'
+                    : 'bg-candy-red-soft border-candy-red-deep text-candy-red-deep'
+                  : 'bg-white hover:bg-candy-yellow-soft border-candy-yellow text-candy-yellow-deep'
               }`}
             >
               {val}
@@ -274,20 +274,30 @@ export function MathChallengeGame() {
       {/* AI 小智数学解题讲解 */}
       <div className="pt-1">
         {!showAiHelp ? (
-          <button
+          <CandyButton
+            size="sm"
+            tone="yellow"
+            variant="soft"
+            fullWidth
+            silent
             onClick={handleAskAiHelp}
-            aria-label="使用AI讲解解题思路"
-            className="w-full text-center text-xs font-black text-amber-700 hover:text-amber-900 bg-amber-100/70 hover:bg-amber-200/70 py-2 rounded-xl border border-amber-300 transition-all flex items-center justify-center gap-1.5"
           >
-            <span>🐱 让 AI 小智教我怎么算</span>
-          </button>
+            🐱 让 AI 小智教我怎么算
+          </CandyButton>
         ) : (
           <div className="bg-white/90 p-3 rounded-2xl border border-amber-300 text-xs font-bold text-amber-900 space-y-1 shadow-sm">
             <div className="flex items-center justify-between text-[11px] font-black text-amber-700">
               <span>🐱 AI 小智解题思路：</span>
-              <button onClick={() => setShowAiHelp(false)} aria-label="关闭讲解" className="text-amber-500 hover:text-amber-800">
+              <IconButton
+                tone="yellow"
+                silent
+                minTouchTarget
+                label="关闭讲解"
+                onClick={() => setShowAiHelp(false)}
+                className="!h-8 !w-8 text-sm"
+              >
                 ✕
-              </button>
+              </IconButton>
             </div>
             <div className="text-slate-800 text-xs leading-relaxed animate-pulse">
               {aiExplanation || '喵喵正在思考简单算法中...'}
