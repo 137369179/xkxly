@@ -53,6 +53,7 @@ export type PetAction =
   | { type: 'pomodoro-start'; phase: 'work' | 'rest' }
   | { type: 'pomodoro-tick'; delta: number }
   | { type: 'pomodoro-reset' }
+  | { type: 'pomodoro-config'; workMin: number; restMin: number }
   | { type: 'todo'; action: TodosAction }
   | { type: 'pixel'; serialized: string }
   | { type: 'home'; value: boolean };
@@ -89,6 +90,12 @@ export function petReducer(state: PetState, action: PetAction): PetActionResult 
     }
     case 'pomodoro-reset':
       return { state: { ...state, pomodoro: createPomodoro() }, leveledUp: false, todoDone: false };
+    case 'pomodoro-config': {
+      // 配置仅允许 1..120 分钟；运行中不直接改动，由 UI 在 idle 时提供
+      const workMin = Math.min(120, Math.max(1, Math.round(action.workMin)));
+      const restMin = Math.min(120, Math.max(1, Math.round(action.restMin)));
+      return { state: { ...state, pomodoroConfig: { workMin, restMin } }, leveledUp: false, todoDone: false };
+    }
     case 'todo': {
       const res = todosReducer(state.todos, action.action);
       return { state: { ...state, todos: res.todos }, leveledUp: false, todoDone: res.justCompleted };

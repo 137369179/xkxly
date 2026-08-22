@@ -11,7 +11,7 @@ import { INTERACTIONS, ACCESSORIES, PALETTE, type InteractionType, type Accessor
 import { affinityLevel, addInteraction, levelProgress, todayKey } from './lib/affinity';
 import { formatRemain } from './lib/pomodoro';
 import { todosReducer } from './lib/todos';
-import { blankGrid, serialize, paletteAt, type PixelGrid } from './lib/pixel';
+import { blankGrid, serialize, paletteAt, parse, PIXEL_W, PIXEL_H, PIXEL_PRESETS, type PixelGrid } from './lib/pixel';
 
 export function DesktopPetPage() {
   return (
@@ -113,7 +113,7 @@ function PetManager() {
           dispatch({ type: 'todo', action: { type: 'toggle', id } });
           if (res.justCompleted) interact('task');
         }} onRemove={(id) => dispatch({ type: 'todo', action: { type: 'remove', id } })} />
-        <PixelEditorPanel onSave={(serialized) => dispatch({ type: 'pixel', serialized })} onToast={showToast} />
+        <PixelEditorPanel initial={state.pixel} onSave={(serialized) => dispatch({ type: 'pixel', serialized })} onToast={showToast} />
       </div>
 
       <SettingsPanel state={state} dispatch={dispatch} toNext={toNext} />
@@ -185,6 +185,20 @@ function AccessoryPanel({ state, onToggle }: { state: PetState; onToggle: (id: A
 /* ---------------- 番茄钟面板 ---------------- */
 function PomodoroPanel({ state, dispatch }: { state: PetState; dispatch: (a: PetAction) => void }) {
   const { phase, remainingMs, cycles } = state.pomodoro;
+  const { workMin, restMin } = state.pomodoroConfig;
+  const [w, setW] = useState(workMin);
+  const [r, setR] = useState(restMin);
+  // 外部配置变化（如 localStorage 恢复）时同步输入框
+  useEffect(() => { setW(workMin); }, [workMin]);
+  useEffect(() => { setR(restMin); }, [restMin]);
+
+  const applyConfig = (nextW = w, nextR = r) => {
+    const nw = Math.min(120, Math.max(1, Math.round(nextW) || 1));
+    const nr = Math.min(120, Math.max(1, Math.round(nextR) || 1));
+    setW(nw); setR(nr);
+    dispatch({ type: 'pomodoro-config', workMin: nw, restMin: nr });
+  };
+
   return (
     <Section emoji="🍅" title="番茄钟">
       <div className="mb-2 text-center">
@@ -194,6 +208,50 @@ function PomodoroPanel({ state, dispatch }: { state: PetState; dispatch: (a: Pet
           {cycles > 0 && ` · 已完成 ${cycles} 轮`}
         </div>
       </div>
+
+      {/* 时长配置（仅空闲时可改，运行中锁定避免状态混乱） */}
+      <div className={`mb-2 rounded-xl bg-white/50 p-2 transition ${phase === 'idle' ? '' : 'pointer-events-none opacity-40'}`}>
+        <div className="mb-1.5 flex items-center gap-2">
+          <label className="flex flex-1 items-center gap-1.5 text-xs font-bold text-ink/70">
+            专注
+            <input
+              type="number" min={1} max={120} value={w}
+              onChange={(e) => setW(Number(e.target.value))}
+              onBlur={() => applyConfig()}
+              onKeyDown={(e) => { if (e.key === 'Enter') applyConfig(); }}
+              className="w-14 rounded-lg border-2 border-white/80 bg-white px-1.5 py-1 text-center text-sm font-bold text-ink outline-none focus:border-purple-400"
+              aria-label="专注时长（分钟）"
+            />
+            分钟
+          </label>
+          <label className="flex flex-1 items-center gap-1.5 text-xs font-bold text-ink/70">
+            休息
+            <input
+              type="number" min={1} max={120} value={r}
+              onChange={(e) => setR(Number(e.target.value))}
+              onBlur={() => applyConfig()}
+              onKeyDown={(e) => { if (e.key === 'Enter') applyConfig(); }}
+              className="w-14 rounded-lg border-2 border-white/80 bg-white px-1.5 py-1 text-center text-sm font-bold text-ink outline-none focus:border-teal-400"
+              aria-label="休息时长（分钟）"
+            />
+            分钟
+          </label>
+        </div>
+        <div className="flex flex-wrap items-center gap-1">
+          <span className="text-[10px] font-bold text-ink/50">快捷：</span>
+          {[15, 25, 50].map((m) => (
+            <button
+              key={m}
+              onClick={() => applyConfig(m, r)}
+              className={`rounded-full px-2 py-0.5 text-[11px] font-bold transition active:translate-y-[1px] ${w === m ? 'bg-purple-500 text-white' : 'bg-white/80 text-ink'}`}
+            >
+              专注{m}分
+            </button>
+          ))}
+          {phase !== 'idle' && <span className="ml-auto text-[10px] text-ink/40">运行中锁定</span>}
+        </div>
+      </div>
+
       <div className="flex gap-2">
         {phase === 'idle' ? (
           <>
@@ -250,10 +308,16 @@ function TodoPanel({ state, onAdd, onToggle, onRemove }: {
 }
 
 /* ---------------- 拼豆编辑器 ---------------- */
-function PixelEditorPanel({ onSave, onToast }: {
-  onSave: (s: string) => void; onToast: (m: string) => void;
+function PixelEditorPanel({ initial, onSave, onToast }: {
+  initial: string | null; onSave: (s: string) => void; onToast: (m: string) => void;
 }) {
-  const [grid, setGrid] = useState<PixelGrid>(() => blankGrid());
+  // 初始化时回显已保存的图案（刷新/重进后编辑区不丢内容）
+  const [grid, setGrid] = useState<PixelGrid>(() => {
+    const p = initial ? parse(initial) : null;
+    return p && p.w === PIXEL_W && p.h === PIXEL_H && p.grid.length === PIXEL_W * PIXEL_H
+      ? p.grid
+      : blankGrid();
+  });
   const [color, setColor] = useState(4);
 
   const paint = (i: number) => {
@@ -291,6 +355,21 @@ function PixelEditorPanel({ onSave, onToast }: {
                 style={{ background: hex }}
                 aria-label={`颜色 ${hex}`}
               />
+            ))}
+          </div>
+          <div className="mb-2 flex flex-wrap items-center gap-1.5">
+            <span className="text-[11px] font-black text-ink/60">预设模板：</span>
+            {PIXEL_PRESETS.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setGrid(p.grid.slice())}
+                className="flex items-center gap-1 rounded-lg border border-purple-200 bg-white/90 px-2 py-1 text-xs font-bold text-ink shadow-xs transition hover:scale-105 active:scale-95"
+                title={`加载${p.name}模板`}
+              >
+                <span>{p.emoji}</span>
+                <span>{p.name}</span>
+              </button>
             ))}
           </div>
           <div className="flex flex-wrap gap-1.5">

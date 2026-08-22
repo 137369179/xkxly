@@ -1,6 +1,6 @@
 /**
  * 拼豆像素宠物（纯逻辑，可单测）
- * 网格用「调色板索引」存储；支持序列化/反序列化/校验/扩尺寸。
+ * 网格用「调色板索引」存储；支持序列化/反序列化/校验/预设模板。
  */
 import { PALETTE } from '../data';
 
@@ -51,3 +51,104 @@ export function validGrid(grid: PixelGrid): boolean {
 export function hasContent(grid: PixelGrid): boolean {
   return grid.some((v) => v !== -1);
 }
+
+export interface PixelPreset {
+  id: string;
+  name: string;
+  emoji: string;
+  grid: PixelGrid;
+}
+
+export function createPresetGrid(pattern: string[]): PixelGrid {
+  const grid = blankGrid();
+  pattern.forEach((row, r) => {
+    if (r >= PIXEL_H) return;
+    for (let c = 0; c < Math.min(row.length, PIXEL_W); c++) {
+      const ch = row[c];
+      if (ch && ch !== '.') {
+        const idx = Number.parseInt(ch, 16);
+        grid[r * PIXEL_W + c] = Number.isNaN(idx) ? 4 : idx % PALETTE.length;
+      }
+    }
+  });
+  return grid;
+}
+
+export const PIXEL_PRESETS: PixelPreset[] = [
+  {
+    id: 'heart',
+    name: '爱心',
+    emoji: '💖',
+    grid: createPresetGrid([
+      '................',
+      '..4444....4444..',
+      '.444444..444444.',
+      '4444444444444444',
+      '4444444444444444',
+      '.44444444444444.',
+      '..444444444444..',
+      '...4444444444...',
+      '....44444444....',
+      '.....444444.....',
+      '......4444......',
+      '.......44.......',
+    ]),
+  },
+  {
+    id: 'cat',
+    name: '小猫',
+    emoji: '🐱',
+    grid: createPresetGrid([
+      '..22........22..',
+      '.2222......2222.',
+      '.22222222222222.',
+      '.22222222222222.',
+      '.22002222220022.',
+      '.22002222220022.',
+      '.22222244222222.',
+      '.22222444422222.',
+      '..222222222222..',
+      '..222222222222..',
+      '..222222222222..',
+      '................',
+    ]),
+  },
+  {
+    id: 'star',
+    name: '星星',
+    emoji: '⭐',
+    grid: createPresetGrid([
+      '.......66.......',
+      '.......66.......',
+      '......6666......',
+      '.66666666666666.',
+      '..666666666666..',
+      '...6666666666...',
+      '....66666666....',
+      '...6666..6666...',
+      '..6666....6666..',
+      '.666........666.',
+      '................',
+      '................',
+    ]),
+  },
+  {
+    id: 'fish',
+    name: '小鱼',
+    emoji: '🐟',
+    grid: createPresetGrid([
+      '................',
+      '....8888........',
+      '...888888...8...',
+      '..88088888.88...',
+      '.8888888888888..',
+      '888888888888888.',
+      '.8888888888888..',
+      '..88888888.88...',
+      '...888888...8...',
+      '....8888........',
+      '................',
+      '................',
+    ]),
+  },
+];

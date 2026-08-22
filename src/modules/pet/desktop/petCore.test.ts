@@ -95,6 +95,15 @@ describe('番茄钟 pomodoro', () => {
     expect(formatRemain(65_000)).toBe('01:05');
     expect(formatRemain(0)).toBe('00:00');
   });
+  it('pomodoro-config 更新配置并钳制到 [1,120]', () => {
+    let r = petReducer(defaultPetState(), { type: 'pomodoro-config', workMin: 40, restMin: 8 });
+    expect(r.state.pomodoroConfig).toEqual({ workMin: 40, restMin: 8 });
+    r = petReducer(defaultPetState(), { type: 'pomodoro-config', workMin: 999, restMin: 0 });
+    expect(r.state.pomodoroConfig).toEqual({ workMin: 120, restMin: 1 });
+    // 配置后开始专注使用新时长
+    const started = petReducer(r.state, { type: 'pomodoro-start', phase: 'work' }).state.pomodoro;
+    expect(started.remainingMs).toBe(120 * 60_000);
+  });
 });
 
 describe('待办 todos', () => {
