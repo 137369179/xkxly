@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { petReducer, defaultPetState } from './petReducer';
 import {
   emptyAttributes, attrLevel, gainAttr, ATTR_SOURCES, ATTR_MAX_EXP,
 } from './lib/attributes';
@@ -140,5 +141,51 @@ describe('行为引擎 behavior', () => {
   it('白天无特殊条件：决策确定性', () => {
     const st = emptyBehavior();
     expect(decide(st, ctx()).action).toBe(decide(st, ctx()).action);
+  });
+});
+
+describe('reducer 扩展（属性/进化/行为）', () => {
+  it('gain-attr 写入属性', () => {
+    const s0 = petReducer(defaultPetState(), { type: 'gain-attr', kind: 'numbers', now: 1 });
+    expect(s0.state.attributes.exp.int).toBe(10);
+    expect(s0.leveledUp).toBe(false);
+  });
+
+  it('evolve-check：总等级跨阈值时进化并记图鉴', () => {
+    let base = defaultPetState();
+    base = { ...base, attributes: { ...emptyAttributes(), exp: { int: 200, vit: 200, cha: 200, cre: 200 } } };
+    const r = petReducer(base, { type: 'evolve-check', now: 42 });
+    // aff=0→Lv1；(5+5+5+5+1)/5=4.2→4 少年
+    expect(r.state.evolution.stage).toBe(3);
+    expect(r.evolved).toBe(true);
+    expect(r.state.evolution.dex[3]).toBe(42);
+  });
+
+  it('evolve-check 首次运行记录初始阶段', () => {
+    const s = petReducer(defaultPetState(), { type: 'evolve-check', now: 7 }).state;
+    expect(s.evolution.stage).toBe(1);
+    expect(s.evolution.dex[1]).toBe(7);
+  });
+
+  it('behavior-adopt 更新行为并打冷却戳', () => {
+    let s = petReducer(defaultPetState(), { type: 'behavior-adopt', action: 'invite', now: 5 }).state;
+    expect(s.behavior.current).toBe('invite');
+    expect(s.behavior.lastInviteAt).toBe(5);
+    s = petReducer(s, { type: 'behavior-adopt', action: 'study', now: 6 }).state;
+    expect(s.behavior.lastStudyAt).toBe(6);
+  });
+
+  it('behavior-interact 重置互动计时', () => {
+    const s = petReducer(defaultPetState(), { type: 'behavior-interact', now: 777 }).state;
+    expect(s.behavior.lastInteractAt).toBe(777);
+  });
+
+  it('equip 超出阶段槽位被拒（蛋阶段 2 槽）', () => {
+    let s = defaultPetState();
+    s = petReducer(s, { type: 'equip', id: 'hat' }).state;
+    s = petReducer(s, { type: 'equip', id: 'crown' }).state;
+    const blocked = petReducer(s, { type: 'equip', id: 'scarf' }).state;
+    expect(s.accessories).toHaveLength(2);
+    expect(blocked.accessories).toHaveLength(2); // 第 3 件被拒
   });
 });

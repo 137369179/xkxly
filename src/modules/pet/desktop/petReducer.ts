@@ -4,16 +4,23 @@
  */
 import {
   addInteraction,
+  affinityLevel,
   emptyAffinity,
   levelProgress,
   type AffinityState,
 } from './lib/affinity';
+import { emptyAttributes, gainAttr, attrLevel, type AttributesState, type AttrSourceKind } from './lib/attributes';
+import { emptyEvolution, totalLevel, checkEvolution, accessorySlots, type EvolutionState } from './lib/evolution';
+import { emptyBehavior, type BehaviorState, type BehaviorAction } from './lib/behavior';
 import { createPomodoro, startPhase, tickPomodoro, type PomodoroConfig, type PomodoroState } from './lib/pomodoro';
 import { todosReducer, type TodosAction, type Todo } from './lib/todos';
 import type { AccessoryId, InteractionType, PersonalityId } from './data';
 
 export interface PetState {
   affinity: AffinityState;
+  attributes: AttributesState;
+  evolution: EvolutionState;
+  behavior: BehaviorState;
   accessories: AccessoryId[];
   opaqueness: number; // 0.3..1
   personality: PersonalityId;
@@ -27,6 +34,9 @@ export interface PetState {
 
 export const defaultPetState = (): PetState => ({
   affinity: emptyAffinity(),
+  attributes: emptyAttributes(),
+  evolution: emptyEvolution(),
+  behavior: emptyBehavior(),
   accessories: [],
   opaqueness: 1,
   personality: 'gentle',
@@ -43,6 +53,8 @@ export interface PetActionResult {
   leveledUp: boolean;
   /** 待办刚完成（好感度联动） */
   todoDone: boolean;
+  /** 进化刚发生（阶段庆祝） */
+  evolved?: boolean;
 }
 
 export type PetAction =
@@ -56,7 +68,11 @@ export type PetAction =
   | { type: 'pomodoro-config'; workMin: number; restMin: number }
   | { type: 'todo'; action: TodosAction }
   | { type: 'pixel'; serialized: string }
-  | { type: 'home'; value: boolean };
+  | { type: 'home'; value: boolean }
+  | { type: 'gain-attr'; kind: AttrSourceKind; now?: number }
+  | { type: 'evolve-check'; now?: number }
+  | { type: 'behavior-adopt'; action: BehaviorAction; now?: number }
+  | { type: 'behavior-interact'; now?: number };
 
 export function petReducer(state: PetState, action: PetAction): PetActionResult {
   switch (action.type) {
@@ -69,7 +85,12 @@ export function petReducer(state: PetState, action: PetAction): PetActionResult 
       return { state: { ...state, affinity }, leveledUp, todoDone: false };
     }
     case 'equip': {
-      const accessories = state.accessories.includes(action.id)
+      const slots = accessorySlots(state.evolution.stage);
+      const on = state.accessories.includes(action.id);
+      if (!on && state.accessories.length >= slots) {
+        return { state, leveledUp: false, todoDone: false };
+      }
+      const accessories = on
         ? state.accessories.filter((a) => a !== action.id)
         : [...state.accessories, action.id];
       return { state: { ...state, accessories }, leveledUp: false, todoDone: false };
@@ -104,6 +125,53 @@ export function petReducer(state: PetState, action: PetAction): PetActionResult 
       return { state: { ...state, pixel: action.serialized }, leveledUp: false, todoDone: false };
     case 'home':
       return { state: { ...state, home: action.value }, leveledUp: false, todoDone: false };
+    case 'gain-attr': {
+      const now = action.now ?? Date.now();
+      const r = gainAttr(state.attributes, action.kind, now);
+      if (r.gained === 0) return { state, leveledUp: false, todoDone: false };
+      return { state: { ...state, attributes: r.state }, leveledUp: false, todoDone: false };
+    }
+    case 'evolve-check': {
+      const now = action.now ?? Date.now();
+      const five = {
+        int: attrLevel(state.attributes.exp.int),
+        vit: attrLevel(state.attributes.exp.vit),
+        cha: attrLevel(state.attributes.exp.cha),
+        cre: attrLevel(state.attributes.exp.cre),
+        aff: affinityLevel(state.affinity.exp),
+      };
+      const { stage, evolved } = checkEvolution(state.evolution.stage, totalLevel(five));
+      const dex = { ...state.evolution.dex };
+      if (dex[state.evolution.stage] == null) dex[state.evolution.stage] = now;
+      if (evolved) dex[stage] = now;
+      if (!evolved && dex[state.evolution.stage] === state.evolution.dex[state.evolution.stage]) {
+        return { state, leveledUp: false, todoDone: false, evolved: false }; // 无变化
+      }
+      return { state: { ...state, evolution: { stage, dex } }, leveledUp: evolved, todoDone: false, evolved };
+    }
+    case 'behavior-adopt': {
+      const now = action.now ?? Date.now();
+      const b = state.behavior;
+      return {
+        state: {
+          ...state,
+          behavior: {
+            ...b,
+            current: action.action,
+            lastInviteAt: action.action === 'invite' ? now : b.lastInviteAt,
+            lastStudyAt: action.action === 'study' ? now : b.lastStudyAt,
+          },
+        },
+        leveledUp: false,
+        todoDone: false,
+      };
+    }
+    case 'behavior-interact':
+      return {
+        state: { ...state, behavior: { ...state.behavior, lastInteractAt: action.now ?? Date.now() } },
+        leveledUp: false,
+        todoDone: false,
+      };
     default:
       return { state, leveledUp: false, todoDone: false };
   }
