@@ -1,5 +1,8 @@
-import { describe, it, expect } from 'vitest';
+// @vitest-environment jsdom
+import { describe, it, expect, beforeEach } from 'vitest';
 import { petReducer, defaultPetState } from './petReducer';
+import { usePetLinkStore } from '@/store/usePetLinkStore';
+import { loadInitial } from './PetProvider';
 import {
   emptyAttributes, attrLevel, gainAttr, ATTR_SOURCES, ATTR_MAX_EXP,
 } from './lib/attributes';
@@ -187,5 +190,42 @@ describe('reducer 扩展（属性/进化/行为）', () => {
     const blocked = petReducer(s, { type: 'equip', id: 'scarf' }).state;
     expect(s.accessories).toHaveLength(2);
     expect(blocked.accessories).toHaveLength(2); // 第 3 件被拒
+  });
+});
+
+describe('事件总线 usePetLinkStore', () => {
+  beforeEach(() => {
+    usePetLinkStore.setState({ lastAt: {}, listeners: [] });
+  });
+
+  it('report 派发事件，订阅者收到 kind', () => {
+    const got: string[] = [];
+    const off = usePetLinkStore.getState().subscribe((kind) => got.push(kind));
+    usePetLinkStore.getState().report('numbers');
+    expect(got).toEqual(['numbers']);
+    off();
+  });
+
+  it('60s 内同 kind 去重不派发', () => {
+    const got: string[] = [];
+    const off = usePetLinkStore.getState().subscribe((kind) => got.push(kind));
+    usePetLinkStore.getState().report('letters');
+    usePetLinkStore.getState().report('letters');
+    expect(got).toHaveLength(1);
+    off();
+  });
+});
+
+describe('v1→v2 迁移集成', () => {
+  it('v1 旧数据加载：好感保留、阶段初始化、v1 清除', () => {
+    localStorage.clear();
+    localStorage.setItem('xkxly_desktop_pet_v1', JSON.stringify({
+      affinity: { exp: 320, interacted: {} }, accessories: ['crown'],
+    }));
+    const st = loadInitial();
+    expect(st.affinity.exp).toBe(320);
+    expect(st.evolution.stage).toBeGreaterThanOrEqual(1);
+    expect(localStorage.getItem('xkxly_desktop_pet_v1')).toBeNull();
+    localStorage.clear();
   });
 });

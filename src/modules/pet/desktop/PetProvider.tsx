@@ -2,28 +2,53 @@
  * 桌面宠物 · 状态提供器
  * 用 reducer 管理整体状态并持久化到 localStorage；附带天气感知 hook（Open-Meteo，无 key）。
  */
-import { createContext, useContext, useEffect, useMemo, useReducer, useState, useCallback } from 'react';
+import { createContext, useContext, useEffect, useMemo, useReducer, useState, useCallback, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { petReducer, defaultPetState, type PetState } from './petReducer';
 import type { PetAction } from './petReducer';
 import type { WeatherCode, InteractionType } from './data';
 import { weatherPreset } from './lib/env';
+import { attrLevel } from './lib/attributes';
+import { affinityLevel } from './lib/affinity';
+import { stageOf, totalLevel } from './lib/evolution';
+import { decide } from './lib/behavior';
+import { usePetLinkStore } from '@/store/usePetLinkStore';
 
-const KEY = 'xkxly_desktop_pet_v1';
+const KEY = 'xkxly_desktop_pet_v2';
+const KEY_V1 = 'xkxly_desktop_pet_v1';
 
-function loadInitial(): PetState {
+export function loadInitial(): PetState {
+  const base = defaultPetState();
+  let raw: string | null = null;
   try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return defaultPetState();
+    raw = localStorage.getItem(KEY) ?? localStorage.getItem(KEY_V1);
+  } catch { return base; }
+  if (!raw) return base;
+  try {
     const parsed = JSON.parse(raw) as Partial<PetState>;
-    const base = defaultPetState();
-    return {
+    const merged: PetState = {
       ...base,
       ...parsed,
       affinity: { ...base.affinity, ...(parsed.affinity ?? {}) },
+      attributes: { ...base.attributes, ...(parsed.attributes ?? {}) },
+      evolution: { ...base.evolution, ...(parsed.evolution ?? {}) },
+      behavior: { ...base.behavior, ...(parsed.behavior ?? {}) },
     };
+    if (Object.keys(merged.evolution.dex).length === 0) {
+      const five = {
+        int: attrLevel(merged.attributes.exp.int),
+        vit: attrLevel(merged.attributes.exp.vit),
+        cha: attrLevel(merged.attributes.exp.cha),
+        cre: attrLevel(merged.attributes.exp.cre),
+        aff: affinityLevel(merged.affinity.exp),
+      };
+      const stage = stageOf(totalLevel(five));
+      merged.evolution = { stage, dex: { [stage]: Date.now() } };
+    }
+    try { localStorage.removeItem(KEY_V1); } catch { /* ignore */ }
+    return merged;
   } catch {
-    return defaultPetState();
+    return base;
   }
 }
 
@@ -41,6 +66,8 @@ export function PetProvider({ children }: { children: ReactNode }) {
     loadInitial,
   );
   const dispatch = useCallback((a: PetAction) => internalDispatch(a), []);
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   useEffect(() => {
     try {
@@ -49,6 +76,36 @@ export function PetProvider({ children }: { children: ReactNode }) {
       /* 存储满则忽略 */
     }
   }, [state]);
+
+  // 全站学习行为 → 属性
+  useEffect(() => {
+    const off = usePetLinkStore.getState().subscribe((kind) => {
+      dispatch({ type: 'gain-attr', kind });
+    });
+    return off;
+  }, [dispatch]);
+
+  // 行为决策周期 3s + 进化检测
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      const s = stateRef.current;
+      const now = Date.now();
+      const hour = new Date().getHours();
+      const night = hour >= 21 || hour < 6;
+      const e = s.attributes.exp;
+      const { action } = decide(s.behavior, {
+        hour,
+        night,
+        atHome: s.home,
+        affinityLv: affinityLevel(s.affinity.exp),
+        lowestIsInt: e.int <= e.vit && e.int <= e.cha && e.int <= e.cre,
+        now,
+      });
+      if (action !== s.behavior.current) dispatch({ type: 'behavior-adopt', action, now });
+      dispatch({ type: 'evolve-check', now });
+    }, 3000);
+    return () => window.clearInterval(id);
+  }, [dispatch]);
 
   const value = useMemo(() => ({ state, dispatch }), [state, dispatch]);
   return <PetCtx.Provider value={value}>{children}</PetCtx.Provider>;
