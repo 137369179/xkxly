@@ -5,6 +5,7 @@ import {
 import {
   totalLevel, stageOf, checkEvolution, accessorySlots, STAGES, emptyEvolution, type FiveLevels,
 } from './lib/evolution';
+import { decide, utility, emptyBehavior, type BehaviorCtx, type BehaviorState } from './lib/behavior';
 
 describe('属性引擎 attributes', () => {
   it('等级公式：每 50exp 一级，封顶 10', () => {
@@ -91,5 +92,53 @@ describe('进化引擎 evolution', () => {
 
   it('emptyEvolution 初始为蛋阶段', () => {
     expect(emptyEvolution()).toEqual({ stage: 1, dex: {} });
+  });
+});
+
+describe('行为引擎 behavior', () => {
+  const ctx = (over: Partial<BehaviorCtx> = {}): BehaviorCtx => ({
+    hour: 14, atHome: false, affinityLv: 2, lowestIsInt: true,
+    now: 1_000_000, night: false, ...over,
+  });
+
+  it('深夜未在家：sleep 最高且 goHome 次之', () => {
+    const st = emptyBehavior();
+    const r = decide(st, ctx({ hour: 23, night: true }));
+    expect(r.action).toBe('sleep');
+    expect(utility('goHome', st, ctx({ hour: 23, night: true }))).toBeGreaterThan(0.5);
+  });
+
+  it('夜晚已在家：sleep 得 +0.3', () => {
+    const c = ctx({ hour: 23, night: true, atHome: true });
+    expect(utility('sleep', emptyBehavior(), c)).toBeCloseTo(1.25);
+  });
+
+  it('invite 冷却 10min 内强制 0，超时且久未互动得高分', () => {
+    let st: BehaviorState = { ...emptyBehavior(), lastInviteAt: 900_000, lastInteractAt: 0 };
+    expect(utility('invite', st, ctx({ now: 1_000_000 }))).toBe(0);
+    st = { ...emptyBehavior(), lastInviteAt: 0, lastInteractAt: 0 };
+    expect(utility('invite', st, ctx({ now: 1_000_000 }))).toBe(0.7);
+    expect(utility('invite', st, ctx({ now: 3_000_000 }))).toBe(0.85);
+  });
+
+  it('study：智力最低+白天 0.7；冷却 20min 内 0；夜里低分', () => {
+    let st = emptyBehavior();
+    expect(utility('study', st, ctx())).toBe(0.7);
+    expect(utility('study', st, ctx({ lowestIsInt: false }))).toBeLessThan(0.7);
+    expect(utility('study', st, ctx({ night: true }))).toBeLessThan(0.1);
+    st = { ...emptyBehavior(), lastStudyAt: 1_000_000 - 60_000 };
+    expect(utility('study', st, ctx())).toBe(0);
+  });
+
+  it('迟滞：当前行为 +0.15 决策防抖', () => {
+    const st: BehaviorState = { ...emptyBehavior(), current: 'idle' };
+    const r = decide(st, ctx());
+    expect(r.utilities.idle).toBeCloseTo(0.55);
+    expect(Object.keys(r.utilities)).toHaveLength(8);
+  });
+
+  it('白天无特殊条件：决策确定性', () => {
+    const st = emptyBehavior();
+    expect(decide(st, ctx()).action).toBe(decide(st, ctx()).action);
   });
 });
