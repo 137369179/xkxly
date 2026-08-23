@@ -19,6 +19,7 @@ export function ParentSettingsSection() {
   const setEyeCareMode = useSettingsStore((s) => s.setEyeCareMode);
 
   return (
+    <>
     <Panel>
       <PanelTitle emoji="⚙️" title={translate('common.settings')} tone="green" />
       <div className="space-y-4">
@@ -122,5 +123,6 @@ export function ParentSettingsSection() {
       </div>
     </Panel>
     <LearningReportPanel />
+    </>
   );
 }
