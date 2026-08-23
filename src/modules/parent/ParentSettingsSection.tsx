@@ -5,6 +5,7 @@ import { useProfilesStore } from '@/store/useProfilesStore';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { sfxTap } from '@/lib/sfx';
+import { LearningReportPanel } from './LearningReportPanel';
 
 const LIMITS = [0, 15, 30, 45, 60];
 const EYE = [0, 15, 20, 30];
@@ -120,5 +121,6 @@ export function ParentSettingsSection() {
         </div>
       </div>
     </Panel>
+    <LearningReportPanel />
   );
 }

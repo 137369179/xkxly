@@ -882,6 +882,8 @@
   "parent": {
     "title": "家长中心",
     "report": "学习报告",
+    "badges": "徽章",
+    "accuracy": "正确率",
     "settings": "设置",
     "eyeCare": "护眼提醒",
     "timeLimit": "时间限制",

@@ -882,6 +882,8 @@
   "parent": {
     "title": "Parent Center",
     "report": "Learning Report",
+    "badges": "Badges",
+    "accuracy": "Accuracy",
     "settings": "Settings",
     "eyeCare": "Eye Care Reminder",
     "timeLimit": "Time Limit",
