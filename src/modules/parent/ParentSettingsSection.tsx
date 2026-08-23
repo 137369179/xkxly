@@ -15,6 +15,7 @@ export function ParentSettingsSection() {
   const setDailyLimit = useStore((s) => s.setDailyLimit);
   const setEyeCare = useStore((s) => s.setEyeCare);
   const setVoiceGuide = useStore((s) => s.setVoiceGuide);
+  const setEyeCareMode = useSettingsStore((s) => s.setEyeCareMode);
 
   return (
     <Panel>
@@ -51,6 +52,31 @@ export function ParentSettingsSection() {
               </CandyButton>
             ))}
           </div>
+        </div>
+        {/* E2 · 护眼模式主开关：暖色滤镜 + 降视觉密度，对标 2026 护眼焦点 */}
+        <div>
+          <div className="mb-2 text-sm font-extrabold text-ink">{translate('parent.eyeCareMode')}</div>
+          <div className="flex flex-wrap gap-2">
+            <CandyButton
+              tone={settings.eyeCareMode ? 'green' : 'purple'}
+              variant={settings.eyeCareMode ? 'solid' : 'soft'}
+              size="sm"
+              onClick={() => setEyeCareMode(true)}
+            >
+              {translate('common.on')}
+            </CandyButton>
+            <CandyButton
+              tone={!settings.eyeCareMode ? 'green' : 'purple'}
+              variant={!settings.eyeCareMode ? 'solid' : 'soft'}
+              size="sm"
+              onClick={() => setEyeCareMode(false)}
+            >
+              {translate('common.close')}
+            </CandyButton>
+          </div>
+          <p className="mt-1 text-xs font-bold text-ink-soft">
+            {translate('parent.eyeCareModeDesc')}
+          </p>
         </div>
         {/* A2 · 语音引导开关：控制页面/步骤切换时的引导朗读，默认开 */}
         <div>

@@ -785,6 +785,33 @@
 }
 
 /* ============================================================
+   E2 · 护眼模式暖色滤镜（蓝光过滤）
+   开启后根节点 [data-eyecare='on'] 时，全屏叠加一层暖色半透明滤镜，
+   降低冷色 / 蓝光占比，缓解长时间阅读的视觉疲劳（对标 2026 护眼焦点：
+   古古识字「蓝光过滤 + 定时休息」）。
+   设计约束：
+     - 仅暖色叠加，不位移、不缩放、不模糊，保证内容清晰可读；
+     - pointer-events: none，绝不拦截任何交互；
+     - 尊重 prefers-reduced-motion（P5），关闭过渡避免闪烁；
+     - 与 data-motion="density-low" 协同，护眼模式同时降视觉密度。
+   ============================================================ */
+.eyecare-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  pointer-events: none;
+  background: rgba(255, 170, 80, 0.10); /* 暖橙滤镜：吸收部分蓝光，缓解眼疲劳 */
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+[data-eyecare='on'] .eyecare-overlay {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .eyecare-overlay { transition: none; }
+}
+
+/* ============================================================
    UI审计 P7 · 最小屏安全间距（应用层）
    对 App 主内容区（main / [data-page]）补强最小安全内边距，
    即使上游 Tailwind 类在小屏仅给 px-2，也保证内容不被视口/刘海裁切。

@@ -30,6 +30,8 @@ export interface Settings {
   dailyLimitMin: number;
   /** 护眼提醒间隔（分钟），0 = 关闭 */
   eyeCareMin: number;
+  /** 护眼模式主开关：开启后全局暖色滤镜 + 降视觉密度（复用 motion-density 体系） */
+  eyeCareMode: boolean;
   /** 全站 AI 总开关，关闭后所有 AI 点静默退回本地内容 */
   aiEnabled: boolean;
   /** 语音引导开关（页面/步骤切换时的引导朗读），默认开；仍受 sound 总开关约束 */
@@ -50,6 +52,7 @@ interface SettingsStoreState {
   clearPin: () => void;
   setDailyLimit: (min: number) => void;
   setEyeCare: (min: number) => void;
+  setEyeCareMode: (v: boolean) => void;
   setAiEnabled: (v: boolean) => void;
   setVoiceGuide: (v: boolean) => void;
   setPrivacyAccepted: (v: boolean) => void;
@@ -63,6 +66,7 @@ const initialSettings: Settings = {
   pinLockUntil: 0,
   dailyLimitMin: 0,
   eyeCareMin: 20,
+  eyeCareMode: false,
   aiEnabled: true,
   voiceGuide: true,
   privacyAccepted: false,
@@ -115,6 +119,9 @@ export const useSettingsStore = create<SettingsStoreState>()(
 
       setEyeCare: (min) =>
         set((s) => ({ settings: { ...s.settings, eyeCareMin: min } })),
+
+      setEyeCareMode: (v) =>
+        set((s) => ({ settings: { ...s.settings, eyeCareMode: v } })),
 
       setAiEnabled: (v) => {
         aiSetEnabled(v);

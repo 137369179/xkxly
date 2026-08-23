@@ -20,9 +20,11 @@ import { SwUpdateToast } from '@/components/SwUpdateToast';
 import { BackupRestorePanel } from '@/components/BackupRestorePanel';
 import { startAutoBackup, useBackupDetection } from '@/lib/autoBackup';
 import { useStore } from '@/store/useStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { putStorybookContent } from '@/lib/storybookStore';
 import { announceToScreenReader } from '@/components/Accessibility';
 import { useSoundSync } from '@/hooks/useSoundSync';
+import { updateAppBadge } from '@/lib/badgeSync';
 const CatCompanion = lazy(() =>
   import('@/modules/companion/CatCompanion').then((m) => ({ default: m.CatCompanion })) as Promise<{ default: React.ComponentType<any> }>
 );
@@ -79,6 +81,7 @@ const DiscoveryGallery = lazy(() => import('@/modules/research/DiscoveryGallery'
 const DesignSystemPage = lazy(() => import('@/modules/design/DesignSystemPage'));
 const AchievementCenter = lazy(() => import('@/modules/achievement/AchievementCenter'));
 const NurseryPage = lazy(() => import('@/modules/fun/NurseryPage'));
+const ParentChildDuel = lazy(() => import('@/modules/game/ParentChildDuel'));
 
 function Page() {
   const { route, param } = useRoute();
@@ -132,6 +135,7 @@ function Page() {
       case 'design': return <DesignSystemPage />;
       case 'achievement': return <AchievementCenter />;
       case 'nursery': return <NurseryPage />;
+      case 'duel': return <ParentChildDuel />;
       default: return <HomePage />;
     }
   }, [route]);
@@ -163,6 +167,8 @@ export function App() {
   const closeVoiceModal = useTtsStore((s) => s.closeVoiceModal);
   const onboarded = useProfilesStore((s) => s.onboarded);
   const completeOnboarding = useProfilesStore((s) => s.completeOnboarding);
+  // E2 · 护眼模式：驱动根节点 data-eyecare / data-motion，联动暖色滤镜 + 降密度
+  const eyeCareMode = useSettingsStore((s) => s.settings.eyeCareMode);
   
   // P0-2: 备份恢复检测
   const { showRestorePanel, handleRestoreComplete } = useBackupDetection();
@@ -188,6 +194,11 @@ export function App() {
     // P1-2：多档案启动迁移 —— 首次把当前进度转为「宝贝」档案，老数据零丢失；
     // 之后每次启动把运行时最新进度同步回 active 仓库，保证两份持久化一致。
     useProfilesStore.getState().ensureInit();
+
+    // PWA 角标同步：根据到期复习题数更新桌面角标
+    const mastery = useStore.getState().progress.mastery ?? {};
+    const dueCount = Object.values(mastery).filter((m) => m && m.lv > 0 && m.due <= Date.now()).length;
+    updateAppBadge(dueCount);
 
     // P1-10：一次性迁移 —— 老版本 progress 携带的绘本全文迁入 IndexedDB，
     // 并从 progress 剥离（只留轻量元数据，控制 localStorage 体积）。幂等：无 data 即跳过。
@@ -241,7 +252,11 @@ export function App() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen bg-gradient-to-br from-[#FFF0F4] via-[#FFE4EF] to-[#F2EAFD] selection:bg-pink-200">
+      <div
+        className="min-h-screen bg-gradient-to-br from-[#FFF0F4] via-[#FFE4EF] to-[#F2EAFD] selection:bg-pink-200"
+        data-eyecare={eyeCareMode ? 'on' : 'off'}
+        data-motion={eyeCareMode ? 'density-low' : undefined}
+      >
         <TopBar />
         <div className="mx-auto flex max-w-7xl items-start gap-4 px-2 sm:px-4 py-3 sm:py-6">
           <Sidebar active={route} />
@@ -257,6 +272,8 @@ export function App() {
         <Suspense fallback={null}><BadgeUnlock /></Suspense>
         <ComboIndicator />
         <StudyGuard />
+        {/* E2 · 护眼模式暖色滤镜叠加层（pointer-events:none，绝不拦截交互） */}
+        <div className="eyecare-overlay" aria-hidden="true" />
         <OfflineToast />
         <PwaInstallBanner />
         <SwUpdateToast />
