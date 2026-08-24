@@ -6,7 +6,7 @@ import { PageHeader, Panel } from '@/components/ui/Card';
 import { Tabs, type TabItem } from '@/components/ui/Tabs';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { CandyButton } from '@/components/ui/Button';
-import { useMastery } from '@/store/useStore';
+import { useMastery, useStreak } from '@/store/useStore';
 import type { Progress } from '@/types';
 import { sfxTap } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
@@ -72,6 +72,7 @@ export default function WordsPage() {
   const [selected, setSelected] = useState<WordEntry | null>(null);
   const [sightGrade, setSightGrade] = useState<1 | 2 | 3>(1);
   const mastery = useMastery();
+  const streak = useStreak();
   const { t: tr } = useTranslation();
   const { target, clear } = useTrainingTarget('words');
 
@@ -234,6 +235,14 @@ export default function WordsPage() {
   return (
     <div className="space-y-5">
       <PageHeader iconType="town" title={tr('words.wordsTitle')} subtitle={tr('words.homeSubtitle', { count: getWordCount() })} tone={tone} />
+      <div className="flex flex-wrap gap-2">
+        <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1 text-xs font-black text-orange-700 shadow-sm">
+          🔥 连续学习 {streak} 天
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-full bg-pink-100 px-3 py-1 text-xs font-black text-pink-700 shadow-sm">
+          ⭐ 已学 {learnedCount} 词
+        </span>
+      </div>
       <TrainingBanner target={target} onClose={clear} />
       <Tabs items={MAIN_TABS} value={mainTab} onChange={setMainTab} tone="blue" layoutId="words-main-tabs" />
 

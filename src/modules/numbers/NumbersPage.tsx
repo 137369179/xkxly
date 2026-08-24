@@ -2,7 +2,7 @@ import { useState, lazy, Suspense, useEffect, useMemo } from 'react';
 import { PageHeader } from '@/components/ui/Card';
 import { useTranslation } from '@/i18n/useTranslation';
 import { sfxTap } from '@/lib/sfx';
-import { useStore } from '@/store/useStore';
+import { useStore, useStreak } from '@/store/useStore';
 import { useTrainingTarget } from '@/hooks/useTrainingTarget';
 import { TrainingBanner } from '@/components/study/TrainingBanner';
 import { ModuleGameCard } from '@/components/study/ModuleGameCard';
@@ -114,6 +114,7 @@ const NUMBERS_PARAM_MAP: Record<string, { cat: MathCategory; sub: string }> = {
 
 export default function NumbersPage() {
   const { t } = useTranslation();
+  const streak = useStreak();
   const [activeCategory, setActiveCategory] = useState<MathCategory>('sensory');
   const [activeSubTab, setActiveSubTab] = useState<string>('wall');
   const { target, clear } = useTrainingTarget('numbers');
@@ -203,6 +204,15 @@ export default function NumbersPage() {
         subtitle={t('numbersPage.subtitle') || '数感启蒙 · 算术工坊 · 口算应用 · 几何度量'}
         tone="yellow"
       />
+
+      <div className="flex flex-wrap gap-2">
+        <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-black text-amber-700 shadow-sm">
+          🔥 连续学习 {streak} 天
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-3 py-1 text-xs font-black text-yellow-700 shadow-sm">
+          ⭐ 星星 {mathStars}
+        </span>
+      </div>
 
       <TrainingBanner target={target} onClose={clear} />
 

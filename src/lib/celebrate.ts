@@ -163,6 +163,14 @@ export async function celebrateBig(): Promise<void> {
   }
 }
 
+/**
+ * 兼容别名：celebrateLarge 曾为「大庆祝」独立入口，现已统一收敛为 celebrateBig。
+ * 汉zi 核心模块（HanziSpeechReview / HanziCourseRunner）仍引用 celebrateLarge，
+ * 此处以别名保形，避免已提交代码悬空导入导致生产构建断裂。后续核心模块迁移到
+ * celebrateBig 后可安全移除本别名。
+ */
+export const celebrateLarge = celebrateBig;
+
 /** 星星雨：获得星星时 */
 export async function celebrateStars(count = 3): Promise<void> {
   if (reduceMotion()) return;
