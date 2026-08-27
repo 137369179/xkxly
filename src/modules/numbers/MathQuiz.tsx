@@ -8,11 +8,16 @@ import { makeSpacedDrill } from "@/lib/drill";
 import { genMathQuestion, mathExplainTask } from "@/lib/ai/tasks";
 import type { Question } from "@/types";
 import { useStore } from "@/store/useStore";
+import { useRoute } from "@/lib/router";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useAdaptiveDifficultyState } from "@/store/adaptiveDifficulty";
 import { AdaptiveDifficultyHint } from "@/components/study/AdaptiveDifficultyHint";
 import { MathStarQuest } from "./MathStarQuest";
 import { RestReminder } from "@/components/gamification/RestReminder";
+import { MistakeBookPanel } from "@/components/gamification/MistakeBookPanel";
+import { ComboMeter } from "@/components/gamification/ComboMeter";
+import { GentleFeedback } from "@/components/gamification/GentleFeedback";
+import { praiseByScene, encourageByScene } from "@/lib/praise";
 
 const MAX_OF: Record<Difficulty, number> = { 1: 10, 2: 15, 3: 20 };
 
@@ -22,6 +27,8 @@ const POOL_TARGET = 2;
 export function MathQuiz() {
   const { t } = useTranslation();
   const recordMath = useStore((s) => s.recordMath);
+  const progress = useStore((s) => s.progress);
+  const { navigate } = useRoute();
   const aiOn = useSettingsStore((s) => s.settings.aiEnabled);
   const [diff, setDiff, diffMeta] = useAdaptiveDifficultyState("math");
   const DIFFS: { id: Difficulty; label: string }[] = [
@@ -31,6 +38,10 @@ export function MathQuiz() {
   ];
   const [aiMode, setAiMode] = useState(false);
   const [poolSize, setPoolSize] = useState(0);
+  /** 连击计数（任务 #1 积分/连击激励）：由 onAnswered 维护，驱动 @/game ComboMeter 实时能量条 */
+  const [combo, setCombo] = useState(0);
+  /** 即时反馈气泡状态（任务 #3）：正确积极强化 / 错误温和引导，无障碍 aria-live，与洪恩/宝宝巴士温和反馈一致 */
+  const [feedback, setFeedback] = useState<{ correct: boolean; msg: string } | null>(null);
 
   const poolRef = useRef<Question[]>([]);
   const fillingRef = useRef(0);
@@ -124,8 +135,17 @@ export function MathQuiz() {
         tone="yellow"
         questionsPerRound={5}
         streakBar={{ leveled: true, tone: "yellow" }}
-        onRoundStart={diffMeta.syncNow}
-        onAnswered={(q, c) => recordMath(c, q.skill)}
+        onRoundStart={() => {
+          diffMeta.syncNow();
+          setCombo(0);
+          setFeedback(null);
+        }}
+        onAnswered={(q, c) => {
+          recordMath(c, q.skill);
+          if (c) setCombo((prev) => prev + 1);
+          else setCombo(0);
+          setFeedback({ correct: c, msg: c ? praiseByScene("math") : encourageByScene("math") });
+        }}
         aiExplain={(q, chosen, correct) =>
           mathExplainTask(q.prompt, q.display ?? q.prompt, correct, chosen)
         }
@@ -193,8 +213,13 @@ export function MathQuiz() {
           </div>
         }
       />
-      <MathStarQuest />
-      <RestReminder />
+      <section className="space-y-3">
+        <MathStarQuest />
+        <MistakeBookPanel progress={progress} onReview={() => navigate('wrongbook')} />
+        <ComboMeter count={combo} />
+        {feedback && <GentleFeedback correct={feedback.correct} message={feedback.msg} />}
+        <RestReminder />
+      </section>
     </>
   );
 }
