@@ -19,6 +19,10 @@ export { useGamification } from './useGamification';
 export type { UseGamificationOptions, AnswerHandleResult, GamificationApi } from './useGamification';
 export { useReducedMotion } from './useReducedMotion';
 export { GameErrorBoundary } from './GameErrorBoundary';
+export { useAdaptiveDifficulty } from './useAdaptiveDifficulty';
+export type { UseAdaptiveDifficultyOptions, AdaptiveDifficultyApi, DifficultyLevel } from './useAdaptiveDifficulty';
+export { useSound } from './useSound';
+export type { UseSoundApi, SoundKind } from './useSound';
 
 export * from '@/lib/srs';
 export * from '@/lib/milestone';
