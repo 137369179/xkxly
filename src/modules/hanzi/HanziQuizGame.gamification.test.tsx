@@ -53,4 +53,14 @@ describe('HanziQuizGame 游戏化接线（R147）', () => {
     expect(c.textContent).toContain('连续答对积累连击');
     expect(c.querySelector('[aria-label="当前连击 0"]')).not.toBeNull();
   });
+
+  it('挂载渐进式难度指示（任务 #2）：初始挑战等级 1，accessible progressbar 存在', () => {
+    const c = renderGame();
+    // 难度指示文案 + 角色化进度条（A 层无障碍：progressbar + aria-valuenow/max）
+    expect(c.textContent).toContain('挑战等级');
+    const bar = c.querySelector('[role="progressbar"][aria-label^="当前挑战等级"]');
+    expect(bar).not.toBeNull();
+    expect(bar?.getAttribute('aria-valuemax')).toBe('2');
+    expect(bar?.getAttribute('aria-valuenow')).toBe('0');
+  });
 });

@@ -12,6 +12,7 @@ import { HanziStarQuest } from './HanziStarQuest';
 import { ComboMeter } from '@/components/gamification/ComboMeter';
 import { GentleFeedback } from '@/components/gamification/GentleFeedback';
 import { RestReminder } from '@/components/gamification/RestReminder';
+import { useAdaptiveDifficulty, type DifficultyLevel } from '@/game';
 import { praiseByScene, encourageByScene } from '@/lib/praise';
 
 interface HanziQuizGameProps {
@@ -36,6 +37,11 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
   /** 即时反馈气泡状态（任务 #3）：正确积极强化 / 错误温和引导，无障碍 aria-live */
   const [feedback, setFeedback] = useState<{ correct: boolean; msg: string } | null>(null);
 
+  /** 渐进式难度（任务 #2）：随连对表现爬坡的当前挑战等级，仅供可视化呈现，不改题目选取逻辑 */
+  const adapt = useAdaptiveDifficulty({
+    initialLevel: (Math.min(3, Math.max(1, Math.round(level))) as DifficultyLevel),
+  });
+
   // 初始化关卡题目池 (5 题)
   useEffect(() => {
     const rawPool = getHanziByLevel(level);
@@ -46,7 +52,8 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
     setTotalStars(0);
     setIsCompleted(false);
     setFeedback(null);
-  }, [level]);
+    adapt.reset();
+  }, [level, adapt.reset]);
 
   // 当索引切换时设置题目与选项
   useEffect(() => {
@@ -81,6 +88,7 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
       sfxCorrect();
       triggerHaptic(45);
       celebrateSmall();
+      adapt.onCorrect();
       setStreak((prev) => prev + 1);
       setTotalStars((prev) => prev + 1);
       addFish(1);
@@ -90,6 +98,7 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
     } else {
       sfxWrong();
       triggerHaptic(20);
+      adapt.onWrong();
       setStreak(0);
       setFeedback({ correct: false, msg: encourageByScene('hanzi') });
       void speak(`差一点点哦，这是 ${entry.c}，正确答案是 ${currentHanzi.c}`).catch(() => {});
@@ -106,7 +115,7 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
         void speak(`恭喜你完成汉字闯关！一共获得 ${totalStars + (correct ? 1 : 0)} 颗星！`).catch(() => {});
       }
     }, 1800);
-  }, [selectedAnswer, currentHanzi, currentIndex, pool.length, totalStars, addFish, practice]);
+  }, [selectedAnswer, currentHanzi, currentIndex, pool.length, totalStars, addFish, practice, adapt.onCorrect, adapt.onWrong]);
 
   const handlePlayVoice = useCallback(() => {
     if (!currentHanzi) return;
@@ -124,7 +133,8 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
     setCurrentIndex(0);
     setIsCompleted(false);
     setFeedback(null);
-  }, [level]);
+    adapt.reset();
+  }, [level, adapt.reset]);
 
   // 键盘快捷键监听
   useEffect(() => {
@@ -211,6 +221,28 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
             {t('hanziQuizGame.progress', { current: currentIndex + 1, total: pool.length })}
           </span>
           <ComboMeter count={streak} />
+          {/* 渐进式难度指示（任务 #2）：随连对表现实时爬坡，进度条对标通关连对目标 */}
+          <div className="flex items-center gap-1.5" title="连续答对越多，挑战等级越高">
+            <span className="text-[11px] font-black text-amber-700 whitespace-nowrap">挑战等级</span>
+            <div className="flex gap-0.5" aria-hidden="true">
+              {[1, 2, 3].map((n) => (
+                <span key={n} className={n <= adapt.level ? 'text-xs leading-none' : 'text-xs leading-none opacity-30'}>⭐</span>
+              ))}
+            </div>
+            <div
+              className="h-1.5 w-16 rounded-full bg-amber-100 overflow-hidden"
+              role="progressbar"
+              aria-label={`当前挑战等级 ${adapt.level}，再连对 ${Math.max(0, adapt.streakTarget - adapt.correctStreak)} 题升级`}
+              aria-valuenow={adapt.correctStreak}
+              aria-valuemin={0}
+              aria-valuemax={adapt.streakTarget}
+            >
+              <div
+                className="h-full bg-amber-400 transition-all duration-300"
+                style={{ width: `${Math.min(100, (adapt.correctStreak / adapt.streakTarget) * 100)}%` }}
+              />
+            </div>
+          </div>
         </div>
 
         <div className="text-xs font-extrabold text-amber-600">
