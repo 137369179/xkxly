@@ -16,6 +16,8 @@ import { speak } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
 import { RhythmRepeat } from '@/components/games/RhythmRepeat';
 import MusicCreatePage from './MusicCreatePage';
+import { TaikoRhythmGame } from './components/TaikoRhythmGame';
+import { InstrumentExplorer } from './components/InstrumentExplorer';
 import { useStore, useMastery } from '@/store/useStore';
 
 // Web Audio API 调音引擎
@@ -57,7 +59,7 @@ export default function MusicPage() {
   const [activeKey, setActiveKey] = useState<number | null>(null);
   const [quizTone, setQuizTone] = useState<{ n1: number; n2: number; ansHigh: boolean } | null>(null);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | ''>('');
-  const [activeTab, setActiveTab] = useState<'piano' | 'create' | 'rhythm'>('piano');
+  const [activeTab, setActiveTab] = useState<'piano' | 'instruments' | 'taiko' | 'create' | 'rhythm'>('piano');
   const lockRef = useRef(false);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -77,7 +79,8 @@ export default function MusicPage() {
 
   const handleKeyClick = (idx: number) => {
     setActiveKey(idx);
-    playNote(FREQS[idx]!);
+    const freq = FREQS[idx];
+    if (freq) playNote(freq);
     tickTime(3);
     const t = setTimeout(() => setActiveKey(null), 300);
     timersRef.current.push(t);
@@ -95,8 +98,10 @@ export default function MusicPage() {
     setQuizTone({ n1, n2, ansHigh: firstHigher });
 
     speak(tr('music.listenPrompt'), { lang: 'zh-CN' });
-    const t1 = setTimeout(() => playNote(FREQS[n1]!), 1000);
-    const t2 = setTimeout(() => playNote(FREQS[n2]!), 2000);
+    const f1 = FREQS[n1];
+    const f2 = FREQS[n2];
+    const t1 = setTimeout(() => { if (f1) playNote(f1); }, 1000);
+    const t2 = setTimeout(() => { if (f2) playNote(f2); }, 2000);
     timersRef.current.push(t1, t2);
   };
 
@@ -157,22 +162,32 @@ export default function MusicPage() {
       </Panel>
 
       {/* 模式切换 */}
-      <div className="flex gap-2">
-        {(['piano', 'create', 'rhythm'] as const).map((tab) => (
+      <div className="flex gap-2 flex-wrap">
+        {(['piano', 'instruments', 'taiko', 'create', 'rhythm'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`rounded-xl px-4 py-2 text-sm font-black transition-all ${
               activeTab === tab
-                ? 'bg-pink-400 text-white shadow-md'
-                : 'bg-white text-pink-600 border border-pink-200'
+                ? 'bg-pink-500 text-white shadow-md scale-105'
+                : 'bg-white text-pink-600 border border-pink-200 hover:bg-pink-50'
             }`}
           >
-            {tab === 'piano' ? tr('music.pianoTab') : tab === 'create' ? tr('music.createTab') : tr('music.rhythmTab')}
+            {tab === 'piano'
+              ? tr('music.pianoTab')
+              : tab === 'instruments'
+              ? '🌍 中西乐器馆'
+              : tab === 'taiko'
+              ? '🥁 动感太鼓达人'
+              : tab === 'create'
+              ? tr('music.createTab')
+              : tr('music.rhythmTab')}
           </button>
         ))}
       </div>
 
+      {activeTab === 'instruments' && <InstrumentExplorer />}
+      {activeTab === 'taiko' && <TaikoRhythmGame />}
       {activeTab === 'create' && <MusicCreatePage />}
       {activeTab === 'rhythm' && (
         <RhythmRepeat

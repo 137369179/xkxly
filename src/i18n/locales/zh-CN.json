@@ -111,180 +111,216 @@
   },
   "categories": {
     "title": "全部学习内容",
-    "learn": "学习",
-    "game": "游戏",
-    "story": "故事",
-    "create": "创意",
-    "ai": "AI 小老师",
-    "growth": "成长",
+    "learn": "启蒙学科",
+    "game": "益智游戏",
+    "story": "故事绘本",
+    "create": "艺术创意",
+    "ai": "AI 伴学小老师",
+    "growth": "成长荣誉",
     "parent": "家长中心",
-    "research": "研究乐园"
+    "research": "探索研究",
+    "design": "设计系统"
   },
   "nav": {
     "home": {
       "label": "我的乐园",
       "short": "首页",
-      "desc": "看看今天学了什么"
+      "desc": "今日学习计划与成长看板"
     },
     "today": {
       "label": "今日课程",
       "short": "今日",
-      "desc": "跟着课程一步步学"
-    },
-    "letters": {
-      "label": "字母乐园",
-      "short": "字母",
-      "desc": "26 个字母大冒险"
-    },
-    "poems": {
-      "label": "古诗花园",
-      "short": "古诗",
-      "desc": "385 首经典古诗"
-    },
-    "numbers": {
-      "label": "数字王国",
-      "short": "数字",
-      "desc": "认数字 · 学算术"
-    },
-    "hanzi": {
-      "label": "汉字识字",
-      "short": "汉字",
-      "desc": "300 字 · 玩认练写说"
-    },
-    "pinyin": {
-      "label": "拼音学习",
-      "short": "拼音",
-      "desc": "声母韵母 · 拼读"
-    },
-    "words": {
-      "label": "英语单词",
-      "short": "英语",
-      "desc": "74 词 · Phonics"
-    },
-    "logic": {
-      "label": "逻辑挑战",
-      "short": "逻辑",
-      "desc": "找规律 · 动脑筋"
-    },
-    "fun": {
-      "label": "趣味乐园",
-      "short": "趣味",
-      "desc": "对战 · 听力 · 创意"
-    },
-    "idioms": {
-      "label": "成语故事",
-      "short": "成语",
-      "desc": "60 个成语故事"
-    },
-    "songs": {
-      "label": "儿歌乐园",
-      "short": "儿歌",
-      "desc": "10 首经典儿歌"
-    },
-    "science": {
-      "label": "自然百科",
-      "short": "百科",
-      "desc": "恐龙 · 太空 · 天气"
-    },
-    "music": {
-      "label": "音乐律动",
-      "short": "音乐",
-      "desc": "彩虹琴 · 视唱练耳"
-    },
-    "art": {
-      "label": "艺术色彩",
-      "short": "艺术",
-      "desc": "魔法调色盘 · 色彩"
-    },
-    "safety": {
-      "label": "安全防护",
-      "short": "安全",
-      "desc": "刷牙伴读 · 110/119"
-    },
-    "geography": {
-      "label": "世界地理",
-      "short": "地理",
-      "desc": "七大洲 · 世界动物"
-    },
-    "vehicles": {
-      "label": "交通职业",
-      "short": "交通",
-      "desc": "消防车 · 职业对对碰"
-    },
-    "festivals": {
-      "label": "节气文化",
-      "short": "节气",
-      "desc": "二十四节气 · 节日风俗"
-    },
-    "plants": {
-      "label": "奇妙植物",
-      "short": "植物",
-      "desc": "向日葵 · 浇水光合作用"
-    },
-    "cat_house": {
-      "label": "养猫乐园",
-      "short": "养猫",
-      "desc": "小鱼干 · 梦幻粉猫"
-    },
-    "adventure": {
-      "label": "闯关冒险",
-      "short": "闯关",
-      "desc": "闯关拿星星徽章"
-    },
-    "rewards": {
-      "label": "奖励中心",
-      "short": "奖励",
-      "desc": "贴纸册 · 徽章墙"
-    },
-    "passport": {
-      "label": "学习护照",
-      "short": "护照",
-      "desc": "盖章里程碑 · 成就墙"
-    },
-    "parent": {
-      "label": "家长中心",
-      "short": "家长",
-      "desc": "报告 · 设置 · 护眼"
+      "desc": "自适应每日任务与3分钟极速复习"
     },
     "companion": {
       "label": "小茜伙伴",
       "short": "伙伴",
-      "desc": "拟人讲解 · 陪娃聊天"
+      "desc": "拟人化智能讲解 · 社交情商演练"
+    },
+    "hanzi": {
+      "label": "汉字乐园",
+      "short": "汉字",
+      "desc": "象形字源 · 玩认练写说 · 300字精学"
+    },
+    "hanzi-listen": {
+      "label": "听音识字",
+      "short": "听音",
+      "desc": "纯正普通话发音 · 快速识字听音辨字"
+    },
+    "pinyin": {
+      "label": "拼音滑梯",
+      "short": "拼音",
+      "desc": "声韵滑滑梯 · 易混辨析 · 拼读大冒险"
+    },
+    "letters": {
+      "label": "字母与拼读",
+      "short": "字母",
+      "desc": "26 字母大冒险 · Phonics 气泡 · CVC三拼"
+    },
+    "words": {
+      "label": "英语单词乐园",
+      "short": "单词",
+      "desc": "300+ 生活主题词汇 · 美式真人原声"
+    },
+    "numbers": {
+      "label": "数学与思维",
+      "short": "数学",
+      "desc": "数感天平 · 十格阵加减 · 七巧空间工坊"
+    },
+    "logic": {
+      "label": "逻辑与编程",
+      "short": "逻辑",
+      "desc": "CodeBot 积木编程 · 智能迷宫 · 脑力训练"
+    },
+    "poems": {
+      "label": "国学古诗馆",
+      "short": "古诗",
+      "desc": "经典诗词长卷 · 诗仙飞花令 · 九宫拼诗"
+    },
+    "idioms": {
+      "label": "成语消消乐",
+      "short": "成语",
+      "desc": "60 个成语典故 · 4x4 方块消除 · 寓言大决斗"
     },
     "storybook": {
-      "label": "绘本工坊",
+      "label": "分级绘本岛",
       "short": "绘本",
-      "desc": "AI 创作专属绘本"
+      "desc": "自集字专属故事 · Level 1~5 分级阅读"
     },
-    "wrongbook": {
-      "label": "错题本",
-      "short": "错题",
-      "desc": "AI 自适应复习 · 消灭错题"
+    "songs": {
+      "label": "儿歌乐园",
+      "short": "儿歌",
+      "desc": "10 首经典童谣 · 节奏明快启蒙"
     },
-    "gamecenter": {
-      "label": "游戏中心",
-      "short": "游戏",
-      "desc": "闯关 · 对战 · 脑力 · 创意"
+    "nursery": {
+      "label": "儿歌跟唱",
+      "short": "跟唱",
+      "desc": "逐句跟唱伴学 · 知识儿歌好习惯"
     },
-    "story": {
-      "label": "故事馆",
-      "short": "故事",
-      "desc": "绘本 · 儿歌 · 成语 · 古诗"
+    "science": {
+      "label": "自然科学馆",
+      "short": "科学",
+      "desc": "恐龙考古 · 植物生命周期 · 太空天气"
+    },
+    "music": {
+      "label": "音乐律动坊",
+      "short": "音乐",
+      "desc": "太鼓达人律动 · 彩虹琴视唱练耳"
+    },
+    "art": {
+      "label": "艺术与填色",
+      "short": "艺术",
+      "desc": "魔力分块填色本 · 魔法调色盘 · 自由画板"
+    },
+    "safety": {
+      "label": "安全情景剧场",
+      "short": "安全",
+      "desc": "习惯模拟器 · 地震火灾逃生 · 出行防走失"
+    },
+    "geography": {
+      "label": "环球 3D 地理",
+      "short": "地理",
+      "desc": "七大洲五大洋 · 地标名胜 · 护照集章"
+    },
+    "vehicles": {
+      "label": "城市交通救援",
+      "short": "救援",
+      "desc": "消防灭火 · 救护医疗 · 特警探案 · 挖掘机"
+    },
+    "festivals": {
+      "label": "节气文化馆",
+      "short": "节气",
+      "desc": "二十四节气长卷 · 传统节日风俗"
+    },
+    "plants": {
+      "label": "奇妙植物馆",
+      "short": "植物",
+      "desc": "向日葵生长 · 浇水光照光合作用"
+    },
+    "cat_house": {
+      "label": "伴读猫屋",
+      "short": "猫咪",
+      "desc": "2D/3D 梦幻猫咪 · 伴读喂养互动"
+    },
+    "realistic_cat": {
+      "label": "写实猫咪3D",
+      "short": "写实猫",
+      "desc": "真实毛发 · PBR渲染 · 多品种切换"
+    },
+    "desktop_pet": {
+      "label": "桌面宠物",
+      "short": "宠物",
+      "desc": "互动桌面萌宠 · 亲密度好感度 · 番茄钟"
     },
     "growth": {
-      "label": "成长博物馆",
-      "short": "成长",
-      "desc": "徽章墙 · 等级 · 成长树"
+      "label": "成长荣誉馆",
+      "short": "荣誉",
+      "desc": "全景记忆星图 · 勋章百宝箱 · 成长之树"
+    },
+    "wrongbook": {
+      "label": "智能错题本",
+      "short": "错题",
+      "desc": "AI 自适应薄弱诊断 · 变式题消灭错题"
+    },
+    "voicestudio": {
+      "label": "发音评测工坊",
+      "short": "发音",
+      "desc": "多音色童声伴读 · 5维发音雷达 · 逐句跟读"
+    },
+    "gamecenter": {
+      "label": "益智游戏中心",
+      "short": "游戏",
+      "desc": "闯关冒险 · 亲子对战 · 脑力空间"
+    },
+    "fun": {
+      "label": "趣味竞技场",
+      "short": "竞技",
+      "desc": "亲子对战 · 听力反应 · 创意搭建"
+    },
+    "story": {
+      "label": "万卷故事馆",
+      "short": "故事",
+      "desc": "绘本 · 儿歌 · 成语 · 古诗综合总馆"
     },
     "content": {
-      "label": "AI 内容站",
-      "short": "内容",
-      "desc": "AI 生成 · 故事谜语科普"
+      "label": "AI 内容创作站",
+      "short": "创作",
+      "desc": "AI 故事生成 · 知识谜语 · 百科答疑"
     },
     "research": {
-      "label": "研究乐园",
+      "label": "探索研究乐园",
       "short": "研究",
-      "desc": "选题探索 · 记录发现"
+      "desc": "小课题探究 · 科学假设与验证"
+    },
+    "discoveries": {
+      "label": "科学发现画廊",
+      "short": "画廊",
+      "desc": "探索记录 · 知识卡片 · 荣誉成果"
+    },
+    "adventure": {
+      "label": "星际闯关大冒险",
+      "short": "闯关",
+      "desc": "通关赢取星星勋章与专属宝藏"
+    },
+    "rewards": {
+      "label": "奖励中心",
+      "short": "奖励",
+      "desc": "贴纸百宝箱 · 荣誉勋章墙"
+    },
+    "passport": {
+      "label": "学习打卡护照",
+      "short": "护照",
+      "desc": "里程碑盖章 · 世界足迹成就墙"
+    },
+    "achievement": {
+      "label": "宝贝成就中心",
+      "short": "成就",
+      "desc": "见证点滴进步 · 闪耀荣誉殿堂"
+    },
+    "parent": {
+      "label": "家长管理中心",
+      "short": "家长",
+      "desc": "学情周报 · 视力护眼时长 · 课程配置"
     },
     "sidebarLabel": "侧边导航"
   },

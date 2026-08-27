@@ -28,10 +28,12 @@ import { FormationExplainer } from '@/modules/hanzi/FormationExplainer';
 import { ComponentBreakdown } from '@/modules/hanzi/ComponentBreakdown';
 import { AssemblyAnimation } from '@/modules/hanzi/AssemblyAnimation';
 import { HanziFamilyTree } from '@/modules/hanzi/HanziFamilyTree';
+import { HanziCourseRunner } from '@/modules/hanzi/course/HanziCourseRunner';
 import type { HanziEntry } from '@/data/hanziIndex';
 
 export function HanziLearn({ hanzi, onDone }: { hanzi: HanziEntry; onDone: () => void }) {
   const { t } = useTranslation();
+  const [show5StepCourse, setShow5StepCourse] = useState(false);
   const [difficulty, setDifficulty, diffMeta] = useAdaptiveDifficultyState('hanzi');
   const [writeMode, setWriteMode] = useState<'stroke' | 'free'>('stroke');
   // 练习环节「3 连对闯关」：连续答对点亮里程碑，答错归零温和引导
@@ -355,6 +357,45 @@ export function HanziLearn({ hanzi, onDone }: { hanzi: HanziEntry; onDone: () =>
     },
   ];
 
-  return <LearnFlow steps={steps} tone="green" finishLabel={t('hanzi.finishLearn')} onFinish={onDone} />;
+  return (
+    <div className="space-y-4">
+      {/* 洪恩级五步闭环精学入口横幅 */}
+      <div className="p-4 bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 rounded-3xl shadow-lg text-white flex flex-col sm:flex-row items-center justify-between gap-3 border-2 border-amber-200">
+        <div className="flex items-center gap-3">
+          <span className="text-3xl">🎬</span>
+          <div>
+            <h4 className="font-black text-base">洪恩级五步精学闭环</h4>
+            <p className="text-xs text-amber-100 font-medium">
+              玩·认·练·写·说 沉浸式五步贯通，攻克「{hanzi.c}」字
+            </p>
+          </div>
+        </div>
+
+        <CandyButton
+          tone="orange"
+          size="md"
+          variant="solid"
+          onClick={() => {
+            sfxTap();
+            setShow5StepCourse(true);
+          }}
+        >
+          🚀 开启沉浸精学
+        </CandyButton>
+      </div>
+
+      <LearnFlow steps={steps} tone="green" finishLabel={t('hanzi.finishLearn')} onFinish={onDone} />
+
+      {show5StepCourse && (
+        <HanziCourseRunner
+          char={hanzi}
+          onClose={() => {
+            setShow5StepCourse(false);
+            onDone();
+          }}
+        />
+      )}
+    </div>
+  );
 }
 

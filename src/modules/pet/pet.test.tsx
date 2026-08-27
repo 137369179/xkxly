@@ -139,14 +139,18 @@ describe('useCountdown hook（fake timers）', () => {
   it('未设置 endAt 时返回 0', () => {
     const { host, root } = renderHarness(undefined);
     expect(host.querySelector('[data-sec]')!.getAttribute('data-sec')).toBe('0');
-    root.unmount();
+    act(() => {
+      root.unmount();
+    });
     host.remove();
   });
 
   it('endAt 已过期时立即为 0', () => {
     const { host, root } = renderHarness(Date.now() - 1000);
     expect(host.querySelector('[data-sec]')!.getAttribute('data-sec')).toBe('0');
-    root.unmount();
+    act(() => {
+      root.unmount();
+    });
     host.remove();
   });
 
@@ -165,7 +169,9 @@ describe('useCountdown hook（fake timers）', () => {
       vi.advanceTimersByTime(5000);
     });
     expect(host.querySelector('[data-sec]')!.getAttribute('data-sec')).toBe('0');
-    root.unmount();
+    act(() => {
+      root.unmount();
+    });
     host.remove();
   });
 });

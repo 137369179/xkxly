@@ -63,13 +63,14 @@ describe('核心页面架构与渲染冒烟测试', () => {
     expect(container.textContent).toContain('几何度量');
   });
 
-  it('PinyinPage 正常渲染 3 大阶段导航', async () => {
+  it('PinyinPage 正常渲染 4 大核心阶段导航', async () => {
     await act(async () => {
       root.render(createElement(PinyinPage));
     });
     expect(container.textContent).toContain('拼音字母表');
-    expect(container.textContent).toContain('拼读与声调');
-    expect(container.textContent).toContain('辨音与听写');
+    expect(container.textContent).toContain('声韵滑滑梯');
+    expect(container.textContent).toContain('易混大辨析');
+    expect(container.textContent).toContain('闯关与听写');
   });
 
   it('WordsPage 正常渲染主导航', async () => {

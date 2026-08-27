@@ -10,7 +10,7 @@ import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
 import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHint';
 import { logicExplainTask } from '@/lib/ai/tasks';
 import { useStore } from '@/store/useStore';
-import { CodeBot } from './CodeBot';
+import { CodeBotStudio } from './CodeBotStudio';
 import { MazeGame } from './MazeGame';
 import { KidSudoku } from './KidSudoku';
 import { LogicDetective } from './LogicDetective';
@@ -134,7 +134,7 @@ export default function LogicPage() {
         </>
       )}
       {tab === 'detective' && <LogicDetective />}
-      {tab === 'code' && <CodeBot />}
+      {tab === 'code' && <CodeBotStudio />}
       {tab === 'maze' && <MazeGame />}
       {tab === 'sudoku' && <KidSudoku />}
     </div>

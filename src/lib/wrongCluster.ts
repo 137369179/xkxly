@@ -106,9 +106,9 @@ export function rootCauseOf(skill: string): RootCause {
  * 按根因归并错题本，返回按 count 降序的聚类列表。
  * 只读聚合，不修改 wrongBook 数据结构本身。
  */
-export function clusterWrongBook(progress: { wrongBook: string[] }): WrongCluster[] {
+export function clusterWrongBook(progress: { wrongBook?: string[] }): WrongCluster[] {
   const map = new Map<string, WrongCluster>();
-  for (const skill of progress.wrongBook) {
+  for (const skill of progress.wrongBook ?? []) {
     const { key, label } = rootCauseOf(skill);
     const existing = map.get(key);
     if (existing) {

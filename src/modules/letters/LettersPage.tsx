@@ -19,8 +19,9 @@ const LetterTrace = lazy(() => import('./LetterTrace').then((m) => ({ default: m
 const LetterOrder = lazy(() => import('./LetterOrder').then((m) => ({ default: m.LetterOrder })));
 const MatchGame = lazy(() => import('./MatchGame').then((m) => ({ default: m.MatchGame })));
 const LetterPopGame = lazy(() => import('./LetterPopGame').then((m) => ({ default: m.LetterPopGame })));
+const PhonicsBubbleLand = lazy(() => import('./PhonicsBubbleLand').then((m) => ({ default: m.PhonicsBubbleLand })));
 
-type TabId = 'wall' | 'study' | 'trace' | 'order' | 'arcade';
+type TabId = 'wall' | 'study' | 'trace' | 'order' | 'arcade' | 'phonics';
 type ArcadeMode = 'pop' | 'match';
 
 export default function LettersPage() {
@@ -145,6 +146,16 @@ export default function LettersPage() {
           testId="gamecard-arcade"
           onEnter={() => { sfxTap(); setTab('arcade'); }}
         />
+        <ModuleGameCard
+          emoji="🫧"
+          title="自然拼读乐园"
+          desc="26字母发音 · CVC三拼"
+          tone="pink"
+          progress={letterProgress}
+          stars={letterStars}
+          testId="gamecard-phonics"
+          onEnter={() => { sfxTap(); setTab('phonics'); }}
+        />
       </div>
 
       {/* 主入口已改为游戏化功能卡；arcade 二级切换保留在 Suspense 内按钮组，交互逻辑零回归 */}
@@ -164,6 +175,7 @@ export default function LettersPage() {
         {tab === 'study' && <LetterStudy initialUpper={studyLetter} />}
         {tab === 'trace' && <LetterTrace initialLetter={traceLetter} />}
         {tab === 'order' && <LetterOrder />}
+        {tab === 'phonics' && <PhonicsBubbleLand />}
         {tab === 'arcade' && (
           <div className="space-y-4">
             {/* 游乐场二级切换 */}

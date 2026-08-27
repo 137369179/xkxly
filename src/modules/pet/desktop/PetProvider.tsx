@@ -19,7 +19,7 @@ const KEY_V1 = 'xkxly_desktop_pet_v1';
 
 export function loadInitial(): PetState {
   const base = defaultPetState();
-  let raw: string | null = null;
+  let raw: string | null;
   try {
     raw = localStorage.getItem(KEY) ?? localStorage.getItem(KEY_V1);
   } catch { return base; }

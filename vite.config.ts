@@ -20,6 +20,8 @@ export default defineConfig(({ mode }) => ({
     dedupe: ['react', 'react-dom', 'scheduler', 'three'],
   },
   server: {
+    port: 5181,
+    strictPort: true,
     host: true,
     allowedHosts: true,
     // 开发态把 AI / 内容中心请求转给 BFF，密钥始终留在服务端、不进 bundle

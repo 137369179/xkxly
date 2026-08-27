@@ -117,6 +117,62 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 2.2 🌟 工业级热门启蒙精选 (Featured Specialty Hubs) */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">✨</span>
+            <h2 className="text-xl font-black text-rainbow">大厂专业级 · 特色启蒙</h2>
+          </div>
+          <span className="text-xs font-bold text-slate-500">沉浸互动 · 一键直达</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-3.5">
+          {[
+            { id: 'logic', name: '🤖 CodeBot编程', desc: '积木指令迷宫', tone: 'green' as const },
+            { id: 'geography', name: '🧭 环球3D探险', desc: '七大洲护照打卡', tone: 'blue' as const },
+            { id: 'vehicles', name: '🚒 城市应急救援', desc: '消防特警救护', tone: 'orange' as const },
+            { id: 'art', name: '🖍️ 魔力填色本', desc: '恐龙城堡填色', tone: 'pink' as const },
+            { id: 'pinyin', name: '🛝 拼音滑滑梯', desc: '声韵合体大冒险', tone: 'blue' as const },
+            { id: 'poems', name: '🌸 国学飞花令', desc: '诗词九宫格对决', tone: 'pink' as const },
+            { id: 'science', name: '🌱 植物昆虫馆', desc: '生命周期与恐龙', tone: 'green' as const },
+            { id: 'safety', name: '🚨 避险情景剧场', desc: '地震火灾防走失', tone: 'pink' as const },
+          ].map((item) => {
+            const tk = TONE_STYLE[item.tone] ?? TONE_STYLE.blue;
+            return (
+              <motion.button
+                key={item.id}
+                type="button"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.96 }}
+                onClick={() => {
+                  sfxTap();
+                  navigate(item.id as RouteId);
+                }}
+                className="no-select flex flex-col justify-between p-3.5 rounded-2xl border-2 text-left shadow-sm transition-all"
+                style={{
+                  borderColor: tk.soft,
+                  background: `linear-gradient(135deg, ${tk.soft} 0%, #ffffff 85%)`,
+                }}
+              >
+                <div>
+                  <div className="text-sm font-black" style={{ color: tk.deep }}>
+                    {item.name}
+                  </div>
+                  <div className="text-[11px] font-bold text-slate-500 mt-0.5">
+                    {item.desc}
+                  </div>
+                </div>
+                <div className="mt-2.5 flex items-center justify-between text-xs font-black" style={{ color: tk.main }}>
+                  <span>进入体验</span>
+                  <span>→</span>
+                </div>
+              </motion.button>
+            );
+          })}
+        </div>
+      </section>
+
       {/* 2.5 模块封面墙 · 专题百科一览（精选拓展专题，不与核心4大学科重复） */}
       <section className="space-y-3">
         <div className="flex items-center gap-2 px-1">

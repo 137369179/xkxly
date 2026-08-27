@@ -23,9 +23,10 @@ export function MistakeBookPanel({ progress, onReview }: Props) {
 
   if (clusters.length === 0) {
     return (
-      <div className="rounded-2xl bg-[#e7fbe9] p-4 text-center font-bold text-[#1f8a3b]">
+      <section aria-label="错题本" className="rounded-2xl bg-[#e7fbe9] p-4 text-center font-bold text-[#1f8a3b]">
+        <h3 className="mb-2 text-lg font-extrabold text-[#ff6b96]">📕 我的错题本</h3>
         🎉 错题本空空如也，你真棒！
-      </div>
+      </section>
     );
   }
 

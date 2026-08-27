@@ -48,6 +48,8 @@ export const ROUTES = [
   'design',
   'achievement',
   'nursery',
+  'duel',
+  'voicestudio',
 ] as const;
 
 export type RouteId = (typeof ROUTES)[number];

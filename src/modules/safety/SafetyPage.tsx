@@ -6,7 +6,7 @@
  * 3. 紧急求助电话拨号练习 (Emergency 110/119/120 Dialing)
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
@@ -17,6 +17,8 @@ import { safetySceneTask } from '@/lib/ai/tasks/culture';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useStore, useMastery } from '@/store/useStore';
+import { HabitSimulator } from './components/HabitSimulator';
+import { EmergencyTheatre } from './components/EmergencyTheatre';
 
 /** 新增场景（scene9–scene12）的内置默认中文文案：当 i18n 缺失时作为 fallback。 */
 const DEFAULT_TEXTS: Record<string, { scene: string; safe: string; danger: string }> = {
@@ -80,14 +82,7 @@ function resolveText(translate: (key: string) => string, key: string, field: 'sc
 export default function SafetyPage() {
   const { t: translate } = useTranslation();
   const practice = useStore((s) => s.practice);
-  const tickTime = useStore((s) => s.tickTime);
   const mastery = useMastery();
-  // 刷牙计时
-  const [brushing, setBrushing] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(120);
-  // 用 ref 记录「正在刷牙」真实状态，避免 timeLeft===0 时重复触发朗读
-  const brushingRef = useRef(false);
-
   // 紧急电话练习
   const [dialNum, setDialNum] = useState('');
   const [dialFeedback, setDialFeedback] = useState('');
@@ -97,35 +92,6 @@ export default function SafetyPage() {
   const [safetyChosen, setSafetyChosen] = useState<string | null>(null);
   const [showSafetyAi, setShowSafetyAi] = useState(false);
   const safetyAi = useAiStream();
-
-  // 计时器：依赖仅 [brushing]，避免每秒重建 interval 造成计时漂移
-  useEffect(() => {
-    if (!brushing) return;
-    brushingRef.current = true;
-    const timer = setInterval(() => {
-      setTimeLeft(t => (t <= 1 ? 0 : t - 1));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [brushing]);
-
-  // 完成检测：依赖仅 [timeLeft]，用 brushingRef 确保只朗读一次
-  useEffect(() => {
-    if (timeLeft === 0 && brushingRef.current) {
-      brushingRef.current = false;
-      setBrushing(false);
-      sfxCorrect();
-      speak('2分钟刷牙完成啦！牙齿白又亮！', { lang: 'zh-CN' });
-      practice('safety:brushing', true, 2, 1);
-      tickTime(120);
-    }
-  }, [timeLeft, practice, tickTime]);
-
-  const handleStartBrush = () => {
-    sfxTap();
-    setTimeLeft(120);
-    setBrushing(true);
-    speak('开始刷牙啦！上下刷、左右刷，小牙齿真干净！', { lang: 'zh-CN' });
-  };
 
   const handleDialDigit = (digit: string) => {
     sfxTap();
@@ -184,28 +150,14 @@ export default function SafetyPage() {
         />
       </Panel>
 
-      {/* 2分钟刷牙伴读 */}
-      <Panel className="border-2 border-blue-300 bg-gradient-to-r from-blue-50 via-sky-50 to-indigo-50 text-center space-y-3">
-        <h3 className="text-lg font-black text-blue-900">🦷 {translate('safety.brushTitle')}</h3>
-        <p className="text-xs font-bold text-blue-600">
-          {translate('safety.brushTip')}
-        </p>
+      {/* 宝宝巴士级互动好习惯模拟器 (刷牙小卫士 & 七步洗手操) */}
+      <Panel className="border-3 border-sky-300 bg-sky-50/50 p-4 sm:p-6">
+        <HabitSimulator />
+      </Panel>
 
-        <div className="text-4xl font-black text-blue-900">
-          ⏱️ {Math.floor(timeLeft / 60)} : {String(timeLeft % 60).padStart(2, '0')}
-        </div>
-
-        <div>
-          {!brushing ? (
-            <CandyButton tone="blue" size="md" onClick={handleStartBrush}>
-              🪥 {translate('safety.startBrush')}
-            </CandyButton>
-          ) : (
-            <CandyButton tone="pink" size="md" onClick={() => setBrushing(false)}>
-              ⏸️ {translate('safety.pause')}
-            </CandyButton>
-          )}
-        </div>
+      {/* 🚨 宝宝巴士级生活安全与灾害避险演练剧场 */}
+      <Panel className="border-3 border-rose-300 bg-rose-50/50 p-4 sm:p-6">
+        <EmergencyTheatre />
       </Panel>
 
       {/* 紧急求助电话模拟 */}

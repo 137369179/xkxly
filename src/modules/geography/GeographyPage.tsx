@@ -1,19 +1,21 @@
 /**
  * 3D 羊毛毡地理空间与世界文化馆 🧭 (Geography & World Explorer)
  * ------------------------------------------------------------
- * 1. 3D 羊毛毡七大洲与五大洋探索地图 (Seven Continents & Oceans)
- * 2. 世界代表动物与地标中英文双语朗读
- * 3. 地理探索护照小挑战 (Geography Explorer Quiz)
+ * 1. 🧭 宝宝巴士级「全球七大洲五大洋 3D 环球探险与护照打卡」 (World Safari Explorer Pro)
+ * 2. 3D 羊毛毡七大洲探索地图 (Seven Continents)
+ * 3. 世界代表动物与地标中英文双语朗读与挑战
  */
 
-import { useState } from 'react';
-import { shuffle } from "@/lib/utils";
+import { useState, useMemo } from 'react';
+import { shuffle } from '@/lib/utils';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
+import { Tabs, type TabItem } from '@/components/ui/Tabs';
 import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useStore, useMastery } from '@/store/useStore';
+import { WorldSafariExplorer } from './WorldSafariExplorer';
 
 interface Continent {
   id: string;
@@ -37,13 +39,35 @@ const CONTINENTS: Continent[] = [
   { id: 'antarctica', nameZh: '南极洲', nameEn: 'Antarctica', emoji: '🐧', animalZh: '帝企鹅', animalEn: 'Emperor Penguin', landmark: '冰川与极光', desc: '被冰雪覆盖的冷冰冰世界，是企鹅家族的快乐家园！', color: 'bg-sky-100 border-sky-300 text-sky-900' },
 ];
 
+const FALLBACK_CONTINENT: Continent = {
+  id: 'asia',
+  nameZh: '亚洲',
+  nameEn: 'Asia',
+  emoji: '🐼',
+  animalZh: '大熊猫',
+  animalEn: 'Giant Panda',
+  landmark: '万里长城',
+  desc: '世界上最大的洲，有可爱的熊猫和雄伟的长城！',
+  color: 'bg-emerald-100 border-emerald-300 text-emerald-900',
+};
+
+type GeoTab = 'safari' | 'continents' | 'quiz';
+
 export default function GeographyPage() {
   const { t: tr } = useTranslation();
   const { learnSkill, practice, tickTime } = useStore();
   const mastery = useMastery();
-  const [selected, setSelected] = useState<Continent>(CONTINENTS[0]!);
+
+  const [tab, setTab] = useState<GeoTab>('safari');
+  const [selected, setSelected] = useState<Continent>(CONTINENTS[0] ?? FALLBACK_CONTINENT);
   const [quizItem, setQuizItem] = useState<{ c: Continent; options: Continent[] } | null>(null);
   const [feedback, setFeedback] = useState('');
+
+  const TABS: TabItem<GeoTab>[] = useMemo(() => [
+    { id: 'safari', label: '环球探险打卡', emoji: '🧭' },
+    { id: 'continents', label: tr('geography.exploreTitle'), emoji: '🌏' },
+    { id: 'quiz', label: tr('geography.passportTitle'), emoji: '🛂' },
+  ], [tr]);
 
   const exploredCount = CONTINENTS.filter(c => {
     const m = mastery[`geo:${c.id}`];
@@ -61,13 +85,12 @@ export default function GeographyPage() {
   const startQuiz = () => {
     sfxTap();
     setFeedback('');
-    const target = CONTINENTS[Math.floor(Math.random() * CONTINENTS.length)]!
+    const target = CONTINENTS[Math.floor(Math.random() * CONTINENTS.length)] ?? FALLBACK_CONTINENT;
     const shuffledOpts = shuffle(CONTINENTS).slice(0, 3);
     if (!shuffledOpts.find(o => o.id === target.id)) {
       shuffledOpts[0] = target;
     }
-    const finalOpts = shuffledOpts;
-    setQuizItem({ c: target, options: finalOpts });
+    setQuizItem({ c: target, options: shuffledOpts });
 
     speak(`请问，${target.animalZh}生活的${target.nameZh}在哪儿？`, { lang: 'zh-CN' });
   };
@@ -96,83 +119,94 @@ export default function GeographyPage() {
         tone="green"
       />
 
+      <Tabs items={TABS} value={tab} onChange={setTab} tone="green" layoutId="geo-tabs" />
+
+      {/* 🧭 环球 3D 探险打卡 */}
+      {tab === 'safari' && <WorldSafariExplorer />}
+
       {/* 大洲探索选择 */}
-      <Panel className="border-2 border-green-300 bg-emerald-50 text-center space-y-4">
-        <h3 className="text-lg font-black text-emerald-900">🌏 {tr('geography.exploreTitle')}</h3>
+      {tab === 'continents' && (
+        <Panel className="border-2 border-green-300 bg-emerald-50 text-center space-y-4">
+          <h3 className="text-lg font-black text-emerald-900">🌏 {tr('geography.exploreTitle')}</h3>
 
-        <div className="text-sm font-bold text-emerald-700">
-          📖 已探索 {exploredCount}/7 大洲
-        </div>
-
-        <div className="flex flex-wrap justify-center gap-2">
-          {CONTINENTS.map(c => (
-            <button
-              key={c.id}
-              onClick={() => handleSelect(c)}
-              className={`rounded-2xl border-2 px-3.5 py-2 text-sm font-black transition-transform active:scale-95 ${
-                selected.id === c.id ? 'bg-emerald-600 text-white border-emerald-700 scale-105 shadow-md' : 'bg-white text-emerald-900 border-emerald-200 hover:scale-102'
-              }`}
-            >
-              {c.emoji} {c.nameZh}
-            </button>
-          ))}
-        </div>
-
-        {/* 详情卡片 */}
-        <div className={`mx-auto max-w-lg rounded-3xl border-2 p-5 text-left shadow-fluffy transition-all ${selected.color}`}>
-          <div className="flex items-center gap-4 mb-3">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-4xl shadow-sm">
-              {selected.emoji}
-            </div>
-            <div>
-              <h4 className="text-xl font-black">{selected.nameZh} <span className="text-sm font-extrabold opacity-80">({selected.nameEn})</span></h4>
-              <p className="text-xs font-bold opacity-90">🏛️ {tr('geography.landmark')}：{selected.landmark} | 🐾 {tr('geography.animal')}：{selected.animalZh} ({selected.animalEn})</p>
-            </div>
+          <div className="text-sm font-bold text-emerald-700">
+            📖 已探索 {exploredCount}/7 大洲
           </div>
-          <p className="text-xs font-bold leading-relaxed opacity-95">{selected.desc}</p>
-        </div>
-      </Panel>
+
+          <div className="flex flex-wrap justify-center gap-2">
+            {CONTINENTS.map(c => (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => handleSelect(c)}
+                className={`rounded-2xl border-2 px-3.5 py-2 text-sm font-black transition-transform active:scale-95 ${
+                  selected.id === c.id ? 'bg-emerald-600 text-white border-emerald-700 scale-105 shadow-md' : 'bg-white text-emerald-900 border-emerald-200 hover:scale-102'
+                }`}
+              >
+                {c.emoji} {c.nameZh}
+              </button>
+            ))}
+          </div>
+
+          {/* 详情卡片 */}
+          <div className={`mx-auto max-w-lg rounded-3xl border-2 p-5 text-left shadow-fluffy transition-all ${selected.color}`}>
+            <div className="flex items-center gap-4 mb-3">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-4xl shadow-sm">
+                {selected.emoji}
+              </div>
+              <div>
+                <h4 className="text-xl font-black">{selected.nameZh} <span className="text-sm font-extrabold opacity-80">({selected.nameEn})</span></h4>
+                <p className="text-xs font-bold opacity-90">🏛️ {tr('geography.landmark')}：{selected.landmark} | 🐾 {tr('geography.animal')}：{selected.animalZh} ({selected.animalEn})</p>
+              </div>
+            </div>
+            <p className="text-xs font-bold leading-relaxed opacity-95">{selected.desc}</p>
+          </div>
+        </Panel>
+      )}
 
       {/* 地理知识问答护照 */}
-      <Panel className="border-2 border-blue-300 bg-blue-50 text-center space-y-4">
-        <h3 className="text-lg font-black text-blue-900">🛂 {tr('geography.passportTitle')}</h3>
+      {tab === 'quiz' && (
+        <Panel className="border-2 border-blue-300 bg-blue-50 text-center space-y-4">
+          <h3 className="text-lg font-black text-blue-900">🛂 {tr('geography.passportTitle')}</h3>
 
-        {!quizItem ? (
-          <CandyButton tone="blue" size="md" onClick={startQuiz}>
-            🌍 {tr('geography.startQuiz')}
-          </CandyButton>
-        ) : (
-          <div className="space-y-4">
-            <div className="rounded-2xl bg-white p-4 text-base font-black text-blue-900 shadow-sm inline-block">
-              {quizItem.c.emoji} {tr('geography.quizQ', { animal: quizItem.c.animalZh, animalEn: quizItem.c.animalEn })}
-            </div>
-
-            <div className="flex justify-center flex-wrap gap-3">
-              {quizItem.options.map(o => (
-                <button
-                  key={o.id}
-                  onClick={() => handleAnswer(o)}
-                  className="rounded-2xl border-2 border-blue-200 bg-white px-5 py-3 text-base font-black text-blue-900 shadow-sm hover:scale-105 active:scale-95 transition-transform"
-                >
-                  {o.emoji} {o.nameZh}
-                </button>
-              ))}
-            </div>
-
-            {feedback && (
-              <div className="text-sm font-black text-emerald-800">
-                {feedback}
+          {!quizItem ? (
+            <CandyButton tone="blue" size="md" onClick={startQuiz}>
+              🌍 {tr('geography.startQuiz')}
+            </CandyButton>
+          ) : (
+            <div className="space-y-4">
+              <div className="rounded-2xl bg-white p-4 text-base font-black text-blue-900 shadow-sm inline-block">
+                {quizItem.c.emoji} {tr('geography.quizQ', { animal: quizItem.c.animalZh, animalEn: quizItem.c.animalEn })}
               </div>
-            )}
 
-            <div>
-              <CandyButton tone="purple" variant="soft" size="sm" onClick={startQuiz}>
-                {tr('common.nextQuestion')}
-              </CandyButton>
+              <div className="flex justify-center flex-wrap gap-3">
+                {quizItem.options.map(o => (
+                  <button
+                    key={o.id}
+                    type="button"
+                    onClick={() => handleAnswer(o)}
+                    className="rounded-2xl border-2 border-blue-200 bg-white px-5 py-3 text-base font-black text-blue-900 shadow-sm hover:scale-105 active:scale-95 transition-transform"
+                  >
+                    {o.emoji} {o.nameZh}
+                  </button>
+                ))}
+              </div>
+
+              {feedback && (
+                <div className="text-sm font-black text-emerald-800">
+                  {feedback}
+                </div>
+              )}
+
+              <div>
+                <CandyButton tone="purple" variant="soft" size="sm" onClick={startQuiz}>
+                  {tr('common.nextQuestion')}
+                </CandyButton>
+              </div>
             </div>
-          </div>
-        )}
-      </Panel>
+          )}
+        </Panel>
+      )}
     </div>
   );
 }

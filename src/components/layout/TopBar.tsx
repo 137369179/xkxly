@@ -40,6 +40,27 @@ export function TopBar() {
     'en-US': 'EN',
   };
 
+  const handleClearCache = async () => {
+    sfxTap();
+    try {
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for (const reg of regs) {
+          await reg.unregister();
+        }
+      }
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        for (const key of keys) {
+          await caches.delete(key);
+        }
+      }
+    } catch {
+      // ignore
+    }
+    window.location.reload();
+  };
+
   return (
     <header className="pt-safe sticky top-0 z-30 px-2.5 py-1.5 sm:px-6 sm:py-2 transition-all">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 rounded-[1.8rem] border-[3px] border-white bg-white/90 px-2.5 py-1.5 shadow-jelly backdrop-blur-xl sm:px-5 sm:py-2">
@@ -65,11 +86,21 @@ export function TopBar() {
 
         {/* 右侧：工具组 + 身份组 */}
         <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
-          {/* 工具组：静音 · 语言 · 分类 */}
+          {/* 工具组：静音 · 语言 · 刷新缓存 · 分类 */}
           <div className="hidden items-center gap-0.5 rounded-full bg-white/60 p-0.5 shadow-inner sm:flex">
             <Suspense fallback={null}>
               <SoundMuteToggle className="[&>button]:h-9 [&>button]:px-2 [&>button]:py-0" />
             </Suspense>
+            <button
+              type="button"
+              onClick={handleClearCache}
+              title="清理缓存并刷新"
+              aria-label="清理缓存并刷新"
+              className="flex h-9 items-center gap-1 rounded-full px-2 text-xs font-black text-slate-600 transition-all hover:bg-white hover:text-amber-600 active:scale-95"
+            >
+              <span className="text-sm">🧹</span>
+              <span className="hidden lg:inline">刷新缓存</span>
+            </button>
             <button
               type="button"
               onClick={toggleLocale}
@@ -91,8 +122,17 @@ export function TopBar() {
           </div>
           {catOpen && <CategorySheet open={catOpen} onClose={() => setCatOpen(false)} />}
 
-          {/* 移动端精简工具条：分类 + 静音（语言切换低频，仅桌面展示） */}
+          {/* 移动端精简工具条：分类 + 静音 + 清理缓存（语言切换低频，仅桌面展示） */}
           <div className="flex shrink-0 items-center gap-1 sm:hidden">
+            <button
+              type="button"
+              onClick={handleClearCache}
+              title="清理缓存并刷新"
+              aria-label="清理缓存并刷新"
+              className="grid h-9 w-9 place-items-center rounded-full bg-slate-100 text-sm shadow-sm active:scale-95 transition-all"
+            >
+              🧹
+            </button>
             <button
               type="button"
               onClick={() => { sfxTap(); setCatOpen(true); }}

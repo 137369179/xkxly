@@ -73,6 +73,7 @@ const DesktopPetPage = lazy(() => import('@/modules/pet/desktop/DesktopPetPage')
 const StorybookPage = lazy(() => import('@/modules/storybook/StorybookPage'));
 const WrongBookPage = lazy(() => import('@/modules/wrongbook/WrongBookDashboard'));
 const GameCenterPage = lazy(() => import('@/modules/game/GameCenterPage'));
+const VoiceStudioPage = lazy(() => import('@/modules/voice/VoiceStudioPage'));
 const StoryLibraryPage = lazy(() => import('@/modules/story/StoryLibraryPage'));
 const GrowthMuseumPage = lazy(() => import('@/modules/growth/GrowthMuseumPage'));
 const ContentStationPage = lazy(() => import('@/modules/content/ContentStationPage'));
@@ -127,6 +128,7 @@ function Page() {
       case 'storybook': return <StorybookPage />;
       case 'wrongbook': return <WrongBookPage />;
       case 'gamecenter': return <GameCenterPage />;
+      case 'voicestudio': return <VoiceStudioPage />;
       case 'story': return <StoryLibraryPage />;
       case 'growth': return <GrowthMuseumPage />;
       case 'content': return <ContentStationPage />;
@@ -197,7 +199,7 @@ export function App() {
 
     // PWA 角标同步：根据到期复习题数更新桌面角标
     const mastery = useStore.getState().progress.mastery ?? {};
-    const dueCount = Object.values(mastery).filter((m) => m && m.lv > 0 && m.due <= Date.now()).length;
+    const dueCount = Object.values(mastery).filter((m) => m && m.lv > 0 && typeof m.due === 'number' && m.due <= Date.now()).length;
     updateAppBadge(dueCount);
 
     // P1-10：一次性迁移 —— 老版本 progress 携带的绘本全文迁入 IndexedDB，

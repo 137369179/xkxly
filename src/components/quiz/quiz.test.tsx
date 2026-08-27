@@ -20,10 +20,40 @@ vi.mock('@/components/games/CyberMasterCat3D', () => ({
   CyberMasterCat3D: () => null,
 }));
 vi.mock('@/modules/pet/PetIcons', () => ({ CatPurrIcon: () => null }));
-vi.mock('motion/react', () => ({
-  motion: { div: (p: any) => createElement('div', p, p.children), span: (p: any) => createElement('span', p, p.children), button: (p: any) => createElement('button', p, p.children) },
-  AnimatePresence: ({ children }: any) => children,
-}));
+vi.mock('motion/react', () => {
+  const filterMotionProps = (props: Record<string, unknown>) => {
+    const {
+      whileHover: _wh,
+      whileTap: _wt,
+      whileFocus: _wf,
+      whileDrag: _wd,
+      whileInView: _wiv,
+      initial: _i,
+      animate: _a,
+      exit: _e,
+      transition: _t,
+      variants: _v,
+      layout: _l,
+      layoutId: _lid,
+      ...rest
+    } = props || {};
+    return rest;
+  };
+
+  const createComponent = (tag: string) => {
+    return ({ children, ...props }: any) => createElement(tag, filterMotionProps(props), children);
+  };
+
+  return {
+    motion: new Proxy(
+      {},
+      {
+        get: (_target, prop: string) => createComponent(prop),
+      }
+    ),
+    AnimatePresence: ({ children }: any) => children,
+  };
+});
 
 const { OptionGrid } = await import('@/components/quiz/OptionGrid');
 const { BossTimerBar } = await import('@/components/quiz/BossTimerBar');

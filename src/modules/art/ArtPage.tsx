@@ -16,6 +16,8 @@ import { speak } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useStore, useMastery } from '@/store/useStore';
 import { ColorExplore } from '@/components/games/ColorExplore';
+import { MagicColoringBook } from './MagicColoringBook';
+import { MasterpieceGallery } from './MasterpieceGallery';
 
 /* ---------- Type definitions ---------- */
 
@@ -114,7 +116,7 @@ export default function ArtPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawingRef = useRef(false);
   const lastPosRef = useRef<{ x: number; y: number } | null>(null);
-  const [canvasColor, setCanvasColor] = useState(CANVAS_COLORS[0]!.css);
+  const [canvasColor, setCanvasColor] = useState(CANVAS_COLORS[0]?.css ?? '#ff5c7a');
 
   // 进入页面记录学习时长
   useEffect(() => {
@@ -136,8 +138,9 @@ export default function ArtPage() {
     setSelectedColors(newPicked);
 
     if (newPicked.length === 2) {
-      const c0 = newPicked[0]!;
-      const c1 = newPicked[1]!;
+      const c0 = newPicked[0];
+      const c1 = newPicked[1];
+      if (!c0 || !c1) return;
       const skill = mixSkillKey(c0, c1);
       const match = COLOR_MIXES.find(
         m => (m.c1 === c0 && m.c2 === c1) ||
@@ -232,7 +235,7 @@ export default function ArtPage() {
     setCanvasColor(css);
   };
 
-  const [activeTab, setActiveTab] = useState<'explore' | 'mixer' | 'canvas'>('explore');
+  const [activeTab, setActiveTab] = useState<'coloring' | 'explore' | 'gallery' | 'mixer' | 'canvas'>('coloring');
 
   return (
     <div className="space-y-5">
@@ -243,9 +246,32 @@ export default function ArtPage() {
         tone="pink"
       />
 
-      {/* 顶部三合一导航 Tab */}
-      <div className="flex justify-center gap-2">
+      {/* 顶部五合一导航 Tab */}
+      <div className="flex flex-wrap justify-center gap-2">
         <button
+          type="button"
+          onClick={() => { sfxTap(); setActiveTab('coloring'); }}
+          className={`rounded-2xl px-4 py-2 text-sm font-black transition-all ${
+            activeTab === 'coloring'
+              ? 'bg-candy-pink-deep text-white shadow-candy-sm scale-105'
+              : 'bg-white text-ink-soft hover:bg-pink-50'
+          }`}
+        >
+          🖍️ 魔力填色本
+        </button>
+        <button
+          type="button"
+          onClick={() => { sfxTap(); setActiveTab('gallery'); }}
+          className={`rounded-2xl px-4 py-2 text-sm font-black transition-all ${
+            activeTab === 'gallery'
+              ? 'bg-candy-pink-deep text-white shadow-candy-sm scale-105'
+              : 'bg-white text-ink-soft hover:bg-pink-50'
+          }`}
+        >
+          🖼️ 世界名画馆
+        </button>
+        <button
+          type="button"
           onClick={() => { sfxTap(); setActiveTab('explore'); }}
           className={`rounded-2xl px-4 py-2 text-sm font-black transition-all ${
             activeTab === 'explore'
@@ -256,6 +282,7 @@ export default function ArtPage() {
           🌈 基础色彩认知
         </button>
         <button
+          type="button"
           onClick={() => { sfxTap(); setActiveTab('mixer'); }}
           className={`rounded-2xl px-4 py-2 text-sm font-black transition-all ${
             activeTab === 'mixer'
@@ -266,6 +293,7 @@ export default function ArtPage() {
           🔮 魔法调色盘
         </button>
         <button
+          type="button"
           onClick={() => { sfxTap(); setActiveTab('canvas'); }}
           className={`rounded-2xl px-4 py-2 text-sm font-black transition-all ${
             activeTab === 'canvas'
@@ -276,6 +304,10 @@ export default function ArtPage() {
           🎨 自由画板
         </button>
       </div>
+
+      {activeTab === 'coloring' && <MagicColoringBook />}
+
+      {activeTab === 'gallery' && <MasterpieceGallery />}
 
       {activeTab === 'explore' && <ColorExplore />}
 

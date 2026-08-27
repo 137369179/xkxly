@@ -42,6 +42,7 @@ import {
   PinyinActivity,
   WordActivity,
 } from './TodaySections';
+import { DailySrsMission } from './DailySrsMission';
 
 /* ========================================================================
  * 通用小题循环（复习 / 综合），复用 QuizCard，逐题记录到掌握度
@@ -343,6 +344,9 @@ export default function TodayPage() {
 
       {/* 每日小目标：完成领星星（独立于课程包，当天内稳定） */}
       <DailyGoal />
+
+      {/* ⚡ 每日 3 分钟艾宾浩斯极速复习微习惯 */}
+      <DailySrsMission />
 
       {/* 概览 */}
       <Panel className="!py-4 rounded-[2.2rem] border-4 border-pink-200/90 bg-white/95 shadow-fluffy">

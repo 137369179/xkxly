@@ -15,14 +15,16 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { SCIENCE_ITEMS } from '@/data/scienceIndex';
 import { ScienceQuiz } from '@/components/quiz/ScienceQuiz';
 
-// 懒加载 5 大模块
+// 懒加载 7 大模块
+const BotanicalLab = lazy(() => import('./components/BotanicalLab').then(m => ({ default: m.BotanicalLab })));
 const DinoWorld = lazy(() => import('./components/DinoWorld').then(m => ({ default: m.DinoWorld })));
+const DinoArchaeology = lazy(() => import('./components/DinoArchaeology').then(m => ({ default: m.DinoArchaeology })));
 const SpaceExplorer = lazy(() => import('./components/SpaceExplorer').then(m => ({ default: m.SpaceExplorer })));
 const WeatherLab = lazy(() => import('./components/WeatherLab').then(m => ({ default: m.WeatherLab })));
 const AnimalWorld = lazy(() => import('./components/AnimalWorld').then(m => ({ default: m.AnimalWorld })));
 const BodyAdventure = lazy(() => import('./components/BodyAdventure').then(m => ({ default: m.BodyAdventure })));
 
-type SciTab = 'dino' | 'space' | 'weather' | 'animal' | 'body';
+type SciTab = 'botany' | 'archaeology' | 'dino' | 'space' | 'weather' | 'animal' | 'body';
 
 interface TabConfig {
   id: SciTab;
@@ -33,6 +35,8 @@ interface TabConfig {
 }
 
 const TABS: TabConfig[] = [
+  { id: 'botany', labelKey: '植物昆虫实验室', emoji: '🌱', color: 'text-emerald-700', activeColor: 'bg-emerald-600 text-white' },
+  { id: 'archaeology', labelKey: '恐龙考古发掘', emoji: '⛏️', color: 'text-amber-700', activeColor: 'bg-amber-500 text-white' },
   { id: 'dino', labelKey: 'sciencePage.tabDino', emoji: '🦖', color: 'text-green-700', activeColor: 'bg-green-400 text-white' },
   { id: 'space', labelKey: 'sciencePage.tabSpace', emoji: '🪐', color: 'text-blue-700', activeColor: 'bg-blue-400 text-white' },
   { id: 'weather', labelKey: 'sciencePage.tabWeather', emoji: '🌈', color: 'text-orange-700', activeColor: 'bg-orange-400 text-white' },
@@ -59,7 +63,7 @@ function LoadingFallback({ emoji }: { emoji: string }) {
 
 export default function SciencePage() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<SciTab>('dino');
+  const [tab, setTab] = useState<SciTab>('botany');
 
   return (
     <div className="space-y-5">
@@ -117,6 +121,8 @@ export default function SciencePage() {
 
       {/* Tab 内容 */}
       <Suspense fallback={<LoadingFallback emoji={TABS.find(t => t.id === tab)?.emoji ?? '🔬'} />}>
+        {tab === 'botany' && <BotanicalLab />}
+        {tab === 'archaeology' && <DinoArchaeology />}
         {tab === 'dino' && <DinoWorld />}
         {tab === 'space' && <SpaceExplorer />}
         {tab === 'weather' && <WeatherLab />}

@@ -7,17 +7,39 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createElement, act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 
-vi.mock('motion/react', () => ({
-  motion: new Proxy(
-    {},
-    {
-      get: (_target: any, tag: string) => {
-        return ({ children, ...rest }: any) => createElement(tag, rest, children);
-      },
-    }
-  ),
-  AnimatePresence: ({ children }: any) => children,
-}));
+vi.mock('motion/react', () => {
+  const filterMotionProps = (props: Record<string, unknown>) => {
+    const {
+      whileHover: _wh,
+      whileTap: _wt,
+      whileFocus: _wf,
+      whileDrag: _wd,
+      whileInView: _wiv,
+      initial: _i,
+      animate: _a,
+      exit: _e,
+      transition: _t,
+      variants: _v,
+      layout: _l,
+      layoutId: _lid,
+      ...rest
+    } = props || {};
+    return rest;
+  };
+
+  return {
+    motion: new Proxy(
+      {},
+      {
+        get: (_target: any, tag: string) => {
+          return ({ children, ...props }: any) =>
+            createElement(tag, filterMotionProps(props), children);
+        },
+      }
+    ),
+    AnimatePresence: ({ children }: any) => children,
+  };
+});
 vi.mock('@/components/ui/ProgressBar', () => ({
   ProgressBar: (p: any) => createElement('div', { 'data-testid': 'bar', 'data-value': p.value }),
 }));

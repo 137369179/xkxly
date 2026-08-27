@@ -111,180 +111,216 @@
   },
   "categories": {
     "title": "All learning content",
-    "learn": "Learn",
+    "learn": "Subjects",
     "game": "Games",
     "story": "Stories",
-    "create": "Create",
+    "create": "Arts & Crafts",
     "ai": "AI Teacher",
-    "growth": "Growth",
+    "growth": "Growth & Honors",
     "parent": "Parents",
-    "research": "Research Park"
+    "research": "Research Park",
+    "design": "Design System"
   },
   "nav": {
     "home": {
       "label": "My Park",
       "short": "Home",
-      "desc": "What we learn today"
+      "desc": "Daily plan & growth dashboard"
     },
     "today": {
       "label": "Today's Lesson",
       "short": "Today",
-      "desc": "Step by step lessons"
-    },
-    "letters": {
-      "label": "Letter Land",
-      "short": "ABC",
-      "desc": "26 letter adventure"
-    },
-    "poems": {
-      "label": "Poem Garden",
-      "short": "Poems",
-      "desc": "385 classic poems"
-    },
-    "numbers": {
-      "label": "Number Kingdom",
-      "short": "Math",
-      "desc": "Numbers & math"
-    },
-    "hanzi": {
-      "label": "Chinese Characters",
-      "short": "Hanzi",
-      "desc": "300 characters"
-    },
-    "pinyin": {
-      "label": "Pinyin Learning",
-      "short": "Pinyin",
-      "desc": "Phonics & spelling"
-    },
-    "words": {
-      "label": "English Words",
-      "short": "Words",
-      "desc": "74 words · Phonics"
-    },
-    "logic": {
-      "label": "Logic Challenge",
-      "short": "Logic",
-      "desc": "Patterns & puzzles"
-    },
-    "fun": {
-      "label": "Fun Zone",
-      "short": "Fun",
-      "desc": "Battle · Listening · Creative"
-    },
-    "idioms": {
-      "label": "Idiom Stories",
-      "short": "Idioms",
-      "desc": "60 idiom stories"
-    },
-    "songs": {
-      "label": "Nursery Rhymes",
-      "short": "Songs",
-      "desc": "10 classic nursery rhymes"
-    },
-    "science": {
-      "label": "Science World",
-      "short": "Nature",
-      "desc": "Dino · Space · Weather"
-    },
-    "music": {
-      "label": "Music & Rhythm",
-      "short": "Music",
-      "desc": "Rainbow piano · Ear training"
-    },
-    "art": {
-      "label": "Art & Colors",
-      "short": "Art",
-      "desc": "Magic palette · Colors"
-    },
-    "safety": {
-      "label": "Safety First",
-      "short": "Safety",
-      "desc": "Brushing · 110/119"
-    },
-    "geography": {
-      "label": "World Geography",
-      "short": "Geo",
-      "desc": "7 continents · Animals"
-    },
-    "vehicles": {
-      "label": "Vehicles & Jobs",
-      "short": "Vehicles",
-      "desc": "Fire truck · Jobs"
-    },
-    "festivals": {
-      "label": "Festivals & Seasons",
-      "short": "Culture",
-      "desc": "24 solar terms · Festivals"
-    },
-    "plants": {
-      "label": "Amazing Plants",
-      "short": "Plants",
-      "desc": "Sunflower · Photosynthesis"
-    },
-    "cat_house": {
-      "label": "Cat Care",
-      "short": "Cats",
-      "desc": "Fish snacks · Pink cat"
-    },
-    "adventure": {
-      "label": "Adventure Mode",
-      "short": "Quest",
-      "desc": "Quest for stars"
-    },
-    "rewards": {
-      "label": "Rewards Center",
-      "short": "Rewards",
-      "desc": "Stickers · Badge wall"
-    },
-    "passport": {
-      "label": "Study Passport",
-      "short": "Passport",
-      "desc": "Milestones · Achievements"
-    },
-    "parent": {
-      "label": "Parent Center",
-      "short": "Parent",
-      "desc": "Reports · Settings · Eye care"
+      "desc": "Adaptive daily missions & 3-min SRS"
     },
     "companion": {
       "label": "AI Buddy",
       "short": "Buddy",
-      "desc": "AI explain · Chat"
+      "desc": "Personified AI guide & EQ scenarios"
+    },
+    "hanzi": {
+      "label": "Chinese Character Park",
+      "short": "Hanzi",
+      "desc": "Pictographic origins · 5-step mastery · 300 words"
+    },
+    "hanzi-listen": {
+      "label": "Listen & Recognize",
+      "short": "Listen",
+      "desc": "Authentic Mandarin audio · Fast recognition"
+    },
+    "pinyin": {
+      "label": "Pinyin Slide",
+      "short": "Pinyin",
+      "desc": "Phonics slider · Confusion buster · Phonics quest"
+    },
+    "letters": {
+      "label": "Letters & Phonics",
+      "short": "ABC",
+      "desc": "26 letters · Phonics bubble land · CVC blend"
+    },
+    "words": {
+      "label": "English Words Land",
+      "short": "Words",
+      "desc": "300+ life theme words · Native audio"
+    },
+    "numbers": {
+      "label": "Math & Thinking",
+      "short": "Math",
+      "desc": "Ten-frame balance · Addition & subtraction · Tangram studio"
+    },
+    "logic": {
+      "label": "Logic & Coding",
+      "short": "Logic",
+      "desc": "CodeBot visual blocks · Smart maze · Brain training"
+    },
+    "poems": {
+      "label": "Classical Poetry Hall",
+      "short": "Poems",
+      "desc": "Poetry scroll · Flying flower duel · 9-grid puzzle"
+    },
+    "idioms": {
+      "label": "Idiom Match Quest",
+      "short": "Idioms",
+      "desc": "60 classic allusions · 4x4 match puzzle · Quest duel"
     },
     "storybook": {
-      "label": "Storybook",
+      "label": "Graded Storybook Island",
       "short": "Books",
-      "desc": "Create AI storybooks"
+      "desc": "Custom word stories · Level 1~5 graded readers"
     },
-    "wrongbook": {
-      "label": "Wrong Book",
-      "short": "Wrong",
-      "desc": "AI review · Fix mistakes"
+    "songs": {
+      "label": "Nursery Rhymes",
+      "short": "Songs",
+      "desc": "10 classic children's songs · Rhythm enlightenment"
     },
-    "gamecenter": {
-      "label": "Game Center",
-      "short": "Games",
-      "desc": "Levels · Battle · Brain · Create"
+    "nursery": {
+      "label": "Sing-Along Rhymes",
+      "short": "Sing",
+      "desc": "Sentence-by-sentence sing-along · Good habit nursery"
     },
-    "story": {
-      "label": "Story Library",
-      "short": "Stories",
-      "desc": "Storybooks · Songs · Idioms · Poems"
+    "science": {
+      "label": "Natural Science Museum",
+      "short": "Science",
+      "desc": "Dino archaeology · Plant life cycle · Space & weather"
+    },
+    "music": {
+      "label": "Music & Rhythm Workshop",
+      "short": "Music",
+      "desc": "Taiko rhythm game · Rainbow piano ear training"
+    },
+    "art": {
+      "label": "Art & Coloring Book",
+      "short": "Art",
+      "desc": "Magic vector coloring · Magic palette · Free canvas"
+    },
+    "safety": {
+      "label": "Life Safety Theatre",
+      "short": "Safety",
+      "desc": "Habit simulator · Earthquake & fire escape · Anti-lost"
+    },
+    "geography": {
+      "label": "3D World Geography",
+      "short": "Geo",
+      "desc": "7 continents & 5 oceans · Landmarks · Passport stamps"
+    },
+    "vehicles": {
+      "label": "City Rescue Fleet",
+      "short": "Rescue",
+      "desc": "Fire rescue · Ambulance medical · Police detective · Digger"
+    },
+    "festivals": {
+      "label": "Solar Terms & Festivals",
+      "short": "Culture",
+      "desc": "24 solar terms scroll · Traditional cultural customs"
+    },
+    "plants": {
+      "label": "Botanical Wonder Lab",
+      "short": "Plants",
+      "desc": "Sunflower growth · Watering & photosynthesis"
+    },
+    "cat_house": {
+      "label": "Cat Companion Room",
+      "short": "Cats",
+      "desc": "2D/3D cats · Feeding & study buddy interaction"
+    },
+    "realistic_cat": {
+      "label": "Realistic 3D Cat",
+      "short": "3D Cat",
+      "desc": "Realistic fur · PBR rendering · Multi-breed switch"
+    },
+    "desktop_pet": {
+      "label": "Desktop Pet",
+      "short": "Pet",
+      "desc": "Interactive desktop pet · Intimacy chat · Pomodoro timer"
     },
     "growth": {
-      "label": "Growth Museum",
+      "label": "Growth & Honors Hall",
       "short": "Growth",
-      "desc": "Badges · Level · Growth Tree"
+      "desc": "Memory constellation · Badge treasure box · Tree of growth"
+    },
+    "wrongbook": {
+      "label": "Smart Mistake Notebook",
+      "short": "Mistakes",
+      "desc": "AI adaptive diagnosis · Variant questions fix mistakes"
+    },
+    "voicestudio": {
+      "label": "Pronunciation Radar Studio",
+      "short": "Voice",
+      "desc": "Multi-voice child TTS · 5-axis radar · Follow-along"
+    },
+    "gamecenter": {
+      "label": "Brain Games Center",
+      "short": "Games",
+      "desc": "Adventure quest · Parent-child duel · Spatial brain games"
+    },
+    "fun": {
+      "label": "Fun Battle Arena",
+      "short": "Arena",
+      "desc": "Parent-child duel · Listening reaction · Creative building"
+    },
+    "story": {
+      "label": "Grand Storybook Library",
+      "short": "Library",
+      "desc": "Picture books · Songs · Idioms · Poems mega hub"
     },
     "content": {
-      "label": "AI Content Station",
-      "short": "Content",
-      "desc": "AI stories · riddles · science"
+      "label": "AI Content Creation Hub",
+      "short": "Create",
+      "desc": "AI story generation · Knowledge riddles · Science Q&A"
     },
     "research": {
-      "label": "Research Park",
+      "label": "Discovery & Research Park",
       "short": "Research",
-      "desc": "Pick a topic · explore · record findings"
+      "desc": "Mini research topics · Scientific hypothesis & testing"
+    },
+    "discoveries": {
+      "label": "Scientific Discovery Gallery",
+      "short": "Gallery",
+      "desc": "Research records · Knowledge cards · Honor exhibits"
+    },
+    "adventure": {
+      "label": "Interstellar Quest Adventure",
+      "short": "Quest",
+      "desc": "Clear stages to earn star medals and treasures"
+    },
+    "rewards": {
+      "label": "Rewards Center",
+      "short": "Rewards",
+      "desc": "Sticker treasure box · Medal of honor wall"
+    },
+    "passport": {
+      "label": "Study Passport",
+      "short": "Passport",
+      "desc": "Milestone stamp · World footprint achievement wall"
+    },
+    "achievement": {
+      "label": "Baby Achievement Center",
+      "short": "Honors",
+      "desc": "Witness every step of growth · Shining honor hall"
+    },
+    "parent": {
+      "label": "Parent Management Center",
+      "short": "Parent",
+      "desc": "Weekly study reports · Eye-care time control · Course config"
     },
     "sidebarLabel": "Sidebar navigation"
   },

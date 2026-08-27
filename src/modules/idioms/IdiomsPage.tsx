@@ -13,6 +13,7 @@ import { speak } from '@/lib/speech';
 import { sfxTap, sfxWin, sfxStar } from '@/lib/sfx';
 import { IDIOMS, getIdiomsByLevel, IDIOM_CATEGORIES, type Idiom, type IdiomCategory } from '@/data/idioms';
 import { IdiomChain } from './IdiomChain';
+import { IdiomMatchGame } from './IdiomMatchGame';
 import { IdiomReviewCenter } from './IdiomReviewCenter';
 import { useDueIdiomSkills } from './idiomSrs';
 import { shuffle } from '@/lib/utils';
@@ -26,7 +27,7 @@ import { QuizSessionRunner } from '@/components/quiz/QuizSessionRunner';
 import { AllusionBrowser } from '@/modules/poems/AllusionBrowser';
 import type { Question } from '@/types';
 
-type Tab = 'library' | 'guess' | 'chain' | 'allusion';
+type Tab = 'library' | 'guess' | 'match' | 'chain' | 'allusion';
 
 /** 主题 → 糖果色（与 TONES 对齐） */
 const CAT_TONE: Record<IdiomCategory, Tone> = {
@@ -106,6 +107,7 @@ export default function IdiomsPage() {
   // 切换语言后标签不变）；useMemo 仅在语言变化时重算。
   const TABS: TabItem<Tab>[] = useMemo(() => [
     { id: 'library', label: t('idioms.library'), emoji: '📖' },
+    { id: 'match', label: '成语消消乐', emoji: '🎴' },
     { id: 'guess', label: t('idioms.guess'), emoji: '🎯' },
     { id: 'chain', label: t('idioms.chain'), emoji: '🐉' },
     { id: 'allusion', label: t('allusionBrowser.title'), emoji: '📚' },
@@ -166,6 +168,16 @@ export default function IdiomsPage() {
     levelMeta.syncNow();
     setGuessStarted(true);
   };
+
+  if (tab === 'match') {
+    return (
+      <div className="space-y-5">
+        <PageHeader emoji="🎴" title="成语消消乐" subtitle="点选汉字组合成语，探索成语智慧" tone="pink" />
+        <Tabs items={TABS} value={tab} onChange={setTab} tone="pink" layoutId="idiom-tabs" />
+        <IdiomMatchGame />
+      </div>
+    );
+  }
 
   if (tab === 'chain') {
     return (

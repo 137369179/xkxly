@@ -28,7 +28,7 @@ const PoemNotes = lazy(() => import('./PoemNotes'));
 const PoetTimeline = lazy(() => import('@/modules/poems/PoetTimeline'));
 const PoetArchive = lazy(() => import('./PoetArchive'));
 const PoetWorks = lazy(() => import('./PoetWorks').then(m => ({ default: m.PoetWorks })));
-const FlyingFlowers = lazy(() => import('./FlyingFlowers').then(m => ({ default: m.FlyingFlowers })));
+const FlyingFlowers = lazy(() => import('./FlyingFlowerDuel').then(m => ({ default: m.FlyingFlowerDuel })));
 
 type ViewKey = 'lib' | 'train' | 'plan' | 'notes' | 'timeline' | 'archive' | 'works' | 'flying';
 

@@ -39,13 +39,16 @@ const GrowthTree = lazy(() =>
 const StickerScene = lazy(() =>
   import('@/components/feedback/StickerScene').then((m) => ({ default: m.StickerScene })),
 );
+const MemoryConstellation = lazy(() =>
+  import('./MemoryConstellation').then((m) => ({ default: m.MemoryConstellation })),
+);
 
 function formatDate(ts: number): string {
   const d = new Date(ts);
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
 }
 
-export type GrowthTab = 'tree' | 'badges' | 'stickers';
+export type GrowthTab = 'tree' | 'constellation' | 'badges' | 'stickers';
 
 export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?: GrowthTab }) {
   const { t } = useTranslation();
@@ -139,12 +142,13 @@ export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?:
         })}
       </div>
 
-      {/* 三大主 Tab 导航 */}
-      <div className="flex gap-2 rounded-2xl bg-white/70 p-1.5 shadow-sm border-2 border-purple-100">
+      {/* 四大主 Tab 导航 */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 rounded-2xl bg-white/70 p-1.5 shadow-sm border-2 border-purple-100">
         {[
           { id: 'tree' as const, label: '🌱 成长足迹', emoji: '🌳', tone: 'green' as Tone },
-          { id: 'badges' as const, label: `🏅 勋章荣誉 (${ownedBadges.size}/${BADGES.length})`, emoji: '🏅', tone: 'purple' as Tone },
-          { id: 'stickers' as const, label: `🎁 星愿百宝箱 (${ownedStickers.size}贴纸)`, emoji: '🎁', tone: 'pink' as Tone },
+          { id: 'constellation' as const, label: '🌌 记忆星图', emoji: '🌌', tone: 'blue' as Tone },
+          { id: 'badges' as const, label: `🏅 勋章荣誉 (${ownedBadges.size})`, emoji: '🏅', tone: 'purple' as Tone },
+          { id: 'stickers' as const, label: `🎁 星愿百宝箱`, emoji: '🎁', tone: 'pink' as Tone },
         ].map((item) => {
           const active = tab === item.id;
           const toneStyle = TONE_STYLE[item.tone] ?? TONE_STYLE.purple;
@@ -153,7 +157,7 @@ export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?:
               key={item.id}
               onClick={() => setTab(item.id)}
               className={cn(
-                'no-select flex-1 rounded-xl py-2.5 text-center text-sm font-black transition-all',
+                'no-select flex-1 rounded-xl py-2.5 text-center text-xs font-black transition-all',
                 active ? 'text-white shadow-md scale-[1.02]' : 'text-ink-soft hover:text-ink',
               )}
               style={active ? { background: toneStyle.main } : {}}
@@ -262,7 +266,22 @@ export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?:
           </motion.div>
         )}
 
-        {/* Tab 2: 勋章荣誉 */}
+        {/* Tab 2: 记忆星图 */}
+        {tab === 'constellation' && (
+          <motion.div
+            key="constellation"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-6"
+          >
+            <Suspense fallback={<FriendlyLoading message="正在观测全景知识星空..." />}>
+              <MemoryConstellation />
+            </Suspense>
+          </motion.div>
+        )}
+
+        {/* Tab 3: 勋章荣誉 */}
         {tab === 'badges' && (
           <motion.div
             key="badges"

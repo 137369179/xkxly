@@ -16,33 +16,39 @@ const BlendPractice = lazy(() => import('./BlendPractice').then((m) => ({ defaul
 const TonePractice = lazy(() => import('./TonePractice').then((m) => ({ default: m.TonePractice })));
 const Dictation = lazy(() => import('./Dictation').then((m) => ({ default: m.Dictation })));
 const PinyinGroup = lazy(() => import('./PinyinGroup').then((m) => ({ default: m.PinyinGroup })));
+const PhonicsSlide = lazy(() => import('./PhonicsSlide').then((m) => ({ default: m.PhonicsSlide })));
+const ConfusionBuster = lazy(() => import('./ConfusionBuster').then((m) => ({ default: m.ConfusionBuster })));
 
-type MainCategory = 'chart' | 'blend_tone' | 'quiz_dictation';
+type MainCategory = 'chart' | 'slide_fusion' | 'confusion' | 'quiz_dictation';
+type QuizSubCategory = 'blend' | 'tone' | 'group' | 'practice' | 'dictation';
 
 export default function PinyinPage() {
   const { t: tr } = useTranslation();
   const [mainCat, setMainCat] = useState<MainCategory>('chart');
   const [chartType, setChartType] = useState<'shengmu' | 'yunmu' | 'zhengti'>('shengmu');
-  const [blendType, setBlendType] = useState<'blend' | 'tone' | 'group'>('blend');
-  const [quizType, setQuizType] = useState<'practice' | 'dictation'>('practice');
+  const [quizType, setQuizType] = useState<QuizSubCategory>('blend');
 
   const [selected, setSelected] = useState<PinyinEntry | null>(null);
   const mastery = useStore((s) => s.progress.mastery);
   const { target, clear } = useTrainingTarget('pinyin');
 
-  // 深链 param → 对应练习：tone 四声调 / blend 拼读 / dictation 听写 / group 分类连线
+  // 深链 param → 对应练习：slide 滑滑梯 / confusion 易混 / tone 四声调 / blend 拼读 / dictation 听写 / group 分类连线
   useEffect(() => {
     const p = target?.param;
     if (!p) return;
-    if (p === 'tone') {
-      setMainCat('blend_tone');
-      setBlendType('tone');
+    if (p === 'slide') {
+      setMainCat('slide_fusion');
+    } else if (p === 'confusion') {
+      setMainCat('confusion');
+    } else if (p === 'tone') {
+      setMainCat('quiz_dictation');
+      setQuizType('tone');
     } else if (p === 'blend') {
-      setMainCat('blend_tone');
-      setBlendType('blend');
+      setMainCat('quiz_dictation');
+      setQuizType('blend');
     } else if (p === 'group') {
-      setMainCat('blend_tone');
-      setBlendType('group');
+      setMainCat('quiz_dictation');
+      setQuizType('group');
     } else if (p === 'dictation') {
       setMainCat('quiz_dictation');
       setQuizType('dictation');
@@ -80,14 +86,14 @@ export default function PinyinPage() {
       <PageHeader
         emoji="📋"
         title={tr('pinyinPage.title') || '拼音学习'}
-        subtitle={tr('pinyinPage.subtitle') || '声母 · 韵母 · 整体认读 · 声韵拼读 · 四声调'}
+        subtitle={tr('pinyinPage.subtitle') || '声母 · 韵母 · 整体认读 · 声韵滑梯 · 易混辨析'}
         tone="blue"
       />
 
       <TrainingBanner target={target} onClose={clear} />
 
-      {/* 👑 一级大分类导航 */}
-      <div className="grid grid-cols-3 gap-2.5">
+      {/* 👑 一级大分类导航 (4 大核心模式) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         <button
           onClick={() => { sfxTap(); setMainCat('chart'); }}
           className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all text-center ${
@@ -97,21 +103,34 @@ export default function PinyinPage() {
           }`}
         >
           <span className="text-2xl mb-0.5">📋</span>
-          <span className="text-base font-black text-ink">拼音字母表</span>
-          <span className="text-[11px] font-semibold text-ink-soft">声母 · 韵母 · 整体认读</span>
+          <span className="text-sm font-black text-ink">拼音字母表</span>
+          <span className="text-[10px] font-semibold text-ink-soft">声母 · 韵母 · 整体认读</span>
         </button>
 
         <button
-          onClick={() => { sfxTap(); setMainCat('blend_tone'); }}
+          onClick={() => { sfxTap(); setMainCat('slide_fusion'); }}
           className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all text-center ${
-            mainCat === 'blend_tone'
+            mainCat === 'slide_fusion'
               ? 'border-candy-pink-deep bg-gradient-to-b from-pink-50 to-rose-100/70 shadow-candy-sm scale-[1.02]'
               : 'border-pink-200/70 bg-white/90 hover:border-pink-300'
           }`}
         >
-          <span className="text-2xl mb-0.5">🔗</span>
-          <span className="text-base font-black text-ink">拼读与声调</span>
-          <span className="text-[11px] font-semibold text-ink-soft">声韵大作战 · 四声调</span>
+          <span className="text-2xl mb-0.5">🎢</span>
+          <span className="text-sm font-black text-ink">声韵滑滑梯</span>
+          <span className="text-[10px] font-semibold text-ink-soft">小车合体 · 汉字拼读</span>
+        </button>
+
+        <button
+          onClick={() => { sfxTap(); setMainCat('confusion'); }}
+          className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all text-center ${
+            mainCat === 'confusion'
+              ? 'border-amber-400 bg-gradient-to-b from-amber-50 to-orange-100/70 shadow-candy-sm scale-[1.02]'
+              : 'border-amber-200/70 bg-white/90 hover:border-amber-300'
+          }`}
+        >
+          <span className="text-2xl mb-0.5">⚡</span>
+          <span className="text-sm font-black text-ink">易混大辨析</span>
+          <span className="text-[10px] font-semibold text-ink-soft">平翘舌 · 前后鼻音</span>
         </button>
 
         <button
@@ -123,8 +142,8 @@ export default function PinyinPage() {
           }`}
         >
           <span className="text-2xl mb-0.5">🎯</span>
-          <span className="text-base font-black text-ink">辨音与听写</span>
-          <span className="text-[11px] font-semibold text-ink-soft">辨音闯关 · 听音默写</span>
+          <span className="text-sm font-black text-ink">闯关与听写</span>
+          <span className="text-[10px] font-semibold text-ink-soft">声调 · 连线 · 听写</span>
         </button>
       </div>
 
@@ -165,7 +184,7 @@ export default function PinyinPage() {
                     已掌握基础拼音，快来开启声韵拼读吧！
                   </p>
                 </div>
-                <CandyButton tone="blue" size="sm" onClick={() => { sfxTap(); setMainCat('blend_tone'); }}>
+                <CandyButton tone="blue" size="sm" onClick={() => { sfxTap(); setMainCat('slide_fusion'); }}>
                   {tr('pinyinPage.blendPractice') || '去拼读'}
                 </CandyButton>
               </div>
@@ -228,24 +247,38 @@ export default function PinyinPage() {
         </div>
       )}
 
-      {/* 🔗 2. 拼读与声调主视图 */}
-      {mainCat === 'blend_tone' && (
+      {/* 🎢 2. 声韵滑滑梯主视图 */}
+      {mainCat === 'slide_fusion' && (
+        <Suspense fallback={<div className="py-16 text-center text-3xl animate-bounce">🎢</div>}>
+          <PhonicsSlide />
+        </Suspense>
+      )}
+
+      {/* ⚡ 3. 易混大辨析主视图 */}
+      {mainCat === 'confusion' && (
+        <Suspense fallback={<div className="py-16 text-center text-3xl animate-bounce">⚡</div>}>
+          <ConfusionBuster />
+        </Suspense>
+      )}
+
+      {/* 🎯 4. 闯关与听写主视图 */}
+      {mainCat === 'quiz_dictation' && (
         <div className="space-y-4">
-          <div className="flex justify-center gap-2 p-1.5 rounded-2xl bg-pink-100/60 border border-pink-200">
+          <div className="flex flex-wrap justify-center gap-1.5 p-1.5 rounded-2xl bg-purple-100/60 border border-purple-200">
             <button
-              onClick={() => { sfxTap(); setBlendType('blend'); }}
-              className={`px-4 py-2 rounded-xl text-sm font-black transition-all ${
-                blendType === 'blend'
+              onClick={() => { sfxTap(); setQuizType('blend'); }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
+                quizType === 'blend'
                   ? 'bg-candy-pink-deep text-white shadow-candy-sm'
                   : 'bg-white/80 text-ink-soft hover:bg-white'
               }`}
             >
-              🔗 声韵拼读大作战
+              🔗 声韵对对碰
             </button>
             <button
-              onClick={() => { sfxTap(); setBlendType('tone'); }}
-              className={`px-4 py-2 rounded-xl text-sm font-black transition-all ${
-                blendType === 'tone'
+              onClick={() => { sfxTap(); setQuizType('tone'); }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
+                quizType === 'tone'
                   ? 'bg-candy-pink-deep text-white shadow-candy-sm'
                   : 'bg-white/80 text-ink-soft hover:bg-white'
               }`}
@@ -253,52 +286,41 @@ export default function PinyinPage() {
               🎵 四声调练调
             </button>
             <button
-              onClick={() => { sfxTap(); setBlendType('group'); }}
-              className={`px-4 py-2 rounded-xl text-sm font-black transition-all ${
-                blendType === 'group'
+              onClick={() => { sfxTap(); setQuizType('group'); }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
+                quizType === 'group'
                   ? 'bg-candy-pink-deep text-white shadow-candy-sm'
                   : 'bg-white/80 text-ink-soft hover:bg-white'
               }`}
             >
               🎶 拼音分类连线
             </button>
-          </div>
-
-          <Suspense fallback={<div className="py-16 text-center text-3xl animate-bounce">🎶</div>}>
-            {blendType === 'blend' && <BlendPractice />}
-            {blendType === 'tone' && <TonePractice />}
-            {blendType === 'group' && <PinyinGroup />}
-          </Suspense>
-        </div>
-      )}
-
-      {/* 🎯 3. 辨音与听写主视图 */}
-      {mainCat === 'quiz_dictation' && (
-        <div className="space-y-4">
-          <div className="flex justify-center gap-2 p-1.5 rounded-2xl bg-purple-100/60 border border-purple-200">
             <button
               onClick={() => { sfxTap(); setQuizType('practice'); }}
-              className={`px-4 py-2 rounded-xl text-sm font-black transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
                 quizType === 'practice'
                   ? 'bg-candy-purple-deep text-white shadow-candy-sm'
                   : 'bg-white/80 text-ink-soft hover:bg-white'
               }`}
             >
-              🎯 综合辨音冲关
+              🎯 综合辨音
             </button>
             <button
               onClick={() => { sfxTap(); setQuizType('dictation'); }}
-              className={`px-4 py-2 rounded-xl text-sm font-black transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
                 quizType === 'dictation'
                   ? 'bg-candy-purple-deep text-white shadow-candy-sm'
                   : 'bg-white/80 text-ink-soft hover:bg-white'
               }`}
             >
-              🎧 听音默写测试
+              🎧 听音默写
             </button>
           </div>
 
           <Suspense fallback={<div className="py-16 text-center text-3xl animate-bounce">🎯</div>}>
+            {quizType === 'blend' && <BlendPractice />}
+            {quizType === 'tone' && <TonePractice />}
+            {quizType === 'group' && <PinyinGroup />}
             {quizType === 'practice' && <PinyinPractice />}
             {quizType === 'dictation' && <Dictation />}
           </Suspense>
@@ -307,3 +329,4 @@ export default function PinyinPage() {
     </div>
   );
 }
+

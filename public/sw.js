@@ -371,6 +371,11 @@ self.addEventListener('fetch', (event) => {
   // 只拦截 GET 请求
   if (request.method !== 'GET') return;
 
+  // 本地开发环境 (localhost / 127.0.0.1)：绝不拦截缓存，直接走网络，确保新功能和热更新即时呈现
+  if (self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1') {
+    return;
+  }
+
   let url;
   try {
     url = new URL(request.url);

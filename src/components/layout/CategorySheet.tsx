@@ -49,7 +49,7 @@ export function CategorySheet({
 
         <div className="flex-1 space-y-5 overflow-y-auto px-4 pb-6">
           {groups.map((g) => {
-            const meta = NAV_CATEGORY_META.find((m) => m.key === g.key) ?? NAV_CATEGORY_META[0]!;
+            const meta = NAV_CATEGORY_META.find((m) => m.key === g.key) ?? { key: g.key, emoji: '📚', tone: 'blue' as const };
             const tone = TONE_STYLE[meta.tone] ?? TONE_STYLE.pink;
             return (
               <div key={g.key}>

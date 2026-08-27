@@ -58,7 +58,9 @@ export default function ExploreMore({ excludeIds }: ExploreMoreProps) {
           >
             <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
               {others.map((m) => {
-                const t = TONE_STYLE[m.tone];
+                const tone = TONE_STYLE[m.tone] ?? TONE_STYLE.pink;
+                const label = t(`nav.${m.id}.label`) || m.label;
+                const desc = t(`nav.${m.id}.desc`) || m.desc;
                 return (
                   <motion.button
                     key={m.id}
@@ -69,13 +71,13 @@ export default function ExploreMore({ excludeIds }: ExploreMoreProps) {
                     whileHover={{ scale: 1.04 }}
                     whileTap={{ scale: 0.95 }}
                     className="no-select flex min-h-[110px] flex-col items-center justify-center gap-1.5 rounded-[1.6rem] p-3 text-center shadow-candy-sm border-2 border-white/90"
-                    style={{ background: `linear-gradient(160deg, ${t.soft} 0%, #ffffff 70%)` }}
+                    style={{ background: `linear-gradient(160deg, ${tone.soft} 0%, #ffffff 70%)` }}
                   >
                     <FluffyIcon type={m.id} size="md" />
-                    <span className="text-sm font-black tracking-wide" style={{ color: t.deep }}>
-                      {m.label}
+                    <span className="text-sm font-black tracking-wide" style={{ color: tone.deep }}>
+                      {label}
                     </span>
-                    <span className="line-clamp-1 text-[10px] font-bold text-ink-soft">{m.desc}</span>
+                    <span className="line-clamp-1 text-[10px] font-bold text-ink-soft">{desc}</span>
                   </motion.button>
                 );
               })}

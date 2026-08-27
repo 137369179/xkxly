@@ -18,6 +18,7 @@ const TenFrameMath = lazy(() => import('./TenFrameMath').then((m) => ({ default:
 const CountingGame = lazy(() => import('./CountingGame').then((m) => ({ default: m.CountingGame })));
 const NumberTrace = lazy(() => import('./NumberTrace').then((m) => ({ default: m.NumberTrace })));
 const SkipCounting = lazy(() => import('./SkipCounting').then((m) => ({ default: m.SkipCounting })));
+const TenFrameBalance = lazy(() => import('./components/TenFrameBalance').then((m) => ({ default: m.TenFrameBalance })));
 
 const MathChallengeGame = lazy(() => import('@/components/numbers/MathChallengeGame').then((m) => ({ default: m.MathChallengeGame })));
 const MathQuiz = lazy(() => import('./MathQuiz').then((m) => ({ default: m.MathQuiz })));
@@ -34,6 +35,7 @@ const ClockTrainer = lazy(() => import('./ClockTrainer').then((m) => ({ default:
 const MeasureCompare = lazy(() => import('./MeasureCompare').then((m) => ({ default: m.MeasureCompare })));
 const FractionLearn = lazy(() => import('./FractionLearn').then((m) => ({ default: m.FractionLearn })));
 const MoneyLearn = lazy(() => import('./MoneyLearn').then((m) => ({ default: m.MoneyLearn })));
+const TangramBuilder = lazy(() => import('./components/TangramBuilder').then((m) => ({ default: m.TangramBuilder })));
 
 type MathCategory = 'sensory' | 'arithmetic' | 'practice' | 'geometry';
 
@@ -48,9 +50,10 @@ const CATEGORIES: { id: MathCategory; label: string; emoji: string; desc: string
     id: 'sensory',
     label: '数感启蒙',
     emoji: '🔢',
-    desc: '认数字 · 十格阵 · 数数 · 描红',
+    desc: '认数字 · 十格阵 · 空间天平 · 数数',
     subTabs: [
       { id: 'wall', label: '数字墙', emoji: '💯' },
+      { id: 'balance', label: '十格天平', emoji: '⚖️' },
       { id: 'tenframe', label: '十格阵', emoji: '🥕' },
       { id: 'count', label: '数数乐', emoji: '🍎' },
       { id: 'trace', label: '数字描红', emoji: '✍️' },
@@ -88,6 +91,7 @@ const CATEGORIES: { id: MathCategory; label: string; emoji: string; desc: string
     desc: '形状 · 时钟 · 测量 · 分数 · 钱币',
     subTabs: [
       { id: 'shape', label: '形状认知', emoji: '📐' },
+      { id: 'tangram', label: '七巧板工坊', emoji: '🧩' },
       { id: 'clock', label: '认识时钟', emoji: '⏰' },
       { id: 'measure', label: '比较测量', emoji: '📏' },
       { id: 'fraction', label: '披萨分数', emoji: '🍕' },
@@ -106,6 +110,7 @@ const NUMBERS_PARAM_MAP: Record<string, { cat: MathCategory; sub: string }> = {
   rabbit: { cat: 'arithmetic', sub: 'run' },
   word: { cat: 'practice', sub: 'word' },
   shape: { cat: 'geometry', sub: 'shape' },
+  tangram: { cat: 'geometry', sub: 'tangram' },
   time: { cat: 'geometry', sub: 'clock' },
   compare: { cat: 'geometry', sub: 'measure' },
   fraction: { cat: 'geometry', sub: 'fraction' },
@@ -136,6 +141,7 @@ export default function NumbersPage() {
     run: 'math:rabbit',
     word: 'math:word',
     shape: 'math:shape',
+    tangram: 'math:tangram',
     fraction: 'math:fraction',
     money: 'math:money',
   };
@@ -282,6 +288,7 @@ export default function NumbersPage() {
       {/* 🚀 主体内容区域（带友好 Loading） */}
       <Suspense fallback={<div className="py-16 text-center text-3xl animate-bounce">🔢</div>}>
         {activeSubTab === 'wall' && <NumberWall />}
+        {activeSubTab === 'balance' && <TenFrameBalance />}
         {activeSubTab === 'tenframe' && <TenFrameMath />}
         {activeSubTab === 'count' && <CountingGame />}
         {activeSubTab === 'trace' && <NumberTrace />}
@@ -298,6 +305,7 @@ export default function NumbersPage() {
         {activeSubTab === 'word' && <WordProblems />}
 
         {activeSubTab === 'shape' && <ShapeLearn />}
+        {activeSubTab === 'tangram' && <TangramBuilder />}
         {activeSubTab === 'clock' && <ClockTrainer />}
         {activeSubTab === 'measure' && <MeasureCompare />}
         {activeSubTab === 'fraction' && <FractionLearn />}

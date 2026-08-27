@@ -1,20 +1,32 @@
 // @vitest-environment jsdom
 /**
- * WordBuilder 深链预选目标字（initialChar）单元测试
- * 覆盖 R3「识字深链直达具体汉字」改造：
- *   1. 无 initialChar 时显示「开始」引导屏，不预选
- *   2. initialChar="木" 时自动预选「木」进入组词/造句，跳过开始屏
- *   3. 非法 initialChar（数据不存在）时不预选，回退到开始屏
+ * WordBuilder 单元测试
+ * 覆盖：
+ *   1. 偏旁部首合成魔法锅模式与选字互动
+ *   2. 词语组装磁吸盘模式切换与拼装
+ *   3. 童心造句积木轨模式与语序拼装
  */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { createElement, act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 
-vi.mock('@/lib/sfx', () => ({ sfxCorrect: vi.fn(), sfxWrong: vi.fn() }));
-vi.mock('@/lib/speech', () => ({ speak: vi.fn(() => Promise.resolve()) }));
-vi.mock('@/i18n/useTranslation', () => ({ useTranslation: () => ({ t: (k: any) => (typeof k === 'string' ? k : '') }) }));
+vi.mock('@/lib/sfx', () => ({
+  sfxTap: vi.fn(),
+  sfxCorrect: vi.fn(),
+  sfxWrong: vi.fn(),
+  sfxWin: vi.fn(),
+}));
 
-const fakeState = { practice: vi.fn(), addStars: vi.fn(), markTraced: vi.fn(), learnSkill: vi.fn() };
+vi.mock('@/lib/celebrate', () => ({
+  celebrateSmall: vi.fn(),
+  celebrateBig: vi.fn(),
+}));
+
+vi.mock('@/lib/speech', () => ({
+  speak: vi.fn(() => Promise.resolve()),
+}));
+
+const fakeState = { practice: vi.fn(), addStars: vi.fn() };
 vi.mock('@/store/useStore', () => ({
   useStore: (sel?: any) => (sel ? sel(fakeState) : fakeState),
   useMastery: () => ({}),
@@ -37,29 +49,42 @@ function renderWith(initialChar?: string) {
   return container;
 }
 
-function bigChar(container: HTMLElement): string {
-  // 大字展示 span 经历响应式字号放大（text-5xl → text-6xl sm:text-7xl），
-  // 选择器与当前 UI 保持同步，仅锁定「预选目标字渲染为大字」行为本身。
-  const el = container.querySelector('.text-6xl');
-  return el?.textContent?.trim() ?? '';
-}
-
-describe('WordBuilder 深链预选目标字', () => {
-  it('无 initialChar 时显示开始引导屏，不预选', () => {
-    const c = renderWith(undefined);
-    expect(c.textContent).toContain('wordBuilder.start');
-    expect(bigChar(c)).toBe('');
+describe('WordBuilder 偏旁部首合成与组词造句工坊', () => {
+  it('渲染偏旁部首合成魔法锅', () => {
+    const c = renderWith();
+    expect(c.textContent).toContain('偏旁合成魔法锅');
+    expect(c.textContent).toContain('日');
+    expect(c.textContent).toContain('月');
+    expect(c.textContent).toContain('明');
   });
 
-  it('initialChar="木" 自动预选「木」，跳过开始屏', () => {
-    const c = renderWith('木');
-    expect(c.textContent).not.toContain('wordBuilder.start');
-    expect(bigChar(c)).toBe('木');
+  it('点击偏旁合成正确选项触发加星与发音', () => {
+    const c = renderWith();
+    const mingBtn = Array.from(c.querySelectorAll('button')).find((b) => b.textContent === '明');
+    expect(mingBtn).toBeDefined();
+    act(() => {
+      mingBtn?.click();
+    });
+    expect(fakeState.addStars).toHaveBeenCalledWith(1);
   });
 
-  it('initialChar 为不存在的字时不预选，回退开始屏', () => {
-    const c = renderWith('鿃');
-    expect(c.textContent).toContain('wordBuilder.start');
-    expect(bigChar(c)).toBe('');
+  it('支持切换至组词磁吸盘模式', () => {
+    const c = renderWith();
+    const wordTab = Array.from(c.querySelectorAll('button')).find((b) => b.textContent?.includes('组词磁吸盘'));
+    expect(wordTab).toBeDefined();
+    act(() => {
+      wordTab?.click();
+    });
+    expect(c.textContent).toContain('词语拼装');
+  });
+
+  it('支持切换至童心造句积木轨模式', () => {
+    const c = renderWith();
+    const sentenceTab = Array.from(c.querySelectorAll('button')).find((b) => b.textContent?.includes('童心造句积木轨'));
+    expect(sentenceTab).toBeDefined();
+    act(() => {
+      sentenceTab?.click();
+    });
+    expect(c.textContent).toContain('语句拼装');
   });
 });

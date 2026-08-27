@@ -117,10 +117,31 @@ async function doRegister(): Promise<void> {
 
 /** 注册 Service Worker。重复调用是安全的，只注册一次（失败后允许重试）。 */
 export function registerSW(): void {
-  if (registered) return;
   if (typeof window === 'undefined') return;
   if (!('serviceWorker' in navigator)) return;
 
+  // 开发环境 (localhost/127.0.0.1/DEV) 彻底注销并清除旧 Service Worker 与 Cache Storage，确保热重载与最新代码立即可见
+  if (
+    import.meta.env.DEV ||
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1'
+  ) {
+    void navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (const registration of registrations) {
+        void registration.unregister();
+      }
+    });
+    if ('caches' in window) {
+      void caches.keys().then((keys) => {
+        for (const key of keys) {
+          void caches.delete(key);
+        }
+      });
+    }
+    return;
+  }
+
+  if (registered) return;
   registered = true;
   bindUpdateChannels();
 

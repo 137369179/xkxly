@@ -25,6 +25,7 @@ import { EmotionPop } from '@/modules/companion/EmotionPop';
 import { StudyBuddyMode } from '@/modules/companion/StudyBuddyMode';
 import { DailyQuestBoard } from '@/modules/companion/DailyQuestBoard';
 import { ExplainFollowUp } from '@/modules/companion/ExplainFollowUp';
+import { SocialEmotionGame } from './components/SocialEmotionGame';
 import {
   COMPANION_CATEGORIES,
   type CompanionTopic,
@@ -86,10 +87,11 @@ function DifficultyStars({ stars }: { stars: 1 | 2 | 3 }) {
   );
 }
 
-type CompanionTab = 'explain' | 'buddy' | 'quests' | 'followup';
+type CompanionTab = 'explain' | 'social' | 'buddy' | 'quests' | 'followup';
 
 const TABS: { id: CompanionTab; emoji: string; label: string }[] = [
   { id: 'explain', emoji: '📖', label: '讲一讲' },
+  { id: 'social', emoji: '🎭', label: '社交情感' },
   { id: 'buddy', emoji: '🎯', label: '学习搭子' },
   { id: 'quests', emoji: '📋', label: '今日任务' },
   { id: 'followup', emoji: '🤔', label: '知识追问' },
@@ -483,6 +485,9 @@ export default function CompanionPage() {
           </Panel>
         )
       )}
+
+      {/* ── 社交与情感互动（宝宝巴士五大领域模块） ── */}
+      {activeTab === 'social' && <SocialEmotionGame />}
 
       {/* ── 和小茜聊天（常驻底部） ── */}
       <Panel>
