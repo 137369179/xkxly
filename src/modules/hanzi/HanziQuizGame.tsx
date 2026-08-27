@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { Panel } from '@/components/ui/Card';
 import { speak } from '@/lib/speech';
-import { sfxTap } from '@/lib/sfx';
-import { celebrateSmall } from '@/lib/celebrate';
+import { sfxTap, sfxCorrect, sfxWrong, triggerHaptic } from '@/lib/sfx';
+import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 import { getHanziByLevel, type HanziEntry } from '@/data/hanziIndex';
 import { useTranslation } from '@/i18n/useTranslation';
+import { HanziStarQuest } from './HanziStarQuest';
 
 interface HanziQuizGameProps {
   level?: number;
@@ -61,7 +62,7 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
 
   const currentHanzi = pool[currentIndex];
 
-  const handleSelectOption = (entry: HanziEntry) => {
+  const handleSelectOption = useCallback((entry: HanziEntry) => {
     if (selectedAnswer !== null || !currentHanzi) return;
 
     sfxTap();
@@ -70,6 +71,8 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
     setIsCorrect(correct);
 
     if (correct) {
+      sfxCorrect();
+      triggerHaptic(45);
       celebrateSmall();
       setStreak((prev) => prev + 1);
       setTotalStars((prev) => prev + 1);
@@ -77,6 +80,8 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
       void speak(`答对啦！${entry.c}，${entry.p}。真棒！`).catch(() => {});
       practice(`hanzi:${entry.c}`, true);
     } else {
+      sfxWrong();
+      triggerHaptic(20);
       setStreak(0);
       void speak(`差一点点哦，这是 ${entry.c}，正确答案是 ${currentHanzi.c}`).catch(() => {});
       practice(`hanzi:${currentHanzi.c}`, false);
@@ -87,11 +92,58 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
         setCurrentIndex((prev) => prev + 1);
       } else {
         setIsCompleted(true);
-        celebrateSmall();
+        celebrateBig();
+        triggerHaptic([60, 40, 60, 40, 100]);
         void speak(`恭喜你完成汉字闯关！一共获得 ${totalStars + (correct ? 1 : 0)} 颗星！`).catch(() => {});
       }
     }, 1800);
-  };
+  }, [selectedAnswer, currentHanzi, currentIndex, pool.length, totalStars, addFish, practice]);
+
+  const handlePlayVoice = useCallback(() => {
+    if (!currentHanzi) return;
+    sfxTap();
+    triggerHaptic(20);
+    speak(`${currentHanzi.c}，${currentHanzi.p}`);
+  }, [currentHanzi]);
+
+  const handleRestart = useCallback(() => {
+    sfxTap();
+    triggerHaptic(30);
+    const rawPool = getHanziByLevel(level);
+    const shuffled = [...rawPool].sort(() => Math.random() - 0.5).slice(0, 5);
+    setPool(shuffled);
+    setCurrentIndex(0);
+    setIsCompleted(false);
+  }, [level]);
+
+  // 键盘快捷键监听
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (!isCompleted) {
+        if (selectedAnswer === null && options.length > 0) {
+          if (['1', '2', '3', '4'].includes(e.key)) {
+            const idx = parseInt(e.key, 10) - 1;
+            const opt = options[idx];
+            if (opt) {
+              e.preventDefault();
+              handleSelectOption(opt);
+            }
+          } else if (e.key === 's' || e.key === 'S' || e.key === ' ') {
+            e.preventDefault();
+            handlePlayVoice();
+          }
+        }
+      } else {
+        if (e.key === ' ' || e.key === 'Enter' || e.key === 'r' || e.key === 'R') {
+          e.preventDefault();
+          handleRestart();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isCompleted, selectedAnswer, options, handleSelectOption, handlePlayVoice, handleRestart]);
 
   if (isCompleted) {
     return (
@@ -135,6 +187,13 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
 
   return (
     <div className="w-full max-w-xl mx-auto space-y-4">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-[11px] text-amber-900 font-bold bg-amber-50/90 px-3 py-1 rounded-xl border border-amber-200">
+          ⌨️ 键盘快捷操作：数字键 1-4 快速选字 · S 听发音
+        </span>
+      </div>
+
       {/* 关卡顶部进度与 Combo */}
       <div className="flex items-center justify-between bg-white/80 p-3 rounded-2xl border border-amber-200 shadow-xs">
         <div className="flex items-center gap-2">
@@ -165,11 +224,9 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
 
         <div className="flex items-center justify-center gap-3">
           <button
-            onClick={() => {
-              sfxTap();
-              speak(`${currentHanzi.c}，${currentHanzi.p}`);
-            }}
-            className="w-16 h-16 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 flex items-center justify-center text-2xl shadow-md active:scale-95 transition-all"
+            type="button"
+            onClick={handlePlayVoice}
+            className="w-16 h-16 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 flex items-center justify-center text-2xl shadow-md active:scale-95 transition-all focus-visible:ring-4 focus-visible:ring-amber-300 focus:outline-none"
           >
             🔊
           </button>
@@ -190,17 +247,18 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
 
       {/* 4 选项卡片网格 */}
       <div className="grid grid-cols-2 gap-3">
-        {options.map((opt) => {
+        {options.map((opt, idx) => {
           const isSelected = selectedAnswer === opt.c;
 
           return (
             <motion.button
               key={opt.c}
+              type="button"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.96 }}
               onClick={() => handleSelectOption(opt)}
               disabled={selectedAnswer !== null}
-              className={`relative p-5 rounded-2xl border-4 text-center transition-all shadow-md ${
+              className={`relative p-5 min-h-[90px] rounded-2xl border-4 text-center transition-all shadow-md focus-visible:ring-4 focus-visible:ring-amber-300 focus:outline-none ${
                 isSelected
                   ? isCorrect
                     ? 'bg-emerald-100 border-emerald-500 text-emerald-950'
@@ -208,6 +266,7 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
                   : 'bg-white hover:bg-amber-50/50 border-amber-200 text-amber-950'
               }`}
             >
+              <span className="absolute top-2 left-2.5 text-xs font-bold opacity-50">[{idx + 1}]</span>
               <div className="text-center text-5xl font-black leading-tight font-serif tracking-widest sm:text-6xl">
                 {opt.c}
               </div>
@@ -224,6 +283,8 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
           );
         })}
       </div>
+
+      <HanziStarQuest />
     </div>
   );
 }

@@ -5,7 +5,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
-import { getWordsByLevel } from '@/data/wordIndex';
+import { getWordsByLevel, getWordsByTheme, WORD_THEMES } from '@/data/wordIndex';
 import type { WordEntry } from '@/data/words';
 import { sfxTap, sfxCorrect, sfxWrong, sfxStar } from '@/lib/sfx';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -13,6 +13,7 @@ import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { motion } from 'motion/react';
 import { useStore } from '@/store/useStore';
 import { shuffle } from '@/lib/utils';
+import { WordStarQuest } from './WordStarQuest';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
 import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHint';
 
@@ -40,6 +41,7 @@ const DIFFS: DiffEntry[] = [
 export function WordMatch() {
   const { t: tr } = useTranslation();
   const [diff, setDiff, diffMeta] = useAdaptiveDifficultyState('word');
+  const [themeFilter, setThemeFilter] = useState<string>('all');
   const [pairs, setPairs] = useState<Pair[]>([]);
   const [enOrder, setEnOrder] = useState<number[]>([]);
   const [zhOrder, setZhOrder] = useState<number[]>([]);
@@ -51,9 +53,15 @@ export function WordMatch() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const practice = useStore(s => s.practice);
 
-  const start = useCallback((d: DiffEntry) => {
+  const start = useCallback((d: DiffEntry, customTheme?: string) => {
     sfxTap();
-    const pool = getWordsByLevel(d.level);
+    const activeTheme = customTheme ?? themeFilter;
+    const pool = activeTheme === 'all'
+      ? getWordsByLevel(d.level)
+      : (() => {
+          const tp = getWordsByTheme(activeTheme);
+          return tp.length < d.pairs ? [...tp, ...getWordsByLevel(d.level)] : tp;
+        })();
     const picked = shuffle(pool).slice(0, d.pairs);
     const newPairs = picked.map(word => ({ word, matched: false }));
     setPairs(newPairs);
@@ -66,7 +74,7 @@ export function WordMatch() {
     setPhase('playing');
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => setTime(t => t + 1), 1000);
-  }, []);
+  }, [themeFilter]);
 
   /** 按档位 id 开一局（找不到就退回最简单那档） */
   const startById = useCallback((id: 1 | 2 | 3) => {
@@ -172,6 +180,44 @@ export function WordMatch() {
     <div className="space-y-4">
       <PageHeader emoji="🔗" title={tr('wordMatch.title')} subtitle={tr('wordMatch.subtitle')} tone="green" />
 
+      {/* 主题分类筛选 */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+        <button
+          type="button"
+          onClick={() => {
+            setThemeFilter('all');
+            const targetDiff = DIFFS.find((d) => d.id === diff) ?? DIFFS[0]!;
+            start(targetDiff, 'all');
+          }}
+          className={`px-3 py-1.5 rounded-xl font-black text-xs whitespace-nowrap transition-all border ${
+            themeFilter === 'all'
+              ? 'bg-emerald-600 text-white border-emerald-700 shadow-sm'
+              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+          }`}
+        >
+          <span>🌈 全部综合</span>
+        </button>
+        {WORD_THEMES.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => {
+              setThemeFilter(t.id);
+              const targetDiff = DIFFS.find((d) => d.id === diff) ?? DIFFS[0]!;
+              start(targetDiff, t.id);
+            }}
+            className={`px-3 py-1.5 rounded-xl font-black text-xs whitespace-nowrap transition-all border flex items-center gap-1 ${
+              themeFilter === t.id
+                ? 'bg-emerald-600 text-white border-emerald-700 shadow-sm'
+                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <span>{t.emoji}</span>
+            <span>{t.name}</span>
+          </button>
+        ))}
+      </div>
+
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <div className="flex gap-2">
@@ -250,6 +296,8 @@ export function WordMatch() {
           })}
         </div>
       </div>
+
+      <WordStarQuest />
     </div>
   );
 }
