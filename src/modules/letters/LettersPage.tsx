@@ -5,7 +5,7 @@ import type { Progress } from '@/types';
 import { masteredCount } from '@/lib/englishCurriculum';
 import { useTranslation } from '@/i18n/useTranslation';
 import { PageHeader } from '@/components/ui/Card';
-import { sfxTap } from '@/lib/sfx';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
 import { useTrainingTarget } from '@/hooks/useTrainingTarget';
 import { TrainingBanner } from '@/components/study/TrainingBanner';
@@ -57,6 +57,42 @@ export default function LettersPage() {
     }
   }, [target]);
 
+  // 全局键盘快捷键响应 (1-6 切换子模块)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === '1') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setTab('wall');
+      } else if (e.key === '2') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setTab('study');
+      } else if (e.key === '3') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setTab('trace');
+      } else if (e.key === '4') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setTab('order');
+      } else if (e.key === '5') {
+        if (unlockedPhonics) {
+          e.preventDefault();
+          triggerHaptic(20);
+          setTab('arcade');
+        }
+      } else if (e.key === '6') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setTab('phonics');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [unlockedPhonics]);
+
   return (
     <div className="space-y-4">
       <PageHeader
@@ -66,11 +102,18 @@ export default function LettersPage() {
         tone="blue"
       />
 
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-[11px] text-blue-900 font-bold bg-blue-50/90 px-3 py-1 rounded-xl border border-blue-200">
+          ⌨️ 键盘快捷操作：数字 1-6 切换模式 (字母墙/精学/描红/排序/游乐场/自然拼读)
+        </span>
+      </div>
+
       <TrainingBanner target={target} onClose={clear} />
 
       {unlockedPhonics && (
         <button
-          onClick={() => navigate('words')}
+          onClick={() => { triggerHaptic(20); navigate('words'); }}
           className="w-full rounded-2xl border-3 border-purple-300 bg-gradient-to-r from-purple-50 via-pink-50 to-amber-50 p-3 text-left shadow-md transition-all hover:scale-[1.01] active:scale-[0.99]"
         >
           <div className="flex items-center gap-3">
@@ -97,8 +140,9 @@ export default function LettersPage() {
           masteredCount={lettersDone}
           totalCount={26}
           stars={letterStars}
+          pressed={tab === 'wall'}
           testId="gamecard-wall"
-          onEnter={() => { sfxTap(); setTab('wall'); }}
+          onEnter={() => { sfxTap(); triggerHaptic(20); setTab('wall'); }}
         />
         <ModuleGameCard
           emoji="🎯"
@@ -109,8 +153,9 @@ export default function LettersPage() {
           masteredCount={lettersDone}
           totalCount={26}
           stars={letterStars}
+          pressed={tab === 'study'}
           testId="gamecard-study"
-          onEnter={() => { sfxTap(); setTab('study'); }}
+          onEnter={() => { sfxTap(); triggerHaptic(20); setTab('study'); }}
         />
         <ModuleGameCard
           emoji="✍️"
@@ -121,8 +166,9 @@ export default function LettersPage() {
           masteredCount={lettersDone}
           totalCount={26}
           stars={letterStars}
+          pressed={tab === 'trace'}
           testId="gamecard-trace"
-          onEnter={() => { sfxTap(); setTab('trace'); }}
+          onEnter={() => { sfxTap(); triggerHaptic(20); setTab('trace'); }}
         />
         <ModuleGameCard
           emoji="🅰️"
@@ -133,8 +179,9 @@ export default function LettersPage() {
           masteredCount={lettersDone}
           totalCount={26}
           stars={letterStars}
+          pressed={tab === 'order'}
           testId="gamecard-order"
-          onEnter={() => { sfxTap(); setTab('order'); }}
+          onEnter={() => { sfxTap(); triggerHaptic(20); setTab('order'); }}
         />
         <ModuleGameCard
           emoji="🎮"
@@ -143,8 +190,9 @@ export default function LettersPage() {
           tone="purple"
           progress={unlockedPhonics ? 100 : 0}
           locked={!unlockedPhonics}
+          pressed={tab === 'arcade'}
           testId="gamecard-arcade"
-          onEnter={() => { sfxTap(); setTab('arcade'); }}
+          onEnter={() => { sfxTap(); triggerHaptic(20); setTab('arcade'); }}
         />
         <ModuleGameCard
           emoji="🫧"
@@ -153,13 +201,13 @@ export default function LettersPage() {
           tone="pink"
           progress={letterProgress}
           stars={letterStars}
+          pressed={tab === 'phonics'}
           testId="gamecard-phonics"
-          onEnter={() => { sfxTap(); setTab('phonics'); }}
+          onEnter={() => { sfxTap(); triggerHaptic(20); setTab('phonics'); }}
         />
       </div>
 
       {/* 主入口已改为游戏化功能卡；arcade 二级切换保留在 Suspense 内按钮组，交互逻辑零回归 */}
-
 
       <Suspense
         fallback={
@@ -181,7 +229,7 @@ export default function LettersPage() {
             {/* 游乐场二级切换 */}
             <div className="flex justify-center gap-2">
               <button
-                onClick={() => { sfxTap(); setArcadeMode('pop'); }}
+                onClick={() => { sfxTap(); triggerHaptic(20); setArcadeMode('pop'); }}
                 className={cn(
                   'flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-black transition active:scale-95 shadow-sm',
                   arcadeMode === 'pop'
@@ -192,7 +240,7 @@ export default function LettersPage() {
                 <span>🎈 听音戳气球</span>
               </button>
               <button
-                onClick={() => { sfxTap(); setArcadeMode('match'); }}
+                onClick={() => { sfxTap(); triggerHaptic(20); setArcadeMode('match'); }}
                 className={cn(
                   'flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-black transition active:scale-95 shadow-sm',
                   arcadeMode === 'match'

@@ -1,13 +1,14 @@
 import { useState, lazy, Suspense, useEffect, useMemo } from 'react';
 import { PageHeader } from '@/components/ui/Card';
 import { useTranslation } from '@/i18n/useTranslation';
-import { sfxTap } from '@/lib/sfx';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
 import { useStore, useStreak } from '@/store/useStore';
 import { useTrainingTarget } from '@/hooks/useTrainingTarget';
 import { TrainingBanner } from '@/components/study/TrainingBanner';
 import { ModuleGameCard } from '@/components/study/ModuleGameCard';
 import { recommendNumberSkill } from './recommendNumbers';
 import { NumberRecommend } from './NumberRecommend';
+import { calcMathSubProgress } from './mathProgress';
 
 // ── 子组件全部懒加载以实现极优的首屏性能 ──
 // 备注：NumberRecommend 保持静态导入（随 NumbersPage 主 chunk 一并加载）。
@@ -129,42 +130,13 @@ export default function NumbersPage() {
   const mathStars = useStore((s) => s.progress.stars);
   const recommendation = useMemo(() => recommendNumberSkill(mastery), [mastery]);
 
-  // 子功能 → 掌握度进度（0-100）：优先用具体 math:<key> 回写计数，未独立回写的用分类聚合近似
-  const SUB_MATH_KEY: Record<string, string> = {
-    tenframe: 'math:tenframe',
-    trace: 'math:trace',
-    skip: 'math:skip',
-    math: 'math:add',
-    extra: 'math:mul',
-    vertical: 'math:add',
-    ladder: 'math:ladder',
-    run: 'math:rabbit',
-    word: 'math:word',
-    shape: 'math:shape',
-    tangram: 'math:tangram',
-    fraction: 'math:fraction',
-    money: 'math:money',
-  };
+  // 子功能 → 掌握度进度（0-100）：优先用具体 math:<key> 回写（含子项后缀键），
+  // 无独立回写的用分类聚合近似。算法见 src/modules/numbers/mathProgress.ts
   const subProgress = useMemo(() => {
-    const calc = (subId: string, catSubIds: string[]): number => {
-      const key = SUB_MATH_KEY[subId];
-      if (key) {
-        // 该具体技能掌握计数（lv>=1）相对小目标(6)的进度
-        const done = Object.keys(mastery).filter((k) => k === key && (mastery[k]?.lv ?? 0) >= 1).length;
-        return Math.min(100, Math.round((done / 6) * 100));
-      }
-      // 分类聚合：该分类下已回写任一 math:* 的子功能占比
-      const catKeys = catSubIds
-        .map((id) => SUB_MATH_KEY[id])
-        .filter((k): k is string => Boolean(k));
-      if (catKeys.length === 0) return 0;
-      const touched = catKeys.filter((k) => (mastery[k]?.lv ?? 0) >= 1).length;
-      return Math.min(100, Math.round((touched / catKeys.length) * 100));
-    };
     const map: Record<string, number> = {};
     for (const c of CATEGORIES) {
       const ids = c.subTabs.map((s) => s.id);
-      for (const s of c.subTabs) map[s.id] = calc(s.id, ids);
+      for (const s of c.subTabs) map[s.id] = calcMathSubProgress(mastery, s.id, ids);
     }
     return map;
   }, [mastery]);
@@ -188,10 +160,37 @@ export default function NumbersPage() {
     }
   }, [target]);
 
+  // 全局键盘快捷键响应 (1-4 专区切换)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === '1') {
+        e.preventDefault();
+        triggerHaptic(20);
+        handleSelectCategory('sensory');
+      } else if (e.key === '2') {
+        e.preventDefault();
+        triggerHaptic(20);
+        handleSelectCategory('arithmetic');
+      } else if (e.key === '3') {
+        e.preventDefault();
+        triggerHaptic(20);
+        handleSelectCategory('practice');
+      } else if (e.key === '4') {
+        e.preventDefault();
+        triggerHaptic(20);
+        handleSelectCategory('geometry');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const currentCategory = CATEGORIES.find((c) => c.id === activeCategory)!;
 
   const handleSelectCategory = (cat: MathCategory) => {
     sfxTap();
+    triggerHaptic(20);
     setActiveCategory(cat);
     const catMeta = CATEGORIES.find((c) => c.id === cat)!;
     setActiveSubTab(catMeta.subTabs[0]!.id);
@@ -199,6 +198,7 @@ export default function NumbersPage() {
 
   const handleSelectSubTab = (subId: string) => {
     sfxTap();
+    triggerHaptic(20);
     setActiveSubTab(subId);
   };
 
@@ -210,6 +210,13 @@ export default function NumbersPage() {
         subtitle={t('numbersPage.subtitle') || '数感启蒙 · 算术工坊 · 口算应用 · 几何度量'}
         tone="yellow"
       />
+
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-[11px] text-amber-900 font-bold bg-amber-50/90 px-3 py-1 rounded-xl border border-amber-200">
+          ⌨️ 键盘快捷操作：数字 1-4 切换专区 (数感启蒙/算术工坊/口算应用/几何度量)
+        </span>
+      </div>
 
       <div className="flex flex-wrap gap-2">
         <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-black text-amber-700 shadow-sm">
@@ -230,6 +237,7 @@ export default function NumbersPage() {
           weakness={(mastery[recommendation.skill]?.ng ?? 0) > 0}
           onGo={() => {
             sfxTap();
+            triggerHaptic(30);
             setActiveCategory(recDef.cat);
             setActiveSubTab(recDef.def.id);
           }}
