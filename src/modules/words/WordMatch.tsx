@@ -16,6 +16,10 @@ import { shuffle } from '@/lib/utils';
 import { WordStarQuest } from './WordStarQuest';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
 import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHint';
+import { ComboMeter } from '@/components/gamification/ComboMeter';
+import { GentleFeedback } from '@/components/gamification/GentleFeedback';
+import { RestReminder } from '@/components/gamification/RestReminder';
+import { praiseByScene, encourageByScene } from '@/lib/praise';
 
 type Phase = 'playing' | 'result';
 type Side = 'en' | 'zh';
@@ -48,6 +52,8 @@ export function WordMatch() {
   const [selected, setSelected] = useState<{ side: Side; idx: number } | null>(null);
   const [combo, setCombo] = useState(0);
   const [score, setScore] = useState(0);
+  /** 即时反馈气泡状态（任务 #3）：正确积极强化 / 错误温和引导，无障碍 aria-live */
+  const [feedback, setFeedback] = useState<{ correct: boolean; msg: string } | null>(null);
   const [time, setTime] = useState(0);
   const [phase, setPhase] = useState<Phase>('playing');
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -70,6 +76,7 @@ export function WordMatch() {
     setSelected(null);
     setCombo(0);
     setScore(0);
+    setFeedback(null);
     setTime(0);
     setPhase('playing');
     if (timerRef.current) clearInterval(timerRef.current);
@@ -127,6 +134,7 @@ export function WordMatch() {
       const gain = 10 + (newCombo - 1) * 2;
       setScore(s => s + gain);
       setPairs(prev => prev.map((p, i) => i === enIdx ? { ...p, matched: true } : p));
+      setFeedback({ correct: true, msg: praiseByScene('word') });
       const targetPair = pairs[enIdx];
       if (targetPair) {
         practice(`word:${targetPair.word.word}`, true, 0, diff);
@@ -134,6 +142,7 @@ export function WordMatch() {
     } else {
       sfxWrong();
       setCombo(0);
+      setFeedback({ correct: false, msg: encourageByScene('word') });
     }
     setSelected(null);
   };
@@ -241,6 +250,7 @@ export function WordMatch() {
           meta={diffMeta}
           labels={{ 1: tr('wordMatch.easy'), 2: tr('wordMatch.medium'), 3: tr('wordMatch.hard') }}
         />
+        <ComboMeter count={combo} />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -297,7 +307,10 @@ export function WordMatch() {
         </div>
       </div>
 
+      {feedback && <GentleFeedback correct={feedback.correct} message={feedback.msg} />}
+
       <WordStarQuest />
+      <RestReminder />
     </div>
   );
 }

@@ -12,6 +12,7 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { useAdaptiveDifficultyState } from "@/store/adaptiveDifficulty";
 import { AdaptiveDifficultyHint } from "@/components/study/AdaptiveDifficultyHint";
 import { MathStarQuest } from "./MathStarQuest";
+import { RestReminder } from "@/components/gamification/RestReminder";
 
 const MAX_OF: Record<Difficulty, number> = { 1: 10, 2: 15, 3: 20 };
 
@@ -193,6 +194,7 @@ export function MathQuiz() {
         }
       />
       <MathStarQuest />
+      <RestReminder />
     </>
   );
 }

@@ -9,6 +9,10 @@ import { useStore } from '@/store/useStore';
 import { getHanziByLevel, type HanziEntry } from '@/data/hanziIndex';
 import { useTranslation } from '@/i18n/useTranslation';
 import { HanziStarQuest } from './HanziStarQuest';
+import { ComboMeter } from '@/components/gamification/ComboMeter';
+import { GentleFeedback } from '@/components/gamification/GentleFeedback';
+import { RestReminder } from '@/components/gamification/RestReminder';
+import { praiseByScene, encourageByScene } from '@/lib/praise';
 
 interface HanziQuizGameProps {
   level?: number;
@@ -29,6 +33,8 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
   const [streak, setStreak] = useState(0);
   const [totalStars, setTotalStars] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
+  /** 即时反馈气泡状态（任务 #3）：正确积极强化 / 错误温和引导，无障碍 aria-live */
+  const [feedback, setFeedback] = useState<{ correct: boolean; msg: string } | null>(null);
 
   // 初始化关卡题目池 (5 题)
   useEffect(() => {
@@ -39,6 +45,7 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
     setStreak(0);
     setTotalStars(0);
     setIsCompleted(false);
+    setFeedback(null);
   }, [level]);
 
   // 当索引切换时设置题目与选项
@@ -77,12 +84,14 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
       setStreak((prev) => prev + 1);
       setTotalStars((prev) => prev + 1);
       addFish(1);
+      setFeedback({ correct: true, msg: praiseByScene('hanzi') });
       void speak(`答对啦！${entry.c}，${entry.p}。真棒！`).catch(() => {});
       practice(`hanzi:${entry.c}`, true);
     } else {
       sfxWrong();
       triggerHaptic(20);
       setStreak(0);
+      setFeedback({ correct: false, msg: encourageByScene('hanzi') });
       void speak(`差一点点哦，这是 ${entry.c}，正确答案是 ${currentHanzi.c}`).catch(() => {});
       practice(`hanzi:${currentHanzi.c}`, false);
     }
@@ -114,6 +123,7 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
     setPool(shuffled);
     setCurrentIndex(0);
     setIsCompleted(false);
+    setFeedback(null);
   }, [level]);
 
   // 键盘快捷键监听
@@ -200,15 +210,7 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
           <span className="text-xs font-black px-3 py-1 bg-amber-100 text-amber-900 rounded-full">
             {t('hanziQuizGame.progress', { current: currentIndex + 1, total: pool.length })}
           </span>
-          {streak > 1 && (
-            <motion.span
-              initial={{ scale: 0.8 }}
-              animate={{ scale: [1, 1.2, 1] }}
-              className="text-xs font-black text-rose-600 bg-rose-100 px-2.5 py-0.5 rounded-full border border-rose-300"
-            >
-              {t('hanziQuizGame.streak', { streak })}
-            </motion.span>
-          )}
+          <ComboMeter count={streak} />
         </div>
 
         <div className="text-xs font-extrabold text-amber-600">
@@ -284,7 +286,10 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
         })}
       </div>
 
+      {feedback && <GentleFeedback correct={feedback.correct} message={feedback.msg} />}
+
       <HanziStarQuest />
+      <RestReminder />
     </div>
   );
 }
