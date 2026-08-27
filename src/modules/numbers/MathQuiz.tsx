@@ -1,16 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useTranslation } from '@/i18n/useTranslation';
-import { RoundRunner } from '@/components/quiz/RoundRunner';
-import { CandyButton } from '@/components/ui/Button';
-import { AiAvatar } from '@/components/ai';
-import { makeMathQuestion, type Difficulty } from '@/lib/questions';
-import { makeSpacedDrill } from '@/lib/drill';
-import { genMathQuestion, mathExplainTask } from '@/lib/ai/tasks';
-import type { Question } from '@/types';
-import { useStore } from '@/store/useStore';
-import { useSettingsStore } from '@/store/useSettingsStore';
-import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
-import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHint';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "@/i18n/useTranslation";
+import { RoundRunner } from "@/components/quiz/RoundRunner";
+import { CandyButton } from "@/components/ui/Button";
+import { AiAvatar } from "@/components/ai";
+import { makeMathQuestion, type Difficulty } from "@/lib/questions";
+import { makeSpacedDrill } from "@/lib/drill";
+import { genMathQuestion, mathExplainTask } from "@/lib/ai/tasks";
+import type { Question } from "@/types";
+import { useStore } from "@/store/useStore";
+import { useSettingsStore } from "@/store/useSettingsStore";
+import { useAdaptiveDifficultyState } from "@/store/adaptiveDifficulty";
+import { AdaptiveDifficultyHint } from "@/components/study/AdaptiveDifficultyHint";
+import { MathStarQuest } from "./MathStarQuest";
 
 const MAX_OF: Record<Difficulty, number> = { 1: 10, 2: 15, 3: 20 };
 
@@ -21,11 +22,11 @@ export function MathQuiz() {
   const { t } = useTranslation();
   const recordMath = useStore((s) => s.recordMath);
   const aiOn = useSettingsStore((s) => s.settings.aiEnabled);
-  const [diff, setDiff, diffMeta] = useAdaptiveDifficultyState('math');
+  const [diff, setDiff, diffMeta] = useAdaptiveDifficultyState("math");
   const DIFFS: { id: Difficulty; label: string }[] = [
-    { id: 1, label: t('numbers.diff10') },
-    { id: 2, label: t('numbers.diff15') },
-    { id: 3, label: t('numbers.diff20') },
+    { id: 1, label: t("numbers.diff10") },
+    { id: 2, label: t("numbers.diff15") },
+    { id: 3, label: t("numbers.diff20") },
   ];
   const [aiMode, setAiMode] = useState(false);
   const [poolSize, setPoolSize] = useState(0);
@@ -60,7 +61,7 @@ export function MathQuiz() {
     const need = POOL_TARGET - poolRef.current.length - fillingRef.current;
     for (let i = 0; i < need; i++) {
       fillingRef.current++;
-      const op: 'add' | 'sub' = Math.random() < 0.6 ? 'add' : 'sub';
+      const op: "add" | "sub" = Math.random() < 0.6 ? "add" : "sub";
       genMathQuestion(op, MAX_OF[diff])
         .then((r) => {
           // 兜底题不入池：本地题库随时能造，池子只留 AI 的情景题
@@ -73,7 +74,8 @@ export function MathQuiz() {
           /* 出题失败：本地题库随时兜底，不打扰用户 */
         })
         .finally(() => {
-          if (gen === genRef.current) fillingRef.current = Math.max(0, fillingRef.current - 1);
+          if (gen === genRef.current)
+            fillingRef.current = Math.max(0, fillingRef.current - 1);
         });
     }
   }, [aiMode, aiOn, diff]);
@@ -82,7 +84,11 @@ export function MathQuiz() {
     refill();
   }, [refill]);
 
-  const localMake = makeSpacedDrill('math', makeMathQuestion, () => useStore.getState().progress);
+  const localMake = makeSpacedDrill(
+    "math",
+    makeMathQuestion,
+    () => useStore.getState().progress,
+  );
 
   const make = useCallback(
     (d: Difficulty): Question => {
@@ -109,72 +115,84 @@ export function MathQuiz() {
   );
 
   return (
-    <RoundRunner
-      key={`${diff}-${aiMode}`}
-      makeQuestion={make}
-      difficulty={diff}
-      tone="yellow"
-      questionsPerRound={5}
-      streakBar={{ leveled: true, tone: 'yellow' }}
-      onRoundStart={diffMeta.syncNow}
-      onAnswered={(q, c) => recordMath(c, q.skill)}
-      aiExplain={(q, chosen, correct) =>
-        mathExplainTask(q.prompt, q.display ?? q.prompt, correct, chosen)
-      }
-      header={
-        <div className="space-y-2.5">
-          <div className="flex gap-2.5">
-            {DIFFS.map((d) => (
-              <CandyButton
-                key={d.id}
-                tone={diff === d.id ? 'yellow' : 'purple'}
-                variant={diff === d.id ? 'solid' : 'soft'}
-                size="sm"
-                fullWidth
-                onClick={() => setDiff(d.id)}
-              >
-                {d.label}
-              </CandyButton>
-            ))}
-          </div>
-          <AdaptiveDifficultyHint meta={diffMeta} labels={{ 1: t('numbers.diff10'), 2: t('numbers.diff15'), 3: t('numbers.diff20') }} />
-
-          {aiOn && (
-            <button
-              type="button"
-              onClick={() => setAiMode((v) => !v)}
-              className="flex w-full items-center gap-2.5 rounded-2xl border-2 px-3.5 py-2.5 text-left transition active:translate-y-[2px]"
-              style={{
-                background: aiMode ? '#ECE5FF' : '#FFFFFF',
-                borderColor: aiMode ? '#8b6ef0' : '#ece5ff',
+    <>
+      <RoundRunner
+        key={`${diff}-${aiMode}`}
+        makeQuestion={make}
+        difficulty={diff}
+        tone="yellow"
+        questionsPerRound={5}
+        streakBar={{ leveled: true, tone: "yellow" }}
+        onRoundStart={diffMeta.syncNow}
+        onAnswered={(q, c) => recordMath(c, q.skill)}
+        aiExplain={(q, chosen, correct) =>
+          mathExplainTask(q.prompt, q.display ?? q.prompt, correct, chosen)
+        }
+        header={
+          <div className="space-y-2.5">
+            <div className="flex gap-2.5">
+              {DIFFS.map((d) => (
+                <CandyButton
+                  key={d.id}
+                  tone={diff === d.id ? "yellow" : "purple"}
+                  variant={diff === d.id ? "solid" : "soft"}
+                  size="sm"
+                  fullWidth
+                  onClick={() => setDiff(d.id)}
+                >
+                  {d.label}
+                </CandyButton>
+              ))}
+            </div>
+            <AdaptiveDifficultyHint
+              meta={diffMeta}
+              labels={{
+                1: t("numbers.diff10"),
+                2: t("numbers.diff15"),
+                3: t("numbers.diff20"),
               }}
-            >
-              <AiAvatar size={30} mood={aiMode ? 'talking' : 'sleep'} />
-              <span className="min-w-0 flex-1">
-                <span className="block text-base font-extrabold text-candy-purple-deep">
-                  {t(aiMode ? 'numbers.aiTitleOn' : 'numbers.aiTitleOff')}
-                </span>
-                <span className="block text-xs text-ink-soft">
-                  {aiMode
-                    ? poolSize > 0
-                    ? t('numbers.aiPoolReady', { poolSize })
-                    : t('numbers.aiPoolEmpty')
-                    : '让小茜把算式编成买水果、分糖果的小故事'}
-                </span>
-              </span>
-              <span
-                className="grid h-7 w-12 shrink-0 items-center rounded-full px-1 transition"
-                style={{ background: aiMode ? '#8b6ef0' : '#d9c6f5' }}
+            />
+
+            {aiOn && (
+              <button
+                type="button"
+                onClick={() => setAiMode((v) => !v)}
+                className="flex w-full items-center gap-2.5 rounded-2xl border-2 px-3.5 py-2.5 text-left transition active:translate-y-[2px]"
+                style={{
+                  background: aiMode ? "#ECE5FF" : "#FFFFFF",
+                  borderColor: aiMode ? "#8b6ef0" : "#ece5ff",
+                }}
               >
+                <AiAvatar size={30} mood={aiMode ? "talking" : "sleep"} />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-base font-extrabold text-candy-purple-deep">
+                    {t(aiMode ? "numbers.aiTitleOn" : "numbers.aiTitleOff")}
+                  </span>
+                  <span className="block text-xs text-ink-soft">
+                    {aiMode
+                      ? poolSize > 0
+                        ? t("numbers.aiPoolReady", { poolSize })
+                        : t("numbers.aiPoolEmpty")
+                      : "让小茜把算式编成买水果、分糖果的小故事"}
+                  </span>
+                </span>
                 <span
-                  className="block h-5 w-5 rounded-full bg-white transition-transform"
-                  style={{ transform: aiMode ? 'translateX(20px)' : 'translateX(0)' }}
-                />
-              </span>
-            </button>
-          )}
-        </div>
-      }
-    />
+                  className="grid h-7 w-12 shrink-0 items-center rounded-full px-1 transition"
+                  style={{ background: aiMode ? "#8b6ef0" : "#d9c6f5" }}
+                >
+                  <span
+                    className="block h-5 w-5 rounded-full bg-white transition-transform"
+                    style={{
+                      transform: aiMode ? "translateX(20px)" : "translateX(0)",
+                    }}
+                  />
+                </span>
+              </button>
+            )}
+          </div>
+        }
+      />
+      <MathStarQuest />
+    </>
   );
 }
