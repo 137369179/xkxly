@@ -8,6 +8,7 @@ import { TrainingBanner } from '@/components/study/TrainingBanner';
 import { ModuleGameCard } from '@/components/study/ModuleGameCard';
 import { recommendNumberSkill } from './recommendNumbers';
 import { NumberRecommend } from './NumberRecommend';
+import { calcMathSubProgress } from './mathProgress';
 
 // ── 子组件全部懒加载以实现极优的首屏性能 ──
 // 备注：NumberRecommend 保持静态导入（随 NumbersPage 主 chunk 一并加载）。
@@ -121,41 +122,13 @@ export default function NumbersPage() {
   const mathStars = useStore((s) => s.progress.stars);
   const recommendation = useMemo(() => recommendNumberSkill(mastery), [mastery]);
 
-  // 子功能 → 掌握度进度（0-100）：优先用具体 math:<key> 回写计数，未独立回写的用分类聚合近似
-  const SUB_MATH_KEY: Record<string, string> = {
-    tenframe: 'math:tenframe',
-    trace: 'math:trace',
-    skip: 'math:skip',
-    math: 'math:add',
-    extra: 'math:mul',
-    vertical: 'math:add',
-    ladder: 'math:ladder',
-    run: 'math:rabbit',
-    word: 'math:word',
-    shape: 'math:shape',
-    fraction: 'math:fraction',
-    money: 'math:money',
-  };
+  // 子功能 → 掌握度进度（0-100）：优先用具体 math:<key> 回写（含子项后缀键），
+  // 无独立回写的用分类聚合近似。算法见 src/modules/numbers/mathProgress.ts
   const subProgress = useMemo(() => {
-    const calc = (subId: string, catSubIds: string[]): number => {
-      const key = SUB_MATH_KEY[subId];
-      if (key) {
-        // 该具体技能掌握计数（lv>=1）相对小目标(6)的进度
-        const done = Object.keys(mastery).filter((k) => k === key && (mastery[k]?.lv ?? 0) >= 1).length;
-        return Math.min(100, Math.round((done / 6) * 100));
-      }
-      // 分类聚合：该分类下已回写任一 math:* 的子功能占比
-      const catKeys = catSubIds
-        .map((id) => SUB_MATH_KEY[id])
-        .filter((k): k is string => Boolean(k));
-      if (catKeys.length === 0) return 0;
-      const touched = catKeys.filter((k) => (mastery[k]?.lv ?? 0) >= 1).length;
-      return Math.min(100, Math.round((touched / catKeys.length) * 100));
-    };
     const map: Record<string, number> = {};
     for (const c of CATEGORIES) {
       const ids = c.subTabs.map((s) => s.id);
-      for (const s of c.subTabs) map[s.id] = calc(s.id, ids);
+      for (const s of c.subTabs) map[s.id] = calcMathSubProgress(mastery, s.id, ids);
     }
     return map;
   }, [mastery]);
