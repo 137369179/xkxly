@@ -19,6 +19,9 @@ import { ComboMeter } from "@/components/gamification/ComboMeter";
 import { GentleFeedback } from "@/components/gamification/GentleFeedback";
 import { ReducedMotionToggle } from "@/components/gamification/ReducedMotionToggle";
 import { praiseByScene, encourageByScene } from "@/lib/praise";
+import { StarSettlementCard } from "@/components/gamification/StarSettlementCard";
+import { earnStars, type EarnResult } from "@/game/rewardEconomy";
+import { speak } from "@/lib/speech";
 
 const MAX_OF: Record<Difficulty, number> = { 1: 10, 2: 15, 3: 20 };
 
@@ -43,6 +46,15 @@ export function MathQuiz() {
   const [combo, setCombo] = useState(0);
   /** 即时反馈气泡状态（任务 #3）：正确积极强化 / 错误温和引导，无障碍 aria-live，与洪恩/宝宝巴士温和反馈一致 */
   const [feedback, setFeedback] = useState<{ correct: boolean; msg: string } | null>(null);
+  /** 每回合 5 题；与 RoundRunner 的 questionsPerRound 保持一致 */
+  const QUESTIONS_PER_ROUND = 5;
+  /** 本回合答对题数与最长连击：用 ref 累积，避免每题重渲染，结算时统一口径 */
+  const correctCountRef = useRef(0);
+  const bestComboRef = useRef(0);
+  const comboRef = useRef(0);
+  /** 结算结果：展示**实际入账**的星数，成长荣誉馆读同一份 */
+  const [settlement, setSettlement] = useState<EarnResult | null>(null);
+  const addStars = useStore((s) => s.addStars);
 
   const poolRef = useRef<Question[]>([]);
   const fillingRef = useRef(0);
@@ -134,18 +146,38 @@ export function MathQuiz() {
         makeQuestion={make}
         difficulty={diff}
         tone="yellow"
-        questionsPerRound={5}
+        questionsPerRound={QUESTIONS_PER_ROUND}
         streakBar={{ leveled: true, tone: "yellow" }}
         onRoundStart={() => {
           diffMeta.syncNow();
           setCombo(0);
           setFeedback(null);
+          correctCountRef.current = 0;
+          bestComboRef.current = 0;
+          comboRef.current = 0;
+          setSettlement(null);
         }}
         onAnswered={(q, c) => {
           recordMath(c, q.skill);
-          if (c) setCombo((prev) => prev + 1);
-          else setCombo(0);
+          if (c) {
+            comboRef.current += 1;
+            correctCountRef.current += 1;
+            bestComboRef.current = Math.max(bestComboRef.current, comboRef.current);
+            setCombo(comboRef.current);
+          } else {
+            comboRef.current = 0;
+            setCombo(0);
+          }
           setFeedback({ correct: c, msg: c ? praiseByScene("math") : encourageByScene("math") });
+        }}
+        onComplete={() => {
+          const total = QUESTIONS_PER_ROUND;
+          const correct = correctCountRef.current;
+          const best = bestComboRef.current;
+          const result = earnStars({ module: "numbers", total, correct, bestCombo: best });
+          if (result.granted > 0) addStars(result.granted);
+          setSettlement(result);
+          void speak(`恭喜你完成数学闯关！一共获得 ${result.granted} 颗星！`).catch(() => {});
         }}
         aiExplain={(q, chosen, correct) =>
           mathExplainTask(q.prompt, q.display ?? q.prompt, correct, chosen)
@@ -218,6 +250,8 @@ export function MathQuiz() {
         <MathStarQuest />
         <MistakeBookPanel progress={progress} onReview={() => navigate('wrongbook')} />
         <ComboMeter count={combo} />
+        {/* 展示**实际入账**的星数，与成长荣誉馆同一份数据 */}
+        {settlement && <StarSettlementCard result={settlement} moduleName="数学" />}
         {feedback && <GentleFeedback correct={feedback.correct} message={feedback.msg} />}
         <RestReminder />
         <ReducedMotionToggle />

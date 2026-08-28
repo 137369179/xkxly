@@ -22,7 +22,10 @@ import { GentleFeedback } from '@/components/gamification/GentleFeedback';
 import { RestReminder } from '@/components/gamification/RestReminder';
 import { ReducedMotionToggle } from '@/components/gamification/ReducedMotionToggle';
 import { MistakeBookPanel } from '@/components/gamification/MistakeBookPanel';
+import { StarSettlementCard } from '@/components/gamification/StarSettlementCard';
 import { praiseByScene, encourageByScene } from '@/lib/praise';
+import { earnStars, type EarnResult } from '@/game/rewardEconomy';
+import { speak } from '@/lib/speech';
 
 type Phase = 'playing' | 'result';
 type Side = 'en' | 'zh';
@@ -56,7 +59,12 @@ export function WordMatch() {
   const [zhOrder, setZhOrder] = useState<number[]>([]);
   const [selected, setSelected] = useState<{ side: Side; idx: number } | null>(null);
   const [combo, setCombo] = useState(0);
+  /** 本回合最长连击：连对越多，结算奖励越高（与汉字/数学模块一致口径） */
+  const [bestCombo, setBestCombo] = useState(0);
   const [score, setScore] = useState(0);
+  /** 结算结果：展示的是**实际入账**的星数，成长荣誉馆读的是同一份 */
+  const [settlement, setSettlement] = useState<EarnResult | null>(null);
+  const addStars = useStore((s) => s.addStars);
   /** 即时反馈气泡状态（任务 #3）：正确积极强化 / 错误温和引导，无障碍 aria-live */
   const [feedback, setFeedback] = useState<{ correct: boolean; msg: string } | null>(null);
   const [time, setTime] = useState(0);
@@ -80,7 +88,9 @@ export function WordMatch() {
     setZhOrder(shuffle(newPairs.map((_, i) => i)));
     setSelected(null);
     setCombo(0);
+    setBestCombo(0);
     setScore(0);
+    setSettlement(null);
     setFeedback(null);
     setTime(0);
     setPhase('playing');
@@ -94,6 +104,21 @@ export function WordMatch() {
     start(DIFFS.find(d => d.id === id) ?? fallbackDiff);
   }, [start]);
 
+  /**
+   * 回合结算 —— 「赚」的唯一出口，复用全站 `earnStars()` 口径（评级 / 连击 / 全对），
+   * 再经 `addStars()` 入全局账本。连连看全部配对成功即视为全部答对（correct = total）。
+   */
+  const settleRound = useCallback(
+    (total: number, correct: number, best: number): EarnResult => {
+      const result = earnStars({ module: 'words', total, correct, bestCombo: best });
+      if (result.granted > 0) addStars(result.granted);
+      setSettlement(result);
+      void speak(`恭喜你完成单词连连看！一共获得 ${result.granted} 颗星！`).catch(() => {});
+      return result;
+    },
+    [addStars],
+  );
+
   useEffect(() => {
     // 开局用小茜推荐的档位（而不是恒定最简单那档）
     startById(diff);
@@ -106,9 +131,11 @@ export function WordMatch() {
       if (timerRef.current) clearInterval(timerRef.current);
       sfxStar();
       celebrateBig();
+      // 全部配对成功即全部答对；连击用本回合最长连击结算
+      settleRound(pairs.length, pairs.length, bestCombo);
       setPhase('result');
     }
-  }, [allMatched, phase]);
+  }, [allMatched, phase, pairs.length, bestCombo, settleRound]);
 
   const handleClick = (side: Side, idx: number) => {
     if (phase !== 'playing') return;
@@ -137,6 +164,7 @@ export function WordMatch() {
       celebrateSmall();
       const newCombo = combo + 1;
       setCombo(newCombo);
+      setBestCombo((b) => Math.max(b, newCombo));
       const gain = 10 + (newCombo - 1) * 2;
       setScore(s => s + gain);
       setPairs(prev => prev.map((p, i) => i === enIdx ? { ...p, matched: true } : p));
@@ -174,6 +202,8 @@ export function WordMatch() {
             <div className="text-xs font-bold text-ink-soft">{tr('wordMatch.pairs')}</div>
           </div>
         </div>
+        {/* 展示**实际入账**的星数，与成长荣誉馆同一份数据 */}
+        {settlement && <StarSettlementCard result={settlement} moduleName="单词" />}
         <CandyButton
           tone="green"
           size="sm"

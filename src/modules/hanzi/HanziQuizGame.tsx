@@ -16,6 +16,8 @@ import { RestReminder } from '@/components/gamification/RestReminder';
 import { ReducedMotionToggle } from '@/components/gamification/ReducedMotionToggle';
 import { useAdaptiveDifficulty, type DifficultyLevel } from '@/game';
 import { MistakeBookPanel } from '@/components/gamification/MistakeBookPanel';
+import { StarSettlementCard } from '@/components/gamification/StarSettlementCard';
+import { earnStars, type EarnResult } from '@/game/rewardEconomy';
 import { praiseByScene, encourageByScene } from '@/lib/praise';
 
 interface HanziQuizGameProps {
@@ -27,6 +29,7 @@ interface HanziQuizGameProps {
 export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps) {
   const { t } = useTranslation();
   const addFish = useStore((s) => s.addFish);
+  const addStars = useStore((s) => s.addStars);
   const practice = useStore((s) => s.practice);
   const progress = useStore((s) => s.progress);
   const { navigate } = useRoute();
@@ -41,6 +44,17 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
   const [isCompleted, setIsCompleted] = useState(false);
   /** 即时反馈气泡状态（任务 #3）：正确积极强化 / 错误温和引导，无障碍 aria-live */
   const [feedback, setFeedback] = useState<{ correct: boolean; msg: string } | null>(null);
+  /**
+   * 本节最长连击（任务 #1 结算依据）。
+   * 与 `streak`（当前连击，答错即清零）刻意分开：连击奖励看的是「这节课最好的一段
+   * 连续表现」，而不是结束那一刻的残留值 —— 否则孩子答错最后一题会被扣掉整节的连击成果。
+   */
+  const [bestCombo, setBestCombo] = useState(0);
+  /**
+   * 本回合星星结算结果（R162：让「赚到星星」从口头承诺变成入账事实）。
+   * 为 null 表示本回合尚未结算（不应发生，但 UI 做了兜底）。
+   */
+  const [settlement, setSettlement] = useState<EarnResult | null>(null);
 
   /** 渐进式难度（任务 #2）：随连对表现爬坡的当前挑战等级，仅供可视化呈现，不改题目选取逻辑 */
   const adapt = useAdaptiveDifficulty({
@@ -54,8 +68,10 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
     setPool(shuffled);
     setCurrentIndex(0);
     setStreak(0);
+    setBestCombo(0);
     setTotalStars(0);
     setIsCompleted(false);
+    setSettlement(null);
     setFeedback(null);
     adapt.reset();
   }, [level, adapt.reset]);
@@ -81,6 +97,25 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
 
   const currentHanzi = pool[currentIndex];
 
+  /**
+   * 回合结算 —— 「赚」这一步的唯一出口。
+   *
+   * 走的是全站既有通道：`earnStars()` 统一口径（评级 / 连击 / 全对 / 越挫越勇）
+   * → `addStars()` 入全局账本（成长荣誉馆、贴纸商店、成就徽章都读这一份）。
+   * 不另建账本、不另定阈值，避免同一个孩子在三个模块看到三种星级标准。
+   */
+  const settleRound = useCallback(
+    (total: number, correct: number, best: number): EarnResult => {
+      const result = earnStars({ module: 'hanzi', total, correct, bestCombo: best });
+      // 只有真正入账的星数才入账；上限触顶时 granted 为 0，此时不写盘、也不改文案。
+      if (result.granted > 0) addStars(result.granted);
+      setSettlement(result);
+      void speak(`恭喜你完成汉字闯关！一共获得 ${result.granted} 颗星！`).catch(() => {});
+      return result;
+    },
+    [addStars],
+  );
+
   const handleSelectOption = useCallback((entry: HanziEntry) => {
     if (selectedAnswer !== null || !currentHanzi) return;
 
@@ -94,7 +129,10 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
       triggerHaptic(45);
       celebrateSmall();
       adapt.onCorrect();
-      setStreak((prev) => prev + 1);
+      // 连击：当前连击驱动 ComboMeter，最长连击留作本回合结算依据
+      const nextStreak = streak + 1;
+      setStreak(nextStreak);
+      setBestCombo((best) => Math.max(best, nextStreak));
       setTotalStars((prev) => prev + 1);
       addFish(1);
       setFeedback({ correct: true, msg: praiseByScene('hanzi') });
@@ -117,10 +155,15 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
         setIsCompleted(true);
         celebrateBig();
         triggerHaptic([60, 40, 60, 40, 100]);
-        void speak(`恭喜你完成汉字闯关！一共获得 ${totalStars + (correct ? 1 : 0)} 颗星！`).catch(() => {});
+        // 统一口径结算并真实入账（speak 已由 settleRound 负责，避免重复播报）
+        const finalCorrect = totalStars + (correct ? 1 : 0);
+        // 闭包里的 streak / bestCombo 是本次作答前的旧值：答对时新连击为 streak+1，
+        // 答错时连击归零、最长连击不变。
+        const finalBestCombo = correct ? Math.max(bestCombo, streak + 1) : bestCombo;
+        settleRound(pool.length, finalCorrect, finalBestCombo);
       }
     }, 1800);
-  }, [selectedAnswer, currentHanzi, currentIndex, pool.length, totalStars, addFish, practice, adapt.onCorrect, adapt.onWrong]);
+  }, [selectedAnswer, currentHanzi, currentIndex, pool.length, totalStars, streak, bestCombo, settleRound, addFish, practice, adapt.onCorrect, adapt.onWrong]);
 
   const handlePlayVoice = useCallback(() => {
     if (!currentHanzi) return;
@@ -136,7 +179,13 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
     const shuffled = [...rawPool].sort(() => Math.random() - 0.5).slice(0, 5);
     setPool(shuffled);
     setCurrentIndex(0);
+    // 计分必须一并清零：否则「再闯一次」会把上一轮的星星继续往上累加，
+    // 孩子看到的是一串与本节表现无关、且永不入账的虚高数字。
+    setStreak(0);
+    setBestCombo(0);
+    setTotalStars(0);
     setIsCompleted(false);
+    setSettlement(null);
     setFeedback(null);
     adapt.reset();
   }, [level, adapt.reset]);
@@ -175,9 +224,15 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
       <Panel className="text-center p-6 space-y-4 max-w-lg mx-auto border-4 border-candy-pink-deep">
         <div className="text-4xl">🏆</div>
         <h3 className="text-2xl font-black text-candy-pink-deep">{t('hanziQuizGame.completedTitle')}</h3>
+        {/* 展示的是**实际入账**的星数，而非本地计数：孩子在这里看到多少，
+            成长荣誉馆里就多多少，两处必须永远相等 */}
         <p className="text-sm font-bold text-ink-soft">
-          {t('hanziQuizGame.completedDesc', { stars: totalStars })}
+          {t('hanziQuizGame.completedDesc', {
+            stars: settlement ? settlement.granted : totalStars,
+          })}
         </p>
+
+        {settlement && <StarSettlementCard result={settlement} moduleName="汉字" />}
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
           {currentHanzi && onSelectWriting && (
@@ -198,7 +253,11 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
               const shuffled = [...rawPool].sort(() => Math.random() - 0.5).slice(0, 5);
               setPool(shuffled);
               setCurrentIndex(0);
+              setStreak(0);
+              setBestCombo(0);
+              setTotalStars(0);
               setIsCompleted(false);
+              setSettlement(null);
             }}
           >
             🔄 {t('hanziQuizGame.again')}
