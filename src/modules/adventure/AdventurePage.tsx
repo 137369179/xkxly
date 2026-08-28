@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
-import type { LevelDef, Question } from '@/types';
+import type { LevelDef, Progress, Question } from '@/types';
 import { LEVELS, TOTAL_LEVELS } from '@/data/levels';
 import { STORY_MAP } from '@/data/adventureStory';
 import POEMS from '@/data/poems';
-import { BADGES } from '@/data/badges';
+import { BADGES, normalizeProgress } from '@/data/badges';
 import { StoryUnlock } from '@/components/games/StoryUnlock';
 import { CHAPTERS, findChapterByLevel, isBossLevel } from '@/data/adventureChapters';
 import { BossBattle } from '@/components/games/BossBattle';
@@ -32,7 +32,6 @@ import { rampDifficulty } from '@/lib/difficulty';
 import { sample, cn } from '@/lib/utils';
 import { useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
-import type { Progress } from '@/types';
 import { TONE_STYLE, type Tone } from '@/lib/tones';
 import { PageHeader } from '@/components/ui/Card';
 import { Panel, PanelTitle } from '@/components/ui/Card';
@@ -64,7 +63,9 @@ const MAKERS: Record<string, (d: Difficulty) => Question> = {
 function makeAdventureQuestion(level: LevelDef, d: Difficulty): Question {
   const kinds = level.kinds ?? [];
   const kind = kinds.length ? sample(kinds) : 'math';
-  return makeSpacedDrill(kind, MAKERS[kind]! ?? [], () => useStore.getState().progress)(d);
+  const maker = MAKERS[kind];
+  if (!maker) return makeMathQuestion(d);
+  return makeSpacedDrill(kind, maker, () => useStore.getState().progress)(d);
 }
 
 export default function AdventurePage(_: { param?: string }) {
@@ -94,7 +95,7 @@ export default function AdventurePage(_: { param?: string }) {
   // 动态难度：以关卡基础难度为下限，根据该关卡涉及题型的掌握度上调，
   // 让已经掌握的技能自然变难，形成顺滑的难度曲线（不会低于关卡预设难度）
   const adventureDifficulty = useMemo<Difficulty>(() => {
-    if (!level) return 1;
+    if (!level) return 1 as Difficulty;
     const base = (level.difficulty ?? 1) as 1 | 2 | 3;
     const kinds = level.kinds ?? [];
     let d: 1 | 2 | 3 = base;
@@ -103,7 +104,7 @@ export default function AdventurePage(_: { param?: string }) {
       if (rd > d) d = rd;
     }
     return d as Difficulty;
-  }, [level, progress]);
+  }, [level, progress.mastery, progress.badges]);
 
   if (level) {
     const nextLevel = LEVELS.find((l) => l.id === level.id + 1) ?? null;
@@ -292,9 +293,9 @@ export default function AdventurePage(_: { param?: string }) {
       <div className="space-y-5">
         {CHAPTERS.map((chapter) => {
           const chapterLevels = chapter.levelIds
-            .map(id => LEVELS.find(l => l.id === id)!)
-            .filter(Boolean);
-          const chapterUnlocked = chapterLevels[0]!.id <= progress.unlockedLevel;
+            .map(id => LEVELS.find(l => l.id === id))
+            .filter((x): x is LevelDef => !!x);
+          const chapterUnlocked = chapterLevels[0]?.id != null && chapterLevels[0].id <= progress.unlockedLevel;
 
           return (
             <div
@@ -397,7 +398,7 @@ export default function AdventurePage(_: { param?: string }) {
           {BADGES.map((b) => {
             const owned = ownedBadges.has(b.id);
             const t = TONE_STYLE[(b.tone ?? 'blue') as Tone]!
-            const meter = b.meter?.(progress);
+            const meter = b.meter?.(normalizeProgress(progress));
             return (
               <div
                 key={b.id}

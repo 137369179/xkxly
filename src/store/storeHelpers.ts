@@ -156,13 +156,14 @@ export function wrongCategory(skill: string): string {
 
 /** 按类别分桶更新错题本 */
 export function applyWrongBook(p: Progress, skill: string, correct: boolean, m: MasteryItem): string[] {
+  const wrongBook = p.wrongBook ?? [];
   if (correct && m.lv >= 3) {
-    return p.wrongBook.filter((x) => x !== skill);
+    return wrongBook.filter((x) => x !== skill);
   }
   if (correct) {
-    return p.wrongBook;
+    return wrongBook;
   }
-  const filtered = p.wrongBook.filter((x) => x !== skill);
+  const filtered = wrongBook.filter((x) => x !== skill);
   const cat = wrongCategory(skill);
   const sameCatCount = filtered.filter((x) => wrongCategory(x) === cat).length;
   if (sameCatCount >= WRONG_CAP_PER_CATEGORY) {
@@ -195,9 +196,10 @@ export function applyPractice(
   correct: boolean,
   star: number,
   difficulty?: 1 | 2 | 3,
+  latencyMs?: number,
 ): Progress {
   const now = Date.now();
-  const m = review(p.mastery[skill], correct, now, difficulty);
+  const m = review(p.mastery[skill], correct, now, difficulty, latencyMs);
   // P-每日目标修复：首次达到「已掌握」（lv>=1）时记录日期，供每日「新掌握」目标精确统计（旧数据缺失 firstSeen 视为非今日）
   if (m.lv >= 1 && !m.firstSeen) m.firstSeen = dateKey();
   const wrongBook = applyWrongBook(p, skill, correct, m);

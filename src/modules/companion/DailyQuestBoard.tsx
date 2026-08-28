@@ -7,14 +7,14 @@
  * - 完成的任务显示"领取奖励"按钮 → claimQuestReward(id)
  * - 全部完成显示庆祝
  */
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AiAvatar } from '@/components/ai/AiAvatar';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { useStore } from '@/store/useStore';
 import { dateKey } from '@/lib/dailyPlan';
 import { TONE_STYLE, toneAt } from '@/lib/tones';
-import { sfxTap, sfxStar, sfxCorrect } from '@/lib/sfx';
+import { sfxTap, sfxStar, sfxCorrect, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 import type { DailyQuest } from '@/types';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -85,7 +85,7 @@ function QuestCard({ quest, tone, onClaim }: {
         <motion.button
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          onClick={() => onClaim(quest.id)}
+          onClick={() => { triggerHaptic(45); onClaim(quest.id); }}
           className="min-h-[48px] w-full rounded-full text-base font-extrabold transition active:translate-y-[2px]"
           style={{
             background: '#FFC93C',
@@ -104,6 +104,7 @@ function QuestCard({ quest, tone, onClaim }: {
       {!quest.completed && (
         <a
           href={quest.route}
+          onClick={() => triggerHaptic(20)}
           className="block min-h-[48px] w-full rounded-full border-2 text-center text-base font-extrabold leading-[44px] transition active:translate-y-[2px]"
           style={{ borderColor: `${tone.main}55`, color: tone.deep }}
         >
@@ -140,25 +141,59 @@ export function DailyQuestBoard() {
     if (hasQuests) {
       checkQuestCompletion();
     }
-  }, [hasQuests, progress.mathTotal, progress.poemsRead.length, progress.logicTotal, progress.traced.length, checkQuestCompletion]);
+  }, [hasQuests, progress.mathTotal, (progress.poemsRead ?? []).length, progress.logicTotal, (progress.traced ?? []).length, checkQuestCompletion]);
 
-  const handleGenerate = () => {
+  const handleGenerate = useCallback(() => {
     sfxTap();
+    triggerHaptic(30);
     generateDailyQuests();
-  };
+  }, [generateDailyQuests]);
 
-  const handleClaim = (questId: string) => {
+  const handleClaim = useCallback((questId: string) => {
     sfxStar();
     sfxCorrect();
+    triggerHaptic(45);
     claimQuestReward(questId);
     // 小庆祝
     void celebrateSmall();
-  };
+  }, [claimQuestReward]);
+
+  // 全局键盘快捷键
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['1', '2', '3'].includes(e.key)) {
+        const idx = parseInt(e.key, 10) - 1;
+        const q = quests[idx];
+        if (q && q.completed) {
+          const claimedKey = `questClaimed_${q.id}_${today}`;
+          if (!progress.chatHistory?.[claimedKey]) {
+            e.preventDefault();
+            handleClaim(q.id);
+          }
+        }
+      } else if (e.key === ' ' || e.key === 'Enter') {
+        if (!hasQuests) {
+          e.preventDefault();
+          handleGenerate();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [quests, hasQuests, today, progress.chatHistory, handleClaim, handleGenerate]);
 
   const tone = TONE_STYLE.green;
 
   return (
     <Panel>
+      {/* 快捷操作提示条 */}
+      <div className="mb-3 text-center">
+        <span className="inline-block text-[11px] text-green-900 font-bold bg-green-50/90 px-3 py-1 rounded-xl border border-green-200">
+          ⌨️ 键盘快捷操作：数字键 1-3 领取完成任务 · 空格 生成今日成长任务
+        </span>
+      </div>
+
       <PanelTitle
         emoji="📋"
         title={tr('quest.title')}

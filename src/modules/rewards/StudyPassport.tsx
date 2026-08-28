@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useBadges, useBadgeDates, useBadgeMetricProgress } from '@/store/useStore';
-import { BADGE_MAP } from '@/data/badges';
+import { BADGE_MAP, normalizeProgress } from '@/data/badges';
 import { TONE_STYLE, type Tone } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 import { PageHeader, Panel, PanelTitle } from '@/components/ui/Card';
@@ -9,6 +9,8 @@ import { ProgressBar } from '@/components/ui/ProgressBar';
 import { AchievementWall } from '@/components/AchievementWall';
 import type { BadgeDef, Progress } from '@/types';
 import { useTranslation } from '@/i18n/useTranslation';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
+import { navigate } from '@/lib/router';
 
 /**
  * 学习护照
@@ -85,6 +87,21 @@ export default function StudyPassport() {
   const metric = useBadgeMetricProgress();
   const ownedBadges = useMemo(() => new Set(badges), [badges]);
 
+  // 全局键盘快捷键响应 (Esc 返回主页)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        navigate('home');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // 总盖章数
   const stampedCount = useMemo(
     () => PASSPORT_GROUPS.flatMap((g) => g.milestones).filter((id) => ownedBadges.has(id)).length,
@@ -104,6 +121,13 @@ export default function StudyPassport() {
         tone="purple"
       />
 
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-[11px] text-purple-900 font-bold bg-purple-50/90 px-3.5 py-1.5 rounded-2xl border border-purple-200 shadow-sm">
+          ⌨️ 键盘快捷操作：点击徽章印章查看详情 · Esc 返回乐园主页
+        </span>
+      </div>
+
       {PASSPORT_GROUPS.map((group) => {
         const groupDone = group.milestones.filter((id) => ownedBadges.has(id)).length;
         return (
@@ -120,7 +144,7 @@ export default function StudyPassport() {
                 if (!badge) return null;
                 const stamped = ownedBadges.has(badgeId);
                 const date = badgeDates[badgeId];
-                const meter = badge.meter?.(metric as Progress);
+                const meter = badge.meter?.(normalizeProgress(metric as Progress));
                 return (
                   <Stamp
                     key={badgeId}

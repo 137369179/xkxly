@@ -69,13 +69,13 @@ export function moduleStat(route: RouteId | string, p: Progress): ModuleStat {
       done = (p.storybooks ?? []).length;
       break;
     case 'poemsRead':
-      done = p.poemsRead.length;
+      done = (p.poemsRead ?? []).length;
       break;
     case 'lettersHeard':
-      done = p.lettersHeard.length;
+      done = (p.lettersHeard ?? []).length;
       break;
     case 'numbersHeard':
-      done = p.numbersHeard.length;
+      done = (p.numbersHeard ?? []).length;
       break;
   }
   const rate = Math.min(1, done / def.total);

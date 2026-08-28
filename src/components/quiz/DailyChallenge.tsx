@@ -38,7 +38,7 @@ const CHALLENGES: Challenge[] = [
     target: 10,
     // 当日增量：今日数学总数 - 起始值（旧数据无起始值时兜底为 0 增量）
     check: (p) => {
-      const start = p.dailyLog[dateKey()]?.startMathTotal ?? p.mathTotal ?? 0;
+      const start = (p.dailyLog ?? {})[dateKey()]?.startMathTotal ?? p.mathTotal ?? 0;
       return (p.mathTotal ?? 0) - start;
     },
     reward: 3,
@@ -49,7 +49,7 @@ const CHALLENGES: Challenge[] = [
     label: 'dailyChallenge.poem2',
     emoji: '🌸',
     target: 2,
-    check: (p) => p.poemsRead.length,
+    check: (p) => (p.poemsRead ?? []).length,
     reward: 2,
     route: 'poems',
   },
@@ -60,7 +60,7 @@ const CHALLENGES: Challenge[] = [
     target: 5,
     // 当日增量：今日逻辑总数 - 起始值（旧数据无起始值时兜底为 0 增量）
     check: (p) => {
-      const start = p.dailyLog[dateKey()]?.startLogicTotal ?? p.logicTotal ?? 0;
+      const start = (p.dailyLog ?? {})[dateKey()]?.startLogicTotal ?? p.logicTotal ?? 0;
       return (p.logicTotal ?? 0) - start;
     },
     reward: 3,
@@ -80,7 +80,7 @@ const CHALLENGES: Challenge[] = [
     label: 'dailyChallenge.hanzi5',
     emoji: '🀄',
     target: 5,
-    check: (p) => Object.keys(p.mastery).filter((k: string) => k.startsWith('hanzi:')).length,
+    check: (p) => Object.keys(p.mastery ?? {}).filter((k: string) => k.startsWith('hanzi:')).length,
     reward: 3,
     route: 'hanzi',
   },
@@ -89,7 +89,7 @@ const CHALLENGES: Challenge[] = [
     label: 'dailyChallenge.pinyin3',
     emoji: '📋',
     target: 3,
-    check: (p) => Object.keys(p.mastery).filter((k: string) => k.startsWith('pinyin:')).length,
+    check: (p) => Object.keys(p.mastery ?? {}).filter((k: string) => k.startsWith('pinyin:')).length,
     reward: 2,
     route: 'pinyin',
   },
@@ -98,7 +98,7 @@ const CHALLENGES: Challenge[] = [
     label: 'dailyChallenge.word3',
     emoji: '🌐',
     target: 3,
-    check: (p) => Object.keys(p.mastery).filter((k: string) => k.startsWith('word:')).length,
+    check: (p) => Object.keys(p.mastery ?? {}).filter((k: string) => k.startsWith('word:')).length,
     reward: 2,
     route: 'words',
   },
@@ -116,7 +116,7 @@ const CHALLENGES: Challenge[] = [
     label: 'dailyChallenge.lesson1',
     emoji: '📅',
     target: 1,
-    check: (p) => (p.dailyLog[dateKey()]?.lesson ? 1 : 0),
+    check: (p) => ((p.dailyLog ?? {})[dateKey()]?.lesson ? 1 : 0),
     reward: 5,
     route: 'today',
   },

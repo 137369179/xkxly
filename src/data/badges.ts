@@ -735,8 +735,70 @@ export const BADGES: BadgeDef[] = [
 
 export const BADGE_MAP = new Map(BADGES.map((b) => [b.id, b]));
 
+// ── 安全读取 Progress ──────────────────────────────────────────
+// localStorage 旧数据可能缺失某些字段（如 lettersHeard），导致
+export function normalizeProgress(p: Progress): Progress {
+  return {
+    ...p,
+    lettersHeard: p.lettersHeard ?? [],
+    poemsRead: p.poemsRead ?? [],
+    numbersHeard: p.numbersHeard ?? [],
+    matchGamesWon: p.matchGamesWon ?? 0,
+    mathCorrect: p.mathCorrect ?? 0,
+    mathTotal: p.mathTotal ?? 0,
+    countCorrect: p.countCorrect ?? 0,
+    logicCorrect: p.logicCorrect ?? 0,
+    logicTotal: p.logicTotal ?? 0,
+    stars: p.stars ?? 0,
+    spent: p.spent ?? 0,
+    streak: p.streak ?? 0,
+    levelStars: p.levelStars ?? {},
+    mastery: p.mastery ?? {},
+    wrongBook: p.wrongBook ?? [],
+    dailyLog: p.dailyLog ?? {},
+    poemRecite: p.poemRecite ?? {},
+    badgeDates: p.badgeDates ?? {},
+    poemFavorites: p.poemFavorites ?? [],
+    poemMarks: p.poemMarks ?? {},
+    poemNotes: p.poemNotes ?? {},
+    researchNotes: p.researchNotes ?? {},
+    discoveries: p.discoveries ?? [],
+    gameBest: p.gameBest ?? {},
+    bossRecords: p.bossRecords ?? {},
+    chatHistory: p.chatHistory ?? {},
+    ownedEquipment: p.ownedEquipment ?? [],
+    researchStats: p.researchStats ?? {
+      topicsExplored: [],
+      exploreActions: 0,
+      cardsRead: 0,
+      sessionsCompleted: 0,
+      exploreSeconds: 0,
+    },
+    speedCorrect: p.speedCorrect ?? 0,
+    pkCount: p.pkCount ?? 0,
+    wrongHistory: p.wrongHistory ?? {
+      totalEver: 0,
+      uniqueSkills: 0,
+      cleared: 0,
+      maxCount: 0,
+      bestStreak: 0,
+      dailyStreak: 0,
+      lastTrainDate: '',
+      aiAnalyzeCount: 0,
+    },
+    traced: p.traced ?? [],
+    stickers: p.stickers ?? [],
+    growth: p.growth ?? [],
+    unlockedLevel: p.unlockedLevel ?? 1,
+    lastVisit: p.lastVisit ?? '',
+    lessonDate: p.lessonDate ?? '',
+    lessonStep: p.lessonStep ?? 0,
+  };
+}
+
 /** 计算当前应当解锁但尚未记录的徽章 */
 export function findNewBadges(p: Progress): string[] {
-  const owned = new Set(p.badges);
-  return BADGES.filter((b) => !owned.has(b.id) && b.check(p)).map((b) => b.id);
+  const safe = normalizeProgress(p);
+  const owned = new Set(safe.badges);
+  return BADGES.filter((b) => !owned.has(b.id) && b.check(safe)).map((b) => b.id);
 }

@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { useBadges, useBadgeDates, useBadgeMetricProgress } from '@/store/useStore';
-import { BADGE_MAP } from '@/data/badges';
+import { BADGE_MAP, normalizeProgress } from '@/data/badges';
 import { TONE_STYLE } from '@/lib/tones';
 import { sfxTap } from '@/lib/sfx';
 import type { BadgeDef, Progress } from '@/types';
@@ -46,7 +46,7 @@ export function WrongBookBadgeList() {
       .filter((b): b is BadgeDef => !!b)
       .map((b) => {
         const unlocked = badges.includes(b.id);
-        const meter = b.meter ? b.meter(metric as Progress) : [unlocked ? 1 : 0, 1];
+        const meter = b.meter ? b.meter(normalizeProgress(metric as Progress)) : [unlocked ? 1 : 0, 1];
         const current = meter[0]!;
         const target = meter[1]!;
         const pct = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;

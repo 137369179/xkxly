@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
-import { BADGES } from '@/data/badges';
+import { BADGES, normalizeProgress } from '@/data/badges';
 import { TONE_STYLE, type Tone } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 import { Panel, PanelTitle } from '@/components/ui/Card';
@@ -102,7 +102,7 @@ export function AchievementWall() {
                   badge={b}
                   unlocked={owned.has(b.id)}
                   date={fmtDate(badgeDates[b.id])}
-                  meter={b.meter?.(metric as Progress)}
+                  meter={b.meter?.(normalizeProgress(metric as Progress))}
                   tier={tier}
                 />
               ))}

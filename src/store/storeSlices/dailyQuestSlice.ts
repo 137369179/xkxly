@@ -51,7 +51,7 @@ export const createDailyQuestSlice: SliceCreator<
     if (!quests) return;
 
     const p = get().progress;
-    const todayLog = p.dailyLog[today];
+    const todayLog = (p.dailyLog ?? {})[today];
     const itemsToday = todayLog?.items ?? 0;
 
     let changed = false;
@@ -59,10 +59,10 @@ export const createDailyQuestSlice: SliceCreator<
       if (q.completed) return q;
       let current = q.currentCount;
       if (q.type === 'math') current = Math.min(itemsToday, q.targetCount);
-      else if (q.type === 'poem') current = Math.min(p.poemsRead.length, q.targetCount);
+      else if (q.type === 'poem') current = Math.min((p.poemsRead ?? []).length, q.targetCount);
       else if (q.type === 'logic') current = Math.min(p.logicTotal, q.targetCount);
-      else if (q.type === 'hanzi') current = Math.min(p.traced.length, q.targetCount);
-      else if (q.type === 'word') current = Math.min(p.lettersHeard.length, q.targetCount);
+      else if (q.type === 'hanzi') current = Math.min((p.traced ?? []).length, q.targetCount);
+      else if (q.type === 'word') current = Math.min((p.lettersHeard ?? []).length, q.targetCount);
 
       const isDone = current >= q.targetCount;
       if (isDone && !q.completed) {

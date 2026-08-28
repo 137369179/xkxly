@@ -158,8 +158,8 @@ async function generateReport(
     `📚 接触知识点：${touchedCount(progress)} 个`,
     `✅ 已熟练：${masteredCount(progress)} 个`,
     `📈 整体掌握率：${Math.round(masteryRate(progress) * 100)}%`,
-    `📖 已读古诗：${progress.poemsRead.length} 首`,
-    `❌ 错题本：${progress.wrongBook.length} 题`,
+    `📖 已读古诗：${(progress.poemsRead ?? []).length} 首`,
+    `❌ 错题本：${(progress.wrongBook ?? []).length} 题`,
   ];
   for (const s of stats) {
     ctx.fillText(s, 60, y);
