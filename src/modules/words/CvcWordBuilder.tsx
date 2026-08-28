@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { CandyButton } from '@/components/ui/Button';
-import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, triggerHaptic } from '@/lib/sfx';
 import { speak, speakLetter } from '@/lib/speech';
 import { celebrateSmall } from '@/lib/celebrate';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -27,6 +27,14 @@ const CVC_WORDS: CvcTarget[] = [
   { word: 'hat', letters: ['h', 'a', 't'], emoji: '🎩', meaning: '帽子', phonics: ['/h/', '/æ/', '/t/'], options: ['h', 'a', 't', 'o', 'e', 'g'] },
   { word: 'bed', letters: ['b', 'e', 'd'], emoji: '🛏️', meaning: '小床', phonics: ['/b/', '/e/', '/d/'], options: ['b', 'e', 'd', 'p', 'a', 't'] },
   { word: 'cup', letters: ['c', 'u', 'p'], emoji: '🥛', meaning: '杯子', phonics: ['/k/', '/ʌ/', '/p/'], options: ['c', 'u', 'p', 'b', 'o', 't'] },
+  { word: 'bag', letters: ['b', 'a', 'g'], emoji: '🎒', meaning: '书包', phonics: ['/b/', '/æ/', '/g/'], options: ['b', 'a', 'g', 'p', 'e', 'd'] },
+  { word: 'map', letters: ['m', 'a', 'p'], emoji: '🗺️', meaning: '地图', phonics: ['/m/', '/æ/', '/p/'], options: ['m', 'a', 'p', 'n', 'u', 't'] },
+  { word: 'hen', letters: ['h', 'e', 'n'], emoji: '🐔', meaning: '母鸡', phonics: ['/h/', '/e/', '/n/'], options: ['h', 'e', 'n', 'p', 'o', 't'] },
+  { word: 'net', letters: ['n', 'e', 't'], emoji: '🥅', meaning: '网兜', phonics: ['/n/', '/e/', '/t/'], options: ['n', 'e', 't', 'm', 'a', 'p'] },
+  { word: 'bin', letters: ['b', 'i', 'n'], emoji: '🗑️', meaning: '垃圾桶', phonics: ['/b/', '/ɪ/', '/n/'], options: ['b', 'i', 'n', 'p', 'e', 'g'] },
+  { word: 'box', letters: ['b', 'o', 'x'], emoji: '📦', meaning: '盒子', phonics: ['/b/', '/ɒ/', '/ks/'], options: ['b', 'o', 'x', 'f', 'u', 'n'] },
+  { word: 'nut', letters: ['n', 'u', 't'], emoji: '🥜', meaning: '坚果', phonics: ['/n/', '/ʌ/', '/t/'], options: ['n', 'u', 't', 'c', 'a', 'p'] },
+  { word: 'bug', letters: ['b', 'u', 'g'], emoji: '🐛', meaning: '小虫', phonics: ['/b/', '/ʌ/', '/g/'], options: ['b', 'u', 'g', 'l', 'e', 'g'] },
 ];
 
 export function CvcWordBuilder() {
@@ -40,6 +48,7 @@ export function CvcWordBuilder() {
 
   const playBlending = useCallback(async () => {
     sfxTap();
+    triggerHaptic(20);
     for (let i = 0; i < current.letters.length; i++) {
       setBlendingStep(i);
       const letter = current.letters[i]!;
@@ -52,8 +61,9 @@ export function CvcWordBuilder() {
     setBlendingStep(null);
   }, [current]);
 
-  const handlePickLetter = (letter: string) => {
+  const handlePickLetter = useCallback((letter: string) => {
     sfxTap();
+    triggerHaptic(20);
     void speakLetter(letter).catch(() => {});
     if (userLetters.length >= current.letters.length) return;
     const nextList = [...userLetters, letter];
@@ -62,42 +72,89 @@ export function CvcWordBuilder() {
     if (nextList.length === current.letters.length) {
       if (nextList.join('') === current.word) {
         sfxCorrect();
+        triggerHaptic(45);
         celebrateSmall();
         setFeedback('correct');
         practice(`word:${current.word}`, true);
         void speak(`${current.word}! ${current.meaning}!`, { lang: 'en-US', rate: 0.8 }).catch(() => {});
       } else {
         sfxWrong();
+        triggerHaptic([60, 40, 60]);
         setFeedback('wrong');
         practice(`word:${current.word}`, false);
         void speak('Try again!', { lang: 'en-US' }).catch(() => {});
       }
     }
-  };
+  }, [userLetters, current, practice]);
 
-  const handleRemoveSlot = (slotIdx: number) => {
+  const handleRemoveSlot = useCallback((slotIdx: number) => {
     sfxTap();
+    triggerHaptic(15);
     const next = [...userLetters];
     next.splice(slotIdx, 1);
     setUserLetters(next);
     setFeedback('');
-  };
+  }, [userLetters]);
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     sfxTap();
+    triggerHaptic(20);
     setUserLetters([]);
     setFeedback('');
-  };
+  }, []);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     sfxTap();
+    triggerHaptic(25);
     setUserLetters([]);
     setFeedback('');
-    setIdx((idx + 1) % CVC_WORDS.length);
-  };
+    setIdx((i) => (i + 1) % CVC_WORDS.length);
+  }, []);
+
+  // 全局键盘快捷键
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['1', '2', '3', '4', '5', '6'].includes(e.key)) {
+        const optIdx = parseInt(e.key, 10) - 1;
+        const opt = current.options[optIdx];
+        if (opt) {
+          e.preventDefault();
+          handlePickLetter(opt);
+        }
+      } else if (e.key === 'Backspace') {
+        if (userLetters.length > 0) {
+          e.preventDefault();
+          handleRemoveSlot(userLetters.length - 1);
+        }
+      } else if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        if (feedback === 'correct') {
+          handleNext();
+        } else {
+          void playBlending();
+        }
+      } else if (/^[a-zA-Z]$/.test(e.key)) {
+        const char = e.key.toLowerCase();
+        if (current.options.includes(char)) {
+          e.preventDefault();
+          handlePickLetter(char);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [current, userLetters, feedback, handlePickLetter, handleRemoveSlot, handleNext, playBlending]);
 
   return (
     <div className="rounded-3xl border-3 border-candy-pink-soft/60 bg-gradient-to-br from-pink-50 via-purple-50 to-amber-50 p-5 text-center space-y-4 shadow-fluffy">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-pink-900 font-bold bg-pink-50/90 px-3 py-1 rounded-xl border border-pink-200">
+          ⌨️ 键盘快捷操作：直接敲击字母 A-Z / 数字键 1-6 · 退格撤销 · 空格示范 / 下一词
+        </span>
+      </div>
+
       <div className="flex items-center justify-between">
         <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-pink-700 shadow-sm border border-pink-100">
           {t('cvcWordBuilder.badge', { current: idx + 1, total: CVC_WORDS.length })}
@@ -142,7 +199,7 @@ export function CvcWordBuilder() {
               } ${isHighlight ? 'ring-4 ring-candy-yellow-deep scale-110' : ''}`}
             >
               <span>{userLetters[i] || '?'}</span>
-              <span className="text-[10px] font-bold opacity-75">{current.phonics[i]}</span>
+              <span className="text-xs font-bold opacity-75">{current.phonics[i]}</span>
             </motion.button>
           );
         })}

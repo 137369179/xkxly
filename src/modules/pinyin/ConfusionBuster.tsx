@@ -229,7 +229,7 @@ export function ConfusionBuster() {
             >
               <span className="text-2xl mb-0.5">{topic.emoji}</span>
               <span className={`text-xs font-black ${isSel ? topic.color : 'text-slate-700'}`}>{topic.title}</span>
-              <span className="text-[10px] text-slate-400 font-bold">{topic.tag}</span>
+              <span className="text-xs text-slate-400 font-bold">{topic.tag}</span>
             </button>
           );
         })}

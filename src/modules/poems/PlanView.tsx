@@ -78,7 +78,7 @@ export default function PlanView({ onOpen }: { onOpen: (id: string, tab?: '原�
                 {plan.focus.length > 0 && (
                   <div className="mb-2 flex flex-wrap gap-1.5">
                     {plan.focus.map((f, i) => (
-                      <span key={`f-${i}`} className="rounded-full bg-candy-orange-soft px-2.5 py-0.5 text-[11px] font-bold text-candy-orange-deep">{f}</span>
+                      <span key={`f-${i}`} className="rounded-full bg-candy-orange-soft px-2.5 py-0.5 text-xs font-bold text-candy-orange-deep">{f}</span>
                     ))}
                   </div>
                 )}
@@ -86,14 +86,14 @@ export default function PlanView({ onOpen }: { onOpen: (id: string, tab?: '原�
                 {/* 步骤链 */}
                 <div className="flex flex-wrap items-center gap-1.5">
                   {plan.steps.map((s, i) => (
-                    <span key={`s-${i}`} className="rounded-full bg-candy-purple-soft px-2.5 py-1 text-[11px] font-bold text-candy-purple-deep">
+                    <span key={`s-${i}`} className="rounded-full bg-candy-purple-soft px-2.5 py-1 text-xs font-bold text-candy-purple-deep">
                       {i + 1}.{stepLabel(s.type)}
                     </span>
                   ))}
                 </div>
 
                 <div className="mt-3 flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-ink-soft/70">{t('planView.suggestStage', { stage: plan.nextStage })}</span>
+                  <span className="text-xs font-bold text-ink-soft/70">{t('planView.suggestStage', { stage: plan.nextStage })}</span>
                   <CandyButton tone="pink" size="sm" onClick={() => onOpen(plan.poemId, '研读')}>{t('planView.startReview')}</CandyButton>
                 </div>
               </motion.div>

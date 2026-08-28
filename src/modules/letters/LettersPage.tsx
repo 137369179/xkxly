@@ -87,11 +87,18 @@ export default function LettersPage() {
         e.preventDefault();
         triggerHaptic(20);
         setTab('phonics');
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        if (tab !== 'wall') {
+          setTab('wall');
+        } else {
+          navigate('home');
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [unlockedPhonics]);
+  }, [unlockedPhonics, tab]);
 
   return (
     <div className="space-y-4">
@@ -104,7 +111,7 @@ export default function LettersPage() {
 
       {/* 快捷操作提示条 */}
       <div className="text-center">
-        <span className="inline-block text-[11px] text-blue-900 font-bold bg-blue-50/90 px-3 py-1 rounded-xl border border-blue-200">
+        <span className="inline-block text-xs text-blue-900 font-bold bg-blue-50/90 px-3 py-1 rounded-xl border border-blue-200">
           ⌨️ 键盘快捷操作：数字 1-6 切换模式 (字母墙/精学/描红/排序/游乐场/自然拼读)
         </span>
       </div>

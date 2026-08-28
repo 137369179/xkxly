@@ -11,7 +11,8 @@
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { sfxTap } from '@/lib/sfx';
-import { ensureStrokeData, medianLength, type StrokeData } from '@/lib/strokes';
+import { useStrokeData } from '@/lib/useStrokeData';
+import { medianLength } from '@/lib/strokes';
 import { useTranslation } from '@/i18n/useTranslation';
 
 interface StrokeAnimationProps {
@@ -32,8 +33,7 @@ function medianToPath(m: [number, number][]): string {
 
 export function StrokeAnimation({ char, autoPlay = true, strokeMs = 750 }: StrokeAnimationProps) {
   const { t } = useTranslation();
-  const [data, setData] = useState<StrokeData | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const { data, loaded } = useStrokeData(char);
   const [current, setCurrent] = useState(-1); // 正在写的笔序；-1 = 未开始
   const [playing, setPlaying] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -41,22 +41,13 @@ export function StrokeAnimation({ char, autoPlay = true, strokeMs = 750 }: Strok
   const total = data?.s.length ?? 0;
   const done = current >= total - 1 && total > 0;
 
-  // 加载笔顺数据
+  // useStrokeData 的 loaded 回 false 时重置子状态
   useEffect(() => {
-    let alive = true;
-    setLoaded(false);
-    setData(null);
-    setCurrent(-1);
-    setPlaying(false);
-    ensureStrokeData(char).then((d) => {
-      if (!alive) return;
-      setData(d);
-      setLoaded(true);
-    });
-    return () => {
-      alive = false;
-    };
-  }, [char]);
+    if (!loaded) {
+      setCurrent(-1);
+      setPlaying(false);
+    }
+  }, [loaded]);
 
   const clearTimer = () => {
     if (timerRef.current) {

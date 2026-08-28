@@ -5,13 +5,14 @@
  * 2. 小园丁阳光水滴浇水成长实验室 (种子->发芽->开花->结果)
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
-import { sfxTap, sfxCorrect } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, triggerHaptic } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useStore, useMastery } from '@/store/useStore';
+import { navigate } from '@/lib/router';
 
 interface Plant {
   id: string;
@@ -57,6 +58,7 @@ export default function PlantsPage() {
 
   const handleSelectP = (p: Plant) => {
     sfxTap();
+    triggerHaptic(20);
     setSelectedP(p);
     speak(`${p.nameZh}，${p.nameEn}。特点：${p.feature}秘密：${p.secret}`, { lang: 'zh-CN' });
     learnSkill(`plant:${p.id}`);
@@ -65,6 +67,7 @@ export default function PlantsPage() {
 
   const addSun = () => {
     sfxTap();
+    triggerHaptic(30);
     setSunCount(c => c + 1);
     tickTime(3);
     checkGrowth(sunCount + 1, waterCount);
@@ -72,6 +75,7 @@ export default function PlantsPage() {
 
   const addWater = () => {
     sfxTap();
+    triggerHaptic(30);
     setWaterCount(c => c + 1);
     tickTime(3);
     checkGrowth(sunCount, waterCount + 1);
@@ -82,17 +86,20 @@ export default function PlantsPage() {
     if (total >= 6 && growthStage < 3) {
       setGrowthStage(3);
       sfxCorrect();
+      triggerHaptic(50);
       speak('哇！小植物在阳光和甜甜水滴养育下，结出了丰硕的果实！', { lang: 'zh-CN' });
       practice('plant:garden', true, 1, 1);
       practice('plant:garden-master', true, 3, 2);
     } else if (total >= 4 && growthStage < 2) {
       setGrowthStage(2);
       sfxTap();
+      triggerHaptic(20);
       speak('开出美丽的花朵啦！', { lang: 'zh-CN' });
       practice('plant:garden', true, 1, 1);
     } else if (total >= 2 && growthStage < 1) {
       setGrowthStage(1);
       sfxTap();
+      triggerHaptic(20);
       speak('小嫩芽破土而出啦！', { lang: 'zh-CN' });
       practice('plant:garden', true, 1, 1);
     }
@@ -100,10 +107,33 @@ export default function PlantsPage() {
 
   const resetGarden = () => {
     sfxTap();
+    triggerHaptic(20);
     setGrowthStage(0);
     setWaterCount(0);
     setSunCount(0);
   };
+
+  // 全局键盘快捷键响应 (1/S 阳光 · 2/W 浇水 · R 重新播种)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === '1' || e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        addSun();
+      } else if (e.key === '2' || e.key.toLowerCase() === 'w') {
+        e.preventDefault();
+        addWater();
+      } else if (e.key.toLowerCase() === 'r') {
+        e.preventDefault();
+        resetGarden();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        navigate('home');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [sunCount, waterCount, growthStage]);
 
   const STAGE_ICONS = ['🌰', '🌱', '🌸', '🍎'];
   const STAGE_NAMES = ['泥土中的小种子', '破土而出的小嫩芽', '盛开的花朵', '硕果累累的大苹果'];
@@ -116,6 +146,13 @@ export default function PlantsPage() {
         subtitle={tr('plants.subtitle')}
         tone="green"
       />
+
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-emerald-900 font-bold bg-emerald-50/90 px-3 py-1 rounded-xl border border-emerald-200">
+          ⌨️ 键盘快捷操作：S/1 照耀阳光 · W/2 浇灌水滴 · R 重新播种
+        </span>
+      </div>
 
       {/* 奇妙植物百科 */}
       <Panel className="border-2 border-emerald-300 bg-emerald-50 text-center space-y-4">

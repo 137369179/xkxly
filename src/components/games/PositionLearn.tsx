@@ -78,7 +78,7 @@ export function PositionLearn() {
             <button key={p.label} onClick={()=>pickPose(p)} className={`${p.color} rounded-2xl p-4 text-center shadow-sm transition-all hover:scale-105 active:scale-95`}>
               <div className="text-3xl">{p.emoji}</div>
               <div className="mt-1 text-sm font-extrabold">{p.label}</div>
-              <div className="text-[10px] font-medium opacity-70">{p.en}</div>
+              <div className="text-xs font-medium opacity-70">{p.en}</div>
             </button>
           ))}
         </div>

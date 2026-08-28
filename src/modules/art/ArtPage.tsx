@@ -10,7 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
-import { sfxTap, sfxMagic, sfxPraise } from '@/lib/sfx';
+import { sfxTap, sfxMagic, sfxPraise, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 import { speak } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -118,6 +118,36 @@ export default function ArtPage() {
   const lastPosRef = useRef<{ x: number; y: number } | null>(null);
   const [canvasColor, setCanvasColor] = useState(CANVAS_COLORS[0]?.css ?? '#ff5c7a');
 
+  // 全局键盘快捷键响应 (1-5 切换专区)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === '1') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setActiveTab('coloring');
+      } else if (e.key === '2') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setActiveTab('gallery');
+      } else if (e.key === '3') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setActiveTab('explore');
+      } else if (e.key === '4') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setActiveTab('mixer');
+      } else if (e.key === '5') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setActiveTab('canvas');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // 进入页面记录学习时长
   useEffect(() => {
     tickTime(5);
@@ -129,6 +159,7 @@ export default function ArtPage() {
 
   const handlePickColor = (code: ColorCode) => {
     sfxTap();
+    triggerHaptic(20);
     if (selectedColors.length >= 2) {
       setSelectedColors([code]);
       setMixedResult(null);
@@ -245,6 +276,13 @@ export default function ArtPage() {
         subtitle={t('art.subtitle')}
         tone="pink"
       />
+
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-pink-900 font-bold bg-pink-50/90 px-3 py-1 rounded-xl border border-pink-200">
+          ⌨️ 键盘快捷操作：数字 1-5 切换专区 (魔力填色本/世界名画馆/色彩认知/魔法调色/自由画板)
+        </span>
+      </div>
 
       {/* 顶部五合一导航 Tab */}
       <div className="flex flex-wrap justify-center gap-2">

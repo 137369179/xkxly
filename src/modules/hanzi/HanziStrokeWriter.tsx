@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { speak } from '@/lib/speech';
-import { sfxTap } from '@/lib/sfx';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 import { useAiStream } from '@/lib/ai/useAi';
@@ -40,6 +40,7 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
 
   // 清空画布
   const clearCanvas = () => {
+    triggerHaptic(20);
     const cvs = canvasRef.current;
     if (!cvs) return;
     const ctx = cvs.getContext('2d');
@@ -54,6 +55,23 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
     clearCanvas();
     // 自动发音（TTS 不可用时静默降级）
     void speak(`${hanzi.c}，${hanzi.p}`).catch(() => {});
+  }, [hanzi]);
+
+  // 键盘快捷监听
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        clearCanvas();
+      } else if (e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        triggerHaptic(20);
+        void speak(`${hanzi.c}，${hanzi.p}`).catch(() => {});
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [hanzi]);
 
   // 模拟笔画动画播放
@@ -170,6 +188,13 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
 
   return (
     <div className="w-full max-w-xl mx-auto bg-gradient-to-b from-candy-pink-light to-candy-pink-soft rounded-3xl p-4 sm:p-6 border-4 border-candy-pink-soft shadow-jelly space-y-4 jelly-shine">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-pink-900 font-bold bg-white/80 px-3 py-1 rounded-xl border border-pink-200 shadow-xs">
+          ⌨️ 键盘快捷操作：P 读字音 · R 重写清空
+        </span>
+      </div>
+
       {/* 头部信息与语音控制 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -324,7 +349,7 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
           </button>
         ) : (
           <div className="bg-white/90 p-3 rounded-2xl border border-candy-pink-soft text-xs font-bold text-candy-pink-deep space-y-1.5 shadow-sm">
-            <div className="flex items-center justify-between text-[11px] font-black text-candy-pink-deep">
+            <div className="flex items-center justify-between text-xs font-black text-candy-pink-deep">
               <span>{t('hanziStrokeWriter.aiStoryTitle')}</span>
               <button onClick={() => setShowAiStory(false)} className="text-candy-pink-deep hover:text-candy-red">
                 ✕

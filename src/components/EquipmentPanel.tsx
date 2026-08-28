@@ -52,10 +52,10 @@ export function EquipmentPanel({ ownedFragments, ownedEquipment, equippedItems, 
 
       {(bonus.extraHp || bonus.extraTime || bonus.extraHints || bonus.starBonus) && (
         <div className="mt-2 flex flex-wrap gap-1.5">
-          {bonus.extraHp ? <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-600">❤️ +{bonus.extraHp}</span> : null}
-          {bonus.extraTime ? <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-600">⏰ +{bonus.extraTime}s</span> : null}
-          {bonus.extraHints ? <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-[10px] font-bold text-yellow-600">💡 +{bonus.extraHints}</span> : null}
-          {bonus.starBonus ? <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-600">⭐ +{bonus.starBonus}</span> : null}
+          {bonus.extraHp ? <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-600">❤️ +{bonus.extraHp}</span> : null}
+          {bonus.extraTime ? <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-600">⏰ +{bonus.extraTime}s</span> : null}
+          {bonus.extraHints ? <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-bold text-yellow-600">💡 +{bonus.extraHints}</span> : null}
+          {bonus.starBonus ? <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-bold text-purple-600">⭐ +{bonus.starBonus}</span> : null}
         </div>
       )}
 
@@ -86,17 +86,17 @@ export function EquipmentPanel({ ownedFragments, ownedEquipment, equippedItems, 
                     )}
                   >
                     <span className="text-3xl">{isOwned ? eq.emoji : '❓'}</span>
-                    <span className="text-[11px] font-extrabold text-ink">{isOwned ? eq.name : '???'}</span>
-                    <span className="text-[9px] font-bold text-ink-soft">{slotInfo.emoji} {t(`equipmentPanel.${eq.slot}`)}</span>
+                    <span className="text-xs font-extrabold text-ink">{isOwned ? eq.name : '???'}</span>
+                    <span className="text-xs font-bold text-ink-soft">{slotInfo.emoji} {t(`equipmentPanel.${eq.slot}`)}</span>
                     {isOwned && (
-                      <span className="text-[9px] font-bold text-amber-600">
+                      <span className="text-xs font-bold text-amber-600">
                         {eq.bonus.extraHp ? `❤️+${eq.bonus.extraHp} ` : ''}
                         {eq.bonus.extraTime ? `⏰+${eq.bonus.extraTime}s ` : ''}
                         {eq.bonus.extraHints ? `💡+${eq.bonus.extraHints} ` : ''}
                         {eq.bonus.starBonus ? `⭐+${eq.bonus.starBonus}` : ''}
                       </span>
                     )}
-                    {isEquipped && <span className="text-[9px] font-black text-amber-600">✓ 已装备</span>}
+                    {isEquipped && <span className="text-xs font-black text-amber-600">✓ 已装备</span>}
                   </motion.button>
                 );
               })}

@@ -10,6 +10,7 @@ import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
 import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHint';
 import { logicExplainTask } from '@/lib/ai/tasks';
 import { useStore } from '@/store/useStore';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
 import { CodeBotStudio } from './CodeBotStudio';
 import { MazeGame } from './MazeGame';
 import { KidSudoku } from './KidSudoku';
@@ -69,6 +70,42 @@ export default function LogicPage() {
     if (nextTab) setTab(nextTab);
   }, [target]);
 
+  // 全局键盘快捷键响应 (1-0 切换 Tab · Q/W/E 难度)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      const tabOrder: TabId[] = ['pattern', 'match', 'order', 'condition', 'steps', 'mixed', 'detective', 'code', 'maze', 'sudoku'];
+      const num = parseInt(e.key, 10);
+      if (!isNaN(num)) {
+        const index = num === 0 ? 9 : num - 1;
+        const targetTab = tabOrder[index];
+        if (targetTab) {
+          e.preventDefault();
+          sfxTap();
+          triggerHaptic(20);
+          setTab(targetTab);
+        }
+      } else if (e.key.toLowerCase() === 'q') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        setDiff(1);
+      } else if (e.key.toLowerCase() === 'w') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        setDiff(2);
+      } else if (e.key.toLowerCase() === 'e') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        setDiff(3);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setDiff]);
+
   const makeQuestion = (d: Difficulty) =>
     makeSpacedDrill('logic', (dd) => makeLogicQuestion(tab === 'mixed' ? 'mixed' : (tab as LogicKind), dd), () => useStore.getState().progress)(d);
 
@@ -81,13 +118,23 @@ export default function LogicPage() {
         tone="green"
       />
 
+      {/* 快捷操作提示条 */}
+      <div className="text-center mb-3">
+        <span className="inline-block text-xs text-emerald-900 font-bold bg-emerald-50/90 px-3 py-1 rounded-xl border border-emerald-200">
+          ⌨️ 键盘快捷操作：数字 1-0 切换逻辑专区 · Q/W/E 切换初级/进阶/挑战难度
+        </span>
+      </div>
+
       <TrainingBanner target={target} onClose={clear} />
 
       <Tabs<TabId>
         tone="green"
         layoutId="logic-tabs"
         value={tab}
-        onChange={setTab}
+        onChange={(nt) => {
+          triggerHaptic(20);
+          setTab(nt);
+        }}
         items={TABS}
       />
 
@@ -105,7 +152,7 @@ export default function LogicPage() {
                 onClick={() => setDiff(d.id)}
               >
                 <span className="block leading-tight">{d.label}</span>
-                <span className="block text-[10px] font-bold opacity-80">{d.age}</span>
+                <span className="block text-xs font-bold opacity-80">{d.age}</span>
               </CandyButton>
             ))}
           </div>

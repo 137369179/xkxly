@@ -5,7 +5,7 @@
  * 就能拼读整个词族的词（cat/bat/mat/rat）。
  * 每轮：找同族词（选择）+ 点读拼读（发音），答对计入 SRS skill word:family:<id>。
  */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { WORD_FAMILIES, type WordFamily } from '@/data/wordFamilies';
 import { PageHeader, Panel } from '@/components/ui/Card';
@@ -13,7 +13,7 @@ import { CandyButton } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/i18n/useTranslation';
-import { sfxTap, sfxCorrect, sfxWrong, sfxStar } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, sfxStar, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { shuffle, sampleMany } from '@/lib/utils';
 import { speak } from '@/lib/speech';
@@ -51,43 +51,90 @@ export function WordFamilyGame() {
     return shuffle([target, ...others]);
   }, [fam, target]);
 
-  const pick = (w: string) => {
-    if (chosen) return;
+  const pick = useCallback((w: string) => {
+    if (chosen || !fam) return;
+    sfxTap();
     setChosen(w);
     const correct = w === target;
     if (correct) {
       sfxCorrect();
+      triggerHaptic(45);
       celebrateSmall();
       setScore((s) => s + 1);
-      practice(`word:family:${fam!.id}`, true, 1);
+      practice(`word:family:${fam.id}`, true, 1);
       speak(`Great! ${w}`, { lang: 'en-US', rate: 0.9 }).catch(() => {});
     } else {
       sfxWrong();
-      practice(`word:family:${fam!.id}`, false, 0);
-      speak(`Try again`, { lang: 'en-US', rate: 0.9 }).catch(() => {});
+      triggerHaptic(20);
+      practice(`word:family:${fam.id}`, false, 0);
+      speak(`Try again, looking for ${target}`, { lang: 'en-US', rate: 0.9 }).catch(() => {});
     }
-  };
+  }, [chosen, fam, target, practice]);
 
-  const next = () => {
+  const next = useCallback(() => {
     sfxTap();
+    triggerHaptic(25);
     if (round + 1 >= ROUNDS) {
       setDone(true);
       sfxStar();
       celebrateBig();
+      triggerHaptic([60, 40, 60, 40, 100]);
     } else {
       setRound((r) => r + 1);
       setChosen(null);
     }
-  };
+  }, [round]);
 
-  const start = (f: WordFamily) => {
+  const start = useCallback((f: WordFamily) => {
     sfxTap();
+    triggerHaptic(30);
     setFam(f);
     setRound(0);
     setScore(0);
     setDone(false);
     setChosen(null);
-  };
+  }, []);
+
+  const handlePlayVoice = useCallback(() => {
+    if (!target) return;
+    sfxTap();
+    triggerHaptic(20);
+    speak(target, { lang: 'en-US', rate: 0.85 });
+  }, [target]);
+
+  // 键盘快捷键监听
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (fam && !done) {
+        if (!chosen && options.length > 0) {
+          if (['1', '2', '3', '4'].includes(e.key)) {
+            const idx = parseInt(e.key, 10) - 1;
+            const opt = options[idx];
+            if (opt) {
+              e.preventDefault();
+              pick(opt);
+            }
+          } else if (e.key === 's' || e.key === 'S') {
+            e.preventDefault();
+            handlePlayVoice();
+          }
+        } else if (chosen) {
+          if (e.key === ' ' || e.key === 'Enter') {
+            e.preventDefault();
+            next();
+          }
+        }
+      } else if (done && fam) {
+        if (e.key === ' ' || e.key === 'Enter' || e.key === 'r' || e.key === 'R') {
+          e.preventDefault();
+          start(fam);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [fam, done, chosen, options, pick, handlePlayVoice, next, start]);
 
   // 结果页
   if (done && fam) {
@@ -126,6 +173,13 @@ export function WordFamilyGame() {
   if (fam) {
     return (
       <div className="space-y-4">
+        {/* 快捷操作提示条 */}
+        <div className="text-center">
+          <span className="inline-block text-xs text-purple-900 font-bold bg-purple-50/90 px-3 py-1 rounded-xl border border-purple-200">
+            ⌨️ 键盘快捷操作：数字键 1-4 选单词 · S 听发音 · 空格/Enter 下一题
+          </span>
+        </div>
+
         <div className="flex items-center justify-between">
           <CandyButton
             tone="blue"
@@ -157,7 +211,8 @@ export function WordFamilyGame() {
           <CandyButton
             tone="purple"
             size="md"
-            onClick={() => speak(target, { lang: 'en-US', rate: 0.85 })}
+            onClick={handlePlayVoice}
+            className="min-h-[44px]"
           >
             🔊 听听目标发音
           </CandyButton>
@@ -170,9 +225,10 @@ export function WordFamilyGame() {
             return (
               <motion.button
                 key={w}
+                type="button"
                 whileTap={{ scale: 0.95 }}
                 onClick={() => pick(w)}
-                className={`flex items-center justify-center p-4 rounded-2xl border-3 text-xl font-black transition-all shadow-sm ${
+                className={`relative flex items-center justify-center p-4 min-h-[56px] rounded-2xl border-3 text-xl font-black transition-all shadow-sm focus-visible:ring-4 focus-visible:ring-purple-300 focus:outline-none ${
                   chosen
                     ? isTarget
                       ? 'border-green-500 bg-green-100 text-green-800 scale-105'

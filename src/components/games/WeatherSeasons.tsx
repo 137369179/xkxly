@@ -47,7 +47,7 @@ function WeatherSeasonsImpl() {
                 className={cn(s.color,'rounded-2xl p-4 text-center shadow-sm transition-all hover:scale-105', selected===i&&'ring-3 ring-candy-orange-deep')}>
                 <div className="text-3xl">{s.emoji}</div>
                 <div className="mt-1 text-sm font-extrabold">{s.name}</div>
-                <div className="text-[10px] font-medium opacity-70">{s.months}</div>
+                <div className="text-xs font-medium opacity-70">{s.months}</div>
               </button>
             ))}
           </div>
@@ -58,7 +58,7 @@ function WeatherSeasonsImpl() {
                 <p className="font-extrabold text-ink">{season.name} ({season.months})</p>
                 <p className="text-xs font-medium text-ink-soft">{season.desc}</p>
                 <div className="mt-1 flex gap-1">
-                  {season.weather.map(w => <span key={w} className="rounded-lg bg-ink-soft/10 px-2 py-0.5 text-[10px] font-bold">{w}</span>)}
+                  {season.weather.map(w => <span key={w} className="rounded-lg bg-ink-soft/10 px-2 py-0.5 text-xs font-bold">{w}</span>)}
                 </div>
               </div>
             </div>
@@ -73,8 +73,8 @@ function WeatherSeasonsImpl() {
               className={cn(w.color,'rounded-2xl p-4 text-center shadow-sm transition-all hover:scale-105 active:scale-95')}>
               <div className="text-4xl">{w.emoji}</div>
               <div className="mt-1 text-sm font-extrabold">{w.name}</div>
-              <div className="text-[10px] font-medium opacity-70">{w.en}</div>
-              <div className="mt-1 text-[9px] font-medium text-ink-muted">💡 {w.tip}</div>
+              <div className="text-xs font-medium opacity-70">{w.en}</div>
+              <div className="mt-1 text-xs font-medium text-ink-muted">💡 {w.tip}</div>
             </button>
           ))}
         </div>

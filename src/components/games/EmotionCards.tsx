@@ -97,8 +97,8 @@ export function EmotionCards() {
               className={cn(e.color, 'rounded-2xl p-4 text-center shadow-sm transition-all hover:scale-105 active:scale-95')}>
               <div className="text-4xl">{e.emoji}</div>
               <div className="mt-1 text-sm font-extrabold">{e.name}</div>
-              <div className="text-[10px] font-medium opacity-70">{e.en}</div>
-              <div className="mt-1 text-[9px] font-medium text-ink-muted">{e.desc}</div>
+              <div className="text-xs font-medium opacity-70">{e.en}</div>
+              <div className="mt-1 text-xs font-medium text-ink-muted">{e.desc}</div>
             </button>
           ))}
         </div>
@@ -115,7 +115,7 @@ export function EmotionCards() {
               <button key={e.name} onClick={()=>pickEmotion(e.emoji)}
                 className="rounded-2xl bg-white p-3 text-center shadow-sm transition-all hover:scale-105 active:scale-95">
                 <div className="text-3xl">{e.emoji}</div>
-                <div className="text-[10px] font-extrabold">{e.name}</div>
+                <div className="text-xs font-extrabold">{e.name}</div>
               </button>
             ))}
           </div>

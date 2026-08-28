@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, useCallback, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { Question } from '@/types';
 import type { Difficulty } from '@/lib/questions';
@@ -7,7 +7,7 @@ import { QuizCard, type QuizCardProps } from '@/components/QuizCard';
 import { Modal } from '@/components/ui/Modal';
 import { CandyButton } from '@/components/ui/Button';
 import { celebrateBig } from '@/lib/celebrate';
-import { sfxWin, sfxCorrect } from '@/lib/sfx';
+import { sfxWin, sfxCorrect, sfxWrong, triggerHaptic } from '@/lib/sfx';
 import type { BossConfig } from '@/data/adventureChapters';
 import type { EquipmentBonus } from '@/data/equipment';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -77,6 +77,32 @@ export function BossBattle({
     };
   }, []);
 
+  const restart = useCallback(() => {
+    setBossHp(boss.hp);
+    setPlayerHp(playerMaxHp);
+    setTurn(0);
+    setWrongCount(0);
+    setHintsUsed(0);
+    setPhase('fighting');
+    setActiveEffects({ timeLimit: false, doubleDamage: false, shuffle: false, hideHint: false });
+    setQuestion(makeRef.current(difficulty));
+  }, [boss.hp, playerMaxHp, difficulty]);
+
+  // 键盘快捷监听
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (phase === 'victory' || phase === 'defeat') {
+        if (e.key === ' ' || e.key === 'Enter' || e.key === 'r' || e.key === 'R') {
+          e.preventDefault();
+          restart();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [phase, restart]);
+
   // 检查并激活Boss技能
   useEffect(() => {
     const hpPct = (bossHp / boss.hp) * 100;
@@ -92,6 +118,7 @@ export function BossBattle({
 
     let cleanup: (() => void) | undefined;
     if (triggered) {
+      triggerHaptic([30, 40, 30]);
       setActiveEffects(newEffects);
       setSkillFlash(triggered);
       const timer = setTimeout(() => setSkillFlash(null), 2000);
@@ -107,6 +134,7 @@ export function BossBattle({
 
     if (correct) {
       sfxCorrect();
+      triggerHaptic(45);
       setBossShake(true);
       if (bossShakeTimerRef.current) clearTimeout(bossShakeTimerRef.current);
       bossShakeTimerRef.current = setTimeout(() => setBossShake(false), 400);
@@ -116,16 +144,20 @@ export function BossBattle({
           setPhase('victory');
           celebrateBig();
           sfxWin();
+          triggerHaptic([60, 40, 60, 40, 100]);
           onVictory?.(turn + 1);
         }
         return newHp;
       });
     } else {
+      sfxWrong();
+      triggerHaptic(20);
       const damage = activeEffects.doubleDamage ? 2 : 1;
       const newWrongCount = wrongCount + 1;
       setWrongCount(newWrongCount);
 
       if (newWrongCount % boss.attackEvery === 0 || newWrongCount === 1) {
+        triggerHaptic([40, 50, 40]);
         setPlayerShake(true);
         if (playerShakeTimerRef.current) clearTimeout(playerShakeTimerRef.current);
         playerShakeTimerRef.current = setTimeout(() => setPlayerShake(false), 400);
@@ -133,6 +165,7 @@ export function BossBattle({
           const newHp = Math.max(0, hp - damage);
           if (newHp <= 0) {
             setPhase('defeat');
+            triggerHaptic(30);
           }
           return newHp;
         });
@@ -142,17 +175,6 @@ export function BossBattle({
 
   const handleNext = () => {
     if (phase !== 'fighting') return;
-    setQuestion(makeRef.current(difficulty));
-  };
-
-  const restart = () => {
-    setBossHp(boss.hp);
-    setPlayerHp(playerMaxHp);
-    setTurn(0);
-    setWrongCount(0);
-    setHintsUsed(0);
-    setPhase('fighting');
-    setActiveEffects({ timeLimit: false, doubleDamage: false, shuffle: false, hideHint: false });
     setQuestion(makeRef.current(difficulty));
   };
 
@@ -262,7 +284,7 @@ export function BossBattle({
             <span
               key={s.name}
               className={cn(
-                'rounded-full px-2 py-0.5 text-[10px] font-bold',
+                'rounded-full px-2 py-0.5 text-xs font-bold',
                 activeEffects[s.effect] ? 'bg-red-200 text-red-700' : 'bg-gray-200 text-gray-500'
               )}
             >

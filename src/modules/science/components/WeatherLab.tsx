@@ -3,10 +3,10 @@
  * ------------------------------------------------------------
  * 拖拽元素组合天气 + 季节配对小游戏 + AI 天气讲解
  */
-import { memo, useState, useCallback } from 'react';
+import { memo, useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Panel } from '@/components/ui/Card';
-import { sfxTap, sfxStar, sfxCorrect, sfxWrong } from '@/lib/sfx';
+import { sfxTap, sfxStar, sfxCorrect, sfxWrong, triggerHaptic } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { cn } from '@/lib/utils';
 import { ScienceAiPanel } from './ScienceAiPanel';
@@ -88,6 +88,7 @@ function WeatherGenerator() {
 
   const handleDrop = useCallback((elementId: string) => {
     sfxTap();
+    triggerHaptic(30);
     if (dropped.includes(elementId)) return;
     const newElements = [...dropped, elementId];
     setDropped(newElements);
@@ -95,6 +96,7 @@ function WeatherGenerator() {
     if (combo) {
       setResult(combo);
       sfxStar();
+      triggerHaptic([40, 50, 80]);
       speak(combo.message, { lang: 'zh-CN', rate: 0.9 });
     } else if (newElements.length >= 3) {
       setError(true);
@@ -102,11 +104,34 @@ function WeatherGenerator() {
     }
   }, [dropped]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     sfxTap();
+    triggerHaptic(35);
     setDropped([]);
     setResult(null);
-  };
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['1', '2', '3', '4', '5'].includes(e.key)) {
+        const idx = parseInt(e.key, 10) - 1;
+        const el = ELEMENTS[idx];
+        if (el && !dropped.includes(el.id) && !result) {
+          e.preventDefault();
+          handleDrop(el.id);
+        }
+      } else if (e.key === 'r' || e.key === 'R' || e.key === 'c' || e.key === 'C' || e.key === 'Backspace') {
+        if (dropped.length > 0) {
+          e.preventDefault();
+          handleReset();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [dropped, result, handleDrop, handleReset]);
 
   return (
     <Panel className="border-2 border-orange-200 bg-gradient-to-br from-orange-50 via-yellow-50 to-sky-50">
@@ -131,11 +156,11 @@ function WeatherGenerator() {
             <p className="mt-2 text-4xl font-black leading-tight text-orange-900 sm:text-5xl">{result.weather.nameZh}</p>
             <p className="text-xs font-bold text-orange-600">{result.weather.nameEn}</p>
             <p className="mt-1 text-xs text-ink-soft">{result.message}</p>
-            <p className="mt-1 text-[10px] text-ink-muted">💡 {result.weather.formation}</p>
-            <p className="text-[10px] text-green-700">🎯 {result.weather.activity}</p>
+            <p className="mt-1 text-xs text-ink-muted">💡 {result.weather.formation}</p>
+            <p className="text-xs text-green-700">🎯 {result.weather.activity}</p>
             <div className="mt-1 flex gap-1">
               {result.weather.gear.map(g => (
-                <span key={g} className="rounded-full bg-orange-100 px-2 py-0.5 text-[9px] font-bold text-orange-700">🎒 {g}</span>
+                <span key={g} className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-bold text-orange-700">🎒 {g}</span>
               ))}
             </div>
           </motion.div>
@@ -151,7 +176,7 @@ function WeatherGenerator() {
                   className="flex flex-col items-center"
                 >
                   <span className="text-4xl">{el.emoji}</span>
-                  <span className="text-[9px] font-bold">{el.name}</span>
+                  <span className="text-xs font-bold">{el.name}</span>
                 </motion.div>
               );
             })}
@@ -165,21 +190,22 @@ function WeatherGenerator() {
       </div>
 
       {/* 元素栏 */}
-      <div className="flex justify-center gap-2">
+      <div className="flex justify-center gap-2" role="group" aria-label="天气元素选择">
         {ELEMENTS.map(el => (
           <button
             key={el.id}
+            type="button"
             onClick={() => handleDrop(el.id)}
             disabled={dropped.includes(el.id) || !!result}
             className={cn(
-              'flex flex-col items-center rounded-xl p-2 transition-all',
+              'flex flex-col items-center rounded-xl p-2 min-h-[44px] min-w-[44px] transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-orange-300',
               dropped.includes(el.id)
                 ? 'opacity-30'
                 : 'bg-white shadow-sm hover:scale-110 active:scale-95'
             )}
           >
             <span className="text-3xl">{el.emoji}</span>
-            <span className="text-[9px] font-bold">{el.name}</span>
+            <span className="text-xs font-bold">{el.name}</span>
           </button>
         ))}
       </div>
@@ -187,16 +213,17 @@ function WeatherGenerator() {
       {dropped.length > 0 && (
         <div className="mt-2 flex justify-center">
           <button
+            type="button"
             onClick={handleReset}
-            className="rounded-lg bg-orange-200 px-3 py-1 text-xs font-bold text-orange-800 hover:bg-orange-300"
+            className="rounded-lg bg-orange-200 px-3 py-1.5 min-h-[44px] text-xs font-bold text-orange-800 hover:bg-orange-300 focus:outline-none focus-visible:ring-4 focus-visible:ring-orange-300"
           >
-            {t('weather.restart')}
+            {t('weather.restart')} (R)
           </button>
         </div>
       )}
 
       {/* 组合提示 */}
-      <div className="mt-2 rounded-xl bg-white/60 p-2 text-center text-[10px] text-ink-muted">
+      <div className="mt-2 rounded-xl bg-white/60 p-2 text-center text-xs text-ink-muted">
         {t('weather.comboHint')}
       </div>
     </Panel>
@@ -215,11 +242,13 @@ function SeasonMatchGame() {
     const item = SEASON_ITEMS.find(i => i.id === itemId)!;
     if (item.season === seasonId) {
       sfxCorrect();
+      triggerHaptic(40);
       speak(`对啦！${item.id}是${SEASONS.find(s => s.id === seasonId)!.name}的`, { lang: 'zh-CN', rate: 0.9 });
       setMatched(new Set([...matched, itemId]));
       setScore(score + 1);
     } else {
       sfxWrong();
+      triggerHaptic(20);
       setWrong(itemId);
       setTimeout(() => setWrong(null), 1000);
     }
@@ -227,6 +256,7 @@ function SeasonMatchGame() {
 
   const reset = () => {
     sfxTap();
+    triggerHaptic(35);
     setMatched(new Set());
     setScore(0);
   };
@@ -257,14 +287,15 @@ function SeasonMatchGame() {
             )}
           >
             <div className="text-2xl">{item.emoji}</div>
-            <div className="text-[10px] font-bold">{item.id}</div>
+            <div className="text-xs font-bold">{item.id}</div>
             {!matched.has(item.id) && (
               <div className="mt-1 flex flex-wrap justify-center gap-0.5">
                 {SEASONS.map(s => (
                   <button
                     key={s.id}
+                    type="button"
                     onClick={() => handleMatch(item.id, s.id)}
-                    className="rounded px-1 py-0.5 text-[8px] font-bold bg-gray-100 hover:bg-gray-200"
+                    className="rounded px-1.5 py-1 min-h-[32px] text-[8px] font-bold bg-gray-100 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-300"
                   >
                     {s.emoji}
                   </button>
@@ -283,7 +314,7 @@ function SeasonMatchGame() {
         >
           <p className="text-lg font-black text-orange-700">{t('weather.allMatched')}</p>
           <p className="text-sm font-bold text-orange-600">⭐⭐⭐ {t('learning.excellent')}</p>
-          <button onClick={reset} className="mt-2 rounded-lg bg-orange-300 px-3 py-1 text-xs font-bold text-white hover:bg-orange-400">
+          <button type="button" onClick={reset} className="mt-2 rounded-lg bg-orange-300 px-3 py-1.5 min-h-[44px] text-xs font-bold text-white hover:bg-orange-400 focus:outline-none focus-visible:ring-4 focus-visible:ring-orange-300">
             {t('weather.playAgain')}
           </button>
         </motion.div>
@@ -304,28 +335,48 @@ function WeatherLabImpl() {
   const [tab, setTab] = useState<'generator' | 'match' | 'info'>('generator');
   const [selectedWeather, setSelectedWeather] = useState<WeatherType | null>(null);
 
+  const handleSelectTab = useCallback((targetTab: 'generator' | 'match' | 'info') => {
+    sfxTap();
+    triggerHaptic(30);
+    setTab(targetTab);
+  }, []);
+
   return (
     <div className="space-y-4">
       {/* Tab 切换 */}
-      <div className="flex justify-center gap-2">
+      <div className="flex justify-center gap-2" role="tablist" aria-label="天气实验室标签">
         <button
-          onClick={() => { sfxTap(); setTab('generator'); }}
-          className={cn('rounded-xl px-4 py-2 text-sm font-extrabold transition-all', tab === 'generator' ? 'bg-orange-400 text-white shadow-md' : 'bg-white text-ink-soft shadow-sm')}
+          role="tab"
+          aria-selected={tab === 'generator'}
+          type="button"
+          onClick={() => handleSelectTab('generator')}
+          className={cn('rounded-xl px-4 py-2 min-h-[44px] text-sm font-extrabold transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-orange-300', tab === 'generator' ? 'bg-orange-400 text-white shadow-md' : 'bg-white text-ink-soft shadow-sm')}
         >
           {t('weather.tabGenerator')}
         </button>
         <button
-          onClick={() => { sfxTap(); setTab('match'); }}
-          className={cn('rounded-xl px-4 py-2 text-sm font-extrabold transition-all', tab === 'match' ? 'bg-pink-400 text-white shadow-md' : 'bg-white text-ink-soft shadow-sm')}
+          role="tab"
+          aria-selected={tab === 'match'}
+          type="button"
+          onClick={() => handleSelectTab('match')}
+          className={cn('rounded-xl px-4 py-2 min-h-[44px] text-sm font-extrabold transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-pink-300', tab === 'match' ? 'bg-pink-400 text-white shadow-md' : 'bg-white text-ink-soft shadow-sm')}
         >
           {t('weather.tabMatch')}
         </button>
         <button
-          onClick={() => { sfxTap(); setTab('info'); }}
-          className={cn('rounded-xl px-4 py-2 text-sm font-extrabold transition-all', tab === 'info' ? 'bg-blue-400 text-white shadow-md' : 'bg-white text-ink-soft shadow-sm')}
+          role="tab"
+          aria-selected={tab === 'info'}
+          type="button"
+          onClick={() => handleSelectTab('info')}
+          className={cn('rounded-xl px-4 py-2 min-h-[44px] text-sm font-extrabold transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300', tab === 'info' ? 'bg-blue-400 text-white shadow-md' : 'bg-white text-ink-soft shadow-sm')}
         >
           {t('weather.tabInfo')}
         </button>
+      </div>
+
+      {/* 快捷操作提示条 */}
+      <div className="flex items-center justify-between text-xs text-orange-700 font-bold bg-orange-50/90 px-3 py-1 rounded-xl border border-orange-200">
+        <span>⌨️ 键盘快捷操作：数字键 1-5 调配天气元素 · R 重置画布</span>
       </div>
 
       <AnimatePresence mode="wait">
@@ -372,7 +423,7 @@ function WeatherLabImpl() {
                   >
                     <div className="text-4xl">{w.emoji}</div>
                     <div className="mt-1 text-sm font-extrabold">{w.nameZh}</div>
-                    <div className="text-[10px] font-medium opacity-70">{w.nameEn}</div>
+                    <div className="text-xs font-medium opacity-70">{w.nameEn}</div>
                   </button>
                 ))}
               </div>
@@ -400,7 +451,7 @@ function WeatherLabImpl() {
                   </div>
                   <div className="mt-1 flex gap-1 flex-wrap">
                     {selectedWeather.gear.map(g => (
-                      <span key={g} className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold text-orange-700">🎒 {g}</span>
+                      <span key={g} className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-bold text-orange-700">🎒 {g}</span>
                     ))}
                   </div>
                 </motion.div>

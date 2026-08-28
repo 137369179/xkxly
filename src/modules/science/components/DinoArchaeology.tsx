@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
-import { sfxTap, sfxCorrect, sfxWin } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { celebrateBig, celebrateSmall } from '@/lib/celebrate';
 import { speak } from '@/lib/speech';
 import { useStore } from '@/store/useStore';
@@ -166,7 +166,7 @@ export function DinoArchaeology() {
   const currentDino = DINOS[selectedDinoIdx] ?? FALLBACK_DINO;
 
   // WebAudio 模拟恐龙咆哮低频共振
-  const playRoarSfx = (baseHz: number) => {
+  const playRoarSfx = useCallback((baseHz: number) => {
     try {
       const ctx = getAudioContext();
       const osc = ctx.createOscillator();
@@ -189,7 +189,7 @@ export function DinoArchaeology() {
     } catch {
       // Audio context policy fallback
     }
-  };
+  }, []);
 
   useEffect(() => {
     const rawParts = currentDino.parts.map((p) => ({
@@ -203,9 +203,10 @@ export function DinoArchaeology() {
   }, [selectedDinoIdx, currentDino]);
 
   // 挖掘某个化石碎片
-  const handleDigPart = (partId: string) => {
+  const handleDigPart = useCallback((partId: string) => {
     sfxTap();
     sfxCorrect();
+    triggerHaptic(35);
     celebrateSmall();
 
     const nextParts = parts.map((p) =>
@@ -224,16 +225,18 @@ export function DinoArchaeology() {
       setTimeout(() => {
         setGameState('assembling');
         sfxWin();
+        triggerHaptic([60, 40, 60, 40, 100]);
         celebrateBig();
         void speak(`太棒啦！${currentDino.name}的所有化石骨骼全部出土！现在进入骨架复原拼装台！`, { lang: 'zh-CN' });
       }, 1000);
     }
-  };
+  }, [parts, currentDino]);
 
   // 拼装某个化石碎片
-  const handleAssemblePart = (partId: string) => {
+  const handleAssemblePart = useCallback((partId: string) => {
     sfxTap();
     sfxCorrect();
+    triggerHaptic(45);
     celebrateSmall();
 
     const nextParts = parts.map((p) =>
@@ -252,6 +255,7 @@ export function DinoArchaeology() {
       setTimeout(() => {
         setGameState('revived');
         sfxWin();
+        triggerHaptic([60, 40, 60, 40, 100]);
         celebrateBig();
         playRoarSfx(currentDino.roarTone);
         addStars(8);
@@ -259,10 +263,51 @@ export function DinoArchaeology() {
         void speak(`奇迹出现！通过骨骼基因复原，${currentDino.name}成功复活！${currentDino.funFact}`, { lang: 'zh-CN' });
       }, 1000);
     }
-  };
+  }, [parts, currentDino, addStars, addFish, playRoarSfx]);
+
+  // 全局键盘快捷键
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['1', '2', '3', '4'].includes(e.key)) {
+        const idx = parseInt(e.key, 10) - 1;
+        const targetPart = parts[idx];
+        if (targetPart) {
+          e.preventDefault();
+          if (gameState === 'excavating' && !targetPart.discovered) {
+            handleDigPart(targetPart.id);
+          } else if (gameState === 'assembling' && !targetPart.assembled) {
+            handleAssemblePart(targetPart.id);
+          }
+        }
+      } else if (e.key === 'r' || e.key === 'R' || e.key === ' ') {
+        if (gameState === 'revived') {
+          e.preventDefault();
+          playRoarSfx(currentDino.roarTone);
+        }
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        sfxTap();
+        setSelectedDinoIdx((i) => (i + 1) % DINOS.length);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        sfxTap();
+        setSelectedDinoIdx((i) => (i - 1 + DINOS.length) % DINOS.length);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [parts, gameState, currentDino.roarTone, handleDigPart, handleAssemblePart, playRoarSfx]);
 
   return (
     <div className="space-y-6">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-amber-900 font-bold bg-amber-50/90 px-3 py-1 rounded-xl border border-amber-200">
+          ⌨️ 键盘快捷操作：数字键 1-4 挖掘/拼装化石 · 左右方向键 切换恐龙 · 空格/R 播放咆哮
+        </span>
+      </div>
+
       {/* 顶部恐龙馆导览切换 */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
         {DINOS.map((dino, idx) => (
@@ -328,7 +373,7 @@ export function DinoArchaeology() {
                 <span className="text-3xl select-none">
                   {p.discovered ? p.emoji : '🪨'}
                 </span>
-                <span className="text-[10px] font-black mt-1">
+                <span className="text-xs font-black mt-1">
                   {p.discovered ? p.name : '轻触挖掘'}
                 </span>
               </motion.button>
@@ -368,7 +413,7 @@ export function DinoArchaeology() {
               >
                 <span className="text-4xl select-none">{p.assembled ? '✅' : p.emoji}</span>
                 <span>{p.name}</span>
-                <span className="text-[10px] text-slate-500">
+                <span className="text-xs text-slate-500">
                   {p.assembled ? '已精准复原' : '👉 点击安装'}
                 </span>
               </button>
@@ -410,19 +455,19 @@ export function DinoArchaeology() {
           {/* 科学属性卡片 */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 max-w-lg mx-auto pt-2">
             <div className="bg-white/90 p-2.5 rounded-2xl border border-amber-200 text-xs shadow-sm">
-              <span className="text-slate-400 font-bold block text-[10px]">分类</span>
+              <span className="text-slate-400 font-bold block text-xs">分类</span>
               <span className="font-black text-slate-800">{currentDino.type}</span>
             </div>
             <div className="bg-white/90 p-2.5 rounded-2xl border border-amber-200 text-xs shadow-sm">
-              <span className="text-slate-400 font-bold block text-[10px]">食性</span>
+              <span className="text-slate-400 font-bold block text-xs">食性</span>
               <span className="font-black text-slate-800">{currentDino.diet}</span>
             </div>
             <div className="bg-white/90 p-2.5 rounded-2xl border border-amber-200 text-xs shadow-sm">
-              <span className="text-slate-400 font-bold block text-[10px]">生存年代</span>
+              <span className="text-slate-400 font-bold block text-xs">生存年代</span>
               <span className="font-black text-slate-800">{currentDino.period.split(' ')[0]}</span>
             </div>
             <div className="bg-white/90 p-2.5 rounded-2xl border border-amber-200 text-xs shadow-sm">
-              <span className="text-slate-400 font-bold block text-[10px]">体型</span>
+              <span className="text-slate-400 font-bold block text-xs">体型</span>
               <span className="font-black text-slate-800">{currentDino.length.split('，')[0]}</span>
             </div>
           </div>

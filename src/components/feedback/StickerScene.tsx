@@ -202,7 +202,7 @@ export function StickerScene() {
                 className="flex flex-col items-center rounded-lg bg-white p-1.5 shadow-sm hover:bg-candy-pink-soft transition-colors"
               >
                 <span className="text-2xl">{s.emoji}</span>
-                <span className="text-[9px] font-bold text-ink-soft mt-0.5 truncate max-w-full">{s.name}</span>
+                <span className="text-xs font-bold text-ink-soft mt-0.5 truncate max-w-full">{s.name}</span>
               </motion.button>
             ))}
           </div>

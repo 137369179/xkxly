@@ -82,7 +82,7 @@ export function Leaderboard() {
           <div key={s.labelKey} className="rounded-xl bg-candy-orange-soft p-2 text-center">
             <div className="text-lg">{s.emoji}</div>
             <div className="text-base font-black text-candy-orange-deep">{s.value}</div>
-            <div className="text-[10px] font-bold text-ink-soft">{t(s.labelKey)}</div>
+            <div className="text-xs font-bold text-ink-soft">{t(s.labelKey)}</div>
           </div>
         ))}
       </div>

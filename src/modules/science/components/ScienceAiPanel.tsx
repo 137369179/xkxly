@@ -66,7 +66,7 @@ function ScienceAiPanelImpl({ topic, label, triggerLabel = '🤖 小茜讲讲', 
             <div className="rounded-xl bg-white/80 p-3 text-sm leading-relaxed text-ink">
               {text}
               {fallback && (
-                <span className="mt-1 block text-[10px] text-ink-muted">{tr('science.knowledgeCard')}</span>
+                <span className="mt-1 block text-xs text-ink-muted">{tr('science.knowledgeCard')}</span>
               )}
             </div>
             {status === 'done' && (

@@ -108,7 +108,7 @@ export function VoiceSettings() {
               >
                 {t.tag && (
                   <span
-                    className={`absolute -top-3 right-4 rounded-full px-2.5 py-0.5 text-[10px] font-black shadow-xs ${
+                    className={`absolute -top-3 right-4 rounded-full px-2.5 py-0.5 text-xs font-black shadow-xs ${
                       isSelected
                         ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
                         : 'bg-slate-100 text-slate-500 border border-slate-200'
@@ -130,7 +130,7 @@ export function VoiceSettings() {
                   {t.desc}
                 </p>
                 <div className="mt-4 w-full flex items-center justify-between border-t border-amber-100/80 pt-3">
-                  <span className="text-[11px] font-extrabold text-amber-700">
+                  <span className="text-xs font-extrabold text-amber-700">
                     🔊 点击即刻试听
                   </span>
                   <span className="text-xs">{isSelected ? '✅' : '👉'}</span>

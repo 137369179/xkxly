@@ -3,11 +3,11 @@
  * ------------------------------------------------------------
  * 懒加载 Planet3D 组件，2D 降级方案
  */
-import { memo, useState, Suspense, lazy } from 'react';
+import { memo, useState, Suspense, lazy, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
-import { sfxTap } from '@/lib/sfx';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { PLANETS, type PlanetItem } from '@/data/space';
 import { ScienceAiPanel } from './ScienceAiPanel';
@@ -20,7 +20,7 @@ function PlanetDetail({ planet, onClose }: { planet: PlanetItem; onClose: () => 
   const { t: tr } = useTranslation();
   return (
     <Panel className="border-2 border-blue-300 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <button onClick={() => { sfxTap(); onClose(); }} className="mb-3 text-xs font-bold text-blue-700 hover:text-blue-900">
+      <button onClick={() => { sfxTap(); triggerHaptic(20); onClose(); }} className="mb-3 text-xs font-bold text-blue-700 hover:text-blue-900">
         {tr('spaceExplorer.backToList')}
       </button>
       <div className="flex flex-col sm:flex-row items-center gap-5">
@@ -47,19 +47,19 @@ function PlanetDetail({ planet, onClose }: { planet: PlanetItem; onClose: () => 
           <p className="text-sm font-bold text-blue-800">{planet.desc}</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <div className="rounded-xl bg-white/80 p-2 text-center border border-blue-200">
-              <p className="text-[10px] font-bold text-ink-muted">{tr('spaceExplorer.diameter')}</p>
+              <p className="text-xs font-bold text-ink-muted">{tr('spaceExplorer.diameter')}</p>
               <p className="text-xs font-black text-blue-700">{planet.diameter.toLocaleString()}km</p>
             </div>
             <div className="rounded-xl bg-white/80 p-2 text-center border border-blue-200">
-              <p className="text-[10px] font-bold text-ink-muted">{tr('spaceExplorer.distanceFromSun')}</p>
+              <p className="text-xs font-bold text-ink-muted">{tr('spaceExplorer.distanceFromSun')}</p>
               <p className="text-xs font-black text-blue-700">{planet.distanceAU} AU</p>
             </div>
             <div className="rounded-xl bg-white/80 p-2 text-center border border-blue-200">
-              <p className="text-[10px] font-bold text-ink-muted">{tr('spaceExplorer.orbitalPeriod')}</p>
+              <p className="text-xs font-bold text-ink-muted">{tr('spaceExplorer.orbitalPeriod')}</p>
               <p className="text-xs font-black text-blue-700">{planet.orbitalPeriod}{tr('spaceExplorer.days')}</p>
             </div>
             <div className="rounded-xl bg-white/80 p-2 text-center border border-blue-200">
-              <p className="text-[10px] font-bold text-ink-muted">{tr('spaceExplorer.moons')}</p>
+              <p className="text-xs font-bold text-ink-muted">{tr('spaceExplorer.moons')}</p>
               <p className="text-xs font-black text-blue-700">{planet.moons}{tr('spaceExplorer.moonCount')}</p>
             </div>
           </div>
@@ -70,9 +70,9 @@ function PlanetDetail({ planet, onClose }: { planet: PlanetItem; onClose: () => 
             🎵 {planet.chant}
           </div>
           <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
-            <CandyButton tone="blue" size="sm" onClick={() => { sfxTap(); speak(`${planet.nameZh}。${planet.desc}`, { lang: 'zh-CN' }); }}>{tr('spaceExplorer.chinese')}</CandyButton>
-            <CandyButton tone="green" size="sm" onClick={() => { sfxTap(); speak(planet.nameEn, { lang: 'en-US', rate: 0.85 }); }}>{tr('spaceExplorer.english')}</CandyButton>
-            <CandyButton tone="orange" size="sm" onClick={() => { sfxTap(); speak(planet.chant, { lang: 'zh-CN', rate: 0.9 }); }}>{tr('spaceExplorer.chant')}</CandyButton>
+            <CandyButton tone="blue" size="sm" onClick={() => { sfxTap(); triggerHaptic(20); speak(`${planet.nameZh}。${planet.desc}`, { lang: 'zh-CN' }); }}>{tr('spaceExplorer.chinese')}</CandyButton>
+            <CandyButton tone="green" size="sm" onClick={() => { sfxTap(); triggerHaptic(20); speak(planet.nameEn, { lang: 'en-US', rate: 0.85 }); }}>{tr('spaceExplorer.english')}</CandyButton>
+            <CandyButton tone="orange" size="sm" onClick={() => { sfxTap(); triggerHaptic(20); speak(planet.chant, { lang: 'zh-CN', rate: 0.9 }); }}>{tr('spaceExplorer.chant')}</CandyButton>
           </div>
         </div>
       </div>
@@ -98,14 +98,51 @@ function SpaceExplorerImpl() {
   const [selected, setSelected] = useState<PlanetItem | null>(null);
   const [show3D, setShow3D] = useState(false);
 
+  const handleSelectPlanet = useCallback((planet: PlanetItem) => {
+    sfxTap();
+    triggerHaptic(20);
+    setSelected(planet);
+  }, []);
+
+  // 全局键盘快捷键
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(e.key)) {
+        const idx = parseInt(e.key, 10) - 1;
+        const p = PLANETS[idx];
+        if (p) {
+          e.preventDefault();
+          handleSelectPlanet(p);
+        }
+      } else if (e.key === 'Escape') {
+        if (selected) {
+          e.preventDefault();
+          sfxTap();
+          triggerHaptic(20);
+          setSelected(null);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selected, handleSelectPlanet]);
+
   return (
     <div className="space-y-4">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-blue-900 font-bold bg-blue-50/90 px-3 py-1 rounded-xl border border-blue-200">
+          ⌨️ 键盘快捷操作：数字键 1-9 挑选太阳系天体 · Esc 返回星空概览
+        </span>
+      </div>
+
       {/* 3D 太阳系切换 */}
       <div className="flex justify-center gap-2">
         <CandyButton
           tone="blue"
           size="sm"
-          onClick={() => { sfxTap(); setShow3D(!show3D); }}
+          onClick={() => { sfxTap(); triggerHaptic(20); setShow3D(!show3D); }}
         >
           {show3D ? tr('spaceExplorer.planetList') : tr('spaceExplorer.solarSystem3D')}
         </CandyButton>

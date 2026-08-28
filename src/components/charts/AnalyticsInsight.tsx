@@ -107,11 +107,11 @@ export function AnalyticsInsight() {
       <div className="grid grid-cols-2 gap-2">
         <div className="rounded-2xl border-2 border-orange-200 bg-orange-50/70 p-3 text-center">
           <div className="text-2xl font-black text-orange-500 tabular-nums">🔥 {stats.longest}</div>
-          <div className="mt-0.5 text-[11px] font-bold text-ink-soft">{t('analyticsInsight.longestStreak')}</div>
+          <div className="mt-0.5 text-xs font-bold text-ink-soft">{t('analyticsInsight.longestStreak')}</div>
         </div>
         <div className="rounded-2xl border-2 border-blue-200 bg-blue-50/70 p-3 text-center">
           <div className="text-2xl font-black text-blue-500">📅 周{stats.favIdx >= 0 ? WEEK_DAYS[stats.favIdx] : '—'}</div>
-          <div className="mt-0.5 text-[11px] font-bold text-ink-soft">{t('analyticsInsight.favWeekday')}</div>
+          <div className="mt-0.5 text-xs font-bold text-ink-soft">{t('analyticsInsight.favWeekday')}</div>
         </div>
       </div>
 
@@ -132,7 +132,7 @@ export function AnalyticsInsight() {
                   style={{ height: h }}
                   title={t('analyticsInsight.aiCount', { count: v })}
                 />
-                <span className={cn('text-[9px] font-bold', isToday ? 'text-candy-purple-deep' : 'text-ink-soft')}>
+                <span className={cn('text-xs font-bold', isToday ? 'text-candy-purple-deep' : 'text-ink-soft')}>
                   {['一', '二', '三', '四', '五', '六', '日'][i]}
                 </span>
               </div>
@@ -148,7 +148,7 @@ export function AnalyticsInsight() {
         <ActiveCard label={t('analyticsInsight.avgAccuracy')} value={`${stats.accuracy}%`} tone="bg-yellow-50 text-yellow-600 border-yellow-200" />
       </div>
 
-      <p className="text-center text-[11px] font-bold text-ink-soft">
+      <p className="text-center text-xs font-bold text-ink-soft">
         {todayActive ? t('analyticsInsight.todayActiveTip') : t('analyticsInsight.todayIdleTip')}
       </p>
     </div>
@@ -159,7 +159,7 @@ function ActiveCard({ label, value, tone }: { label: string; value: string; tone
   return (
     <div className={cn('rounded-2xl border-2 p-3 text-center', tone)}>
       <div className="text-xl font-black tabular-nums">{value}</div>
-      <div className="mt-0.5 text-[11px] font-bold text-ink-soft">{label}</div>
+      <div className="mt-0.5 text-xs font-bold text-ink-soft">{label}</div>
     </div>
   );
 }

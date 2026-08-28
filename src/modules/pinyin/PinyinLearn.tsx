@@ -1,15 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LearnFlow, type FlowStep } from '@/components/LearnFlow';
 import { TraceCanvas } from '@/components/TraceCanvas';
 import { QuizCard } from '@/components/QuizCard';
+import { SpeechEvalButton } from '@/components/feedback/SpeechEvalButton';
 import { AiPanel } from '@/components/ai';
 import { CandyButton } from '@/components/ui/Button';
 import { Panel } from '@/components/ui/Card';
 import { useAiStream } from '@/lib/ai/useAi';
 import { pinyinTutorTask } from '@/lib/ai/tasks';
 import { speak } from '@/lib/speech';
-import { sfxTap, sfxCorrect } from '@/lib/sfx';
-import { celebrateSmall } from '@/lib/celebrate';
+import { sfxTap, sfxCorrect, sfxWin, triggerHaptic } from '@/lib/sfx';
+import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 import { getAllPinyin, type PinyinEntry } from '@/data/pinyinIndex';
 import type { Question } from '@/types';
@@ -29,10 +30,29 @@ export function PinyinLearn({ entry, onDone }: { entry: PinyinEntry; onDone: () 
   const learnSkill = useStore(s => s.learnSkill);
   const practice = useStore(s => s.practice);
   const markTraced = useStore(s => s.markTraced);
+  const addStars = useStore(s => s.addStars);
   const tutor = useAiStream();
 
   const skill = `pinyin:${entry.p}`;
   const typeLabel = entry.type === 'shengmu' ? tr('pinyin.shengmu') : entry.type === 'yunmu' ? tr('pinyin.yunmu') : tr('pinyin.wholeSyllable');
+
+  // 键盘快捷监听
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        triggerHaptic(20);
+        onDone();
+      } else if (e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        triggerHaptic(20);
+        void speak(`${entry.p}。${entry.rhyme}`, { lang: 'zh-CN', rate: 0.7 });
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [entry, onDone]);
 
   function createQuestion(): Question {
     const correct = entry.rhyme;
@@ -128,7 +148,10 @@ export function PinyinLearn({ entry, onDone }: { entry: PinyinEntry; onDone: () 
             </div>
           </Panel>
           <div className="flex justify-center">
-            <CandyButton tone="green" size="lg" onClick={() => api.ready()}>{tr('pinyin.readDone1')}</CandyButton>
+            <CandyButton tone="green" size="lg" onClick={() => {
+              triggerHaptic(30);
+              api.ready();
+            }}>{tr('pinyin.readDone1')}</CandyButton>
           </div>
         </div>
       ),
@@ -144,8 +167,16 @@ export function PinyinLearn({ entry, onDone }: { entry: PinyinEntry; onDone: () 
             question={question}
             onAnswer={(correct: boolean) => {
               practice(skill, correct);
-              if (correct) { sfxCorrect(); celebrateSmall(); api.ready(); }
-              else { nextQuestion(); }
+              if (correct) {
+                sfxCorrect();
+                triggerHaptic(45);
+                celebrateSmall();
+                addStars(1);
+                api.ready();
+              } else {
+                triggerHaptic(20);
+                nextQuestion();
+              }
             }}
             onNext={() => {}}
           />
@@ -162,7 +193,15 @@ export function PinyinLearn({ entry, onDone }: { entry: PinyinEntry; onDone: () 
           <div className="text-center">
             <div className="text-6xl font-black text-ink">{entry.p}</div>
           </div>
-          <TraceCanvas char={entry.p} tone="blue" onPass={() => { markTraced(`pinyin:${entry.p}`); api.ready(); }} />
+          <TraceCanvas
+            char={entry.p}
+            tone="blue"
+            onPass={() => {
+              triggerHaptic(45);
+              markTraced(`pinyin:${entry.p}`);
+              api.ready();
+            }}
+          />
         </div>
       ),
     },
@@ -175,29 +214,86 @@ export function PinyinLearn({ entry, onDone }: { entry: PinyinEntry; onDone: () 
           <Panel className="text-center">
             <div className="text-6xl font-black text-ink">{entry.p}</div>
             <p className="mt-2 text-lg font-bold text-candy-purple-deep">{entry.rhyme}</p>
-            <p className="mt-2 text-base font-bold text-ink-soft">{tr('pinyin.readTip')}</p>
+            
+            {/* 智能语音跟读评测 */}
+            <div className="my-4 p-3 bg-blue-50/80 rounded-2xl border border-blue-200">
+              <p className="text-xs font-bold text-blue-900 mb-2">🎙️ 大声读出拼音「{entry.p}」，小茜为你评分：</p>
+              <SpeechEvalButton
+                targetText={entry.p}
+                lang="zh-CN"
+                onPass={() => {
+                  sfxWin();
+                  triggerHaptic([60, 40, 60, 40, 100]);
+                  celebrateBig();
+                  learnSkill(skill);
+                  addStars(2);
+                  api.ready();
+                }}
+              />
+            </div>
+
             {entry.tones && (
               <div className="mt-3">
                 <p className="text-sm font-bold text-ink-soft">{tr('pinyin.tonesChain')}</p>
                 <div className="mt-1 flex justify-center gap-3">
                   {entry.tones.map(t => (
-                    <button key={t} onClick={() => speak(t, { lang: 'zh-CN', rate: 0.6 })} className="text-3xl font-black text-candy-orange-deep active:scale-95">{t}</button>
+                    <button
+                      key={t}
+                      onClick={() => {
+                        triggerHaptic(20);
+                        speak(t, { lang: 'zh-CN', rate: 0.6 });
+                      }}
+                      className="text-3xl font-black text-candy-orange-deep active:scale-95"
+                    >
+                      {t}
+                    </button>
                   ))}
                 </div>
               </div>
             )}
           </Panel>
           <div className="flex flex-col gap-3">
-            <CandyButton tone="blue" size="lg" fullWidth onClick={() => speak(entry.p, { lang: 'zh-CN', rate: 0.6 })}>{tr('pinyin.followRead')}</CandyButton>
-            <CandyButton tone="purple" size="md" variant="soft" fullWidth onClick={() => speak(entry.rhyme, { lang: 'zh-CN', rate: 0.7 })}>{tr('pinyin.readRhyme')}</CandyButton>
+            <CandyButton tone="blue" size="lg" fullWidth onClick={() => {
+              triggerHaptic(20);
+              speak(entry.p, { lang: 'zh-CN', rate: 0.6 });
+            }}>
+              {tr('pinyin.followRead')}
+            </CandyButton>
+            <CandyButton tone="purple" size="md" variant="soft" fullWidth onClick={() => {
+              triggerHaptic(20);
+              speak(entry.rhyme, { lang: 'zh-CN', rate: 0.7 });
+            }}>
+              {tr('pinyin.readRhyme')}
+            </CandyButton>
           </div>
           <div className="flex justify-center">
-            <CandyButton tone="green" size="lg" onClick={() => { learnSkill(skill); api.ready(); }}>{tr('pinyin.readDone2')}</CandyButton>
+            <CandyButton tone="green" size="lg" onClick={() => {
+              triggerHaptic(30);
+              learnSkill(skill);
+              api.ready();
+            }}>
+              {tr('pinyin.readDone2')}
+            </CandyButton>
           </div>
         </div>
       ),
     },
   ];
 
-  return <LearnFlow steps={steps} tone="blue" finishLabel={tr('learning.finish')} onFinish={onDone} />;
+  return (
+    <div className="space-y-4">
+      {/* 顶部操作提示条 */}
+      <div className="flex items-center justify-between text-xs text-blue-800 font-bold bg-blue-50/90 px-3 py-1.5 rounded-xl border border-blue-200">
+        <span>⌨️ 键盘快捷操作：R 听拼音口诀 · Esc 返回拼音表</span>
+        <button
+          onClick={onDone}
+          className="text-xs text-blue-700 hover:text-blue-900 underline font-black"
+        >
+          返回拼音表 ➔
+        </button>
+      </div>
+
+      <LearnFlow steps={steps} tone="blue" finishLabel={tr('learning.finish')} onFinish={onDone} />
+    </div>
+  );
 }

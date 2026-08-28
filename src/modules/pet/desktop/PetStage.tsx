@@ -156,7 +156,7 @@ export function PetStage({ state, weather, onPetInteract, onGoHome }: Props) {
 
       <div ref={doorRef} className="absolute right-5 bottom-2 flex flex-col items-center opacity-90">
         <span className="text-5xl drop-shadow">🏠</span>
-        <span className="rounded-full bg-white/80 px-2 py-0.5 text-[11px] font-bold text-ink">拖回家</span>
+        <span className="rounded-full bg-white/80 px-2 py-0.5 text-xs font-bold text-ink">拖回家</span>
       </div>
 
       <div
@@ -198,7 +198,7 @@ export function PetStage({ state, weather, onPetInteract, onGoHome }: Props) {
         ) : (
           <div className="flex flex-col items-center">
             <span className="text-6xl drop-shadow-lg" style={{ fontSize: 56 }}>🐱</span>
-            <span className="mt-0.5 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-bold text-ink">
+            <span className="mt-0.5 rounded-full bg-white/90 px-2 py-0.5 text-xs font-bold text-ink">
               {state.home ? '在家休息 💤' : weather === 'rain' ? '下雨啦，撑伞☂️' : weather === 'hot' ? '来根冰棍❄️' : state.personality === 'jokester' ? '哈哈😆' : '小智'}
             </span>
           </div>

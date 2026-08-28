@@ -200,7 +200,7 @@ export function HanziWorksheet() {
               }`}
             >
               <span className="text-2xl font-black text-ink">{h.c}</span>
-              <span className="text-[10px] font-bold text-ink-soft">{h.p}</span>
+              <span className="text-xs font-bold text-ink-soft">{h.p}</span>
               {picked && <span className="text-xs">✅</span>}
             </button>
           );

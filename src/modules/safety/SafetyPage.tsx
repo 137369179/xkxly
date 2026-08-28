@@ -6,11 +6,11 @@
  * 3. 紧急求助电话拨号练习 (Emergency 110/119/120 Dialing)
  */
 
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
-import { sfxTap, sfxCorrect } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, triggerHaptic } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { useAiStream } from '@/lib/ai/useAi';
 import { safetySceneTask } from '@/lib/ai/tasks/culture';
@@ -19,6 +19,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { useStore, useMastery } from '@/store/useStore';
 import { HabitSimulator } from './components/HabitSimulator';
 import { EmergencyTheatre } from './components/EmergencyTheatre';
+import { navigate } from '@/lib/router';
 
 /** 新增场景（scene9–scene12）的内置默认中文文案：当 i18n 缺失时作为 fallback。 */
 const DEFAULT_TEXTS: Record<string, { scene: string; safe: string; danger: string }> = {
@@ -93,41 +94,76 @@ export default function SafetyPage() {
   const [showSafetyAi, setShowSafetyAi] = useState(false);
   const safetyAi = useAiStream();
 
-  const handleDialDigit = (digit: string) => {
+  const handleDialDigit = useCallback((digit: string) => {
     sfxTap();
+    triggerHaptic(30);
     if (dialNum.length >= 3) return;
     const newNum = dialNum + digit;
     setDialNum(newNum);
 
     if (newNum === '110') {
       sfxCorrect();
+      triggerHaptic([40, 50, 80]);
       setDialFeedback('🚓 110 警察叔叔警报电话！有危险找警察！');
       speak('1 1 0，匪警求助电话！警察叔叔来帮忙！', { lang: 'zh-CN' });
       practice('safety:dial-110', true, 2, 1);
     } else if (newNum === '119') {
       sfxCorrect();
+      triggerHaptic([40, 50, 80]);
       setDialFeedback('🚒 119 火警电话！着火了打 119！');
       speak('1 1 9，火警救灾电话！消防员叔叔来灭火！', { lang: 'zh-CN' });
       practice('safety:dial-119', true, 2, 1);
     } else if (newNum === '120') {
       sfxCorrect();
+      triggerHaptic([40, 50, 80]);
       setDialFeedback('🚑 120 医疗急救电话！有人受伤打 120！');
       speak('1 2 0，急救电话！医生护士救护车！', { lang: 'zh-CN' });
       practice('safety:dial-120', true, 2, 1);
     }
-  };
+  }, [dialNum, practice]);
 
-  const handleClearDial = () => {
+  const handleClearDial = useCallback(() => {
     sfxTap();
+    triggerHaptic(35);
     setDialNum('');
     setDialFeedback('');
-  };
+  }, []);
+
+  const handleNextScene = useCallback(() => {
+    sfxTap();
+    triggerHaptic(30);
+    setSafetyIdx((i) => (i + 1) % SAFETY_SCENES.length);
+    setSafetyChosen(null);
+    setShowSafetyAi(false);
+  }, []);
 
   // 统计已掌握的安全情景数（mastery 中 safety:scene-{i} 的 lv >= 1）
   const masteredScenes = SAFETY_SCENES.filter((_, i) => {
     const m = mastery[`safety:scene-${i + 1}`];
     return m != null && m.lv >= 1;
   }).length;
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(e.key)) {
+        e.preventDefault();
+        handleDialDigit(e.key);
+      } else if (e.key === 'Backspace' || e.key === 'c' || e.key === 'C') {
+        e.preventDefault();
+        handleClearDial();
+      } else if (e.key === 'n' || e.key === 'N') {
+        e.preventDefault();
+        handleNextScene();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        navigate('home');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleDialDigit, handleClearDial, handleNextScene]);
 
   return (
     <div className="space-y-5">
@@ -167,6 +203,11 @@ export default function SafetyPage() {
           {translate('safety.dialTip')}
         </p>
 
+        {/* 快捷操作提示条 */}
+        <div className="inline-flex items-center justify-between text-xs text-rose-700 font-bold bg-white/90 px-3 py-1 rounded-xl border border-rose-200">
+          <span>⌨️ 键盘拨号：数字键 0-9 拨号 · Backspace/C 重新输入</span>
+        </div>
+
         <div className="mx-auto flex h-16 w-48 items-center justify-center rounded-2xl border-2 border-rose-300 bg-white text-3xl font-black tracking-widest text-rose-900 shadow-inner">
           {dialNum || '---'}
         </div>
@@ -178,11 +219,33 @@ export default function SafetyPage() {
         )}
 
         <div className="mx-auto grid max-w-xs grid-cols-3 gap-2">
-          {['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '110', '119'].map(d => (
+          {['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '110', '119'].map((d) => (
             <button
               key={d}
-              onClick={() => d.length > 1 ? (setDialNum(d), handleDialDigit('')) : handleDialDigit(d)}
-              className="rounded-2xl border-2 border-rose-200 bg-white p-3 text-lg font-black text-rose-900 shadow-sm active:scale-95 transition-transform"
+              type="button"
+              onClick={() => {
+                if (d.length > 1) {
+                  sfxTap();
+                  triggerHaptic(30);
+                  setDialNum(d);
+                  if (d === '110') {
+                    sfxCorrect();
+                    triggerHaptic([40, 50, 80]);
+                    setDialFeedback('🚓 110 警察叔叔警报电话！有危险找警察！');
+                    speak('1 1 0，匪警求助电话！警察叔叔来帮忙！', { lang: 'zh-CN' });
+                    practice('safety:dial-110', true, 2, 1);
+                  } else if (d === '119') {
+                    sfxCorrect();
+                    triggerHaptic([40, 50, 80]);
+                    setDialFeedback('🚒 119 火警电话！着火了打 119！');
+                    speak('1 1 9，火警救灾电话！消防员叔叔来灭火！', { lang: 'zh-CN' });
+                    practice('safety:dial-119', true, 2, 1);
+                  }
+                } else {
+                  handleDialDigit(d);
+                }
+              }}
+              className="min-h-[48px] rounded-2xl border-2 border-rose-200 bg-white p-3 text-lg font-black text-rose-900 shadow-sm active:scale-95 transition-transform focus:outline-none focus-visible:ring-4 focus-visible:ring-rose-300"
             >
               {d}
             </button>
@@ -214,15 +277,17 @@ export default function SafetyPage() {
               return (
                 <button
                   key={optKey}
+                  type="button"
                   onClick={() => {
                     sfxTap();
+                    const isSafe = optKey === SAFETY_SCENES[safetyIdx]!.safe;
+                    triggerHaptic(isSafe ? 45 : 20);
                     setSafetyChosen(optText);
                     setShowSafetyAi(true);
-                    const isSafe = optKey === SAFETY_SCENES[safetyIdx]!.safe;
                     practice(`safety:scene-${safetyIdx + 1}`, isSafe, isSafe ? 2 : 0, 2);
                     safetyAi.run(safetySceneTask(resolveText(translate, SAFETY_SCENES[safetyIdx]!.scene, 'scene'), optText));
                   }}
-                  className={`rounded-2xl border-2 px-4 py-2.5 text-sm font-black transition-all active:scale-95 ${
+                  className={`min-h-[48px] rounded-2xl border-2 px-4 py-2.5 text-sm font-black transition-all active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-green-300 ${
                     safetyChosen === optText
                       ? 'border-green-500 bg-green-100 text-green-900 shadow-md'
                       : 'border-green-200 bg-white text-green-800 hover:scale-102'
@@ -258,12 +323,7 @@ export default function SafetyPage() {
           <CandyButton
             tone="green"
             size="sm"
-            onClick={() => {
-              sfxTap();
-              setSafetyIdx((i) => (i + 1) % SAFETY_SCENES.length);
-              setSafetyChosen(null);
-              setShowSafetyAi(false);
-            }}
+            onClick={handleNextScene}
           >
             🔄 {translate('safety.nextScene')}
           </CandyButton>

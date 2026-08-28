@@ -7,10 +7,10 @@
  * 4. 听音戳气泡大冒险与连击 Streak 激励。
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { speak } from '@/lib/speech';
-import { sfxTap, sfxCorrect, sfxWrong, sfxWin } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 import { StreakBar } from '@/components/study/StreakBar';
@@ -101,7 +101,7 @@ export const WORD_FAMILIES: WordFamily[] = [
     emoji: '🐱',
     words: [
       { prefix: 'c', word: 'cat', meaning: '小猫', emoji: '🐱' },
-      { prefix: 'b', word: 'bat', meaning: '蝙蝠', emoji: '🦇' },
+      { prefix: 'b', word: 'bat', meaning: '蝙蝠/球棒', emoji: '🦇' },
       { prefix: 'h', word: 'hat', meaning: '帽子', emoji: '🎩' },
       { prefix: 'r', word: 'rat', meaning: '老鼠', emoji: '🐭' },
     ],
@@ -114,20 +114,20 @@ export const WORD_FAMILIES: WordFamily[] = [
     words: [
       { prefix: 'h', word: 'hen', meaning: '母鸡', emoji: '🐔' },
       { prefix: 'p', word: 'pen', meaning: '钢笔', emoji: '🖊️' },
-      { prefix: 't', word: 'ten', meaning: '数字十', emoji: '🔟' },
-      { prefix: 'm', word: 'men', meaning: '男人们', emoji: '👨‍👦' },
+      { prefix: 't', word: 'ten', meaning: '数字10', emoji: '🔟' },
+      { prefix: 'm', word: 'men', meaning: '人们', emoji: '👥' },
     ],
   },
   {
     family: '-ig',
     vowel: 'i',
-    themeName: '-ig 家族 (Pig/Big/Dig/Wig)',
+    themeName: '-ig 家族 (Pig/Big/Dig/Fig)',
     emoji: '🐷',
     words: [
       { prefix: 'p', word: 'pig', meaning: '小猪', emoji: '🐷' },
       { prefix: 'b', word: 'big', meaning: '巨大的', emoji: '🐘' },
-      { prefix: 'd', word: 'dig', meaning: '挖泥土', emoji: '⛏️' },
-      { prefix: 'w', word: 'wig', meaning: '假发', emoji: '💇' },
+      { prefix: 'd', word: 'dig', meaning: '挖掘', emoji: '⛏️' },
+      { prefix: 'f', word: 'fig', meaning: '无花果', emoji: '🫐' },
     ],
   },
   {
@@ -136,10 +136,10 @@ export const WORD_FAMILIES: WordFamily[] = [
     themeName: '-op 家族 (Hop/Top/Mop/Pop)',
     emoji: '🐰',
     words: [
-      { prefix: 'h', word: 'hop', meaning: '单脚跳', emoji: '🐇' },
-      { prefix: 't', word: 'top', meaning: '陀螺/顶端', emoji: '🪀' },
+      { prefix: 'h', word: 'hop', meaning: '单脚跳', emoji: '🐰' },
+      { prefix: 't', word: 'top', meaning: '陀螺/顶部', emoji: '🪀' },
       { prefix: 'm', word: 'mop', meaning: '拖把', emoji: '🧹' },
-      { prefix: 'p', word: 'pop', meaning: '爆米花/啪', emoji: '🍿' },
+      { prefix: 'p', word: 'pop', meaning: '爆米花/啪声', emoji: '🍿' },
     ],
   },
   {
@@ -148,10 +148,10 @@ export const WORD_FAMILIES: WordFamily[] = [
     themeName: '-ug 家族 (Bug/Mug/Hug/Rug)',
     emoji: '🐛',
     words: [
-      { prefix: 'b', word: 'bug', meaning: '小虫子', emoji: '🐞' },
+      { prefix: 'b', word: 'bug', meaning: '小虫子', emoji: '🐛' },
       { prefix: 'm', word: 'mug', meaning: '马克杯', emoji: '☕' },
-      { prefix: 'h', word: 'hug', meaning: '温暖拥抱', emoji: '🤗' },
-      { prefix: 'r', word: 'rug', meaning: '小地毯', emoji: '🧶' },
+      { prefix: 'h', word: 'hug', meaning: '拥抱', emoji: '🤗' },
+      { prefix: 'r', word: 'rug', meaning: '地毯', emoji: '🧶' },
     ],
   },
 ];
@@ -175,12 +175,17 @@ const FALLBACK_CVC: CvcWord = {
   emoji: '🐱',
 };
 
-const FALLBACK_FAMILY: WordFamily = WORD_FAMILIES[0] ?? {
+const FALLBACK_FAMILY: WordFamily = {
   family: '-at',
   vowel: 'a',
-  themeName: '-at 家族',
+  themeName: '-at 家族 (Cat/Bat/Hat/Rat)',
   emoji: '🐱',
-  words: [{ prefix: 'c', word: 'cat', meaning: '小猫', emoji: '🐱' }],
+  words: [
+    { prefix: 'c', word: 'cat', meaning: '小猫', emoji: '🐱' },
+    { prefix: 'b', word: 'bat', meaning: '蝙蝠/球棒', emoji: '🦇' },
+    { prefix: 'h', word: 'hat', meaning: '帽子', emoji: '🎩' },
+    { prefix: 'r', word: 'rat', meaning: '老鼠', emoji: '🐭' },
+  ],
 };
 
 export type PhonicsMode = 'bubbles' | 'cvc' | 'family' | 'quiz';
@@ -191,12 +196,16 @@ export function PhonicsBubbleLand() {
 
   const [mode, setMode] = useState<PhonicsMode>('bubbles');
   const [selectedLetter, setSelectedLetter] = useState<PhonicsLetter>(PHONICS_LETTERS[0] ?? FALLBACK_PHONICS);
-  const [cvcIdx, setCvcIdx] = useState(0);
-  const [familyIdx, setFamilyIdx] = useState(0);
-  const [familyWordIdx, setFamilyWordIdx] = useState(0);
   const [streak, setStreak] = useState(0);
 
-  // 听音辨音问答
+  // CVC 模式状态
+  const [cvcIdx, setCvcIdx] = useState(0);
+
+  // Word Family 模式状态
+  const [familyIdx, setFamilyIdx] = useState(0);
+  const [familyWordIdx, setFamilyWordIdx] = useState(0);
+
+  // 听音戳气泡 Quiz 模式状态
   const [quizIdx, setQuizIdx] = useState(0);
   const [answeredOpt, setAnsweredOpt] = useState<string | null>(null);
 
@@ -229,6 +238,7 @@ export function PhonicsBubbleLand() {
   const handlePickBubble = useCallback(
     (item: PhonicsLetter) => {
       sfxTap();
+      triggerHaptic(20);
       setSelectedLetter(item);
       celebrateSmall();
       addStars(1);
@@ -238,19 +248,21 @@ export function PhonicsBubbleLand() {
     [addStars, practice],
   );
 
-  const handleCvcFuse = () => {
+  const handleCvcFuse = useCallback(() => {
     sfxCorrect();
     celebrateBig();
     sfxWin();
+    triggerHaptic([40, 30, 40, 30, 70]);
     const nextStreak = streak + 1;
     setStreak(nextStreak);
     addStars(1);
     practice('word:cvc-fusion', true, 2, 1);
     void speak(`${currentCvc.c1}, ${currentCvc.v}, ${currentCvc.c2}... ${currentCvc.word}! ${currentCvc.meaning}!`, { lang: 'en-US' });
-  };
+  }, [currentCvc, streak, addStars, practice]);
 
-  const handleFamilyWordClick = (wIdx: number) => {
+  const handleFamilyWordClick = useCallback((wIdx: number) => {
     sfxTap();
+    triggerHaptic(25);
     setFamilyWordIdx(wIdx);
     const targetWord = currentFamily.words[wIdx];
     if (targetWord) {
@@ -260,15 +272,16 @@ export function PhonicsBubbleLand() {
       practice(`word:family-${targetWord.word}`, true, 1, 1);
       void speak(`${targetWord.prefix}, ${currentFamily.family}... ${targetWord.word}! ${targetWord.meaning}!`, { lang: 'en-US' });
     }
-  };
+  }, [currentFamily, addStars, practice]);
 
-  const handlePickQuizOption = (opt: PhonicsLetter) => {
+  const handlePickQuizOption = useCallback((opt: PhonicsLetter) => {
     if (answeredOpt !== null) return;
     setAnsweredOpt(opt.letter);
 
     if (opt.letter === currentQuiz.target.letter) {
       sfxCorrect();
       celebrateSmall();
+      triggerHaptic([30, 40, 60]);
       const nextStreak = streak + 1;
       setStreak(nextStreak);
       addStars(1);
@@ -276,6 +289,7 @@ export function PhonicsBubbleLand() {
       void speak(`Great! ${opt.letter} says ${opt.phonics}. ${opt.word}!`, { lang: 'en-US' });
     } else {
       sfxWrong();
+      triggerHaptic(50);
       setStreak(0);
       void speak(`Try again! ${currentQuiz.target.letter} says ${currentQuiz.target.phonics}.`, { lang: 'en-US' });
     }
@@ -284,23 +298,53 @@ export function PhonicsBubbleLand() {
       setAnsweredOpt(null);
       setQuizIdx((i) => (i + 1) % PHONICS_LETTERS.length);
     }, 1500);
-  };
+  }, [answeredOpt, currentQuiz, streak, addStars, practice]);
+
+  // 全局快捷键
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (mode === 'cvc' && (e.key === ' ' || e.key === 'Enter')) {
+        e.preventDefault();
+        handleCvcFuse();
+      } else if (mode === 'quiz' && ['1', '2', '3', '4'].includes(e.key)) {
+        const idx = parseInt(e.key, 10) - 1;
+        const opt = currentQuiz.options[idx];
+        if (opt) {
+          e.preventDefault();
+          handlePickQuizOption(opt);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mode, handleCvcFuse, currentQuiz.options, handlePickQuizOption]);
 
   return (
     <div className="space-y-4">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-sky-900 font-bold bg-sky-50/90 px-3 py-1 rounded-xl border border-sky-200">
+          ⌨️ 键盘快捷操作：听音选泡泡按数字键 1-4 · CVC 拼读按空格/Enter 融合
+        </span>
+      </div>
+
       {/* 顶部四大模式导航 */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+        <div className="flex flex-wrap gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200" role="tablist" aria-label="自然拼读模式导航">
           <button
             type="button"
+            role="tab"
+            aria-selected={mode === 'bubbles'}
             onClick={() => {
               sfxTap();
+              triggerHaptic(20);
               setMode('bubbles');
             }}
-            className={`py-1.5 px-3 rounded-xl font-black text-xs transition-all flex items-center gap-1 border ${
+            className={`min-h-[44px] py-1.5 px-3 rounded-xl font-black text-xs transition-all flex items-center gap-1 border focus-visible:ring-4 focus-visible:ring-sky-300 focus:outline-none ${
               mode === 'bubbles'
                 ? 'bg-sky-500 text-white border-sky-600 shadow-sm'
-                : 'bg-white text-slate-700 border-slate-200 hover:border-sky-300'
+                : 'bg-white text-slate-700 border-slate-200 hover:border-sky-300 active:scale-95'
             }`}
           >
             <span>🫧</span>
@@ -309,14 +353,17 @@ export function PhonicsBubbleLand() {
 
           <button
             type="button"
+            role="tab"
+            aria-selected={mode === 'cvc'}
             onClick={() => {
               sfxTap();
+              triggerHaptic(20);
               setMode('cvc');
             }}
-            className={`py-1.5 px-3 rounded-xl font-black text-xs transition-all flex items-center gap-1 border ${
+            className={`min-h-[44px] py-1.5 px-3 rounded-xl font-black text-xs transition-all flex items-center gap-1 border focus-visible:ring-4 focus-visible:ring-purple-300 focus:outline-none ${
               mode === 'cvc'
                 ? 'bg-purple-600 text-white border-purple-700 shadow-sm'
-                : 'bg-white text-slate-700 border-slate-200 hover:border-purple-300'
+                : 'bg-white text-slate-700 border-slate-200 hover:border-purple-300 active:scale-95'
             }`}
           >
             <span>🎰</span>
@@ -325,14 +372,17 @@ export function PhonicsBubbleLand() {
 
           <button
             type="button"
+            role="tab"
+            aria-selected={mode === 'family'}
             onClick={() => {
               sfxTap();
+              triggerHaptic(20);
               setMode('family');
             }}
-            className={`py-1.5 px-3 rounded-xl font-black text-xs transition-all flex items-center gap-1 border ${
+            className={`min-h-[44px] py-1.5 px-3 rounded-xl font-black text-xs transition-all flex items-center gap-1 border focus-visible:ring-4 focus-visible:ring-emerald-300 focus:outline-none ${
               mode === 'family'
                 ? 'bg-emerald-600 text-white border-emerald-700 shadow-sm'
-                : 'bg-white text-slate-700 border-slate-200 hover:border-emerald-300'
+                : 'bg-white text-slate-700 border-slate-200 hover:border-emerald-300 active:scale-95'
             }`}
           >
             <span>🚂</span>
@@ -341,16 +391,19 @@ export function PhonicsBubbleLand() {
 
           <button
             type="button"
+            role="tab"
+            aria-selected={mode === 'quiz'}
             onClick={() => {
               sfxTap();
+              triggerHaptic(20);
               setMode('quiz');
               setAnsweredOpt(null);
               void speak(`Listen carefully: which letter says ${currentQuiz.target.phonics}?`, { lang: 'en-US' });
             }}
-            className={`py-1.5 px-3 rounded-xl font-black text-xs transition-all flex items-center gap-1 border ${
+            className={`min-h-[44px] py-1.5 px-3 rounded-xl font-black text-xs transition-all flex items-center gap-1 border focus-visible:ring-4 focus-visible:ring-amber-300 focus:outline-none ${
               mode === 'quiz'
                 ? 'bg-amber-500 text-white border-amber-600 shadow-sm'
-                : 'bg-white text-slate-700 border-slate-200 hover:border-amber-300'
+                : 'bg-white text-slate-700 border-slate-200 hover:border-amber-300 active:scale-95'
             }`}
           >
             <span>🎯</span>
@@ -424,7 +477,7 @@ export function PhonicsBubbleLand() {
                   }`}
                 >
                   <span className="text-xl font-black">{item.letter}</span>
-                  <span className="text-[10px] font-bold opacity-80">{item.phonics}</span>
+                  <span className="text-xs font-bold opacity-80">{item.phonics}</span>
                 </motion.button>
               );
             })}

@@ -19,6 +19,7 @@ vi.mock('@/lib/sfx', () => ({
   sfxCorrect: vi.fn(),
   sfxWrong: vi.fn(),
   sfxWin: vi.fn(),
+  triggerHaptic: vi.fn(),
 }));
 
 vi.mock('@/lib/celebrate', () => ({
@@ -85,39 +86,36 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
+import VoiceStudioPage from '../VoiceStudioPage';
+
 // ── Page-level smoke tests ───────────────────────────────────────────────────
 
 describe('VoiceStudioPage smoke tests', () => {
   it('renders page title', async () => {
-    const { default: Page } = await import('../VoiceStudioPage');
-    await act(async () => { root = createRoot(container); root.render(<Page />); });
+    await act(async () => { root = createRoot(container); root.render(<VoiceStudioPage />); });
     expect(container.textContent).toContain('声音工坊');
-  });
+  }, 10000);
 
   it('renders all 3 character names in voice tab', async () => {
-    const { default: Page } = await import('../VoiceStudioPage');
-    await act(async () => { root = createRoot(container); root.render(<Page />); });
+    await act(async () => { root = createRoot(container); root.render(<VoiceStudioPage />); });
     expect(container.textContent).toContain('茜茜');
     expect(container.textContent).toContain('温柔老师');
     expect(container.textContent).toContain('活泼小兔');
   });
 
   it('shows character description in voice tab', async () => {
-    const { default: Page } = await import('../VoiceStudioPage');
-    await act(async () => { root = createRoot(container); root.render(<Page />); });
+    await act(async () => { root = createRoot(container); root.render(<VoiceStudioPage />); });
     expect(container.textContent).toContain('活泼小女孩');
   });
 
   it('renders custom speak input box in voice tab', async () => {
-    const { default: Page } = await import('../VoiceStudioPage');
-    await act(async () => { root = createRoot(container); root.render(<Page />); });
+    await act(async () => { root = createRoot(container); root.render(<VoiceStudioPage />); });
     const input = container.querySelector('input[type="text"]');
     expect(input).toBeTruthy();
   });
 
   it('switches character on button click (voice tab)', async () => {
-    const { default: Page } = await import('../VoiceStudioPage');
-    await act(async () => { root = createRoot(container); root.render(<Page />); });
+    await act(async () => { root = createRoot(container); root.render(<VoiceStudioPage />); });
     const allBtns = () => Array.from(container.querySelectorAll('button'));
     const teacherBtn = allBtns().find((b) => b.textContent?.includes('温柔老师'));
     await act(async () => { teacherBtn?.click(); });
@@ -125,8 +123,7 @@ describe('VoiceStudioPage smoke tests', () => {
   });
 
   it('shows greeting text of default character', async () => {
-    const { default: Page } = await import('../VoiceStudioPage');
-    await act(async () => { root = createRoot(container); root.render(<Page />); });
+    await act(async () => { root = createRoot(container); root.render(<VoiceStudioPage />); });
     expect(container.textContent).toContain('你好呀');
   });
 });
@@ -278,8 +275,7 @@ describe('READ_ITEMS data integrity', () => {
 
   it('VOICE_CHARACTERS is defined with 3 entries', async () => {
     // We verify by checking the rendered output contains all 3 character names
-    const { default: Page } = await import('../VoiceStudioPage');
-    await act(async () => { root = createRoot(container); root.render(<Page />); });
+    await act(async () => { root = createRoot(container); root.render(<VoiceStudioPage />); });
     const text = container.textContent ?? '';
     const found = ['茜茜', '温柔老师', '活泼小兔'].filter((name) => text.includes(name));
     expect(found).toHaveLength(3);

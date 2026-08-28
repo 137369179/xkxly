@@ -113,11 +113,11 @@ function AnimalDetail({ animal, onClose }: { animal: AnimalItem; onClose: () => 
           <p className="text-sm font-bold text-green-800">{animal.desc}</p>
           <div className="grid grid-cols-2 gap-2 max-w-xs">
             <div className="rounded-xl bg-white/80 p-2 text-center border border-green-200">
-              <p className="text-[10px] font-bold text-ink-muted">{tr('animalWorld.sizeLabel')}</p>
+              <p className="text-xs font-bold text-ink-muted">{tr('animalWorld.sizeLabel')}</p>
               <p className="text-sm font-black text-green-700">{SIZE_LABELS[animal.sizeLevel]}</p>
             </div>
             <div className="rounded-xl bg-white/80 p-2 text-center border border-green-200">
-              <p className="text-[10px] font-bold text-ink-muted">{tr('animalWorld.soundLabel')}</p>
+              <p className="text-xs font-bold text-ink-muted">{tr('animalWorld.soundLabel')}</p>
               <p className="text-sm font-black text-green-700">{animal.sound}</p>
             </div>
           </div>
@@ -236,7 +236,7 @@ function HabitatMap() {
       {/* 栖息地图例 */}
       <div className="mt-3 flex flex-wrap justify-center gap-1.5">
         {Object.keys(habitatGroups).map(h => (
-          <span key={h} className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700">
+          <span key={h} className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-bold text-green-700">
             {HABITAT_EMOJI[h]} {tr(HABITAT_KEY[h] ?? '')} ({habitatGroups[h]!.length})
           </span>
         ))}
@@ -327,7 +327,7 @@ function AnimalWorldImpl() {
                       >
                         <span className="text-4xl">{animal.emoji}</span>
                         <span className="mt-1 text-sm font-black text-ink">{animal.nameZh}</span>
-                        <span className="text-[10px] font-bold text-emerald-600">{animal.nameEn}</span>
+                        <span className="text-xs font-bold text-emerald-600">{animal.nameEn}</span>
                         <div className="mt-1 flex gap-1">
                           <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[8px] font-bold text-blue-700">
                             {HABITAT_EMOJI[animal.habitat]} {tr(HABITAT_KEY[animal.habitat] ?? '')}

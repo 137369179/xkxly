@@ -63,7 +63,7 @@ function VehicleExploreImpl() {
               selected===i ? 'bg-candy-blue-deep text-white' : 'bg-white'
             )}>
             <div className="text-2xl">{v.emoji}</div>
-            <div className="text-[9px] font-bold">{v.name}</div>
+            <div className="text-xs font-bold">{v.name}</div>
           </button>
         ))}
       </div>

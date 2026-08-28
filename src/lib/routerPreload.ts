@@ -34,7 +34,7 @@ export function preloadRoute(routeId: RouteId): void {
   }
 }
 
-/** 在浏览器空闲时间段依次预加载核心高频路由 */
+/** 在浏览器空闲时间段依次温和预加载核心高频路由（首屏稳定后 6s 启动，间隔 1.5s） */
 export function preloadHighFrequencyRoutes(): void {
   if (typeof window === 'undefined') return;
 
@@ -49,26 +49,26 @@ export function preloadHighFrequencyRoutes(): void {
       window.requestIdleCallback(
         () => {
           preloadRoute(nextRoute);
-          scheduleNext(remaining);
+          setTimeout(() => scheduleNext(remaining), 1500);
         },
-        { timeout: 3000 },
+        { timeout: 8000 },
       );
     } else {
       setTimeout(() => {
         preloadRoute(nextRoute);
         scheduleNext(remaining);
-      }, 500);
+      }, 1500);
     }
   };
 
-  // 放在 requestIdleCallback 里，保证首屏渲染绝对优先
-  if ('requestIdleCallback' in window) {
-    window.requestIdleCallback(() => {
+  // 延迟到首屏渲染完成且主线程充分空闲后触发（避免与 TBT/LCP 测速争抢 CPU）
+  setTimeout(() => {
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(() => {
+        scheduleNext(coreQueue);
+      }, { timeout: 10000 });
+    } else {
       scheduleNext(coreQueue);
-    }, { timeout: 5000 });
-  } else {
-    setTimeout(() => {
-      scheduleNext(coreQueue);
-    }, 2000);
-  }
+    }
+  }, 6000);
 }

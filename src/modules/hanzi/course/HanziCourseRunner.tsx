@@ -107,7 +107,7 @@ export function HanziCourseRunner({ char, onClose }: Props) {
                 <span className="text-sm">
                   {isDone ? '✅' : step.emoji}
                 </span>
-                <span className="text-[11px] scale-95 mt-0.5 truncate max-w-full">
+                <span className="text-xs scale-95 mt-0.5 truncate max-w-full">
                   {step.titleKey.split('·')[0]}
                 </span>
               </div>

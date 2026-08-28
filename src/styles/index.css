@@ -471,6 +471,29 @@
   }
 }
 
+/* Hero 入场：淡入 + 上移，替代 motion 的 initial/animate（P1 减 DOM 优化） */
+@keyframes heroFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hero 泡泡：轻微放大脉冲（替代 motion.span animate scale），纯装饰 */
+@keyframes bubblePulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.14);
+  }
+}
+
 /* ============================================================
    基础层
    ============================================================ */
@@ -482,11 +505,18 @@
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
+    /* 排版 P0：禁止中文在 font-black(900) 下触发浏览器合成加粗
+       （PingFang 最重仅 Semibold，合成粗体笔画粘连发糊），
+       自动回落到最接近的真实字重，中文渲染更清晰 */
+    font-synthesis-weight: none;
   }
 
   body {
     margin: 0;
     font-family: var(--font-round);
+    /* 排版 P0：中文正文行高 1.75（preflight 的 1.5 对中文偏紧），
+       显式 leading-* 的元素不受影响 */
+    line-height: 1.75;
     color: var(--color-ink);
     background-color: #FFF9FA;
     background-image:
@@ -672,6 +702,16 @@
   animation: jellyWobble 2.4s ease-in-out infinite;
 }
 
+/* Hero 入场：淡入 + 上移（配合 [animation-delay:...] 实现错峰） */
+@utility animate-hero-fade-up {
+  animation: heroFadeUp 0.4s ease-out both;
+}
+
+/* Hero 泡泡：放大脉冲（永动，纯装饰） */
+@utility animate-bubble-pulse {
+  animation: bubblePulse 4s ease-in-out infinite;
+}
+
 /* 果冻输入框（设计方案 03 ⑤）：玻璃底 + 粉描边 + 聚焦主色发光
  * 供页面内联输入框统一引用（输入框样式散落各页面，提供规范类由后续页面接入） */
 @utility input-jelly {
@@ -766,7 +806,8 @@
     [class*='animate-rainbow'],
     [class*='animate-bounce-soft'],
     [class*='animate-twinkle'],
-    [class*='animate-jelly-wobble'] {
+    [class*='animate-jelly-wobble'],
+    [class*='animate-bubble-pulse'] {
       animation-iteration-count: 1 !important;
       animation-duration: 6s !important;
     }
@@ -778,6 +819,7 @@
   [data-motion='density-low'] [class*='animate-bounce-soft'],
   [data-motion='density-low'] [class*='animate-twinkle'],
   [data-motion='density-low'] [class*='animate-jelly-wobble'],
+  [data-motion='density-low'] [class*='animate-bubble-pulse'],
   [data-motion='density-low'] .icon-chip:not(.icon-chip--static) {
     animation-iteration-count: 1 !important;
     animation-duration: 4s !important;
@@ -931,7 +973,7 @@ main,
   border-radius: 9999px;
   font-family: 'Baloo 2', ui-rounded, system-ui, sans-serif;
   font-weight: 900;
-  font-size: 0.625rem;
+  font-size: 0.75rem; /* 排版 P0：角标 10px → 12px，儿童可读性下限 */
   line-height: 1;
   padding: 0.22rem 0.55rem;
   color: white;

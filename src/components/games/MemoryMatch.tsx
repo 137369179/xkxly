@@ -2,10 +2,11 @@
  * 翻牌记忆 🃏 (O5)
  * 经典记忆配对游戏，锻炼幼儿专注力与记忆
  */
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
-import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, sfxWin, triggerHaptic } from '@/lib/sfx';
+import { celebrateBig } from '@/lib/celebrate';
 import { speak } from '@/lib/speech';
 import { cn, shuffle } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -41,7 +42,9 @@ export function MemoryMatch() {
   const [locked, setLocked] = useState(false);
   const [done, setDone] = useState(false);
 
-  const newGame = (d:number) => {
+  const newGame = useCallback((d:number) => {
+    sfxTap();
+    triggerHaptic(30);
     setDifficulty(d);
     setDeck(createDeck(d));
     setFlipped([]);
@@ -49,11 +52,12 @@ export function MemoryMatch() {
     setMatched(0);
     setLocked(false);
     setDone(false);
-  };
+  }, []);
 
-  const handleFlip = (card:Card) => {
+  const handleFlip = useCallback((card:Card) => {
     if (locked || card.flipped || card.matched) return;
     sfxTap();
+    triggerHaptic(20);
     setDeck(prev => prev.map(c => c.id===card.id ? {...c, flipped:true} : c));
     const newFlipped = [...flipped, card.id];
     setFlipped(newFlipped);
@@ -62,10 +66,15 @@ export function MemoryMatch() {
       setMoves(m=>m+1);
       setLocked(true);
       const [first, second] = newFlipped;
-      const c1 = deck.find(c=>c.id===first)!;
-      const c2 = deck.find(c=>c.id===second)!;
+      const c1 = deck.find(c=>c.id===first);
+      const c2 = deck.find(c=>c.id===second);
+      if (!c1 || !c2) {
+        setLocked(false);
+        return;
+      }
       if (c1.pairId === c2.pairId) {
         sfxCorrect();
+        triggerHaptic(45);
         const newMatched = matched + 1;
         setMatched(newMatched);
         void speak(`找到了一对${c1.label}！`, { lang:'zh-CN', rate:0.85, module:'praise' });
@@ -73,10 +82,16 @@ export function MemoryMatch() {
           setDeck(prev => prev.map(c => (c.id===first||c.id===second) ? {...c, matched:true} : c));
           setFlipped([]);
           setLocked(false);
-          if (newMatched+1 >= difficulty) setDone(true);
+          if (newMatched >= difficulty) {
+            setDone(true);
+            sfxWin();
+            celebrateBig();
+            triggerHaptic([60, 40, 60, 40, 100]);
+          }
         }, 500);
       } else {
         sfxWrong();
+        triggerHaptic(20);
         setTimeout(()=>{
           setDeck(prev => prev.map(c => (c.id===first||c.id===second) ? {...c, flipped:false} : c));
           setFlipped([]);
@@ -84,41 +99,91 @@ export function MemoryMatch() {
         }, 800);
       }
     }
-  };
+  }, [locked, flipped, deck, matched, difficulty]);
+
+  // 键盘快捷监听
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === '1') {
+        e.preventDefault();
+        newGame(4);
+      } else if (e.key === '2') {
+        e.preventDefault();
+        newGame(6);
+      } else if (e.key === '3') {
+        e.preventDefault();
+        newGame(8);
+      } else if (e.key === ' ' || e.key === 'Enter') {
+        if (done) {
+          e.preventDefault();
+          newGame(Math.min(difficulty + 2, 8));
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [done, difficulty, newGame]);
 
   return (
     <div className="card-candy p-4 sm:p-6">
       <h3 className="mb-2 text-center text-lg font-extrabold text-ink">{t('memoryMatch.title')}</h3>
-      <div className="mb-4 flex justify-center gap-2">
+
+      {/* 快捷操作提示条 */}
+      <div className="mb-3 text-center">
+        <span className="inline-block text-xs text-purple-900 font-bold bg-purple-50/90 px-3 py-1 rounded-xl border border-purple-200">
+          ⌨️ 键盘快捷操作：数字键 1-3 选择对数 · 通关后空格键进入下一关
+        </span>
+      </div>
+
+      <div className="mb-4 flex justify-center gap-2" role="tablist" aria-label="翻牌配对难度选择">
         {[4,6,8].map(d => (
-          <button key={d} onClick={()=>newGame(d)}
-            className={cn('rounded-xl px-3 py-1.5 text-xs font-extrabold',
-              difficulty===d ? 'bg-candy-purple-deep text-white' : 'bg-white text-ink-soft shadow-sm'
-            )}>
+          <button
+            key={d}
+            type="button"
+            role="tab"
+            aria-selected={difficulty === d}
+            onClick={() => newGame(d)}
+            className={cn(
+              'min-h-[44px] rounded-xl px-3 py-1.5 text-xs font-extrabold transition-all focus-visible:ring-4 focus-visible:ring-purple-300 focus:outline-none',
+              difficulty === d ? 'bg-candy-purple-deep text-white shadow-md scale-105' : 'bg-white text-ink-soft shadow-sm hover:bg-purple-50'
+            )}
+          >
             {d===4?t('memoryMatch.pairs',{count:4}):d===6?t('memoryMatch.pairs',{count:6}):t('memoryMatch.pairs',{count:8})}
           </button>
         ))}
       </div>
+
       <div className="flex justify-between mb-3 text-xs font-bold text-ink-soft">
-        <span>{t('memoryMatch.moves', { count: moves })}</span><span>✅ {matched}/{difficulty}</span>
+        <span>{t('memoryMatch.moves', { count: moves })}</span>
+        <span>✅ {matched}/{difficulty}</span>
       </div>
+
       <div className={cn('grid gap-2', difficulty<=4?'grid-cols-4':difficulty===6?'grid-cols-4':'grid-cols-4')}>
         {deck.map(card => (
-          <button key={card.id} onClick={()=>handleFlip(card)}
-            className={cn('aspect-square rounded-xl flex items-center justify-center text-3xl transition-all duration-300 shadow-sm',
+          <button
+            key={card.id}
+            type="button"
+            onClick={() => handleFlip(card)}
+            className={cn(
+              'min-h-[48px] aspect-square rounded-xl flex items-center justify-center text-3xl transition-all duration-300 shadow-sm focus-visible:ring-4 focus-visible:ring-purple-300 focus:outline-none',
               card.flipped||card.matched ? 'bg-white' : 'bg-candy-purple-deep',
-              card.matched && 'bg-candy-green-soft',
-              !card.flipped && !card.matched && 'hover:scale-105'
-            )}>
+              card.matched && 'bg-candy-green-soft scale-95',
+              !card.flipped && !card.matched && 'hover:scale-105 active:scale-95'
+            )}
+          >
             {(card.flipped||card.matched) ? card.emoji : '❓'}
           </button>
         ))}
       </div>
+
       {done && (
         <motion.div initial={{scale:0}} animate={{scale:1}} className="mt-4 text-center">
           <div className="text-4xl">🎉🏆🎉</div>
           <p className="text-lg font-extrabold text-candy-purple-deep">{t('memoryMatch.allFound', { count: moves })}</p>
-          <CandyButton tone="purple" onClick={()=>newGame(Math.min(difficulty+2,8))} className="mt-2">下一关 →</CandyButton>
+          <CandyButton tone="purple" onClick={() => newGame(Math.min(difficulty+2,8))} className="mt-2 min-h-[44px] px-6 text-sm font-black">
+            下一关 →
+          </CandyButton>
         </motion.div>
       )}
     </div>

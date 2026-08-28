@@ -85,7 +85,7 @@ export function RabbitRunMath() {
               ) : (
                 <div className="text-xl">🍄</div>
               )}
-              <span className="text-[10px] font-bold text-amber-400">Step {s}</span>
+              <span className="text-xs font-bold text-amber-400">Step {s}</span>
             </div>
           ))}
         </div>

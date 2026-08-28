@@ -56,15 +56,15 @@ function AnimalCardsImpl() {
 
       <div className="mb-3 grid grid-cols-3 gap-2 text-center">
         <div className="rounded-xl bg-candy-blue-soft/30 p-2">
-          <p className="text-[10px] font-bold text-ink-muted">{t('animal.habitat') || '栖息地'}</p>
+          <p className="text-xs font-bold text-ink-muted">{t('animal.habitat') || '栖息地'}</p>
           <p className="text-sm font-extrabold text-ink">{a.habitat}</p>
         </div>
         <div className="rounded-xl bg-candy-orange-soft/30 p-2">
-          <p className="text-[10px] font-bold text-ink-muted">{t('animal.class') || '类别'}</p>
+          <p className="text-xs font-bold text-ink-muted">{t('animal.class') || '类别'}</p>
           <p className="text-sm font-extrabold text-ink">{a.animalClass}</p>
         </div>
         <div className="rounded-xl bg-candy-pink-soft/30 p-2">
-          <p className="text-[10px] font-bold text-ink-muted">{t('animal.diet') || '食性'}</p>
+          <p className="text-xs font-bold text-ink-muted">{t('animal.diet') || '食性'}</p>
           <p className="text-sm font-extrabold text-ink">{a.diet}</p>
         </div>
       </div>
@@ -83,7 +83,7 @@ function AnimalCardsImpl() {
                 selected===realIdx ? 'bg-candy-green-deep text-white' : 'bg-white'
               )}>
               <div className="text-2xl">{an.emoji}</div>
-              <p className="mt-0.5 truncate text-[11px] font-extrabold">{an.name}</p>
+              <p className="mt-0.5 truncate text-xs font-extrabold">{an.name}</p>
             </button>
           );
         })}

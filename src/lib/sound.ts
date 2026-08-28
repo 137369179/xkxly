@@ -14,6 +14,7 @@ import { pinyinToSpoken } from './pinyinAudio';
 import { playLetterVoice } from './letterAudio';
 import { isSingleHanziVoice, playHanziVoice } from './hanziAudio';
 import { stopSpeaking as legacyStopSpeaking } from './speech';
+import { unlockAudioContext } from './audioContext';
 
 export type TeacherId = 'tiantian' | 'yunxi' | 'xiaoxiao';
 
@@ -115,6 +116,7 @@ class KidsSoundManager {
       if (this.isAudioUnlocked) return;
       this.isAudioUnlocked = true;
       try {
+        unlockAudioContext();
         const dummyAudio = new Audio();
         dummyAudio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
         const p = dummyAudio.play();

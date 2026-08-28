@@ -22,7 +22,7 @@
     "erasableSyntaxOnly": true,
     "noUncheckedSideEffectImports": true,
     "forceConsistentCasingInFileNames": true,
-    "noImplicitOverride": false,
+    "noImplicitOverride": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]

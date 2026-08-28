@@ -99,7 +99,7 @@ export interface StoreState {
 
   // —— v2 新增 ——
   /** 记录一次知识点练习（间隔重复核心入口） */
-  practice: (skill: string, correct: boolean, star?: number, difficulty?: 1 | 2 | 3) => void;
+  practice: (skill: string, correct: boolean, star?: number, difficulty?: 1 | 2 | 3, latencyMs?: number) => void;
   /** 首次接触某知识点（教学环节，不计对错） */
   learnSkill: (skill: string) => void;
   /** 累计学习时长（秒） */

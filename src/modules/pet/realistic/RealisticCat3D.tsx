@@ -152,7 +152,7 @@ export function RealisticCat3D({
             <button
               key={anim}
               onClick={() => handleSwitchAnimation(anim)}
-              className={`px-2 py-0.5 text-[10px] rounded-full border transition-all ${
+              className={`px-2 py-0.5 text-xs rounded-full border transition-all ${
                 currentAnimation === anim
                   ? 'bg-pink-500 text-white border-pink-600 shadow-sm'
                   : 'bg-white text-pink-900 border-pink-200 hover:bg-pink-50'
@@ -166,7 +166,7 @@ export function RealisticCat3D({
 
       {/* 品种信息标签 */}
       <div className="mt-1 text-center">
-        <span className="text-[10px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
           🐱 {breedConfig.name} · {breedConfig.personality}
         </span>
       </div>

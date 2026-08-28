@@ -893,12 +893,12 @@ function VisibleBodyHologram({
 
         {/* 顶部病理警告条 */}
         {isBad && (
-          <div className="absolute top-2 left-3 right-3 flex items-center justify-between px-2.5 py-1 rounded-lg bg-rose-950/80 border border-rose-500/40 text-[10px] font-black text-rose-300 z-20 shadow-sm animate-pulse">
+          <div className="absolute top-2 left-3 right-3 flex items-center justify-between px-2.5 py-1 rounded-lg bg-rose-950/80 border border-rose-500/40 text-xs font-black text-rose-300 z-20 shadow-sm animate-pulse">
             <span className="flex items-center gap-1">
               <span>⚠️</span>
               <span>坏习惯病理透视模式已激活</span>
             </span>
-            <span className="font-mono text-[9px] bg-rose-500/30 px-1.5 py-0.5 rounded text-rose-200">PATHOLOGY SCAN</span>
+            <span className="font-mono text-xs bg-rose-500/30 px-1.5 py-0.5 rounded text-rose-200">PATHOLOGY SCAN</span>
           </div>
         )}
 
@@ -1386,12 +1386,12 @@ function VisibleBodyHologram({
         </svg>
 
         {/* 底部全息雷达扫描线 */}
-        <div className="absolute bottom-2 left-4 right-4 flex items-center justify-between text-[10px] font-mono text-cyan-400/80 bg-slate-950/85 backdrop-blur px-3 py-1 rounded-full border border-cyan-500/30 shadow-md">
+        <div className="absolute bottom-2 left-4 right-4 flex items-center justify-between text-xs font-mono text-cyan-400/80 bg-slate-950/85 backdrop-blur px-3 py-1 rounded-full border border-cyan-500/30 shadow-md">
           <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
-            <span className="font-mono tracking-wider font-bold text-[10px]">3D ANATOMICAL HOLO-SCAN</span>
+            <span className="font-mono tracking-wider font-bold text-xs">3D ANATOMICAL HOLO-SCAN</span>
           </span>
-          <span className="text-slate-300 font-sans font-black text-[10px]">点击器官透视探险 ✨</span>
+          <span className="text-slate-300 font-sans font-black text-xs">点击器官透视探险 ✨</span>
         </div>
       </div>
     </div>
@@ -1427,10 +1427,10 @@ function HologramOrganDetailHUD({
       className="rounded-3xl bg-slate-900/95 backdrop-blur-xl border-2 border-cyan-500/40 p-4 shadow-[0_0_25px_rgba(6,182,212,0.25)] text-left text-white space-y-3 relative overflow-hidden"
     >
       {/* 科技四角卡扣装饰 */}
-      <span className="absolute top-1.5 left-2 font-mono text-[10px] text-cyan-500/40 pointer-events-none select-none">┌</span>
-      <span className="absolute top-1.5 right-2 font-mono text-[10px] text-cyan-500/40 pointer-events-none select-none">┐</span>
-      <span className="absolute bottom-1.5 left-2 font-mono text-[10px] text-cyan-500/40 pointer-events-none select-none">└</span>
-      <span className="absolute bottom-1.5 right-2 font-mono text-[10px] text-cyan-500/40 pointer-events-none select-none">┘</span>
+      <span className="absolute top-1.5 left-2 font-mono text-xs text-cyan-500/40 pointer-events-none select-none">┌</span>
+      <span className="absolute top-1.5 right-2 font-mono text-xs text-cyan-500/40 pointer-events-none select-none">┐</span>
+      <span className="absolute bottom-1.5 left-2 font-mono text-xs text-cyan-500/40 pointer-events-none select-none">└</span>
+      <span className="absolute bottom-1.5 right-2 font-mono text-xs text-cyan-500/40 pointer-events-none select-none">┘</span>
 
       {/* 科技背景角标与全息光晕 */}
       <div className="absolute top-0 right-0 w-28 h-28 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" />
@@ -1447,7 +1447,7 @@ function HologramOrganDetailHUD({
           <div>
             <div className="flex items-center gap-2">
               <h4 className="text-lg font-black text-cyan-300 tracking-wide">{organ.nameZh}</h4>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-cyan-950 text-cyan-400 border border-cyan-500/40 shadow-sm">
+              <span className="px-2 py-0.5 rounded-full text-xs font-black bg-cyan-950 text-cyan-400 border border-cyan-500/40 shadow-sm">
                 {system.nameZh}
               </span>
             </div>
@@ -1478,7 +1478,7 @@ function HologramOrganDetailHUD({
       </div>
 
       {/* 生理机能能量仪表盘 (Vital Sign Indicator) */}
-      <div className="grid grid-cols-2 gap-2 bg-slate-950/70 p-2.5 rounded-2xl border border-cyan-500/20 text-[11px]">
+      <div className="grid grid-cols-2 gap-2 bg-slate-950/70 p-2.5 rounded-2xl border border-cyan-500/20 text-xs">
         <div className="flex flex-col gap-1">
           <div className="flex justify-between text-slate-400">
             <span>机能活跃度</span>
@@ -1528,7 +1528,7 @@ function HologramOrganDetailHUD({
             <span className="text-base">📏</span>
             <div>
               <span className="text-purple-400 font-black flex items-center gap-2">
-                【人体尺寸对照】<span className="text-[10px] bg-purple-500/20 px-2 py-0.5 rounded-full text-purple-300">点击查看实物比例 ✨</span>
+                【人体尺寸对照】<span className="text-xs bg-purple-500/20 px-2 py-0.5 rounded-full text-purple-300">点击查看实物比例 ✨</span>
               </span>
               <div className="text-purple-200/90 mt-0.5 leading-relaxed">{organ.sizeComparison}</div>
             </div>
@@ -1543,12 +1543,12 @@ function HologramOrganDetailHUD({
               >
                 <div className="text-5xl drop-shadow-lg relative">
                   {organ.emoji}
-                  <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px] whitespace-nowrap text-purple-300">{organ.nameZh}</span>
+                  <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-xs whitespace-nowrap text-purple-300">{organ.nameZh}</span>
                 </div>
                 <div className="text-purple-400 font-black text-2xl animate-pulse">≈</div>
                 <div className="text-5xl drop-shadow-lg relative">
                   {organ.id === 'heart' ? '✊' : organ.id === 'brain' ? '🍈' : organ.id === 'stomach' ? '🎒' : (organ.id === 'small-intestine' || organ.id === 'large-intestine') ? '🎾' : organ.id === 'lung-left' || organ.id === 'lung-right' ? '🧽' : organ.id === 'liver' ? '🏈' : organ.id === 'mouth' ? '👄' : organ.id === 'eye' ? '🍇' : organ.id === 'ear' ? '🥟' : organ.id === 'bone' || organ.id === 'ribs' ? '🦴' : '📐'}
-                  <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px] whitespace-nowrap text-purple-300">实物尺寸</span>
+                  <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-xs whitespace-nowrap text-purple-300">实物尺寸</span>
                 </div>
               </motion.div>
             )}
@@ -2026,7 +2026,7 @@ function BodyAdventureImpl() {
     <div className="space-y-4">
       {/* 快捷操作提示条 */}
       <div className="text-center">
-        <span className="inline-block text-[11px] text-cyan-900 font-bold bg-cyan-50/90 px-3 py-1 rounded-xl border border-cyan-200">
+        <span className="inline-block text-xs text-cyan-900 font-bold bg-cyan-50/90 px-3 py-1 rounded-xl border border-cyan-200">
           ⌨️ 键盘快捷操作：数字键 1-6 切换六大生理系统 · H 开启/关闭坏习惯检测 · 问答模式 1-4 答题 / 空格 下一题
         </span>
       </div>
@@ -2145,7 +2145,7 @@ function BodyAdventureImpl() {
                     sfxTap();
                     setVisualLayer(lay);
                   }}
-                  className={`px-2.5 py-1 rounded-xl text-[10px] font-black transition-all ${
+                  className={`px-2.5 py-1 rounded-xl text-xs font-black transition-all ${
                     visualLayer === lay
                       ? 'bg-cyan-500 text-slate-950 shadow'
                       : 'text-slate-400 hover:text-white'
@@ -2226,7 +2226,7 @@ function BodyAdventureImpl() {
                         <div className="text-xs font-black text-slate-100 truncate">
                           {organ.nameZh}
                         </div>
-                        <div className="text-[10px] text-slate-400 truncate">{organ.nameEn}</div>
+                        <div className="text-xs text-slate-400 truncate">{organ.nameEn}</div>
                       </div>
                     </button>
                   ))}

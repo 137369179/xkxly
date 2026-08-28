@@ -8,6 +8,11 @@
     />
     <meta name="referrer" content="no-referrer" />
     <meta name="theme-color" content="#FFF6FA" />
+    <!-- P0-LCP：首屏 Hero 图片预加载必须排在 <head> 最前，确保浏览器预加载扫描器
+         第一时间发现 LCP 资源并开始下载，不受后续 OG/结构化数据/字体 preload 阻塞 -->
+    <link rel="preload" as="image" href="/hero_jelly.jpg" fetchpriority="high" importance="high" />
+    <!-- 字体预加载：避免 FOIT，字体与 JS 并行下载 -->
+    <link rel="preload" as="font" href="/fonts/baloo-2.woff2" type="font/woff2" crossorigin />
     <meta name="description" content="宝贝学习乐园 —— AI 儿童成长学习乐园：字母、古诗、数学、汉字、英语、逻辑、闯关冒险，还有 AI 小老师陪孩子聊天、出题、讲故事。让学习变成一场有趣的冒险。" />
     <meta name="keywords" content="儿童学习,幼儿启蒙,AI儿童,数学启蒙,拼音,古诗,英语单词,逻辑思维,宝贝学习乐园" />
     <link rel="canonical" href="https://xkxly.ccwu.cc/" />
@@ -64,16 +69,15 @@
     <link rel="icon" href="/icons/favicon.png" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <title>宝贝学习乐园 · AI 儿童成长学习乐园</title>
-
-    <!-- 性能优化：关键资源提前加载 -->
-    <!-- 字体预加载：避免 FOIT，字体与 JS 并行下载，LCP 提前 -->
-    <link rel="preload" as="font" href="/fonts/baloo-2.woff2" type="font/woff2" crossorigin />
-    <!-- 首屏 hero 图片预加载：HomePage 一进入就可见（P0-#4：改为实际 LCP 图 hero_jelly.png，
-         hero_banner.jpg 仅作 og:image 分享图，不应参与 preload） -->
-    <link rel="preload" as="image" href="/hero_jelly.png" fetchpriority="high" />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+    <!-- P0-LCP：静态 Hero 图片使浏览器在 JS 加载前即可发现 LCP 候选元素，
+         React 挂载后自动替换此内容，保证首帧即见 Hero 主视觉 -->
+    <img src="/hero_jelly.jpg" alt="" fetchpriority="high" loading="eager" decoding="async"
+         style="position:fixed;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 38%" />
+    <div style="position:fixed;inset:0;background:linear-gradient(to right,rgba(224,90,128,0.6),rgba(255,107,150,0.3),transparent);pointer-events:none"></div>
+  </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

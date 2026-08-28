@@ -16,6 +16,7 @@ vi.mock('@/lib/sfx', () => ({
   sfxWrong: vi.fn(),
   sfxStar: vi.fn(),
   sfxWin: vi.fn(),
+  triggerHaptic: vi.fn(),
 }));
 
 vi.mock('@/lib/celebrate', () => ({

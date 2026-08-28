@@ -7,14 +7,15 @@
  * 4. 完整 36 组高频常用音节库、汉字词汇图文发音映射与拼读寻宝闯关！
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { speak } from '@/lib/speech';
-import { sfxTap, sfxCorrect, sfxWin } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 import { StreakBar } from '@/components/study/StreakBar';
 import { getAudioContext } from '@/lib/audioContext';
+import { navigate } from '@/lib/router';
 
 // ── 常见合法拼读与汉字映射库 ──
 export interface SyllableMatch {
@@ -152,6 +153,7 @@ export function PhonicsSlide() {
   const handleTriggerSlide = useCallback(() => {
     if (isSliding) return;
     sfxTap();
+    triggerHaptic(45);
     setIsSliding(true);
     setMergedResult(null);
 
@@ -168,6 +170,7 @@ export function PhonicsSlide() {
         setMergedResult(match);
         sfxCorrect();
         celebrateSmall();
+        triggerHaptic([60, 40, 60, 40, 100]);
         addStars(1);
         practice(`pinyin:${match.pinyin}`, true, 2, 1);
         void speak(`${match.initial}——${match.final}——${match.pinyin}！${match.hanzi}，${match.word}！`, { lang: 'zh-CN' });
@@ -184,6 +187,7 @@ export function PhonicsSlide() {
     if (initial === targetChallenge.initial && final === targetChallenge.final && tone === targetChallenge.tone) {
       sfxWin();
       celebrateBig();
+      triggerHaptic([60, 40, 60, 40, 100]);
       playToneCoasterSfx(targetChallenge.tone);
       setScore((s) => s + 1);
       addStars(2);
@@ -193,12 +197,60 @@ export function PhonicsSlide() {
         setChallengeIdx((i) => i + 1);
       }, 1500);
     } else {
+      triggerHaptic(20);
       void speak(`还差一点点哦！目标是【${targetChallenge.pinyin}】，快调整声母韵母和声调吧！`, { lang: 'zh-CN' });
     }
   }, [initial, final, tone, targetChallenge, addStars, practice]);
 
+  // 键盘快捷监听
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === '1') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        setTone(1);
+      } else if (e.key === '2') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        setTone(2);
+      } else if (e.key === '3') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        setTone(3);
+      } else if (e.key === '4') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        setTone(4);
+      } else if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        if (mode === 'challenge') {
+          handleVerifyChallenge();
+        } else {
+          handleTriggerSlide();
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        navigate('pinyin');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mode, handleVerifyChallenge, handleTriggerSlide]);
+
   return (
     <div className="space-y-4">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-blue-900 font-bold bg-blue-50/90 px-3 py-1 rounded-xl border border-blue-200">
+          ⌨️ 键盘快捷操作：数字键 1-4 选声调 · 空格/Enter 发射拼读 / 验证挑战
+        </span>
+      </div>
+
       {/* 顶部模式切换导航 */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
@@ -206,9 +258,10 @@ export function PhonicsSlide() {
             type="button"
             onClick={() => {
               sfxTap();
+              triggerHaptic(25);
               setMode('slide');
             }}
-            className={`py-1.5 px-3.5 rounded-xl font-black text-xs transition-all ${
+            className={`min-h-[44px] py-1.5 px-3.5 rounded-xl font-black text-xs transition-all ${
               mode === 'slide' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:text-blue-700'
             }`}
           >
@@ -218,9 +271,10 @@ export function PhonicsSlide() {
             type="button"
             onClick={() => {
               sfxTap();
+              triggerHaptic(25);
               setMode('coaster');
             }}
-            className={`py-1.5 px-3.5 rounded-xl font-black text-xs transition-all ${
+            className={`min-h-[44px] py-1.5 px-3.5 rounded-xl font-black text-xs transition-all ${
               mode === 'coaster' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 hover:text-purple-700'
             }`}
           >
@@ -230,9 +284,10 @@ export function PhonicsSlide() {
             type="button"
             onClick={() => {
               sfxTap();
+              triggerHaptic(25);
               setMode('challenge');
             }}
-            className={`py-1.5 px-3.5 rounded-xl font-black text-xs transition-all ${
+            className={`min-h-[44px] py-1.5 px-3.5 rounded-xl font-black text-xs transition-all ${
               mode === 'challenge' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:text-emerald-700'
             }`}
           >
@@ -323,7 +378,7 @@ export function PhonicsSlide() {
                 transition={{ duration: 0.6 }}
                 className="h-20 w-20 rounded-2xl bg-blue-500 text-white flex flex-col items-center justify-center shadow-md border-2 border-blue-600"
               >
-                <span className="text-[10px] font-bold opacity-80">声母</span>
+                <span className="text-xs font-bold opacity-80">声母</span>
                 <span className="text-3xl font-black">{initial}</span>
               </motion.div>
 
@@ -335,7 +390,7 @@ export function PhonicsSlide() {
                 transition={{ duration: 0.6 }}
                 className="h-20 w-20 rounded-2xl bg-purple-500 text-white flex flex-col items-center justify-center shadow-md border-2 border-purple-600"
               >
-                <span className="text-[10px] font-bold opacity-80">韵母</span>
+                <span className="text-xs font-bold opacity-80">韵母</span>
                 <span className="text-3xl font-black">{formatTonedFinal(final, tone)}</span>
               </motion.div>
 
@@ -343,7 +398,7 @@ export function PhonicsSlide() {
 
               {/* 合体结果卡片 */}
               <div className="h-20 min-w-[80px] px-3 rounded-2xl bg-emerald-500 text-white flex flex-col items-center justify-center shadow-md border-2 border-emerald-600">
-                <span className="text-[10px] font-bold opacity-80">合体读音</span>
+                <span className="text-xs font-bold opacity-80">合体读音</span>
                 <span className="text-2xl font-black">
                   {mergedResult ? mergedResult.pinyin : `${initial}${formatTonedFinal(final, tone)}`}
                 </span>
@@ -395,7 +450,7 @@ export function PhonicsSlide() {
                   }`}
                 >
                   <span className="text-lg">{TONE_MARKS[tNum]?.curve}</span>
-                  <span className="text-[11px]">{tNum} 声</span>
+                  <span className="text-xs">{tNum} 声</span>
                 </button>
               );
             })}

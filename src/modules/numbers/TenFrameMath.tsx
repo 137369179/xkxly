@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
-import { sfxTap, sfxCorrect } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 import { speak } from '@/lib/speech';
 import { useStore } from '@/store/useStore';
@@ -61,20 +61,23 @@ export function TenFrameMath() {
   const addProb = ADD_PROBLEMS[idx % ADD_PROBLEMS.length]!;
   const subProb = SUB_PROBLEMS[idx % SUB_PROBLEMS.length]!;
 
-  const handleMakeTen = () => {
+  const handleMakeTen = useCallback(() => {
     sfxTap();
+    triggerHaptic(30);
     setStep('action');
     speak(`从第二个数借走 ${addProb.makeTen} 个，凑成 10！剩下 ${addProb.remain} 个！`, { lang: 'zh-CN' }).catch(() => {});
-  };
+  }, [addProb]);
 
-  const handleBreakTen = () => {
+  const handleBreakTen = useCallback(() => {
     sfxTap();
+    triggerHaptic(30);
     setStep('action');
     speak(`从 10 格框拿走 ${subProb.sub} 个，剩 ${subProb.breakTen} 个！再加上多出来的 ${subProb.remain} 个！`, { lang: 'zh-CN' }).catch(() => {});
-  };
+  }, [subProb]);
 
-  const handleComplete = () => {
+  const handleComplete = useCallback(() => {
     sfxCorrect();
+    triggerHaptic(45);
     celebrateSmall();
     setStep('done');
     practice('math:tenframe', true);
@@ -83,21 +86,70 @@ export function TenFrameMath() {
     } else {
       speak(`10 减 ${subProb.sub} 得 ${subProb.breakTen}，再加上 ${subProb.remain}，等于 ${subProb.result}！破十法算对啦！`, { lang: 'zh-CN' }).catch(() => {});
     }
-  };
+  }, [mode, addProb, subProb, practice]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     sfxTap();
+    triggerHaptic(25);
     setStep('initial');
     setIdx((i) => i + 1);
-  };
+  }, []);
+
+  const handleSwitchSkin = useCallback(() => {
+    sfxTap();
+    triggerHaptic(20);
+    setSkinIdx((s) => (s + 1) % SKINS.length);
+  }, []);
+
+  // 键盘快捷键支持
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === '1') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        setMode('add');
+        setStep('initial');
+      } else if (e.key === '2') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        setMode('sub');
+        setStep('initial');
+      } else if (e.key === 's' || e.key === 'S') {
+        e.preventDefault();
+        handleSwitchSkin();
+      } else if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        if (step === 'initial') {
+          if (mode === 'add') handleMakeTen();
+          else handleBreakTen();
+        } else if (step === 'action') {
+          handleComplete();
+        } else if (step === 'done') {
+          handleNext();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mode, step, handleMakeTen, handleBreakTen, handleComplete, handleNext, handleSwitchSkin]);
 
   return (
     <div className="card-candy space-y-4 p-5 text-center shadow-fluffy">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-amber-900 font-bold bg-amber-50/90 px-3 py-1 rounded-xl border border-amber-200">
+          ⌨️ 键盘快捷操作：数字键 1/2 选模式 · S 换道具 · 空格/Enter 推进演示
+        </span>
+      </div>
+
       {/* 顶部模式与道具皮肤切换 */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-purple-100 pb-3">
         <div className="flex gap-2">
           <button
-            onClick={() => { setMode('add'); setStep('initial'); }}
+            onClick={() => { sfxTap(); triggerHaptic(20); setMode('add'); setStep('initial'); }}
             className={`rounded-2xl px-4 py-2.5 text-base font-black transition-all ${
               mode === 'add' ? 'bg-candy-orange-deep text-white shadow-sm scale-105' : 'bg-orange-100 text-orange-800'
             }`}
@@ -105,8 +157,8 @@ export function TenFrameMath() {
             ✨ 凑十法 (加法进位)
           </button>
           <button
-            onClick={() => { setMode('sub'); setStep('initial'); }}
-            className={`rounded-2xl px-4 py-1.5 text-xs font-black transition-all ${
+            onClick={() => { sfxTap(); triggerHaptic(20); setMode('sub'); setStep('initial'); }}
+            className={`rounded-2xl px-4 py-2.5 text-base font-black transition-all ${
               mode === 'sub' ? 'bg-candy-purple-deep text-white shadow-sm scale-105' : 'bg-purple-100 text-purple-800'
             }`}
           >
@@ -116,7 +168,7 @@ export function TenFrameMath() {
 
         {/* 皮肤选择器 */}
         <button
-          onClick={() => setSkinIdx((s) => (s + 1) % SKINS.length)}
+          onClick={handleSwitchSkin}
           className="rounded-full bg-white px-3 py-2.5 text-base font-bold text-ink-soft border border-pink-200 shadow-xs hover:scale-105 active:scale-95"
         >
           道具: {skin.label}

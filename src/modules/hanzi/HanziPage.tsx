@@ -7,7 +7,7 @@ import { ProgressBar } from '@/components/ui/ProgressBar';
 import { CandyButton } from '@/components/ui/Button';
 import { QuizCard } from '@/components/QuizCard';
 import { useMastery, useStore } from '@/store/useStore';
-import { sfxTap } from '@/lib/sfx';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
 import { TONE_STYLE } from '@/lib/tones';
 import type { Question } from '@/types';
 import { HanziLearn } from './HanziLearn';
@@ -30,14 +30,16 @@ import { useTrainingTarget } from '@/hooks/useTrainingTarget';
 import { TrainingBanner } from '@/components/study/TrainingBanner';
 import { useOptimizedHanziQuery, useDebounceSearch } from '@/hooks/useOptimizedHanzi';
 
-type MainZone = 'trail' | 'library' | 'playground';
+type MainZone = 'trail' | 'library' | 'playground' | 'review';
 type LibraryTab = 'level1' | 'level2' | 'level3' | 'h500' | 'radical' | 'evolve' | 'family';
-type PlaygroundTab = 'flash' | 'quizgame' | 'writer' | 'dictation' | 'builder' | 'magic' | 'worksheet';
+type PlaygroundTab = 'builder' | 'quizgame' | 'writer' | 'dictation' | 'magic';
+type ReviewTab = 'worksheet' | 'flash';
 
 const MAIN_ZONES: TabItem<MainZone>[] = [
   { id: 'trail', label: '今日闯关', emoji: '🌟' },
   { id: 'library', label: '汉字宝库', emoji: '📚' },
-  { id: 'playground', label: '复习游乐场', emoji: '🎪' },
+  { id: 'playground', label: '游乐工坊', emoji: '🎪' },
+  { id: 'review', label: '字帖复习', emoji: '📜' },
 ];
 
 const LIBRARY_TABS: TabItem<LibraryTab>[] = [
@@ -51,13 +53,16 @@ const LIBRARY_TABS: TabItem<LibraryTab>[] = [
 ];
 
 const PLAYGROUND_TABS: TabItem<PlaygroundTab>[] = [
-  { id: 'flash', label: '生字闪卡', emoji: '🃏' },
+  { id: 'builder', label: '组词造句', emoji: '✏️' },
   { id: 'quizgame', label: '听音识字', emoji: '🎧' },
   { id: 'writer', label: '笔画描红', emoji: '✍️' },
   { id: 'dictation', label: '听写测试', emoji: '📝' },
-  { id: 'builder', label: '组词造句', emoji: '✏️' },
   { id: 'magic', label: '部首魔法', emoji: '🪄' },
+];
+
+const REVIEW_TABS: TabItem<ReviewTab>[] = [
   { id: 'worksheet', label: '字帖打印', emoji: '📄' },
+  { id: 'flash', label: '艾宾浩斯闪卡', emoji: '🃏' },
 ];
 
 /** 从数组中随机取 n 个 */
@@ -210,7 +215,8 @@ export default function HanziPage() {
   const { t } = useTranslation();
   const [zone, setZone] = useState<MainZone>('trail');
   const [libTab, setLibTab] = useState<LibraryTab>('level1');
-  const [playTab, setPlayTab] = useState<PlaygroundTab>('dictation');
+  const [playTab, setPlayTab] = useState<PlaygroundTab>('builder');
+  const [reviewTab, setReviewTab] = useState<ReviewTab>('worksheet');
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounceSearch(query, 300);
   const [selected, setSelected] = useState<HanziEntry | null>(null);
@@ -253,7 +259,7 @@ export default function HanziPage() {
   const isLevelTab = zone === 'library' && (libTab === 'level1' || libTab === 'level2' || libTab === 'level3');
   const levelNum = libTab === 'level2' ? 2 : libTab === 'level3' ? 3 : 1;
   const levelInfo = HANZI_LEVELS.find((l) => l.id === levelNum)!;
-  const tone = zone === 'trail' ? 'orange' : zone === 'playground' ? 'purple' : levelInfo.tone;
+  const tone = zone === 'trail' ? 'orange' : zone === 'playground' ? 'purple' : zone === 'review' ? 'green' : levelInfo.tone;
 
   const list = useMemo(() => {
     if (!isLevelTab) return [];
@@ -279,6 +285,7 @@ export default function HanziPage() {
 
   const startMiniQuiz = () => {
     sfxTap();
+    triggerHaptic(30);
     const qs = buildQuiz(levelNum, mastery);
     if (qs.length) {
       setQuizQuestions(qs);
@@ -286,11 +293,48 @@ export default function HanziPage() {
     }
   };
 
+  // 全局键盘快捷键响应 (1-4 专区切换，空格开始推荐字)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (selected) return; // 单字学习状态交由 HanziLearn 处理
+      if (e.key === '1') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setZone('trail');
+      } else if (e.key === '2') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setZone('library');
+      } else if (e.key === '3') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setZone('playground');
+      } else if (e.key === '4') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setZone('review');
+      } else if (e.key === ' ' && zone === 'trail' && recommended) {
+        e.preventDefault();
+        triggerHaptic(35);
+        setSelected(recommended);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [zone, recommended, selected]);
+
   if (selected) {
     return (
       <div className="space-y-5">
-        <button onClick={() => setSelected(null)} className="text-sm font-bold text-ink-soft">
-          {t('hanzi.backToWall')}
+        <button
+          onClick={() => {
+            triggerHaptic(20);
+            setSelected(null);
+          }}
+          className="text-sm font-bold text-ink-soft hover:text-ink flex items-center gap-1"
+        >
+          ← {t('hanzi.backToWall')}
         </button>
         <HanziLearn hanzi={selected} onDone={() => setSelected(null)} />
       </div>
@@ -303,13 +347,24 @@ export default function HanziPage() {
     <div className="space-y-5">
       <PageHeader emoji="🔤" title={t('hanzi.pageTitle')} subtitle={t('hanzi.subtitle')} tone={tone} />
 
+      {/* 快捷操作提示条 */}
+      <div className="text-center relative z-10">
+        <span className="inline-block text-xs text-orange-900 font-bold bg-orange-50/90 px-3 py-1 rounded-xl border border-orange-200">
+          ⌨️ 键盘快捷操作：数字 1-4 切换专区 (今日闯关/宝库/游乐场/字帖) · 空格 开启今日推荐关卡
+        </span>
+      </div>
+
       <TrainingBanner target={target} onClose={clear} />
 
-      {/* 核心三区降维导向菜单 */}
+      {/* 核心四大专区导航菜单 */}
       <Tabs
         items={MAIN_ZONES}
         value={zone}
-        onChange={(v) => { setZone(v); setQuery(''); }}
+        onChange={(v) => {
+          triggerHaptic(20);
+          setZone(v);
+          setQuery('');
+        }}
         tone={tone}
         layoutId="hanzi-main-zones"
       />
@@ -335,7 +390,10 @@ export default function HanziPage() {
             <RecommendCard
               hanzi={recommended}
               levelInfo={recLevelInfo}
-              onClick={() => setSelected(recommended)}
+              onClick={() => {
+                triggerHaptic(30);
+                setSelected(recommended);
+              }}
             />
           ) : (
             <div className="relative w-full overflow-hidden rounded-[1.5rem] bg-candy-yellow-soft p-5 text-center shadow-candy-sm">
@@ -347,48 +405,64 @@ export default function HanziPage() {
 
           {/* 闯关解锁地图（对标洪恩：单字解锁路径） */}
           <Panel>
-            <HanziTrailMap onSelect={setSelected} />
+            <HanziTrailMap onSelect={(h) => {
+              triggerHaptic(25);
+              setSelected(h);
+            }} />
           </Panel>
 
-          {/* 旧流程节点（学习/听写/组词三步指引，保留） */}
+          {/* 学习/听写/组词三步指引 */}
           <Panel>
             <h4 className="text-sm font-extrabold text-ink mb-3">📍 闯关路线图</h4>
             <div className="flex items-center justify-around gap-2 py-2">
               <div
-                onClick={() => recommended && setSelected(recommended)}
+                onClick={() => {
+                  if (recommended) {
+                    triggerHaptic(25);
+                    setSelected(recommended);
+                  }
+                }}
                 className="flex flex-col items-center cursor-pointer group active:scale-95 transition-all"
               >
                 <div className="w-14 h-14 rounded-2xl bg-candy-orange-soft border-2 border-candy-orange-deep flex items-center justify-center text-2xl font-black text-candy-orange-deep shadow-candy-sm group-hover:scale-105">
                   {recommended ? recommended.c : '⭐'}
                 </div>
                 <span className="text-xs font-bold text-ink mt-1">1. 核心字</span>
-                <span className="text-[10px] text-candy-orange-deep font-extrabold">当前关卡</span>
+                <span className="text-xs text-candy-orange-deep font-extrabold">当前关卡</span>
               </div>
 
               <div className="h-0.5 flex-1 bg-candy-orange-soft" />
 
               <div
-                onClick={() => { setZone('playground'); setPlayTab('dictation'); }}
+                onClick={() => {
+                  triggerHaptic(20);
+                  setZone('playground');
+                  setPlayTab('dictation');
+                }}
                 className="flex flex-col items-center cursor-pointer group active:scale-95 transition-all"
               >
                 <div className="w-14 h-14 rounded-2xl bg-candy-blue-soft border-2 border-candy-blue-deep flex items-center justify-center text-2xl font-black text-candy-blue-deep shadow-candy-sm group-hover:scale-105">
                   🎧
                 </div>
                 <span className="text-xs font-bold text-ink mt-1">2. 听写复习</span>
-                <span className="text-[10px] text-ink-soft font-bold">巩固记忆</span>
+                <span className="text-xs text-ink-soft font-bold">巩固记忆</span>
               </div>
 
               <div className="h-0.5 flex-1 bg-candy-orange-soft" />
 
               <div
-                onClick={() => { setZone('playground'); setPlayTab('builder'); }}
+                onClick={() => {
+                  triggerHaptic(20);
+                  setZone('playground');
+                  setPlayTab('builder');
+                }}
                 className="flex flex-col items-center cursor-pointer group active:scale-95 transition-all"
               >
                 <div className="w-14 h-14 rounded-2xl bg-candy-green-soft border-2 border-candy-green-deep flex items-center justify-center text-2xl font-black text-candy-green-deep shadow-candy-sm group-hover:scale-105">
                   ✏️
                 </div>
                 <span className="text-xs font-bold text-ink mt-1">3. 组词游戏</span>
-                <span className="text-[10px] text-ink-soft font-bold">学以致用</span>
+                <span className="text-xs text-ink-soft font-bold">学以致用</span>
               </div>
             </div>
           </Panel>
@@ -408,7 +482,11 @@ export default function HanziPage() {
           <Tabs
             items={LIBRARY_TABS}
             value={libTab}
-            onChange={(v) => { setLibTab(v); setQuery(''); }}
+            onChange={(v) => {
+              triggerHaptic(20);
+              setLibTab(v);
+              setQuery('');
+            }}
             tone={tone}
             layoutId="hanzi-library-tabs"
           />
@@ -438,7 +516,10 @@ export default function HanziPage() {
               learnedMap={Object.fromEntries(
                 Object.entries(cachedLearnedMap).map(([k, v]) => [k, (v?.lv ?? 0) >= 1]),
               )}
-              onCardClick={setSelected}
+              onCardClick={(h) => {
+                triggerHaptic(25);
+                setSelected(h);
+              }}
             />
           )}
 
@@ -449,26 +530,35 @@ export default function HanziPage() {
           {libTab === 'h500' && <Hanzi500Page />}
           {libTab === 'radical' && <RadicalBrowser />}
           {libTab === 'evolve' && <HanziEvolve />}
-          {libTab === 'family' && <PhoneticFamilies onLearn={setSelected} />}
+          {libTab === 'family' && <PhoneticFamilies onLearn={(h) => {
+            triggerHaptic(25);
+            setSelected(h);
+          }} />}
         </div>
       )}
 
-      {/* 🎪 3. 复习游乐场区 (Playground & Review) */}
+      {/* 🎪 3. 游乐工坊区 (Playground) */}
       {zone === 'playground' && (
         <div className="space-y-4">
           <Tabs
             items={PLAYGROUND_TABS}
             value={playTab}
-            onChange={setPlayTab}
+            onChange={(v) => {
+              triggerHaptic(20);
+              setPlayTab(v);
+            }}
             tone="purple"
             layoutId="hanzi-playground-tabs"
           />
 
-          {playTab === 'flash' && <HanziFlashReview />}
+          {playTab === 'builder' && <WordBuilder initialChar={builderTargetChar} />}
           {playTab === 'quizgame' && (
             <HanziQuizGame
               level={levelNum}
-              onSelectWriting={(h) => setSelected(h)}
+              onSelectWriting={(h) => {
+                triggerHaptic(25);
+                setSelected(h);
+              }}
             />
           )}
           {playTab === 'writer' && (
@@ -477,9 +567,26 @@ export default function HanziPage() {
             />
           )}
           {playTab === 'dictation' && <HanziDictation />}
-          {playTab === 'builder' && <WordBuilder initialChar={builderTargetChar} />}
           {playTab === 'magic' && <RadicalsMagic />}
-          {playTab === 'worksheet' && <HanziWorksheet />}
+        </div>
+      )}
+
+      {/* 📜 4. 字帖复习区 (Review & Worksheets) */}
+      {zone === 'review' && (
+        <div className="space-y-4">
+          <Tabs
+            items={REVIEW_TABS}
+            value={reviewTab}
+            onChange={(v) => {
+              triggerHaptic(20);
+              setReviewTab(v);
+            }}
+            tone="green"
+            layoutId="hanzi-review-tabs"
+          />
+
+          {reviewTab === 'worksheet' && <HanziWorksheet />}
+          {reviewTab === 'flash' && <HanziFlashReview />}
         </div>
       )}
 
@@ -490,5 +597,6 @@ export default function HanziPage() {
     </div>
   );
 }
+
 
 

@@ -297,7 +297,7 @@ export function ProfileSwitcher({ open, onClose }: { open: boolean; onClose: () 
                     }}
                   >
                     <span className="text-lg leading-none">{a.emoji}</span>
-                    <span className="text-[10px] font-extrabold text-gray-600">{a.short}</span>
+                    <span className="text-xs font-extrabold text-gray-600">{a.short}</span>
                   </button>
                 ))}
               </div>

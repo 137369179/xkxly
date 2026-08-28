@@ -11,7 +11,7 @@ import { Panel } from '@/components/ui/Card';
 import { useAiStream } from '@/lib/ai/useAi';
 import { wordStoryTask, wordPhonicsTask } from '@/lib/ai/tasks';
 import { speak } from '@/lib/speech';
-import { sfxTap, sfxCorrect } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, triggerHaptic } from '@/lib/sfx';
 import { celebrateBig } from '@/lib/celebrate';
 import { answerCorrect, answerWrong } from '@/lib/feedback';
 import { StreakBar } from '@/components/study/StreakBar';
@@ -183,9 +183,11 @@ export function WordLearn({ word, onDone }: { word: WordEntry; onDone: () => voi
                 if (next >= 3) {
                   // 3 连对闯关成功：庆祝 + 进入下一步
                   sfxCorrect();
+                  triggerHaptic(40);
                   celebrateBig();
                   api.ready();
                 } else {
+                  triggerHaptic(15);
                   answerCorrect('word');
                 }
               } else {

@@ -92,7 +92,7 @@ export function SymmetryLearn() {
                   current===i ? 'bg-candy-blue-deep text-white' : 'bg-white'
                 )}>
                 <div className="text-2xl">{it.emoji}</div>
-                <div className="text-[10px] font-bold">{it.label}</div>
+                <div className="text-xs font-bold">{it.label}</div>
               </button>
             ))}
           </div>

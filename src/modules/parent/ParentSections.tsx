@@ -243,7 +243,7 @@ export function ParentActionCardsSection() {
                   <h4 className="text-base font-black text-ink-main mb-1.5">{card.title}</h4>
                   <p className="text-xs text-ink leading-relaxed mb-2 font-medium">{card.guide}</p>
                 </div>
-                <div className="border-t border-purple-50 pt-2 text-[11px] font-bold text-purple-600">
+                <div className="border-t border-purple-50 pt-2 text-xs font-bold text-purple-600">
                   ✨ {card.benefit}
                 </div>
               </div>

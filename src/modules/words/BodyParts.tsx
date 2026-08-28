@@ -61,7 +61,7 @@ export function BodyParts() {
                     className={cn('rounded-xl p-3 text-center shadow-sm transition-all hover:scale-105', selected===p.id?'bg-candy-blue-deep text-white':'bg-white')}>
                     <div className="text-2xl">{p.emoji}</div>
                     <div className="mt-1 text-xs font-extrabold">{p.name}</div>
-                    <div className="text-[10px] font-medium opacity-70">{p.en}</div>
+                    <div className="text-xs font-medium opacity-70">{p.en}</div>
                   </button>
                 ))}
               </div>

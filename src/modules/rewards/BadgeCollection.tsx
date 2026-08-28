@@ -44,7 +44,7 @@ export function BadgeCollection() {
       <div className="mb-4 rounded-2xl bg-gradient-to-br from-purple-600 via-pink-600 to-rose-500 p-4 text-white shadow-fluffy relative overflow-hidden">
         <div className="flex items-center justify-between relative z-10">
           <div>
-            <p className="text-[11px] font-extrabold tracking-widest text-pink-200 uppercase">BABY LEARNING PARK</p>
+            <p className="text-xs font-extrabold tracking-widest text-pink-200 uppercase">BABY LEARNING PARK</p>
             <p className="text-xl font-black tracking-wide drop-shadow">宝贝学习乐园 · 成就护照</p>
           </div>
           <FluffyIcon type="medal" size="md" className="border-amber-300 shadow-md" />
@@ -86,13 +86,13 @@ export function BadgeCollection() {
                 <div className="mt-1 text-sm font-extrabold text-ink">{b.name}</div>
                 <div className="text-xs font-bold text-ink-soft">{b.desc}</div>
                 {owned && date && (
-                  <div className="mt-1 text-[10px] font-bold text-ink-soft">
+                  <div className="mt-1 text-xs font-bold text-ink-soft">
                     {new Date(date).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
                   </div>
                 )}
                 {owned && (
                   <div
-                    className="absolute -right-1 -top-1 flex h-6 w-6 rotate-12 items-center justify-center rounded-full text-[10px] font-black text-white"
+                    className="absolute -right-1 -top-1 flex h-6 w-6 rotate-12 items-center justify-center rounded-full text-xs font-black text-white"
                     style={{ background: t.deep }}
                   >
                     ✓

@@ -11,7 +11,7 @@ import POEMS from '@/data/poems';
 import { DOSSIERS } from '@/data/poemDossiers';
 import type { DeepPoem } from '@/types';
 import { useStore, useSettings, usePoemFavorites, usePoemsRead } from '@/store/useStore';
-import { sfxTap } from '@/lib/sfx';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
@@ -53,17 +53,17 @@ const PoemCard = memo(function PoemCard({
       className="no-select relative flex min-h-[120px] flex-col items-center justify-center gap-1 rounded-[1.5rem] border-2 border-pink-200/80 bg-white/90 p-3 text-center shadow-candy-sm transition-all hover:-translate-y-0.5 hover:border-candy-pink/60"
     >
       {read && (
-        <span className="absolute top-2 left-2 grid h-6 w-6 place-items-center rounded-full bg-white/90 text-[11px] shadow-sm" title="Read">✅</span>
+        <span className="absolute top-2 left-2 grid h-6 w-6 place-items-center rounded-full bg-white/90 text-xs shadow-sm" title="Read">✅</span>
       )}
       {fav && (
-        <span className="absolute top-2 right-2 grid h-6 w-6 place-items-center rounded-full bg-white/90 text-[11px] shadow-sm" title="Favorited">❤️</span>
+        <span className="absolute top-2 right-2 grid h-6 w-6 place-items-center rounded-full bg-white/90 text-xs shadow-sm" title="Favorited">❤️</span>
       )}
       {deep && (
-        <span className="absolute bottom-2 right-2 grid h-5 w-5 place-items-center rounded-full bg-candy-pink/10 text-[10px] font-extrabold text-candy-pink-deep" title="Has deep notes">研</span>
+        <span className="absolute bottom-2 right-2 grid h-5 w-5 place-items-center rounded-full bg-candy-pink/10 text-xs font-extrabold text-candy-pink-deep" title="Has deep notes">研</span>
       )}
       <span className="line-clamp-2 text-lg font-extrabold text-candy-pink-deep">{poem.title}</span>
       <span className="text-xs font-bold text-ink-soft">{poem.author}·{poem.dynasty}</span>
-      <span className="text-[11px] font-semibold text-ink-soft/60">{poem.genre}</span>
+      <span className="text-xs font-semibold text-ink-soft/60">{poem.genre}</span>
     </motion.button>
   );
 });
@@ -164,11 +164,15 @@ export default function PoemsPage({ param }: { param?: string }) {
 
   const openPoem = (id: string, tab?: DetailTab) => {
     sfxTap();
+    triggerHaptic(30);
     readPoem(id);
     setOpenTab(tab ?? '原文');
     setOpenId(id);
   };
-  const close = () => setOpenId(null);
+  const close = () => {
+    triggerHaptic(20);
+    setOpenId(null);
+  };
 
   // 打开某首诗时，按需动态加载其深层数据（译文/注释/用典），不阻塞列表
   useEffect(() => {
@@ -190,28 +194,88 @@ export default function PoemsPage({ param }: { param?: string }) {
   }, [openId]);
 
 
-  // 视图切换时重置检索态
+  // 全局键盘快捷键响应 (1-3 专区切换，F 飞花令，Esc 关闭详情)
   useEffect(() => {
-    if (view === 'lib') {
-      /* 保持当前检索态 */
-    }
-    // intentional: only reset when view changes to 'lib'
-  }, [view]);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (openId) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          triggerHaptic(20);
+          close();
+        }
+        return;
+      }
+      if (e.key === '1') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setView('lib');
+      } else if (e.key === '2') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setView('train');
+      } else if (e.key === '3') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setView('plan');
+      } else if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        triggerHaptic(30);
+        setView('flying');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [openId]);
 
   return (
     <div>
       {/* 页头 */}
       <PageHeader emoji="🌸" title={t('poem.academy')} subtitle={t('poem.academySubtitle', { count: POEMS.length })} tone="pink" />
 
+      {/* 快捷操作提示条 */}
+      <div className="text-center mb-3">
+        <span className="inline-block text-xs text-pink-900 font-bold bg-pink-50/90 px-3 py-1 rounded-xl border border-pink-200">
+          ⌨️ 键盘快捷操作：数字 1-3 切换主专区 (诗库/训练/计划) · F 飞花令对决 · Esc 关闭详情
+        </span>
+      </div>
+
       {/* 主导航：核心 3 个 + 「更多」下拉 */}
       <div className="mb-4 flex gap-2">
-        <Seg active={view === 'lib'} onClick={() => setView('lib')} emoji="📚" label={t('poem.lib')} />
-        <Seg active={view === 'train'} onClick={() => setView('train')} emoji="🎯" label={t('poem.train')} />
-        <Seg active={view === 'plan'} onClick={() => setView('plan')} emoji="🗺️" label={t('poem.plan')} />
+        <Seg
+          active={view === 'lib'}
+          onClick={() => {
+            triggerHaptic(20);
+            setView('lib');
+          }}
+          emoji="📚"
+          label={t('poem.lib')}
+        />
+        <Seg
+          active={view === 'train'}
+          onClick={() => {
+            triggerHaptic(20);
+            setView('train');
+          }}
+          emoji="🎯"
+          label={t('poem.train')}
+        />
+        <Seg
+          active={view === 'plan'}
+          onClick={() => {
+            triggerHaptic(20);
+            setView('plan');
+          }}
+          emoji="🗺️"
+          label={t('poem.plan')}
+        />
         <div className="relative">
           <Seg
             active={!['lib', 'train', 'plan'].includes(view)}
-            onClick={() => setShowMoreMenu((v) => !v)}
+            onClick={() => {
+              triggerHaptic(20);
+              setShowMoreMenu((v) => !v);
+            }}
             emoji="⋯"
             label={t('poem.more')}
           />
@@ -226,7 +290,11 @@ export default function PoemsPage({ param }: { param?: string }) {
               ].map((m) => (
                 <button
                   key={m.k}
-                  onClick={() => { setView(m.k as ViewKey); setShowMoreMenu(false); }}
+                  onClick={() => {
+                    triggerHaptic(20);
+                    setView(m.k as ViewKey);
+                    setShowMoreMenu(false);
+                  }}
                   className={cn(
                     'flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-extrabold transition-colors',
                     view === m.k ? 'bg-candy-pink text-white' : 'text-ink-soft hover:bg-pink-50',
@@ -436,7 +504,7 @@ function ChipBtn({
       <span>{emoji}</span>
       {children}
       {badge !== undefined && (
-        <span className="ml-0.5 rounded-full bg-white px-1.5 py-0 text-[10px] font-black text-candy-pink-deep">
+        <span className="ml-0.5 rounded-full bg-white px-1.5 py-0 text-xs font-black text-candy-pink-deep">
           {badge}
         </span>
       )}
@@ -448,7 +516,7 @@ function ChipBtn({
 function FacetCompact({ label, values, sel, onToggle }: { label: string; values: string[]; sel: Set<string>; onToggle: (v: string) => void }) {
   return (
     <div className="flex items-start gap-2">
-      <span className="mt-1 w-10 shrink-0 text-[11px] font-extrabold text-ink-soft">{label}</span>
+      <span className="mt-1 w-10 shrink-0 text-xs font-extrabold text-ink-soft">{label}</span>
       <div className="flex flex-wrap gap-1">
         {values.map((v) => (
           <button
@@ -456,7 +524,7 @@ function FacetCompact({ label, values, sel, onToggle }: { label: string; values:
             type="button"
             onClick={() => onToggle(v)}
             className={cn(
-              'tap-target rounded-full px-2.5 py-0.5 text-[11px] font-extrabold transition-colors',
+              'tap-target rounded-full px-2.5 py-0.5 text-xs font-extrabold transition-colors',
               sel.has(v) ? 'bg-candy-pink text-white shadow-candy-xs' : 'bg-gray-100 text-ink-soft hover:bg-pink-100',
             )}
           >

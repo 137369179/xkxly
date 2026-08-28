@@ -133,7 +133,7 @@ export function CreativeExpress() {
                 )}
               >
                 <div className="text-2xl">{p.emoji}</div>
-                <div className="text-[10px] font-bold text-ink-soft">{p.label}</div>
+                <div className="text-xs font-bold text-ink-soft">{p.label}</div>
               </button>
             ))}
           </div>

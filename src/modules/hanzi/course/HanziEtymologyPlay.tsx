@@ -132,7 +132,7 @@ export function HanziEtymologyPlay({ char, onComplete }: Props) {
             </motion.div>
           )}
 
-          <div className="absolute bottom-1 right-2 text-[10px] text-amber-500/80 font-medium">
+          <div className="absolute bottom-1 right-2 text-xs text-amber-500/80 font-medium">
             👆 轻触看魔法
           </div>
         </div>

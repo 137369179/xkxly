@@ -103,9 +103,11 @@ export class WebSpeechEngine implements TtsEngine {
         const v = opts.voiceURI ? pickByURI(opts.voiceURI) : bestZhVoice();
         if (v) u.voice = v;
         let ended = false;
+        let fallbackTimer: ReturnType<typeof setTimeout> | undefined;
         const end = () => {
           if (ended) return;
           ended = true;
+          clearTimeout(fallbackTimer);
           res();
         };
         u.onend = end;
@@ -118,7 +120,7 @@ export class WebSpeechEngine implements TtsEngine {
         synth.speak(u);
         // 兜底超时：避免极端情况下 Promise 永久挂起
         const est = Math.max(2000, s.length * 420 + 1500);
-        setTimeout(() => {
+        fallbackTimer = setTimeout(() => {
           if (!ended) end();
         }, est);
       });

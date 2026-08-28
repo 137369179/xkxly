@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { LETTERS, type LetterItem } from '@/data/letters';
 import { TONE_STYLE, toneOf } from '@/lib/tones';
 import { cn, sampleMany, shuffle } from '@/lib/utils';
-import { sfxCorrect, sfxFlip, sfxWrong, sfxWin } from '@/lib/sfx';
+import { sfxCorrect, sfxFlip, sfxWrong, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { celebrateBig, celebrateSmall } from '@/lib/celebrate';
 import { randomPraise, speak, playLetterVoice, playWordVoice } from '@/lib/speech';
 import { useStore } from '@/store/useStore';
@@ -113,6 +113,7 @@ export function MatchGame() {
       setWon(true);
       celebrateBig();
       sfxWin();
+      triggerHaptic([60, 40, 60, 40, 100]);
       wonMatchGame();
       addStars(3);
       void speak(`太棒了！26字母大小写全部配对成功！`, { rate: 0.85, module: 'praise' });
@@ -125,25 +126,28 @@ export function MatchGame() {
     };
   }, []);
 
-  const pickUpper = (item: LetterItem) => {
+  const pickUpper = useCallback((item: LetterItem) => {
     if (matched.includes(item.upper)) return;
     sfxFlip();
+    triggerHaptic(20);
     setPickedUpper(item.upper);
     void playLetterVoice(item.upper).catch(() => {
       void speak(item.upper, { lang: 'en-US', rate: 0.7 });
     });
-  };
+  }, [matched]);
 
-  const pickLower = (item: LetterItem) => {
+  const pickLower = useCallback((item: LetterItem) => {
     if (matched.includes(item.upper)) return;
     if (!pickedUpper) {
       // 引导：先选左边
       sfxFlip();
+      triggerHaptic(15);
       void speak('请先点左边的大写字母哦', { rate: 0.85, module: 'quiz' });
       return;
     }
     if (pickedUpper === item.upper) {
       sfxCorrect();
+      triggerHaptic(45);
       celebrateSmall();
       setCombo((c) => c + 1);
       setMatched((m) => [...m, item.upper]);
@@ -155,6 +159,7 @@ export function MatchGame() {
       });
     } else {
       sfxWrong();
+      triggerHaptic([60, 40, 60]);
       setCombo(0);
       setMistakes((m) => m + 1);
       setWrongPair([pickedUpper, item.upper]);
@@ -167,12 +172,56 @@ export function MatchGame() {
         setPickedUpper(null);
       }, 620);
     }
-  };
+  }, [matched, pickedUpper, practice]);
+
+  // 全局键盘快捷键
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['1', '2', '3', '4', '5', '6'].includes(e.key)) {
+        const idx = parseInt(e.key, 10) - 1;
+        const item = round.uppers[idx];
+        if (item) {
+          e.preventDefault();
+          pickUpper(item);
+        }
+      } else if (['q', 'w', 'e', 'a', 's', 'd'].includes(e.key.toLowerCase())) {
+        const map: Record<string, number> = { q: 0, w: 1, e: 2, a: 3, s: 4, d: 5 };
+        const idx = map[e.key.toLowerCase()];
+        if (idx !== undefined) {
+          const item = round.lowers[idx];
+          if (item) {
+            e.preventDefault();
+            pickLower(item);
+          }
+        }
+      } else if (e.key === ' ' || e.key === 'r' || e.key === 'R') {
+        if (won) {
+          e.preventDefault();
+          reset();
+        }
+      } else if (e.key === 'Escape') {
+        if (won) {
+          e.preventDefault();
+          reset();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [round, won, pickUpper, pickLower, reset]);
 
   const stars = mistakes === 0 ? 3 : mistakes <= 2 ? 2 : 1;
 
   return (
     <div className="space-y-5">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-blue-900 font-bold bg-blue-50/90 px-3 py-1 rounded-xl border border-blue-200">
+          ⌨️ 键盘快捷操作：数字键 1-6 选左列大写 · 字母键 Q/W/E/A/S/D 选右列小写 · 空格/R 换新局
+        </span>
+      </div>
+
       <Panel className="!py-4">
         <div className="mb-2 flex items-center justify-between gap-3">
           <span className="text-sm font-extrabold text-ink-soft">

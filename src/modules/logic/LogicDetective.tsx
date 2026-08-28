@@ -274,11 +274,11 @@ export function LogicDetective() {
                     <span className="font-black text-sm text-slate-800 block">
                       {suspect.name}
                     </span>
-                    <span className="text-[11px] text-slate-500 font-medium block mt-0.5">
+                    <span className="text-xs text-slate-500 font-medium block mt-0.5">
                       {suspect.feature}
                     </span>
                   </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold">
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold">
                     👉 点击指认
                   </span>
                 </motion.button>

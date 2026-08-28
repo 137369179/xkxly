@@ -3,6 +3,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { CandyButton } from '@/components/ui/Button';
 import { useStore } from '@/store/useStore';
 import { cn } from '@/lib/utils';
+import { triggerHaptic } from '@/lib/sfx';
 
 /* ── 全部子组件懒加载，FunPage chunk 仅含框架 ~5KB ── */
 const ParentChildPK = lazy(() => import('./ParentChildPK').then(m => ({ default: m.ParentChildPK })));
@@ -179,6 +180,7 @@ export default function FunPage() {
   }, [tickTime]);
 
   const handleCategoryChange = (cat: GameCategory) => {
+    triggerHaptic(20);
     setActiveCategory(cat.id);
     const firstTab = cat.tabs[0];
     if (firstTab && !cat.tabs.includes(tab)) {
@@ -187,14 +189,39 @@ export default function FunPage() {
   };
 
   const handleTabChange = (id: TabId) => {
+    triggerHaptic(20);
     setTab(id);
     tickTime(3);
   };
+
+  // 全局键盘快捷键响应 (1-4 切换四大主题)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      const num = parseInt(e.key, 10);
+      if (num >= 1 && num <= 4) {
+        const cat = CATEGORIES[num - 1];
+        if (cat) {
+          e.preventDefault();
+          handleCategoryChange(cat);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const currentCategory = CATEGORIES.find((c) => c.id === activeCategory) ?? CATEGORIES[0]!;
 
   return (
     <div className="space-y-4">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-purple-900 font-bold bg-purple-50/90 px-3 py-1 rounded-xl border border-purple-200">
+          ⌨️ 键盘快捷操作：数字 1-4 切换游戏主题 (对战互动/益智解谜/生活百科/思维编程)
+        </span>
+      </div>
+
       {/* 一级主题分类栏 */}
       <div className="flex gap-2 rounded-2xl bg-white/80 p-1.5 shadow-sm border border-purple-100">
         {CATEGORIES.map((cat) => {

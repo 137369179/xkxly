@@ -8,7 +8,7 @@ import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { useStore } from '@/store/useStore';
 import { makeMathQuestion, makeMulQuestion, type Difficulty } from '@/lib/questions';
-import { sfxTap, sfxWin, sfxWrong } from '@/lib/sfx';
+import { sfxTap, sfxWin, sfxWrong, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { addSpeedRecord, SpeedRankings } from './SpeedRankings';
 import { cn } from '@/lib/utils';
@@ -16,10 +16,10 @@ import type { Question } from '@/types';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
 import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHint';
 import { useTranslation } from '@/i18n/useTranslation';
+import { navigate } from '@/lib/router';
 
 const CHALLENGE_SEC = 60;
 const GAME_KEY = 'speed_math';
-
 
 function genQuestion(diff: Difficulty, includeMul: boolean): Question {
   if (includeMul && diff >= 2 && Math.random() < 0.3) {
@@ -52,14 +52,7 @@ export function SpeedMath() {
 
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const advanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // 单题作答锁（P0-#1）：用同步 ref 即时锁住，避免快速连点时
-  // chosen(state) 尚未刷新导致同一题重复计分 / 重复写 SRS、排行榜。
   const answeringRef = useRef(false);
-
-  /**
-   * 本局锁定的难度。开局时冻结一次，之后整局不再变——限时挑战途中换难度
-   * 既不公平（记录没法比）也会打断节奏，所以自适应只在开局那一刻生效。
-   */
   const runDiffRef = useRef<Difficulty>(diff);
 
   const next = useCallback(() => {
@@ -67,9 +60,9 @@ export function SpeedMath() {
     setChosen(null);
   }, []);
 
-  const start = () => {
+  const start = useCallback(() => {
     sfxTap();
-    // 开局是安全边界：先让小茜把最新建议应用上来，再锁定本局难度
+    triggerHaptic(30);
     diffMeta.syncNow();
     runDiffRef.current = diffMeta.auto ? diffMeta.recommended : diff;
     setActive(true);
@@ -80,7 +73,7 @@ export function SpeedMath() {
     setBest(0);
     setTime(CHALLENGE_SEC);
     next();
-  };
+  }, [diff, diffMeta, next]);
 
   useEffect(() => {
     if (!active) return;
@@ -98,8 +91,7 @@ export function SpeedMath() {
     return () => { if (timer.current) clearInterval(timer.current); };
   }, [active]);
 
-  const handle = (opt: string) => {
-    // 同步上锁：同一渲染帧内的连点（chosen 尚未刷新）也会被拦下
+  const handle = useCallback((opt: string) => {
     if (answeringRef.current || chosen || !q) return;
     answeringRef.current = true;
     setChosen(opt);
@@ -107,6 +99,7 @@ export function SpeedMath() {
     recordMath(correct, q.skill);
     if (correct) {
       sfxWin();
+      triggerHaptic(45);
       setOk(o => o + 1);
       setStreak(s => {
         const ns = s + 1;
@@ -119,32 +112,68 @@ export function SpeedMath() {
     } else {
       recordSpeed(false);
       sfxWrong();
+      triggerHaptic(20);
       setNg(n => n + 1);
       setStreak(0);
       if (q.skill) practice(q.skill, false, 0, runDiffRef.current);
     }
-    // next 身份稳定（难度走 runDiffRef），setTimeout 里拿到的永远是本局锁定难度；
-    // 换题时释放锁，保证下一题可正常作答。
     advanceRef.current = setTimeout(() => {
       answeringRef.current = false;
       next();
     }, 400);
-  };
+  }, [chosen, q, recordMath, practice, recordSpeed, next]);
 
   // 卸载时清理定时器
   useEffect(() => () => { if (advanceRef.current) clearTimeout(advanceRef.current); }, []);
 
-  // 结束时保存记录到 store（统一持久化，备份可覆盖）
+  // 结束时保存记录到 store
   useEffect(() => {
     if (done && ok > 0) {
-      // 用本局锁定的难度记榜，避免结算后自适应改档导致记录难度对不上
       addSpeedRecord('小宝贝', ok, CHALLENGE_SEC - time, runDiffRef.current);
     }
     if (done && ok > record) {
       setGameBest(GAME_KEY, ok);
       celebrateBig();
+      triggerHaptic([60, 40, 60, 40, 100]);
     }
-  }, [done, ok, record, time]);
+  }, [done, ok, record, time, setGameBest]);
+
+  // 键盘快捷监听
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (!active && !done) {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          start();
+        } else if (['1', '2', '3'].includes(e.key)) {
+          const d = parseInt(e.key, 10) as Difficulty;
+          e.preventDefault();
+          setDiff(d);
+        }
+      } else if (done) {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          start();
+        }
+      } else if (active && q) {
+        if (['1', '2', '3', '4'].includes(e.key)) {
+          const idx = parseInt(e.key, 10) - 1;
+          const opt = q.options[idx];
+          if (opt && !chosen) {
+            e.preventDefault();
+            handle(opt.id);
+          }
+        }
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        navigate('numbers');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [active, done, q, chosen, handle, start, setDiff]);
 
   if (showRank) {
     return (
@@ -159,12 +188,22 @@ export function SpeedMath() {
     return (
       <div className="space-y-5">
         <PageHeader emoji="⚡" title={tr('speedMath.title')} subtitle={tr('speedMath.subtitle')} tone="green" />
+
+        {/* 快捷操作提示条 */}
+        <div className="text-center">
+          <span className="inline-block text-xs text-green-900 font-bold bg-green-50/90 px-3 py-1 rounded-xl border border-green-200">
+            ⌨️ 键盘快捷操作：数字键 1-3 选难度 · 空格/Enter 开启挑战
+          </span>
+        </div>
+
         <Panel className="text-center">
           <div className="text-6xl">⚡</div>
           {record > 0 && (
             <p className="mt-2 text-sm font-bold text-candy-orange-deep">{tr('speedMath.bestRecord', { count: record })}</p>
           )}
-          <CandyButton tone="orange" variant="soft" size="sm" onClick={() => setShowRank(true)}>{tr('speedMath.rankButton')}</CandyButton>
+          <CandyButton tone="orange" variant="soft" size="sm" onClick={() => setShowRank(true)} className="min-h-[44px]">
+            {tr('speedMath.rankButton')}
+          </CandyButton>
           <div className="mt-4 mb-4">
             <p className="mb-2 text-sm font-bold text-ink-soft">{tr('speedMath.selectDifficulty')}</p>
             <div className="flex justify-center gap-2">
@@ -175,6 +214,7 @@ export function SpeedMath() {
                   variant={diff === d ? 'solid' : 'soft'}
                   size="sm"
                   onClick={() => setDiff(d)}
+                  className="min-h-[44px] px-4 font-black"
                 >
                   {d === 1 ? tr('speedMath.diffEasy') : d === 2 ? tr('speedMath.diffMedium') : tr('speedMath.diffHard')}
                 </CandyButton>
@@ -186,8 +226,8 @@ export function SpeedMath() {
               className="mt-2 justify-center"
             />
           </div>
-          <CandyButton tone="green" size="lg" fullWidth onClick={start}>
-            {tr('speedMath.startChallenge')}
+          <CandyButton tone="green" size="lg" fullWidth onClick={start} className="min-h-[52px] text-base font-black">
+            🚀 {tr('speedMath.startChallenge')}
           </CandyButton>
         </Panel>
       </div>
@@ -201,6 +241,14 @@ export function SpeedMath() {
     return (
       <div className="space-y-5">
         <PageHeader emoji="⚡" title={tr('speedMath.challengeEnd')} subtitle="" tone="green" />
+
+        {/* 快捷操作提示条 */}
+        <div className="text-center">
+          <span className="inline-block text-xs text-green-900 font-bold bg-green-50/90 px-3 py-1 rounded-xl border border-green-200">
+            ⌨️ 键盘快捷操作：空格/Enter 再来一次
+          </span>
+        </div>
+
         <Panel className="text-center">
           <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring' }} className="text-6xl">
             {isRecord ? '🏆' : acc >= 80 ? '🎉' : acc >= 50 ? '💪' : '📚'}
@@ -228,8 +276,8 @@ export function SpeedMath() {
           </div>
           <p className="mt-3 text-sm font-bold text-ink-soft">{tr('speedMath.bestRecord', { count: record })}</p>
           <div className="mt-4">
-            <CandyButton tone="green" size="lg" fullWidth onClick={start}>
-              {tr('speedMath.tryAgain')}
+            <CandyButton tone="green" size="lg" fullWidth onClick={start} className="min-h-[52px] text-base font-black">
+              🔄 {tr('speedMath.tryAgain')}
             </CandyButton>
           </div>
         </Panel>
@@ -239,6 +287,13 @@ export function SpeedMath() {
 
   return (
     <div className="space-y-4">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-green-900 font-bold bg-green-50/90 px-3 py-1 rounded-xl border border-green-200">
+          ⌨️ 键盘快捷操作：数字键 1-4 快速选答案
+        </span>
+      </div>
+
       <div className="flex items-center justify-between rounded-2xl bg-candy-green-soft p-3">
         <div className="flex gap-4">
           <div>
@@ -256,7 +311,10 @@ export function SpeedMath() {
             </motion.div>
           )}
         </div>
-        <button onClick={() => { if (timer.current) clearInterval(timer.current); setActive(false); setDone(true); }} className="text-base font-bold text-ink-soft">
+        <button
+          onClick={() => { if (timer.current) clearInterval(timer.current); setActive(false); setDone(true); }}
+          className="min-h-[44px] px-3 py-1 text-base font-bold text-ink-soft hover:text-ink transition-all"
+        >
           {tr('common.end')}
         </button>
       </div>
@@ -274,26 +332,28 @@ export function SpeedMath() {
               <p className="text-sm font-bold text-ink-soft">{q.prompt}</p>
               <p className="my-6 text-5xl font-black text-ink">{q.display}</p>
               <div className="grid grid-cols-2 gap-3">
-                {q.options.map(opt => {
+                {q.options.map((opt, idx) => {
                   const isAnswer = opt.id === q.answerId;
                   const isChosen = opt.id === chosen;
                   return (
                     <button
                       key={opt.id}
+                      type="button"
                       onClick={() => handle(opt.id)}
                       disabled={!!chosen}
                       className={cn(
-                        'rounded-2xl py-4 text-2xl font-black transition-all active:translate-y-[2px]',
+                        'min-h-[56px] rounded-2xl py-4 text-2xl font-black transition-all active:translate-y-[2px] focus-visible:ring-4 focus-visible:ring-green-300 focus:outline-none flex items-center justify-center gap-2',
                         chosen
                           ? isAnswer
-                            ? 'bg-candy-green-soft text-candy-green-deep scale-105'
+                            ? 'bg-candy-green-soft text-candy-green-deep scale-105 shadow-md ring-4 ring-green-300'
                             : isChosen
                               ? 'bg-candy-orange-soft text-candy-orange-deep'
                               : 'bg-gray-100 text-gray-400'
-                          : 'bg-candy-purple-soft text-candy-purple-deep hover:scale-105'
+                          : 'bg-candy-purple-soft text-candy-purple-deep hover:scale-105 active:scale-95 shadow-sm'
                       )}
                     >
-                      {opt.label}
+                      <span className="text-xs font-bold opacity-60">[{idx + 1}]</span>
+                      <span>{opt.label}</span>
                     </button>
                   );
                 })}

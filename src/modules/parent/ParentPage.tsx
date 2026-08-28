@@ -1,5 +1,9 @@
 import { useMemo, useState, useEffect } from 'react';
 import { WorksheetGenerator } from '@/components/study/WorksheetGenerator';
+import { VoiceStudyReport } from './VoiceStudyReport';
+import { OfflineManager } from './OfflineManager';
+import { AdultGateModal } from '@/components/parent/AdultGateModal';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
 import {
   useStore,
   useMastery,
@@ -31,7 +35,6 @@ import { GrowthTrend, SubjectBalance, StudyTips } from '@/components/charts/Pare
 import { StudyCalendar } from '@/components/study/StudyCalendar';
 import { ReportExporter } from '@/components/study/ReportExporter';
 import { WeekCompare } from '@/components/study/WeekCompare';
-import { PdfExport } from '@/components/study/PdfExport';
 import { Leaderboard } from '@/components/study/Leaderboard';
 import { ChainDashboard } from '@/components/study/ChainDashboard';
 import { ParentAdvicePanel } from '@/components/study/ParentAdvicePanel';
@@ -81,7 +84,23 @@ export default function ParentPage() {
   const [newPin, setNewPin] = useState('');
   const [verifying, setVerifying] = useState(false);
   const [pinError, setPinError] = useState('');
+  const [showResetGate, setShowResetGate] = useState(false);
   const [now, setNow] = useState(Date.now());
+
+  // 全局键盘快捷键响应 (Esc 返回主页)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        navigate('home');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // 锁定倒计时刷新
   useEffect(() => {
@@ -89,6 +108,14 @@ export default function ParentPage() {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, [settings.parentPin, unlocked]);
+
+  const handleResetSuccess = () => {
+    setShowResetGate(false);
+    clearPin();
+    setSetMode(false);
+    setPinInput('');
+    setPinError('');
+  };
 
   const weak = useMemo(() => weakSkills({ mastery } as Progress, 8), [mastery]);
   const grid = useMemo(
@@ -184,11 +211,10 @@ export default function ParentPage() {
                 🔒 {translate('parent.lockTooMany', { time: formatLock(remain) })}
               </p>
               <button
+                type="button"
                 onClick={() => {
-                  clearPin();
-                  setSetMode(false);
-                  setPinInput('');
-                  setPinError('');
+                  sfxTap();
+                  setShowResetGate(true);
                 }}
                 className="text-xs font-bold text-ink-soft underline"
               >
@@ -239,11 +265,10 @@ export default function ParentPage() {
                 </p>
               )}
               <button
+                type="button"
                 onClick={() => {
-                  clearPin();
-                  setSetMode(false);
-                  setPinInput('');
-                  setPinError('');
+                  sfxTap();
+                  setShowResetGate(true);
                 }}
                 className="mt-3 text-xs font-bold text-ink-soft underline"
               >
@@ -252,6 +277,14 @@ export default function ParentPage() {
             </>
           )}
         </Panel>
+
+        <AdultGateModal
+          isOpen={showResetGate}
+          title="家长密码重置门禁"
+          subtitle="为防止儿童误重置家长密码，请由爸爸妈妈完成以下算术题："
+          onSuccess={handleResetSuccess}
+          onClose={() => setShowResetGate(false)}
+        />
       </div>
     );
   }
@@ -261,11 +294,24 @@ export default function ParentPage() {
     <div className="space-y-5">
       <PageHeader emoji="👨‍👩‍👧" title={translate('parent.title')} subtitle={translate('parent.dashboardSubtitle')} tone="green" />
 
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-emerald-900 font-bold bg-emerald-50/90 px-3.5 py-1.5 rounded-2xl border border-emerald-200 shadow-sm">
+          ⌨️ 键盘快捷操作：Esc 返回乐园主页 · 报告与数据自动实时同步
+        </span>
+      </div>
+
       {/* 海报生成入口 */}
       <ParentPosterSection />
 
+      {/* 60秒今日学情语音速报 */}
+      <VoiceStudyReport />
+
       {/* 智能可打印练习册生成器 */}
       <WorksheetGenerator />
+
+      {/* 离线数据与资源包管理 */}
+      <OfflineManager />
 
       {/* 概览 */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -305,7 +351,7 @@ export default function ParentPage() {
             <div key={c.label} className="rounded-2xl bg-blue-50 px-1 py-2">
               <div className="text-lg">{c.emoji}</div>
               <div className="mt-0.5 text-base font-black tabular-nums text-candy-blue-deep">{c.value}</div>
-              <div className="mt-0.5 text-[10px] font-bold text-ink-soft">{c.label}</div>
+              <div className="mt-0.5 text-xs font-bold text-ink-soft">{c.label}</div>
             </div>
           ))}
         </div>
@@ -429,7 +475,6 @@ export default function ParentPage() {
 
       {/* 报告导出 */}
       <ReportExporter />
-      <PdfExport />
       <Leaderboard />
 
       <ChainDashboard />

@@ -62,7 +62,7 @@ export function CatEvolveSection({
               <p className="mt-2 text-xs font-black text-amber-950 flex items-center justify-center gap-1">
                 {info.emoji} Lv.{lv} {t(info.title)}
               </p>
-              <p className="text-[10px] text-amber-700 font-bold">{t(info.desc)}</p>
+              <p className="text-xs text-amber-700 font-bold">{t(info.desc)}</p>
             </div>
           );
         })}

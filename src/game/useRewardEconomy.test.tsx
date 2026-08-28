@@ -12,7 +12,7 @@ import {
   type RewardEconomyApi,
   type UseRewardEconomyOptions,
 } from './useRewardEconomy';
-import { CAPSULE_PRIZES, PITY_THRESHOLD, REWARD_CATALOG } from './rewardEconomy';
+import { CAPSULE_PRIZES, DEFAULT_DAILY_CAP, PITY_THRESHOLD, REWARD_CATALOG } from './rewardEconomy';
 import type { SessionOutcome } from './rewardEconomy';
 import { clearMemoryFallback, safeGetJSON } from '@/lib/safeStorage';
 

@@ -349,7 +349,7 @@ function ReviewCard({ idiom }: { idiom: Idiom }) {
       <div className="mt-3 flex items-center justify-center gap-2">
         <h3 className="text-3xl font-black text-ink">{idiom.word}</h3>
         {idiom.category && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-pink-100 px-2.5 py-0.5 text-[11px] font-extrabold text-pink-700">
+          <span className="inline-flex items-center gap-1 rounded-full bg-pink-100 px-2.5 py-0.5 text-xs font-extrabold text-pink-700">
             <span>{IDIOM_CATEGORIES.find((c) => c.id === idiom.category)?.emoji}</span>
             <span>{categoryLabel(idiom.category)}</span>
           </span>

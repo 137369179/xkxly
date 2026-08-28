@@ -5,13 +5,13 @@
  * 顶部统计卡片：总错题数 / 已消灭 / 待复习 / 今日新增
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { useWrongBook, useMastery } from '@/store/useStore';
 import { isDue } from '@/lib/srs';
-import { sfxTap } from '@/lib/sfx';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
 import { navigate } from '@/lib/router';
 import { useTranslation } from '@/i18n/useTranslation';
 import {
@@ -43,6 +43,32 @@ export default function WrongBookDashboard() {
   const [tab, setTab] = useState<TabId>('overview');
   const [trainMode, setTrainMode] = useState<'adaptive' | 'speed'>('adaptive');
 
+  // 全局键盘快捷键响应 (1-4 切换专区)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === '1') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setTab('overview');
+      } else if (e.key === '2') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setTab('train');
+      } else if (e.key === '3') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setTab('badges');
+      } else if (e.key === '4') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setTab('causes');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // 到期错题提醒
   const dueWrongCount = useMemo(() => {
     return wrongBook.filter((s) => {
@@ -57,6 +83,13 @@ export default function WrongBookDashboard() {
       <div className="flex items-center gap-2">
         <span className="text-3xl">📝</span>
         <h1 className="text-2xl font-black text-ink">{t('wrongbook.title')}</h1>
+      </div>
+
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-amber-900 font-bold bg-amber-50/90 px-3 py-1 rounded-xl border border-amber-200">
+          ⌨️ 键盘快捷操作：数字 1-4 切换专区 (统计概览/错题特训/成就勋章/归因分类)
+        </span>
       </div>
 
       {/* 顶部统计卡片 */}

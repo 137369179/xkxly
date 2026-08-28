@@ -52,7 +52,7 @@ export function RadicalBrowser() {
                   className="flex flex-col items-center rounded-2xl border-4 border-candy-blue-soft bg-white p-2 transition-all hover:bg-candy-blue-soft active:translate-y-[1px]"
                 >
                   <span className="text-2xl font-black text-candy-blue-deep">{r}</span>
-                  <span className="text-[10px] font-bold text-ink-soft">{t('radicalBrowser.charCount', { n: count })}</span>
+                  <span className="text-xs font-bold text-ink-soft">{t('radicalBrowser.charCount', { n: count })}</span>
                 </button>
               );
             })}
@@ -87,8 +87,8 @@ export function RadicalBrowser() {
                     )}
                   >
                     <span className="text-2xl font-black text-ink">{h.c}</span>
-                    <span className="text-[10px] font-bold text-ink-soft">{h.p}</span>
-                    {learned && <span className="text-[10px]">✅</span>}
+                    <span className="text-xs font-bold text-ink-soft">{h.p}</span>
+                    {learned && <span className="text-xs">✅</span>}
                   </button>
                 );
               })}

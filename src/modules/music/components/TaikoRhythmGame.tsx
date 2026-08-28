@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'motion/react';
-import { sfxTap, sfxCorrect, sfxWin } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { getAudioContext } from '@/lib/audioContext';
 import { speak } from '@/lib/speech';
@@ -104,48 +104,56 @@ const SONGS: Song[] = [
   },
 ];
 
-// 合成太鼓声
+// 太鼓 WebAudio 合成音效
 function playTaikoSound(type: 'don' | 'ka') {
   try {
     const ctx = getAudioContext();
+    if (!ctx) return;
     const now = ctx.currentTime;
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
-    if (type === 'don') {
-      // 鼓心低沉饱满
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(140, now);
-      osc.frequency.exponentialRampToValueAtTime(45, now + 0.2);
-      gain.gain.setValueAtTime(0.6, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-    } else {
-      // 鼓边清脆高亢
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(480, now);
-      osc.frequency.exponentialRampToValueAtTime(220, now + 0.1);
-      gain.gain.setValueAtTime(0.4, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
-    }
-
     osc.connect(gain);
     gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(now + 0.4);
-  } catch {
-    sfxTap();
+
+    if (type === 'don') {
+      // 咚：低沉雄厚鼓心震动 (150Hz -> 40Hz)
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(150, now);
+      osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+
+      gain.gain.setValueAtTime(0.8, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+
+      osc.start(now);
+      osc.stop(now + 0.18);
+    } else {
+      // 咔：清脆木质鼓边敲击 (800Hz -> 300Hz)
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(800, now);
+      osc.frequency.exponentialRampToValueAtTime(300, now + 0.08);
+
+      gain.gain.setValueAtTime(0.6, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.09);
+
+      osc.start(now);
+      osc.stop(now + 0.09);
+    }
+  } catch (e) {
+    console.warn('Taiko WebAudio error', e);
   }
 }
 
 export function TaikoRhythmGame() {
-  const [selectedSongIdx, setSelectedSongIdx] = useState<number>(0);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [selectedSongIdx, setSelectedSongIdx] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [score, setScore] = useState(0);
+  const [combo, setCombo] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
   const [notes, setNotes] = useState<Note[]>([]);
-  const [combo, setCombo] = useState<number>(0);
-  const [score, setScore] = useState<number>(0);
-  const [lastHitJudge, setLastHitJudge] = useState<'PERFECT' | 'GREAT' | 'MISS' | null>(null);
-  const [isGameOver, setIsGameOver] = useState<boolean>(false);
+  const [lastHitJudge, setLastHitJudge] = useState<'PERFECT' | 'GREAT' | null>(null);
 
   const addStars = useStore((s) => s.addStars);
   const addFish = useStore((s) => s.addFish);
@@ -164,8 +172,9 @@ export function TaikoRhythmGame() {
     speak('欢迎来到动感太鼓达人！当音符到达左侧圆圈判定区时，敲击红色鼓心或蓝色鼓边，跟随节拍一起律动吧！');
   }, []);
 
-  const handleStartSong = () => {
+  const handleStartSong = useCallback(() => {
     sfxTap();
+    triggerHaptic(20);
     setIsPlaying(true);
     setIsGameOver(false);
     setCombo(0);
@@ -184,7 +193,6 @@ export function TaikoRhythmGame() {
       const elapsed = (Date.now() - startTimeRef.current) / 1000;
       setCurrentTime(elapsed);
 
-      // 检查超时的音符判定为 Miss
       setNotes((prevNotes) =>
         prevNotes.map((n) => {
           if (!n.hit && elapsed - n.time > 0.4) {
@@ -194,24 +202,24 @@ export function TaikoRhythmGame() {
         })
       );
 
-      // 歌曲结束判定
       if (elapsed >= currentSong.duration) {
         if (timerRef.current) clearInterval(timerRef.current);
         setIsPlaying(false);
         setIsGameOver(true);
         sfxWin();
+        triggerHaptic([50, 40, 50, 40, 80]);
         celebrateBig();
         addStars(6);
         addFish(2);
         speak(`太棒啦！节拍感非常精准，恭喜获得 6 颗节奏之星！`);
       }
     }, 50);
-  };
+  }, [currentSong, addStars, addFish]);
 
-  const handleStopSong = () => {
+  const handleStopSong = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
     setIsPlaying(false);
-  };
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -219,12 +227,13 @@ export function TaikoRhythmGame() {
     };
   }, []);
 
-  const handleHitDrum = (type: 'don' | 'ka') => {
+  const handleHitDrum = useCallback((type: 'don' | 'ka') => {
     playTaikoSound(type);
+    triggerHaptic(type === 'don' ? 30 : 20);
 
     if (!isPlaying) return;
 
-    // 寻找在当前时间 ±0.4s 内最近且未命中的音符
+    // 寻找在当前时间 ±0.45s 内最近且未命中的音符
     const candidate = notes.find(
       (n) => !n.hit && Math.abs(n.time - currentTime) <= 0.45 && n.type === type
     );
@@ -248,29 +257,60 @@ export function TaikoRhythmGame() {
       setNotes((prev) =>
         prev.map((n) => (n.id === candidate.id ? { ...n, hit: judge } : n))
       );
-    } else {
-      // 乱敲不扣分，鼓励孩子探索
     }
-  };
+  }, [isPlaying, notes, currentTime]);
+
+  // 太鼓键盘交互快捷键 (F/J 咚, D/K 咔, 空格开始/暂停)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === 'f' || e.key === 'F' || e.key === 'j' || e.key === 'J' || e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        handleHitDrum('don');
+      } else if (e.key === 'd' || e.key === 'D' || e.key === 'k' || e.key === 'K' || e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        handleHitDrum('ka');
+      } else if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        if (!isPlaying) {
+          handleStartSong();
+        } else {
+          handleStopSong();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleHitDrum, handleStartSong, handleStopSong, isPlaying]);
 
   return (
     <div className="space-y-6">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-rose-900 font-bold bg-rose-50/90 px-3 py-1 rounded-xl border border-rose-200">
+          ⌨️ 键盘快捷操作：F/J 敲鼓心 · D/K 敲鼓边 · 空格/Enter 开启/暂停演奏
+        </span>
+      </div>
+
       {/* 歌曲快速切换 */}
-      <div className="flex items-center justify-center gap-2">
+      <div className="flex flex-wrap items-center justify-center gap-2" role="tablist" aria-label="曲目选择">
         {SONGS.map((song, idx) => (
           <button
             key={song.id}
             type="button"
+            role="tab"
+            aria-selected={selectedSongIdx === idx}
             onClick={() => {
               if (!isPlaying) {
                 sfxTap();
+                triggerHaptic(20);
                 setSelectedSongIdx(idx);
               }
             }}
-            className={`px-4 py-2 rounded-2xl font-black text-xs transition-all ${
+            className={`min-h-[44px] px-4 py-2 rounded-2xl font-black text-xs transition-all focus-visible:ring-4 focus-visible:ring-rose-300 focus:outline-none ${
               selectedSongIdx === idx
                 ? 'bg-rose-500 text-white shadow-md scale-105'
-                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 active:scale-95'
             }`}
           >
             {song.title}
@@ -378,10 +418,10 @@ export function TaikoRhythmGame() {
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.94 }}
           onClick={() => handleHitDrum('don')}
-          className="h-28 bg-gradient-to-br from-rose-500 to-red-600 rounded-3xl border-4 border-rose-300 shadow-xl flex flex-col items-center justify-center text-white font-black active:shadow-inner cursor-pointer"
+          className="h-28 bg-gradient-to-br from-rose-500 to-red-600 rounded-3xl border-4 border-rose-300 shadow-xl flex flex-col items-center justify-center text-white font-black active:shadow-inner cursor-pointer focus-visible:ring-4 focus-visible:ring-rose-300 focus:outline-none select-none"
         >
           <span className="text-4xl">🥁</span>
-          <span className="text-lg mt-1">🔴 咚 (敲鼓心)</span>
+          <span className="text-lg mt-1">🔴 咚 (敲鼓心 · F/J)</span>
         </motion.button>
 
         <motion.button
@@ -389,10 +429,10 @@ export function TaikoRhythmGame() {
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.94 }}
           onClick={() => handleHitDrum('ka')}
-          className="h-28 bg-gradient-to-br from-sky-500 to-blue-600 rounded-3xl border-4 border-sky-300 shadow-xl flex flex-col items-center justify-center text-white font-black active:shadow-inner cursor-pointer"
+          className="h-28 bg-gradient-to-br from-sky-500 to-blue-600 rounded-3xl border-4 border-sky-300 shadow-xl flex flex-col items-center justify-center text-white font-black active:shadow-inner cursor-pointer focus-visible:ring-4 focus-visible:ring-sky-300 focus:outline-none select-none"
         >
           <span className="text-4xl">🥢</span>
-          <span className="text-lg mt-1">🔵 咔 (敲鼓边)</span>
+          <span className="text-lg mt-1">🔵 咔 (敲鼓边 · D/K)</span>
         </motion.button>
       </div>
 

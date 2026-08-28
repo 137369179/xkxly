@@ -1,0 +1,45 @@
+/* 儿童无障碍包容层（A 层 · R150 落地）
+ * ------------------------------------------------------------
+ * 全局护栏：焦点可见 / 最小触控目标 / 减弱动画。
+ * 仅作用于 .a11y-* 工具类与已标注的动效元素，不侵入业务样式。
+ * 契合 2026 商用底线：WCAG 2.2 AA（EAA 已生效 / ADA Title II 2027）、
+ * Apple Kids Category、Google Play Families 均要求可达性。
+
+/* A6 焦点可见：键盘 / 读屏导航的高对比描边，覆盖浏览器默认弱描边 */
+.a11y-focusable:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible,
+[role="switch"]:focus-visible,
+a:focus-visible {
+  outline: 3px solid #2b6cff;
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+/* A3 最小触控目标：44px 命中区（Apple HIG 44pt；高于 WCAG 2.2 AA 24px 下限，儿童友好） */
+.a11y-min-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* A2 + A5 减弱动画：尊重系统 prefers-reduced-motion（前庭安全 / 光敏友好） */
+@media (prefers-reduced-motion: reduce) {
+  .gamified,
+  .combo-fill,
+  .candy-pop,
+  [data-animate="true"] {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* A2 应用内减弱动画总开关：ReducedMotionToggle 在 <html> 打 data-reduced-motion="true" 时全站降级。
+ * 默认（未开启）零影响；开启后仅降级动效，不影响布局与功能。 */
+html[data-reduced-motion="true"] *,
+html[data-reduced-motion="true"] *::before,
+html[data-reduced-motion="true"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}

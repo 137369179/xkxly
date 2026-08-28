@@ -7,7 +7,8 @@ import { useState, useRef, useEffect } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { speak } from '@/lib/speech';
-import { sfxTap, sfxCorrect, sfxWrong, sfxStar } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, sfxStar, triggerHaptic } from '@/lib/sfx';
+import { navigate } from '@/lib/router';
 import { celebrateSmall } from '@/lib/celebrate';
 import { randomPraise, randomEncourage } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -41,10 +42,24 @@ export function DialoguePage() {
     };
   }, []);
 
+  // 全局键盘快捷键：Esc 返回主页/对话列表、Space 下一句
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement).tagName === 'INPUT') return;
+      if (e.key === 'Escape') {
+        if (selected) setSelected(null);
+        else navigate('words');
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [selected]);
+
   const currentLine = selected ? selected.lines[lineIdx] : null;
 
   const startDialogue = (d: Dialogue) => {
     sfxTap();
+    triggerHaptic(20);
     // 切换对话时清理旧的 timeout
     if (firstLineTimerRef.current) {
       clearTimeout(firstLineTimerRef.current);
@@ -68,6 +83,7 @@ export function DialoguePage() {
   const nextLine = () => {
     if (!selected) return;
     sfxTap();
+    triggerHaptic(10);
     if (lineIdx + 1 < selected.lines.length) {
       const next = lineIdx + 1;
       setLineIdx(next);
@@ -93,6 +109,7 @@ export function DialoguePage() {
     if (isRight) {
       practice(`word:dialogue:${selected.id}:${lineIdx}`, true, 1);
       sfxCorrect();
+      triggerHaptic(30);
       randomPraise();
       setScore(s => s + 10);
     } else {

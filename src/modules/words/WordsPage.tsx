@@ -8,7 +8,7 @@ import { ProgressBar } from '@/components/ui/ProgressBar';
 import { CandyButton } from '@/components/ui/Button';
 import { useMastery, useStreak } from '@/store/useStore';
 import type { Progress } from '@/types';
-import { sfxTap } from '@/lib/sfx';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 
 import { TONE_STYLE } from '@/lib/tones';
@@ -87,6 +87,40 @@ export default function WordsPage() {
     }
   }, [target]);
 
+  // 全局键盘快捷键响应 (1-4 切换四大专区，Esc 返回)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (selected) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          triggerHaptic(20);
+          setSelected(null);
+        }
+        return;
+      }
+      if (e.key === '1') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setMainTab('course');
+      } else if (e.key === '2') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setMainTab('words');
+      } else if (e.key === '3') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setMainTab('practice');
+      } else if (e.key === '4') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setMainTab('review');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selected]);
+
   const MAIN_TABS: TabItem<MainTab>[] = useMemo(() => [
     { id: 'course', label: tr('words.tab.course'), emoji: '📚' },
     { id: 'words', label: tr('words.tab.words'), emoji: '📖' },
@@ -107,6 +141,7 @@ export default function WordsPage() {
   /** 课程页：开始某阶段 */
   const goStage = (stage: EnglishStage) => {
     sfxTap();
+    triggerHaptic(30);
     const act = STAGE_ACTIONS[stage];
     setMainTab(act.main);
     if (act.practice) setPracticeTab(act.practice);
@@ -119,6 +154,14 @@ export default function WordsPage() {
     return (
       <div className="space-y-5">
         <PageHeader iconType="town" title={tr('words.courseTitle')} subtitle={tr('words.courseSubtitle')} tone="purple" />
+        
+        {/* 快捷操作提示条 */}
+        <div className="text-center">
+          <span className="inline-block text-xs text-purple-900 font-bold bg-purple-50/90 px-3 py-1 rounded-xl border border-purple-200">
+            ⌨️ 键盘快捷操作：数字 1-4 切换专区 (英语课程/单词宝库/专项练习/复习中心) · Esc 返回
+          </span>
+        </div>
+
         <TrainingBanner target={target} onClose={clear} />
         <Tabs items={MAIN_TABS} value={mainTab} onChange={setMainTab} tone="purple" layoutId="words-main-tabs" />
 
@@ -160,13 +203,13 @@ export default function WordsPage() {
                       <p className="text-base font-extrabold text-ink">
                         {tr('words.courseStage')} {def.stage} · {def.name}
                         {completed && <span className="ml-2 text-xs text-candy-green-deep">✅ {tr('words.courseDone')}</span>}
-                        {isCurrent && !completed && <span className="ml-2 rounded-full bg-purple-500 px-2 py-0.5 text-[10px] font-black text-white">{tr('words.courseNow')}</span>}
+                        {isCurrent && !completed && <span className="ml-2 rounded-full bg-purple-500 px-2 py-0.5 text-xs font-black text-white">{tr('words.courseNow')}</span>}
                       </p>
                       <span className="text-xs font-bold text-ink-soft">{done}/{def.targetCount}</span>
                     </div>
                     <p className="mt-0.5 text-xs font-bold text-ink-soft">{def.desc} · {tr('words.courseGoal')}：{def.goal}</p>
                     <ProgressBar value={done} max={def.targetCount || 1} tone={def.tone} className="mt-2" />
-                    {!unlocked && <p className="mt-1 text-[11px] font-bold text-ink/50">{def.unlockHint}</p>}
+                    {!unlocked && <p className="mt-1 text-xs font-bold text-ink/50">{def.unlockHint}</p>}
                   </div>
                 </div>
               </button>
@@ -185,6 +228,14 @@ export default function WordsPage() {
     return (
       <div className="space-y-5">
         <PageHeader emoji="🎯" title={tr('words.practiceTitle')} subtitle={tr('words.practiceSubtitle')} tone="pink" />
+        
+        {/* 快捷操作提示条 */}
+        <div className="text-center">
+          <span className="inline-block text-xs text-pink-900 font-bold bg-pink-50/90 px-3 py-1 rounded-xl border border-pink-200">
+            ⌨️ 键盘快捷操作：数字 1-4 切换专区 (英语课程/单词宝库/专项练习/复习中心)
+          </span>
+        </div>
+
         <TrainingBanner target={target} onClose={clear} />
         <Tabs items={MAIN_TABS} value={mainTab} onChange={setMainTab} tone="pink" layoutId="words-main-tabs" />
         <Tabs items={practiceTabs} value={practiceTab} onChange={setPracticeTab} tone="purple" layoutId="words-practice-tabs" />
@@ -209,6 +260,14 @@ export default function WordsPage() {
     return (
       <div className="space-y-5">
         <PageHeader emoji="🔁" title={tr('words.tab.review')} subtitle={tr('words.reviewSubtitle')} tone="green" />
+        
+        {/* 快捷操作提示条 */}
+        <div className="text-center">
+          <span className="inline-block text-xs text-emerald-900 font-bold bg-emerald-50/90 px-3 py-1 rounded-xl border border-emerald-200">
+            ⌨️ 键盘快捷操作：数字 1-4 切换专区 (英语课程/单词宝库/专项练习/复习中心)
+          </span>
+        </div>
+
         <TrainingBanner target={target} onClose={clear} />
         <Tabs items={MAIN_TABS} value={mainTab} onChange={setMainTab} tone="green" layoutId="words-main-tabs" />
         <Suspense fallback={<div className="py-12 text-center text-3xl animate-bounce">🔁</div>}>
@@ -222,7 +281,7 @@ export default function WordsPage() {
   if (selected) {
     return (
       <div className="space-y-5">
-        <button onClick={() => setSelected(null)} className="text-sm font-bold text-ink-soft">
+        <button onClick={() => { triggerHaptic(20); setSelected(null); }} className="text-sm font-bold text-ink-soft">
           {tr('words.backToList')}
         </button>
         <WordLearn word={selected} onDone={() => setSelected(null)} />
@@ -235,6 +294,14 @@ export default function WordsPage() {
   return (
     <div className="space-y-5">
       <PageHeader iconType="town" title={tr('words.wordsTitle')} subtitle={tr('words.homeSubtitle', { count: getWordCount() })} tone={tone} />
+      
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-blue-900 font-bold bg-blue-50/90 px-3 py-1 rounded-xl border border-blue-200">
+          ⌨️ 键盘快捷操作：数字 1-4 切换专区 (英语课程/单词宝库/专项练习/复习中心)
+        </span>
+      </div>
+
       <div className="flex flex-wrap gap-2">
         <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1 text-xs font-black text-orange-700 shadow-sm">
           🔥 连续学习 {streak} 天

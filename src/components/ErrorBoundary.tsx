@@ -30,7 +30,7 @@ interface State {
 }
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
-  state: State = { error: null };
+  override state: State = { error: null };
 
   static getDerivedStateFromError(error: Error): State {
     return { error };
@@ -51,7 +51,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
     reportRenderError(error, info.componentStack ?? undefined);
   }
 
-  render() {
+  override render() {
     const { error, stack } = this.state;
     if (!error) return this.props.children;
 
@@ -72,10 +72,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
               重新试一次
             </button>
             <details className="mt-3 text-left">
-              <summary className="cursor-pointer text-[11px] font-bold text-ink-soft/70">
+              <summary className="cursor-pointer text-xs font-bold text-ink-soft/70">
                 错误详情
               </summary>
-              <pre className="mt-2 max-h-32 overflow-auto rounded-lg bg-[#fbf6f7] p-2 text-[10px] leading-relaxed whitespace-pre-wrap text-ink-soft">
+              <pre className="mt-2 max-h-32 overflow-auto rounded-lg bg-[#fbf6f7] p-2 text-xs leading-relaxed whitespace-pre-wrap text-ink-soft">
                 {error.message}
                 {stack ? `\n${stack}` : ''}
               </pre>
@@ -117,7 +117,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
             <summary className="cursor-pointer text-xs font-bold text-ink-soft/70">
               给家长看的错误详情
             </summary>
-            <pre className="mt-2 max-h-40 overflow-auto rounded-xl bg-[#fbf6f7] p-3 text-[11px] leading-relaxed whitespace-pre-wrap text-ink-soft">
+            <pre className="mt-2 max-h-40 overflow-auto rounded-xl bg-[#fbf6f7] p-3 text-xs leading-relaxed whitespace-pre-wrap text-ink-soft">
               {error.message}
               {stack ? `\n${stack}` : ''}
             </pre>

@@ -6,14 +6,15 @@
  * 每个模块懒加载，独立交互
  */
 
-import { useState, Suspense, lazy } from 'react';
+import { useState, Suspense, lazy, useEffect } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
-import { sfxTap } from '@/lib/sfx';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
 import { SCIENCE_ITEMS } from '@/data/scienceIndex';
 import { ScienceQuiz } from '@/components/quiz/ScienceQuiz';
+import { navigate } from '@/lib/router';
 
 // 懒加载 7 大模块
 const BotanicalLab = lazy(() => import('./components/BotanicalLab').then(m => ({ default: m.BotanicalLab })));
@@ -65,6 +66,25 @@ export default function SciencePage() {
   const { t } = useTranslation();
   const [tab, setTab] = useState<SciTab>('botany');
 
+  // 全局键盘快捷键响应 (1-7 切换专区)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      const tabKeys: SciTab[] = ['botany', 'archaeology', 'dino', 'space', 'weather', 'animal', 'body'];
+      const num = parseInt(e.key, 10);
+      if (num >= 1 && num <= 7) {
+        e.preventDefault();
+        triggerHaptic(20);
+        setTab(tabKeys[num - 1]!);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        navigate('home');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
     <div className="space-y-5">
       <PageHeader
@@ -73,6 +93,13 @@ export default function SciencePage() {
         subtitle={t('sciencePage.subtitle')}
         tone="green"
       />
+
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-emerald-900 font-bold bg-emerald-50/90 px-3 py-1 rounded-xl border border-emerald-200">
+          ⌨️ 键盘快捷操作：数字 1-7 切换科学专区 (植物/考古/恐龙/太空/天气/动物/人体)
+        </span>
+      </div>
 
       {/* 知识卡片精选 */}
       <Panel>
@@ -89,6 +116,7 @@ export default function SciencePage() {
               )}
               onClick={() => {
                 sfxTap();
+                triggerHaptic(20);
                 speak(`${item.nameZh}。${item.nameEn}`, { lang: 'zh-CN' });
                 const tabMap: Record<string, SciTab> = { dino: 'dino', space: 'space', weather: 'weather' };
                 setTab(tabMap[item.category] ?? 'dino');
@@ -96,7 +124,7 @@ export default function SciencePage() {
             >
               <span className="text-3xl">{item.emoji}</span>
               <div className="mt-1 text-xs font-extrabold text-ink">{item.nameZh}</div>
-              <div className="text-[10px] font-bold text-ink-soft">{item.nameEn}</div>
+              <div className="text-xs font-bold text-ink-soft">{item.nameEn}</div>
             </div>
           ))}
         </div>
@@ -107,7 +135,12 @@ export default function SciencePage() {
         {TABS.map(tb => (
           <button
             key={tb.id}
-            aria-label={t(tb.labelKey)} onClick={() => { sfxTap(); setTab(tb.id); }}
+            aria-label={t(tb.labelKey)}
+            onClick={() => {
+              sfxTap();
+              triggerHaptic(20);
+              setTab(tb.id);
+            }}
             className={cn(
               'flex min-h-[48px] flex-1 items-center justify-center gap-1.5 rounded-[1rem] px-4 py-2.5 text-sm font-extrabold transition-all whitespace-nowrap',
               tab === tb.id ? tb.activeColor : cn('bg-white/50', tb.color, 'hover:bg-white')

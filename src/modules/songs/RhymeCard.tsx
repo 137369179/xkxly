@@ -31,7 +31,7 @@ function RhymeCard({
         <span className="text-3xl">{rhyme.emoji}</span>
         {learned && (
           <span
-            className="rounded-full px-2 py-0.5 text-[10px] font-extrabold"
+            className="rounded-full px-2 py-0.5 text-xs font-extrabold"
             style={{ background: TONE_STYLE.green.soft, color: TONE_STYLE.green.deep }}
           >
             {translate('song.learnedShort')}
@@ -42,10 +42,10 @@ function RhymeCard({
         <div className="text-base font-black" style={{ color: t.deep }}>
           {rhyme.title}
         </div>
-        <div className="line-clamp-1 text-[11px] font-bold text-ink-soft">{rhyme.desc}</div>
+        <div className="line-clamp-1 text-xs font-bold text-ink-soft">{rhyme.desc}</div>
       </div>
       <div
-        className="inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-extrabold"
+        className="inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-xs font-extrabold"
         style={{ background: 'rgba(255,255,255,0.6)', color: t.deep }}
       >
         {THEME_LABEL[rhyme.theme].emoji} {THEME_LABEL[rhyme.theme].label} · {translate('song.agePlus', { age: rhyme.ageMin })}

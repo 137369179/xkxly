@@ -43,8 +43,8 @@ export function PoetWorks() {
                 className="card-candy p-3 text-left transition-all hover:scale-[1.02] active:scale-95"
               >
                 <div className="text-lg font-extrabold text-ink">{p.name}</div>
-                <div className="mt-0.5 text-[10px] font-bold text-ink-soft">{p.life}</div>
-                <div className="mt-0.5 text-[9px] font-semibold text-ink-muted">{p.epithet || p.style?.split('，')[0]}</div>
+                <div className="mt-0.5 text-xs font-bold text-ink-soft">{p.life}</div>
+                <div className="mt-0.5 text-xs font-semibold text-ink-muted">{p.epithet || p.style?.split('，')[0]}</div>
               </button>
             ))}
           </div>
@@ -79,7 +79,7 @@ export function PoetWorks() {
                   className="card-candy p-3 text-left transition-all hover:scale-[1.01]"
                 >
                   <div className="font-extrabold text-ink">{pi.title}</div>
-                  <div className="mt-0.5 text-[10px] font-semibold text-ink-soft">
+                  <div className="mt-0.5 text-xs font-semibold text-ink-soft">
                     {pi.dynasty} · {pi.genre} · {t('poetWorks.level', { n: pi.level })}
                   </div>
                 </button>

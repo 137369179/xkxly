@@ -260,7 +260,7 @@ export function ChantBar({ poem }: { poem: DeepPoem }) {
         </CandyButton>
       </div>
       <p className="text-xs font-bold text-ink-soft">{chantHint(plan, tr)}</p>
-      <p className="text-[11px] text-candy-purple-600">
+      <p className="text-xs text-candy-purple-600">
         🎭 {tr('poem.moodBase')} · {mood.name}
         <span className="ml-1 text-ink-soft">（{tr('poem.moodNote')}）</span>
       </p>
@@ -282,7 +282,7 @@ export function ChantBar({ poem }: { poem: DeepPoem }) {
                   return (
                     <div
                       key={k}
-                      className="flex items-center justify-center rounded-[3px] text-[9px] font-bold text-ink/70"
+                      className="flex items-center justify-center rounded-[3px] text-xs font-bold text-ink/70"
                       style={{ width: `${w}%`, background: bg }}
                       title={`${t.c || t.role} · 期望 ${t.holdMs}ms`}
                     >
@@ -316,14 +316,14 @@ export function ChantBar({ poem }: { poem: DeepPoem }) {
                   onPointerUp={() => stopRec(i)}
                   onPointerLeave={() => recLine === i && stopRec(i)}
                   className={cn(
-                    'no-select rounded-full px-3 py-1 text-[11px] font-extrabold transition-colors',
+                    'no-select rounded-full px-3 py-1 text-xs font-extrabold transition-colors',
                     recLine === i ? 'bg-candy-red text-white' : 'bg-candy-orange-soft text-candy-orange-deep',
                   )}
                 >
                   {recLine === i ? tr('poem.recRelease') : tr('poem.recHold')}
                 </button>
                 {durations[i] ? (
-                  <span className="text-[11px] font-bold text-ink-soft">
+                  <span className="text-xs font-bold text-ink-soft">
                     {(durations[i]! / 1000).toFixed(1)}s
                     {blobs[i] && (
                       <button className="ml-1 text-candy-blue-deep underline" onClick={() => playBack(blobs[i]!)}>
@@ -332,7 +332,7 @@ export function ChantBar({ poem }: { poem: DeepPoem }) {
                     )}
                   </span>
                 ) : (
-                  <span className="text-[11px] text-ink-soft/60">{tr('poem.expected')} {(ln.expectedMs / 1000).toFixed(1)}s</span>
+                  <span className="text-xs text-ink-soft/60">{tr('poem.expected')} {(ln.expectedMs / 1000).toFixed(1)}s</span>
                 )}
               </div>
             </div>
@@ -360,7 +360,7 @@ export function ChantBar({ poem }: { poem: DeepPoem }) {
           {score.score >= 80 && <span className="ml-1">👍 {tr('poem.rhythmGood')}</span>}
         </div>
       )}
-      <p className="text-[11px] leading-relaxed text-ink-soft/80">
+      <p className="text-xs leading-relaxed text-ink-soft/80">
         {tr('poem.recExplain')}
       </p>
     </div>
@@ -495,7 +495,7 @@ export function PlanSummary({ poem }: { poem: DeepPoem }) {
           </li>
         ))}
       </ol>
-      <p className="text-[11px] text-ink-soft/70">{tr('poem.suggestStage')}：{tr('poem.stageN', { n: String(plan.nextStage) })} · {tr('poem.steps')}：{plan.steps.map((s) => stepLabel(s.type, tr)).join(' → ')}</p>
+      <p className="text-xs text-ink-soft/70">{tr('poem.suggestStage')}：{tr('poem.stageN', { n: String(plan.nextStage) })} · {tr('poem.steps')}：{plan.steps.map((s) => stepLabel(s.type, tr)).join(' → ')}</p>
     </div>
   );
 }

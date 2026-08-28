@@ -123,7 +123,7 @@ export default function StudyPassport() {
 
       {/* 快捷操作提示条 */}
       <div className="text-center">
-        <span className="inline-block text-[11px] text-purple-900 font-bold bg-purple-50/90 px-3.5 py-1.5 rounded-2xl border border-purple-200 shadow-sm">
+        <span className="inline-block text-xs text-purple-900 font-bold bg-purple-50/90 px-3.5 py-1.5 rounded-2xl border border-purple-200 shadow-sm">
           ⌨️ 键盘快捷操作：点击徽章印章查看详情 · Esc 返回乐园主页
         </span>
       </div>
@@ -210,18 +210,18 @@ function Stamp({
         {badge.name}
       </span>
       {stamped ? (
-        <span className="text-[10px] font-bold text-candy-green-deep">
+        <span className="text-xs font-bold text-candy-green-deep">
           ✅ {date || '已盖章'}
         </span>
       ) : meter ? (
         <div className="w-full">
           <ProgressBar value={Math.min(meter[0], meter[1])} max={meter[1]} tone={badge.tone} height={6} />
-          <span className="mt-0.5 block text-[10px] font-bold text-ink-soft">
+          <span className="mt-0.5 block text-xs font-bold text-ink-soft">
             {Math.min(meter[0], meter[1])}/{meter[1]}
           </span>
         </div>
       ) : (
-        <span className="text-[10px] font-bold text-ink-soft">未开始</span>
+        <span className="text-xs font-bold text-ink-soft">未开始</span>
       )}
     </motion.div>
   );

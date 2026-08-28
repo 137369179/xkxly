@@ -27,6 +27,7 @@ import { CandyButton } from '@/components/ui/Button';
 import { StarCounter } from '@/components/ui/Stars';
 import { BigPraise } from '@/components/ui/Feedback';
 import { celebrateBig } from '@/lib/celebrate';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
 import { FriendlyLoading } from '@/components/feedback/FriendlyLoading';
 import { navigate } from '@/lib/router';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -100,10 +101,41 @@ export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?:
     };
   }, []);
 
+  // 全局键盘快捷键响应 (1-4 切换四大 Tab)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === '1') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        setTab('tree');
+      } else if (e.key === '2') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        setTab('constellation');
+      } else if (e.key === '3') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        setTab('badges');
+      } else if (e.key === '4') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        setTab('stickers');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const handleBuySticker = (id: string, cost: number) => {
     if (ownedStickers.has(id)) return;
     const ok = buySticker(id, cost);
     if (ok) {
+      triggerHaptic(40);
       setJustGot(id);
       celebrateBig();
       if (justGotTimerRef.current) clearTimeout(justGotTimerRef.current);
@@ -119,6 +151,13 @@ export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?:
         subtitle={t('growth.subtitle')}
         tone="purple"
       />
+
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-purple-900 font-bold bg-purple-50/90 px-3.5 py-1.5 rounded-2xl border border-purple-200 shadow-sm">
+          ⌨️ 键盘快捷操作：数字 1-4 切换专区 (成长足迹/记忆星图/勋章荣誉/星愿百宝箱)
+        </span>
+      </div>
 
       {/* 数据总览 */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -201,7 +240,7 @@ export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?:
                   <div key={c.label} className="rounded-2xl bg-blue-50 px-2 py-2.5">
                     <div className="text-xl">{c.emoji}</div>
                     <div className="mt-0.5 text-lg font-black tabular-nums text-candy-blue-deep">{c.value}</div>
-                    <div className="text-[10px] font-bold text-ink-soft">{c.label}</div>
+                    <div className="text-xs font-bold text-ink-soft">{c.label}</div>
                   </div>
                 ))}
               </div>
@@ -254,7 +293,7 @@ export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?:
                           <div className="truncate text-sm font-extrabold text-ink">{badge?.name ?? id}</div>
                           <div className="truncate text-xs font-bold text-ink-soft">{badge?.desc}</div>
                         </div>
-                        <span className="shrink-0 rounded-full bg-black/5 px-2.5 py-1 text-[11px] font-bold tabular-nums text-ink-soft">
+                        <span className="shrink-0 rounded-full bg-black/5 px-2.5 py-1 text-xs font-bold tabular-nums text-ink-soft">
                           {formatDate(ts)}
                         </span>
                       </motion.div>
@@ -309,7 +348,7 @@ export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?:
                   <FluffyIcon type="box" size="sm" />
                   <div>
                     <span className="text-sm font-extrabold text-pink-900">{t('rewards.wallet')}</span>
-                    <p className="text-[11px] font-bold text-pink-600">
+                    <p className="text-xs font-bold text-pink-600">
                       {t('rewards.walletSummary', { stars, spent })}
                     </p>
                   </div>
@@ -365,15 +404,15 @@ export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?:
                       style={{ background: got ? toneStyle.soft : '#F3EEF6' }}
                     >
                       <span className={cn('text-4xl', !got && 'opacity-35 grayscale')}>{s.emoji}</span>
-                      <span className="line-clamp-1 text-[11px] font-extrabold" style={{ color: got ? toneStyle.deep : '#8B7F96' }}>
+                      <span className="line-clamp-1 text-xs font-extrabold" style={{ color: got ? toneStyle.deep : '#8B7F96' }}>
                         {s.name}
                       </span>
                       {!got && (
-                        <span className="flex items-center gap-0.5 text-[11px] font-bold text-candy-yellow-deep">
+                        <span className="flex items-center gap-0.5 text-xs font-bold text-candy-yellow-deep">
                           ⭐ {s.cost}
                         </span>
                       )}
-                      {got && <span className="text-[11px] font-extrabold text-candy-green-deep">{t('rewards.collected')} ✅</span>}
+                      {got && <span className="text-xs font-extrabold text-candy-green-deep">{t('rewards.collected')} ✅</span>}
                     </motion.button>
                   );
                 })}

@@ -81,8 +81,8 @@ function Swatch({ name, hex, note }: { name: string; hex: string; note: string }
       <div className="px-3 py-2.5">
         <div className="text-sm font-extrabold text-ink">{name}</div>
         <div className="mt-0.5 flex items-center justify-between">
-          <span className="text-[11px] font-semibold text-ink-soft">{note}</span>
-          <span className={`text-[11px] font-bold ${useMutedText ? 'text-ink-soft' : 'text-candy-pink-deep'}`}>
+          <span className="text-xs font-semibold text-ink-soft">{note}</span>
+          <span className={`text-xs font-bold ${useMutedText ? 'text-ink-soft' : 'text-candy-pink-deep'}`}>
             {hex.toUpperCase()}
           </span>
         </div>
@@ -225,8 +225,8 @@ export default function DesignSystemPage() {
                 />
                 <div className="min-w-0">
                   <div className="text-sm font-extrabold capitalize text-ink">{tone}</div>
-                  <div className="text-[11px] font-semibold text-ink-soft">{ts.main}</div>
-                  <div className="text-[11px] font-semibold text-ink-soft">{ts.deep}</div>
+                  <div className="text-xs font-semibold text-ink-soft">{ts.main}</div>
+                  <div className="text-xs font-semibold text-ink-soft">{ts.deep}</div>
                 </div>
               </div>
             );
@@ -278,7 +278,7 @@ export default function DesignSystemPage() {
             {RADII.map((r) => (
               <div key={r.label} className="flex flex-col items-center gap-2">
                 <div className={`h-16 w-16 bg-candy-pink-soft ${r.cls}`} />
-                <span className="text-[11px] font-bold text-ink-soft">{r.label}</span>
+                <span className="text-xs font-bold text-ink-soft">{r.label}</span>
               </div>
             ))}
           </div>

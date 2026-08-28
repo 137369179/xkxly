@@ -16,6 +16,7 @@ import * as THREE from 'three';
 import type { CatBreed, CatExpression, RenderMode, DeviceCapability } from './types';
 import { createCatGeometry, setFurDirtyLevel } from './CatGeometry';
 import { useTranslation } from '@/i18n/useTranslation';
+import { getDevicePerfProfile } from '@/lib/deviceAdapt';
 // ========== 子组件 ==========
 
 /** 加载进度指示器 */
@@ -356,7 +357,7 @@ export function RealisticCatScene({
       >
         <FallbackCatView breed={breed} expression={expression} size={size} />
         {showControls && (
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] text-pink-500 bg-white/80 px-2 py-0.5 rounded-full">
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-pink-500 bg-white/80 px-2 py-0.5 rounded-full">
             💡 {tr('cat.fallbackMode')}
           </div>
         )}
@@ -375,7 +376,7 @@ export function RealisticCatScene({
           alpha: true,
           powerPreference: 'high-performance',
         }}
-        dpr={deviceCap?.gpuTier === 'low' ? 1 : Math.min(window.devicePixelRatio, 2)}
+        dpr={deviceCap?.gpuTier === 'low' ? 1 : getDevicePerfProfile().recommendedDpr}
         onClick={handleClick}
         style={{ background: 'transparent' }}
       >
@@ -455,7 +456,7 @@ export function RealisticCatScene({
 
       {/* 设备信息调试（开发模式） */}
       {import.meta.env.DEV && deviceCap && (
-        <div className="absolute top-1 left-1 text-[9px] bg-black/60 text-white px-1.5 py-0.5 rounded font-mono">
+        <div className="absolute top-1 left-1 text-xs bg-black/60 text-white px-1.5 py-0.5 rounded font-mono">
           GPU: {deviceCap.gpuTier} | Mode: {deviceCap.renderMode} | WebGL2: {deviceCap.webgl2 ? '✓' : '✗'}
         </div>
       )}

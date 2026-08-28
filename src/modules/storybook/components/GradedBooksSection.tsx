@@ -73,7 +73,7 @@ export function GradedBooksSection() {
         <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm p-3 rounded-2xl border border-white/20">
           <div className="text-center px-2">
             <span className="text-2xl font-black block">{knownChars.length}</span>
-            <span className="text-[10px] text-amber-100 font-bold">已掌握字数</span>
+            <span className="text-xs text-amber-100 font-bold">已掌握字数</span>
           </div>
           <div className="w-px h-8 bg-white/20" />
           <button
@@ -116,7 +116,7 @@ export function GradedBooksSection() {
             >
               <span>{tab.emoji}</span>
               <span>{tab.label}</span>
-              <span className={`text-[10px] font-normal px-1.5 py-0.2 rounded-full ${
+              <span className={`text-xs font-normal px-1.5 py-0.2 rounded-full ${
                 active ? 'bg-white/20' : 'bg-slate-100 text-slate-500'
               }`}>
                 {tab.range}
@@ -154,7 +154,7 @@ export function GradedBooksSection() {
                         ? '🎯 推荐挑战阅读'
                         : '📖 伴读进阶'}
                     </span>
-                    <span className="text-[11px] text-slate-400 font-bold block mt-1">
+                    <span className="text-xs text-slate-400 font-bold block mt-1">
                       字汇匹配率 {Math.round(coverage.coverageRate * 100)}%
                     </span>
                   </div>

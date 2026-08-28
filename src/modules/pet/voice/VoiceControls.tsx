@@ -110,7 +110,7 @@ export function QuickPhrases({ onSend }: { onSend: (text: string) => void }) {
               sfxTap();
               setActiveCategory(cat.id);
             }}
-            className={`flex-shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-black transition-all ${
+            className={`flex-shrink-0 rounded-full px-2.5 py-0.5 text-xs font-black transition-all ${
               activeCategory === cat.id
                 ? 'bg-pink-500 text-white shadow-xs'
                 : 'bg-pink-100/70 text-pink-700 hover:bg-pink-200/80'
@@ -131,7 +131,7 @@ export function QuickPhrases({ onSend }: { onSend: (text: string) => void }) {
               sfxTap();
               onSend(phrase.replace(/^[\p{Emoji}\s]+/u, ''));
             }}
-            className="flex-shrink-0 rounded-full border border-pink-200 bg-white/90 px-3 py-1 text-[11px] font-extrabold text-ink-soft shadow-xs transition-all hover:border-pink-400 hover:bg-pink-50 hover:text-pink-700 active:scale-95"
+            className="flex-shrink-0 rounded-full border border-pink-200 bg-white/90 px-3 py-1 text-xs font-extrabold text-ink-soft shadow-xs transition-all hover:border-pink-400 hover:bg-pink-50 hover:text-pink-700 active:scale-95"
           >
             {phrase}
           </button>

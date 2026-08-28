@@ -109,7 +109,7 @@ export function ModuleGameCard({
             {title}
           </p>
           {desc && (
-            <p className="truncate text-[11px] font-semibold text-ink-soft">{desc}</p>
+            <p className="truncate text-xs font-semibold text-ink-soft">{desc}</p>
           )}
         </div>
       </div>
@@ -124,7 +124,7 @@ export function ModuleGameCard({
           showValue={false}
           animated
         />
-        <div className="flex items-center justify-between text-[11px] font-bold">
+        <div className="flex items-center justify-between text-xs font-bold">
           <span className={locked ? 'text-gray-400' : 'text-ink-soft'}>
             {totalCount != null && masteredCount != null
               ? `已点亮 ${masteredCount}/${totalCount}`

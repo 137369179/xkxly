@@ -80,8 +80,8 @@ export function HanziFamilyTree({ char }: { char: string }) {
       <div className="flex flex-wrap items-center justify-center gap-2">
         <div className="flex flex-col items-center rounded-2xl bg-gradient-to-br from-candy-yellow-soft to-candy-orange-soft px-3 py-2 shadow-sm">
           <span className="text-3xl font-black leading-none text-candy-orange-deep">{family.root}</span>
-          {family.rootPd && <span className="mt-0.5 text-[10px] font-bold text-candy-orange-deep">{family.rootPd}</span>}
-          <span className="mt-1 text-[10px] font-extrabold text-candy-orange-deep">{t('hanzi.familyRootLabel')}</span>
+          {family.rootPd && <span className="mt-0.5 text-xs font-bold text-candy-orange-deep">{family.rootPd}</span>}
+          <span className="mt-1 text-xs font-extrabold text-candy-orange-deep">{t('hanzi.familyRootLabel')}</span>
         </div>
         <span className="text-2xl font-black text-ink-soft">→</span>
         {family.members.map((m) => (
@@ -92,11 +92,11 @@ export function HanziFamilyTree({ char }: { char: string }) {
             title={t('hanzi.listenFamily')}
           >
             <span className="text-3xl font-black leading-none text-ink">{m.c}</span>
-            {m.pd && <span className="mt-0.5 text-[10px] font-bold text-ink-soft">{m.pd}</span>}
-            <span className={`mt-1 rounded-full px-2 py-0.5 text-[10px] font-extrabold ${ROLE_BADGE[m.role]}`}>
+            {m.pd && <span className="mt-0.5 text-xs font-bold text-ink-soft">{m.pd}</span>}
+            <span className={`mt-1 rounded-full px-2 py-0.5 text-xs font-extrabold ${ROLE_BADGE[m.role]}`}>
               {roleBadge(t, m.role)}
             </span>
-            <span className="mt-0.5 text-[10px] font-semibold text-ink-soft">{m.word}</span>
+            <span className="mt-0.5 text-xs font-semibold text-ink-soft">{m.word}</span>
           </button>
         ))}
       

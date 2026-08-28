@@ -21,7 +21,7 @@ export function CatSkillTreeSection() {
               <img src={c.img} alt={c.label} className="h-full w-full object-cover" loading="lazy" decoding="async" />
             </div>
             <span className="mt-1 flex items-center gap-1"><c.Icon size={16} /> {c.label}</span>
-            <p className="text-[10px] text-emerald-600 mt-0.5">{c.desc}</p>
+            <p className="text-xs text-emerald-600 mt-0.5">{c.desc}</p>
           </div>
         ))}
       </div>

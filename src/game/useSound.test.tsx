@@ -59,7 +59,7 @@ describe('useSound', () => {
   it('有 AudioContext → play 触发振荡器合成；muted 时不触发', () => {
     const createOscSpy = vi.fn(() => new FakeOsc());
     class SpyCtx extends FakeCtx {
-      createOscillator() {
+      override createOscillator() {
         createOscSpy();
         return new FakeOsc();
       }

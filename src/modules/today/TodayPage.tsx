@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { LessonSection, Question, Progress } from '@/types';
 import {
@@ -28,7 +28,7 @@ import { QuizCard } from '@/components/QuizCard';
 import { DailyGoal } from '@/components/quiz/DailyGoal';
 import { LetterLearn } from '@/components/games/LetterLearn';
 import { NumberLearn } from '@/modules/today/NumberLearn';
-import { sfxTap, sfxStar } from '@/lib/sfx';
+import { sfxTap, sfxStar, triggerHaptic } from '@/lib/sfx';
 import { celebrateBig } from '@/lib/celebrate';
 import { useStruggle } from '@/lib/struggle';
 import { StruggleModal } from '@/components/feedback/StruggleModal';
@@ -297,6 +297,7 @@ export default function TodayPage() {
   const { param } = useRoute();
   const setLessonStep = useStore((s) => s.setLessonStep);
   const finishLesson = useStore((s) => s.finishLesson);
+  const addFish = useStore((s) => s.addFish);
 
   const today = dateKey();
   // 课程包按「天」稳定生成：当天内不随进度变化重排
@@ -315,12 +316,13 @@ export default function TodayPage() {
     const ns = step + 1;
     if (ns >= plan.sections.length) {
       finishLesson(3);
+      addFish(2);
       sfxStar();
       celebrateBig();
     } else {
       setLessonStep(ns);
     }
-  }, [step, plan, finishLesson, setLessonStep]);
+  }, [step, plan, finishLesson, addFish, setLessonStep]);
 
   // 当天已学过的知识点（综合小挑战回扣用）
   const todaySkills = useMemo(
@@ -328,9 +330,26 @@ export default function TodayPage() {
     [plan, step],
   );
 
-  const restart = () => setLessonStep(0);
+  const restart = () => {
+    triggerHaptic(20);
+    setLessonStep(0);
+  };
 
   const active: LessonSection | undefined = plan.sections[step];
+
+  // 全局键盘快捷键响应 (Esc 返回主页)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        triggerHaptic(20);
+        navigate('home');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // 薄弱点专项深链：从家长报告「去练习」进入，针对单一学科强化巩固。
   // 必须放在所有 hook 调用之后，保证两种分支 hook 数量一致。
@@ -341,6 +360,13 @@ export default function TodayPage() {
   return (
     <div className="space-y-5">
       <PageHeader emoji="📅" title={t('today.title')} subtitle={t('today.subtitle')} tone="purple" />
+
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-purple-900 font-bold bg-purple-50/90 px-3 py-1 rounded-xl border border-purple-200">
+          ⌨️ 键盘快捷操作：点击或按对应题目按键闯关 · Esc 返回乐园主页
+        </span>
+      </div>
 
       {/* 每日小目标：完成领星星（独立于课程包，当天内稳定） */}
       <DailyGoal />
@@ -439,7 +465,7 @@ export default function TodayPage() {
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-2">
-                        <span className="rounded-full bg-pink-100 px-2 py-0.5 text-[10px] font-black text-pink-600">
+                        <span className="rounded-full bg-pink-100 px-2 py-0.5 text-xs font-black text-pink-600">
                           {t('today.levelN', { count: i + 1 })}
                         </span>
                         <span className="truncate text-base font-black text-ink">{sec.title}</span>

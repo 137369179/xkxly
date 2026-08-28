@@ -104,7 +104,7 @@ export default function PoetTimeline() {
                         >
                           <span className="text-2xl font-black" style={{ color }}>👤</span>
                           <span className="mt-1 text-sm font-extrabold text-ink">{poet.name}</span>
-                          <span className="text-[10px] font-bold text-ink-soft">
+                          <span className="text-xs font-bold text-ink-soft">
                             {readCount}/{poetPoemsCount} 首
                           </span>
                         </button>

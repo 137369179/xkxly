@@ -213,7 +213,7 @@ export default function NumbersPage() {
 
       {/* 快捷操作提示条 */}
       <div className="text-center">
-        <span className="inline-block text-[11px] text-amber-900 font-bold bg-amber-50/90 px-3 py-1 rounded-xl border border-amber-200">
+        <span className="inline-block text-xs text-amber-900 font-bold bg-amber-50/90 px-3 py-1 rounded-xl border border-amber-200">
           ⌨️ 键盘快捷操作：数字 1-4 切换专区 (数感启蒙/算术工坊/口算应用/几何度量)
         </span>
       </div>
@@ -263,7 +263,7 @@ export default function NumbersPage() {
             >
               <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">{cat.emoji}</span>
               <span className={`text-base font-black ${isAct ? 'text-amber-900' : 'text-ink'}`}>{cat.label}</span>
-              <span className="text-[11px] font-semibold text-ink-soft line-clamp-1 mt-0.5">{cat.desc}</span>
+              <span className="text-xs font-semibold text-ink-soft line-clamp-1 mt-0.5">{cat.desc}</span>
             </button>
           );
         })}

@@ -112,9 +112,9 @@ export function TimeSequence() {
           {answer.map((c, i) => (
             <motion.button key={c.id} initial={{scale:0}} animate={{scale:1}} onClick={()=>unpick(c)}
               className="relative rounded-xl bg-white p-2 text-center shadow-sm">
-              <span className="absolute -left-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-candy-blue-deep text-[10px] font-bold text-white">{i+1}</span>
+              <span className="absolute -left-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-candy-blue-deep text-xs font-bold text-white">{i+1}</span>
               <div className="text-2xl">{c.emoji}</div>
-              <div className="text-[10px] font-extrabold">{c.label}</div>
+              <div className="text-xs font-extrabold">{c.label}</div>
             </motion.button>
           ))}
           {answer.length === 0 && <span className="text-xs text-ink-muted">{t('timeseq.pickCards')}</span>}
@@ -127,8 +127,8 @@ export function TimeSequence() {
           <button key={c.id} onClick={()=>pickCard(c)}
             className="rounded-xl bg-white p-2 text-center shadow-sm transition-all hover:scale-105 active:scale-95">
             <div className="text-2xl">{c.emoji}</div>
-            <div className="text-[10px] font-extrabold">{c.label}</div>
-            <div className="text-[9px] text-ink-muted">{c.time}</div>
+            <div className="text-xs font-extrabold">{c.label}</div>
+            <div className="text-xs text-ink-muted">{c.time}</div>
           </button>
         ))}
       </div>

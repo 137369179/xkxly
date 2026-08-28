@@ -4,12 +4,12 @@
  * 含 AI 智能提示：卡住时给线索，不直接给答案
  */
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { useStore } from '@/store/useStore';
-import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 import { answerCorrect, answerWrong } from '@/lib/feedback';
 import { StreakBar } from '@/components/study/StreakBar';
@@ -129,7 +129,7 @@ export function IdiomChain() {
     }
   };
 
-  const handlePick = (idiomStr: string) => {
+  const handlePick = useCallback((idiomStr: string) => {
     if (phase !== 'playing') return;
     sfxTap();
     const prevLast = lastChar(chain[chain.length - 1]!.idiom);
@@ -137,6 +137,7 @@ export function IdiomChain() {
 
     if (isCorrect) {
       sfxCorrect();
+      triggerHaptic(45);
       celebrateSmall();
       randomPraise();
       const newScore = score + 10 + combo * 2;
@@ -156,6 +157,7 @@ export function IdiomChain() {
       generateOptions(lastChar(idiomStr));
     } else {
       sfxWrong();
+      triggerHaptic(20);
       randomEncourage();
       setCombo(0);
       setStreak(0);
@@ -164,25 +166,59 @@ export function IdiomChain() {
       // 不结束，扣时间
       setTimeLeft(t => Math.max(0, t - 3));
     }
-  };
+  }, [phase, chain, score, combo, practice]);
 
-  const handleSkip = () => {
+  const handleSkip = useCallback(() => {
     sfxTap();
+    triggerHaptic(25);
     setCombo(0);
     setStreak(0);
     setTimeLeft(t => Math.max(0, t - 2));
     const prevLast = lastChar(chain[chain.length - 1]!.idiom);
     generateOptions(prevLast);
     setShowHint(false);
-  };
+  }, [chain]);
 
-  const handleHint = () => {
+  const handleHint = useCallback(() => {
     if (hintsLeft <= 0) return;
     sfxTap();
+    triggerHaptic(30);
     setHintsLeft(h => h - 1);
     setShowHint(true);
     hintState.run();
-  };
+  }, [hintsLeft, hintState]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (phase === 'idle' || phase === 'over') {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          start();
+        }
+        return;
+      }
+      if (phase === 'playing') {
+        if (['1', '2', '3', '4'].includes(e.key)) {
+          const idx = parseInt(e.key, 10) - 1;
+          const opt = options[idx];
+          if (opt) {
+            e.preventDefault();
+            handlePick(opt.word);
+          }
+        } else if (e.key === 'h' || e.key === 'H') {
+          e.preventDefault();
+          handleHint();
+        } else if (e.key === 's' || e.key === 'S' || e.key === ' ') {
+          e.preventDefault();
+          handleSkip();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [phase, options, handlePick, handleHint, handleSkip]);
 
   // 游戏结束时记录最高分（副作用移入 effect，避免 render 阶段写 store）
   useEffect(() => {
@@ -344,13 +380,19 @@ export function IdiomChain() {
         )}
       </AnimatePresence>
 
+      {/* 快捷操作提示条 */}
+      <div className="flex items-center justify-between text-xs text-purple-700 font-bold bg-purple-50/90 px-3 py-1 rounded-xl border border-purple-200">
+        <span>⌨️ 键盘快捷操作：数字键 1-4 选成语 · H 获取提示 · S 跳过</span>
+      </div>
+
       {/* 选项 */}
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2" role="group" aria-label="成语接龙选项">
         {options.map((opt, i) => (
           <button
             key={`opt-${i}`}
+            type="button"
             onClick={() => handlePick(opt.word)}
-            className="rounded-2xl border-4 border-candy-purple-soft bg-white p-3 text-center text-lg font-extrabold text-ink transition-all active:translate-y-[1px] hover:bg-candy-purple-soft"
+            className="rounded-2xl border-4 border-candy-purple-soft bg-white p-3 min-h-[52px] text-center text-lg font-extrabold text-ink transition-all active:translate-y-[1px] hover:bg-candy-purple-soft focus:outline-none focus-visible:ring-4 focus-visible:ring-purple-300"
           >
             {opt.word}
           </button>
@@ -359,7 +401,7 @@ export function IdiomChain() {
 
       <div className="flex justify-center gap-2">
         <CandyButton tone="orange" variant="soft" size="sm" onClick={handleSkip}>
-          ⏭️ {tr('idiom.skip')} (-2s)
+          ⏭️ {tr('idiom.skip')} (-2s) (S)
         </CandyButton>
         <CandyButton
           tone="yellow"
@@ -367,7 +409,7 @@ export function IdiomChain() {
           size="sm"
           onClick={handleHint}
         >
-          💡 {tr('idiom.aiHint')} ({hintsLeft})
+          💡 {tr('idiom.aiHint')} ({hintsLeft}) (H)
         </CandyButton>
       </div>
     </div>

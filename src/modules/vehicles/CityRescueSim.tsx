@@ -9,14 +9,15 @@
  * 6. WebAudio 拟真警笛扫频合成、双语特种载具百科、连击 Streak 体系与金牌勋章成就
  */
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { speak } from '@/lib/speech';
-import { sfxTap, sfxCorrect, sfxWin } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 import { StreakBar } from '@/components/study/StreakBar';
 import { getAudioContext } from '@/lib/audioContext';
+import { navigate } from '@/lib/router';
 
 export type RescueMissionType = 'fire' | 'ambulance' | 'police' | 'builder' | 'helicopter';
 
@@ -405,8 +406,9 @@ export function CityRescueSim() {
     }
   };
 
-  const handleToggleSiren = () => {
+  const handleToggleSiren = useCallback(() => {
     sfxTap();
+    triggerHaptic([40, 30, 40]);
     if (isSirenActive) {
       if (sirenTimerRef.current) clearInterval(sirenTimerRef.current);
       setIsSirenActive(false);
@@ -418,7 +420,7 @@ export function CityRescueSim() {
         playSirenSfx(mission.sirenFreqs, mission.sirenType);
       }, 750);
     }
-  };
+  }, [isSirenActive, mission]);
 
   useEffect(() => {
     return () => {
@@ -427,8 +429,9 @@ export function CityRescueSim() {
   }, []);
 
   // 切换任务
-  const handleSwitchMission = (idx: number) => {
+  const handleSwitchMission = useCallback((idx: number) => {
     sfxTap();
+    triggerHaptic(30);
     if (sirenTimerRef.current) clearInterval(sirenTimerRef.current);
     setIsSirenActive(false);
     setCurrentIdx(idx);
@@ -436,12 +439,13 @@ export function CityRescueSim() {
     setSolvedTargetIds([]);
     const target = MISSIONS[idx] ?? FALLBACK_MISSION;
     void speak(`开启任务：${target.titleZh}，${target.titleEn}！`, { lang: 'zh-CN' });
-  };
+  }, []);
 
   // 点击交互沙盘目标
-  const handleSolveTarget = (targetId: string) => {
+  const handleSolveTarget = useCallback((targetId: string) => {
     if (solvedTargetIds.includes(targetId)) return;
     sfxCorrect();
+    triggerHaptic(45);
     celebrateSmall();
 
     const updated = [...solvedTargetIds, targetId];
@@ -464,15 +468,16 @@ export function CityRescueSim() {
           practice(`vehicle:${mission.id}`, true, 3, 1);
           setStreak((s) => s + 1);
           sfxWin();
+          triggerHaptic([60, 40, 60, 40, 100]);
           celebrateBig();
           void speak(mission.successStory, { lang: 'zh-CN' });
         }
       }, 1000);
     }
-  };
+  }, [solvedTargetIds, currentStep, currentStepIdx, mission, completedMissions, addStars, practice]);
 
   // 一键快捷执行
-  const handleQuickAction = () => {
+  const handleQuickAction = useCallback(() => {
     const remaining = currentStep.targets.filter((t) => !solvedTargetIds.includes(t.id));
     if (remaining.length > 0) {
       const nextTarget = remaining[0];
@@ -480,22 +485,67 @@ export function CityRescueSim() {
         handleSolveTarget(nextTarget.id);
       }
     }
-  };
+  }, [currentStep, solvedTargetIds, handleSolveTarget]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['1', '2', '3', '4', '5'].includes(e.key)) {
+        const idx = parseInt(e.key, 10) - 1;
+        if (MISSIONS[idx]) {
+          e.preventDefault();
+          handleSwitchMission(idx);
+        }
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        setCurrentIdx((prev) => (prev > 0 ? prev - 1 : MISSIONS.length - 1));
+        setCurrentStepIdx(1);
+        setSolvedTargetIds([]);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        setCurrentIdx((prev) => (prev < MISSIONS.length - 1 ? prev + 1 : 0));
+        setCurrentStepIdx(1);
+        setSolvedTargetIds([]);
+      } else if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        handleQuickAction();
+      } else if (e.key === 's' || e.key === 'S' || e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        handleToggleSiren();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        if (sirenTimerRef.current) clearInterval(sirenTimerRef.current);
+        navigate('vehicles');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleSwitchMission, handleQuickAction, handleToggleSiren]);
 
   return (
     <div className="space-y-4">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-orange-900 font-bold bg-orange-50/90 px-3 py-1 rounded-xl border border-orange-200">
+          ⌨️ 键盘快捷操作：数字键 1-5 切换车队任务 · S 开启/关闭警笛 · 空格/Enter 救援行动
+        </span>
+      </div>
+
       {/* 顶部 5 大车队特种任务快捷切换栏 */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="救援任务主题选择">
           {MISSIONS.map((m, idx) => {
             const isSel = currentIdx === idx;
             const isDone = completedMissions.includes(m.id);
             return (
               <button
                 key={m.id}
+                role="tab"
+                aria-selected={isSel}
                 type="button"
                 onClick={() => handleSwitchMission(idx)}
-                className={`py-2 px-3.5 rounded-2xl font-black text-xs transition-all border-2 flex items-center gap-1.5 shadow-sm ${
+                className={`py-2 px-3.5 min-h-[44px] rounded-2xl font-black text-xs transition-all border-2 flex items-center gap-1.5 shadow-sm focus:outline-none focus-visible:ring-4 focus-visible:ring-orange-300 ${
                   isSel
                     ? 'bg-orange-600 text-white border-orange-700 shadow-md scale-105'
                     : 'bg-white text-slate-700 border-slate-200 hover:border-orange-300'
@@ -510,6 +560,11 @@ export function CityRescueSim() {
         </div>
 
         <StreakBar streak={streak} target={3} />
+      </div>
+
+      {/* 快捷键提示条 */}
+      <div className="flex items-center justify-between text-xs text-orange-700 font-bold bg-orange-50/90 px-3 py-1 rounded-xl border border-orange-200">
+        <span>⌨️ 键盘快捷操作：数字键 1-5 切换救援车队 · ←/→ 切换 · 空格/回车 快速执行下一步 · S 拉响警笛</span>
       </div>
 
       {/* 主救援情境交互沙盘 */}
@@ -601,7 +656,7 @@ export function CityRescueSim() {
                     <span className="text-xs font-black tracking-wide text-center">
                       {target.name}
                     </span>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${
                       isSolved ? 'bg-emerald-900 text-emerald-300' : 'bg-amber-500/20 text-amber-300'
                     }`}>
                       {isSolved ? '✅ 已处置' : `👉 ${target.hint}`}
@@ -644,7 +699,7 @@ export function CityRescueSim() {
                   <h4 className="text-xs font-black text-emerald-900">
                     恭喜获得「城市特级应急救援英雄勋章」！
                   </h4>
-                  <p className="text-[11px] font-bold text-emerald-700 mt-0.5">
+                  <p className="text-xs font-bold text-emerald-700 mt-0.5">
                     {mission.successStory}
                   </p>
                 </div>

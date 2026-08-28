@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { sfxTap, sfxBubble, sfxCorrect, sfxWin } from '@/lib/sfx';
+import { sfxTap, sfxBubble, sfxCorrect, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { celebrateBig, celebrateSmall } from '@/lib/celebrate';
 import { speak } from '@/lib/speech';
 import { useStore } from '@/store/useStore';
@@ -54,8 +54,9 @@ export function HabitSimulator() {
   }, [activeMode]);
 
   // 刷牙消除细菌
-  const handleBrushGerm = (id: number) => {
+  const handleBrushGerm = useCallback((id: number) => {
     sfxBubble();
+    triggerHaptic(30);
     setBrushingCount((c) => c + 1);
     setGerms((prev) =>
       prev
@@ -68,23 +69,26 @@ export function HabitSimulator() {
       setIsTeethClean(true);
       sfxCorrect();
       sfxWin();
+      triggerHaptic([60, 40, 60, 40, 100]);
       celebrateBig();
       addStars(5);
       addFish(2);
       speak('太厉害了！牙齿变得白白亮亮的，蛀牙细菌全被你消灭啦！');
     }
-  };
+  }, [germs, addStars, addFish]);
 
-  const handleResetTeeth = () => {
+  const handleResetTeeth = useCallback(() => {
     sfxTap();
+    triggerHaptic(35);
     setGerms(INITIAL_GERMS);
     setBrushingCount(0);
     setIsTeethClean(false);
-  };
+  }, []);
 
   // 七步洗手推进
-  const handleNextWashStep = () => {
+  const handleNextWashStep = useCallback(() => {
     sfxBubble();
+    triggerHaptic(35);
     celebrateSmall();
     if (washStep < HAND_WASH_STEPS.length - 1) {
       const next = washStep + 1;
@@ -97,30 +101,72 @@ export function HabitSimulator() {
       setIsHandClean(true);
       sfxCorrect();
       sfxWin();
+      triggerHaptic([60, 40, 60, 40, 100]);
       celebrateBig();
       addStars(5);
       addFish(2);
       speak('冲水啦！七步洗手法全部完成，双手变得干干净净，细菌全跑光啦！');
     }
-  };
+  }, [washStep, addStars, addFish]);
 
-  const handleResetHand = () => {
+  const handleResetHand = useCallback(() => {
     sfxTap();
+    triggerHaptic(35);
     setWashStep(0);
     setIsHandClean(false);
-  };
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (activeMode === 'teeth') {
+        if (['1', '2', '3', '4', '5', '6'].includes(e.key)) {
+          const idx = parseInt(e.key, 10) - 1;
+          const g = germs[idx];
+          if (g) {
+            e.preventDefault();
+            handleBrushGerm(g.id);
+          }
+        } else if (e.key === ' ' || e.key === 'Enter') {
+          if (isTeethClean) {
+            e.preventDefault();
+            handleResetTeeth();
+          } else if (germs.length > 0) {
+            e.preventDefault();
+            const firstGerm = germs[0];
+            if (firstGerm) handleBrushGerm(firstGerm.id);
+          }
+        }
+      } else {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          if (isHandClean) {
+            handleResetHand();
+          } else {
+            handleNextWashStep();
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeMode, germs, isTeethClean, isHandClean, handleBrushGerm, handleResetTeeth, handleNextWashStep, handleResetHand]);
 
   return (
     <div className="space-y-6">
       {/* 顶部模式切换 (Teeth / Hand) */}
-      <div className="flex items-center justify-center gap-3">
+      <div className="flex items-center justify-center gap-3" role="tablist" aria-label="好习惯模拟模式">
         <button
+          role="tab"
+          aria-selected={activeMode === 'teeth'}
           type="button"
           onClick={() => {
             sfxTap();
+            triggerHaptic(30);
             setActiveMode('teeth');
           }}
-          className={`px-5 py-3 rounded-2xl font-black text-sm transition-all flex items-center gap-2 border-2 ${
+          className={`px-5 py-3 min-h-[44px] rounded-2xl font-black text-sm transition-all flex items-center gap-2 border-2 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-300 ${
             activeMode === 'teeth'
               ? 'bg-sky-500 text-white border-sky-600 shadow-lg scale-105'
               : 'bg-white text-slate-700 border-sky-200 hover:bg-sky-50'
@@ -131,12 +177,15 @@ export function HabitSimulator() {
         </button>
 
         <button
+          role="tab"
+          aria-selected={activeMode === 'hand'}
           type="button"
           onClick={() => {
             sfxTap();
+            triggerHaptic(30);
             setActiveMode('hand');
           }}
-          className={`px-5 py-3 rounded-2xl font-black text-sm transition-all flex items-center gap-2 border-2 ${
+          className={`px-5 py-3 min-h-[44px] rounded-2xl font-black text-sm transition-all flex items-center gap-2 border-2 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 ${
             activeMode === 'hand'
               ? 'bg-emerald-500 text-white border-emerald-600 shadow-lg scale-105'
               : 'bg-white text-slate-700 border-emerald-200 hover:bg-emerald-50'
@@ -145,6 +194,11 @@ export function HabitSimulator() {
           <span>🧼</span>
           <span>七步洗手操</span>
         </button>
+      </div>
+
+      {/* 快捷操作提示条 */}
+      <div className="flex items-center justify-between text-xs text-sky-700 font-bold bg-sky-50/90 px-3 py-1 rounded-xl border border-sky-200">
+        <span>⌨️ 键盘快捷操作：空格键 快速刷牙/洗手 · 数字键 1-6 消除指定细菌</span>
       </div>
 
       {/* 模式一：刷牙小卫士 (Brush Teeth Guard) */}
@@ -227,7 +281,7 @@ export function HabitSimulator() {
                   <span className="text-xl select-none">
                     {g.type === 'sugar' ? '🍬' : g.type === 'bacteria' ? '👾' : '🍫'}
                   </span>
-                  <span className="text-[9px] font-black text-amber-950 bg-white/80 px-1 rounded-full">
+                  <span className="text-xs font-black text-amber-950 bg-white/80 px-1 rounded-full">
                     {'❤️'.repeat(g.hp)}
                   </span>
                 </motion.button>

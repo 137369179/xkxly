@@ -6,12 +6,12 @@
  * 3. 职业角色与工具道具配对 (消防员-水枪, 医生-听诊器)
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { shuffle } from '@/lib/utils';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { Tabs, type TabItem } from '@/components/ui/Tabs';
-import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, triggerHaptic } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useStore, useMastery } from '@/store/useStore';
@@ -107,6 +107,28 @@ export default function VehiclesPage() {
   const [jobQuiz, setJobQuiz] = useState<{ j: JobPair; options: JobPair[] } | null>(null);
   const [feedback, setFeedback] = useState('');
 
+  // 全局键盘快捷键响应 (1-3 切换专区)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === '1') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setTab('rescue');
+      } else if (e.key === '2') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setTab('fleet');
+      } else if (e.key === '3') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setTab('career');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const TABS: TabItem<VehicleTab>[] = useMemo(() => [
     { id: 'rescue', label: '城市救援大冒险', emoji: '🚒' },
     { id: 'fleet', label: t('vehicle.fleetTitle'), emoji: '🚘' },
@@ -122,6 +144,7 @@ export default function VehiclesPage() {
 
   const handleSelectV = (v: Vehicle) => {
     sfxTap();
+    triggerHaptic(20);
     setSelectedV(v);
     learnSkill(`vehicle:${v.id}`);
     tickTime(5);
@@ -130,6 +153,7 @@ export default function VehiclesPage() {
 
   const startJobQuiz = () => {
     sfxTap();
+    triggerHaptic(30);
     setFeedback('');
     const target = JOB_PAIRS[Math.floor(Math.random() * JOB_PAIRS.length)] ?? FALLBACK_JOB;
     const shuffled = shuffle(JOB_PAIRS).slice(0, 3);
@@ -145,12 +169,14 @@ export default function VehiclesPage() {
     if (!jobQuiz) return;
     if (picked.jobZh === jobQuiz.j.jobZh) {
       sfxCorrect();
+      triggerHaptic(45);
       setFeedback(t('vehicle.correctFeedback'));
       practice(`vehicle:job-${jobQuiz.j.jobZh}`, true, 2, 2);
       tickTime(5);
       speak(t('vehicle.correctSpeak', { job: jobQuiz.j.jobZh, tool: jobQuiz.j.toolZh }), { lang: 'zh-CN' });
     } else {
       sfxWrong();
+      triggerHaptic(20);
       setFeedback(t('vehicle.wrongFeedback'));
       practice(`vehicle:job-${jobQuiz.j.jobZh}`, false, 0, 2);
     }
@@ -164,6 +190,13 @@ export default function VehiclesPage() {
         subtitle={t('vehicle.subtitle')}
         tone="amber"
       />
+
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-amber-900 font-bold bg-amber-50/90 px-3 py-1 rounded-xl border border-amber-200">
+          ⌨️ 键盘快捷操作：数字 1-3 切换专区 (城市救援/交通车队/职业配对)
+        </span>
+      </div>
 
       <Tabs items={TABS} value={tab} onChange={setTab} tone="orange" layoutId="vehicle-tabs" />
 

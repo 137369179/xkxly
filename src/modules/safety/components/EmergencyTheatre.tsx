@@ -11,10 +11,10 @@
  * 4. 真人安全口诀朗读与安全小卫士徽章成就。
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { speak } from '@/lib/speech';
-import { sfxTap, sfxCorrect, sfxWrong, sfxWin } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 import { StreakBar } from '@/components/study/StreakBar';
@@ -282,6 +282,7 @@ export function EmergencyTheatre() {
     playSafetyAlarmSfx(choice === 'safe');
 
     if (choice === 'safe') {
+      triggerHaptic(45);
       const nextStreak = streak + 1;
       setStreak(nextStreak);
       addStars(1);
@@ -289,6 +290,7 @@ export function EmergencyTheatre() {
 
       if (nextStreak >= 3) {
         sfxWin();
+        triggerHaptic([60, 40, 60, 40, 100]);
         celebrateBig();
       } else {
         sfxCorrect();
@@ -297,43 +299,82 @@ export function EmergencyTheatre() {
 
       void speak(`太棒啦！回答正确！${currentScenario.safeDetail} 安全口诀记心间：${currentScenario.rhyme}`, { lang: 'zh-CN' });
     } else {
+      triggerHaptic(20);
       setStreak(0);
       sfxWrong();
       void speak(`这样做很危险哦！${currentScenario.dangerDetail} 正确做法是：${currentScenario.safeChoice}。`, { lang: 'zh-CN' });
     }
   }, [selectedChoice, streak, currentScenario, addStars, practice]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     sfxTap();
+    triggerHaptic(30);
     setSelectedChoice(null);
     setScenarioIdx((i) => (i + 1) % filteredScenarios.length);
-  };
+  }, [filteredScenarios.length]);
 
-  const handleReciteRhyme = () => {
+  const handleReciteRhyme = useCallback(() => {
     sfxTap();
+    triggerHaptic(30);
     playSafetyAlarmSfx(true);
     void speak(`安全小口诀：${currentScenario.rhyme}`, { lang: 'zh-CN' });
-  };
+  }, [currentScenario.rhyme]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === '1' || e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handleChoice('safe');
+      } else if (e.key === '2' || e.key === 'b' || e.key === 'B' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleChoice('danger');
+      } else if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        if (selectedChoice !== null) {
+          handleNext();
+        } else {
+          handleReciteRhyme();
+        }
+      } else if (e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        handleReciteRhyme();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedChoice, handleChoice, handleNext, handleReciteRhyme]);
 
   return (
     <div className="space-y-4">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-rose-900 font-bold bg-rose-50/90 px-3 py-1 rounded-xl border border-rose-200">
+          ⌨️ 键盘快捷操作：数字键 1/2 选择决策 · R 听口诀 · 空格/Enter 确认下一题
+        </span>
+      </div>
+
       {/* 顶部四大安全分类切换 */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="应急安全演练分类">
           {CATEGORIES.map((cat) => {
             const isSel = activeCat === cat.id;
             const count = SCENARIOS.filter((s) => s.category === cat.id).length;
             return (
               <button
                 key={cat.id}
+                role="tab"
+                aria-selected={isSel}
                 type="button"
                 onClick={() => {
                   sfxTap();
+                  triggerHaptic(30);
                   setActiveCat(cat.id);
                   setScenarioIdx(0);
                   setSelectedChoice(null);
                 }}
-                className={`py-2 px-3 rounded-2xl font-black text-xs transition-all border-2 flex items-center gap-1.5 shadow-sm ${
+                className={`py-2 px-3 min-h-[44px] rounded-2xl font-black text-xs transition-all border-2 flex items-center gap-1.5 shadow-sm focus:outline-none focus-visible:ring-4 focus-visible:ring-rose-300 ${
                   isSel
                     ? 'bg-rose-500 text-white border-rose-600 shadow-md scale-105'
                     : 'bg-white text-slate-700 border-slate-200 hover:border-rose-300'
@@ -347,6 +388,11 @@ export function EmergencyTheatre() {
         </div>
 
         <StreakBar streak={streak} target={3} />
+      </div>
+
+      {/* 快捷操作提示条 */}
+      <div className="flex items-center justify-between text-xs text-rose-700 font-bold bg-rose-50/90 px-3 py-1 rounded-xl border border-rose-200">
+        <span>⌨️ 键盘快捷操作：数字键 1/2 选择决策 · 空格键 下一幕/读口诀 · R 重读口诀</span>
       </div>
 
       {/* 主情境剧场舞台 */}
@@ -368,7 +414,7 @@ export function EmergencyTheatre() {
           <button
             type="button"
             onClick={handleReciteRhyme}
-            className="py-1.5 px-3 rounded-xl bg-rose-500 text-white text-xs font-black shadow hover:bg-rose-600 active:scale-95 flex items-center gap-1"
+            className="py-1.5 px-3 min-h-[44px] rounded-xl bg-rose-500 text-white text-xs font-black shadow hover:bg-rose-600 active:scale-95 flex items-center gap-1 focus:outline-none focus-visible:ring-4 focus-visible:ring-rose-300"
           >
             <span>📢</span>
             <span>读安全口诀</span>

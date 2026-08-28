@@ -1,37 +1,81 @@
-import { useState, useMemo } from 'react';
-import { motion } from 'motion/react';
+import { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { NAV_ITEMS } from '@/data/nav';
 import { navigate, type RouteId } from '@/lib/router';
 import { TONE_STYLE } from '@/lib/tones';
-import { sfxTap } from '@/lib/sfx';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
 import { useTranslation } from '@/i18n/useTranslation';
+import type { NavCategory } from '@/data/nav';
 
-// 首页极简组件
+// 首页极简组件（同步导入，首屏必需）
 import HomeHeader from '@/modules/home/HomeHeader';
 import { HomeHero } from '@/modules/home/HomeHero';
-import ExploreMore from '@/modules/home/ExploreMore';
-import { CategorySheet } from '@/components/layout/CategorySheet';
-import type { NavCategory } from '@/data/nav';
-import { DailyChallenge } from '@/components/quiz/DailyChallenge';
 import { AiAvatar } from '@/components/ai/AiAvatar';
+
+// 非首屏必需组件懒加载：折叠区、浮层、每日挑战
+const ExploreMore = lazy(() => import('@/modules/home/ExploreMore'));
+const CategorySheet = lazy(() => import('@/components/layout/CategorySheet').then((m) => ({ default: m.CategorySheet })));
+const DailyChallenge = lazy(() => import('@/components/quiz/DailyChallenge').then((m) => ({ default: m.DailyChallenge })));
+
+const FEATURED_SPECIALTIES = [
+  { id: 'logic', name: '🤖 CodeBot编程', desc: '积木指令迷宫', tone: 'green' as const },
+  { id: 'geography', name: '🧭 环球3D探险', desc: '七大洲护照打卡', tone: 'blue' as const },
+  { id: 'vehicles', name: '🚒 城市应急救援', desc: '消防特警救护', tone: 'orange' as const },
+  { id: 'art', name: '🖍️ 魔力填色本', desc: '恐龙城堡填色', tone: 'pink' as const },
+  { id: 'pinyin', name: '🛝 拼音滑滑梯', desc: '声韵合体大冒险', tone: 'blue' as const },
+  { id: 'poems', name: '🌸 国学飞花令', desc: '诗词九宫格对决', tone: 'pink' as const },
+  { id: 'science', name: '🌱 自然科学馆', desc: '恐龙考古与生命', tone: 'green' as const },
+  { id: 'safety', name: '🚨 避险情景剧场', desc: '地震火灾防走失', tone: 'pink' as const },
+] as const;
 
 export default function HomePage() {
   const { t } = useTranslation();
   const [catOpen, setCatOpen] = useState(false);
   const [catInit] = useState<NavCategory | undefined>(undefined);
 
-  // 知识画卷专题封面列表（排除核心学科）
+  // 全局键盘快捷键响应 (1-9 快速直达各大学习专区)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      const keyMap: Record<string, RouteId> = {
+        '1': 'hanzi',
+        '2': 'numbers',
+        '3': 'letters',
+        '4': 'storybook',
+        '5': 'companion',
+        '6': 'today',
+        '7': 'cat_house',
+        '8': 'gamecenter',
+        '9': 'growth',
+        '0': 'parent',
+        'p': 'parent',
+        'P': 'parent',
+      };
+      const dest = keyMap[e.key];
+      if (dest) {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        navigate(dest);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const featuredIds = useMemo(() => FEATURED_SPECIALTIES.map((s) => s.id), []);
+
+  // 知识画卷专题封面列表（排除核心4大学科与特色特色专区，杜绝模块重复）
   const coverItems = useMemo(
     () =>
       NAV_ITEMS.filter(
         (n) =>
           n.imageIcon?.includes('/icons/cover-') &&
-          !['hanzi', 'numbers', 'letters', 'storybook'].includes(n.id),
+          !['hanzi', 'numbers', 'letters', 'storybook', ...featuredIds].includes(n.id),
       ),
-    [],
+    [featuredIds],
   );
 
-  // 探索更多区域需要排除的已展示模块 id
+  // 探索更多区域需要排除的所有已展示模块 id（实现全页零重复）
   const excludeFromMore = useMemo(
     () => [
       'hanzi',
@@ -41,13 +85,21 @@ export default function HomePage() {
       'companion',
       'home',
       'today',
+      ...featuredIds,
       ...coverItems.map((n) => n.id),
     ],
-    [coverItems],
+    [featuredIds, coverItems],
   );
 
   return (
     <div className="space-y-6">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-purple-900 font-bold bg-white/90 px-3.5 py-1.5 rounded-2xl border border-purple-200 shadow-sm">
+          ⌨️ 键盘快捷操作：数字 1-4 核心学科 · 5 伴学 · 6 任务 · 7 喵屋 · 8 游戏 · 9 荣誉 · 0/P 家长
+        </span>
+      </div>
+
       {/* 1. 顶部状态与极简关卡卡片 (Top Status & Super Hero) */}
       <HomeHeader />
       <HomeHero />
@@ -73,15 +125,14 @@ export default function HomePage() {
           ].map((k) => {
             const tk = TONE_STYLE[k.tone] ?? TONE_STYLE.pink;
             return (
-              <motion.button
+              <button
                 key={k.id}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.96 }}
                 onClick={() => {
                   sfxTap();
+                  triggerHaptic(20);
                   navigate(k.id as RouteId);
                 }}
-                className="no-select text-left relative overflow-hidden rounded-[2.2rem] border-4 p-5 sm:p-6 shadow-fluffy transition-all flex flex-col justify-between min-h-[160px]"
+                className="no-select text-left relative overflow-hidden rounded-[2.2rem] border-4 p-5 sm:p-6 shadow-fluffy transition-all duration-200 hover:scale-[1.02] active:scale-[0.96] flex flex-col justify-between min-h-[160px]"
                 style={{
                   borderColor: tk.soft,
                   background: `linear-gradient(135deg, ${tk.soft} 0%, #ffffff 80%)`,
@@ -111,7 +162,7 @@ export default function HomePage() {
                   </span>
                   <span className="text-3xl">✨</span>
                 </div>
-              </motion.button>
+              </button>
             );
           })}
         </div>
@@ -128,28 +179,18 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-3.5">
-          {[
-            { id: 'logic', name: '🤖 CodeBot编程', desc: '积木指令迷宫', tone: 'green' as const },
-            { id: 'geography', name: '🧭 环球3D探险', desc: '七大洲护照打卡', tone: 'blue' as const },
-            { id: 'vehicles', name: '🚒 城市应急救援', desc: '消防特警救护', tone: 'orange' as const },
-            { id: 'art', name: '🖍️ 魔力填色本', desc: '恐龙城堡填色', tone: 'pink' as const },
-            { id: 'pinyin', name: '🛝 拼音滑滑梯', desc: '声韵合体大冒险', tone: 'blue' as const },
-            { id: 'poems', name: '🌸 国学飞花令', desc: '诗词九宫格对决', tone: 'pink' as const },
-            { id: 'science', name: '🌱 植物昆虫馆', desc: '生命周期与恐龙', tone: 'green' as const },
-            { id: 'safety', name: '🚨 避险情景剧场', desc: '地震火灾防走失', tone: 'pink' as const },
-          ].map((item) => {
+          {FEATURED_SPECIALTIES.map((item) => {
             const tk = TONE_STYLE[item.tone] ?? TONE_STYLE.blue;
             return (
-              <motion.button
+              <button
                 key={item.id}
                 type="button"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.96 }}
                 onClick={() => {
                   sfxTap();
+                  triggerHaptic(20);
                   navigate(item.id as RouteId);
                 }}
-                className="no-select flex flex-col justify-between p-3.5 rounded-2xl border-2 text-left shadow-sm transition-all"
+                className="no-select flex flex-col justify-between p-3.5 rounded-2xl border-2 text-left shadow-sm transition-all duration-200 hover:scale-[1.03] active:scale-[0.96]"
                 style={{
                   borderColor: tk.soft,
                   background: `linear-gradient(135deg, ${tk.soft} 0%, #ffffff 85%)`,
@@ -159,7 +200,7 @@ export default function HomePage() {
                   <div className="text-sm font-black" style={{ color: tk.deep }}>
                     {item.name}
                   </div>
-                  <div className="text-[11px] font-bold text-slate-500 mt-0.5">
+                  <div className="text-xs font-bold text-slate-500 mt-0.5">
                     {item.desc}
                   </div>
                 </div>
@@ -167,7 +208,7 @@ export default function HomePage() {
                   <span>进入体验</span>
                   <span>→</span>
                 </div>
-              </motion.button>
+              </button>
             );
           })}
         </div>
@@ -187,15 +228,13 @@ export default function HomePage() {
           {coverItems.map((m) => {
             const tk = TONE_STYLE[m.tone] ?? TONE_STYLE.pink;
             return (
-              <motion.button
+              <button
                 key={m.id}
                 onClick={() => {
                   sfxTap();
                   navigate(m.id);
                 }}
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
-                className="no-select group relative flex flex-col overflow-hidden rounded-[1.4rem] border-2 border-white/80 bg-white shadow-candy-sm"
+                className="no-select group relative flex flex-col overflow-hidden rounded-[1.4rem] border-2 border-white/80 bg-white shadow-candy-sm transition-all duration-200 hover:scale-[1.04] active:scale-[0.96]"
                 style={{ boxShadow: `0 6px 18px ${tk.soft}` }}
               >
                 <img
@@ -209,12 +248,12 @@ export default function HomePage() {
                   className="aspect-square w-full object-cover"
                 />
                 <span
-                  className="px-2 py-1.5 text-center text-[11px] font-black leading-tight"
+                  className="px-2 py-1.5 text-center text-xs font-black leading-tight"
                   style={{ color: tk.deep }}
                 >
                   {m.label}
                 </span>
-              </motion.button>
+              </button>
             );
           })}
         </div>
@@ -222,16 +261,12 @@ export default function HomePage() {
 
       {/* 3. 小茜伙伴与每日挑战 (Companion & Daily Challenge) */}
       <section className="space-y-4">
-        <motion.button
-          initial={{ opacity: 0, scale: 0.97 }}
-          animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+        <button
           onClick={() => {
             sfxTap();
             navigate('companion');
           }}
-          className="no-select relative w-full overflow-hidden rounded-[2.2rem] border-4 border-white bg-gradient-to-br from-candy-purple-soft to-candy-blue-soft p-5 text-left shadow-fluffy"
+          className="no-select relative w-full overflow-hidden rounded-[2.2rem] border-4 border-white bg-gradient-to-br from-candy-purple-soft to-candy-blue-soft p-5 text-left shadow-fluffy transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
         >
           <div className="flex items-center gap-4">
             <AiAvatar size={56} />
@@ -241,14 +276,21 @@ export default function HomePage() {
             </div>
             <span className="text-2xl font-black text-candy-purple-deep">→</span>
           </div>
-        </motion.button>
+        </button>
 
-        <DailyChallenge compact />
-        <ExploreMore excludeIds={excludeFromMore} />
+        <Suspense fallback={null}>
+          <DailyChallenge compact />
+        </Suspense>
+        <Suspense fallback={null}>
+          <ExploreMore excludeIds={excludeFromMore} />
+        </Suspense>
       </section>
 
       {/* 分类浏览浮层 */}
-      <CategorySheet open={catOpen} onClose={() => setCatOpen(false)} initialCategory={catInit} />
+      <Suspense fallback={null}>
+        <CategorySheet open={catOpen} onClose={() => setCatOpen(false)} initialCategory={catInit} />
+      </Suspense>
     </div>
+
   );
 }

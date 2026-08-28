@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { useMastery } from '@/store/useStore';
-import { sfxTap } from '@/lib/sfx';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
 import { FluffyIcon } from '@/components/ui/FluffyIcon';
 import { NURSERY_RHYMES, RHYME_MAP, THEME_LABEL, type RhymeTheme } from '@/data/nurseryRhymes';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -30,8 +30,22 @@ export default function SongsPage() {
     return s;
   }, [mastery]);
 
+  // 全局键盘快捷键响应 (Esc 返回)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (selectedId && e.key === 'Escape') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setSelectedId(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedId]);
+
   if (selected) {
-    return <RhymePlayer rhyme={selected} onBack={() => setSelectedId(null)} />;
+    return <RhymePlayer rhyme={selected} onBack={() => { triggerHaptic(20); setSelectedId(null); }} />;
   }
 
   const filtered = filter === 'all' ? NURSERY_RHYMES : NURSERY_RHYMES.filter((r) => r.theme === filter);
@@ -46,8 +60,15 @@ export default function SongsPage() {
         tone="pink"
       />
 
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-pink-900 font-bold bg-pink-50/90 px-3 py-1 rounded-xl border border-pink-200">
+          ⌨️ 键盘快捷操作：点击儿歌卡片开始唱唱乐 · Esc 返回歌单
+        </span>
+      </div>
+
       {/* 今日推荐卡片 */}
-      <RecommendCard onPick={(id) => { sfxTap(); setSelectedId(id); }} />
+      <RecommendCard onPick={(id) => { sfxTap(); triggerHaptic(20); setSelectedId(id); }} />
 
       {/* 3D 羊毛毡童话故事小剧场 */}
       <Panel className="border-2 border-pink-300 bg-gradient-to-r from-pink-100 via-rose-50 to-purple-100 p-5 shadow-fluffy overflow-hidden">

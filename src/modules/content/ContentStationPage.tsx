@@ -179,11 +179,11 @@ export default function ContentStationPage() {
                     <h2 className="text-lg font-black text-ink">{item.title}</h2>
                     <div className="mt-1 flex flex-wrap items-center gap-1.5">
                       {item.tags?.map((tag) => (
-                        <span key={tag} className="rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-bold text-ink-soft">
+                        <span key={tag} className="rounded-full bg-white/80 px-2 py-0.5 text-xs font-bold text-ink-soft">
                           #{tag}
                         </span>
                       ))}
-                      <span className="text-[10px] font-bold text-ink-soft">· {formatDate(item.createdAt)}</span>
+                      <span className="text-xs font-bold text-ink-soft">· {formatDate(item.createdAt)}</span>
                     </div>
                   </div>
                   <button

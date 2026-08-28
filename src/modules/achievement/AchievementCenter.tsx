@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useBadges, useBadgeDates, useBadgeMetricProgress, useStars } from '@/store/useStore';
 import { MEDALS, REWARD_META, type MedalDef, type MedalCategory } from '@/data/medals';
@@ -8,6 +8,8 @@ import { PageHeader, Panel, PanelTitle } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { useTranslation } from '@/i18n/useTranslation';
 import type { Progress } from '@/types';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
+import { navigate } from '@/lib/router';
 
 /**
  * 宝贝成就中心
@@ -35,6 +37,31 @@ export default function AchievementCenter() {
   const owned = useMemo(() => new Set(badges), [badges]);
   const [tab, setTab] = useState<Tab>('all');
 
+  // 全局键盘快捷键响应 (1-4 切换分类 · Esc 返回主页)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      const tabOrder: Tab[] = ['all', 'achievement', 'milestone', 'behavior'];
+      const num = parseInt(e.key, 10);
+      if (!isNaN(num) && num >= 1 && num <= 4) {
+        const targetTab = tabOrder[num - 1];
+        if (targetTab) {
+          e.preventDefault();
+          sfxTap();
+          triggerHaptic(20);
+          setTab(targetTab);
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        navigate('home');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const total = MEDALS.length;
   const doneCount = MEDALS.filter((m) => owned.has(m.id)).length;
 
@@ -58,6 +85,13 @@ export default function AchievementCenter() {
         subtitle={t('achievementCenter.subtitle', { done: doneCount, total })}
         tone="pink"
       />
+
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-pink-900 font-bold bg-pink-50/90 px-3.5 py-1.5 rounded-2xl border border-pink-200 shadow-sm">
+          ⌨️ 键盘快捷操作：数字 1-4 切换专区 (全部/成就/里程碑/行为激励) · Esc 返回主页
+        </span>
+      </div>
 
       {/* 统计卡：已收集勋章 + 累计星星 */}
       <div className="grid grid-cols-2 gap-3">
@@ -118,7 +152,7 @@ function StatCard({ tone, emoji, value, label }: { tone: Tone; emoji: string; va
       <span className="text-3xl">{emoji}</span>
       <div className="flex flex-col">
         <span className="text-2xl font-extrabold" style={{ color: ts.deep }}>{value}</span>
-        <span className="text-[11px] font-bold text-ink-soft">{label}</span>
+        <span className="text-xs font-bold text-ink-soft">{label}</span>
       </div>
     </div>
   );
@@ -165,32 +199,32 @@ function MedalCard({
           medal.emoji
         )}
       </div>
-      <span className="line-clamp-1 text-[11px] font-extrabold" style={{ color: unlocked ? ts.deep : '#8B7F96' }}>
+      <span className="line-clamp-1 text-xs font-extrabold" style={{ color: unlocked ? ts.deep : '#8B7F96' }}>
         {medal.name}
       </span>
       {unlocked ? (
         <div className="flex flex-col items-center gap-0.5">
           {reward && (
             <span
-              className="inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-bold"
+              className="inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-bold"
               style={{ background: `${ts.main}22`, color: ts.deep }}
             >
               {reward.emoji} {medal.reward?.amount}
             </span>
           )}
-          <span className="text-[10px] font-bold text-candy-green-deep">
+          <span className="text-xs font-bold text-candy-green-deep">
             {date ? `✅ ${date}` : `✅ ${t('achievementCenter.unlocked')}`}
           </span>
         </div>
       ) : meter ? (
         <div className="w-full">
           <ProgressBar value={Math.min(meter[0], meter[1])} max={meter[1]} tone={medal.tone} height={6} />
-          <span className="mt-0.5 block text-[10px] font-bold text-ink-soft">
+          <span className="mt-0.5 block text-xs font-bold text-ink-soft">
             {Math.min(meter[0], meter[1])}/{meter[1]}
           </span>
         </div>
       ) : (
-        <span className="text-[10px] font-bold text-ink-soft">{t('achievementCenter.notStarted')}</span>
+        <span className="text-xs font-bold text-ink-soft">{t('achievementCenter.notStarted')}</span>
       )}
     </motion.div>
   );

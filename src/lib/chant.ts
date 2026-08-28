@@ -376,3 +376,33 @@ export function buildChantSegments(poem: DeepPoem, mode: ChantMode = 'fan'): Cha
     return segs;
   });
 }
+
+export interface TimedToken {
+  char: string;
+  pinyin: string;
+  role: '平' | '仄' | '入' | '标';
+  startMs: number;
+  durationMs: number;
+}
+
+/**
+ * 计算单句中每个字符的理论时间戳区间（供卡拉OK单字流动光标使用）
+ */
+export function calculateTokenTimeOffsets(line: ChantLine): TimedToken[] {
+  let currentMs = 0;
+  const result: TimedToken[] = [];
+
+  line.tokens.forEach((t) => {
+    const duration = Math.max(120, Math.round(t.holdMs));
+    result.push({
+      char: t.c,
+      pinyin: t.p,
+      role: t.role,
+      startMs: currentMs,
+      durationMs: duration,
+    });
+    currentMs += duration;
+  });
+
+  return result;
+}

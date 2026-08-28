@@ -1,17 +1,11 @@
-/**
- * 音乐创作工作室 🎹 (B1 音乐升级)
- * ------------------------------------------------------------
- * 1. 自由创作：8 音彩色琴键 + 录制回放
- * 2. AI 创作点评：敲完一段让 AI 点评
- * 3. 节奏模仿：集成 RhythmRepeat
- */
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { useAiStream } from '@/lib/ai/useAi';
 import { musicCreateTask } from '@/lib/ai/tasks/music';
-import { sfxTap, sfxCorrect } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, triggerHaptic } from '@/lib/sfx';
+import { navigate } from '@/lib/router';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
 
@@ -64,6 +58,7 @@ export default function MusicCreatePage() {
   const handleKeyClick = useCallback(
     (idx: number) => {
       setActiveKey(idx);
+      triggerHaptic(20);
       playFreq(NOTES[idx]!.freq);
       const t = setTimeout(() => setActiveKey(null), 300);
       timersRef.current.push(t);
@@ -77,24 +72,27 @@ export default function MusicCreatePage() {
   );
 
   // 开始录制
-  const startRecording = () => {
+  const startRecording = useCallback(() => {
     setRecordedNotes([]);
     startTimeRef.current = Date.now();
     setIsRecording(true);
     setShowFeedback(false);
     sfxTap();
-  };
+    triggerHaptic(30);
+  }, []);
 
   // 停止录制
-  const stopRecording = () => {
+  const stopRecording = useCallback(() => {
     setIsRecording(false);
     sfxCorrect();
-  };
+    triggerHaptic(35);
+  }, []);
 
   // 回放
   const playBack = useCallback(() => {
     if (recordedNotes.length === 0) return;
     setIsPlaying(true);
+    triggerHaptic(20);
     let prev = 0;
     recordedNotes.forEach((note) => {
       const t = setTimeout(() => {
@@ -110,14 +108,41 @@ export default function MusicCreatePage() {
     });
     const endT = setTimeout(() => setIsPlaying(false), prev + 200);
     timersRef.current.push(endT);
-  }, [recordedNotes]);  
+  }, [recordedNotes]);
 
   // 清除
-  const clearRecording = () => {
+  const clearRecording = useCallback(() => {
     setRecordedNotes([]);
     setShowFeedback(false);
     sfxTap();
-  };
+    triggerHaptic(15);
+  }, []);
+
+  // 全局键盘快捷键响应 (1-8 弹琴, R 录制, Space 回放, C 清空)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['1', '2', '3', '4', '5', '6', '7', '8'].includes(e.key)) {
+        e.preventDefault();
+        const noteIdx = parseInt(e.key, 10) - 1;
+        handleKeyClick(noteIdx);
+      } else if (e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        if (isRecording) stopRecording();
+        else startRecording();
+      } else if (e.key === ' ' || e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        if (!isPlaying && recordedNotes.length > 0) playBack();
+      } else if (e.key === 'c' || e.key === 'C') {
+        e.preventDefault();
+        clearRecording();
+      } else if (e.key === 'Escape') {
+        navigate('home');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyClick, isRecording, startRecording, stopRecording, isPlaying, recordedNotes, playBack, clearRecording]);
 
   // AI 点评创作
   const askAiFeedback = () => {
@@ -137,6 +162,13 @@ export default function MusicCreatePage() {
         subtitle={tr('music.createSubtitle', { defaultValue: '自由创作 · 录制回放 · AI 点评' })}
         tone="pink"
       />
+
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-pink-900 font-bold bg-pink-50/90 px-3 py-1 rounded-xl border border-pink-200">
+          ⌨️ 键盘快捷操作：数字 1-8 弹奏 8 音琴键 · R 录音/停止 · 空格/P 试听回放 · C 清空 · Esc 返回
+        </span>
+      </div>
 
       {/* 琴键区 */}
       <Panel className="border-2 border-pink-300 bg-gradient-to-r from-pink-50 via-purple-50 to-rose-50 text-center">

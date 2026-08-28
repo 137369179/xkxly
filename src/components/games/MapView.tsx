@@ -226,7 +226,7 @@ export function MapView() {
                   </span>
                   <span
                     className={cn(
-                      'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black text-white shadow-sm',
+                      'shrink-0 rounded-full px-2 py-0.5 text-xs font-black text-white shadow-sm',
                       !stage.unlocked && 'bg-gray-400',
                     )}
                     style={stage.unlocked ? { background: toneStyle.main } : undefined}
@@ -234,7 +234,7 @@ export function MapView() {
                     {stage.unlocked ? `✓ ${t('mapStage.unlocked')}` : '🔒'}
                   </span>
                 </div>
-                <span className="shrink-0 text-[11px] font-bold tabular-nums text-ink-soft">
+                <span className="shrink-0 text-xs font-bold tabular-nums text-ink-soft">
                   {Math.round(Math.min(1, stage.avg / 5) * 100)}%
                 </span>
               </div>
@@ -262,8 +262,8 @@ export function MapView() {
                             style={{ background: node.lv >= 4 ? rTone.main + '22' : 'white' }}
                           >
                             <div className="text-2xl">{node.lv >= 3 ? node.emoji : LV_EMOJI[node.lv]}</div>
-                            <div className="text-[10px] font-bold text-ink-soft">{node.label}</div>
-                            <div className="text-[9px] font-semibold text-ink-muted">{t(`map.lv${node.lv}`)}</div>
+                            <div className="text-xs font-bold text-ink-soft">{node.label}</div>
+                            <div className="text-xs font-semibold text-ink-muted">{t(`map.lv${node.lv}`)}</div>
                           </motion.div>
                         ))}
                       </div>

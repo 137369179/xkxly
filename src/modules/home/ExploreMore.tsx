@@ -38,7 +38,7 @@ export default function ExploreMore({ excludeIds }: ExploreMoreProps) {
         <div className="flex items-center gap-2">
           <span className="text-xl">📂</span>
           <span className="text-base font-extrabold text-ink">{t('exploreMore.title')}</span>
-          <span className="rounded-full bg-candy-purple-soft px-2 py-0.5 text-[11px] font-extrabold text-candy-purple-deep">
+          <span className="rounded-full bg-candy-purple-soft px-2 py-0.5 text-xs font-extrabold text-candy-purple-deep">
             {t('exploreMore.moduleCount', { n: others.length })}
           </span>
         </div>
@@ -77,7 +77,7 @@ export default function ExploreMore({ excludeIds }: ExploreMoreProps) {
                     <span className="text-sm font-black tracking-wide" style={{ color: tone.deep }}>
                       {label}
                     </span>
-                    <span className="line-clamp-1 text-[10px] font-bold text-ink-soft">{desc}</span>
+                    <span className="line-clamp-1 text-xs font-bold text-ink-soft">{desc}</span>
                   </motion.button>
                 );
               })}

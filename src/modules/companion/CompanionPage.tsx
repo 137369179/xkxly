@@ -12,7 +12,7 @@
  *
  * 设计原则：AI 挂了永远有本地兜底；主题全预置合规；进度持久化成就感知
  */
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { PageHeader, Panel, PanelTitle } from '@/components/ui/Card';
 import { AiAvatar } from '@/components/ai/AiAvatar';
@@ -39,10 +39,11 @@ import {
 import { useStore } from '@/store/useStore';
 import { useTtsStore } from '@/store/useTtsStore';
 import { dateKey } from '@/lib/dailyPlan';
-import { sfxTap, sfxCorrect } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, triggerHaptic } from '@/lib/sfx';
 import { speak, stopSpeaking } from '@/lib/speech';
 import { TONE_STYLE } from '@/lib/tones';
 import { useTranslation } from '@/i18n/useTranslation';
+import { navigate } from '@/lib/router';
 
 const QUICK_QUESTIONS = [
   '夸夸我今天很棒',
@@ -113,7 +114,7 @@ export default function CompanionPage() {
   const totalTopics = COMPANION_CATEGORIES.reduce((s, c) => s + c.topics.length, 0);
   const progressPct = Math.round((explainedCount / totalTopics) * 100);
 
-  const cat = COMPANION_CATEGORIES.find((c) => c.id === catId) ?? COMPANION_CATEGORIES[0]!;
+  const cat = COMPANION_CATEGORIES.find((c) => c.id === catId) ?? COMPANION_CATEGORIES[0];
   const mood = explain.status === 'thinking' ? 'thinking' : explain.status === 'streaming' ? 'talking' : 'idle';
   const hour = new Date().getHours();
   const greetingKey =
@@ -125,12 +126,13 @@ export default function CompanionPage() {
   const pickTopic = useCallback(
     (tp: CompanionTopic) => {
       sfxTap();
+      triggerHaptic(20);
       setTopic(tp);
       explain.run(companionExplainTask(tp));
       // 持久化：标记已讲解（下次显示 ✓）
       useStore.getState().markExplained(tp.id);
     },
-    [explain, store]
+    [explain]
   );
 
   // 语音朗读：讲解完成后点按钮朗读
@@ -141,6 +143,7 @@ export default function CompanionPage() {
           ? explain.text.trim()
           : tp.fallback;
       sfxCorrect();
+      triggerHaptic(30);
       stopSpeaking();
       speak(text, { lang: 'zh-CN', rate: 0.9 });
       setRecitingTopic(tp);
@@ -148,12 +151,41 @@ export default function CompanionPage() {
     [explain]
   );
 
+  // 全局键盘快捷键
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['1', '2', '3', '4', '5'].includes(e.key)) {
+        const idx = parseInt(e.key, 10) - 1;
+        const tab = TABS[idx];
+        if (tab) {
+          e.preventDefault();
+          sfxTap();
+          triggerHaptic(20);
+          setActiveTab(tab.id);
+        }
+      } else if (e.key === 'Escape') {
+        stopSpeaking();
+        navigate('home');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const itemsToday = p.dailyLog[dateKey()]?.items ?? 0;
   const chatCountToday = todayChatCount(p);
   const streak = p.streak;
 
   return (
     <div className="mx-auto max-w-3xl space-y-5 px-4 py-6">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-purple-900 font-bold bg-purple-50/90 px-3 py-1 rounded-xl border border-purple-200">
+          ⌨️ 键盘快捷操作：数字键 1-5 快速切换 讲一讲/社交情感/学习搭子/今日任务/知识追问
+        </span>
+      </div>
+
       {/* S2: 情绪陪伴全局弹层 */}
       <EmotionPop />
 
@@ -185,7 +217,7 @@ export default function CompanionPage() {
         </div>
         <button
           type="button"
-          onClick={() => { sfxTap(); openVoiceModal(); }}
+          onClick={() => { sfxTap(); triggerHaptic(30); openVoiceModal(); }}
           aria-label="打开语音对话，跟小茜说话"
           className="flex shrink-0 flex-col items-center gap-1 rounded-2xl border-2 border-white bg-gradient-to-b from-candy-purple to-candy-blue px-3 py-2.5 text-white shadow-md transition-transform active:scale-95"
         >
@@ -323,6 +355,7 @@ export default function CompanionPage() {
         </div>
 
         {/* 主题网格 */}
+        {cat && (
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
           {cat.topics.map((tp) => {
             const done = isTopicExplainedToday(p, tp.id);
@@ -349,7 +382,7 @@ export default function CompanionPage() {
                     {tp.tags.slice(0, 2).map((tag) => (
                       <span
                         key={tag}
-                        className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-bold text-gray-500"
+                        className="rounded-full bg-gray-100 px-1.5 py-0.5 text-xs font-bold text-gray-500"
                       >
                         {tag}
                       </span>
@@ -360,6 +393,7 @@ export default function CompanionPage() {
             );
           })}
         </div>
+        )}
 
         {/* 讲解卡片 */}
         <AnimatePresence mode="wait">

@@ -3,23 +3,17 @@
  * 幼儿产品的即时反馈非常依赖声音，但又不能引入几百 KB 的音频资源。
  */
 
-let ctx: AudioContext | null = null;
+import { getAudioContext } from './audioContext';
+
 let muted = false;
 
 function getCtx(): AudioContext | null {
   if (typeof window === 'undefined') return null;
-  if (!ctx) {
-    const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AC) return null;
-    try {
-      ctx = new AC();
-    } catch {
-      return null;
-    }
+  try {
+    return getAudioContext();
+  } catch {
+    return null;
   }
-  if (ctx.state === 'suspended') void ctx.resume().catch(() => {});
-
-  return ctx;
 }
 
 export function setMuted(v: boolean): void {
@@ -111,7 +105,7 @@ const CORRECT_VARIANTS: ToneSpec[][] = [
 ];
 
 /** 触感震动辅助（移动端/平板设备支持时触发轻微触感） */
-function haptic(pattern: number | number[]): void {
+export function triggerHaptic(pattern: number | number[] = 35): void {
   if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
     try {
       navigator.vibrate(pattern);
@@ -120,6 +114,7 @@ function haptic(pattern: number | number[]): void {
     }
   }
 }
+const haptic = triggerHaptic;
 
 /** 答对：从变种池随机抽一个上行和弦琶音播放并触发轻触感 */
 export function sfxCorrect(): void {

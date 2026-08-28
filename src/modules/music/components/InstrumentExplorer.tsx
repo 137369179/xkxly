@@ -6,9 +6,9 @@
  * 3. 乐器结构知识与文化百科讲解
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
-import { sfxTap } from '@/lib/sfx';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 import { speak } from '@/lib/speech';
 import { getAudioContext } from '@/lib/audioContext';
@@ -253,23 +253,59 @@ export function InstrumentExplorer() {
 
   const current = INSTRUMENTS[selectedIdx % INSTRUMENTS.length] ?? FALLBACK_INSTRUMENT;
 
-  const handleSelect = (idx: number) => {
+  const handleSelect = useCallback((idx: number) => {
     sfxTap();
+    triggerHaptic(20);
     setSelectedIdx(idx);
     const inst = INSTRUMENTS[idx % INSTRUMENTS.length] ?? FALLBACK_INSTRUMENT;
     void speak(`这是${inst.name}。${inst.desc}`, { lang: 'zh-CN' });
-  };
+  }, []);
 
-  const handlePlayKey = (label: string, freq: number) => {
+  const handlePlayKey = useCallback((label: string, freq: number) => {
     setActiveKey(label);
+    triggerHaptic(25);
     playInstrumentSound(freq, current.timbreType);
     celebrateSmall();
     addStars(1);
     setTimeout(() => setActiveKey(null), 300);
-  };
+  }, [current.timbreType, addStars]);
+
+  // 全局键盘快捷键
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['1', '2', '3', '4', '5', '6', '7', '8'].includes(e.key)) {
+        const noteIdx = parseInt(e.key, 10) - 1;
+        const note = current.notes[noteIdx];
+        if (note) {
+          e.preventDefault();
+          handlePlayKey(note.label, note.freq);
+        }
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleSelect((selectedIdx + 1) % INSTRUMENTS.length);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handleSelect((selectedIdx - 1 + INSTRUMENTS.length) % INSTRUMENTS.length);
+      } else if (e.key === ' ' || e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        sfxTap();
+        void speak(`这是${current.name}。${current.desc}`, { lang: 'zh-CN' });
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [current, selectedIdx, handlePlayKey, handleSelect]);
 
   return (
     <div className="space-y-6">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-indigo-900 font-bold bg-indigo-50/90 px-3 py-1 rounded-xl border border-indigo-200">
+          ⌨️ 键盘快捷操作：数字键 1-8 试弹琴键音阶 · 左右方向键 切换乐器 · 空格/R 听百科讲解
+        </span>
+      </div>
+
       {/* 乐器选择器导航 */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {INSTRUMENTS.map((inst, idx) => {
@@ -290,7 +326,7 @@ export function InstrumentExplorer() {
               <span className="text-3xl select-none">{inst.emoji}</span>
               <div className="text-left">
                 <span className="block text-sm leading-tight">{inst.name}</span>
-                <span className={`text-[10px] block ${active ? 'text-indigo-200' : 'text-slate-400'}`}>
+                <span className={`text-xs block ${active ? 'text-indigo-200' : 'text-slate-400'}`}>
                   {inst.nameEn}
                 </span>
               </div>
@@ -333,7 +369,7 @@ export function InstrumentExplorer() {
               <span>🎵</span>
               <span>触键试弹专区 ({current.name} 真实音色)：</span>
             </h4>
-            <span className="text-[11px] text-slate-400 font-bold">
+            <span className="text-xs text-slate-400 font-bold">
               轻触下方音键体验声音高低变化
             </span>
           </div>

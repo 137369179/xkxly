@@ -164,7 +164,7 @@ export function HanziTrailMap({ onSelect }: HanziTrailMapProps) {
                 >
                   <span className="text-base">🔒</span>
                   <span className="text-xs font-extrabold">{t('hanzi.trailMapChapter', { n: ci + 1 })}</span>
-                  <span className="ml-auto text-[10px] font-bold">{t('hanzi.trailMapChapterLocked')}</span>
+                  <span className="ml-auto text-xs font-bold">{t('hanzi.trailMapChapterLocked')}</span>
                 </div>
               );
             }
@@ -191,11 +191,11 @@ export function HanziTrailMap({ onSelect }: HanziTrailMapProps) {
                   <span className="text-xs font-extrabold text-ink">
                     {t('hanzi.trailMapChapter', { n: ci + 1 })}
                   </span>
-                  <span className="text-[10px] font-bold text-ink-soft">
+                  <span className="text-xs font-bold text-ink-soft">
                     {ch.learnedCount}/{ch.chars.length}
                   </span>
                   {done && (
-                    <span className="ml-auto text-[10px] font-extrabold text-candy-green-deep">
+                    <span className="ml-auto text-xs font-extrabold text-candy-green-deep">
                       {t('hanzi.trailMapChapterDone')}
                     </span>
                   )}
@@ -254,7 +254,7 @@ export function HanziTrailMap({ onSelect }: HanziTrailMapProps) {
                           >
                             {h.c}
                           </span>
-                          <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px]">
+                          <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full text-xs">
                             {isLearned ? '✅' : isCur ? '🌟' : locked ? '🔒' : '⭐'}
                           </span>
                         </button>
@@ -269,7 +269,7 @@ export function HanziTrailMap({ onSelect }: HanziTrailMapProps) {
       )}
 
       {/* 图例 */}
-      <div className="flex flex-wrap items-center gap-3 text-[11px] font-bold text-ink-soft">
+      <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-ink-soft">
         <span className="flex items-center gap-1">✅ {t('hanzi.trailMapLegendLearned')}</span>
         <span className="flex items-center gap-1">🌟 {t('hanzi.trailMapLegendCurrent')}</span>
         <span className="flex items-center gap-1">⭐ {t('hanzi.trailMapLegendAvailable')}</span>

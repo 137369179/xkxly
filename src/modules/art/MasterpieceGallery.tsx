@@ -6,9 +6,9 @@
  * 3. 艺术美学启蒙与画家故事语音导览
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
-import { sfxTap, sfxCorrect, sfxWin } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { celebrateBig } from '@/lib/celebrate';
 import { speak } from '@/lib/speech';
 import { useStore } from '@/store/useStore';
@@ -134,33 +134,70 @@ export function MasterpieceGallery() {
     return MASTERPIECES[selectedIdx % MASTERPIECES.length] ?? FALLBACK_MASTERPIECE;
   }, [selectedIdx]);
 
-  const handleSelectMasterpiece = (idx: number) => {
+  const handleSelectMasterpiece = useCallback((idx: number) => {
     sfxTap();
+    triggerHaptic(20);
     setSelectedIdx(idx);
     setAssembledPieces([]);
     setIsCompleted(false);
     const target = MASTERPIECES[idx % MASTERPIECES.length] ?? FALLBACK_MASTERPIECE;
     void speak(`欢迎欣赏世界名画${target.title}，由著名画家${target.artist}创作。快来拼装名画碎片吧！`, { lang: 'zh-CN' });
-  };
+  }, []);
 
-  const handlePlacePiece = (piece: string) => {
+  const handlePlacePiece = useCallback((piece: string) => {
     if (assembledPieces.includes(piece) || isCompleted) return;
     sfxCorrect();
+    triggerHaptic(35);
     const updated = [...assembledPieces, piece];
     setAssembledPieces(updated);
 
     if (updated.length === current.pieces.length) {
       setIsCompleted(true);
       sfxWin();
+      triggerHaptic([60, 40, 60, 40, 100]);
       celebrateBig();
       addStars(5);
       addFish(2);
       void speak(`恭喜完成名画复原！${current.title}，${current.story}`, { lang: 'zh-CN' });
     }
-  };
+  }, [assembledPieces, isCompleted, current, addStars, addFish]);
+
+  // 全局键盘快捷键
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['1', '2', '3', '4'].includes(e.key)) {
+        const idx = parseInt(e.key, 10) - 1;
+        const targetPiece = current.pieces[idx];
+        if (targetPiece && !assembledPieces.includes(targetPiece) && !isCompleted) {
+          e.preventDefault();
+          handlePlacePiece(targetPiece);
+        }
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleSelectMasterpiece((selectedIdx + 1) % MASTERPIECES.length);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handleSelectMasterpiece((selectedIdx - 1 + MASTERPIECES.length) % MASTERPIECES.length);
+      } else if (e.key === ' ' || e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        sfxTap();
+        void speak(`${current.title}，${current.story}`, { lang: 'zh-CN' });
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [current, assembledPieces, isCompleted, selectedIdx, handlePlacePiece, handleSelectMasterpiece]);
 
   return (
     <div className="space-y-6">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-amber-900 font-bold bg-amber-50/90 px-3 py-1 rounded-xl border border-amber-200">
+          ⌨️ 键盘快捷操作：数字键 1-4 拼装碎片 · 左右方向键 切换名画 · 空格/R 重听大师故事
+        </span>
+      </div>
+
       {/* 名画导览选择器 */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
         {MASTERPIECES.map((art, idx) => {
@@ -250,7 +287,7 @@ export function MasterpieceGallery() {
                 >
                   <span className="text-3xl select-none">{placed ? '✅' : '🧩'}</span>
                   <span>{piece}</span>
-                  <span className="text-[10px] text-slate-400">
+                  <span className="text-xs text-slate-400">
                     {placed ? '已精准复原' : '👉 点击拼装'}
                   </span>
                 </motion.button>

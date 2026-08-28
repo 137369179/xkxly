@@ -18,11 +18,10 @@ import { sfxCorrect, sfxTap, sfxWrong } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useStrokeData } from '@/lib/useStrokeData';
 import {
-  ensureStrokeData,
   densifyMedian,
   medianLength,
-  type StrokeData,
 } from '@/lib/strokes';
 
 const VIEW = 1024;
@@ -85,8 +84,7 @@ export interface StrokeTraceProps {
 export function StrokeTrace({ char, tone = 'green', onPass }: StrokeTraceProps) {
   const t = TONE_STYLE[tone];
   const { t: translate } = useTranslation();
-  const [data, setData] = useState<StrokeData | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const { data, loaded } = useStrokeData(char);
   const [strokeIdx, setStrokeIdx] = useState(0); // 当前要写第几笔
   const [doneStrokes, setDoneStrokes] = useState(0); // 已完成笔数
   const [trail, setTrail] = useState<Pt[]>([]); // 当前笔的轨迹（原始坐标）
@@ -97,24 +95,16 @@ export function StrokeTrace({ char, tone = 'green', onPass }: StrokeTraceProps) 
 
   const total = data?.s.length ?? 0;
 
+  // useStrokeData 的 loaded 回 false 时重置子状态
   useEffect(() => {
-    let alive = true;
-    setLoaded(false);
-    setData(null);
-    setStrokeIdx(0);
-    setDoneStrokes(0);
-    setTrail([]);
-    setStatus('idle');
-    passedRef.current = false;
-    ensureStrokeData(char).then((d) => {
-      if (!alive) return;
-      setData(d);
-      setLoaded(true);
-    });
-    return () => {
-      alive = false;
-    };
-  }, [char]);
+    if (!loaded) {
+      setStrokeIdx(0);
+      setDoneStrokes(0);
+      setTrail([]);
+      setStatus('idle');
+      passedRef.current = false;
+    }
+  }, [loaded]);
 
   const reset = useCallback(() => {
     setStrokeIdx(0);

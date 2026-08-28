@@ -58,7 +58,7 @@ function StreakBar({ slot }: { slot: ChainSlot }) {
       )}
       {slot.streak > 0 && (
         <>
-          <span className="text-[10px] font-bold text-green-600">连对{slot.streak}</span>
+          <span className="text-xs font-bold text-green-600">连对{slot.streak}</span>
           <div className="flex gap-0.5">
             {Array.from({ length: total }).map((_, i) => (
               <div
@@ -67,12 +67,12 @@ function StreakBar({ slot }: { slot: ChainSlot }) {
               />
             ))}
           </div>
-          {slot.streak >= 5 && !slot.pendingUp && <span className="text-[9px] font-semibold text-amber-600">→即将升级</span>}
+          {slot.streak >= 5 && !slot.pendingUp && <span className="text-xs font-semibold text-amber-600">→即将升级</span>}
         </>
       )}
       {slot.streak < 0 && (
         <>
-          <span className="text-[10px] font-bold text-red-500">连错{-slot.streak}</span>
+          <span className="text-xs font-bold text-red-500">连错{-slot.streak}</span>
           <div className="flex gap-0.5">
             {Array.from({ length: 3 }).map((_, i) => (
               <div
@@ -81,11 +81,11 @@ function StreakBar({ slot }: { slot: ChainSlot }) {
               />
             ))}
           </div>
-          {danger >= 3 && <span className="text-[9px] font-semibold text-orange-600">→降级</span>}
+          {danger >= 3 && <span className="text-xs font-semibold text-orange-600">→降级</span>}
         </>
       )}
       {slot.streak === 0 && (
-        <span className="text-[10px] font-medium text-ink-muted">持平中</span>
+        <span className="text-xs font-medium text-ink-muted">持平中</span>
       )}
     </div>
   );
@@ -176,7 +176,7 @@ export function ChainDashboard() {
 
               {/* 待升级标记 */}
               {f.pendingUp && (
-                <div className="mt-2 rounded-lg bg-amber-100 px-2 py-1 text-center text-[10px] font-bold text-amber-700">
+                <div className="mt-2 rounded-lg bg-amber-100 px-2 py-1 text-center text-xs font-bold text-amber-700">
                   🎯 等待升级评估
                 </div>
               )}
@@ -186,13 +186,13 @@ export function ChainDashboard() {
                 <div className="mt-2 flex gap-1">
                   <button
                     onClick={() => handleReset(f.key)}
-                    className="flex-1 rounded-md bg-red-500 px-1.5 py-0.5 text-[9px] font-bold text-white"
+                    className="flex-1 rounded-md bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white"
                   >
                     确认重置
                   </button>
                   <button
                     onClick={() => setConfirmReset(null)}
-                    className="flex-1 rounded-md bg-gray-300 px-1.5 py-0.5 text-[9px] font-bold text-gray-700"
+                    className="flex-1 rounded-md bg-gray-300 px-1.5 py-0.5 text-xs font-bold text-gray-700"
                   >
                     取消
                   </button>
@@ -200,7 +200,7 @@ export function ChainDashboard() {
               ) : (
                 <button aria-label="🔧 重置"
                   onClick={() => setConfirmReset(f.key)}
-                  className="mt-2 text-[9px] font-medium text-ink-muted hover:text-red-500"
+                  className="mt-2 text-xs font-medium text-ink-muted hover:text-red-500"
                   title="将链条重置为初始状态"
                 >
                   🔧 重置

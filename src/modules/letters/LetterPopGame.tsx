@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { LETTERS, type LetterItem } from '@/data/letters';
 import { sampleMany, shuffle, randInt } from '@/lib/utils';
 import { playLetterVoice, playWordVoice, speak } from '@/lib/speech';
-import { sfxTap, sfxCorrect, sfxWrong, sfxWin, sfxStar } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, sfxWin, sfxStar, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 import { Panel } from '@/components/ui/Card';
@@ -68,19 +68,6 @@ const BALLOON_PRESETS = [
 ];
 
 const ROUNDS_PER_GAME = 6;
-
-/** 触发轻微触觉反馈 */
-function triggerHaptic(type: 'tap' | 'success' | 'error' = 'tap') {
-  if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
-    try {
-      if (type === 'tap') navigator.vibrate(10);
-      else if (type === 'success') navigator.vibrate([15, 40, 20]);
-      else if (type === 'error') navigator.vibrate([30, 30]);
-    } catch {
-      /* noop */
-    }
-  }
-}
 
 export function LetterPopGame() {
   const practice = useStore((s) => s.practice);
@@ -187,14 +174,14 @@ export function LetterPopGame() {
   }, [startNewGame]);
 
   // 点击气球
-  const handlePop = (balloon: Balloon) => {
+  const handlePop = useCallback((balloon: Balloon) => {
     if (lockRef.current || !target || isGameOver) return;
 
     if (balloon.letter.upper === target.upper) {
       // 🎯 戳中正确气球
       lockRef.current = true;
       setPoppedId(balloon.id);
-      triggerHaptic('success');
+      triggerHaptic(45);
       sfxCorrect();
       celebrateSmall();
       spawnBurstParticles(balloon.particleColor);
@@ -214,6 +201,7 @@ export function LetterPopGame() {
         if (currentRound >= ROUNDS_PER_GAME) {
           // 游戏通关
           sfxWin();
+          triggerHaptic([60, 40, 60, 40, 100]);
           celebrateBig();
           addStars(2);
           setIsGameOver(true);
@@ -224,7 +212,7 @@ export function LetterPopGame() {
       }, 950);
     } else {
       // ❌ 戳错气球
-      triggerHaptic('error');
+      triggerHaptic(20);
       sfxWrong();
       setCombo(0);
       setShowComboPill(false);
@@ -236,10 +224,46 @@ export function LetterPopGame() {
         void speak(balloon.letter.upper, { lang: 'en-US', rate: 0.8 });
       });
     }
-  };
+  }, [target, isGameOver, combo, currentRound, nextTarget, practice, addStars, spawnBurstParticles]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (isGameOver) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          startNewGame();
+        }
+        return;
+      }
+      if (['1', '2', '3', '4'].includes(e.key)) {
+        const idx = parseInt(e.key, 10) - 1;
+        const b = balloons[idx];
+        if (b) {
+          e.preventDefault();
+          handlePop(b);
+        }
+      } else if (e.key === ' ' || e.key === 'r' || e.key === 'R') {
+        if (target) {
+          e.preventDefault();
+          void speakTarget(target);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [balloons, target, isGameOver, handlePop, speakTarget, startNewGame]);
 
   return (
     <div className="space-y-4">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-sky-900 font-bold bg-sky-50/90 px-3 py-1 rounded-xl border border-sky-200">
+          ⌨️ 键盘快捷操作：数字键 1-4 戳气球 · 空格/R 重新发音 · 回车 重新开始
+        </span>
+      </div>
+
       {/* 顶部控制面板 */}
       <Panel className="flex items-center justify-between !py-3 bg-gradient-to-r from-sky-50 via-indigo-50 to-pink-50 border-2 border-sky-200">
         <div className="flex items-center gap-3">
@@ -251,7 +275,7 @@ export function LetterPopGame() {
                 第 {currentRound} / {ROUNDS_PER_GAME} 关
               </span>
               {combo >= 2 && (
-                <span className="rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-black text-amber-950 shadow-xs animate-pulse">
+                <span className="rounded-full bg-amber-400 px-2 py-0.5 text-xs font-black text-amber-950 shadow-xs animate-pulse">
                   🔥 连击 x{combo}
                 </span>
               )}
@@ -266,17 +290,32 @@ export function LetterPopGame() {
               size="sm"
               onClick={() => {
                 sfxTap();
+                triggerHaptic(30);
                 void speakTarget(target);
               }}
             >
-              🔊 重听声音
+              🔊 重听声音 (空格)
             </CandyButton>
           )}
-          <CandyButton tone="purple" variant="soft" size="sm" onClick={startNewGame}>
+          <CandyButton
+            tone="purple"
+            variant="soft"
+            size="sm"
+            onClick={() => {
+              sfxTap();
+              triggerHaptic(30);
+              startNewGame();
+            }}
+          >
             🔄 换一局
           </CandyButton>
         </div>
       </Panel>
+
+      {/* 快捷操作提示条 */}
+      <div className="flex items-center justify-between text-xs text-sky-700 font-bold bg-sky-50/90 px-3 py-1 rounded-xl border border-sky-200">
+        <span>⌨️ 键盘快捷操作：数字键 1-4 戳对应气球 · 空格键 重播发音</span>
+      </div>
 
       {/* 气球漂浮游戏主舞台 */}
       <div className="relative h-80 sm:h-96 w-full overflow-hidden rounded-[2.5rem] border-4 border-sky-200 bg-gradient-to-b from-sky-100 via-blue-50 to-indigo-100 shadow-fluffy p-4 flex flex-col justify-between select-none">

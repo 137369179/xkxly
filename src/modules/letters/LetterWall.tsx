@@ -198,7 +198,7 @@ export function LetterWall() {
                   👑
                 </span>
               ) : lv > 0 ? (
-                <span className="absolute top-1.5 right-2 rounded-full bg-amber-300/90 px-1 py-0.2 text-[9px] font-black text-amber-950 shadow-xs">
+                <span className="absolute top-1.5 right-2 rounded-full bg-amber-300/90 px-1 py-0.2 text-xs font-black text-amber-950 shadow-xs">
                   ⭐ Lv.{lv}
                 </span>
               ) : learned ? (
@@ -208,7 +208,7 @@ export function LetterWall() {
               ) : null}
 
               {/* 自然拼读音标小浮标 */}
-              <span className="absolute top-1.5 left-2 rounded-md bg-white/80 px-1 py-0.2 text-[10px] font-black text-ink-soft shadow-xs">
+              <span className="absolute top-1.5 left-2 rounded-md bg-white/80 px-1 py-0.2 text-xs font-black text-ink-soft shadow-xs">
                 {item.phonicsSound}
               </span>
 
@@ -236,7 +236,7 @@ export function LetterWall() {
                 decoding="async"
                 className="mt-1 h-9 w-9 rounded-full border-2 border-white bg-white object-cover shadow-md sm:h-11 sm:w-11"
               />
-              <span className="text-[11px] font-bold tracking-tight" style={{ color: t.deep }}>
+              <span className="text-xs font-bold tracking-tight" style={{ color: t.deep }}>
                 {item.word}
               </span>
             </motion.button>

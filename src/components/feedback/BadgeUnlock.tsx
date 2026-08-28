@@ -8,7 +8,7 @@ import { TONE_STYLE } from '@/lib/tones';
 import { Modal } from '@/components/ui/Modal';
 import { CandyButton } from '@/components/ui/Button';
 import { celebrateBig } from '@/lib/celebrate';
-import { sfxWin } from '@/lib/sfx';
+import { sfxWin, triggerHaptic } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { useAiStream } from '@/lib/ai/useAi';
 import { praiseTask } from '@/lib/ai/tasks/report';
@@ -44,6 +44,7 @@ export function BadgeUnlock() {
     if (!badge) return;
     celebrateBig();
     sfxWin();
+    triggerHaptic([60, 50, 60, 50, 80]);
     const t = setTimeout(() => {
       void speak(`恭喜你获得${badge.name}勋章！`, { rate: 0.85, module: 'praise' });
     }, 420);

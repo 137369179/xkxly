@@ -61,6 +61,8 @@ import { dailySummaryTask } from '@/lib/ai/tasks';
 import { useAiStream as useAiStreamSummary } from '@/lib/ai/useAi';
 import { AiPanel as AiPanelSummary } from '@/components/ai';
 
+import { navigate } from '@/lib/router';
+
 export function DailySummary({ plan }: { plan: ReturnType<typeof buildDailyPlan> }) {
   const learnedItems = plan.sections
     .filter((s) => s.kind !== 'review' && s.kind !== 'quiz')
@@ -82,7 +84,23 @@ export function DailySummary({ plan }: { plan: ReturnType<typeof buildDailyPlan>
   );
   const ai = useAiStreamSummary(task);
   return (
-    <div className="mt-4 text-left">
+    <div className="mt-4 space-y-3 text-left">
+      <div className="flex items-center justify-between rounded-2xl bg-amber-50 border-2 border-amber-200 p-3.5 shadow-sm">
+        <div className="flex items-center gap-2.5">
+          <span className="text-3xl animate-bounce">🐱</span>
+          <div>
+            <p className="text-sm font-black text-amber-900">🐟 萌宠小鱼干 +2！</p>
+            <p className="text-xs font-bold text-amber-700">小猫很开心，快去猫咪小屋喂它吃大餐吧~</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate('cat_house')}
+          className="rounded-xl bg-amber-500 px-3 py-1.5 text-xs font-black text-white shadow hover:bg-amber-600 active:scale-95 transition-all"
+        >
+          去看猫咪 ➔
+        </button>
+      </div>
       <AiPanelSummary state={ai} tone="purple" compact />
     </div>
   );

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useShallow } from 'zustand/react/shallow';
 import { NAV_MAP } from '@/data/nav';
@@ -8,7 +8,7 @@ import type { Progress } from '@/types';
 import { TONE_STYLE } from '@/lib/tones';
 import { moduleStat } from '@/lib/moduleStats';
 import { cn } from '@/lib/utils';
-import { sfxTap, sfxStar } from '@/lib/sfx';
+import { sfxTap, sfxStar, triggerHaptic } from '@/lib/sfx';
 import { PageHeader } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { FluffyIcon } from '@/components/ui/FluffyIcon';
@@ -88,9 +88,45 @@ export default function GameCenterPage() {
 
   const openRandom = () => {
     sfxStar();
+    triggerHaptic(30);
     const pick = allGameRoutes[Math.floor(Math.random() * allGameRoutes.length)]!;
     navigate(pick);
   };
+
+  // 全局键盘快捷键
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === ' ' || e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        openRandom();
+      } else if (e.key === '1') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        navigate('adventure');
+      } else if (e.key === '2') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        navigate('fun');
+      } else if (e.key === '3') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        navigate('logic');
+      } else if (e.key === '4') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        navigate('art');
+      } else if (e.key === 'Escape') {
+        navigate('home');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [allGameRoutes]);
 
   return (
     <div className="space-y-6">
@@ -109,6 +145,13 @@ export default function GameCenterPage() {
           </motion.button>
         }
       />
+
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-purple-900 font-bold bg-purple-50/90 px-3 py-1 rounded-xl border border-purple-200">
+          ⌨️ 键盘快捷操作：空格/R 随机进入游戏 · 数字 1-4 直达游戏专区 · Esc 返回主页
+        </span>
+      </div>
 
       {/* 概览数据条 */}
       <div className="grid grid-cols-2 gap-3">
@@ -158,6 +201,7 @@ export default function GameCenterPage() {
                     whileTap={{ scale: 0.97 }}
                     onClick={() => {
                       sfxTap();
+                      triggerHaptic(20);
                       navigate(routeId);
                     }}
                     className="no-select group flex items-center gap-3.5 rounded-[2rem] border-4 border-pink-200/90 bg-white/95 p-4 text-left shadow-fluffy transition-all"
@@ -169,7 +213,7 @@ export default function GameCenterPage() {
                           {t(`nav.${routeId}.label`) || item.label}
                         </span>
                         <span
-                          className="shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-black text-white shadow-sm"
+                          className="shrink-0 rounded-full px-2.5 py-0.5 text-xs font-black text-white shadow-sm"
                           style={{ background: tone.main }}
                         >
                           {t('gamecenter.start')} →
@@ -182,7 +226,7 @@ export default function GameCenterPage() {
                         <div className="flex-1">
                           <ProgressBar value={pct} max={100} tone={group.tone} showLabel={false} />
                         </div>
-                        <span className="shrink-0 text-[11px] font-extrabold tabular-nums" style={{ color: tone.deep }}>
+                        <span className="shrink-0 text-xs font-extrabold tabular-nums" style={{ color: tone.deep }}>
                           {pct}%
                         </span>
                       </div>

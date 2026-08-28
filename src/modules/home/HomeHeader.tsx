@@ -1,4 +1,3 @@
-import { motion } from 'motion/react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useStars, useStreak, useBadgeCount } from '@/store/useStore';
 import { navigate } from '@/lib/router';
@@ -39,11 +38,8 @@ export default function HomeHeader() {
   ] as const;
 
   return (
-    <motion.header
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="flex h-14 items-center gap-2 rounded-2xl border-2 border-white/80 bg-gradient-to-r from-pink-100 via-purple-50 to-pink-50 px-3 shadow-sm sm:gap-3 sm:px-4"
+    <header
+      className="animate-hero-fade-up flex h-14 items-center gap-2 rounded-2xl border-2 border-white/80 bg-gradient-to-r from-pink-100 via-purple-50 to-pink-50 px-3 shadow-sm sm:gap-3 sm:px-4"
     >
       {pills.map((p, _i) => (
         <button
@@ -62,6 +58,6 @@ export default function HomeHeader() {
           <span className={`hidden text-xs font-bold ${p.tone.text} sm:inline`}>{p.label}</span>
         </button>
       ))}
-    </motion.header>
+    </header>
   );
 }

@@ -35,6 +35,7 @@ vi.mock('@/lib/sfx', () => ({
   sfxStar: vi.fn(),
   sfxCorrect: vi.fn(),
   setMuted: vi.fn(),
+  triggerHaptic: vi.fn(),
 }));
 vi.mock('@/lib/celebrate', () => ({
   celebrateSmall: vi.fn(() => Promise.resolve()),
@@ -113,13 +114,13 @@ function render() {
 // 进入挑战：点击开始按钮
 function startChallenge() {
   act(() => {
-    const start = [...host!.querySelectorAll('button')].find((b) => b.textContent === 'speedMath.startChallenge');
+    const start = [...host!.querySelectorAll('button')].find((b) => b.textContent?.includes('speedMath.startChallenge'));
     expect(start).toBeTruthy();
     start!.click();
   });
 }
 const optionBtn = (label: string) =>
-  [...host!.querySelectorAll('button')].find((b) => b.textContent === label) as HTMLButtonElement;
+  [...host!.querySelectorAll('button')].find((b) => b.textContent?.includes(label)) as HTMLButtonElement;
 
 beforeEach(() => {
   vi.clearAllMocks();

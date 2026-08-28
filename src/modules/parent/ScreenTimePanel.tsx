@@ -51,15 +51,15 @@ export function ScreenTimeReport() {
         <div className="grid grid-cols-3 gap-3">
           <div className="text-center rounded-2xl bg-purple-50 p-3">
             <div className="text-2xl font-black text-candy-purple-deep tabular-nums">{Math.round(todaySec / 60)}</div>
-            <div className="text-[10px] font-bold text-ink-soft mt-0.5">{t('parent.todayTime') ?? '今日学习'}</div>
+            <div className="text-xs font-bold text-ink-soft mt-0.5">{t('parent.todayTime') ?? '今日学习'}</div>
           </div>
           <div className="text-center rounded-2xl bg-blue-50 p-3">
             <div className="text-2xl font-black text-candy-blue-deep tabular-nums">{todayItems}</div>
-            <div className="text-[10px] font-bold text-ink-soft mt-0.5">{t('parent.todayItems') ?? '练习题数'}</div>
+            <div className="text-xs font-bold text-ink-soft mt-0.5">{t('parent.todayItems') ?? '练习题数'}</div>
           </div>
           <div className="text-center rounded-2xl bg-yellow-50 p-3">
             <div className="text-2xl font-black text-candy-yellow-deep tabular-nums">{todayStars}</div>
-            <div className="text-[10px] font-bold text-ink-soft mt-0.5">{t('parent.todayStars') ?? '获得星星'}</div>
+            <div className="text-xs font-bold text-ink-soft mt-0.5">{t('parent.todayStars') ?? '获得星星'}</div>
           </div>
         </div>
 
@@ -98,7 +98,7 @@ export function ScreenTimeReport() {
                     minHeight: d.min > 0 ? '6px' : '2px',
                   }}
                 />
-                <span className="text-[9px] font-bold text-ink-soft">{d.day}</span>
+                <span className="text-xs font-bold text-ink-soft">{d.day}</span>
                 <span className="text-[8px] text-ink-soft tabular-nums">{d.min}分</span>
               </div>
             ))}

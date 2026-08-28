@@ -89,11 +89,19 @@ const HanziVideoCard = memo(function HanziVideoCard({
   
   return (
     <>
-      {/* 卡片主体 */}
-      <button
+      {/* 主卡片容器 */}
+      <div
+        role="button"
+        tabIndex={0}
         onClick={handleCardClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleCardClick();
+          }
+        }}
         className={cn(
-          'relative flex flex-col items-center justify-center rounded-2xl overflow-hidden transition-all active:translate-y-[2px]',
+          'relative flex flex-col items-center justify-center rounded-2xl overflow-hidden transition-all active:translate-y-[2px] cursor-pointer select-none',
           'min-h-[120px] w-full shadow-candy-sm hover:shadow-lg',
           'border-2 border-transparent hover:border-candy-purple-soft',
           learned && 'ring-2 ring-candy-green-soft'
@@ -131,6 +139,7 @@ const HanziVideoCard = memo(function HanziVideoCard({
         
         {/* 快捷语音播报按钮 */}
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             void import('@/lib/speech')
@@ -145,6 +154,7 @@ const HanziVideoCard = memo(function HanziVideoCard({
 
         {/* 视频播放按钮 */}
         <button
+          type="button"
           onClick={handlePlayVideo}
           className="absolute bottom-2 right-2 w-7 h-7 rounded-full bg-candy-purple-deep/90 flex items-center justify-center hover:bg-candy-purple-deep transition-colors"
           aria-label={t('hanziVideoCard.playAria', { char })}
@@ -153,7 +163,7 @@ const HanziVideoCard = memo(function HanziVideoCard({
             <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
           </svg>
         </button>
-      </button>
+      </div>
       
       {/* 视频播放模态框 */}
       {showVideo && (

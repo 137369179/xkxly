@@ -349,7 +349,7 @@ export default function AdventurePage(_: { param?: string }) {
 
                       {/* BOSS标签 */}
                       {isBoss && (
-                        <span className="absolute top-1.5 right-2 rounded-full bg-red-500 px-1.5 py-0.5 text-[9px] font-black text-white">
+                        <span className="absolute top-1.5 right-2 rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-black text-white">
                           BOSS
                         </span>
                       )}
@@ -367,10 +367,10 @@ export default function AdventurePage(_: { param?: string }) {
                       <span className="text-sm font-extrabold leading-tight text-ink">{lv.name}</span>
                       {stars > 0 && <StarRating value={stars} size={14} />}
                       {isBoss && bossDefeated && (
-                        <span className="text-[9px] font-bold text-green-600">✓ 已击败</span>
+                        <span className="text-xs font-bold text-green-600">✓ 已击败</span>
                       )}
                       {isBoss && !bossDefeated && unlocked && (
-                        <span className="text-[9px] font-bold text-red-500">{chapter.boss.emoji} {chapter.boss.name}</span>
+                        <span className="text-xs font-bold text-red-500">{chapter.boss.emoji} {chapter.boss.name}</span>
                       )}
                     </motion.button>
                   );
@@ -410,15 +410,15 @@ export default function AdventurePage(_: { param?: string }) {
                 title={b.desc}
               >
                 <span className="text-3xl">{b.emoji}</span>
-                <span className="line-clamp-1 text-[11px] font-extrabold" style={{ color: owned ? t.deep : '#8B7F96' }}>
+                <span className="line-clamp-1 text-xs font-extrabold" style={{ color: owned ? t.deep : '#8B7F96' }}>
                   {b.name}
                 </span>
                 {meter && !owned && (
-                  <span className="text-[10px] font-bold text-ink-soft">
+                  <span className="text-xs font-bold text-ink-soft">
                     {Math.min(meter[0], meter[1])}/{meter[1]}
                   </span>
                 )}
-                {owned && <span className="text-[10px] font-extrabold text-candy-green-deep">{tr('adventure.owned')}</span>}
+                {owned && <span className="text-xs font-extrabold text-candy-green-deep">{tr('adventure.owned')}</span>}
               </div>
             );
           })}

@@ -225,7 +225,7 @@ export function DailyChallenge({ compact = false }: { compact?: boolean } = {}) 
               className="h-8 w-8 rounded-full object-cover shadow-candy-sm"
             />
             <span className="text-base font-extrabold text-candy-orange-deep">{tr('dailyChallenge.title')}</span>
-            <span className="rounded-full bg-white/80 px-2 py-0.5 text-[11px] font-bold text-candy-orange-deep">
+            <span className="rounded-full bg-white/80 px-2 py-0.5 text-xs font-bold text-candy-orange-deep">
               {claimedCount}/{challenges.length}
             </span>
           </div>
@@ -240,7 +240,7 @@ export function DailyChallenge({ compact = false }: { compact?: boolean } = {}) 
               }`}
             >
               <div className="text-base">{c.emoji}</div>
-              <div className="text-[10px] font-bold text-ink-soft">
+              <div className="text-xs font-bold text-ink-soft">
                 {c.isClaimed ? '✓' : `${c.current}/${c.target}`}
               </div>
             </div>

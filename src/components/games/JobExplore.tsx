@@ -88,7 +88,7 @@ export function JobExplore() {
                   selected===i ? 'bg-candy-orange-deep text-white' : 'bg-white'
                 )}>
                 <div className="text-2xl">{job.emoji}</div>
-                <div className="text-[9px] font-bold">{job.name}</div>
+                <div className="text-xs font-bold">{job.name}</div>
               </button>
             ))}
           </div>

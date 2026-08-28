@@ -13,6 +13,7 @@ vi.mock('@/lib/sfx', () => ({
   sfxTap: vi.fn(),
   sfxCorrect: vi.fn(),
   sfxWin: vi.fn(),
+  triggerHaptic: vi.fn(),
 }));
 
 vi.mock('@/lib/celebrate', () => ({
@@ -99,8 +100,8 @@ describe('TaikoRhythmGame', () => {
       root?.render(createElement(TaikoRhythmGame));
     });
     expect(container?.textContent).toContain('两只老虎');
-    expect(container?.textContent).toContain('咚 (敲鼓心)');
-    expect(container?.textContent).toContain('咔 (敲鼓边)');
+    expect(container?.textContent).toContain('敲鼓心');
+    expect(container?.textContent).toContain('敲鼓边');
   });
 
   it('starts song when play button is clicked', () => {

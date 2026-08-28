@@ -33,8 +33,8 @@ export const createLearningSlice: SliceCreator<
     | 'completeDailyReview'
   >
 > = (set, get) => ({
-  practice: (skill, correct, star = 1, difficulty) =>
-    set((s) => _applyProgress(s, (p) => _applyPractice(p, skill, correct, star, difficulty))),
+  practice: (skill, correct, star = 1, difficulty, latencyMs) =>
+    set((s) => _applyProgress(s, (p) => _applyPractice(p, skill, correct, star, difficulty, latencyMs))),
 
   learnSkill: (skill) => set((s) => _applyProgress(s, (p) => _applyLearn(p, skill))),
 

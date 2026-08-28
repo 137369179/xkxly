@@ -60,9 +60,9 @@ export function ComponentBreakdown({ char }: { char: string }) {
             <div key={`${c}-${i}`} className="flex items-center gap-2">
               <div className={`flex flex-col items-center rounded-2xl px-3 py-2 ${ROLE_CLASS[role]}`}>
                 <span className="text-3xl font-black leading-none">{c}</span>
-                <span className="mt-1 text-[10px] font-extrabold">{roleLabel(t, role)}</span>
+                <span className="mt-1 text-xs font-extrabold">{roleLabel(t, role)}</span>
                 {noteOf(c, role) && (
-                  <span className="mt-0.5 max-w-[88px] text-center text-[10px] font-semibold leading-tight opacity-80">
+                  <span className="mt-0.5 max-w-[88px] text-center text-xs font-semibold leading-tight opacity-80">
                     {noteOf(c, role)}
                   </span>
                 )}
@@ -74,7 +74,7 @@ export function ComponentBreakdown({ char }: { char: string }) {
         <span className="text-2xl font-black text-ink-soft">=</span>
         <div className="flex flex-col items-center rounded-2xl bg-white/70 px-4 py-2 shadow-sm ring-1 ring-candy-purple/20">
           <span className="text-4xl font-black text-candy-purple-deep leading-none">{char}</span>
-          <span className="mt-1 text-[10px] font-extrabold text-candy-purple-deep">{t('hanzi.resultChar')}</span>
+          <span className="mt-1 text-xs font-extrabold text-candy-purple-deep">{t('hanzi.resultChar')}</span>
         </div>
       
       <ExploreReward rewardKey="hanzi-component" scene="hanzi" tone="blue" /></div>

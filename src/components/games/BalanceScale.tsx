@@ -2,10 +2,10 @@
  * 重量平衡 ⚖️ (S2)
  * 简单等式天平 — 左右放砝码，判断是否平衡
  */
-import { memo, useState, useRef, useEffect } from 'react';
+import { memo, useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
-import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
 const WEIGHTS = [1, 2, 3, 5, 10];
@@ -68,35 +68,67 @@ function BalanceScaleImpl() {
   const leftSum = problem.left.reduce((a, b) => a + b, 0);
   const rightSum = problem.right.reduce((a, b) => a + b, 0);
 
-  const answer = (balanced: boolean) => {
+  const answer = useCallback((balanced: boolean) => {
     if (lockRef.current) return;
     lockRef.current = true;
     sfxTap();
     const isBalanced = leftSum === rightSum;
     if (balanced === isBalanced) {
-      sfxCorrect(); setScore(s => s + 1); setFeedback('✅ 对了！');
+      sfxCorrect();
+      triggerHaptic(45);
+      setScore((s) => s + 1);
+      setFeedback('✅ 对了！');
       void speak('对了！', { lang: 'zh-CN', rate: 0.85, module: 'praise' });
       setTilt(0);
     } else {
-      sfxWrong(); setFeedback(t('balanceScale.wrongFeedback', { left: leftSum, right: rightSum, state: isBalanced ? t('balanceScale.balanced') : t('balanceScale.unbalanced') }));
+      sfxWrong();
+      triggerHaptic(20);
+      setFeedback(t('balanceScale.wrongFeedback', { left: leftSum, right: rightSum, state: isBalanced ? t('balanceScale.balanced') : t('balanceScale.unbalanced') }));
       void speak('再想想', { lang: 'zh-CN', rate: 0.85, module: 'praise' });
       setTilt(leftSum > rightSum ? -8 : 8);
     }
     if (timerRef.current !== null) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
       timerRef.current = null;
-      if (score + 1 >= level * 3) setLevel(l => l + 1);
+      if (score + 1 >= level * 3) {
+        setLevel((l) => l + 1);
+        sfxWin();
+        triggerHaptic([60, 40, 60, 40, 100]);
+      }
       setProblem(genProblem(level));
       setTilt(0);
       setFeedback('');
       lockRef.current = false;
     }, 1800);
-  };
+  }, [leftSum, rightSum, level, score, t]);
+
+  // 键盘快捷键支持
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === '1' || e.key === 'y' || e.key === 'Y' || e.key === 'ArrowLeft' || e.key === ' ') {
+        e.preventDefault();
+        answer(true);
+      } else if (e.key === '2' || e.key === 'n' || e.key === 'N' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        answer(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [answer]);
 
   return (
     <div className="card-candy p-4 sm:p-6">
       <h3 className="mb-2 text-center text-lg font-extrabold text-ink">{t('balanceScale.title')}</h3>
-      <p className="mb-3 text-center text-xs font-bold text-ink-soft">{t('balanceScale.subtitle')}</p>
+      <p className="mb-2 text-center text-xs font-bold text-ink-soft">{t('balanceScale.subtitle')}</p>
+
+      {/* 快捷操作提示条 */}
+      <div className="mb-3 text-center">
+        <span className="inline-block text-xs text-sky-900 font-bold bg-sky-50/90 px-3 py-1 rounded-xl border border-sky-200">
+          ⌨️ 键盘快捷操作：1 / ← 平衡 · 2 / → 不平衡
+        </span>
+      </div>
 
       <div className="mb-4 flex justify-center" style={{ perspective: '400px' }}>
         <motion.div animate={{ rotate: tilt }} transition={{ type: 'spring' }} className="relative" style={{ width: '240px', height: '140px' }}>
@@ -127,8 +159,12 @@ function BalanceScaleImpl() {
       </div>
 
       <div className="flex justify-center gap-4">
-        <CandyButton tone="green" size="lg" onClick={()=>answer(true)}>{t('balanceScale.balanced')}</CandyButton>
-        <CandyButton tone="pink" size="lg" onClick={()=>answer(false)}>{t('balanceScale.unbalanced')}</CandyButton>
+        <CandyButton tone="green" size="lg" onClick={() => answer(true)} className="min-h-[48px] px-6 text-base font-black">
+          ⚖️ {t('balanceScale.balanced')}
+        </CandyButton>
+        <CandyButton tone="pink" size="lg" onClick={() => answer(false)} className="min-h-[48px] px-6 text-base font-black">
+          🚫 {t('balanceScale.unbalanced')}
+        </CandyButton>
       </div>
 
       <div className="mt-3 flex items-center justify-between">

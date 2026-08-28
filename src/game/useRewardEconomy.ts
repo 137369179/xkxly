@@ -227,6 +227,12 @@ export interface RewardEconomyApi {
   lifetime: number;
   /** 当日已入账 */
   earnedToday: number;
+  /**
+   * 每日星星上限。
+   * 触顶时 UI 应给「今天收集的星星够多啦，明天再来」这类**认可式**收尾，
+   * 而不是「已达上限」这种限制式提示 —— 上限是防刷的护栏，不是给孩子的墙。
+   */
+  dailyCap: number;
   /** 已解锁的奖励 id */
   owned: readonly string[];
   /** 扭蛋收集册 */
@@ -425,6 +431,7 @@ export function useRewardEconomy(options: UseRewardEconomyOptions = {}): RewardE
     balance: state.balance,
     lifetime: state.lifetime,
     earnedToday: state.earnedToday,
+    dailyCap,
     owned: state.owned,
     collection: state.collection,
     pity: state.pity,

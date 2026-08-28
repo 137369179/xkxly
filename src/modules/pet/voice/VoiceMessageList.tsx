@@ -75,7 +75,7 @@ export function VoiceMessageList({
                       sfxTap();
                       speak(m.text, { lang: 'zh-CN' });
                     }}
-                    className="flex items-center gap-1 rounded-full border border-pink-200 bg-white/90 px-2 py-0.5 text-[11px] font-bold text-pink-700 shadow-xs transition-transform active:scale-95 hover:bg-pink-50"
+                    className="flex items-center gap-1 rounded-full border border-pink-200 bg-white/90 px-2 py-0.5 text-xs font-bold text-pink-700 shadow-xs transition-transform active:scale-95 hover:bg-pink-50"
                   >
                     <span>🔊</span>
                     <span>{t('catCompanion.voice.replay')}</span>
@@ -84,7 +84,7 @@ export function VoiceMessageList({
                   <button
                     type="button"
                     onClick={() => togglePinyin(m.id)}
-                    className={`rounded-full border px-2 py-0.5 text-[11px] font-bold shadow-xs transition-transform active:scale-95 ${
+                    className={`rounded-full border px-2 py-0.5 text-xs font-bold shadow-xs transition-transform active:scale-95 ${
                       showPinyin
                         ? 'border-purple-300 bg-purple-100 text-purple-700'
                         : 'border-pink-200 bg-white/90 text-pink-600 hover:bg-pink-50'

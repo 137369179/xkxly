@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
-import { sfxTap, sfxCorrect, sfxWin } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { celebrateBig } from '@/lib/celebrate';
 import { speak } from '@/lib/speech';
 import { useStore } from '@/store/useStore';
@@ -100,46 +100,28 @@ const SCENARIOS: SocialScenario[] = [
   },
   {
     id: 3,
-    question: '好朋友送给你一份精心准备的画作礼物，你应该怎么做？',
-    illustration: '🎁 🎨 👭',
+    question: '上课想要回答老师的问题，正确的方式是？',
+    illustration: '🏫 👩‍🏫 🙋‍♂️',
     options: [
-      { text: '开心地双手接过并说：「谢谢你，我很喜欢！」', isPolite: true, feedback: '太棒了！真诚道谢并赞赏对方的用心，友谊更深厚！' },
-      { text: '随手扔在桌上，一句话也不说', isPolite: false, feedback: '要珍惜别人的心意，礼貌说声谢谢是对朋友最好的尊重！' },
+      { text: '安静举起小手，等待老师点名', isPolite: true, feedback: '遵守规则的好孩子！举手发言让课堂更有序！' },
+      { text: '大声喊叫打断老师', isPolite: false, feedback: '随意打断别人是不礼貌的，耐心举手最棒！' },
     ],
   },
   {
     id: 4,
-    question: '在公园滑滑梯前，有几个小朋友正在排队，你应该？',
-    illustration: '🛝 🚶 🚶‍♂️',
+    question: '看到好朋友因为摔跤哭了，可以怎么做？',
+    illustration: '😢 🩹 🫂',
     options: [
-      { text: '跟在队伍最后面，耐心按顺序排队', isPolite: true, feedback: '遵守公共秩序的好榜样！秩序守护安全与公平！' },
-      { text: '从旁边插队挤到最前面去', isPolite: false, feedback: '插队很不文明也容易摔倒受伤哦，大家排队才安全！' },
-    ],
-  },
-  {
-    id: 5,
-    question: '午休时间大家都在安静睡觉，你想拿书看应该怎么做？',
-    illustration: '😴 🤫 📖',
-    options: [
-      { text: '轻手轻脚慢慢走，安安静静不发出大声音', isPolite: true, feedback: '懂得体贴照顾他人的好孩子！不打扰别人休息真体贴！' },
-      { text: '大喊大叫跑来跑去，把大家都吵醒', isPolite: false, feedback: '别人睡觉时要保持安静，这是体贴他人的重要礼仪！' },
-    ],
-  },
-  {
-    id: 6,
-    question: '看到同桌小朋友的彩色画笔撒了一地正在着急，你应该？',
-    illustration: '🖍️ 😭 🤝',
-    options: [
-      { text: '蹲下身主动说：「我来帮你一起捡起来吧！」', isPolite: true, feedback: '热心助人暖人心！主动伸出援手是最高的情商！' },
-      { text: '在旁边嘲笑他笨手笨脚', isPolite: false, feedback: '嘲笑别人会让人伤心，乐于助人才能赢得大家喜爱！' },
+      { text: '走过去扶他起来，轻声安慰「别哭，我陪着你」', isPolite: true, feedback: '你真是一个体贴、温暖的好伙伴！' },
+      { text: '在旁边大声嘲笑他', isPolite: false, feedback: '嘲笑别人会让朋友更难过，我们要学会关爱同伴。' },
     ],
   },
 ];
 
 export function SocialEmotionGame() {
   const [activeTab, setActiveTab] = useState<'emotion' | 'social'>('emotion');
-  const [selectedEmotionIdx, setSelectedEmotionIdx] = useState<number>(0);
-  const [scenarioIdx, setScenarioIdx] = useState<number>(0);
+  const [selectedEmotionIdx, setSelectedEmotionIdx] = useState(0);
+  const [scenarioIdx, setScenarioIdx] = useState(0);
   const [scenarioFeedback, setScenarioFeedback] = useState<string | null>(null);
 
   const addStars = useStore((s) => s.addStars);
@@ -148,7 +130,7 @@ export function SocialEmotionGame() {
   const currentEmotion = EMOTIONS[selectedEmotionIdx] ?? EMOTIONS[0] ?? {
     id: 'happy',
     name: '开心',
-    emoji: '😊',
+    emoji: '😄',
     eyeEmoji: '👀',
     mouthEmoji: '👄',
     desc: '开心快乐',
@@ -156,55 +138,103 @@ export function SocialEmotionGame() {
   };
   const currentScenario = SCENARIOS[scenarioIdx] ?? SCENARIOS[0] ?? {
     id: 1,
-    question: '分享玩具',
-    illustration: '🧸',
+    question: '遇到朋友要打招呼',
+    illustration: '👋',
     options: [],
   };
 
   useEffect(() => {
-    if (activeTab === 'emotion') {
-      speak(`认识情绪：${currentEmotion.name}。${currentEmotion.desc}。${currentEmotion.soothingTip}`);
-    } else {
-      speak(`社交情境练习：${currentScenario.question}`);
-    }
-  }, [activeTab, currentEmotion.desc, currentEmotion.name, currentEmotion.soothingTip, currentScenario.question]);
+    speak('欢迎来到情绪认知与社交剧场！在这里我们可以认识不同情绪，学习如何与小伙伴快乐相处！');
+  }, []);
 
-  const handleSelectOption = (isPolite: boolean, feedback: string) => {
+  const handleSelectEmotion = useCallback((idx: number) => {
+    sfxTap();
+    triggerHaptic(20);
+    setSelectedEmotionIdx(idx);
+    const emo = EMOTIONS[idx];
+    if (emo) {
+      speak(`${emo.name}。${emo.desc} 小魔法锦囊：${emo.soothingTip}`);
+    }
+  }, []);
+
+  const handleNextScenario = useCallback(() => {
+    sfxTap();
+    triggerHaptic(20);
+    setScenarioFeedback(null);
+    setScenarioIdx((prev) => (prev + 1) % SCENARIOS.length);
+    const nextScen = SCENARIOS[(scenarioIdx + 1) % SCENARIOS.length];
+    if (nextScen) {
+      speak(nextScen.question);
+    }
+  }, [scenarioIdx]);
+
+  const handleSelectOption = useCallback((isPolite: boolean, feedback: string) => {
+    setScenarioFeedback(feedback);
     if (isPolite) {
       sfxCorrect();
       sfxWin();
+      triggerHaptic([30, 40, 60]);
       celebrateBig();
-      addStars(5);
-      addFish(2);
-      setScenarioFeedback(feedback);
-      speak(feedback);
+      addStars(4);
+      addFish(1);
+      speak(`回答正确！${feedback}`);
     } else {
       sfxTap();
-      setScenarioFeedback(feedback);
+      triggerHaptic(40);
       speak(feedback);
     }
-  };
+  }, [addStars, addFish]);
 
-  const handleNextScenario = () => {
-    sfxTap();
-    setScenarioFeedback(null);
-    setScenarioIdx((i) => (i + 1) % SCENARIOS.length);
-  };
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (activeTab === 'emotion' && ['1', '2', '3', '4', '5', '6'].includes(e.key)) {
+        const idx = parseInt(e.key, 10) - 1;
+        if (EMOTIONS[idx]) {
+          e.preventDefault();
+          handleSelectEmotion(idx);
+        }
+      } else if (activeTab === 'social') {
+        if (['1', '2'].includes(e.key)) {
+          const idx = parseInt(e.key, 10) - 1;
+          const opt = currentScenario.options[idx];
+          if (opt) {
+            e.preventDefault();
+            handleSelectOption(opt.isPolite, opt.feedback);
+          }
+        } else if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          handleNextScenario();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeTab, handleSelectEmotion, currentScenario.options, handleSelectOption, handleNextScenario]);
 
   return (
     <div className="space-y-6">
-      {/* 顶部模式切换 */}
-      <div className="flex items-center justify-center gap-3">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-rose-900 font-bold bg-rose-50/90 px-3 py-1 rounded-xl border border-rose-200">
+          ⌨️ 键盘快捷操作：数字键 1-6 选情绪 · 社交模式按 1/2 选择决策 · 空格/Enter 下一情景
+        </span>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-center gap-3" role="tablist" aria-label="情商与社交模式切换">
         <button
           type="button"
+          role="tab"
+          aria-selected={activeTab === 'emotion'}
           onClick={() => {
             sfxTap();
+            triggerHaptic(20);
             setActiveTab('emotion');
           }}
-          className={`px-5 py-3 rounded-2xl font-black text-sm transition-all flex items-center gap-2 border-2 ${
+          className={`min-h-[44px] px-5 py-3 rounded-2xl font-black text-sm transition-all flex items-center gap-2 border-2 focus-visible:ring-4 focus-visible:ring-rose-300 focus:outline-none ${
             activeTab === 'emotion'
               ? 'bg-rose-500 text-white border-rose-600 shadow-lg scale-105'
-              : 'bg-white text-slate-700 border-rose-200 hover:bg-rose-50'
+              : 'bg-white text-slate-700 border-rose-200 hover:bg-rose-50 active:scale-95'
           }`}
         >
           <span>🎭</span>
@@ -213,14 +243,17 @@ export function SocialEmotionGame() {
 
         <button
           type="button"
+          role="tab"
+          aria-selected={activeTab === 'social'}
           onClick={() => {
             sfxTap();
+            triggerHaptic(20);
             setActiveTab('social');
           }}
-          className={`px-5 py-3 rounded-2xl font-black text-sm transition-all flex items-center gap-2 border-2 ${
+          className={`min-h-[44px] px-5 py-3 rounded-2xl font-black text-sm transition-all flex items-center gap-2 border-2 focus-visible:ring-4 focus-visible:ring-violet-300 focus:outline-none ${
             activeTab === 'social'
               ? 'bg-violet-500 text-white border-violet-600 shadow-lg scale-105'
-              : 'bg-white text-slate-700 border-violet-200 hover:bg-violet-50'
+              : 'bg-white text-slate-700 border-violet-200 hover:bg-violet-50 active:scale-95'
           }`}
         >
           <span>🤝</span>
@@ -228,23 +261,18 @@ export function SocialEmotionGame() {
         </button>
       </div>
 
-      {/* 模式一：情绪识别 */}
       {activeTab === 'emotion' && (
         <div className="bg-white rounded-3xl border-3 border-rose-200 p-6 shadow-xl space-y-6">
-          {/* 情绪选择卡片 */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
             {EMOTIONS.map((emo, idx) => (
               <button
                 key={emo.id}
                 type="button"
-                onClick={() => {
-                  sfxTap();
-                  setSelectedEmotionIdx(idx);
-                }}
-                className={`p-4 rounded-2xl border-2 font-black text-sm flex flex-col items-center justify-center gap-2 transition-all ${
+                onClick={() => handleSelectEmotion(idx)}
+                className={`min-h-[44px] p-4 rounded-2xl border-2 font-black text-sm flex flex-col items-center justify-center gap-2 transition-all focus-visible:ring-4 focus-visible:ring-rose-300 focus:outline-none ${
                   selectedEmotionIdx === idx
                     ? 'bg-rose-500 text-white border-rose-600 shadow-lg scale-105'
-                    : 'bg-rose-50 border-rose-100 text-slate-700 hover:bg-rose-100'
+                    : 'bg-rose-50 border-rose-100 text-slate-700 hover:bg-rose-100 active:scale-95'
                 }`}
               >
                 <span className="text-4xl">{emo.emoji}</span>
@@ -253,7 +281,6 @@ export function SocialEmotionGame() {
             ))}
           </div>
 
-          {/* 情绪面部与心理疏导卡片 */}
           <motion.div
             key={currentEmotion.id}
             initial={{ opacity: 0, y: 12 }}
@@ -288,7 +315,6 @@ export function SocialEmotionGame() {
         </div>
       )}
 
-      {/* 模式二：礼貌与社交情境 */}
       {activeTab === 'social' && (
         <div className="bg-white rounded-3xl border-3 border-violet-200 p-6 shadow-xl space-y-6">
           <div className="flex items-center justify-between">
@@ -303,9 +329,9 @@ export function SocialEmotionGame() {
             <button
               type="button"
               onClick={handleNextScenario}
-              className="px-3 py-1.5 bg-violet-100 hover:bg-violet-200 text-violet-800 text-xs font-bold rounded-xl"
+              className="min-h-[44px] px-3 py-1.5 bg-violet-100 hover:bg-violet-200 text-violet-800 text-xs font-bold rounded-xl active:scale-95 focus-visible:ring-4 focus-visible:ring-violet-300"
             >
-              🔄 换一题
+              🔄 换一题 (Space)
             </button>
           </div>
 

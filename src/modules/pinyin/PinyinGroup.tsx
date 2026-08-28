@@ -131,8 +131,8 @@ export function PinyinGroup() {
             )}
           >
             <div className="text-lg font-extrabold text-ink">{cat.emoji} {t(CAT_LABEL_KEY[cat.label] || cat.label)}</div>
-            <div className="mt-1 text-[10px] font-bold text-ink-soft">{cat.desc}</div>
-            <div className="mt-1 text-[9px] font-medium text-ink-muted">💡 {cat.hint}</div>
+            <div className="mt-1 text-xs font-bold text-ink-soft">{cat.desc}</div>
+            <div className="mt-1 text-xs font-medium text-ink-muted">💡 {cat.hint}</div>
             {/* 已放入的韵母 */}
             <div className="mt-2 flex flex-wrap justify-center gap-1">
               {items.filter(i => placed[i.p] === cat.id).map(i => (

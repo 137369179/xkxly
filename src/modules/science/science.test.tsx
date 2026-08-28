@@ -33,6 +33,7 @@ vi.mock('@/lib/sfx', () => ({
   sfxStar: vi.fn(),
   sfxWin: vi.fn(),
   setMuted: vi.fn(),
+  triggerHaptic: vi.fn(),
 }));
 
 vi.mock('@/lib/speech', () => ({ speak: vi.fn(() => Promise.resolve()) }));
@@ -137,6 +138,8 @@ describe('getCombo 组合纯逻辑', () => {
   });
 });
 
+import { SpaceExplorer } from './components/SpaceExplorer';
+
 describe('WeatherLab 冒烟', () => {
   it('组件渲染不崩溃', async () => {
     const host = document.createElement('div');
@@ -146,6 +149,24 @@ describe('WeatherLab 冒烟', () => {
       root.render(createElement(WeatherLab));
     });
     expect(host.childNodes.length).toBeGreaterThan(0);
+    act(() => {
+      root.unmount();
+    });
+    host.remove();
+  });
+});
+
+describe('SpaceExplorer 冒烟', () => {
+  it('组件渲染包含太阳系行星及键盘快捷提示', async () => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const root = createRoot(host);
+    await act(async () => {
+      root.render(createElement(SpaceExplorer));
+    });
+    expect(host.textContent).toContain('太阳');
+    expect(host.textContent).toContain('地球');
+    expect(host.textContent).toContain('键盘快捷操作');
     act(() => {
       root.unmount();
     });

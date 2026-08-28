@@ -152,7 +152,7 @@ export function Hanzi500Page() {
             style={{ borderColor: (CAT_COLOR[h.category] ?? '#cda6b0') + '40' }}
           >
             <span className="text-2xl font-black text-ink">{h.char}</span>
-            <span className="text-[10px] font-bold text-ink-soft">{h.pinyin}</span>
+            <span className="text-xs font-bold text-ink-soft">{h.pinyin}</span>
           </button>
         ))}
       </div>

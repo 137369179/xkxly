@@ -7,10 +7,10 @@
  * VoiceStudioPage      —— 汇总入口页
  */
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { speak, stopSpeaking } from '@/lib/speech';
-import { sfxTap, sfxCorrect, sfxWrong, sfxWin } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { celebrateBig, celebrateSmall } from '@/lib/celebrate';
 import {
   evaluatePronunciation,
@@ -23,6 +23,7 @@ import {
   detectVoiceOnce,
   classifyRecogError,
 } from '@/lib/ai/speechRecog';
+import { ArticulationGuideModal } from './components/ArticulationGuideModal';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. 音色角色定义
@@ -205,7 +206,7 @@ function PronunciationRadar({ result, color = '#6366f1' }: { result: Pronunciati
       <div className="grid grid-cols-5 gap-1 w-full max-w-xs">
         {dims.map((d) => (
           <div key={d.label} className="flex flex-col items-center">
-            <span className="text-[10px] font-black text-slate-500">{d.label}</span>
+            <span className="text-xs font-black text-slate-500">{d.label}</span>
             <span className="text-sm font-black" style={{ color }}>{d.value}</span>
           </div>
         ))}
@@ -231,6 +232,7 @@ function VoiceCharacterPanel({
   const handlePreview = useCallback(async (char: VoiceCharacter) => {
     if (speaking) { stopSpeaking(); setSpeaking(false); setSpeakingId(null); return; }
     sfxTap();
+    triggerHaptic(25);
     setSpeaking(true);
     setSpeakingId(char.id);
     try {
@@ -252,14 +254,18 @@ function VoiceCharacterPanel({
               key={char.id}
               type="button"
               whileTap={{ scale: 0.95 }}
-              onClick={() => { sfxTap(); onSelect(char); }}
-              className={`flex flex-col items-center gap-1.5 rounded-2xl border-3 p-3 transition-all ${
-                isSel ? `${char.bgColor} ${char.borderColor} shadow-lg` : 'bg-white border-slate-200'
+              onClick={() => {
+                sfxTap();
+                triggerHaptic(30);
+                onSelect(char);
+              }}
+              className={`min-h-[96px] flex flex-col items-center justify-center gap-1.5 rounded-2xl border-3 p-3 transition-all focus-visible:ring-4 focus-visible:ring-indigo-300 focus:outline-none ${
+                isSel ? `${char.bgColor} ${char.borderColor} shadow-lg scale-[1.02]` : 'bg-white border-slate-200 hover:border-indigo-200'
               }`}
             >
               <span className="text-3xl">{char.emoji}</span>
               <span className={`text-xs font-black ${isSel ? char.color : 'text-slate-600'}`}>{char.name}</span>
-              <span className="text-[10px] text-slate-400 text-center leading-tight">{char.desc}</span>
+              <span className="text-xs text-slate-400 text-center leading-tight">{char.desc}</span>
             </motion.button>
           );
         })}
@@ -268,10 +274,10 @@ function VoiceCharacterPanel({
         type="button"
         whileTap={{ scale: 0.97 }}
         onClick={() => handlePreview(selected)}
-        className={`w-full rounded-2xl py-3 text-sm font-black transition-all flex items-center justify-center gap-2 ${
+        className={`min-h-[44px] w-full rounded-2xl py-3 text-sm font-black transition-all flex items-center justify-center gap-2 focus-visible:ring-4 focus-visible:ring-indigo-300 focus:outline-none ${
           speaking && speakingId === selected.id
             ? `${selected.bgColor} ${selected.color} animate-pulse border-2 ${selected.borderColor}`
-            : 'bg-gradient-to-r from-slate-700 to-slate-900 text-white'
+            : 'bg-gradient-to-r from-slate-700 to-slate-900 text-white hover:opacity-95'
         }`}
       >
         <span>{speaking && speakingId === selected.id ? '⏹️' : '▶️'}</span>
@@ -374,13 +380,21 @@ function FollowReadStudio({ character }: { character: VoiceCharacter }) {
     setPlayCount((p) => p + 1);
     setTotalScore((p) => p + res.score);
     if (res.passed) {
-      sfxWin();
-      celebrateBig();
+      if (res.score >= 90) {
+        sfxWin();
+        celebrateBig();
+        triggerHaptic([50, 40, 50, 40, 80]);
+      } else {
+        sfxCorrect();
+        celebrateSmall();
+        triggerHaptic(45);
+      }
       void speak(res.score >= 90 ? '太棒了！满分！' : '读得很好！继续加油！', {
         lang: 'zh-CN', rate: character.rate, pitch: character.pitch, module: 'praise',
       });
     } else {
       sfxWrong();
+      triggerHaptic(20);
       void speak('再试一次，你可以的！', { lang: 'zh-CN', rate: character.rate, pitch: character.pitch, module: 'praise' });
     }
   }, [item, character]);
@@ -403,6 +417,7 @@ function FollowReadStudio({ character }: { character: VoiceCharacter }) {
 
   const startListening = useCallback(() => {
     sfxTap();
+    triggerHaptic([30, 40, 50]);
     stopDet();
     setError(null);
     setResult(null);
@@ -491,6 +506,7 @@ function FollowReadStudio({ character }: { character: VoiceCharacter }) {
 
   const stopListening = useCallback(() => {
     sfxTap();
+    triggerHaptic(25);
     sessionRef.current++;
     clearTimers();
     stopDet();
@@ -511,8 +527,19 @@ function FollowReadStudio({ character }: { character: VoiceCharacter }) {
     setPhase('idle');
   }, [clearTimers, stopDet]);
 
-  const nextItem = useCallback(() => { sfxTap(); reset(); setItemIdx((i) => (i + 1) % levelItems.length); }, [reset, levelItems.length]);
-  const prevItem = useCallback(() => { sfxTap(); reset(); setItemIdx((i) => (i - 1 + levelItems.length) % levelItems.length); }, [reset, levelItems.length]);
+  const nextItem = useCallback(() => {
+    sfxTap();
+    triggerHaptic(30);
+    reset();
+    setItemIdx((i) => (i + 1) % levelItems.length);
+  }, [reset, levelItems.length]);
+
+  const prevItem = useCallback(() => {
+    sfxTap();
+    triggerHaptic(30);
+    reset();
+    setItemIdx((i) => (i - 1 + levelItems.length) % levelItems.length);
+  }, [reset, levelItems.length]);
 
   const isListening = phase === 'listening';
   const isEvaluating = phase === 'evaluating';
@@ -525,14 +552,22 @@ function FollowReadStudio({ character }: { character: VoiceCharacter }) {
   return (
     <div className="space-y-4">
       {/* Level tabs */}
-      <div className="flex gap-2">
+      <div className="flex gap-2" role="tablist" aria-label="跟读难度选择">
         {([1, 2, 3] as const).map((lv) => (
           <button
             key={lv}
             type="button"
-            onClick={() => { sfxTap(); setLevel(lv); setItemIdx(0); reset(); }}
-            className={`flex-1 rounded-2xl py-2 text-sm font-black border-2 transition-all ${
-              level === lv ? 'bg-indigo-500 text-white border-indigo-500 shadow-md' : 'bg-white text-slate-500 border-slate-200'
+            role="tab"
+            aria-selected={level === lv}
+            onClick={() => {
+              sfxTap();
+              triggerHaptic(30);
+              setLevel(lv);
+              setItemIdx(0);
+              reset();
+            }}
+            className={`flex-1 min-h-[44px] rounded-2xl py-2 text-sm font-black border-2 transition-all focus-visible:ring-4 focus-visible:ring-indigo-300 focus:outline-none ${
+              level === lv ? 'bg-indigo-500 text-white border-indigo-500 shadow-md scale-[1.02]' : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-200'
             }`}
           >
             {lv === 1 ? '🟢 词语' : lv === 2 ? '🟡 句子' : '🔴 古诗'}
@@ -568,8 +603,12 @@ function FollowReadStudio({ character }: { character: VoiceCharacter }) {
         </div>
         <button
           type="button"
-          onClick={() => { sfxTap(); void speak(item.text, { lang: 'zh-CN', rate: character.rate, pitch: character.pitch, module: 'quiz' }); }}
-          className={`flex items-center gap-2 mx-auto px-4 py-1.5 rounded-full border-2 ${character.borderColor} ${character.color} bg-white/80 text-xs font-black`}
+          onClick={() => {
+            sfxTap();
+            triggerHaptic(25);
+            void speak(item.text, { lang: 'zh-CN', rate: character.rate, pitch: character.pitch, module: 'quiz' });
+          }}
+          className={`min-h-[44px] flex items-center gap-2 mx-auto px-4 py-1.5 rounded-full border-2 ${character.borderColor} ${character.color} bg-white/80 text-xs font-black hover:bg-white active:scale-95 transition-all focus-visible:ring-4 focus-visible:ring-indigo-300 focus:outline-none`}
         >
           <span>{character.emoji}</span>
           <span>听 {character.name} 说一遍</span>
@@ -581,12 +620,12 @@ function FollowReadStudio({ character }: { character: VoiceCharacter }) {
         type="button"
         onClick={isListening ? stopListening : startListening}
         disabled={isEvaluating}
-        className={`w-full rounded-3xl py-4 text-lg font-black transition-all flex items-center justify-center gap-3 ${
+        className={`min-h-[56px] w-full rounded-3xl py-4 text-lg font-black transition-all flex items-center justify-center gap-3 focus-visible:ring-4 focus-visible:ring-indigo-300 focus:outline-none ${
           isListening
             ? 'animate-pulse bg-rose-500 text-white shadow-xl shadow-rose-300'
             : isEvaluating
               ? 'bg-amber-400 text-white'
-              : 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg hover:shadow-xl'
+              : 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg hover:shadow-xl active:scale-[0.99]'
         }`}
       >
         <span className="text-2xl">{isEvaluating ? '⏳' : isListening ? '⏹️' : '🎙️'}</span>
@@ -624,7 +663,7 @@ function FollowReadStudio({ character }: { character: VoiceCharacter }) {
             <div className="flex items-center justify-center gap-4">
               <div className={`flex h-20 w-20 flex-col items-center justify-center rounded-full text-white ${result.passed ? 'bg-emerald-500' : 'bg-amber-500'}`}>
                 <span className="text-3xl font-black">{result.score}</span>
-                <span className="text-[10px]">分</span>
+                <span className="text-xs">分</span>
               </div>
               <div>
                 <p className="font-black text-slate-800 text-base">{result.feedback}</p>
@@ -654,7 +693,7 @@ function FollowReadStudio({ character }: { character: VoiceCharacter }) {
                   title={c.status === 'wrong' && c.heard ? `听到「${c.heard}」` : ''}
                 >
                   {c.ch}
-                  <span className="text-[9px] font-bold">
+                  <span className="text-xs font-bold">
                     {c.status === 'correct' ? '✓' : c.status === 'wrong' ? '✗' : '…'}
                   </span>
                 </motion.span>
@@ -663,10 +702,35 @@ function FollowReadStudio({ character }: { character: VoiceCharacter }) {
 
             {/* Actions */}
             <div className="flex gap-2 justify-center flex-wrap">
-              <button type="button" onClick={reset} className="px-4 py-2 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-2xl text-sm font-black">🔄 再读一次</button>
-              <button type="button" onClick={() => { sfxTap(); void speak(item.text, { lang: 'zh-CN', rate: character.rate, pitch: character.pitch, module: 'quiz' }); }} className="px-4 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-2xl text-sm font-black">👂 再听一遍</button>
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic(25);
+                  reset();
+                }}
+                className="min-h-[44px] px-4 py-2 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-2xl text-sm font-black active:scale-95 transition-all focus-visible:ring-4 focus-visible:ring-rose-300"
+              >
+                🔄 再读一次
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  sfxTap();
+                  triggerHaptic(25);
+                  void speak(item.text, { lang: 'zh-CN', rate: character.rate, pitch: character.pitch, module: 'quiz' });
+                }}
+                className="min-h-[44px] px-4 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-2xl text-sm font-black active:scale-95 transition-all focus-visible:ring-4 focus-visible:ring-indigo-300"
+              >
+                👂 再听一遍
+              </button>
               {result.passed && (
-                <button type="button" onClick={nextItem} className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl text-sm font-black">➡️ 下一题</button>
+                <button
+                  type="button"
+                  onClick={nextItem}
+                  className="min-h-[44px] px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl text-sm font-black active:scale-95 transition-all focus-visible:ring-4 focus-visible:ring-emerald-300"
+                >
+                  ➡️ 下一题
+                </button>
               )}
             </div>
           </motion.div>
@@ -676,8 +740,20 @@ function FollowReadStudio({ character }: { character: VoiceCharacter }) {
       {/* Navigation (when idle) */}
       {phase === 'idle' && !result && (
         <div className="flex gap-2 justify-center">
-          <button type="button" onClick={prevItem} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl text-sm font-bold">← 上一题</button>
-          <button type="button" onClick={nextItem} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl text-sm font-bold">下一题 →</button>
+          <button
+            type="button"
+            onClick={prevItem}
+            className="min-h-[44px] px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl text-sm font-bold active:scale-95 transition-all focus-visible:ring-4 focus-visible:ring-slate-300"
+          >
+            ← 上一题
+          </button>
+          <button
+            type="button"
+            onClick={nextItem}
+            className="min-h-[44px] px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl text-sm font-bold active:scale-95 transition-all focus-visible:ring-4 focus-visible:ring-slate-300"
+          >
+            下一题 →
+          </button>
         </div>
       )}
 
@@ -713,33 +789,101 @@ const FALLBACK_CHAR: VoiceCharacter = {
 export default function VoiceStudioPage() {
   const [selectedChar, setSelectedChar] = useState<VoiceCharacter>(VOICE_CHARACTERS[0] ?? FALLBACK_CHAR);
   const [activeTab, setActiveTab] = useState<'voice' | 'followread'>('voice');
+  const [showGuide, setShowGuide] = useState(false);
 
   const handleSelectChar = useCallback((char: VoiceCharacter) => {
     sfxCorrect();
+    triggerHaptic(30);
     setSelectedChar(char);
     celebrateSmall();
   }, []);
 
+  // 键盘快捷漫游
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === '1' && VOICE_CHARACTERS[0]) {
+        e.preventDefault();
+        handleSelectChar(VOICE_CHARACTERS[0]);
+      } else if (e.key === '2' && VOICE_CHARACTERS[1]) {
+        e.preventDefault();
+        handleSelectChar(VOICE_CHARACTERS[1]);
+      } else if (e.key === '3' && VOICE_CHARACTERS[2]) {
+        e.preventDefault();
+        handleSelectChar(VOICE_CHARACTERS[2]);
+      } else if (e.key === 'v' || e.key === 'V') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(25);
+        setActiveTab('voice');
+      } else if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(25);
+        setActiveTab('followread');
+      } else if (e.key === 'g' || e.key === 'G') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(25);
+        setShowGuide((prev) => !prev);
+      } else if (e.key === 'Escape') {
+        if (showGuide) {
+          e.preventDefault();
+          setShowGuide(false);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleSelectChar, showGuide]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-rose-50 pb-24">
-      <div className="px-4 pt-6 pb-4">
-        <div className="flex items-center gap-3 mb-1">
+      <div className="px-4 pt-6 pb-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
           <span className="text-4xl">🎙️</span>
           <div>
             <h1 className="text-2xl font-black text-slate-800">声音工坊</h1>
             <p className="text-xs text-slate-500">多音色朗读 · 跟读评分 · 五维雷达</p>
           </div>
         </div>
+        <button
+          type="button"
+          onClick={() => {
+            sfxTap();
+            triggerHaptic(25);
+            setShowGuide(true);
+          }}
+          className="min-h-[44px] flex items-center gap-1.5 rounded-2xl bg-white border-2 border-indigo-200 px-3.5 py-2 text-xs font-black text-indigo-700 shadow-sm hover:bg-indigo-50 active:scale-95 transition-all focus-visible:ring-4 focus-visible:ring-indigo-300 focus:outline-none"
+        >
+          <span>👄</span>
+          <span>口型小秘诀</span>
+        </button>
       </div>
 
-      <div className="px-4 mb-4 flex gap-2">
+      <ArticulationGuideModal isOpen={showGuide} onClose={() => setShowGuide(false)} />
+
+      {/* 快捷操作提示条 */}
+      <div className="px-4 mb-3">
+        <div className="flex items-center justify-between text-xs text-indigo-900 font-bold bg-indigo-50/90 px-3 py-1 rounded-xl border border-indigo-200">
+          <span>⌨️ 键盘快捷操作：数字键 1-3 切换角色 · V 角色音色 · F 跟读评测 · G 口型秘诀</span>
+        </div>
+      </div>
+
+      <div className="px-4 mb-4 flex gap-2" role="tablist" aria-label="声音工坊功能标签">
         {(['voice', 'followread'] as const).map((tab) => (
           <button
             key={tab}
             type="button"
-            onClick={() => { sfxTap(); setActiveTab(tab); }}
-            className={`flex-1 rounded-2xl py-2.5 text-sm font-black border-2 transition-all ${
-              activeTab === tab ? 'bg-indigo-500 text-white border-indigo-500 shadow-md' : 'bg-white text-slate-500 border-slate-200'
+            role="tab"
+            aria-selected={activeTab === tab}
+            onClick={() => {
+              sfxTap();
+              triggerHaptic(30);
+              setActiveTab(tab);
+            }}
+            className={`min-h-[44px] flex-1 rounded-2xl py-2.5 text-sm font-black border-2 transition-all focus-visible:ring-4 focus-visible:ring-indigo-300 focus:outline-none ${
+              activeTab === tab ? 'bg-indigo-500 text-white border-indigo-500 shadow-md scale-[1.02]' : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-200'
             }`}
           >
             {tab === 'voice' ? '🎭 角色音色' : '🎙️ 跟读评测'}
@@ -775,12 +919,12 @@ export default function VoiceStudioPage() {
                     key={ch.id}
                     type="button"
                     onClick={() => handleSelectChar(ch)}
-                    className={`flex-1 flex flex-col items-center py-1.5 rounded-2xl border-2 text-sm transition-all ${
-                      selectedChar.id === ch.id ? `${ch.bgColor} ${ch.borderColor}` : 'bg-white border-slate-200'
+                    className={`min-h-[52px] flex-1 flex flex-col items-center justify-center py-1.5 rounded-2xl border-2 text-sm transition-all focus-visible:ring-4 focus-visible:ring-indigo-300 focus:outline-none ${
+                      selectedChar.id === ch.id ? `${ch.bgColor} ${ch.borderColor} shadow-sm scale-[1.02]` : 'bg-white border-slate-200 hover:border-indigo-200'
                     }`}
                   >
                     <span className="text-xl">{ch.emoji}</span>
-                    <span className={`text-[10px] font-black ${selectedChar.id === ch.id ? ch.color : 'text-slate-400'}`}>{ch.name}</span>
+                    <span className={`text-xs font-black ${selectedChar.id === ch.id ? ch.color : 'text-slate-400'}`}>{ch.name}</span>
                   </button>
                 ))}
               </div>

@@ -118,8 +118,8 @@ export function PhoneticFamilies({ onLearn }: { onLearn?: (h: HanziEntry) => voi
                         >
                           <span className="text-4xl font-black leading-tight text-ink sm:text-5xl">{h.c}</span>
                           <span className="text-xs font-bold text-candy-purple-deep">{h.pd}</span>
-                          <span className="text-[10px] font-bold text-ink-soft">{t('phoneticFamilies.radicalSuffix', { r: h.radical })}</span>
-                          {learned && <span className="text-[10px]">✅</span>}
+                          <span className="text-xs font-bold text-ink-soft">{t('phoneticFamilies.radicalSuffix', { r: h.radical })}</span>
+                          {learned && <span className="text-xs">✅</span>}
                         </button>
                       );
                     })}

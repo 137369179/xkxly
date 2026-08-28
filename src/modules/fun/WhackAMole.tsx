@@ -5,7 +5,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
-import { sfxTap, sfxCorrect, sfxWrong, sfxWin } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { celebrateBig, celebrateSmall } from '@/lib/celebrate';
 import { motion, AnimatePresence } from 'motion/react';
 import { safeGetItem, safeSetItem } from '@/lib/safeStorage';
@@ -50,42 +50,67 @@ export function WhackAMole() {
     }, 800 + Math.random() * 400);
   }, []);
 
-  const start = () => {
+  const start = useCallback(() => {
     sfxTap();
+    triggerHaptic(30);
     setActive(true);
     setDone(false);
     setScore(0);
     setMiss(0);
     setTime(GAME_TIME);
     spawn();
-  };
+  }, [spawn]);
 
-  const whack = (idx: number) => {
+  const whack = useCallback((idx: number) => {
     if (idx === moleIdx) {
       sfxCorrect();
-      setScore(s => s + 1);
+      triggerHaptic(45);
+      setScore((s) => s + 1);
       setShowResult(idx);
       setTimeout(() => setShowResult(null), 300);
       clearTimeout(spawnRef.current!);
       setMoleIdx(null);
     } else if (idx === bombIdx) {
       sfxWrong();
-      setScore(s => Math.max(0, s - 2));
+      triggerHaptic([60, 40, 60]);
+      setScore((s) => Math.max(0, s - 2));
       setShowResult(idx);
       setTimeout(() => setShowResult(null), 500);
       clearTimeout(spawnRef.current!);
       setBombIdx(null);
     } else {
       sfxTap();
-      setMiss(m => m + 1);
+      triggerHaptic(15);
+      setMiss((m) => m + 1);
     }
-  };
+  }, [moleIdx, bombIdx]);
+
+  // 全局键盘快捷键
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(e.key)) {
+        const idx = parseInt(e.key, 10) - 1;
+        if (active && !done) {
+          e.preventDefault();
+          whack(idx);
+        }
+      } else if (e.key === ' ' || e.key === 'Enter') {
+        if (!active || done) {
+          e.preventDefault();
+          start();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [active, done, whack, start]);
 
   // Timer
   useEffect(() => {
     if (!active) return;
     timerRef.current = setInterval(() => {
-      setTime(t => {
+      setTime((t) => {
         if (t <= 1) {
           clearInterval(timerRef.current!);
           setActive(false);
@@ -97,10 +122,11 @@ export function WhackAMole() {
             safeSetItem('whack-best', String(score + 1));
             celebrateBig();
             sfxWin();
+            triggerHaptic([60, 40, 60, 40, 100]);
           } else {
             celebrateSmall();
           }
-          // 分数 → 全局星星入账（R55 游戏化：消除 localStorage 孤岛，接入全局成就体系）
+          // 分数 → 全局星星入账
           if (score > 0) {
             addStars(Math.max(1, Math.round(score * STARS_PER_HIT)));
           }
@@ -109,7 +135,9 @@ export function WhackAMole() {
         return t - 1;
       });
     }, 1000);
-    return () => { clearInterval(timerRef.current!); };
+    return () => {
+      clearInterval(timerRef.current!);
+    };
   }, [active, score, addStars]);
 
   // Spawn moles
@@ -127,6 +155,13 @@ export function WhackAMole() {
   return (
     <div className="space-y-4">
       <PageHeader emoji="🔨" title={tr('whackAMole.title')} subtitle={tr('whackAMole.subtitle')} tone="orange" />
+
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-amber-900 font-bold bg-amber-50/90 px-3 py-1 rounded-xl border border-amber-200">
+          ⌨️ 键盘快捷操作：数字键 1-9 打击 9 个地洞 · 空格键 开始游戏 / 再玩一次
+        </span>
+      </div>
 
       {!active && !done && (
         <Panel className="text-center">

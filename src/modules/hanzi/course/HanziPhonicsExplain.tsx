@@ -117,7 +117,7 @@ export function HanziPhonicsExplain({ char, onComplete }: Props) {
                   }`}
                 >
                   <span className="block text-base font-black">{w}</span>
-                  <span className="text-[10px] text-sky-600 font-normal mt-0.5 block">🔊 朗读</span>
+                  <span className="text-xs text-sky-600 font-normal mt-0.5 block">🔊 朗读</span>
                 </motion.button>
               );
             })}

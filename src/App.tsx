@@ -1,23 +1,13 @@
-import { Suspense, lazy, useEffect, useMemo } from 'react';
-import { AnimatePresence, motion, MotionConfig } from 'motion/react';
+import { Suspense, lazy, useEffect } from 'react';
 import { useRoute } from '@/lib/router';
 import { NAV_MAP } from '@/data/nav';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { BottomTabs } from '@/components/layout/BottomTabs';
 import { TopBar } from '@/components/layout/TopBar';
-import { ComboIndicator } from '@/components/feedback/ComboIndicator';
-import { StudyGuard } from '@/components/study/StudyGuard';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { OfflineToast } from '@/components/OfflineIndicator';
-import { RouteSkeleton } from '@/components/RouteSkeleton';
 import { useTtsStore } from '@/store/useTtsStore';
 import { useProfilesStore } from '@/store/useProfilesStore';
-import { OnboardingModal } from '@/components/OnboardingModal';
-import { stopSpeaking } from '@/lib/speechCore';
 import { useTranslation } from '@/i18n/useTranslation';
-import { PwaInstallBanner } from '@/components/PwaInstallBanner';
-import { SwUpdateToast } from '@/components/SwUpdateToast';
-import { BackupRestorePanel } from '@/components/BackupRestorePanel';
 import { startAutoBackup, useBackupDetection } from '@/lib/autoBackup';
 import { useStore } from '@/store/useStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
@@ -25,6 +15,13 @@ import { putStorybookContent } from '@/lib/storybookStore';
 import { announceToScreenReader } from '@/components/Accessibility';
 import { useSoundSync } from '@/hooks/useSoundSync';
 import { updateAppBadge } from '@/lib/badgeSync';
+import { performLogArchival } from '@/lib/indexedDbStore';
+import { preloadCoreAudioAssets } from '@/lib/audioCache';
+import { preloadHighFrequencyRoutes } from '@/lib/routerPreload';
+
+// Page 组件懒加载，延迟 motion 库 124KB 的解析执行，减少 TBT
+const Page = lazy(() => import('@/Page'));
+
 const CatCompanion = lazy(() =>
   import('@/modules/companion/CatCompanion').then((m) => ({ default: m.CatCompanion })) as Promise<{ default: React.ComponentType<any> }>
 );
@@ -34,131 +31,36 @@ const CatCompanion = lazy(() =>
 const BadgeUnlock = lazy(() =>
   import('@/components/feedback/BadgeUnlock').then((m) => ({ default: m.BadgeUnlock })),
 );
+// 低频组件懒加载：OnboardingModal 仅首次打开时加载，PwaInstallBanner 仅可安装时，
+// SwUpdateToast 仅 SW 更新时，BackupRestorePanel 仅需恢复时，OfflineToast 仅离线时，
+// ComboIndicator 连击事件低频，StudyGuard 学习护盾覆盖层，均不进首屏主包。
+const OnboardingModal = lazy(() =>
+  import('@/components/OnboardingModal').then((m) => ({ default: m.OnboardingModal })),
+);
+const PwaInstallBanner = lazy(() =>
+  import('@/components/PwaInstallBanner').then((m) => ({ default: m.PwaInstallBanner })),
+);
+const SwUpdateToast = lazy(() =>
+  import('@/components/SwUpdateToast').then((m) => ({ default: m.SwUpdateToast })),
+);
+const BackupRestorePanel = lazy(() =>
+  import('@/components/BackupRestorePanel').then((m) => ({ default: m.BackupRestorePanel })),
+);
+const OfflineToast = lazy(() =>
+  import('@/components/OfflineIndicator').then((m) => ({ default: m.OfflineToast })),
+);
+const ComboIndicator = lazy(() =>
+  import('@/components/feedback/ComboIndicator').then((m) => ({ default: m.ComboIndicator })),
+);
+const StudyGuard = lazy(() =>
+  import('@/components/study/StudyGuard').then((m) => ({ default: m.StudyGuard })),
+);
+
 // Part B · Step 3：AiVoiceModal 仅打开语音对话时才需要，懒加载使整套
 // speech(真实语音) + speechRecog + AI 流式链路离开首屏主包。
 const AiVoiceModal = lazy(() =>
   import('@/components/ai/AiVoiceModal').then((m) => ({ default: m.AiVoiceModal })),
 );
-
-const HomePage = lazy(() => import('@/modules/home/HomePage'));
-const CompanionPage = lazy(() => import('@/modules/companion/CompanionPage'));
-const TodayPage = lazy(() => import('@/modules/today/TodayPage'));
-const LettersPage = lazy(() => import('@/modules/letters/LettersPage'));
-const PoemsPage = lazy(() => import('@/modules/poems/PoemsPage'));
-const NumbersPage = lazy(() => import('@/modules/numbers/NumbersPage'));
-const LogicPage = lazy(() => import('@/modules/logic/LogicPage'));
-const AdventurePage = lazy(() => import('@/modules/adventure/AdventurePage'));
-const RewardsPage = lazy(() => import('@/modules/rewards/RewardsPage'));
-const StudyPassport = lazy(() => import('@/modules/rewards/StudyPassport'));
-const ParentPage = lazy(() => import('@/modules/parent/ParentPage'));
-const TtsTestPage = lazy(() => import('@/modules/parent/TtsTestPage'));
-const HanziPage = lazy(() => import('@/modules/hanzi/HanziPage'));
-const HanziListenPage = lazy(() => import('@/modules/hanzi/HanziListen'));
-const PinyinPage = lazy(() => import('@/modules/pinyin/PinyinPage'));
-const WordsPage = lazy(() => import('@/modules/words/WordsPage'));
-const FunPage = lazy(() => import('@/modules/fun/FunPage'));
-const IdiomsPage = lazy(() => import('@/modules/idioms/IdiomsPage'));
-const SongsPage = lazy(() => import('@/modules/songs/SongsPage'));
-const SciencePage = lazy(() => import('@/modules/science/SciencePage'));
-const MusicPage = lazy(() => import('@/modules/music/MusicPage'));
-const ArtPage = lazy(() => import('@/modules/art/ArtPage'));
-const SafetyPage = lazy(() => import('@/modules/safety/SafetyPage'));
-const GeographyPage = lazy(() => import('@/modules/geography/GeographyPage'));
-const VehiclesPage = lazy(() => import('@/modules/vehicles/VehiclesPage'));
-const FestivalsPage = lazy(() => import('@/modules/festivals/FestivalsPage'));
-const PlantsPage = lazy(() => import('@/modules/plants/PlantsPage'));
-const CatHousePage = lazy(() => import('@/modules/pet/CatHousePage'));
-const RealisticCatHousePage = lazy(() => import('@/modules/pet/realistic/RealisticCatHousePage'));
-const DesktopPetPage = lazy(() => import('@/modules/pet/desktop/DesktopPetPage'));
-const StorybookPage = lazy(() => import('@/modules/storybook/StorybookPage'));
-const WrongBookPage = lazy(() => import('@/modules/wrongbook/WrongBookDashboard'));
-const GameCenterPage = lazy(() => import('@/modules/game/GameCenterPage'));
-const VoiceStudioPage = lazy(() => import('@/modules/voice/VoiceStudioPage'));
-const StoryLibraryPage = lazy(() => import('@/modules/story/StoryLibraryPage'));
-const GrowthMuseumPage = lazy(() => import('@/modules/growth/GrowthMuseumPage'));
-const ContentStationPage = lazy(() => import('@/modules/content/ContentStationPage'));
-const ResearchModePage = lazy(() => import('@/modules/research/ResearchModePage'));
-const DiscoveryGallery = lazy(() => import('@/modules/research/DiscoveryGallery'));
-const DesignSystemPage = lazy(() => import('@/modules/design/DesignSystemPage'));
-const AchievementCenter = lazy(() => import('@/modules/achievement/AchievementCenter'));
-const NurseryPage = lazy(() => import('@/modules/fun/NurseryPage'));
-const ParentChildDuel = lazy(() => import('@/modules/game/ParentChildDuel'));
-
-function Page() {
-  const { route, param } = useRoute();
-
-  useEffect(() => {
-    // 切页副作用：停语音 + 回顶部
-    stopSpeaking();
-    window.scrollTo({ top: 0 });
-  }, [route, param]);
-
-  const page = useMemo(() => {
-    switch (route) {
-      case 'home': return <HomePage />;
-      case 'today': return <TodayPage />;
-      case 'companion': return <CompanionPage />;
-      case 'letters': return <LettersPage />;
-      case 'poems': return <PoemsPage />;
-      case 'numbers': return <NumbersPage />;
-      case 'logic': return <LogicPage />;
-      case 'adventure': return <AdventurePage />;
-      case 'rewards': return <RewardsPage />;
-      case 'passport': return <StudyPassport />;
-      case 'parent': return <ParentPage />;
-      case 'ttstest': return <TtsTestPage />;
-      case 'hanzi': return <HanziPage />;
-      case 'hanzi-listen': return <HanziListenPage />;
-      case 'pinyin': return <PinyinPage />;
-      case 'words': return <WordsPage />;
-      case 'fun': return <FunPage />;
-      case 'idioms': return <IdiomsPage />;
-      case 'songs': return <SongsPage />;
-      case 'science': return <SciencePage />;
-      case 'music': return <MusicPage />;
-      case 'art': return <ArtPage />;
-      case 'safety': return <SafetyPage />;
-      case 'geography': return <GeographyPage />;
-      case 'vehicles': return <VehiclesPage />;
-      case 'festivals': return <FestivalsPage />;
-      case 'plants': return <PlantsPage />;
-      case 'cat_house': return <CatHousePage />;
-      case 'realistic_cat': return <RealisticCatHousePage />;
-      case 'desktop_pet': return <DesktopPetPage />;
-      case 'storybook': return <StorybookPage />;
-      case 'wrongbook': return <WrongBookPage />;
-      case 'gamecenter': return <GameCenterPage />;
-      case 'voicestudio': return <VoiceStudioPage />;
-      case 'story': return <StoryLibraryPage />;
-      case 'growth': return <GrowthMuseumPage />;
-      case 'content': return <ContentStationPage />;
-      case 'research': return <ResearchModePage />;
-      case 'discoveries': return <DiscoveryGallery />;
-      case 'design': return <DesignSystemPage />;
-      case 'achievement': return <AchievementCenter />;
-      case 'nursery': return <NurseryPage />;
-      case 'duel': return <ParentChildDuel />;
-      default: return <HomePage />;
-    }
-  }, [route]);
-
-  return (
-    <ErrorBoundary resetKey={`${route}:${param ?? ''}`} >
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={route}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.22, ease: 'easeOut' }}
-        >
-          {/* P1-7：路由级轻量骨架屏（内容骨架占位，替代全屏 Loading，减少 CLS） */}
-          <Suspense fallback={<RouteSkeleton />}>{page}</Suspense>
-        </motion.div>
-      </AnimatePresence>
-    </ErrorBoundary>
-  );
-}
 
 export function App() {
   const { t } = useTranslation();
@@ -202,35 +104,54 @@ export function App() {
     const dueCount = Object.values(mastery).filter((m) => m && m.lv > 0 && typeof m.due === 'number' && m.due <= Date.now()).length;
     updateAppBadge(dueCount);
 
-    // P1-10：一次性迁移 —— 老版本 progress 携带的绘本全文迁入 IndexedDB，
-    // 并从 progress 剥离（只留轻量元数据，控制 localStorage 体积）。幂等：无 data 即跳过。
-    // ⚠️ 仅剥离「写入成功」的条目：写失败保留 data，下次启动自动重试，杜绝数据丢失。
-    const migrateStorybooks = async () => {
-      const p = useStore.getState().progress;
-      const list = p.storybooks ?? [];
-      if (!list.some((b) => b.data)) return;
-      const results = await Promise.all(
-        list.filter((b) => b.data).map(async (b) => [b, await putStorybookContent(b)] as const),
-      );
-      const failedIds = new Set(results.filter(([, ok]) => !ok).map(([b]) => b.id));
-      const stripped = list.map((b) => {
-        if (!b.data || failedIds.has(b.id)) return b;
-        return {
-          id: b.id,
-          title: b.title ?? b.data.bookTitle,
-          theme: b.theme,
-          style: b.style,
-          character: b.character,
-          createdAt: b.createdAt,
-          readCount: b.readCount,
-          favorite: b.favorite,
-        };
-      });
-      if (stripped.some((b, i) => b !== list[i])) {
-        useStore.setState({ progress: { ...p, storybooks: stripped } });
-      }
-    };
-    void migrateStorybooks();
+    // 非关键初始化推迟到 requestIdleCallback，不阻塞首屏渲染
+    const schedule = (window as unknown as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => void }).requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 2000));
+
+    schedule(() => {
+      // P1-10：一次性迁移 —— 老版本 progress 携带的绘本全文迁入 IndexedDB，
+      // 并从 progress 剥离（只留轻量元数据，控制 localStorage 体积）。幂等：无 data 即跳过。
+      // ⚠️ 仅剥离「写入成功」的条目：写失败保留 data，下次启动自动重试，杜绝数据丢失。
+      const migrateStorybooks = async () => {
+        const p = useStore.getState().progress;
+        const list = p.storybooks ?? [];
+        if (!list.some((b) => b.data)) return;
+        const results = await Promise.all(
+          list.filter((b) => b.data).map(async (b) => [b, await putStorybookContent(b)] as const),
+        );
+        const failedIds = new Set(results.filter(([, ok]) => !ok).map(([b]) => b.id));
+        const stripped = list.map((b) => {
+          if (!b.data || failedIds.has(b.id)) return b;
+          return {
+            id: b.id,
+            title: b.title ?? b.data.bookTitle,
+            theme: b.theme,
+            style: b.style,
+            character: b.character,
+            createdAt: b.createdAt,
+            readCount: b.readCount,
+            favorite: b.favorite,
+          };
+        });
+        if (stripped.length !== list.length || stripped.some((b, i) => b !== list[i])) {
+          useStore.setState({ progress: { ...p, storybooks: stripped } });
+        }
+      };
+      void migrateStorybooks();
+
+      // 数据冷热归档：将 >14 天的打卡日志移入 IndexedDB
+      const archiveLogs = async () => {
+        const p = useStore.getState().progress;
+        const { hotLogs, archivedCount } = await performLogArchival(p.dailyLog ?? {});
+        if (archivedCount > 0) {
+          useStore.setState({ progress: { ...p, dailyLog: hotLogs } });
+        }
+      };
+      void archiveLogs();
+      // 基础高频发音离线预热
+      preloadCoreAudioAssets();
+      // 高频下一路由预测性静默预加载
+      preloadHighFrequencyRoutes();
+    }, { timeout: 5000 });
   }, []);
 
   // SEO（规格十五）：按路由动态更新 document.title，提升各页可识别度与分享体验
@@ -253,8 +174,7 @@ export function App() {
   }, [route]);
 
   return (
-    <MotionConfig reducedMotion="user">
-      <div
+    <div
         className="min-h-screen bg-gradient-to-br from-[#FFF0F4] via-[#FFE4EF] to-[#F2EAFD] selection:bg-pink-200"
         data-eyecare={eyeCareMode ? 'on' : 'off'}
         data-motion={eyeCareMode ? 'density-low' : undefined}
@@ -272,26 +192,29 @@ export function App() {
           <Suspense fallback={null}><CatCompanion /></Suspense>
         </ErrorBoundary>
         <Suspense fallback={null}><BadgeUnlock /></Suspense>
-        <ComboIndicator />
-        <StudyGuard />
+        <Suspense fallback={null}><ComboIndicator /></Suspense>
+        <Suspense fallback={null}><StudyGuard /></Suspense>
         {/* E2 · 护眼模式暖色滤镜叠加层（pointer-events:none，绝不拦截交互） */}
         <div className="eyecare-overlay" aria-hidden="true" />
-        <OfflineToast />
-        <PwaInstallBanner />
-        <SwUpdateToast />
+        <Suspense fallback={null}><OfflineToast /></Suspense>
+        <Suspense fallback={null}><PwaInstallBanner /></Suspense>
+        <Suspense fallback={null}><SwUpdateToast /></Suspense>
         {showRestorePanel && (
-          <BackupRestorePanel onRestoreComplete={handleRestoreComplete} />
+          <Suspense fallback={null}>
+            <BackupRestorePanel onRestoreComplete={handleRestoreComplete} />
+          </Suspense>
         )}
         <Suspense fallback={null}>
           <AiVoiceModal isOpen={voiceModalOpen} onClose={closeVoiceModal} />
         </Suspense>
         {!onboarded && (
-          <OnboardingModal
-            onComplete={(n, a, c, age) => completeOnboarding(n, a, c, age)}
-          />
+          <Suspense fallback={null}>
+            <OnboardingModal
+              onComplete={(n, a, c, age) => completeOnboarding(n, a, c, age)}
+            />
+          </Suspense>
         )}
       </div>
-    </MotionConfig>
   );
 }
 

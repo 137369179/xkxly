@@ -2,12 +2,13 @@
  * 儿歌乐园 - 逐句朗读+拼音+教育寓意
  */
 
-import { useState, useRef, useMemo, useEffect } from 'react';
+import { useState, useRef, useMemo, useEffect, useCallback } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { NURSERY_RHYMES, THEME_LABEL, type NurseryRhyme, type RhymeTheme } from '@/data/nurseryRhymes';
 import { speak, stopSpeaking } from '@/lib/speech';
-import { sfxTap } from '@/lib/sfx';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
+import { navigate } from '@/lib/router';
 import { motion } from 'motion/react';
 import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -39,8 +40,9 @@ export function NurseryPage() {
     return map;
   }, []);
 
-  const playRhyme = async (rhyme: NurseryRhyme) => {
+  const playRhyme = useCallback(async (rhyme: NurseryRhyme) => {
     sfxTap();
+    triggerHaptic(25);
     learnSkill(`fun:nursery-${rhyme.title}`);
     tickTime(10);
     setPlaying(true);
@@ -58,19 +60,50 @@ export function NurseryPage() {
     }
     setActiveLine(-1);
     setPlaying(false);
-  };
+  }, [learnSkill, tickTime]);
 
-  const stop = () => {
+  const stop = useCallback(() => {
     stopRef.current = true;
     stopSpeaking();
+    triggerHaptic(15);
     setPlaying(false);
     setActiveLine(-1);
-  };
+  }, []);
+
+  // 全局键盘快捷键响应 (Space 播放/停止, Esc 返回列表或主页)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        if (selected) {
+          if (playing) stop();
+          else void playRhyme(selected);
+        }
+      } else if (e.key === 'Escape') {
+        if (selected) {
+          stop();
+          setSelected(null);
+        } else {
+          navigate('home');
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selected, playing, playRhyme, stop]);
 
   if (!selected) {
     return (
       <div className="space-y-4">
         <PageHeader emoji="🎵" title={t('nurseryPage.title')} subtitle={t('nurseryPage.subtitle')} tone="pink" />
+        
+        {/* 快捷操作提示条 */}
+        <div className="text-center">
+          <span className="inline-block text-xs text-pink-900 font-bold bg-pink-50/90 px-3 py-1 rounded-xl border border-pink-200">
+            ⌨️ 键盘快捷操作：点击儿歌进入 · 空格键 播放/暂停 · Esc 返回列表/主页
+          </span>
+        </div>
         {(Object.keys(THEME_LABEL) as RhymeTheme[]).map((theme) => {
           const rhymes = byTheme[theme] ?? [];
           if (!rhymes?.length) return null;
@@ -87,7 +120,7 @@ export function NurseryPage() {
                 {rhymes.map(r => (
                   <button
                     key={r.id}
-                    onClick={() => { sfxTap(); setSelected(r); }}
+                    onClick={() => { sfxTap(); triggerHaptic(20); setSelected(r); }}
                     className="flex flex-col items-center rounded-2xl border-4 bg-white p-3 transition-all hover:scale-105 active:translate-y-[1px]"
                     style={{ borderColor: color + '40' }}
                   >

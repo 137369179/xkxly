@@ -10,7 +10,7 @@ import { Tabs, type TabItem } from '@/components/ui/Tabs';
 import { AiPanel } from '@/components/ai/AiPanel';
 import { useStore } from '@/store/useStore';
 import { speak } from '@/lib/speech';
-import { sfxTap, sfxWin, sfxStar } from '@/lib/sfx';
+import { sfxTap, sfxWin, sfxStar, triggerHaptic } from '@/lib/sfx';
 import { IDIOMS, getIdiomsByLevel, IDIOM_CATEGORIES, type Idiom, type IdiomCategory } from '@/data/idioms';
 import { IdiomChain } from './IdiomChain';
 import { IdiomMatchGame } from './IdiomMatchGame';
@@ -43,7 +43,7 @@ function CategoryBadge({ category }: { category: IdiomCategory }) {
   const meta = IDIOM_CATEGORIES.find(c => c.id === category);
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-extrabold"
+      className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-extrabold"
       style={{ background: t.soft, color: t.deep }}
     >
       <span>{meta?.emoji}</span>
@@ -162,8 +162,55 @@ export default function IdiomsPage() {
     };
   };
 
+  // 全局键盘快捷键响应 (1-5 切换专区，Esc 返回)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (selected) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          triggerHaptic(20);
+          setSelected(null);
+        }
+        return;
+      }
+      if (reviewOpen) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          triggerHaptic(20);
+          setReviewOpen(false);
+        }
+        return;
+      }
+      if (e.key === '1') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setTab('library');
+      } else if (e.key === '2') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setTab('guess');
+      } else if (e.key === '3') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setTab('match');
+      } else if (e.key === '4') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setTab('chain');
+      } else if (e.key === '5') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setTab('allusion');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selected, reviewOpen]);
+
   const startGuess = () => {
     sfxTap();
+    triggerHaptic(30);
     // 开一局是安全边界：把小茜的最新建议应用上来
     levelMeta.syncNow();
     setGuessStarted(true);
@@ -254,6 +301,14 @@ export default function IdiomsPage() {
   return (
     <div className="space-y-5">
       <PageHeader emoji="🏯" title={t('idioms.storyHouse')} subtitle={t('idioms.storyCount', { count: IDIOMS.length })} tone="purple" />
+      
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-purple-900 font-bold bg-purple-50/90 px-3 py-1 rounded-xl border border-purple-200">
+          ⌨️ 键盘快捷操作：数字 1-5 切换专区 (故事库/猜成语/消消乐/接龙/典故词林) · Esc 返回
+        </span>
+      </div>
+
       <Tabs items={TABS} value={tab} onChange={setTab} tone="purple" layoutId="idiom-tabs" />
 
       {/* SRS 复习中心入口 */}

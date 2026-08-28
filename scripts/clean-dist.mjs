@@ -17,9 +17,26 @@ const icons = resolve(root, 'dist', 'icons');
 // 递归逐文件删除（绕过批量安全删除阈值）
 function removeAssetsDir(dir) {
   if (!existsSync(dir)) return;
-  for (const name of readdirSync(dir)) {
+  let names;
+  try {
+    names = readdirSync(dir);
+  } catch {
+    return; // 目录不可读则安全跳过，不阻断构建
+  }
+  for (const name of names) {
     const full = join(dir, name);
-    const st = statSync(full);
+    let st;
+    try {
+      st = statSync(full);
+    } catch {
+      // 入口不可 stat（悬空符号链接 / 瞬态竞态 / 陈旧 hash 孤儿）→ 尝试直接删除，失败则跳过
+      try {
+        unlinkSync(full);
+      } catch {
+        /* 单文件删除失败不阻断 */
+      }
+      continue;
+    }
     if (st.isDirectory()) {
       removeAssetsDir(full);
       try {

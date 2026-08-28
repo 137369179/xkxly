@@ -67,7 +67,7 @@ export function Sidebar({ active }: { active: RouteId }) {
             {translate(`nav.${item.id}.label`) || item.label}
           </span>
           <span
-            className={cn('block truncate text-[11px] font-semibold', !isActive && 'text-ink-soft')}
+            className={cn('block truncate text-xs font-semibold', !isActive && 'text-ink-soft')}
             style={isActive ? { color: 'rgba(255,255,255,0.85)' } : undefined}
           >
             {translate(`nav.${item.id}.desc`) || item.desc}
@@ -118,7 +118,7 @@ export function Sidebar({ active }: { active: RouteId }) {
             <div key={g.key} className="mt-1">
               <div className="mb-1.5 flex items-center gap-1.5 px-2">
                 <span className="text-sm">{meta.emoji}</span>
-                <span className="text-[11px] font-extrabold uppercase tracking-wider" style={{ color: tone.deep }}>
+                <span className="text-xs font-extrabold uppercase tracking-wider" style={{ color: tone.deep }}>
                   {translate(`categories.${g.key}`) || g.key}
                 </span>
               </div>

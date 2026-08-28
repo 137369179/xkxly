@@ -14,7 +14,7 @@ import { QuizCard } from '@/components/QuizCard';
 import { useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import { questionForSkill, makeMathQuestion } from '@/lib/questions';
-import { sfxTap, sfxStar, sfxWrong, sfxCorrect } from '@/lib/sfx';
+import { sfxTap, sfxStar, sfxWrong, sfxCorrect, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { isDue, skillLabel, subjectLabel, subjectEmoji, weakSkills } from '@/lib/srs';
 import { useAiTask } from '@/lib/ai/useAi';
@@ -170,6 +170,7 @@ export function AdaptiveTrainer() {
 
     if (correct) {
       sfxCorrect();
+      triggerHaptic(25);
       celebrateSmall();
       setScore((s) => ({ ...s, ok: s.ok + 1 }));
       setStreak((s) => s + 1);
@@ -180,6 +181,7 @@ export function AdaptiveTrainer() {
       }
     } else {
       sfxWrong();
+      triggerHaptic(10);
       setScore((s) => ({ ...s, ng: s.ng + 1 }));
       setStreak(0);
 

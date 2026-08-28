@@ -90,7 +90,7 @@ export function AllusionBrowser() {
             className="rounded-xl bg-candy-purple-soft p-3 text-center hover:bg-candy-purple-soft/80"
           >
             <div className="text-lg font-black text-candy-purple-deep">{term}</div>
-            <div className="mt-1 truncate text-[10px] font-bold text-ink-soft">
+            <div className="mt-1 truncate text-xs font-bold text-ink-soft">
               {ALLUSION_SOURCES[term]?.source ?? ''}
             </div>
           </motion.button>

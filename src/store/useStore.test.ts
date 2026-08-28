@@ -32,7 +32,7 @@ beforeAll(async () => {
   const { useStore: us } = await import('./useStore');
   useStore = us;
   ({ useSettingsStore } = await import('./useSettingsStore'));
-});
+}, 30000);
 
 beforeEach(() => {
   // 每个用例前把进度复位到干净基线

@@ -3,7 +3,6 @@ import {
   diagnoseStartLevel,
   tierForCount,
   type DiagnosticInput,
-  type Tier,
 } from './diagnosticPlacement';
 
 describe('tierForCount 阈值边界', () => {

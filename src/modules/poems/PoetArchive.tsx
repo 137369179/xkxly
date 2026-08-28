@@ -160,7 +160,7 @@ export default function PoetArchive() {
               >
                 <div className="text-2xl">📜</div>
                 <div className="mt-1 text-sm font-extrabold text-ink">{name}</div>
-                <div className="text-[10px] font-bold text-ink-soft">{POETS[name]!.life}</div>
+                <div className="text-xs font-bold text-ink-soft">{POETS[name]!.life}</div>
               </motion.button>
             ))}
           </div>

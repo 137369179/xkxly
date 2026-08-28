@@ -6,10 +6,10 @@
  * 3. 消除金光粒子动效、Combo 连击判定与「成语大宗师」荣誉勋章！
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { speak } from '@/lib/speech';
-import { sfxTap, sfxCorrect, sfxWrong, sfxWin } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 import { StreakBar } from '@/components/study/StreakBar';
@@ -117,6 +117,7 @@ export function IdiomMatchGame() {
   const [clearedIdioms, setClearedIdioms] = useState<string[]>([]);
   const [streak, setStreak] = useState(0);
   const [lastSolvedIdiom, setLastSolvedIdiom] = useState<MatchLevel['idioms'][0] | null>(null);
+  const [hintWord, setHintWord] = useState<string | null>(null);
 
   const currentLevel = useMemo(() => {
     return MATCH_LEVELS[levelIdx % MATCH_LEVELS.length] ?? MATCH_LEVELS[0] ?? FALLBACK_LEVEL;
@@ -143,15 +144,31 @@ export function IdiomMatchGame() {
     setSelectedChars([]);
     setClearedIdioms([]);
     setLastSolvedIdiom(null);
+    setHintWord(null);
   }, []);
 
   // 切换关卡
-  const handleSelectLevel = (idx: number) => {
+  const handleSelectLevel = useCallback((idx: number) => {
     sfxTap();
+    triggerHaptic(30);
     setLevelIdx(idx);
     handleResetLevel();
     void speak(`进入${MATCH_LEVELS[idx]?.name ?? ''}！`, { lang: 'zh-CN' });
-  };
+  }, [handleResetLevel]);
+
+  // 火眼金睛智能提示
+  const handleHint = useCallback(() => {
+    sfxTap();
+    triggerHaptic(35);
+    const uncleared = currentLevel.idioms.filter((i) => !clearedIdioms.includes(i.word));
+    if (uncleared.length === 0) return;
+    const target = uncleared[0]!;
+    setHintWord(target.word);
+    void speak(`提示：找一找「${target.word}」！`, { lang: 'zh-CN' });
+    setTimeout(() => {
+      setHintWord(null);
+    }, 2500);
+  }, [currentLevel, clearedIdioms]);
 
   // 点选字块
   const handlePickCard = (card: { char: string; gridId: string; idiomWord: string }) => {
@@ -160,6 +177,7 @@ export function IdiomMatchGame() {
     if (selectedChars.some((s) => s.gridId === card.gridId)) return;
 
     sfxTap();
+    triggerHaptic(20);
     const nextSelected = [...selectedChars, { char: card.char, gridId: card.gridId }];
     setSelectedChars(nextSelected);
 
@@ -171,6 +189,7 @@ export function IdiomMatchGame() {
       if (targetIdiom) {
         // 匹配成功！
         sfxCorrect();
+        triggerHaptic(45);
         celebrateSmall();
         const nextCleared = [...clearedIdioms, targetIdiom.word];
         setClearedIdioms(nextCleared);
@@ -184,6 +203,7 @@ export function IdiomMatchGame() {
         if (nextCleared.length === currentLevel.idioms.length) {
           sfxWin();
           celebrateBig();
+          triggerHaptic([60, 40, 60, 40, 100]);
           const nextStreak = streak + 1;
           setStreak(nextStreak);
           addStars(2);
@@ -192,6 +212,7 @@ export function IdiomMatchGame() {
       } else {
         // 匹配失败
         sfxWrong();
+        triggerHaptic(20);
         void speak('这四个字不构成完整成语哦，再试一次吧！', { lang: 'zh-CN' });
         setTimeout(() => {
           setSelectedChars([]);
@@ -199,6 +220,35 @@ export function IdiomMatchGame() {
       }
     }
   };
+
+  const isLevelCleared = clearedIdioms.length === currentLevel.idioms.length;
+
+  // 键盘快捷监听
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['1', '2', '3', '4', '5', '6'].includes(e.key)) {
+        const idx = parseInt(e.key, 10) - 1;
+        if (MATCH_LEVELS[idx]) {
+          e.preventDefault();
+          handleSelectLevel(idx);
+        }
+      } else if (e.key === 'h' || e.key === 'H') {
+        e.preventDefault();
+        handleHint();
+      } else if (e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        handleResetLevel();
+      } else if (e.key === ' ' || e.key === 'Enter') {
+        if (isLevelCleared && levelIdx < MATCH_LEVELS.length - 1) {
+          e.preventDefault();
+          handleSelectLevel(levelIdx + 1);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleSelectLevel, handleHint, handleResetLevel, isLevelCleared, levelIdx]);
 
   return (
     <div className="space-y-4">
@@ -227,10 +277,17 @@ export function IdiomMatchGame() {
         <StreakBar streak={streak} target={3} />
       </div>
 
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-purple-900 font-bold bg-purple-50/90 px-3 py-1 rounded-xl border border-purple-200">
+          ⌨️ 键盘快捷操作：数字键 1-6 选关 · H 火眼金睛提示 · R 重置打乱 · 空格键 下一关
+        </span>
+      </div>
+
       {/* 主游戏区 */}
       <div className="bg-gradient-to-br from-purple-50 via-pink-50 to-amber-50 rounded-3xl border-3 border-purple-200 p-5 shadow-sm space-y-4">
         {/* 顶部目标提示 */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h3 className="text-base font-black text-slate-800 flex items-center gap-1.5">
               <span>🎴</span>
@@ -244,13 +301,25 @@ export function IdiomMatchGame() {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={handleResetLevel}
-            className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-black text-slate-600 hover:bg-slate-50"
-          >
-            🔄 重新打乱
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleHint}
+              disabled={isLevelCleared}
+              className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 active:scale-95 text-amber-950 font-black text-xs shadow-sm transition-all flex items-center gap-1 disabled:opacity-50"
+              title="火眼金睛提示 (快捷键 H)"
+            >
+              <span>👁️</span>
+              <span>火眼金睛</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleResetLevel}
+              className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-black text-slate-600 hover:bg-slate-50 active:scale-95 transition-all"
+            >
+              🔄 重新打乱
+            </button>
+          </div>
         </div>
 
         {/* 当前选中的字预览槽位 */}
@@ -277,6 +346,7 @@ export function IdiomMatchGame() {
           {gridCards.map((card) => {
             const isCleared = clearedIdioms.includes(card.idiomWord);
             const isSelected = selectedChars.some((s) => s.gridId === card.gridId);
+            const isHinted = hintWord && card.idiomWord === hintWord && !isCleared;
 
             return (
               <motion.button
@@ -291,7 +361,9 @@ export function IdiomMatchGame() {
                     ? 'bg-slate-100 border-slate-200 text-slate-300 opacity-20 pointer-events-none'
                     : isSelected
                       ? 'bg-purple-600 border-purple-700 text-white shadow-md ring-4 ring-purple-200 scale-105'
-                      : 'bg-white border-purple-200 text-slate-800 hover:border-purple-400 hover:shadow-md'
+                      : isHinted
+                        ? 'bg-amber-100 border-amber-400 text-amber-900 ring-4 ring-amber-300 animate-pulse scale-105'
+                        : 'bg-white border-purple-200 text-slate-800 hover:border-purple-400 hover:shadow-md'
                 }`}
               >
                 {card.char}
@@ -320,6 +392,19 @@ export function IdiomMatchGame() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* 通关下一关引导 */}
+        {isLevelCleared && levelIdx < MATCH_LEVELS.length - 1 && (
+          <div className="text-center pt-2">
+            <button
+              type="button"
+              onClick={() => handleSelectLevel(levelIdx + 1)}
+              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-500 text-white font-black text-sm shadow-lg hover:brightness-110 active:scale-95 transition-all"
+            >
+              🎉 挑战下一关：{MATCH_LEVELS[levelIdx + 1]?.name} →
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

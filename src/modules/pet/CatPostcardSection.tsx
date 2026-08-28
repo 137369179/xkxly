@@ -45,7 +45,7 @@ export function CatPostcardSection({ catAffection }: { catAffection: number }) {
                 )}
               </div>
               <p className="mt-2 text-center">{item.label}</p>
-              <span className="text-[10px] text-rose-500 font-normal">{item.tip}</span>
+              <span className="text-xs text-rose-500 font-normal">{item.tip}</span>
             </div>
           );
         })}

@@ -17,6 +17,7 @@ import { RestReminder } from "@/components/gamification/RestReminder";
 import { MistakeBookPanel } from "@/components/gamification/MistakeBookPanel";
 import { ComboMeter } from "@/components/gamification/ComboMeter";
 import { GentleFeedback } from "@/components/gamification/GentleFeedback";
+import { ReducedMotionToggle } from "@/components/gamification/ReducedMotionToggle";
 import { praiseByScene, encourageByScene } from "@/lib/praise";
 
 const MAX_OF: Record<Difficulty, number> = { 1: 10, 2: 15, 3: 20 };
@@ -219,6 +220,7 @@ export function MathQuiz() {
         <ComboMeter count={combo} />
         {feedback && <GentleFeedback correct={feedback.correct} message={feedback.msg} />}
         <RestReminder />
+        <ReducedMotionToggle />
       </section>
     </>
   );

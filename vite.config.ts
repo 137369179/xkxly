@@ -51,7 +51,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    target: 'es2020',
+    target: 'es2022',
     // 关闭自动清空 dist：本机安全工具（如 macOS 安全删除机制）会拦截 vite 对
     // dist/icons 等子目录的批量删除（>50 文件），导致 build 在 prepare-out-dir 阶段失败。
     // 改为覆盖写入，旧 hash chunk 不被 index.html 引用，无害。

@@ -146,7 +146,7 @@ export function SortClassify() {
                 selected===item.id ? 'ring-2 ring-candy-purple-deep scale-105' : ''
               )}>
               <div className="text-2xl">{item.emoji}</div>
-              <div className="text-[10px] font-extrabold">{item.label}</div>
+              <div className="text-xs font-extrabold">{item.label}</div>
             </button>
           ))}
           {items.length === 0 && <span className="text-xs text-ink-muted">{t('sort.allDone')}</span>}

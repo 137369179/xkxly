@@ -166,24 +166,24 @@ function Medal({
         )}
       </div>
       <span
-        className="line-clamp-1 text-[11px] font-extrabold"
+        className="line-clamp-1 text-xs font-extrabold"
         style={{ color: unlocked ? ts.deep : '#8B7F96' }}
       >
         {badge.name}
       </span>
       {unlocked ? (
-        <span className="text-[10px] font-bold text-candy-green-deep">
+        <span className="text-xs font-bold text-candy-green-deep">
           {date ? `✅ ${date}` : `✅ ${translate('achievementWall.unlocked')}`}
         </span>
       ) : meter ? (
         <div className="w-full">
           <ProgressBar value={Math.min(meter[0], meter[1])} max={meter[1]} tone={badge.tone} height={6} />
-          <span className="mt-0.5 block text-[10px] font-bold text-ink-soft">
+          <span className="mt-0.5 block text-xs font-bold text-ink-soft">
             {Math.min(meter[0], meter[1])}/{meter[1]}
           </span>
         </div>
       ) : (
-        <span className="text-[10px] font-bold text-ink-soft">未开始</span>
+        <span className="text-xs font-bold text-ink-soft">未开始</span>
       )}
     </motion.div>
   );

@@ -40,27 +40,6 @@ export function TopBar() {
     'en-US': 'EN',
   };
 
-  const handleClearCache = async () => {
-    sfxTap();
-    try {
-      if ('serviceWorker' in navigator) {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        for (const reg of regs) {
-          await reg.unregister();
-        }
-      }
-      if ('caches' in window) {
-        const keys = await caches.keys();
-        for (const key of keys) {
-          await caches.delete(key);
-        }
-      }
-    } catch {
-      // ignore
-    }
-    window.location.reload();
-  };
-
   return (
     <header className="pt-safe sticky top-0 z-30 px-2.5 py-1.5 sm:px-6 sm:py-2 transition-all">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 rounded-[1.8rem] border-[3px] border-white bg-white/90 px-2.5 py-1.5 shadow-jelly backdrop-blur-xl sm:px-5 sm:py-2">
@@ -93,16 +72,6 @@ export function TopBar() {
             </Suspense>
             <button
               type="button"
-              onClick={handleClearCache}
-              title="清理缓存并刷新"
-              aria-label="清理缓存并刷新"
-              className="flex h-9 items-center gap-1 rounded-full px-2 text-xs font-black text-slate-600 transition-all hover:bg-white hover:text-amber-600 active:scale-95"
-            >
-              <span className="text-sm">🧹</span>
-              <span className="hidden lg:inline">刷新缓存</span>
-            </button>
-            <button
-              type="button"
               onClick={toggleLocale}
               aria-label={locale === 'zh-CN' ? '切换到繁体中文' : locale === 'zh-TW' ? 'Switch to English' : '切换到简体中文'}
               className="flex h-9 items-center gap-1 rounded-full px-2 text-xs font-black text-candy-purple-deep transition-all active:scale-95"
@@ -122,17 +91,8 @@ export function TopBar() {
           </div>
           {catOpen && <CategorySheet open={catOpen} onClose={() => setCatOpen(false)} />}
 
-          {/* 移动端精简工具条：分类 + 静音 + 清理缓存（语言切换低频，仅桌面展示） */}
+          {/* 移动端精简工具条：分类 + 静音（语言切换低频，仅桌面展示） */}
           <div className="flex shrink-0 items-center gap-1 sm:hidden">
-            <button
-              type="button"
-              onClick={handleClearCache}
-              title="清理缓存并刷新"
-              aria-label="清理缓存并刷新"
-              className="grid h-9 w-9 place-items-center rounded-full bg-slate-100 text-sm shadow-sm active:scale-95 transition-all"
-            >
-              🧹
-            </button>
             <button
               type="button"
               onClick={() => { sfxTap(); setCatOpen(true); }}
@@ -166,7 +126,7 @@ export function TopBar() {
             </span>
             <span className="hidden min-w-0 pr-2.5 pl-1 text-xs font-black text-candy-orange-deep sm:inline">
               <span className="block max-w-[5rem] truncate leading-tight">{activeProfile?.name ?? '宝贝'}</span>
-              <span className="mt-0.5 flex items-center gap-1 rounded-full bg-gradient-to-r from-candy-purple-deep to-candy-purple px-2 py-0.5 text-[10px] font-extrabold text-white">
+              <span className="mt-0.5 flex items-center gap-1 rounded-full bg-gradient-to-r from-candy-purple-deep to-candy-purple px-2 py-0.5 text-xs font-extrabold text-white">
                 🏅 {badgeCount}
               </span>
             </span>

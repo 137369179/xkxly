@@ -10,7 +10,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { speak } from '@/lib/speech';
-import { sfxTap, sfxCorrect, sfxWrong, sfxWin } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { celebrateBig } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 import { StreakBar } from '@/components/study/StreakBar';
@@ -222,26 +222,29 @@ export function CodeBotStudio() {
   }, [handleReset]);
 
   // 添加指令到流水线
-  const handleAddCommand = (cmd: CommandType) => {
+  const handleAddCommand = useCallback((cmd: CommandType) => {
     if (running) return;
     sfxTap();
+    triggerHaptic(25);
     setPipeline((prev) => [...prev, cmd]);
-  };
+  }, [running]);
 
   // 删除单步指令
-  const handleRemoveCommand = (idx: number) => {
+  const handleRemoveCommand = useCallback((idx: number) => {
     if (running) return;
     sfxTap();
+    triggerHaptic(20);
     setPipeline((prev) => prev.filter((_, i) => i !== idx));
-  };
+  }, [running]);
 
   // 清空流水线
-  const handleClearPipeline = () => {
+  const handleClearPipeline = useCallback(() => {
     if (running) return;
     sfxTap();
+    triggerHaptic(40);
     setPipeline([]);
     handleReset();
-  };
+  }, [running, handleReset]);
 
   // 展开流水线中的循环指令为原子动作列表
   const unrolledCommands = useMemo(() => {
@@ -376,6 +379,7 @@ export function CodeBotStudio() {
       setStreak(0);
     } else {
       sfxWrong();
+      triggerHaptic(30);
       setStatusMessage('🏁 未能到达终点火箭，继续调整指令吧！');
       void speak('还没有走到火箭处哦，再加几条指令试试看吧！', { lang: 'zh-CN' });
       setStreak(0);
@@ -384,8 +388,50 @@ export function CodeBotStudio() {
     setRunning(false);
   };
 
+  // 全局键盘快捷键
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['1', '2', '3', '4', '5', '6'].includes(e.key)) {
+        const idx = parseInt(e.key, 10) - 1;
+        const cmdDef = COMMAND_DEFS[idx];
+        if (cmdDef && !running) {
+          e.preventDefault();
+          handleAddCommand(cmdDef.type);
+        }
+      } else if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        void handleRunPipeline();
+      } else if (e.key === 'Backspace' || e.key === 'z' || e.key === 'Z') {
+        if (pipeline.length > 0 && !running) {
+          e.preventDefault();
+          handleRemoveCommand(pipeline.length - 1);
+        }
+      } else if (e.key === 'c' || e.key === 'C') {
+        if (!running) {
+          e.preventDefault();
+          handleClearPipeline();
+        }
+      } else if (e.key === 'r' || e.key === 'R') {
+        if (!running) {
+          e.preventDefault();
+          handleReset();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [running, pipeline, handleAddCommand, handleRemoveCommand, handleClearPipeline, handleReset]);
+
   return (
     <div className="space-y-4">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-blue-900 font-bold bg-blue-50/90 px-3 py-1 rounded-xl border border-blue-200">
+          ⌨️ 键盘快捷操作：数字键 1-6 选积木 · 空格/Enter 运行程序 · Z/退格 撤销单步 · C 清空 · R 复位
+        </span>
+      </div>
+
       {/* 关卡切换与连击状态 */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap gap-1.5">
@@ -573,7 +619,7 @@ export function CodeBotStudio() {
                   type="button"
                   disabled={running}
                   onClick={handleClearPipeline}
-                  className="text-[11px] font-bold text-rose-600 hover:text-rose-700"
+                  className="text-xs font-bold text-rose-600 hover:text-rose-700"
                 >
                   🗑️ 清空流水线
                 </button>

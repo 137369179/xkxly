@@ -188,7 +188,7 @@ export function LineGloss({ poem }: { poem: DeepPoem }) {
                       </a>
                     </div>
                   ) : (
-                    <p className="mt-1 text-[11px] text-ink-soft/70">{tr('poem.noAllusionEntry')}</p>
+                    <p className="mt-1 text-xs text-ink-soft/70">{tr('poem.noAllusionEntry')}</p>
                   )}
                 </div>
               );
@@ -227,7 +227,7 @@ export function ProsodyGrid({ poem }: { poem: DeepPoem }) {
       </div>
 
       {/* 图例 */}
-      <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold">
+      <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
         <span className="rounded-full bg-[#EAF2FF] px-2.5 py-1 text-candy-blue-deep">平</span>
         <span className="rounded-full bg-[#FFEAF1] px-2.5 py-1 text-rose-600">仄</span>
         <span className="rounded-full bg-[#FFF3DC] px-2.5 py-1 text-amber-700">{tr('poem.legendEnter')}</span>
@@ -274,11 +274,11 @@ export function ProsodyGrid({ poem }: { poem: DeepPoem }) {
                           style={{ background: cell.level === '平' ? '#EAF2FF' : cell.ru ? '#FFF3DC' : '#FFEAF1' }}
                         >
                           {std && (
-                            <span className="text-[9px] font-bold text-ink-soft/70">{std === '·' ? '·' : std}</span>
+                            <span className="text-xs font-bold text-ink-soft/70">{std === '·' ? '·' : std}</span>
                           )}
                           <span
                             className={cn(
-                              'text-[10px] font-bold',
+                              'text-xs font-bold',
                               cell.level === '平' ? 'text-candy-blue-deep' : cell.ru ? 'text-amber-700' : 'text-rose-600',
                             )}
                           >
@@ -320,7 +320,7 @@ export function ProsodyGrid({ poem }: { poem: DeepPoem }) {
         </div>
       )}
 
-      <p className="text-[11px] leading-relaxed text-ink-soft/80">
+      <p className="text-xs leading-relaxed text-ink-soft/80">
         {tr('poem.prosodyNote', { count: ruCount })}
         {pro.yunBu
           ? tr('poem.prosodyNoteYun')
@@ -348,7 +348,7 @@ function RhymeRail({ feet }: { feet: string[] }) {
           </g>
         ))}
       </svg>
-      <span className="mt-1 text-[10px] font-bold text-emerald-700">{tr('poem.sameRhyme')}</span>
+      <span className="mt-1 text-xs font-bold text-emerald-700">{tr('poem.sameRhyme')}</span>
     </div>
   );
 }
@@ -394,7 +394,7 @@ export function PoetCard({ poem }: { poem: DeepPoem }) {
         <div>
           <p className="text-lg font-extrabold text-ink">{poet.name}</p>
           <p className="text-xs font-bold text-ink-soft">{poet.life} · {poet.dynasty}{poet.style ? ` · ${poet.style}` : ''}</p>
-          {poet.epithet && <p className="text-[11px] font-bold text-candy-pink-deep">{poet.epithet}</p>}
+          {poet.epithet && <p className="text-xs font-bold text-candy-pink-deep">{poet.epithet}</p>}
         </div>
       </div>
 

@@ -295,7 +295,7 @@ export function MathChallengeGame() {
           </CandyButton>
         ) : (
           <div className="bg-white/90 p-3 rounded-2xl border border-amber-300 text-xs font-bold text-amber-900 space-y-1 shadow-sm">
-            <div className="flex items-center justify-between text-[11px] font-black text-amber-700">
+            <div className="flex items-center justify-between text-xs font-black text-amber-700">
               <span>🐱 AI 小智解题思路：</span>
               <IconButton
                 tone="yellow"

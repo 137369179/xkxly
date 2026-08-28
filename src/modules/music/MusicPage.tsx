@@ -10,7 +10,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
-import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, triggerHaptic } from '@/lib/sfx';
 import { getAudioContext } from '@/lib/audioContext';
 import { speak } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -78,6 +78,7 @@ export default function MusicPage() {
   }, []);
 
   const handleKeyClick = (idx: number) => {
+    triggerHaptic(20);
     setActiveKey(idx);
     const freq = FREQS[idx];
     if (freq) playNote(freq);
@@ -86,8 +87,23 @@ export default function MusicPage() {
     timersRef.current.push(t);
   };
 
+  // 全局键盘快捷弹奏 (1-8 琴键)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      const num = parseInt(e.key, 10);
+      if (num >= 1 && num <= 8) {
+        e.preventDefault();
+        handleKeyClick(num - 1);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const startPitchQuiz = () => {
     sfxTap();
+    triggerHaptic(30);
     setFeedback('');
     const idx1 = Math.floor(Math.random() * 4); // 低音区
     const idx2 = Math.floor(Math.random() * 4) + 4; // 高音区
@@ -112,11 +128,13 @@ export default function MusicPage() {
     const correct = pickFirst === quizTone.ansHigh;
     if (correct) {
       sfxCorrect();
+      triggerHaptic(45);
       setFeedback('correct');
       speak(tr('music.praise'), { lang: 'zh-CN' });
       practice('music:pitch', true, 2, 2);
     } else {
       sfxWrong();
+      triggerHaptic(20);
       setFeedback('wrong');
       speak(tr('music.encourage'), { lang: 'zh-CN' });
       practice('music:pitch', false, 0, 2);
@@ -136,6 +154,13 @@ export default function MusicPage() {
         subtitle={tr('music.subtitle')}
         tone="pink"
       />
+
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-pink-900 font-bold bg-pink-50/90 px-3 py-1 rounded-xl border border-pink-200">
+          ⌨️ 键盘快捷操作：数字 1-8 弹奏 8 音阶 (Do ~ High-Do)
+        </span>
+      </div>
 
       {/* 3D 羊毛毡梦幻彩色琴键 */}
       <Panel className="border-2 border-pink-300 bg-gradient-to-r from-pink-50 via-purple-50 to-rose-50 text-center">

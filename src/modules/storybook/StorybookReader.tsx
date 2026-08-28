@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { speak, stopSpeaking } from '@/lib/speech';
-import { sfxTap, sfxStar, sfxFlip, sfxWin } from '@/lib/sfx';
+import { sfxTap, sfxStar, sfxFlip, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 import { AiAvatar } from '@/components/ai/AiAvatar';
@@ -72,24 +72,10 @@ export function StorybookReader({
     };
   }, [currentPage, playPage]);
 
-  // 键盘导航
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight' && currentPage < totalPages - 1) {
-        setDirection(1);
-        setCurrentPage((p) => p + 1);
-      } else if (e.key === 'ArrowLeft' && currentPage > 0) {
-        setDirection(-1);
-        setCurrentPage((p) => p - 1);
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [currentPage, totalPages]);
-
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     if (saved) return;
     sfxStar();
+    triggerHaptic(30);
     const storybook: SavedStorybook = {
       id: existingId ?? (crypto.randomUUID?.() ?? `sb-${Date.now()}-${Math.random().toString(36).slice(2)}`),
       data: book,
@@ -103,32 +89,73 @@ export function StorybookReader({
     addStars(3);
     celebrateSmall();
     setSaved(true);
-  };
+  }, [saved, existingId, book, theme, style, character, saveStorybook, addStars]);
 
-  const goNext = () => {
+  const goNext = useCallback(() => {
     if (currentPage < totalPages - 1) {
       sfxFlip();
+      triggerHaptic(20);
       setDirection(1);
       const nextP = currentPage + 1;
       setCurrentPage(nextP);
       if (nextP === totalPages - 1) {
         celebrateSmall();
         sfxWin();
+        triggerHaptic([40, 20, 60]);
         addStars(2);
       }
     }
-  };
+  }, [currentPage, totalPages, addStars]);
 
-  const goPrev = () => {
+  const goPrev = useCallback(() => {
     if (currentPage > 0) {
       sfxFlip();
+      triggerHaptic(20);
       setDirection(-1);
       setCurrentPage((p) => p - 1);
     }
-  };
+  }, [currentPage]);
+
+  // 键盘导航
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+        e.preventDefault();
+        goNext();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        goPrev();
+      } else if (e.key === ' ' || e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        playPage(currentPage);
+      } else if (e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        sfxTap();
+        setShowPinyin((v) => !v);
+      } else if (e.key === 's' || e.key === 'S') {
+        e.preventDefault();
+        handleSave();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        stopSpeaking();
+        sfxTap();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [currentPage, totalPages, goNext, goPrev, playPage, handleSave, onClose]);
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-white/95 backdrop-blur-sm">
+      {/* 顶部快捷提示条 */}
+      <div className="bg-purple-50 border-b border-purple-100 text-center py-1">
+        <span className="text-xs font-bold text-purple-900">
+          ⌨️ 键盘快捷操作：← / → 翻页 · 空格 重播朗读 · P 拼音注音 · S 保存绘本 · Esc 返回
+        </span>
+      </div>
+
       {/* 顶部栏 */}
       <header className="flex items-center justify-between px-4 py-3 border-b-2 border-purple-100">
         <button
@@ -136,6 +163,7 @@ export function StorybookReader({
           onClick={() => {
             stopSpeaking();
             sfxTap();
+            triggerHaptic(20);
             onClose();
           }}
           className="flex items-center gap-2 text-gray-500 hover:text-gray-700"

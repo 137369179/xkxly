@@ -75,7 +75,7 @@ export function CategorySheet({
                       <span className="text-2xl">{it.emoji}</span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm font-extrabold text-gray-800">{it.label}</span>
-                        <span className="block truncate text-[11px] font-bold text-ink-soft">{it.desc}</span>
+                        <span className="block truncate text-xs font-bold text-ink-soft">{it.desc}</span>
                       </span>
                     </motion.button>
                   ))}

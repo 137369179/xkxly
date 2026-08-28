@@ -14,6 +14,7 @@ import { useBadges, useMastery, useStore } from '@/store/useStore';
 import type { Progress } from '@/types';
 import { BADGE_MAP } from '@/data/badges';
 import { navigate } from '@/lib/router';
+import { triggerHaptic } from '@/lib/sfx';
 import { useTranslation } from '@/i18n/useTranslation';
 
 /**
@@ -65,8 +66,18 @@ export default function ResearchModePage() {
   useEffect(() => {
     if (session.status === 'COMPLETE') {
       void celebrateBig();
+      triggerHaptic(60);
     }
   }, [session.status]);
+
+  // 全局键盘：Esc 返回主页
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') navigate('home');
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, []);
 
   // —— Sprint 4-C：SRS 到期项（跨主题复习混入数据源）——
   const due = useMemo(() => dueSkills({ mastery } as Progress), [mastery]);
@@ -118,8 +129,8 @@ export default function ResearchModePage() {
     emit({ type: 'CONFIRM' });
   }, [completeResearchSession, emit]);
 
-  const onExploreAgain = useCallback(() => emit({ type: 'EXPLORE_AGAIN' }), [emit]);
-  const onRestart = useCallback(() => emit({ type: 'RESTART' }), [emit]);
+  const onExploreAgain = useCallback(() => { triggerHaptic(15); emit({ type: 'EXPLORE_AGAIN' }); }, [emit]);
+  const onRestart = useCallback(() => { triggerHaptic(15); emit({ type: 'RESTART' }); }, [emit]);
 
   // —— QUIZ 段（RoundRunner 零改动复用，C3 锁存；Sprint 4-C：SRS 复习混入）——
   const quizRunner = useMemo(() => {
@@ -220,7 +231,7 @@ export default function ResearchModePage() {
               <div key={c.label} className="rounded-2xl bg-purple-50 px-2 py-3">
                 <div className="text-xl">{c.emoji}</div>
                 <div className="mt-0.5 text-xl font-black tabular-nums text-candy-purple-deep">{c.value}</div>
-                <div className="mt-0.5 text-[10px] font-bold text-ink-soft">{c.label}</div>
+                <div className="mt-0.5 text-xs font-bold text-ink-soft">{c.label}</div>
               </div>
             ))}
           </div>

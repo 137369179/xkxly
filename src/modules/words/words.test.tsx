@@ -35,6 +35,7 @@ vi.mock('@/lib/sfx', () => ({
   sfxStar: vi.fn(),
   sfxWin: vi.fn(),
   setMuted: vi.fn(),
+  triggerHaptic: vi.fn(),
 }));
 
 vi.mock('@/lib/speech', () => ({ speak: vi.fn(() => Promise.resolve()) }));
@@ -264,6 +265,8 @@ describe('WordFamilyGame 组件渲染与交互', () => {
   });
 });
 
+import { CvcWordBuilder } from './CvcWordBuilder';
+
 describe('PhonicsListen 组件冒烟', () => {
   let container: HTMLDivElement;
   let root: Root;
@@ -286,5 +289,29 @@ describe('PhonicsListen 组件冒烟', () => {
     expect(container.textContent).toContain('phonicsListen.title');
     expect(container.textContent).toContain('phonicsListen.start');
     expect(container.textContent).not.toContain('phonicsListen.soundInfo');
+  });
+});
+
+describe('CvcWordBuilder 组件冒烟', () => {
+  let container: HTMLDivElement;
+  let root: Root;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    root = createRoot(container);
+  });
+
+  afterEach(() => {
+    act(() => root.unmount());
+    container.remove();
+  });
+
+  it('渲染 CVC 拼词积木与快捷操作提示', async () => {
+    await act(async () => {
+      root.render(createElement(CvcWordBuilder));
+    });
+    expect(container.textContent).toContain('键盘快捷操作');
+    expect(container.textContent).toContain('示范拼读');
   });
 });

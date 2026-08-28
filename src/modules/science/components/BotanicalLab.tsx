@@ -1164,7 +1164,7 @@ export function RealPhotoDisplayCard({
             }`}
           />
           <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent p-3 text-left z-20">
-            <span className="inline-block px-2.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black mr-1.5 shadow-sm">
+            <span className="inline-block px-2.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 text-xs font-black mr-1.5 shadow-sm">
               📸 真实生长实拍
             </span>
             <p className="text-xs font-black text-white leading-tight mt-1 drop-shadow">
@@ -1175,10 +1175,10 @@ export function RealPhotoDisplayCard({
       ) : (
         <div className="p-4 flex flex-col items-center justify-between bg-gradient-to-b from-emerald-950/60 to-slate-950 w-full min-h-[224px] text-white">
           <div className="w-full flex items-center justify-between pb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[10px] font-black">
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black">
               🌿 科学矢量物候图解
             </span>
-            <span className="text-[10px] text-slate-400 font-mono">HIGH-RES ANATOMY</span>
+            <span className="text-xs text-slate-400 font-mono">HIGH-RES ANATOMY</span>
           </div>
           <div className="py-2 flex items-center justify-center">
             <PlantGraphicIllustration plantId={plantId} stage={stage} className="scale-110 drop-shadow-md" />
@@ -4041,10 +4041,10 @@ export function BotanicalLab() {
                       sfxTap();
                       setPlantViewMode(plantViewMode === 'timelapse' ? 'photo' : 'timelapse');
                     }}
-                    className="px-3 py-1 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-black shadow transition-all flex items-center gap-1 border border-emerald-400/40"
+                    className="px-3 py-1 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow transition-all flex items-center gap-1 border border-emerald-400/40"
                   >
                     <span>{plantViewMode === 'timelapse' ? '🔬 剖面延时生长' : '📸 真实微距实拍'}</span>
-                    <span className="text-[9px] opacity-75">(点击切换)</span>
+                    <span className="text-xs opacity-75">(点击切换)</span>
                   </button>
                 </div>
 
@@ -4056,7 +4056,7 @@ export function BotanicalLab() {
                       sfxTap();
                       setIsPlaying(!isPlaying);
                     }}
-                    className={`px-2.5 py-1 rounded-xl text-[11px] font-black transition-all ${
+                    className={`px-2.5 py-1 rounded-xl text-xs font-black transition-all ${
                       isPlaying ? 'bg-amber-500 text-slate-950 shadow-md' : 'bg-emerald-600 text-white hover:bg-emerald-500'
                     }`}
                   >
@@ -4070,7 +4070,7 @@ export function BotanicalLab() {
                         sfxTap();
                         setPlaybackSpeed(spd as any);
                       }}
-                      className={`px-1.5 py-0.5 rounded-lg text-[10px] font-mono font-black ${
+                      className={`px-1.5 py-0.5 rounded-lg text-xs font-mono font-black ${
                         playbackSpeed === spd ? 'bg-emerald-500 text-slate-950' : 'text-slate-500 hover:text-emerald-400'
                       }`}
                     >
@@ -4097,7 +4097,7 @@ export function BotanicalLab() {
 
               {/* 连续滑动条时间轴 */}
               <div className="w-full space-y-1.5 px-1 pt-1">
-                <div className="flex items-center justify-between text-[11px] font-black">
+                <div className="flex items-center justify-between text-xs font-black">
                   <span className="text-emerald-700 dark:text-emerald-300">
                     🌱 阶段 {currentPhenologyStage.stageIndex + 1}/8：{currentPhenologyStage.stageName}
                   </span>
@@ -4131,7 +4131,7 @@ export function BotanicalLab() {
                         setGrowthDay(stg.dayStart);
                         void speak(`${stg.stageName}。${stg.aboveGroundDesc}`, { lang: 'zh-CN' });
                       }}
-                      className={`py-1 px-0.5 rounded-xl text-[9px] font-black border transition-all flex flex-col items-center justify-center ${
+                      className={`py-1 px-0.5 rounded-xl text-xs font-black border transition-all flex flex-col items-center justify-center ${
                         isCurrent
                           ? 'bg-emerald-500 text-slate-950 border-emerald-300 ring-2 ring-emerald-300 shadow-md scale-105'
                           : 'bg-white/80 dark:bg-slate-900/80 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-emerald-300'
@@ -4150,19 +4150,19 @@ export function BotanicalLab() {
               {/* 4 项实时连续生理学指标 */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <div className="p-2.5 rounded-2xl bg-emerald-950/20 border border-emerald-500/30 text-center">
-                  <span className="text-[10px] opacity-80 block">株高生长</span>
+                  <span className="text-xs opacity-80 block">株高生长</span>
                   <span className="font-mono font-black text-sm text-emerald-400">{currentPlantHeight} cm</span>
                 </div>
                 <div className="p-2.5 rounded-2xl bg-amber-950/20 border border-amber-500/30 text-center">
-                  <span className="text-[10px] opacity-80 block">根系入土</span>
+                  <span className="text-xs opacity-80 block">根系入土</span>
                   <span className="font-mono font-black text-sm text-amber-400">{currentRootDepth} cm</span>
                 </div>
                 <div className="p-2.5 rounded-2xl bg-blue-950/20 border border-blue-500/30 text-center">
-                  <span className="text-[10px] opacity-80 block">叶片数量</span>
+                  <span className="text-xs opacity-80 block">叶片数量</span>
                   <span className="font-mono font-black text-sm text-blue-400">{currentPhenologyStage.leafCount} 片</span>
                 </div>
                 <div className="p-2.5 rounded-2xl bg-purple-950/20 border border-purple-500/30 text-center">
-                  <span className="text-[10px] opacity-80 block">光合产率</span>
+                  <span className="text-xs opacity-80 block">光合产率</span>
                   <span className="font-mono font-black text-sm text-purple-400">{photosynthesisRate} mg/h</span>
                 </div>
               </div>
@@ -4172,25 +4172,25 @@ export function BotanicalLab() {
                 <div className="p-2.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 space-y-1">
                   <div className="font-black text-emerald-800 dark:text-emerald-300 flex items-center justify-between">
                     <span>🟢【地上茎叶形态】</span>
-                    <span className="text-[10px] font-mono text-emerald-600">{currentPhenologyStage.bbchCode}</span>
+                    <span className="text-xs font-mono text-emerald-600">{currentPhenologyStage.bbchCode}</span>
                   </div>
-                  <p className="text-[11px] leading-relaxed text-slate-700 dark:text-slate-300">{currentPhenologyStage.aboveGroundDesc}</p>
+                  <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300">{currentPhenologyStage.aboveGroundDesc}</p>
                 </div>
 
                 <div className="p-2.5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 space-y-1">
                   <span className="font-black text-amber-800 dark:text-amber-300 block">🟤【地下根系发育】</span>
-                  <p className="text-[11px] leading-relaxed text-slate-700 dark:text-slate-300">{currentPhenologyStage.underGroundDesc}</p>
+                  <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300">{currentPhenologyStage.underGroundDesc}</p>
                 </div>
 
                 <div className="p-2.5 rounded-2xl bg-cyan-50 dark:bg-cyan-950/30 border border-cyan-200 dark:border-cyan-800/40 space-y-1">
                   <span className="font-black text-cyan-800 dark:text-cyan-300 block">🔬【生理学生物学机理】</span>
-                  <p className="text-[11px] leading-relaxed text-slate-700 dark:text-slate-300">{currentPhenologyStage.physiologicalPrinciple}</p>
+                  <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300">{currentPhenologyStage.physiologicalPrinciple}</p>
                 </div>
               </div>
 
               {/* 4 大培育操作按钮 (每次操作加速成长) */}
               <div className="space-y-1.5 pt-1">
-                <div className="flex justify-between text-[11px] font-black">
+                <div className="flex justify-between text-xs font-black">
                   <span>🌿 自然培育加速仓</span>
                   <span className="text-emerald-500">点击每次加速 +3~5 天</span>
                 </div>
@@ -4240,12 +4240,12 @@ export function BotanicalLab() {
                     <span>{isNight ? '🌙' : '☀️'}</span>
                     <span>{isNight ? '夜间呼吸与根系分裂' : '白昼光合能量转化'}</span>
                   </span>
-                  <span className="font-mono text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-300">
+                  <span className="font-mono text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-300">
                     {isNight ? `代谢消耗: ${respirationRate} mg/h` : `光合产率: ${photosynthesisRate} mg/h`}
                   </span>
                 </div>
 
-                <div className="font-mono text-[10px] font-bold p-1.5 rounded-xl bg-white/70 dark:bg-slate-900/80 border border-emerald-500/20 leading-relaxed text-center">
+                <div className="font-mono text-xs font-bold p-1.5 rounded-xl bg-white/70 dark:bg-slate-900/80 border border-emerald-500/20 leading-relaxed text-center">
                   {!isNight ? (
                     <span className="text-emerald-700 dark:text-emerald-300">
                       6CO₂ (吸入) + 6H₂O (泵送) + ☀️光能 ➔ C₆H₁₂O₆ (糖分) + 6O₂↑ (清新氧气)
@@ -4257,7 +4257,7 @@ export function BotanicalLab() {
                   )}
                 </div>
 
-                <div className="flex items-center justify-between text-[10px] font-semibold">
+                <div className="flex items-center justify-between text-xs font-semibold">
                   <span className="flex items-center gap-1">
                     <span>💧⬆️</span>
                     <span>蒸腾拉力 (水分子内聚力向上逆重力泵水):</span>
@@ -4272,14 +4272,14 @@ export function BotanicalLab() {
                   <span className="text-base">🪵</span>
                   <div>
                     <span className="font-black text-emerald-400">【根系构造】</span>
-                    <p className="text-[11px] leading-relaxed opacity-90">{currentPlant.rootType}</p>
+                    <p className="text-xs leading-relaxed opacity-90">{currentPlant.rootType}</p>
                   </div>
                 </div>
                 <div className="p-2.5 rounded-2xl bg-amber-950/20 border border-amber-500/30 flex items-start gap-2">
                   <span className="text-base">💡</span>
                   <div>
                     <span className="font-black text-amber-400">【生长冷知识】</span>
-                    <p className="text-[11px] leading-relaxed opacity-90">{currentPlant.funFact}</p>
+                    <p className="text-xs leading-relaxed opacity-90">{currentPlant.funFact}</p>
                   </div>
                 </div>
               </div>
@@ -4368,7 +4368,7 @@ export function BotanicalLab() {
                   </div>
                   <div className="space-y-1">
                     <h5 className="text-xs font-black text-amber-900">{stg.title}</h5>
-                    <p className="text-[11px] font-semibold text-slate-500 leading-relaxed">
+                    <p className="text-xs font-semibold text-slate-500 leading-relaxed">
                       {stg.desc}
                     </p>
                   </div>
@@ -4386,15 +4386,15 @@ export function BotanicalLab() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-slate-700">
               <div className="p-2.5 rounded-2xl bg-amber-50 border border-amber-200">
                 <span className="font-black text-amber-800 block mb-0.5">【头部 Head】</span>
-                <p className="text-[11px] leading-relaxed">{currentInsect.anatomyDetail.head}</p>
+                <p className="text-xs leading-relaxed">{currentInsect.anatomyDetail.head}</p>
               </div>
               <div className="p-2.5 rounded-2xl bg-orange-50 border border-orange-200">
                 <span className="font-black text-orange-800 block mb-0.5">【胸部 Thorax】</span>
-                <p className="text-[11px] leading-relaxed">{currentInsect.anatomyDetail.thorax}</p>
+                <p className="text-xs leading-relaxed">{currentInsect.anatomyDetail.thorax}</p>
               </div>
               <div className="p-2.5 rounded-2xl bg-yellow-50 border border-yellow-200">
                 <span className="font-black text-yellow-800 block mb-0.5">【腹部 Abdomen】</span>
-                <p className="text-[11px] leading-relaxed">{currentInsect.anatomyDetail.abdomen}</p>
+                <p className="text-xs leading-relaxed">{currentInsect.anatomyDetail.abdomen}</p>
               </div>
             </div>
 
@@ -4405,11 +4405,11 @@ export function BotanicalLab() {
                   <span>🧬</span>
                   <span>{currentInsect.metamorphosisType} 生物学奥秘</span>
                 </span>
-                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-200 text-amber-900">
+                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-amber-200 text-amber-900">
                   HORMONAL DEVELOPMENT
                 </span>
               </div>
-              <p className="text-[11px] text-slate-700 leading-relaxed">
+              <p className="text-xs text-slate-700 leading-relaxed">
                 {currentInsect.metamorphosisType.includes('完全变态')
                   ? '【成虫盘重塑机制】：在神奇的蛹期，幼虫的大部分组织在酶的作用下溶解分解，由隐藏的「成虫盘（Imaginal Discs）」干细胞群分化出全新的复眼、翅膀、口器与生殖系统，完成 100% 全身细胞级别的涅槃蜕变！'
                   : '【外骨骼定期蜕皮】：幼虫（若虫）形态与成虫非常相似，几丁质外骨骼坚硬不能无限拉伸，因此随着身体长大必须分泌蜕皮激素定期脱去旧壳，翅芽在一次次蜕皮中逐渐长大！'}
@@ -4544,7 +4544,7 @@ export function BotanicalLab() {
                         void speak('保卫细胞失水闭合！气孔关闭，牢牢锁住水分防止干旱萎蔫！', { lang: 'zh-CN' });
                       }
                     }}
-                    className="mt-1 px-3 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 text-[10px] font-bold hover:bg-cyan-500/40 active:scale-95 transition-all"
+                    className="mt-1 px-3 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 text-xs font-bold hover:bg-cyan-500/40 active:scale-95 transition-all"
                   >
                     🔄 模拟：{stomaTurgid ? '💧 饱水张开 (光合中)' : '🏜️ 缺水闭合 (保水态)'}
                   </button>
@@ -4595,7 +4595,7 @@ export function BotanicalLab() {
                       <text x="100" y="140" textAnchor="middle" fill="#fef3c7" fontSize="8" fontWeight="bold">① 根冠</text>
                     </g>
                   </svg>
-                  <span className="text-[10px] font-mono text-cyan-300 font-bold">
+                  <span className="text-xs font-mono text-cyan-300 font-bold">
                     当前聚焦: {rootZone === 'cap' ? '🛡️ 根冠钻土' : rootZone === 'meristem' ? '⚡ 分生区分裂' : rootZone === 'elongation' ? '📏 伸长区顶推' : '🪵 根毛区吸水'}
                   </span>
                 </div>
@@ -4644,7 +4644,7 @@ export function BotanicalLab() {
                       <text x="100" y="118" textAnchor="middle" fill="#ffffff" fontSize="7" fontWeight="bold">【腹部 气门】</text>
                     </g>
                   </svg>
-                  <span className="text-[10px] font-mono text-cyan-300 font-bold">头(感官) · 胸(运动) · 腹(呼吸内脏)</span>
+                  <span className="text-xs font-mono text-cyan-300 font-bold">头(感官) · 胸(运动) · 腹(呼吸内脏)</span>
                 </div>
               )}
             </div>
@@ -4655,7 +4655,7 @@ export function BotanicalLab() {
                 <div className="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-500/30 space-y-2">
                   <div className="flex items-center justify-between">
                     <h4 className="text-sm font-black text-cyan-300">🌿 叶绿体工厂与保卫细胞渗透机理</h4>
-                    <span className="text-[10px] font-mono text-cyan-400 font-bold">OSMOSIS PRINCIPLE</span>
+                    <span className="text-xs font-mono text-cyan-400 font-bold">OSMOSIS PRINCIPLE</span>
                   </div>
                   <p className="text-slate-300">
                     在 400 倍显微镜下，叶片表皮分布着由一对**保卫细胞**构成的**气孔（Stomata）**。
@@ -4668,7 +4668,7 @@ export function BotanicalLab() {
                 <div className="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-500/30 space-y-2.5">
                   <div className="flex items-center justify-between">
                     <h4 className="text-sm font-black text-cyan-300">🪵 根尖四区纵切解剖学结构</h4>
-                    <span className="text-[10px] font-mono text-cyan-400 font-bold">ROOT ANATOMY</span>
+                    <span className="text-xs font-mono text-cyan-400 font-bold">ROOT ANATOMY</span>
                   </div>
 
                   {/* 4区选择器按钮 */}
@@ -4687,7 +4687,7 @@ export function BotanicalLab() {
                           setRootZone(rz.id as any);
                           void speak(`${rz.name}。${rz.desc}`, { lang: 'zh-CN' });
                         }}
-                        className={`p-2 rounded-xl text-[11px] font-black border transition-all text-center ${
+                        className={`p-2 rounded-xl text-xs font-black border transition-all text-center ${
                           rootZone === rz.id
                             ? 'bg-cyan-500 text-slate-950 border-cyan-300 shadow-md scale-105'
                             : 'bg-slate-900/80 text-slate-300 border-slate-700 hover:border-cyan-400'
@@ -4698,7 +4698,7 @@ export function BotanicalLab() {
                     ))}
                   </div>
 
-                  <p className="text-slate-300 text-[11px] pt-1">
+                  <p className="text-slate-300 text-xs pt-1">
                     {rootZone === 'cap' && '【根冠】像安全帽一样套在根尖最外侧，细胞壁坚韧，分泌植物粘液减小土壤阻力。'}
                     {rootZone === 'meristem' && '【分生区】由未分化的干细胞组成，细胞壁薄，是根系生长的细胞制造源泉。'}
                     {rootZone === 'elongation' && '【伸长区】细胞停止分裂但体积迅速拉长，是根系向前推进伸展的最主要动力区域。'}
@@ -4711,7 +4711,7 @@ export function BotanicalLab() {
                 <div className="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-500/30 space-y-2">
                   <div className="flex items-center justify-between">
                     <h4 className="text-sm font-black text-cyan-300">🦗 昆虫外骨骼与气门扩散呼吸机制</h4>
-                    <span className="text-[10px] font-mono text-cyan-400 font-bold">TRACHEAL SYSTEM</span>
+                    <span className="text-xs font-mono text-cyan-400 font-bold">TRACHEAL SYSTEM</span>
                   </div>
                   <p className="text-slate-300">
                     昆虫没有肺，而是通过腹部两侧排列的微小**气门（Spiracles）**呼吸。

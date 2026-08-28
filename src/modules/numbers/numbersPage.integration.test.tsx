@@ -32,6 +32,7 @@ vi.mock('@/lib/sfx', () => ({
   sfxStar: vi.fn(),
   sfxWin: vi.fn(),
   setMuted: vi.fn(),
+  triggerHaptic: vi.fn(),
 }));
 
 import NumbersPage from './NumbersPage';

@@ -14,7 +14,7 @@ import { CatStudyHelpCard } from '@/modules/pet/CatStudyHelpCard';
 import { CatVoiceChatModal } from '@/modules/pet/CatVoiceChatModal';
 import { CatMiniGameModal } from '@/modules/pet/CatMiniGameModal';
 import { useTranslation } from '@/i18n/useTranslation';
-import { sfxTap, sfxCorrect, sfxPurr, sfxBubble, sfxMagic, sfxBoing, sfxMeow, sfxStar } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxPurr, sfxBubble, sfxMagic, sfxBoing, sfxMeow, sfxStar, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 import { speak } from '@/lib/speech';
 import {
@@ -30,6 +30,7 @@ import { CatWardrobeSection } from './CatWardrobeSection';
 import { CatSkillTreeSection } from './CatSkillTreeSection';
 import { CatPostcardSection } from './CatPostcardSection';
 import { CatMedalWallSection } from './CatMedalWallSection';
+import { PetDiaryModal } from './components/PetDiaryModal';
 
 const TOY_SPEAK: Record<CatAction, string> = {
   jump: 'pet.wandSpeak', roll: 'pet.yarnSpeak', purr: 'pet.catnipSpeak',
@@ -69,6 +70,7 @@ export default function CatHousePage({ initialRealisticMode = false }: { initial
   const [feedback, setFeedback] = useState(t('pet.welcomeMsg'));
   const [showVoiceChatModal, setShowVoiceChatModal] = useState(false);
   const [showMiniGameModal, setShowMiniGameModal] = useState(false);
+  const [showDiaryModal, setShowDiaryModal] = useState(false);
   const [envLighting, setEnvLighting] = useState<'sunlight' | 'nebula' | 'starry'>('nebula');
   const [realisticMode, setRealisticMode] = useState(initialRealisticMode);
   const motionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -78,6 +80,40 @@ export default function CatHousePage({ initialRealisticMode = false }: { initial
       if (motionTimerRef.current) clearTimeout(motionTimerRef.current);
     };
   }, []);
+
+  // 全局键盘快捷键响应 (1-6 快捷互动)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === '1' || e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        triggerHaptic(20);
+        handleFeed();
+      } else if (e.key === '2' || e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        triggerHaptic(20);
+        handlePetCat();
+      } else if (e.key === '3' || e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        triggerHaptic(20);
+        handleBath();
+      } else if (e.key === '4' || e.key.toLowerCase() === 'v') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setShowVoiceChatModal(true);
+      } else if (e.key === '5' || e.key.toLowerCase() === 'g') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setShowMiniGameModal(true);
+      } else if (e.key === '6' || e.key.toLowerCase() === 'd') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setShowDiaryModal(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [fullness, fishCount]);
 
   /** 拼音已解锁技能点数（用于徽章判定） */
   const pinyinMasteryCount = Object.keys(mastery).filter((k) => k.startsWith('pinyin:')).length;
@@ -221,6 +257,13 @@ export default function CatHousePage({ initialRealisticMode = false }: { initial
         tone="pink"
       />
 
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-pink-900 font-bold bg-pink-50/90 px-3 py-1 rounded-xl border border-pink-200">
+          ⌨️ 键盘快捷操作：数字 1-6 / 字母键 (1/F 喂鱼 · 2/P 抚摸 · 3/B 洗澡 · 4/V 语音 · 5/G 小游戏 · 6/D 日记)
+        </span>
+      </div>
+
       <CatStagePanel
         catAction={catAction}
         feedback={feedback}
@@ -241,6 +284,33 @@ export default function CatHousePage({ initialRealisticMode = false }: { initial
         onTriggerMotion={onTriggerMotion}
         onOpenVoice={() => setShowVoiceChatModal(true)}
         onOpenMiniGame={() => setShowMiniGameModal(true)}
+      />
+
+      {/* 📖 萌宠学情日记与明信片入口 */}
+      <div className="rounded-3xl border-3 border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4 shadow-sm flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="text-3xl animate-bounce">💌</span>
+          <div>
+            <h4 className="text-sm sm:text-base font-black text-amber-950">
+              猫咪伴读手账与学情明信片
+            </h4>
+            <p className="text-xs text-amber-700 font-bold">
+              记录小主人的成长足迹，一键生成专属纪念明信片
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => { sfxTap(); setShowDiaryModal(true); }}
+          className="rounded-2xl bg-amber-500 px-4 py-2 text-xs sm:text-sm font-black text-white shadow-md hover:bg-amber-600 active:scale-95 transition-all shrink-0"
+        >
+          翻开手账 📖
+        </button>
+      </div>
+
+      <PetDiaryModal
+        isOpen={showDiaryModal}
+        onClose={() => setShowDiaryModal(false)}
       />
 
       {/* 🎏 猫咪打工探险庄园 */}

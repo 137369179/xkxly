@@ -292,7 +292,7 @@ export default function TtsTestPage() {
               {modelMsg.ok ? '✅ ' : '⚠️ '}{modelMsg.msg}
             </p>
           )}
-          <p className="text-[11px] leading-relaxed text-ink-soft/80">
+          <p className="text-xs leading-relaxed text-ink-soft/80">
             {translate('tts.tip')}
           </p>
         </div>
@@ -361,7 +361,7 @@ export default function TtsTestPage() {
                     >
                       {r.word}
                     </button>
-                    <span className="text-[11px] text-ink-soft">{r.mean}</span>
+                    <span className="text-xs text-ink-soft">{r.mean}</span>
                   </div>
                 ))}
               </div>
@@ -376,12 +376,12 @@ export default function TtsTestPage() {
           <AbCol title={translate('tts.abSys')} active={abPlaying === 'sys'} onPlay={() => playAb('sys')} onStop={() => stopAb('sys')} />
           <AbCol title={translate('tts.abNeural')} active={abPlaying === 'neu'} onPlay={() => playAb('neu')} onStop={() => stopAb('neu')} />
         </div>
-        <p className="mt-2 text-[11px] text-ink-soft/80">{translate('tts.abDesc')}</p>
+        <p className="mt-2 text-xs text-ink-soft/80">{translate('tts.abDesc')}</p>
       </Card>
 
       {/* FollowRead 跟读评测测试 */}
       <Card title={translate('tts.cardFollowRead')}>
-        <p className="mb-3 text-[11px] text-ink-soft/80">
+        <p className="mb-3 text-xs text-ink-soft/80">
           {translate('tts.frDesc')}
         </p>
         <div className="mb-4 flex flex-wrap gap-2">
@@ -414,7 +414,7 @@ export default function TtsTestPage() {
         />
       </Card>
 
-      <p className="pb-6 text-center text-[11px] text-ink-soft/70">
+      <p className="pb-6 text-center text-xs text-ink-soft/70">
         {translate('tts.frConclusion')}
       </p>
     </div>
@@ -435,7 +435,7 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl bg-white/70 px-3 py-2">
-      <div className="text-[11px] text-ink-soft">{label}</div>
+      <div className="text-xs text-ink-soft">{label}</div>
       <div className="font-extrabold text-ink">{value}</div>
     </div>
   );
@@ -444,7 +444,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="text-[11px] font-bold text-ink-soft">{label}</span>
+      <span className="text-xs font-bold text-ink-soft">{label}</span>
       <div className="mt-1">{children}</div>
     </label>
   );
@@ -471,7 +471,7 @@ function Chip({ active, onClick, children }: { active?: boolean; onClick: () => 
 function Slider({ label, value, min, max, step, onChange }: { label: string; value: number; min: number; max: number; step: number; onChange: (v: number) => void }) {
   return (
     <label className="block">
-      <div className="flex items-center justify-between text-[11px] font-bold text-ink-soft">
+      <div className="flex items-center justify-between text-xs font-bold text-ink-soft">
         <span>{label}</span>
         <span className="font-mono text-candy-purple-deep">{value.toFixed(2)}</span>
       </div>

@@ -6,13 +6,16 @@ import { speak } from '@/lib/speech';
 import { sfxTap, sfxCorrect, sfxWrong, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
+import { useRoute } from '@/lib/router';
 import { getHanziByLevel, type HanziEntry } from '@/data/hanziIndex';
 import { useTranslation } from '@/i18n/useTranslation';
 import { HanziStarQuest } from './HanziStarQuest';
 import { ComboMeter } from '@/components/gamification/ComboMeter';
 import { GentleFeedback } from '@/components/gamification/GentleFeedback';
 import { RestReminder } from '@/components/gamification/RestReminder';
+import { ReducedMotionToggle } from '@/components/gamification/ReducedMotionToggle';
 import { useAdaptiveDifficulty, type DifficultyLevel } from '@/game';
+import { MistakeBookPanel } from '@/components/gamification/MistakeBookPanel';
 import { praiseByScene, encourageByScene } from '@/lib/praise';
 
 interface HanziQuizGameProps {
@@ -25,6 +28,8 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
   const { t } = useTranslation();
   const addFish = useStore((s) => s.addFish);
   const practice = useStore((s) => s.practice);
+  const progress = useStore((s) => s.progress);
+  const { navigate } = useRoute();
 
   const [pool, setPool] = useState<HanziEntry[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -209,7 +214,7 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
     <div className="w-full max-w-xl mx-auto space-y-4">
       {/* 快捷操作提示条 */}
       <div className="text-center">
-        <span className="inline-block text-[11px] text-amber-900 font-bold bg-amber-50/90 px-3 py-1 rounded-xl border border-amber-200">
+        <span className="inline-block text-xs text-amber-900 font-bold bg-amber-50/90 px-3 py-1 rounded-xl border border-amber-200">
           ⌨️ 键盘快捷操作：数字键 1-4 快速选字 · S 听发音
         </span>
       </div>
@@ -223,7 +228,7 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
           <ComboMeter count={streak} />
           {/* 渐进式难度指示（任务 #2）：随连对表现实时爬坡，进度条对标通关连对目标 */}
           <div className="flex items-center gap-1.5" title="连续答对越多，挑战等级越高">
-            <span className="text-[11px] font-black text-amber-700 whitespace-nowrap">挑战等级</span>
+            <span className="text-xs font-black text-amber-700 whitespace-nowrap">挑战等级</span>
             <div className="flex gap-0.5" aria-hidden="true">
               {[1, 2, 3].map((n) => (
                 <span key={n} className={n <= adapt.level ? 'text-xs leading-none' : 'text-xs leading-none opacity-30'}>⭐</span>
@@ -320,8 +325,12 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
 
       {feedback && <GentleFeedback correct={feedback.correct} message={feedback.msg} />}
 
-      <HanziStarQuest />
-      <RestReminder />
+      <section className="space-y-3">
+        <HanziStarQuest />
+        <MistakeBookPanel progress={progress} onReview={() => navigate('wrongbook')} />
+        <RestReminder />
+        <ReducedMotionToggle />
+      </section>
     </div>
   );
 }

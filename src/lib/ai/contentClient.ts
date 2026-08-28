@@ -59,7 +59,7 @@ export async function listContent(
   limit = 8,
 ): Promise<AiContentItem[]> {
   try {
-    const res = await fetch(`/api/content/list?type=${type}&limit=${limit}`);
+    const res = await fetch(`/api/content/list?type=${encodeURIComponent(type)}&limit=${encodeURIComponent(limit)}`);
     const data = await res.json().catch(() => null);
     if (!res.ok || !data?.items) return [];
     return (data.items as AiContentItem[]).filter((i) => i && i.id);

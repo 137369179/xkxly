@@ -30,8 +30,8 @@ function optionText(o: { label?: string; emoji?: string; shapes?: string[] } | u
 
 export interface QuizCardProps {
   question: Question;
-  /** 本题作答结果回调：每题仅触发一次（首次判定，无论对错）；重试的错误点击只做本地反馈，不再重复上报，避免 SRS/计分被放大 */
-  onAnswer?: (correct: boolean) => void;
+  /** 本题作答结果回调：每题仅触发一次（首次判定，无论对错，携带反应时间 latencyMs） */
+  onAnswer?: (correct: boolean, latencyMs?: number) => void;
   /** 答对且用户点击「继续」后触发 */
   onNext?: () => void;
   /** 下一步按钮文案 */
@@ -315,7 +315,7 @@ export function QuizCard({
       // 每题仅上报一次：首次判定即上报父组件（SRS/计分/连击），后续点击只做本地反馈
       if (!reportedRef.current) {
         reportedRef.current = true;
-        onAnswer?.(true);
+        onAnswer?.(true, ms);
         // 自适应学习链：追踪答对，推动难度升级（同时写入 DDA 反应时/提示信号）
         const cat = question.skill ? question.skill.split(':')[0] : null;
         if (cat) recordAttempt(cat, { correct: true, ms, hintUsed });
@@ -352,7 +352,7 @@ export function QuizCard({
       // 每题仅上报一次：首次错判即上报父组件，后续错选只做本地反馈（抖动/鼓励），不再放大 SRS/计分
       if (!reportedRef.current) {
         reportedRef.current = true;
-        onAnswer?.(false);
+        onAnswer?.(false, ms);
         // 自适应学习链：追踪答错，推动难度降级（同时写入 DDA 反应时/提示信号 + 错因类型）
         const cat2 = question.skill ? question.skill.split(':')[0] : null;
         if (cat2) recordAttempt(cat2, { correct: false, ms, hintUsed, errorType: question.kind || question.type || 'unknown' });

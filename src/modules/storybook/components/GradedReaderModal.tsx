@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { GradedBook, GradedPage } from '../engine/GradedBookEngine';
 import { speak, stopSpeaking } from '@/lib/speech';
-import { sfxTap, sfxCorrect, sfxStar, sfxWin } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxStar, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { celebrateBig, celebrateSmall } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 
@@ -42,14 +42,16 @@ export function GradedReaderModal({ book, onClose }: Props) {
     };
   }, [currentPageIdx, quizState, currentPage.text]);
 
-  const handleCharClick = (char: string) => {
+  const handleCharClick = useCallback((char: string) => {
     sfxTap();
+    triggerHaptic(20);
     setSelectedChar(char);
     speak(char);
-  };
+  }, []);
 
-  const handleNextPage = () => {
+  const handleNextPage = useCallback(() => {
     sfxTap();
+    triggerHaptic(25);
     setSelectedChar(null);
     if (currentPageIdx < totalPages - 1) {
       setCurrentPageIdx((i) => i + 1);
@@ -58,34 +60,38 @@ export function GradedReaderModal({ book, onClose }: Props) {
       setQuizState('quiz');
       speak(`读完全书啦！我们来做一道阅读理解小测验：${book.quiz.question}`);
     }
-  };
+  }, [currentPageIdx, totalPages, book.quiz.question]);
 
-  const handlePrevPage = () => {
+  const handlePrevPage = useCallback(() => {
     sfxTap();
+    triggerHaptic(20);
     setSelectedChar(null);
     if (currentPageIdx > 0) {
       setCurrentPageIdx((i) => i - 1);
     }
-  };
+  }, [currentPageIdx]);
 
-  const handleReplayAudio = () => {
+  const handleReplayAudio = useCallback(() => {
     sfxTap();
+    triggerHaptic(20);
     setIsPlayingAudio(true);
     speak(currentPage.text, {
       onEnd: () => setIsPlayingAudio(false),
     });
-  };
+  }, [currentPage.text]);
 
-  const handleAnswerQuiz = (option: string) => {
+  const handleAnswerQuiz = useCallback((option: string) => {
     setSelectedOption(option);
     if (option === book.quiz.answer) {
       sfxCorrect();
       sfxStar();
+      triggerHaptic(45);
       celebrateSmall();
       setQuizFeedback('correct');
       setTimeout(() => {
         setQuizState('passed');
         sfxWin();
+        triggerHaptic([60, 40, 60, 40, 100]);
         celebrateBig();
         addStars(8);
         addFish(3);
@@ -93,6 +99,7 @@ export function GradedReaderModal({ book, onClose }: Props) {
       }, 1000);
     } else {
       sfxTap();
+      triggerHaptic(20);
       setQuizFeedback('wrong');
       speak(`再想想看哦，仔细看绘本里的内容。`);
       setTimeout(() => {
@@ -100,11 +107,56 @@ export function GradedReaderModal({ book, onClose }: Props) {
         setSelectedOption(null);
       }, 1200);
     }
-  };
+  }, [book.quiz, addStars, addFish]);
+
+  // 全局键盘快捷键
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      } else if (quizState === 'reading') {
+        if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D' || e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          handleNextPage();
+        } else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+          e.preventDefault();
+          handlePrevPage();
+        } else if (e.key === 'r' || e.key === 'R') {
+          e.preventDefault();
+          handleReplayAudio();
+        }
+      } else if (quizState === 'quiz') {
+        if (['1', '2', '3', '4'].includes(e.key)) {
+          const idx = parseInt(e.key, 10) - 1;
+          const opt = book.quiz.options[idx];
+          if (opt) {
+            e.preventDefault();
+            handleAnswerQuiz(opt);
+          }
+        }
+      } else if (quizState === 'passed') {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          onClose();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [quizState, handleNextPage, handlePrevPage, handleReplayAudio, handleAnswerQuiz, book.quiz.options, onClose]);
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
       <div className="relative w-full max-w-2xl bg-[#fdfbf7] rounded-3xl shadow-2xl border-4 border-amber-200 overflow-hidden flex flex-col min-h-[580px]">
+        {/* 快捷操作提示条 */}
+        <div className="text-center py-1 bg-amber-100/80 border-b border-amber-200">
+          <span className="text-xs text-amber-900 font-bold">
+            ⌨️ 键盘快捷操作：左右方向键/空格 翻页 · R 重听 · 数字键 1-3 答题 · Esc 关闭
+          </span>
+        </div>
+
         {/* 顶部标题栏与进度 */}
         <div className="p-4 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white flex items-center justify-between shadow-md">
           <div className="flex items-center gap-3">
@@ -204,7 +256,7 @@ export function GradedReaderModal({ book, onClose }: Props) {
                       );
                     })}
                   </div>
-                  <p className="text-[11px] text-amber-600/80 mt-2 font-medium">
+                  <p className="text-xs text-amber-600/80 mt-2 font-medium">
                     💡 轻触上面的任意汉字，即可单独发音点读
                   </p>
                 </div>

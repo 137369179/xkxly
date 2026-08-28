@@ -9,7 +9,7 @@ import { WORD_THEMES, getAllWords, getWordsByLevel } from '@/data/wordIndex';
 import { useMastery, useStore } from '@/store/useStore';
 import type { Progress } from '@/types';
 import { speak } from '@/lib/speech';
-import { sfxTap } from '@/lib/sfx';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
 import { motion } from 'motion/react';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
 import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHint';
@@ -63,7 +63,7 @@ export function WordReview() {
           key={flashIdx}
           initial={{ rotateY: 180, opacity: 0 }}
           animate={{ rotateY: 0, opacity: 1 }}
-          onClick={() => { sfxTap(); setShowZh(!showZh); }}
+          onClick={() => { sfxTap(); triggerHaptic(10); setShowZh(!showZh); }}
           className="cursor-pointer rounded-3xl bg-gradient-to-br from-candy-blue-soft to-candy-purple-soft p-8 text-center shadow-lg"
         >
           <div className="text-6xl">{current.emoji}</div>
@@ -88,7 +88,7 @@ export function WordReview() {
           <CandyButton
             tone="blue"
             size="sm"
-            onClick={() => { sfxTap(); useStore.getState().practice(`word:review:${current.word}`, true); setShowZh(false); setFlashIdx(i => (i + 1) % words.length); }}
+            onClick={() => { sfxTap(); triggerHaptic(15); useStore.getState().practice(`word:review:${current.word}`, true); setShowZh(false); setFlashIdx(i => (i + 1) % words.length); }}
           >
             {t('wordReview.next')}
           </CandyButton>

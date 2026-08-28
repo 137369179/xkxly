@@ -57,13 +57,20 @@ export function review(
   correct: boolean,
   now = Date.now(),
   difficulty?: 1 | 2 | 3,
+  latencyMs?: number,
 ): MasteryItem {
   const cur = prev ?? emptyMastery(now);
   if (correct) {
-    // 难度感知：高难度答对升 2 级，其余升 1 级
-    const step = difficulty === 3 ? 2 : 1;
+    // 难度与反应时感知升降级：
+    // 1. 高难度(3)答对 或 快速秒对(<2.5s) → 提速升 2 级
+    // 2. 犹豫答对(>8s) → 升 1 级但复习间隔缩短 30%（提前保温复习，避免虚假掌握）
+    const isFast = typeof latencyMs === 'number' && latencyMs > 0 && latencyMs < 2500;
+    const isHesitant = typeof latencyMs === 'number' && latencyMs > 8000;
+    const step = difficulty === 3 || isFast ? (difficulty === 1 ? 1 : 2) : 1;
     const lv = Math.min(MAX_LEVEL, cur.lv + step);
-    return { lv, due: now + (INTERVALS[lv] ?? 0) * DAY, ok: cur.ok + 1, ng: cur.ng, last: now };
+    const baseDays = INTERVALS[lv] ?? 0;
+    const adjustedDays = isHesitant ? Math.max(1, Math.round(baseDays * 0.7)) : baseDays;
+    return { lv, due: now + adjustedDays * DAY, ok: cur.ok + 1, ng: cur.ng, last: now };
   }
   // 难度感知：低难度答错降 2 级，其余降 1 级
   const step = difficulty === 1 ? 2 : 1;

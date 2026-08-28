@@ -173,7 +173,7 @@ function AccessoryPanel({ state, onToggle }: { state: PetState; onToggle: (id: A
             >
               <span className="text-2xl">{a.emoji}</span>
               <span className="mt-0.5 text-xs font-bold text-ink">{a.label}</span>
-              <span className="text-[10px] text-ink/50">{on ? '已佩戴' : '未佩戴'}</span>
+              <span className="text-xs text-ink/50">{on ? '已佩戴' : '未佩戴'}</span>
             </button>
           );
         })}
@@ -238,17 +238,17 @@ function PomodoroPanel({ state, dispatch }: { state: PetState; dispatch: (a: Pet
           </label>
         </div>
         <div className="flex flex-wrap items-center gap-1">
-          <span className="text-[10px] font-bold text-ink/50">快捷：</span>
+          <span className="text-xs font-bold text-ink/50">快捷：</span>
           {[15, 25, 50].map((m) => (
             <button
               key={m}
               onClick={() => applyConfig(m, r)}
-              className={`rounded-full px-2 py-0.5 text-[11px] font-bold transition active:translate-y-[1px] ${w === m ? 'bg-purple-500 text-white' : 'bg-white/80 text-ink'}`}
+              className={`rounded-full px-2 py-0.5 text-xs font-bold transition active:translate-y-[1px] ${w === m ? 'bg-purple-500 text-white' : 'bg-white/80 text-ink'}`}
             >
               专注{m}分
             </button>
           ))}
-          {phase !== 'idle' && <span className="ml-auto text-[10px] text-ink/40">运行中锁定</span>}
+          {phase !== 'idle' && <span className="ml-auto text-xs text-ink/40">运行中锁定</span>}
         </div>
       </div>
 
@@ -358,7 +358,7 @@ function PixelEditorPanel({ initial, onSave, onToast }: {
             ))}
           </div>
           <div className="mb-2 flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] font-black text-ink/60">预设模板：</span>
+            <span className="text-xs font-black text-ink/60">预设模板：</span>
             {PIXEL_PRESETS.map((p) => (
               <button
                 key={p.id}

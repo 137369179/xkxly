@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LETTER_SOUNDS, COMBO_SOUNDS, type PhonicsRule } from '@/data/phonics';
 import { useTranslation } from '@/i18n/useTranslation';
 import { Panel, PanelTitle } from '@/components/ui/Card';
@@ -7,7 +7,8 @@ import { AiPanel } from '@/components/ai';
 import { useAiStream } from '@/lib/ai/useAi';
 import { wordPhonicsTask } from '@/lib/ai/tasks';
 import { speak } from '@/lib/speech';
-import { sfxTap } from '@/lib/sfx';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
+import { navigate } from '@/lib/router';
 import { TONE_STYLE } from '@/lib/tones';
 
 export function PhonicsPage() {
@@ -18,6 +19,24 @@ export function PhonicsPage() {
 
   const items = tab === 'letters' ? LETTER_SOUNDS : COMBO_SOUNDS;
   const tone = tab === 'letters' ? 'blue' : 'purple';
+
+  // 全局键盘快捷键：1-2 切换字母音/组合音，Esc 返回
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement).tagName === 'INPUT') return;
+      switch (e.key) {
+        case '1': setTab('letters'); setSelected(null); break;
+        case '2': setTab('combos'); setSelected(null); break;
+        case 'Escape':
+          if (selected) setSelected(null);
+          else navigate('words');
+          break;
+        default: break;
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [selected]);
 
   return (
     <div className="space-y-5">
@@ -39,12 +58,12 @@ export function PhonicsPage() {
             return (
               <button
                 key={rule.letter}
-                onClick={() => { sfxTap(); setSelected(rule); }}
+                onClick={() => { sfxTap(); triggerHaptic(10); setSelected(rule); }}
                 className="flex flex-col items-center justify-center rounded-2xl p-3 min-h-[72px] shadow-candy-sm transition-all active:translate-y-[2px]"
                 style={{ background: active ? t.main : t.soft, color: active ? t.on : t.deep }}
               >
                 <span className="text-2xl font-black">{rule.letter}</span>
-                <span className="text-[10px] font-bold">{rule.sound}</span>
+                <span className="text-xs font-bold">{rule.sound}</span>
               </button>
             );
           })}

@@ -32,7 +32,7 @@ function QuestCard({
           <Icon size={36} />
         </div>
         <span className="text-base">{t(config.name)}</span>
-        <p className="text-[10px] text-indigo-600 mt-1">
+        <p className="text-xs text-indigo-600 mt-1">
           {t('pet.questDuration', { time: formatDuration(config.durationSec, t), count: config.reward })}
         </p>
       </div>

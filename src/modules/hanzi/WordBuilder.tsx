@@ -6,13 +6,14 @@
  * 3. 经典童心造句积木轨 (Sentence Builder): 词块组装通顺语句与名师伴读。
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
-import { sfxTap, sfxCorrect, sfxWrong, sfxWin } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { speak } from '@/lib/speech';
 import { useStore } from '@/store/useStore';
 import { StreakBar } from '@/components/study/StreakBar';
+import { navigate } from '@/lib/router';
 
 // ── 模式一：偏旁部首合成题库 ──
 export interface RadicalFusionItem {
@@ -35,6 +36,10 @@ export const FUSION_ITEMS: RadicalFusionItem[] = [
   { id: 'rf6', r1: '口', r2: '鸟', targetChar: '鸣', pinyin: 'míng', meaning: '张口啼叫，百鸟齐鸣', emoji: '🐦', options: ['鸣', '鸭', '叫', '唱'] },
   { id: 'rf7', r1: '门', r2: '日', targetChar: '间', pinyin: 'jiān', meaning: '门缝透光，天地之间', emoji: '🚪', options: ['间', '闲', '闻', '问'] },
   { id: 'rf8', r1: '氵', r2: '木', targetChar: '沐', pinyin: 'mù', meaning: '沐浴清风，滋润生机', emoji: '🍃', options: ['沐', '林', '洗', '润'] },
+  { id: 'rf9', r1: '口', r2: '十', targetChar: '叶', pinyin: 'yè', meaning: '绿叶茂密，春意盎然', emoji: '🌿', options: ['叶', '古', '右', '早'] },
+  { id: 'rf10', r1: '氵', r2: '青', targetChar: '清', pinyin: 'qīng', meaning: '清清泉水，明澈清冽', emoji: '💧', options: ['清', '情', '请', '晴'] },
+  { id: 'rf11', r1: '女', r2: '子', targetChar: '好', pinyin: 'hǎo', meaning: '女子相依，美好幸福', emoji: '👍', options: ['好', '如', '她', '妈'] },
+  { id: 'rf12', r1: '田', r2: '力', targetChar: '男', pinyin: 'nán', meaning: '在田间出力，勤劳勇敢', emoji: '👦', options: ['男', '苗', '思', '劳'] },
 ];
 
 // ── 模式二：趣味词语组装题库 ──
@@ -56,6 +61,10 @@ export const WORD_ITEMS: WordAssemblyItem[] = [
   { id: 'wa4', c1: '荷', c2: '花', targetWord: '荷花', pinyin: 'hé huā', meaning: '池塘里盛开的粉红荷花', emoji: '🪷', candidateChars: ['荷', '花', '草', '木'] },
   { id: 'wa5', c1: '小', c2: '鸟', targetWord: '小鸟', pinyin: 'xiǎo niǎo', meaning: '在枝头欢快唱歌的小飞鸟', emoji: '🐦', candidateChars: ['小', '鸟', '鱼', '虫'] },
   { id: 'wa6', c1: '星', c2: '星', targetWord: '星星', pinyin: 'xīng xing', meaning: '夜晚天空中闪闪发光的繁星', emoji: '⭐', candidateChars: ['星', '星', '月', '日'] },
+  { id: 'wa7', c1: '彩', c2: '虹', targetWord: '彩虹', pinyin: 'cǎi hóng', meaning: '雨后天空中出现的七彩长桥', emoji: '🌈', candidateChars: ['彩', '虹', '云', '雨'] },
+  { id: 'wa8', c1: '春', c2: '风', targetWord: '春风', pinyin: 'chūn fēng', meaning: '温暖柔和的春天微风', emoji: '🍃', candidateChars: ['春', '风', '夏', '雨'] },
+  { id: 'wa9', c1: '大', c2: '树', targetWord: '大树', pinyin: 'dà shù', meaning: '枝繁叶茂、绿荫如盖的大树', emoji: '🌳', candidateChars: ['大', '树', '小', '草'] },
+  { id: 'wa10', c1: '朋', c2: '友', targetWord: '朋友', pinyin: 'péng you', meaning: '互相关心、一起玩耍的好伙伴', emoji: '🤝', candidateChars: ['朋', '友', '伴', '同'] },
 ];
 
 // ── 模式三：童心造句积木轨 ──
@@ -95,6 +104,20 @@ export const SENTENCE_ITEMS: SentenceBlockItem[] = [
     shuffledBlocks: ['坐在圆圆的荷叶上', '小青蛙', '唱歌。'],
     meaning: '夏天的荷塘里，青蛙奏响了欢快的交响乐！',
     emoji: '🐸',
+  },
+  {
+    id: 'sb5',
+    fullSentence: '小白兔在草地上欢快地跳舞。',
+    shuffledBlocks: ['欢快地跳舞。', '在草地上', '小白兔'],
+    meaning: '毛茸茸的小白兔蹦蹦跳跳，真开心！',
+    emoji: '🐰',
+  },
+  {
+    id: 'sb6',
+    fullSentence: '天空中挂着一道七彩的彩虹。',
+    shuffledBlocks: ['天空中', '挂着一道', '七彩的彩虹。'],
+    meaning: '雨过天晴，七色彩虹像一座美丽的拱桥！',
+    emoji: '🌈',
   },
 ];
 
@@ -155,13 +178,13 @@ export function WordBuilder({ initialChar: _initialChar }: { initialChar?: strin
   }, [sentenceIdx]);
 
   // 处理偏旁部首合成
-  const handlePickFusion = (opt: string) => {
+  const handlePickFusion = useCallback((opt: string) => {
     sfxTap();
     if (opt === currentFusion.targetChar) {
       sfxCorrect();
+      triggerHaptic(45);
       celebrateSmall();
-      const nextStreak = streak + 1;
-      setStreak(nextStreak);
+      setStreak((s) => s + 1);
       addStars(1);
       practice(`hanzi-fusion:${opt}`, true, 2, 1);
       void speak(`合体成功！【${currentFusion.r1}】加【${currentFusion.r2}】变成【${currentFusion.targetChar}】！${currentFusion.meaning}`, { lang: 'zh-CN' });
@@ -170,13 +193,15 @@ export function WordBuilder({ initialChar: _initialChar }: { initialChar?: strin
       }, 1500);
     } else {
       sfxWrong();
+      triggerHaptic(20);
       void speak(`不对哦，再想一想【${currentFusion.r1}】和【${currentFusion.r2}】能组合成哪个字？`, { lang: 'zh-CN' });
     }
-  };
+  }, [currentFusion, addStars, practice]);
 
   // 处理词语拼装
-  const handlePickWordChar = (char: string) => {
+  const handlePickWordChar = useCallback((char: string) => {
     sfxTap();
+    triggerHaptic(25);
     const nextChars = [...selectedWordChars, char];
     setSelectedWordChars(nextChars);
 
@@ -184,9 +209,9 @@ export function WordBuilder({ initialChar: _initialChar }: { initialChar?: strin
       const combined = nextChars.join('');
       if (combined === currentWord.targetWord) {
         sfxWin();
+        triggerHaptic([60, 40, 60, 40, 100]);
         celebrateBig();
-        const nextStreak = streak + 1;
-        setStreak(nextStreak);
+        setStreak((s) => s + 1);
         addStars(1);
         practice(`word-assemble:${combined}`, true, 2, 1);
         void speak(`组词大成功！【${currentWord.targetWord}】(${currentWord.pinyin})，${currentWord.meaning}`, { lang: 'zh-CN' });
@@ -196,17 +221,19 @@ export function WordBuilder({ initialChar: _initialChar }: { initialChar?: strin
         }, 1500);
       } else {
         sfxWrong();
+        triggerHaptic(20);
         void speak(`词语顺序不对哦，再试一次吧！`, { lang: 'zh-CN' });
         setTimeout(() => {
           setSelectedWordChars([]);
         }, 1000);
       }
     }
-  };
+  }, [selectedWordChars, currentWord, addStars, practice]);
 
   // 处理造句拼装
-  const handlePickSentenceBlock = (block: string) => {
+  const handlePickSentenceBlock = useCallback((block: string) => {
     sfxTap();
+    triggerHaptic(25);
     const nextBlocks = [...selectedBlocks, block];
     setSelectedBlocks(nextBlocks);
 
@@ -214,9 +241,9 @@ export function WordBuilder({ initialChar: _initialChar }: { initialChar?: strin
       const combined = nextBlocks.join('');
       if (combined === currentSentence.fullSentence) {
         sfxWin();
+        triggerHaptic([60, 40, 60, 40, 100]);
         celebrateBig();
-        const nextStreak = streak + 1;
-        setStreak(nextStreak);
+        setStreak((s) => s + 1);
         addStars(2);
         practice(`sentence-builder:${currentSentence.id}`, true, 3, 1);
         void speak(`造句完美！${currentSentence.fullSentence}`, { lang: 'zh-CN' });
@@ -226,16 +253,64 @@ export function WordBuilder({ initialChar: _initialChar }: { initialChar?: strin
         }, 1800);
       } else {
         sfxWrong();
+        triggerHaptic(20);
         void speak(`语序还不太通顺哦，我们重新排一排！`, { lang: 'zh-CN' });
         setTimeout(() => {
           setSelectedBlocks([]);
         }, 1000);
       }
     }
-  };
+  }, [selectedBlocks, currentSentence, addStars, practice]);
+
+  // 键盘快捷监听
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        sfxTap();
+        triggerHaptic(20);
+        if (mode === 'words') setSelectedWordChars([]);
+        if (mode === 'sentences') setSelectedBlocks([]);
+      } else if (['1', '2', '3', '4'].includes(e.key)) {
+        const idx = parseInt(e.key, 10) - 1;
+        if (mode === 'fusion') {
+          const opt = currentFusion.options[idx];
+          if (opt) {
+            e.preventDefault();
+            handlePickFusion(opt);
+          }
+        } else if (mode === 'words') {
+          const ch = currentWord.candidateChars[idx];
+          if (ch && !selectedWordChars.includes(ch)) {
+            e.preventDefault();
+            handlePickWordChar(ch);
+          }
+        } else if (mode === 'sentences') {
+          const blk = currentSentence.shuffledBlocks[idx];
+          if (blk && !selectedBlocks.includes(blk)) {
+            e.preventDefault();
+            handlePickSentenceBlock(blk);
+          }
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        navigate('hanzi');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mode, currentFusion, currentWord, currentSentence, selectedWordChars, selectedBlocks, handlePickFusion, handlePickWordChar, handlePickSentenceBlock]);
 
   return (
     <div className="space-y-4">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-emerald-900 font-bold bg-emerald-50/90 px-3 py-1 rounded-xl border border-emerald-200">
+          ⌨️ 键盘快捷操作：数字键 1-4 选字/词块 · R 重新选择
+        </span>
+      </div>
+
       {/* 顶部三大模式切换栏 */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
@@ -396,7 +471,7 @@ export function WordBuilder({ initialChar: _initialChar }: { initialChar?: strin
                   sfxTap();
                   setSelectedWordChars([]);
                 }}
-                className="text-[11px] font-bold text-amber-800 underline"
+                className="text-xs font-bold text-amber-800 underline"
               >
                 🔄 重选
               </button>
@@ -469,7 +544,7 @@ export function WordBuilder({ initialChar: _initialChar }: { initialChar?: strin
                   sfxTap();
                   setSelectedBlocks([]);
                 }}
-                className="text-[11px] font-bold text-purple-800 underline"
+                className="text-xs font-bold text-purple-800 underline"
               >
                 🔄 重排
               </button>

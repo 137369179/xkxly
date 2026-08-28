@@ -104,13 +104,13 @@ export function ResearchLaunchHub({ onSelectTopic, onOpenGallery }: ResearchLaun
               <MasteryBar lv={st.masteryLv} tone={tp.tone} />
 
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-ink-soft">
+                <span className="text-xs font-bold text-ink-soft">
                   {st.explored
                     ? t('research.launch.mastery', { n: String(st.masteryLv) })
                     : t('research.launch.notStarted')}
                 </span>
                 <span
-                  className="rounded-full px-2.5 py-1 text-[11px] font-extrabold"
+                  className="rounded-full px-2.5 py-1 text-xs font-extrabold"
                   style={st.explored ? { background: main, color: on } : { background: '#FFFFFF', color: deep }}
                 >
                   {st.explored ? t('research.launch.continue') : t('research.launch.start')} ▶

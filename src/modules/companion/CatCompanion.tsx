@@ -204,7 +204,7 @@ export function CatCompanion() {
           ))}
 
           {/* 小鱼干徽章数量 */}
-          <div className="absolute -top-1 -left-1 flex h-6 px-2 items-center justify-center rounded-full border border-pink-300 bg-pink-500 text-[10px] font-black text-white shadow-md">
+          <div className="absolute -top-1 -left-1 flex h-6 px-2 items-center justify-center rounded-full border border-pink-300 bg-pink-500 text-xs font-black text-white shadow-md">
             🐟 {fishCount}
           </div>
 

@@ -10,12 +10,12 @@
  * 3. 支持点击单点星球展开「知识星卡」与即时发音试听。
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useMastery } from '@/store/useStore';
 import { isDue } from '@/lib/srs';
 import { speak } from '@/lib/speech';
-import { sfxTap } from '@/lib/sfx';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall } from '@/lib/celebrate';
 
 // ── 知识星系分类 ──
@@ -85,6 +85,15 @@ const SAMPLE_STARS: StarNode[] = [
   { id: 'poem:p004', name: '悯农', category: 'poems', categoryName: '古诗星系', emoji: '🌾', meaning: '锄禾日当午，汗滴禾下土' },
 ];
 
+const GALAXY_TABS = [
+  { id: 'all' as const, label: '🌌 全景星空', emoji: '🌌' },
+  { id: 'hanzi' as const, label: '🀄 汉字星系', emoji: '🀄' },
+  { id: 'pinyin' as const, label: '🗣️ 拼音星系', emoji: '🗣️' },
+  { id: 'math' as const, label: '🔢 数学星系', emoji: '🔢' },
+  { id: 'words' as const, label: '🔠 英语星系', emoji: '🔠' },
+  { id: 'poems' as const, label: '🌸 古诗星系', emoji: '🌸' },
+];
+
 export function MemoryConstellation() {
   const mastery = useMastery();
   const [activeCategory, setActiveCategory] = useState<GalaxyCategory>('all');
@@ -126,52 +135,77 @@ export function MemoryConstellation() {
     return { mastered, dueCount, learning, unlearned, total: SAMPLE_STARS.length };
   }, [mastery]);
 
-  const handleStarClick = (star: StarNode) => {
+  const handleStarClick = useCallback((star: StarNode) => {
     sfxTap();
+    triggerHaptic(20);
     setSelectedStar(star);
     celebrateSmall();
     const speakText = star.pinyin ? `${star.name}，读作${star.pinyin}` : star.name;
     void speak(speakText, { lang: 'zh-CN' });
-  };
+  }, []);
+
+  // 键盘快捷监听
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['1', '2', '3', '4', '5', '6'].includes(e.key)) {
+        const idx = parseInt(e.key, 10) - 1;
+        const tab = GALAXY_TABS[idx];
+        if (tab) {
+          e.preventDefault();
+          sfxTap();
+          triggerHaptic(20);
+          setActiveCategory(tab.id);
+        }
+      } else if (e.key === 'Escape') {
+        if (selectedStar) {
+          e.preventDefault();
+          setSelectedStar(null);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedStar]);
 
   return (
     <div className="space-y-4">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-indigo-900 font-bold bg-indigo-50/90 px-3 py-1 rounded-xl border border-indigo-200">
+          ⌨️ 键盘快捷操作：数字键 1-6 切换知识星系 · Esc 关闭星球卡片
+        </span>
+      </div>
+
       {/* 顶部统计总览 */}
       <div className="grid grid-cols-4 gap-2 bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900 p-4 rounded-3xl text-white shadow-xl">
         <div className="text-center">
-          <p className="text-[10px] text-amber-300 font-bold">⭐ 熟练掌握</p>
+          <p className="text-xs text-amber-300 font-bold">⭐ 熟练掌握</p>
           <p className="text-xl font-black text-amber-400">{stats.mastered}</p>
         </div>
         <div className="text-center">
-          <p className="text-[10px] text-emerald-300 font-bold">🟢 正在学习</p>
+          <p className="text-xs text-emerald-300 font-bold">🟢 正在学习</p>
           <p className="text-xl font-black text-emerald-400">{stats.learning}</p>
         </div>
         <div className="text-center">
-          <p className="text-[10px] text-rose-300 font-bold">🔴 遗忘预警</p>
+          <p className="text-xs text-rose-300 font-bold">🔴 遗忘预警</p>
           <p className="text-xl font-black text-rose-400">{stats.dueCount}</p>
         </div>
         <div className="text-center">
-          <p className="text-[10px] text-slate-300 font-bold">⚪ 待点亮</p>
+          <p className="text-xs text-slate-300 font-bold">⚪ 待点亮</p>
           <p className="text-xl font-black text-slate-300">{stats.unlearned}</p>
         </div>
       </div>
 
       {/* 星系分类切换按钮 */}
       <div className="flex flex-wrap gap-1.5 p-1 rounded-2xl bg-white/80 border border-slate-200">
-        {[
-          { id: 'all' as const, label: '🌌 全景星空', emoji: '🌌' },
-          { id: 'hanzi' as const, label: '🀄 汉字星系', emoji: '🀄' },
-          { id: 'pinyin' as const, label: '🗣️ 拼音星系', emoji: '🗣️' },
-          { id: 'math' as const, label: '🔢 数学星系', emoji: '🔢' },
-          { id: 'words' as const, label: '🔠 英语星系', emoji: '🔠' },
-          { id: 'poems' as const, label: '🌸 古诗星系', emoji: '🌸' },
-        ].map((tab) => {
+        {GALAXY_TABS.map((tab) => {
           const isSel = activeCategory === tab.id;
           return (
             <button
               key={tab.id}
               type="button"
-              onClick={() => { sfxTap(); setActiveCategory(tab.id); }}
+              onClick={() => { sfxTap(); triggerHaptic(20); setActiveCategory(tab.id); }}
               className={`flex-1 min-w-[80px] py-1.5 px-2 rounded-xl text-xs font-black transition-all ${
                 isSel
                   ? 'bg-indigo-600 text-white shadow-md'

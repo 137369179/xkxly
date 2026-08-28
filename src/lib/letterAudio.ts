@@ -69,12 +69,20 @@ function playAudioFile(url: string, onEnd?: () => void): Promise<void> {
   });
 }
 
+import { playCachedAudioBuffer } from './audioCache';
+
 /**
  * 播放单个字母名标准音频 (A, B, C...)
  */
 export function playLetterVoice(char: string, onEnd?: () => void): Promise<void> {
   const c = char.toLowerCase().trim();
   if (!ALPHABET_SET.has(c)) return Promise.reject(new Error('not-letter'));
+
+  // 优先通过 Web Audio 内存缓冲池瞬时播放（<30ms 响应）
+  if (playCachedAudioBuffer(`letter_${c}`, onEnd)) {
+    return Promise.resolve();
+  }
+
   return playAudioFile(`/audio/letters/letter_${c}.mp3`, onEnd).catch(() =>
     playAudioFile(`/audio/letters/letter_${c}.m4a`, onEnd),
   );

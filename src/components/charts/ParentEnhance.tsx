@@ -185,7 +185,7 @@ export function SubjectBalance({ onPracticeSubject }: { onPracticeSubject?: (sub
       <div className="mt-1 space-y-1.5">
         {data.map((d) => (
           <div key={d.key} className="flex items-center gap-2">
-            <span className="w-9 shrink-0 text-[11px] font-extrabold" style={{ color: d.color }}>
+            <span className="w-9 shrink-0 text-xs font-extrabold" style={{ color: d.color }}>
               {d.label}
             </span>
             <div className="h-2 flex-1 overflow-hidden rounded-full bg-cream-dark">
@@ -194,14 +194,14 @@ export function SubjectBalance({ onPracticeSubject }: { onPracticeSubject?: (sub
                 style={{ width: `${Math.round(d.pct * 100)}%`, background: d.color }}
               />
             </div>
-            <span className="w-8 shrink-0 text-right text-[11px] font-bold tabular-nums text-ink-soft">
+            <span className="w-8 shrink-0 text-right text-xs font-bold tabular-nums text-ink-soft">
               {Math.round(d.pct * 100)}%
             </span>
             {onPracticeSubject && (
               <button
                 type="button"
                 onClick={() => onPracticeSubject(d.key)}
-                className="shrink-0 rounded-full bg-candy-purple-soft px-2 py-0.5 text-[10px] font-extrabold text-candy-purple-deep active:scale-95"
+                className="shrink-0 rounded-full bg-candy-purple-soft px-2 py-0.5 text-xs font-extrabold text-candy-purple-deep active:scale-95"
               >
                 {tr('parent.goPractice')}
               </button>
@@ -251,7 +251,7 @@ export function StudyTips({ onPracticeSubject }: { onPracticeSubject?: (subject:
                 <button
                   type="button"
                   onClick={() => onPracticeSubject(t.subject ?? '')}
-                  className="shrink-0 rounded-full bg-candy-green-soft px-2.5 py-1 text-[11px] font-extrabold text-candy-green-deep active:scale-95"
+                  className="shrink-0 rounded-full bg-candy-green-soft px-2.5 py-1 text-xs font-extrabold text-candy-green-deep active:scale-95"
                 >
                   {tr('parent.goPractice')}
                 </button>

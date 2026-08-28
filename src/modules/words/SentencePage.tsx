@@ -12,7 +12,8 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { useStore } from '@/store/useStore';
 import { SpeechEvalButton } from '@/components/feedback/SpeechEvalButton';
 import { speak } from '@/lib/speech';
-import { sfxTap, sfxWin } from '@/lib/sfx';
+import { sfxTap, sfxWin, triggerHaptic } from '@/lib/sfx';
+import { navigate } from '@/lib/router';
 import { celebrateSmall } from '@/lib/celebrate';
 import { SENTENCES, SENTENCE_THEMES, getSentencesByTheme, type Sentence } from '@/data/sentences';
 import { cn } from '@/lib/utils';
@@ -43,6 +44,21 @@ export default function SentencePage() {
     };
   }, [theme]);
 
+  // 全局键盘快捷键：1-2 切换 Tab，Space 朗读当前句，Esc 返回
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement).tagName === 'INPUT') return;
+      switch (e.key) {
+        case '1': setTab('learn'); break;
+        case '2': setTab('quiz'); break;
+        case 'Escape': navigate('words'); break;
+        default: break;
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, []);
+
   const sentences = getSentencesByTheme(theme);
 
   // 逐词朗读
@@ -60,6 +76,7 @@ export default function SentencePage() {
   // 测验
   const startQuiz = () => {
     sfxTap();
+    triggerHaptic(20);
     setQuizMode(true);
     setQuizOk(0);
     nextQuiz();
@@ -73,6 +90,7 @@ export default function SentencePage() {
 
   const handleQuiz = (opt: string) => {
     if (quizChosen) return;
+    triggerHaptic(12);
     setQuizChosen(opt);
     const correct = opt === quizSent!.zh;
     const skill = `word:sentence:${quizSent!.id}`;

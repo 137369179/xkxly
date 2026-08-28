@@ -19,7 +19,7 @@ import { useStore, useMastery } from '@/store/useStore';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
 import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHint';
 import type { Progress, MasteryItem } from '@/types';
-import { sfxTap, sfxCorrect } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, triggerHaptic } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { celebrateBig } from '@/lib/celebrate';
 import { shuffle } from '@/lib/utils';
@@ -70,6 +70,7 @@ export function HanziDictation() {
 
   const start = () => {
     sfxTap();
+    triggerHaptic(30);
     const mastery = useStore.getState().progress.mastery;
     const targets = pickRound(level, mastery);
     if (!targets.length) return;
@@ -85,8 +86,9 @@ export function HanziDictation() {
   };
 
   const onAnswer = (correct: boolean) => {
-    const q = questions[idx]!
+    const q = questions[idx]!;
     if (!q) return;
+    triggerHaptic(correct ? 45 : 20);
     practice(q.skill, correct, 2, level);
     if (correct) setScore((s) => s + 1);
   };

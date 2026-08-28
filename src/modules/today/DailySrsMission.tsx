@@ -190,7 +190,7 @@ export function DailySrsMission({ onComplete }: { onComplete?: () => void }) {
             animate={{ opacity: 1, scale: 1 }}
             className="p-5 rounded-2xl bg-slate-50 border-2 border-slate-100 text-center space-y-2"
           >
-            <span className="inline-block px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-black">
+            <span className="inline-block px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-black">
               {currentQ.category}
             </span>
             <p className="text-lg font-black text-slate-800">{currentQ.prompt}</p>

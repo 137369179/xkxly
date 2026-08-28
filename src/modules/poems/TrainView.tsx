@@ -89,12 +89,12 @@ export default function TrainView({ onOpen }: { onOpen: (id: string, tab?: '原�
                   <p className="text-xs font-bold text-ink-soft">{p.author}·{p.dynasty}</p>
                   <div className="mt-1 flex flex-wrap gap-1.5">
                     {m && (m.chars.length > 0 || m.lines.length > 0) && (
-                      <span className="rounded-full bg-pink-100 px-2 py-0.5 text-[11px] font-bold text-candy-pink-deep">
+                      <span className="rounded-full bg-pink-100 px-2 py-0.5 text-xs font-bold text-candy-pink-deep">
                         {t('trainView.difficult', { n: m.chars.length + m.lines.length })}
                       </span>
                     )}
                     {r && (
-                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-700">
+                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700">
                         {t('trainView.bestRecite', { best: r.best, stage: r.stage })}
                       </span>
                     )}

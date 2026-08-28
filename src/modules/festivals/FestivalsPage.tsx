@@ -6,10 +6,10 @@
  * 3. AI 伴学小老师节气文化解说与自然时令感知。
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
-import { sfxTap, sfxCorrect, sfxWrong, sfxWin } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { speak } from '@/lib/speech';
 import { useAiStream } from '@/lib/ai/useAi';
@@ -17,6 +17,7 @@ import { festivalTalkTask } from '@/lib/ai/tasks/culture';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useStore, useMastery } from '@/store/useStore';
+import { navigate } from '@/lib/router';
 
 export interface SolarTerm {
   name: string;
@@ -100,48 +101,48 @@ export const FESTIVALS: FestivalQuiz[] = [
   },
   {
     name: '端午节',
-    emoji: '🚣‍♂️',
-    customs: ['划龙舟', '吃香甜粽子', '挂艾草辟邪'],
-    question: '农历五月初五端午节，江面上会举行什么激动人心的水上比赛？',
-    options: ['赛跑', '赛龙舟', '骑自行车'],
-    answerIdx: 1,
-    explanation: '端午节大家擂鼓呐喊划龙舟，纪念爱国诗人屈原，还要吃美味粽子！',
+    emoji: '🛶',
+    customs: ['赛龙舟', '吃咸甜粽子', '挂艾草戴香囊'],
+    question: '端午节在水面上会举行什么激动人心的体育活动？',
+    options: ['赛龙舟比赛', '滑雪比赛', '赏月活动'],
+    answerIdx: 0,
+    explanation: '龙舟竞渡水花飞溅，大家一起划龙舟纪念屈原爷爷！',
   },
   {
     name: '七夕节',
     emoji: '🌌',
-    customs: ['仰望银河', '拜织女祈巧', '吃巧果'],
-    question: '七夕节传说中，喜鹊会在银河上搭起什么让牛郎织女相会？',
-    options: ['木桥', '鹊桥', '彩虹桥'],
-    answerIdx: 1,
-    explanation: '无数喜鹊飞到银河上搭起美丽的鹊桥，让牛郎和织女相聚！',
+    customs: ['穿针乞巧', '吃巧果', '仰望银河星空'],
+    question: '七夕节的夜晚，传说牛郎和织女会在哪里相会呢？',
+    options: ['鹊桥银河', '海底龙宫', '广寒宫'],
+    answerIdx: 0,
+    explanation: '喜鹊们成群结队搭成鹊桥，让牛郎织女在银河相聚！',
   },
   {
     name: '中秋节',
     emoji: '🥮',
-    customs: ['一家团圆赏月', '吃香甜月饼', '赏桂花'],
-    question: '八月十五中秋节，大家围坐在一起吃什么圆圆的传统美食？',
-    options: ['粽子', '香甜月饼', '青团'],
-    answerIdx: 1,
-    explanation: '月饼圆圆象征着全家团圆美满，在中秋圆月下吃月饼最幸福啦！',
+    customs: ['吃月饼', '赏圆月', '阖家团圆'],
+    question: '八月十五中秋节，全家人聚在一起赏月时，最喜欢吃什么点心？',
+    options: ['香甜圆月饼', '年糕', '春卷'],
+    answerIdx: 0,
+    explanation: '月饼圆圆象征着阖家团团圆圆，甜甜蜜蜜！',
   },
   {
     name: '重阳节',
     emoji: '⛰️',
-    customs: ['登高望远', '赏菊花', '佩插茱萸敬老'],
-    question: '九月初九重阳节，人们会陪伴家里的爷爷奶奶做哪项传统活动？',
-    options: ['登高赏菊与敬老', '放爆竹', '吃粽子'],
+    customs: ['登高远眺', '赏菊花', '佩茱萸饮菊花酒'],
+    question: '九九重阳节是敬老节，小朋友可以陪爷爷奶奶做哪项传统活动？',
+    options: ['登高山与赏菊花', '包粽子', '放鞭炮'],
     answerIdx: 0,
-    explanation: '重阳节是尊老敬老的节日，大家登高远眺、赏菊花、吃重阳糕！',
+    explanation: '九九重阳登高望远，赏金秋菊花，祝愿长辈健康长寿！',
   },
   {
     name: '除夕夜',
-    emoji: '🎉',
-    customs: ['守岁', '包饺子', '吃年夜饭'],
-    question: '一年中的最后一夜叫除夕，全家人聚在一起吃的丰盛大餐叫什么？',
-    options: ['野餐', '年夜饭(团圆饭)', '早餐'],
-    answerIdx: 1,
-    explanation: '年夜饭又叫团圆饭，全家人开开心心围坐在一起迎接新一年的到来！',
+    emoji: '🍲',
+    customs: ['吃团圆年夜饭', '守岁迎春', '看春晚放礼花'],
+    question: '农历年的最后一晚叫除夕，全家老小坐在一起吃的一顿大餐叫什么？',
+    options: ['团圆年夜饭', '重阳花糕', '元宵汤圆'],
+    answerIdx: 0,
+    explanation: '年夜饭是辞旧迎新最丰盛的团圆饭，大家围炉守岁迎新春！',
   },
 ];
 
@@ -190,25 +191,28 @@ export default function FestivalsPage() {
     [mastery],
   );
 
-  const handleSelectTerm = (t: SolarTerm) => {
+  const handleSelectTerm = useCallback((t: SolarTerm) => {
     sfxTap();
+    triggerHaptic(20);
     setSelectedTerm(t);
     void speak(`${t.name}。${t.chant}风俗：${t.custom}。`, { lang: 'zh-CN' });
     learnSkill(`festival:term-${t.name}`);
-  };
+  }, [learnSkill]);
 
-  const startFestivalQuiz = () => {
+  const startFestivalQuiz = useCallback(() => {
     sfxTap();
+    triggerHaptic(20);
     setFeedback('');
     const target = FESTIVALS[Math.floor(Math.random() * FESTIVALS.length)] ?? FALLBACK_FESTIVAL;
     setFQuiz(target);
     void speak(`传统节日知识问答：${target.question}`, { lang: 'zh-CN' });
-  };
+  }, []);
 
-  const handleAnswer = (idx: number) => {
+  const handleAnswer = useCallback((idx: number) => {
     if (!fQuiz) return;
     if (idx === fQuiz.answerIdx) {
       sfxCorrect();
+      triggerHaptic(45);
       celebrateBig();
       sfxWin();
       addStars(1);
@@ -218,11 +222,34 @@ export default function FestivalsPage() {
       tickTime(10);
     } else {
       sfxWrong();
+      triggerHaptic(20);
       celebrateSmall();
       setFeedback('再仔细想一想哦~ 试着选出正确的传统风俗吧！');
       practice(`festival:quiz-${fQuiz.name}`, false, 0, 2);
     }
-  };
+  }, [fQuiz, addStars, practice, tickTime]);
+
+  // 全局键盘快捷键
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (fQuiz && ['1', '2', '3'].includes(e.key)) {
+        const idx = parseInt(e.key, 10) - 1;
+        if (fQuiz.options[idx]) {
+          e.preventDefault();
+          handleAnswer(idx);
+        }
+      } else if (e.key === ' ') {
+        e.preventDefault();
+        startFestivalQuiz();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        navigate('home');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [fQuiz, handleAnswer, startFestivalQuiz]);
 
   return (
     <div className="space-y-5">
@@ -232,6 +259,13 @@ export default function FestivalsPage() {
         subtitle={tr('festivals.subtitle')}
         tone="pink"
       />
+
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-pink-900 font-bold bg-pink-50/90 px-3 py-1 rounded-xl border border-pink-200">
+          ⌨️ 键盘快捷操作：问答模式按数字键 1-3 选择答案 · 空格键 抽取新节日问答
+        </span>
+      </div>
 
       {/* 24 节气四时风物长卷 */}
       <Panel className="border-2 border-pink-300 bg-gradient-to-r from-pink-50 via-rose-50 to-amber-50 text-center space-y-4">

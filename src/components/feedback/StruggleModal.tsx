@@ -26,7 +26,7 @@ export interface StruggleModalProps {
   onSkip: () => void;
 }
 
-export function StruggleModal({ open, wrongStreak, onContinue, onSkip }: StruggleModalProps) {
+export function StruggleModal({ open, wrongStreak: _wrongStreak, onContinue, onSkip }: StruggleModalProps) {
   const { t } = useTranslation();
   // 弹窗打开时锁定一条话语，避免重渲染时换文案；同时语音朗读
   const [message, setMessage] = useState('');
@@ -51,9 +51,6 @@ export function StruggleModal({ open, wrongStreak, onContinue, onSkip }: Struggl
         </h3>
         <p className="mt-2 text-base font-bold text-ink-soft leading-relaxed">
           {message}
-        </p>
-        <p className="mt-1 text-xs font-bold text-ink-soft/70">
-          {t('struggleModal.wrongStreak', { count: wrongStreak })}
         </p>
         <div className="mt-5 grid grid-cols-2 gap-2">
           <CandyButton tone="green" size="md" fullWidth onClick={onContinue}>

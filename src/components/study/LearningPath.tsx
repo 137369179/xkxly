@@ -89,7 +89,7 @@ function FocusCard() {
                 <span className={cn('rounded-full px-2.5 py-0.5 text-xs font-extrabold', prioStyle[f.priority])}>
                   {prioLabel[f.priority]}
                 </span>
-                <span className="text-[10px] font-bold text-ink-soft">{f.estMinutes} {tr('path.minutes')}</span>
+                <span className="text-xs font-bold text-ink-soft">{f.estMinutes} {tr('path.minutes')}</span>
               </div>
             </li>
           ))}

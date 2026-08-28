@@ -7,10 +7,10 @@
  * 4. 🛂 「小小环球探险家」12 洲洋护照集章大冒险、双语原声科普、Streak 连击条与通关荣誉勋章！
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { speak } from '@/lib/speech';
-import { sfxTap, sfxCorrect, sfxWin } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 import { StreakBar } from '@/components/study/StreakBar';
@@ -325,21 +325,23 @@ export function WorldSafariExplorer() {
   }, [filteredList, selectedIdx]);
 
   // 切换区域
-  const handleSelectItem = (idx: number) => {
+  const handleSelectItem = useCallback((idx: number) => {
     sfxTap();
+    triggerHaptic(30);
     setSelectedIdx(idx);
     setQuizAnswered(null);
     const target = filteredList[idx] ?? FALLBACK_CONTINENT;
     void speak(`来到${target.nameZh}，${target.nameEn}！这里有${target.landmarkZh}，以及代表生物${target.animalZh}！`, { lang: 'zh-CN' });
-  };
+  }, [filteredList]);
 
   // 答题盖章
-  const handleAnswerQuiz = (option: string) => {
+  const handleAnswerQuiz = useCallback((option: string) => {
     if (quizAnswered) return;
 
     setQuizAnswered(option);
     if (option === currentItem.correctAnswer) {
       sfxCorrect();
+      triggerHaptic(45);
       celebrateSmall();
       const nextStamps = Array.from(new Set([...collectedStamps, currentItem.id]));
       setCollectedStamps(nextStamps);
@@ -348,6 +350,7 @@ export function WorldSafariExplorer() {
 
       if (nextStamps.length === SAFARI_CONTINENTS.length) {
         sfxWin();
+        triggerHaptic([60, 40, 60, 40, 100]);
         celebrateBig();
         setStreak((s) => s + 1);
         addStars(3);
@@ -356,24 +359,78 @@ export function WorldSafariExplorer() {
         void speak(`回答正确！已在护照上盖上【${currentItem.nameZh}】专属印章！`, { lang: 'zh-CN' });
       }
     } else {
+      sfxTap();
+      triggerHaptic(25);
       void speak(`再想一想哦，答案是${currentItem.correctAnswer}！`, { lang: 'zh-CN' });
     }
-  };
+  }, [quizAnswered, currentItem, collectedStamps, addStars, practice]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (activeTab !== 'passport') {
+        if (['1', '2', '3', '4'].includes(e.key)) {
+          const optIdx = parseInt(e.key, 10) - 1;
+          const opt = currentItem.quizOptions[optIdx];
+          if (opt && !quizAnswered) {
+            e.preventDefault();
+            handleAnswerQuiz(opt);
+          }
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          setSelectedIdx((prev) => (prev > 0 ? prev - 1 : filteredList.length - 1));
+          setQuizAnswered(null);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          setSelectedIdx((prev) => (prev < filteredList.length - 1 ? prev + 1 : 0));
+          setQuizAnswered(null);
+        } else if (e.key === 'p' || e.key === 'P') {
+          e.preventDefault();
+          setActiveTab('passport');
+        }
+      } else {
+        if (e.key === '1') {
+          e.preventDefault();
+          setActiveTab('continents');
+          setSelectedIdx(0);
+          setQuizAnswered(null);
+        } else if (e.key === '2') {
+          e.preventDefault();
+          setActiveTab('oceans');
+          setSelectedIdx(0);
+          setQuizAnswered(null);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeTab, currentItem, quizAnswered, filteredList, handleAnswerQuiz]);
 
   return (
     <div className="space-y-4">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-emerald-900 font-bold bg-emerald-50/90 px-3 py-1 rounded-xl border border-emerald-200">
+          ⌨️ 键盘快捷操作：数字键 1-4 趣味答题盖章 · 左右方向键 切换洲洋 · P 键查看护照
+        </span>
+      </div>
+
       {/* 顶部主品类切换 (七大洲 / 五大洋 / 探险家护照) */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+        <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200" role="tablist" aria-label="地理探险模式选择">
           <button
+            role="tab"
+            aria-selected={activeTab === 'continents'}
             type="button"
             onClick={() => {
               sfxTap();
+              triggerHaptic(30);
               setActiveTab('continents');
               setSelectedIdx(0);
               setQuizAnswered(null);
             }}
-            className={`py-1.5 px-3.5 rounded-xl font-black text-xs transition-all ${
+            className={`py-1.5 px-3.5 min-h-[44px] rounded-xl font-black text-xs transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 ${
               activeTab === 'continents'
                 ? 'bg-emerald-600 text-white shadow-sm'
                 : 'text-slate-600 hover:text-emerald-700'
@@ -382,14 +439,17 @@ export function WorldSafariExplorer() {
             🌍 七大洲探险 ({SAFARI_CONTINENTS.filter((c) => c.category === 'continent').length})
           </button>
           <button
+            role="tab"
+            aria-selected={activeTab === 'oceans'}
             type="button"
             onClick={() => {
               sfxTap();
+              triggerHaptic(30);
               setActiveTab('oceans');
               setSelectedIdx(0);
               setQuizAnswered(null);
             }}
-            className={`py-1.5 px-3.5 rounded-xl font-black text-xs transition-all ${
+            className={`py-1.5 px-3.5 min-h-[44px] rounded-xl font-black text-xs transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300 ${
               activeTab === 'oceans'
                 ? 'bg-blue-600 text-white shadow-sm'
                 : 'text-slate-600 hover:text-blue-700'
@@ -398,12 +458,15 @@ export function WorldSafariExplorer() {
             🌊 五大洋探秘 ({SAFARI_CONTINENTS.filter((c) => c.category === 'ocean').length})
           </button>
           <button
+            role="tab"
+            aria-selected={activeTab === 'passport'}
             type="button"
             onClick={() => {
               sfxTap();
+              triggerHaptic(30);
               setActiveTab('passport');
             }}
-            className={`py-1.5 px-3.5 rounded-xl font-black text-xs transition-all ${
+            className={`py-1.5 px-3.5 min-h-[44px] rounded-xl font-black text-xs transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-amber-300 ${
               activeTab === 'passport'
                 ? 'bg-amber-600 text-white shadow-sm'
                 : 'text-slate-600 hover:text-amber-700'
@@ -416,19 +479,26 @@ export function WorldSafariExplorer() {
         <StreakBar streak={streak} target={3} />
       </div>
 
+      {/* 快捷键提示条 */}
+      <div className="flex items-center justify-between text-xs text-emerald-700 font-bold bg-emerald-50/90 px-3 py-1 rounded-xl border border-emerald-200">
+        <span>⌨️ 键盘快捷操作：数字键 1-4 快速答题 · ←/→ 切换大洲大洋 · P 查看护照</span>
+      </div>
+
       {activeTab !== 'passport' ? (
         <>
           {/* 二级快捷切换按钮组 */}
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="大洲大洋列表选择">
             {filteredList.map((c, idx) => {
               const isSel = selectedIdx === idx;
               const isStamped = collectedStamps.includes(c.id);
               return (
                 <button
                   key={c.id}
+                  role="tab"
+                  aria-selected={isSel}
                   type="button"
                   onClick={() => handleSelectItem(idx)}
-                  className={`py-2 px-3 rounded-2xl font-black text-xs transition-all border-2 flex items-center gap-1 ${
+                  className={`py-2 px-3 min-h-[44px] rounded-2xl font-black text-xs transition-all border-2 flex items-center gap-1 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 ${
                     isSel
                       ? activeTab === 'continents'
                         ? 'bg-emerald-600 text-white border-emerald-700 shadow-md scale-105'
@@ -562,8 +632,8 @@ export function WorldSafariExplorer() {
                 >
                   <div className="text-3xl mb-1">{isStamped ? item.stampEmoji : '🔒'}</div>
                   <div className="text-sm font-black text-slate-800">{item.nameZh}</div>
-                  <div className="text-[10px] font-bold text-slate-500">{item.nameEn}</div>
-                  <div className="mt-2 text-[11px] font-extrabold">
+                  <div className="text-xs font-bold text-slate-500">{item.nameEn}</div>
+                  <div className="mt-2 text-xs font-extrabold">
                     {isStamped ? (
                       <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">已认证签证</span>
                     ) : (

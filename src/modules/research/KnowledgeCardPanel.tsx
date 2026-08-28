@@ -250,7 +250,7 @@ export function KnowledgeCardPanel({
               ))}
               {askLine && (
                 <div className="mt-1 rounded-xl border-2 border-dashed border-candy-purple-deep/40 bg-purple-50 px-3 py-2">
-                  <p className="text-[10px] font-extrabold uppercase tracking-wide text-candy-purple-deep">
+                  <p className="text-xs font-extrabold uppercase tracking-wide text-candy-purple-deep">
                     {t('research.card.askTitle')}
                   </p>
                   <p className="mt-0.5 flex items-start gap-2 text-sm font-bold leading-relaxed text-ink">

@@ -131,7 +131,7 @@ export function VoiceToys({
             className="absolute z-30 cursor-pointer rounded-full border-2 border-white/80 shadow-md backdrop-blur-xs flex items-center justify-center text-xs select-none"
             title="戳破泡泡"
           >
-            <span className="opacity-70 text-[10px]">✨</span>
+            <span className="opacity-70 text-xs">✨</span>
           </motion.button>
         ))}
       </AnimatePresence>
@@ -242,7 +242,7 @@ export function VoiceToys({
                 className="flex shrink-0 flex-col items-center rounded-xl border border-pink-100 bg-pink-50/60 px-2.5 py-1.5 text-center transition-all hover:bg-pink-100 hover:scale-105 active:scale-95"
               >
                 <span className="text-lg">{opt.icon}</span>
-                <span className="text-[10px] font-bold text-ink-soft">{opt.name}</span>
+                <span className="text-xs font-bold text-ink-soft">{opt.name}</span>
               </button>
             ))}
           </motion.div>

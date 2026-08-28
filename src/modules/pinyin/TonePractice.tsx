@@ -7,17 +7,18 @@
  * 4. 彻底解决声调乱读问题。
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { useStore } from '@/store/useStore';
-import { sfxTap, sfxCorrect, sfxWrong, sfxStar } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, sfxStar, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { answerCorrect, answerWrong } from '@/lib/feedback';
 import { StreakBar } from '@/components/study/StreakBar';
 import { randomPraise, randomEncourage, speak } from '@/lib/speech';
+import { navigate } from '@/lib/router';
 
 interface ToneQuestion {
   base: string; // 如 "ma"
@@ -105,7 +106,6 @@ export function TonePractice() {
   const [picked, setPicked] = useState<number | null>(null);
   const [correct, setCorrect] = useState(0);
   const [combo, setCombo] = useState(0);
-  // 连对闯关：连续答对点亮里程碑（目标 3），答错归零温和引导
   const [streak, setStreak] = useState(0);
   const [done, setDone] = useState(false);
   const practice = useStore((s) => s.practice);
@@ -113,19 +113,19 @@ export function TonePractice() {
   const q = questions[idx]!;
 
   // 播放指定声调的实际带调音节读音
-  const playToneSound = (toneNumber: number) => {
+  const playToneSound = useCallback((toneNumber: number) => {
     const mainVowel = q.base.includes('a') ? 'a' : q.base.includes('o') ? 'o' : q.base.includes('e') ? 'e' : q.base.includes('i') ? 'i' : q.base.includes('u') ? 'u' : q.base.includes('ü') ? 'ü' : 'a';
     const toned = TONE_VOWELS[mainVowel]![toneNumber - 1]!;
     const tonedSyllable = q.base.replace(mainVowel, toned);
     void speak(tonedSyllable, { lang: 'zh-CN', rate: 0.65 }).catch(() => {});
-  };
+  }, [q]);
 
   // 播放当前题目的正确标准发音
-  const playTargetSound = () => {
+  const playTargetSound = useCallback(() => {
     void speak(q.display, { lang: 'zh-CN', rate: 0.65 }).catch(() => {});
-  };
+  }, [q]);
 
-  const handlePick = (tone: number) => {
+  const handlePick = useCallback((tone: number) => {
     if (picked !== null) return;
     sfxTap();
     setPicked(tone);
@@ -136,6 +136,7 @@ export function TonePractice() {
 
     if (isCorrect) {
       sfxCorrect();
+      triggerHaptic(45);
       celebrateSmall();
       randomPraise();
       setCorrect((c) => c + 1);
@@ -144,36 +145,34 @@ export function TonePractice() {
       practice('pinyin:tone', true, 1);
       if (streak + 1 >= 3) answerCorrect('combo');
       else answerCorrect('pinyin');
-      if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        navigator.vibrate([40, 60, 40]);
-      }
     } else {
       sfxWrong();
+      triggerHaptic(20);
       randomEncourage();
       setCombo(0);
       setStreak(0);
       practice('pinyin:tone', false, 0);
       answerWrong('pinyin');
-      if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        navigator.vibrate([120, 80, 120]);
-      }
     }
-  };
+  }, [picked, q, playToneSound, streak, practice]);
 
-  const next = () => {
+  const next = useCallback(() => {
     sfxTap();
+    triggerHaptic(25);
     if (idx + 1 >= questions.length) {
       setDone(true);
       sfxStar();
       celebrateBig();
+      triggerHaptic([60, 40, 60, 40, 100]);
     } else {
       setIdx((i) => i + 1);
       setPicked(null);
     }
-  };
+  }, [idx, questions.length]);
 
-  const restart = () => {
+  const restart = useCallback(() => {
     sfxTap();
+    triggerHaptic(30);
     setQuestions(Array.from({ length: QUESTIONS_PER_ROUND }, makeQuestion));
     setIdx(0);
     setPicked(null);
@@ -181,7 +180,42 @@ export function TonePractice() {
     setCombo(0);
     setStreak(0);
     setDone(false);
-  };
+  }, []);
+
+  // 键盘快捷监听
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (!done) {
+        if (picked === null) {
+          if (['1', '2', '3', '4'].includes(e.key)) {
+            const t = parseInt(e.key, 10);
+            e.preventDefault();
+            handlePick(t);
+          } else if (e.key === 's' || e.key === 'S' || e.key === ' ') {
+            e.preventDefault();
+            playTargetSound();
+          }
+        } else {
+          if (e.key === ' ' || e.key === 'Enter') {
+            e.preventDefault();
+            next();
+          }
+        }
+      } else {
+        if (e.key === ' ' || e.key === 'Enter' || e.key === 'r' || e.key === 'R') {
+          e.preventDefault();
+          restart();
+        }
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        navigate('pinyin');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [done, picked, handlePick, playTargetSound, next, restart]);
 
   if (done) {
     const percent = Math.round((correct / questions.length) * 100);
@@ -193,6 +227,14 @@ export function TonePractice() {
           subtitle={`完成 ${questions.length} 道挑战`}
           tone="orange"
         />
+
+        {/* 快捷操作提示条 */}
+        <div className="text-center">
+          <span className="inline-block text-xs text-orange-900 font-bold bg-orange-50/90 px-3 py-1 rounded-xl border border-orange-200">
+            ⌨️ 键盘快捷操作：空格/Enter 再玩一次
+          </span>
+        </div>
+
         <Panel className="text-center">
           <motion.div
             initial={{ scale: 0 }}
@@ -216,7 +258,7 @@ export function TonePractice() {
             </div>
           </div>
           <div className="mt-6 flex justify-center">
-            <CandyButton tone="green" size="lg" onClick={restart}>
+            <CandyButton tone="green" size="lg" onClick={restart} className="min-h-[52px] text-base font-black">
               🔄 再玩一次滑滑梯
             </CandyButton>
           </div>
@@ -312,13 +354,13 @@ export function TonePractice() {
                 </div>
                 <div className="my-2 text-center w-full">
                   <div className="text-base font-black text-ink">{tc.title}</div>
-                  <div className="text-[11px] font-extrabold text-amber-700 mt-1">{tc.rhyme}</div>
+                  <div className="text-xs font-extrabold text-amber-700 mt-1">{tc.rhyme}</div>
                 </div>
-                <div className="w-full text-center text-[10px] font-bold text-slate-400">
+                <div className="w-full text-center text-xs font-bold text-slate-400">
                   {tc.desc}
                 </div>
                 {picked !== null && isAnswer && (
-                  <span className="absolute -top-2.5 -right-2 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-black text-white shadow-sm">
+                  <span className="absolute -top-2.5 -right-2 rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-black text-white shadow-sm">
                     ✅ 正确
                   </span>
                 )}

@@ -24,6 +24,10 @@ export type { UseAdaptiveDifficultyOptions, AdaptiveDifficultyApi, DifficultyLev
 export { useSound } from './useSound';
 export type { UseSoundApi, SoundKind } from './useSound';
 
+// A 儿童无障碍包容层（R150 落地）：生产级可达性组件，三核心一行 import 即可复用
+export { AccessibleButton } from '@/components/gamification/AccessibleButton';
+export { ReducedMotionToggle } from '@/components/gamification/ReducedMotionToggle';
+
 export * from '@/lib/srs';
 export * from '@/lib/milestone';
 export * from '@/lib/feedback';

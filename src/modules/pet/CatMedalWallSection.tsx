@@ -31,7 +31,7 @@ export function CatMedalWallSection({
           <div key={label} className="rounded-2xl bg-white p-3 border border-amber-200 flex flex-col items-center shadow-xs">
             <Medal size={64} unlocked={unlocked} />
             <span className="mt-2 text-amber-900">{label}</span>
-            <span className="text-[10px] text-amber-600 font-normal">{desc}</span>
+            <span className="text-xs text-amber-600 font-normal">{desc}</span>
           </div>
         ))}
       </div>

@@ -6,7 +6,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { Panel } from '@/components/ui/Card';
-import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, triggerHaptic } from '@/lib/sfx';
 import { playLetterVoice, speak } from '@/lib/speech';
 import { cn, shuffle } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -50,13 +50,14 @@ export function LetterOrder() {
   }, [mode]);
 
   // learn: 逐个认识字母顺序
-  const goLearn = (i: number) => {
+  const goLearn = useCallback((i: number) => {
     sfxTap();
+    triggerHaptic(30);
     setCurrent(i);
     void playLetterVoice(ALPHABET[i]!).catch(() => {
       void speak(ALPHABET[i]!, { lang: 'en-US', rate: 0.6 }).catch(() => {});
     });
-  };
+  }, []);
 
   // order: 把打乱的5个字母排ABC顺序
   const startOrder = useCallback(() => {
@@ -85,9 +86,10 @@ export function LetterOrder() {
     setFeedback('');
   }, []);
 
-  const pickLetter = (letter: string) => {
+  const pickLetter = useCallback((letter: string) => {
     if (mode === 'order') {
       sfxTap();
+      triggerHaptic(30);
       if (answer.includes(letter)) return;
       const newAns = [...answer, letter];
       setAnswer(newAns);
@@ -100,6 +102,7 @@ export function LetterOrder() {
         const isCorrect = newAns.every((c, i) => c === correctSeq[i]!);
         if (isCorrect) {
           sfxCorrect();
+          triggerHaptic(45);
           setFeedback(`🎉 ${tr('letterOrder.perfect')}`);
           setScore((s) => s + 1);
           setStreak((s) => s + 1);
@@ -110,6 +113,7 @@ export function LetterOrder() {
           else answerCorrect('letter');
         } else {
           sfxWrong();
+          triggerHaptic(20);
           setFeedback(`❌ ${tr('letterOrder.correctSeq', { seq: correctSeq.join(' → ') })}`);
           setStreak(0);
           practice('letter-order', false);
@@ -122,16 +126,17 @@ export function LetterOrder() {
         }, 1600);
       }
     }
-  };
+  }, [mode, answer, letters, tr, streak, streakTarget, addStars, practice, startOrder]);
 
   // 撤销选中的字母
-  const undoLetter = (letter: string) => {
+  const undoLetter = useCallback((letter: string) => {
     sfxTap();
+    triggerHaptic(30);
     setAnswer((ans) => ans.filter((x) => x !== letter));
     setFeedback('');
-  };
+  }, []);
 
-  const pickFill = (letter: string) => {
+  const pickFill = useCallback((letter: string) => {
     if (lockRef.current) return;
     lockRef.current = true;
     const sortedOpts = [...fillOptions].sort((a, b) => ALPHABET.indexOf(a) - ALPHABET.indexOf(b));
@@ -143,6 +148,7 @@ export function LetterOrder() {
 
     if (letter === expected) {
       sfxCorrect();
+      triggerHaptic(45);
       setFeedback(`🎉 ${tr('letterOrder.correct')}`);
       setScore((s) => s + 1);
       setStreak((s) => s + 1);
@@ -155,6 +161,7 @@ export function LetterOrder() {
       else answerCorrect('letter');
     } else {
       sfxWrong();
+      triggerHaptic(20);
       setFeedback(`❌ ${tr('letterOrder.wrongExp', { expected: expected ?? '' })}`);
       setStreak(0);
       practice('letter-order', false);
@@ -166,7 +173,55 @@ export function LetterOrder() {
       setFeedback('');
       lockRef.current = false;
     }, 1300);
-  };
+  }, [fillOptions, fillQ, tr, streak, addStars, practice, startFill]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (mode === 'learn') {
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          const prev = current > 0 ? current - 1 : ALPHABET.length - 1;
+          goLearn(prev);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          const next = current < ALPHABET.length - 1 ? current + 1 : 0;
+          goLearn(next);
+        } else if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          goLearn(current);
+        }
+      } else if (mode === 'order') {
+        if (['1', '2', '3', '4', '5'].includes(e.key)) {
+          const available = letters.filter((l) => !answer.includes(l));
+          const idx = parseInt(e.key, 10) - 1;
+          const targetLetter = available[idx];
+          if (targetLetter) {
+            e.preventDefault();
+            pickLetter(targetLetter);
+          }
+        } else if (e.key === 'Backspace' || e.key === 'z' || e.key === 'Z') {
+          if (answer.length > 0) {
+            e.preventDefault();
+            const last = answer[answer.length - 1];
+            if (last) undoLetter(last);
+          }
+        }
+      } else if (mode === 'fill') {
+        if (['1', '2', '3', '4'].includes(e.key)) {
+          const idx = parseInt(e.key, 10) - 1;
+          const opt = fillOptions[idx];
+          if (opt) {
+            e.preventDefault();
+            pickFill(opt);
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mode, current, letters, answer, fillOptions, goLearn, pickLetter, undoLetter, pickFill]);
 
   return (
     <Panel className="space-y-4">
@@ -184,45 +239,62 @@ export function LetterOrder() {
       </div>
 
       {/* 模式选择 */}
-      <div className="flex justify-center gap-2 rounded-2xl bg-pink-50/80 p-1.5 border border-pink-100">
+      <div className="flex justify-center gap-2 rounded-2xl bg-pink-50/80 p-1.5 border border-pink-100" role="tablist" aria-label="字母排序模式">
         <button
+          role="tab"
+          aria-selected={mode === 'learn'}
+          type="button"
           onClick={() => {
             sfxTap();
+            triggerHaptic(30);
             setMode('learn');
           }}
           className={cn(
-            'flex-1 rounded-xl py-2 text-xs font-black transition active:scale-95',
+            'flex-1 rounded-xl py-2 min-h-[44px] text-xs font-black transition active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-pink-300',
             mode === 'learn' ? 'bg-candy-pink-deep text-white shadow-sm' : 'text-ink-soft hover:bg-white/60'
           )}
         >
           📖 {tr('letterOrder.learn')}
         </button>
         <button
+          role="tab"
+          aria-selected={mode === 'order'}
+          type="button"
           onClick={() => {
             sfxTap();
+            triggerHaptic(30);
             setMode('order');
             startOrder();
           }}
           className={cn(
-            'flex-1 rounded-xl py-2 text-xs font-black transition active:scale-95',
+            'flex-1 rounded-xl py-2 min-h-[44px] text-xs font-black transition active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-pink-300',
             mode === 'order' ? 'bg-candy-pink-deep text-white shadow-sm' : 'text-ink-soft hover:bg-white/60'
           )}
         >
           🚂 {tr('letterOrder.sort')}
         </button>
         <button
+          role="tab"
+          aria-selected={mode === 'fill'}
+          type="button"
           onClick={() => {
             sfxTap();
+            triggerHaptic(30);
             setMode('fill');
             startFill();
           }}
           className={cn(
-            'flex-1 rounded-xl py-2 text-xs font-black transition active:scale-95',
+            'flex-1 rounded-xl py-2 min-h-[44px] text-xs font-black transition active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-pink-300',
             mode === 'fill' ? 'bg-candy-pink-deep text-white shadow-sm' : 'text-ink-soft hover:bg-white/60'
           )}
         >
           🎯 {tr('letterOrder.fill')}
         </button>
+      </div>
+
+      {/* 快捷操作提示条 */}
+      <div className="flex items-center justify-between text-xs text-pink-700 font-bold bg-pink-50/90 px-3 py-1 rounded-xl border border-pink-200">
+        <span>⌨️ 键盘快捷操作：数字键 1-5 选字母 · ←/→ 切换 · 空格 重播发音 · Backspace 撤销</span>
       </div>
 
       {/* 闯关里程碑：连续答对点亮，答错归零（order/fill 模式）；目标随得分爬坡 */}
@@ -294,7 +366,7 @@ export function LetterOrder() {
               })}
             </div>
             {answer.length > 0 && (
-              <p className="text-[11px] font-bold text-amber-800/80 mt-2">💡 提示：点击已上车的字母可撤回</p>
+              <p className="text-xs font-bold text-amber-800/80 mt-2">💡 提示：点击已上车的字母可撤回</p>
             )}
           </div>
 

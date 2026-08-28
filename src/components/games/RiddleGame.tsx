@@ -2,10 +2,10 @@
  * 谜语猜猜游戏
  */
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
-import { sfxTap, sfxCorrect, sfxWrong, sfxStar } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, sfxStar, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { randomPraise } from '@/lib/speech';
 import { shuffle } from '@/lib/utils';
@@ -70,9 +70,10 @@ export function RiddleGame() {
     if (revealTimerRef.current) clearTimeout(revealTimerRef.current);
   }, []);
 
-  const startCategory = (cat: Riddle['category'] | 'all') => {
+  const startCategory = useCallback((cat: Riddle['category'] | 'all') => {
     sfxTap();
-    const filtered = cat === 'all' ? RIDDLES : RIDDLES.filter(r => r.category === cat);
+    triggerHaptic(30);
+    const filtered = cat === 'all' ? RIDDLES : RIDDLES.filter((r) => r.category === cat);
     const shuffled = shuffle(filtered);
     setPool(shuffled.slice(0, Math.min(5, shuffled.length)));
     setIdx(0);
@@ -80,25 +81,27 @@ export function RiddleGame() {
     setShowHint(false);
     setRevealed(false);
     setPhase('playing');
-  };
+  }, []);
 
   const current = pool[idx] ?? pool[0] ?? { q: '', a: '', hint: '', category: 'object' };
 
-  const handleReveal = (gotIt: boolean) => {
+  const handleReveal = useCallback((gotIt: boolean) => {
     sfxTap();
     if (gotIt) {
       sfxCorrect();
+      triggerHaptic(45);
       celebrateSmall();
       randomPraise();
-      setCorrect(c => c + 1);
+      setCorrect((c) => c + 1);
     } else {
       sfxWrong();
+      triggerHaptic(20);
     }
     setRevealed(true);
     if (revealTimerRef.current) clearTimeout(revealTimerRef.current);
     revealTimerRef.current = setTimeout(() => {
       if (idx + 1 < pool.length) {
-        setIdx(i => i + 1);
+        setIdx((i) => i + 1);
         setShowHint(false);
         setRevealed(false);
       } else {
@@ -106,27 +109,73 @@ export function RiddleGame() {
         const finalCorrect = correct + (gotIt ? 1 : 0);
         if (finalCorrect >= pool.length * 0.8) {
           sfxStar();
+          triggerHaptic([60, 40, 60, 40, 100]);
           celebrateBig();
         }
       }
     }, 1500);
-  };
+  }, [idx, pool.length, correct]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (phase === 'select') {
+        const cats: (Riddle['category'] | 'all')[] = ['animal', 'plant', 'object', 'char', 'all'];
+        if (['1', '2', '3', '4', '5'].includes(e.key)) {
+          const cat = cats[parseInt(e.key, 10) - 1];
+          if (cat) {
+            e.preventDefault();
+            startCategory(cat);
+          }
+        }
+      } else if (phase === 'playing' && !revealed) {
+        if (e.key === '1' || e.key === 'y' || e.key === 'Y' || e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          handleReveal(true);
+        } else if (e.key === '2' || e.key === 'n' || e.key === 'N') {
+          e.preventDefault();
+          handleReveal(false);
+        } else if (e.key === 'h' || e.key === 'H') {
+          e.preventDefault();
+          sfxTap();
+          triggerHaptic(25);
+          setShowHint(true);
+        }
+      } else if (phase === 'result') {
+        if (e.key === ' ' || e.key === 'Enter' || e.key === 'r' || e.key === 'R') {
+          e.preventDefault();
+          sfxTap();
+          triggerHaptic(30);
+          setPhase('select');
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [phase, revealed, startCategory, handleReveal]);
 
   if (phase === 'select') {
     return (
       <div className="space-y-4">
         <PageHeader emoji="🧩" title={t('riddle.pageTitle')} subtitle={t('riddle.subtitle')} tone="orange" />
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {(['animal', 'plant', 'object', 'char', 'all'] as const).map(cat => {
-            const count = cat === 'all' ? RIDDLES.length : RIDDLES.filter(r => r.category === cat).length;
+        {/* 快捷操作提示条 */}
+        <div className="flex items-center justify-between text-xs text-candy-orange-deep font-bold bg-amber-50/90 px-3 py-1 rounded-xl border border-amber-200">
+          <span>⌨️ 键盘快捷操作：数字键 1-5 快速选择谜语分类</span>
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3" role="group" aria-label="谜语分类选择">
+          {(['animal', 'plant', 'object', 'char', 'all'] as const).map((cat, idx) => {
+            const count = cat === 'all' ? RIDDLES.length : RIDDLES.filter((r) => r.category === cat).length;
             return (
               <button
                 key={cat}
+                type="button"
                 onClick={() => startCategory(cat)}
-                className="flex flex-col items-center rounded-2xl border-4 border-candy-orange-soft bg-white p-4 transition-all hover:bg-candy-orange-soft active:translate-y-[1px]"
+                className="flex flex-col items-center min-h-[96px] rounded-2xl border-4 border-candy-orange-soft bg-white p-4 transition-all hover:bg-candy-orange-soft active:translate-y-[1px] focus:outline-none focus-visible:ring-4 focus-visible:ring-amber-300"
               >
                 <span className="text-3xl">{CAT_LABELS[cat === 'all' ? 'animal' : cat].emoji}</span>
-                <span className="mt-1 text-sm font-extrabold text-ink">
+                <span className="mt-1 text-sm font-extrabold text-ink flex items-center gap-1">
+                  <span className="text-xs text-candy-orange-deep font-bold">[{idx + 1}]</span>
                   {cat === 'all' ? t('riddle.mixed') : t(`riddle.${cat}`)}
                 </span>
                 <span className="text-xs font-bold text-ink-soft">{t('riddle.count', { count })}</span>
@@ -145,7 +194,7 @@ export function RiddleGame() {
         <div className="text-6xl">{rate >= 80 ? '🏆' : rate >= 60 ? '🎉' : '💪'}</div>
         <p className="mt-3 text-xl font-extrabold text-ink">{t('riddle.guessed', { correct, total: pool.length })}</p>
         <p className="text-3xl font-black text-candy-orange-deep">{rate}%</p>
-        <CandyButton tone="orange" size="sm" className="mt-4" onClick={() => setPhase('select')}>
+        <CandyButton tone="orange" size="sm" className="mt-4 min-h-[48px]" onClick={() => { sfxTap(); triggerHaptic(30); setPhase('select'); }}>
           🔄 {t('riddle.again')}
         </CandyButton>
       </Panel>
@@ -163,6 +212,11 @@ export function RiddleGame() {
         </span>
       </div>
 
+      {/* 快捷操作提示条 */}
+      <div className="flex items-center justify-between text-xs text-candy-orange-deep font-bold bg-amber-50/90 px-3 py-1 rounded-xl border border-amber-200">
+        <span>⌨️ 键盘快捷操作：空格/Enter/1 我猜到了 · 2 看答案 · H 提示</span>
+      </div>
+
       <Panel className="text-center">
         <div className="my-4 text-lg font-extrabold leading-relaxed text-ink">
           🧩 {current.q}
@@ -177,14 +231,14 @@ export function RiddleGame() {
             )}
             <div className="flex justify-center gap-2">
               {!showHint && (
-                <CandyButton tone="purple" variant="soft" size="sm" onClick={() => { sfxTap(); setShowHint(true); }}>
+                <CandyButton tone="purple" variant="soft" size="sm" className="min-h-[44px]" onClick={() => { sfxTap(); triggerHaptic(25); setShowHint(true); }}>
                   💡 {t('riddle.hint')}
                 </CandyButton>
               )}
-              <CandyButton tone="green" size="sm" onClick={() => handleReveal(true)}>
+              <CandyButton tone="green" size="sm" className="min-h-[44px]" onClick={() => handleReveal(true)}>
                 ✅ {t('riddle.gotIt')}
               </CandyButton>
-              <CandyButton tone="orange" variant="soft" size="sm" onClick={() => handleReveal(false)}>
+              <CandyButton tone="orange" variant="soft" size="sm" className="min-h-[44px]" onClick={() => handleReveal(false)}>
                 🤔 {t('riddle.showAnswer')}
               </CandyButton>
             </div>

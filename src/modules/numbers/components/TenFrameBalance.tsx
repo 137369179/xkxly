@@ -282,7 +282,7 @@ export function TenFrameBalance() {
                     <span key={idx} title={w.name}>{w.emoji}</span>
                   ))}
                 </div>
-                <span className="text-[10px] font-black text-slate-600 bg-white/90 px-1.5 rounded-full border mt-1">
+                <span className="text-xs font-black text-slate-600 bg-white/90 px-1.5 rounded-full border mt-1">
                   重: {leftTotal}
                 </span>
               </div>
@@ -296,10 +296,10 @@ export function TenFrameBalance() {
                       <span key={idx} title={w.name}>{w.emoji}</span>
                     ))
                   ) : (
-                    <span className="text-[10px] text-slate-400">空盘</span>
+                    <span className="text-xs text-slate-400">空盘</span>
                   )}
                 </div>
-                <span className="text-[10px] font-black text-slate-600 bg-white/90 px-1.5 rounded-full border mt-1">
+                <span className="text-xs font-black text-slate-600 bg-white/90 px-1.5 rounded-full border mt-1">
                   重: {rightTotal}
                 </span>
               </div>
@@ -321,7 +321,7 @@ export function TenFrameBalance() {
                 >
                   <span className="text-xl">{w.emoji}</span>
                   <span>{w.name}</span>
-                  <span className="bg-indigo-200 text-indigo-900 px-1.5 rounded-full text-[10px]">
+                  <span className="bg-indigo-200 text-indigo-900 px-1.5 rounded-full text-xs">
                     +{w.weight}
                   </span>
                 </button>

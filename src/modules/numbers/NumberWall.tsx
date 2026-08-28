@@ -194,7 +194,7 @@ export function NumberStory({ n }: { n: number }) {
       <div data-testid="story-offline" className="mt-4 rounded-2xl bg-white/80 p-3 text-left">
         <p className="text-xs font-extrabold text-amber-600">{t('numbers.storyOfflineTitle')}</p>
         <p className="mt-1 text-sm font-bold leading-relaxed text-ink">🎵 {numberRhyme(n)}</p>
-        <p className="mt-1 text-[11px] text-ink-soft">{t('numbers.storyOffline')}</p>
+        <p className="mt-1 text-xs text-ink-soft">{t('numbers.storyOffline')}</p>
       </div>
     );
   }

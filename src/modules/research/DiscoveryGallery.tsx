@@ -178,11 +178,11 @@ export default function DiscoveryGallery() {
                     <h2 className="text-lg font-black text-ink">{item.title}</h2>
                     <div className="mt-1 flex flex-wrap items-center gap-1.5">
                       {item.tags?.slice(0, 3).map((tag) => (
-                        <span key={tag} className="rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-bold text-ink-soft">
+                        <span key={tag} className="rounded-full bg-white/80 px-2 py-0.5 text-xs font-bold text-ink-soft">
                           #{tag}
                         </span>
                       ))}
-                      <span className="text-[10px] font-bold text-ink-soft">· {formatDate(item.createdAt)}</span>
+                      <span className="text-xs font-bold text-ink-soft">· {formatDate(item.createdAt)}</span>
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-1.5">
@@ -238,7 +238,7 @@ export default function DiscoveryGallery() {
                   <div className="flex items-start justify-between gap-3 px-5 pt-4">
                     <div className="min-w-0">
                       <h2 className="text-lg font-black text-ink">{c.title}</h2>
-                      <span className="text-[10px] font-bold text-ink-soft">{t('research.gallery.offlineTag')}</span>
+                      <span className="text-xs font-bold text-ink-soft">{t('research.gallery.offlineTag')}</span>
                     </div>
                     <div className="flex shrink-0 items-center gap-1.5">
                       <button

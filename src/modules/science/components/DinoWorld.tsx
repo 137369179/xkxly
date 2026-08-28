@@ -55,15 +55,15 @@ function DinoCard({ dino, onClose }: { dino: DinoItem; onClose: () => void }) {
           <p className="text-sm font-bold text-green-800">{dino.desc}</p>
           <div className="grid grid-cols-3 gap-2 max-w-xs">
             <div className="rounded-xl bg-white/80 p-2 text-center border border-green-200">
-              <p className="text-[10px] font-bold text-ink-muted">{tr('dinoWorld.length')}</p>
+              <p className="text-xs font-bold text-ink-muted">{tr('dinoWorld.length')}</p>
               <p className="text-sm font-black text-green-700">{dino.length}m</p>
             </div>
             <div className="rounded-xl bg-white/80 p-2 text-center border border-green-200">
-              <p className="text-[10px] font-bold text-ink-muted">{tr('dinoWorld.weight')}</p>
+              <p className="text-xs font-bold text-ink-muted">{tr('dinoWorld.weight')}</p>
               <p className="text-sm font-black text-green-700">{dino.weight}t</p>
             </div>
             <div className="rounded-xl bg-white/80 p-2 text-center border border-green-200">
-              <p className="text-[10px] font-bold text-ink-muted">{tr('dinoWorld.height')}</p>
+              <p className="text-xs font-bold text-ink-muted">{tr('dinoWorld.height')}</p>
               <p className="text-sm font-black text-green-700">{dino.height}m</p>
             </div>
           </div>
@@ -137,7 +137,7 @@ function DinoCompare() {
             <rect x="5" y={humanHeight * scale - 25} width="6" height="22" fill="#333" rx="2" />
             <rect x="19" y={humanHeight * scale - 25} width="6" height="22" fill="#333" rx="2" />
           </svg>
-          <span className="mt-1 text-[10px] font-bold text-ink-soft">1.7m</span>
+          <span className="mt-1 text-xs font-bold text-ink-soft">1.7m</span>
         </div>
 
         {/* 恐龙 */}
@@ -154,7 +154,7 @@ function DinoCompare() {
             className="rounded-t-full bg-green-300/40"
             style={{ width: `${dinoSvgLength}px`, height: `${dinoSvgHeight * 0.3}px` }}
           />
-          <span className="mt-1 text-[10px] font-bold text-green-700">
+          <span className="mt-1 text-xs font-bold text-green-700">
             {selected.length}m / {selected.height}m / {selected.weight}t
           </span>
         </motion.div>

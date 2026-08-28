@@ -189,7 +189,7 @@ export function DailyQuestBoard() {
     <Panel>
       {/* 快捷操作提示条 */}
       <div className="mb-3 text-center">
-        <span className="inline-block text-[11px] text-green-900 font-bold bg-green-50/90 px-3 py-1 rounded-xl border border-green-200">
+        <span className="inline-block text-xs text-green-900 font-bold bg-green-50/90 px-3 py-1 rounded-xl border border-green-200">
           ⌨️ 键盘快捷操作：数字键 1-3 领取完成任务 · 空格 生成今日成长任务
         </span>
       </div>

@@ -7,11 +7,12 @@ import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { getWordsByLevel, getWordsByTheme, WORD_THEMES } from '@/data/wordIndex';
 import type { WordEntry } from '@/data/words';
-import { sfxTap, sfxCorrect, sfxWrong, sfxStar } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, sfxStar, triggerHaptic } from '@/lib/sfx';
 import { useTranslation } from '@/i18n/useTranslation';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { motion } from 'motion/react';
 import { useStore } from '@/store/useStore';
+import { useRoute } from '@/lib/router';
 import { shuffle } from '@/lib/utils';
 import { WordStarQuest } from './WordStarQuest';
 import { useAdaptiveDifficultyState } from '@/store/adaptiveDifficulty';
@@ -19,6 +20,8 @@ import { AdaptiveDifficultyHint } from '@/components/study/AdaptiveDifficultyHin
 import { ComboMeter } from '@/components/gamification/ComboMeter';
 import { GentleFeedback } from '@/components/gamification/GentleFeedback';
 import { RestReminder } from '@/components/gamification/RestReminder';
+import { ReducedMotionToggle } from '@/components/gamification/ReducedMotionToggle';
+import { MistakeBookPanel } from '@/components/gamification/MistakeBookPanel';
 import { praiseByScene, encourageByScene } from '@/lib/praise';
 
 type Phase = 'playing' | 'result';
@@ -44,6 +47,8 @@ const DIFFS: DiffEntry[] = [
 
 export function WordMatch() {
   const { t: tr } = useTranslation();
+  const progress = useStore((s) => s.progress);
+  const { navigate } = useRoute();
   const [diff, setDiff, diffMeta] = useAdaptiveDifficultyState('word');
   const [themeFilter, setThemeFilter] = useState<string>('all');
   const [pairs, setPairs] = useState<Pair[]>([]);
@@ -128,6 +133,7 @@ export function WordMatch() {
     if (enIdx !== undefined && zhIdx !== undefined && enIdx === zhIdx) {
       // 匹配成功
       sfxCorrect();
+      triggerHaptic(25);
       celebrateSmall();
       const newCombo = combo + 1;
       setCombo(newCombo);
@@ -309,8 +315,12 @@ export function WordMatch() {
 
       {feedback && <GentleFeedback correct={feedback.correct} message={feedback.msg} />}
 
-      <WordStarQuest />
-      <RestReminder />
+      <section className="space-y-3">
+        <WordStarQuest />
+        <MistakeBookPanel progress={progress} onReview={() => navigate('wrongbook')} />
+        <RestReminder />
+        <ReducedMotionToggle />
+      </section>
     </div>
   );
 }

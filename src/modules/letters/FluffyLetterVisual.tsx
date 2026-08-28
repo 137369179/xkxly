@@ -58,7 +58,7 @@ export const FluffyLetterVisual: React.FC<FluffyLetterVisualProps> = ({
         >
           {upper}{lower}
         </div>
-        <div className="absolute bottom-1.5 right-2 bg-white/95 px-2.5 py-0.5 rounded-full text-[11px] font-black text-pink-600 shadow-sm border border-pink-100 flex items-center gap-1">
+        <div className="absolute bottom-1.5 right-2 bg-white/95 px-2.5 py-0.5 rounded-full text-xs font-black text-pink-600 shadow-sm border border-pink-100 flex items-center gap-1">
           <span>{itemData.badge}</span>
         </div>
       </div>

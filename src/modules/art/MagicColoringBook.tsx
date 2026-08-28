@@ -9,14 +9,15 @@
  * 6. Streak 连击激励与「小小色彩艺术家」荣誉勋章！
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { speak } from '@/lib/speech';
-import { sfxTap, sfxCorrect, sfxWin } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
 import { StreakBar } from '@/components/study/StreakBar';
 import { getAudioContext } from '@/lib/audioContext';
+import { navigate } from '@/lib/router';
 
 // ── 调色盘 16 种高饱和度与马卡龙甜美色彩 ──
 export const PALETTE_COLORS = [
@@ -264,18 +265,20 @@ export function MagicColoringBook() {
   };
 
   // 切换线稿底图
-  const handleSelectTemplate = (idx: number) => {
+  const handleSelectTemplate = useCallback((idx: number) => {
     sfxTap();
+    triggerHaptic(30);
     setCurrentIdx(idx);
     setColoredParts({});
     setHistory([]);
     const target = COLORING_TEMPLATES[idx] ?? FALLBACK_TEMPLATE;
     void speak(`开启画布：${target.name}！${target.desc}`, { lang: 'zh-CN' });
-  };
+  }, []);
 
   // 点击分块涂色
-  const handleFillPart = (partId: string) => {
+  const handleFillPart = useCallback((partId: string) => {
     sfxTap();
+    triggerHaptic(35);
     playBrushSfx();
     setHistory((prev) => [...prev, { ...coloredParts }]);
     const nextParts = { ...coloredParts, [partId]: currentColor };
@@ -287,6 +290,7 @@ export function MagicColoringBook() {
 
     if (filledCount === totalParts && !completedTemplates.includes(template.id)) {
       sfxCorrect();
+      triggerHaptic([40, 50, 80]);
       celebrateSmall();
       const nextDone = Array.from(new Set([...completedTemplates, template.id]));
       setCompletedTemplates(nextDone);
@@ -301,28 +305,33 @@ export function MagicColoringBook() {
         void speak(template.praise, { lang: 'zh-CN' });
       }, 500);
     }
-  };
+  }, [coloredParts, currentColor, template, completedTemplates, addStars, practice]);
 
   // 撤销一步
-  const handleUndo = () => {
+  const handleUndo = useCallback(() => {
     if (history.length === 0) return;
     sfxTap();
+    triggerHaptic(30);
     const previous = history[history.length - 1];
     setColoredParts(previous ?? {});
     setHistory((prev) => prev.slice(0, prev.length - 1));
-  };
+  }, [history]);
 
-  // 清空重填
-  const handleClear = () => {
+  // 清空重填（支持通过撤销恢复，防止误触丢失心血）
+  const handleClear = useCallback(() => {
     sfxTap();
+    triggerHaptic(40);
+    if (Object.keys(coloredParts).length > 0) {
+      setHistory((prev) => [...prev, coloredParts]);
+    }
     setColoredParts({});
-    setHistory([]);
-    void speak('画布已重置，重新开始创作吧！', { lang: 'zh-CN' });
-  };
+    void speak('画布已重置，想找回可以点击撤销哦！', { lang: 'zh-CN' });
+  }, [coloredParts]);
 
   // 一键魔力涂色
-  const handleMagicAutoFill = () => {
+  const handleMagicAutoFill = useCallback(() => {
     sfxTap();
+    triggerHaptic([40, 50, 80]);
     const autoFilled: Record<string, string> = {};
     template.parts.forEach((p, idx) => {
       autoFilled[p.id] = PALETTE_COLORS[idx % PALETTE_COLORS.length]?.hex ?? '#FF4D6D';
@@ -332,7 +341,45 @@ export function MagicColoringBook() {
     celebrateBig();
     playMagicArpeggioSfx();
     void speak('🪄 魔法涂色完成！整幅画面瞬间变得五彩斑斓！', { lang: 'zh-CN' });
-  };
+  }, [template]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['1', '2', '3', '4', '5', '6', '7', '8'].includes(e.key)) {
+        const idx = parseInt(e.key, 10) - 1;
+        if (COLORING_TEMPLATES[idx]) {
+          e.preventDefault();
+          handleSelectTemplate(idx);
+        }
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        setCurrentIdx((prev) => (prev > 0 ? prev - 1 : COLORING_TEMPLATES.length - 1));
+        setColoredParts({});
+        setHistory([]);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        setCurrentIdx((prev) => (prev < COLORING_TEMPLATES.length - 1 ? prev + 1 : 0));
+        setColoredParts({});
+        setHistory([]);
+      } else if (e.key === 'z' || e.key === 'Z' || e.key === 'u' || e.key === 'Backspace') {
+        e.preventDefault();
+        handleUndo();
+      } else if (e.key === 'm' || e.key === 'M' || e.key === ' ') {
+        e.preventDefault();
+        handleMagicAutoFill();
+      } else if (e.key === 'c' || e.key === 'C' || e.key === 'Delete') {
+        e.preventDefault();
+        handleClear();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        navigate('art');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleSelectTemplate, handleUndo, handleMagicAutoFill, handleClear]);
 
   const isAllFilled = Object.keys(coloredParts).length === template.parts.length && template.parts.length > 0;
 
@@ -340,16 +387,18 @@ export function MagicColoringBook() {
     <div className="space-y-4">
       {/* 顶部 8 款插画线稿快捷选择 */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="填色底图模板选择">
           {COLORING_TEMPLATES.map((t, idx) => {
             const isSel = currentIdx === idx;
             const isDone = completedTemplates.includes(t.id);
             return (
               <button
                 key={t.id}
+                role="tab"
+                aria-selected={isSel}
                 type="button"
                 onClick={() => handleSelectTemplate(idx)}
-                className={`py-2 px-3 rounded-2xl font-black text-xs transition-all border-2 flex items-center gap-1 shadow-sm ${
+                className={`py-2 px-3 min-h-[44px] rounded-2xl font-black text-xs transition-all border-2 flex items-center gap-1 shadow-sm focus:outline-none focus-visible:ring-4 focus-visible:ring-pink-300 ${
                   isSel
                     ? 'bg-pink-500 text-white border-pink-600 shadow-md scale-105'
                     : 'bg-white text-slate-700 border-slate-200 hover:border-pink-300'
@@ -366,6 +415,11 @@ export function MagicColoringBook() {
         <StreakBar streak={streak} target={3} />
       </div>
 
+      {/* 快捷键提示条 */}
+      <div className="flex items-center justify-between text-xs text-pink-600 font-bold bg-pink-50/80 px-3 py-1 rounded-xl border border-pink-200">
+        <span>⌨️ 键盘快捷操作：数字键 1-8 选图 · ←/→ 切换 · 空格/M 魔法上色 · Z 撤销 · C 清空</span>
+      </div>
+
       {/* 调色盘与操作控制台 */}
       <div className="bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50 rounded-3xl border-3 border-pink-300 p-5 shadow-sm space-y-4">
         {/* 当前插画介绍与操作栏 */}
@@ -375,7 +429,7 @@ export function MagicColoringBook() {
             <div>
               <h3 className="text-base font-black text-slate-800 flex items-center gap-2">
                 <span>{template.name}</span>
-                <span className="text-[11px] font-bold text-pink-600 bg-pink-100 px-2 py-0.5 rounded-full">
+                <span className="text-xs font-bold text-pink-600 bg-pink-100 px-2 py-0.5 rounded-full">
                   {template.theme}
                 </span>
               </h3>
@@ -389,21 +443,21 @@ export function MagicColoringBook() {
               type="button"
               disabled={history.length === 0}
               onClick={handleUndo}
-              className="py-1.5 px-3 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-black shadow-sm disabled:opacity-40 hover:bg-slate-50 active:scale-95"
+              className="py-1.5 px-3 min-h-[44px] rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-black shadow-sm disabled:opacity-40 hover:bg-slate-50 active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-pink-300"
             >
               ↩️ 撤销
             </button>
             <button
               type="button"
               onClick={handleClear}
-              className="py-1.5 px-3 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-black shadow-sm hover:bg-slate-50 active:scale-95"
+              className="py-1.5 px-3 min-h-[44px] rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-black shadow-sm hover:bg-slate-50 active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-pink-300"
             >
               🔄 清空
             </button>
             <button
               type="button"
               onClick={handleMagicAutoFill}
-              className="py-1.5 px-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white text-xs font-black shadow-sm hover:opacity-95 active:scale-95"
+              className="py-1.5 px-3 min-h-[44px] rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white text-xs font-black shadow-sm hover:opacity-95 active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-pink-300"
             >
               🪄 魔力上色
             </button>
@@ -420,7 +474,7 @@ export function MagicColoringBook() {
                 {PALETTE_COLORS.find((c) => c.hex === currentColor)?.name ?? '已选'}
               </span>
             </span>
-            <span className="text-[11px] font-bold text-slate-400">
+            <span className="text-xs font-bold text-slate-400">
               已涂 {Object.keys(coloredParts).length} / {template.parts.length} 块
             </span>
           </div>

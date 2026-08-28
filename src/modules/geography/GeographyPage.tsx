@@ -6,16 +6,17 @@
  * 3. 世界代表动物与地标中英文双语朗读与挑战
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { shuffle } from '@/lib/utils';
 import { PageHeader, Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { Tabs, type TabItem } from '@/components/ui/Tabs';
-import { sfxTap, sfxCorrect, sfxWrong } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, triggerHaptic } from '@/lib/sfx';
 import { speak } from '@/lib/speech';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useStore, useMastery } from '@/store/useStore';
 import { WorldSafariExplorer } from './WorldSafariExplorer';
+import { navigate } from '@/lib/router';
 
 interface Continent {
   id: string;
@@ -63,6 +64,31 @@ export default function GeographyPage() {
   const [quizItem, setQuizItem] = useState<{ c: Continent; options: Continent[] } | null>(null);
   const [feedback, setFeedback] = useState('');
 
+  // 全局键盘快捷键响应 (1-3 切换专区)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === '1') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setTab('safari');
+      } else if (e.key === '2') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setTab('continents');
+      } else if (e.key === '3') {
+        e.preventDefault();
+        triggerHaptic(20);
+        setTab('quiz');
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        navigate('home');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const TABS: TabItem<GeoTab>[] = useMemo(() => [
     { id: 'safari', label: '环球探险打卡', emoji: '🧭' },
     { id: 'continents', label: tr('geography.exploreTitle'), emoji: '🌏' },
@@ -76,6 +102,7 @@ export default function GeographyPage() {
 
   const handleSelect = (c: Continent) => {
     sfxTap();
+    triggerHaptic(20);
     setSelected(c);
     learnSkill(`geo:${c.id}`);
     tickTime(5);
@@ -84,6 +111,7 @@ export default function GeographyPage() {
 
   const startQuiz = () => {
     sfxTap();
+    triggerHaptic(30);
     setFeedback('');
     const target = CONTINENTS[Math.floor(Math.random() * CONTINENTS.length)] ?? FALLBACK_CONTINENT;
     const shuffledOpts = shuffle(CONTINENTS).slice(0, 3);
@@ -99,12 +127,14 @@ export default function GeographyPage() {
     if (!quizItem) return;
     if (picked.id === quizItem.c.id) {
       sfxCorrect();
+      triggerHaptic(45);
       setFeedback(tr('geography.correctMsg'));
       practice(`geo:quiz-${quizItem.c.id}`, true, 2, 2);
       tickTime(5);
       speak(`太棒啦！答对了！${quizItem.c.nameZh}！`, { lang: 'zh-CN' });
     } else {
       sfxWrong();
+      triggerHaptic(20);
       setFeedback(tr('geography.wrongMsg'));
       practice(`geo:quiz-${quizItem.c.id}`, false, 0, 2);
     }
@@ -118,6 +148,13 @@ export default function GeographyPage() {
         subtitle={tr('geography.subtitle')}
         tone="green"
       />
+
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-emerald-900 font-bold bg-emerald-50/90 px-3 py-1 rounded-xl border border-emerald-200">
+          ⌨️ 键盘快捷操作：数字 1-3 切换专区 (环球探险打卡/七大洲探索/地理知识问答)
+        </span>
+      </div>
 
       <Tabs items={TABS} value={tab} onChange={setTab} tone="green" layoutId="geo-tabs" />
 

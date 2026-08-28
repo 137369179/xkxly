@@ -6,7 +6,7 @@
  * 家长中心可调用 reopenOnboarding() 重新打开本引导（自动登录配置）。
  */
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { sfxTap } from '@/lib/sfx';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useSettingsStore } from '@/store/useSettingsStore';
@@ -138,7 +138,7 @@ export function OnboardingModal({ onComplete }: { onComplete: (name: string, ava
                   }}
                 >
                   <span className="text-xl leading-none">{a.emoji}</span>
-                  <span className="text-[10px] font-extrabold text-gray-600">{a.short}</span>
+                  <span className="text-xs font-extrabold text-gray-600">{a.short}</span>
                 </button>
               ))}
             </div>

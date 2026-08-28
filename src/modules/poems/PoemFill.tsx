@@ -1,15 +1,11 @@
-/**
- * 古诗填字游戏 - 从已学古诗中挖空填字
- */
-
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { shuffle } from "@/lib/utils";
 import { Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import POEMS from '@/data/poems';
 import { usePoemsRead } from '@/store/useStore';
 import { speak } from '@/lib/speech';
-import { sfxTap, sfxCorrect, sfxWrong, sfxStar } from '@/lib/sfx';
+import { sfxTap, sfxCorrect, sfxWrong, sfxStar, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { randomPraise, randomEncourage } from '@/lib/speech';
 import { moodOfPoem } from '@/lib/chant';
@@ -96,7 +92,6 @@ export function PoemFill() {
   const [idx, setIdx] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
   const [correct, setCorrect] = useState(0);
-  /** 连续答对里程碑：答对 +1、答错归零，形成闯关目标感 */
   const [streak, setStreak] = useState(0);
   const [phase, setPhase] = useState<'playing' | 'result'>('playing');
 
@@ -106,7 +101,96 @@ export function PoemFill() {
     if (timerRef.current) clearTimeout(timerRef.current);
   }, []);
 
-  if (questions.length === 0) {
+  const q = questions[idx];
+
+  const handlePick = useCallback((ch: string) => {
+    if (picked || !q) return;
+    sfxTap();
+    setPicked(ch);
+    const isRight = ch === q.missingChar;
+    if (isRight) {
+      sfxCorrect();
+      triggerHaptic(45);
+      celebrateSmall();
+      randomPraise();
+      setCorrect(c => c + 1);
+      setStreak(s => s + 1);
+    } else {
+      sfxWrong();
+      triggerHaptic(20);
+      randomEncourage();
+      setStreak(0);
+    }
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      if (idx + 1 >= questions.length) {
+        setPhase('result');
+        if (correct + (isRight ? 1 : 0) >= questions.length * 0.8) {
+          sfxStar();
+          celebrateBig();
+          triggerHaptic([60, 40, 60, 40, 100]);
+        }
+      } else {
+        setIdx(i => i + 1);
+        setPicked(null);
+      }
+    }, 1200);
+  }, [picked, q, idx, questions.length, correct]);
+
+  const handlePlayVoice = useCallback(() => {
+    if (!q) return;
+    sfxTap();
+    triggerHaptic(20);
+    speak(q.line, { rate: 0.8, module: 'poem', moodKey: moodOfPoem(POEMS.find(p => p.id === q.poemId)!).key });
+  }, [q]);
+
+  const handleRestart = useCallback(() => {
+    sfxTap();
+    triggerHaptic(30);
+    const qs: FillQuestion[] = [];
+    for (let i = 0; i < QUESTIONS_PER_ROUND; i++) {
+      const poem = availablePoems[Math.floor(Math.random() * availablePoems.length)]!
+      const nq = makeQuestion(poem, tr);
+      if (nq) qs.push(nq);
+    }
+    setQuestions(qs);
+    setIdx(0);
+    setPicked(null);
+    setCorrect(0);
+    setStreak(0);
+    setPhase('playing');
+  }, [availablePoems, tr]);
+
+  // 键盘快捷监听
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (phase === 'playing' && q) {
+        if (!picked && q.options.length > 0) {
+          if (['1', '2', '3', '4'].includes(e.key)) {
+            const optIdx = parseInt(e.key, 10) - 1;
+            const opt = q.options[optIdx];
+            if (opt) {
+              e.preventDefault();
+              handlePick(opt);
+            }
+          } else if (e.key === 's' || e.key === 'S' || e.key === ' ') {
+            e.preventDefault();
+            handlePlayVoice();
+          }
+        }
+      } else if (phase === 'result') {
+        if (e.key === ' ' || e.key === 'Enter' || e.key === 'r' || e.key === 'R') {
+          e.preventDefault();
+          handleRestart();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [phase, q, picked, handlePick, handlePlayVoice, handleRestart]);
+
+  if (questions.length === 0 || !q) {
     return (
       <Panel className="text-center">
         <div className="text-4xl">📚</div>
@@ -114,8 +198,6 @@ export function PoemFill() {
       </Panel>
     );
   }
-
-  const q = questions[idx]!
 
   const renderLine = () => {
     const chars = [...q.line];
@@ -139,37 +221,6 @@ export function PoemFill() {
     });
   };
 
-  const handlePick = (ch: string) => {
-    if (picked) return;
-    sfxTap();
-    setPicked(ch);
-    const isRight = ch === q.missingChar;
-    if (isRight) {
-      sfxCorrect();
-      celebrateSmall();
-      randomPraise();
-      setCorrect(c => c + 1);
-      setStreak(s => s + 1);
-    } else {
-      sfxWrong();
-      randomEncourage();
-      setStreak(0);
-    }
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      if (idx + 1 >= questions.length) {
-        setPhase('result');
-        if (correct + (isRight ? 1 : 0) >= questions.length * 0.8) {
-          sfxStar();
-          celebrateBig();
-        }
-      } else {
-        setIdx(i => i + 1);
-        setPicked(null);
-      }
-    }, 1200);
-  };
-
   if (phase === 'result') {
     const rate = Math.round((correct / questions.length) * 100);
     const stars = rate >= 90 ? 3 : rate >= 70 ? 2 : 1;
@@ -179,20 +230,7 @@ export function PoemFill() {
         <p className="mt-3 text-xl font-extrabold text-ink">{tr('poemFill.complete')}</p>
         <p className="text-3xl font-black text-candy-pink-deep">{'⭐'.repeat(stars)}</p>
         <p className="text-sm font-bold text-ink-soft">{tr('poemFill.score', { correct, total: questions.length, rate })}</p>
-        <CandyButton tone="pink" size="sm" className="mt-4" onClick={() => {
-          const qs: FillQuestion[] = [];
-          for (let i = 0; i < QUESTIONS_PER_ROUND; i++) {
-            const poem = availablePoems[Math.floor(Math.random() * availablePoems.length)]!
-            const q = makeQuestion(poem, tr);
-            if (q) qs.push(q);
-          }
-          setQuestions(qs);
-          setIdx(0);
-          setPicked(null);
-          setCorrect(0);
-          setStreak(0);
-          setPhase('playing');
-        }}>
+        <CandyButton tone="pink" size="sm" className="mt-4 min-h-[44px]" onClick={handleRestart}>
           🔄 {tr('poemFill.again')}
         </CandyButton>
       </Panel>
@@ -201,6 +239,13 @@ export function PoemFill() {
 
   return (
     <div className="space-y-4">
+      {/* 快捷操作提示条 */}
+      <div className="text-center">
+        <span className="inline-block text-xs text-pink-900 font-bold bg-pink-50/90 px-3 py-1 rounded-xl border border-pink-200">
+          ⌨️ 键盘快捷操作：数字键 1-4 选字 · S 听朗诵
+        </span>
+      </div>
+
       {/* 闯关里程碑：连续答对 3 题点亮，形成目标感 */}
       <StreakBar streak={streak} target={3} tone="pink" />
 
@@ -208,7 +253,7 @@ export function PoemFill() {
         <span className="text-sm font-extrabold text-ink-soft">
           {idx + 1}/{questions.length} · ✅{correct}
         </span>
-        <CandyButton tone="purple" variant="soft" size="sm" onClick={() => speak(q.line, { rate: 0.8, module: 'poem', moodKey: moodOfPoem(POEMS.find(p => p.id === q.poemId)!).key })}>
+        <CandyButton tone="purple" variant="soft" size="sm" onClick={handlePlayVoice}>
           🔊 {tr('poemFill.listen')}
         </CandyButton>
       </div>
@@ -224,12 +269,13 @@ export function PoemFill() {
       </Panel>
 
       <div className="grid grid-cols-2 gap-2">
-        {q.options.map(opt => (
+        {q.options.map((opt, optIdx) => (
           <button
             key={opt}
+            type="button"
             onClick={() => handlePick(opt)}
             disabled={!!picked}
-            className={`rounded-2xl border-4 p-4 text-center text-3xl font-black transition-all ${
+            className={`relative rounded-2xl border-4 p-4 min-h-[64px] text-center text-3xl font-black transition-all focus-visible:ring-4 focus-visible:ring-pink-300 focus:outline-none ${
               picked
                 ? opt === q.missingChar
                   ? 'border-candy-green-deep bg-candy-green-soft text-candy-green-deep'
@@ -239,6 +285,7 @@ export function PoemFill() {
                 : 'border-candy-pink-soft bg-white text-ink hover:bg-candy-pink-soft active:translate-y-[1px]'
             }`}
           >
+            <span className="absolute top-1.5 left-2 text-xs font-bold opacity-50">[{optIdx + 1}]</span>
             {opt}
           </button>
         ))}

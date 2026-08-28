@@ -46,7 +46,7 @@ export function BottomTabs({ active }: { active: RouteId }) {
                   <FluffyIcon type={item.id} size="sm" className={cn('transition-transform', isActive && 'scale-110 border-pink-400')} />
                 </motion.div>
                 <span
-                  className={cn("text-[11px] leading-tight font-black transition-colors", isActive ? "text-pink-600 font-extrabold" : "text-purple-900/60")}
+                  className={cn("text-xs leading-tight font-black transition-colors", isActive ? "text-pink-600 font-extrabold" : "text-purple-900/60")}
                 >
                   {translate(`nav.${item.id}.short`) || item.short}
                 </span>

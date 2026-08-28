@@ -452,7 +452,7 @@ export function SpeechEvalButton({
                 passed ? 'bg-emerald-500' : 'bg-amber-500'
               }`}>
                 <span className="text-2xl font-extrabold">{result.score}</span>
-                <span className="text-[10px]">{tr('tts.pts')}</span>
+                <span className="text-xs">{tr('tts.pts')}</span>
               </div>
               <div className="flex-1">
                 <p className="text-sm font-extrabold text-ink">{result.feedback}</p>

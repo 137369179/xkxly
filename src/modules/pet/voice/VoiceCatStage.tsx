@@ -109,7 +109,7 @@ export function VoiceCatStage({
       />
 
       {/* 身体互动微提示 */}
-      <span className="mt-1 text-[11px] font-bold text-pink-400">
+      <span className="mt-1 text-xs font-bold text-pink-400">
         ✨ 戳戳耳朵、捏捏脸蛋、碰碰小爪有惊喜动作哦～
       </span>
 
@@ -147,7 +147,7 @@ export function VoiceCatStage({
             <button
               type="button"
               onClick={onPet}
-              className="flex items-center gap-1 rounded-full border border-pink-200 bg-white/90 px-2.5 py-0.5 text-[11px] font-bold text-pink-600 shadow-xs transition-all hover:bg-pink-100 active:scale-90"
+              className="flex items-center gap-1 rounded-full border border-pink-200 bg-white/90 px-2.5 py-0.5 text-xs font-bold text-pink-600 shadow-xs transition-all hover:bg-pink-100 active:scale-90"
               title="摸摸小猫的头"
             >
               <span>💖</span>
@@ -159,7 +159,7 @@ export function VoiceCatStage({
             <button
               type="button"
               onClick={onFeed}
-              className="flex items-center gap-1 rounded-full border border-pink-200 bg-white/90 px-2.5 py-0.5 text-[11px] font-bold text-pink-600 shadow-xs transition-all hover:bg-pink-100 active:scale-90"
+              className="flex items-center gap-1 rounded-full border border-pink-200 bg-white/90 px-2.5 py-0.5 text-xs font-bold text-pink-600 shadow-xs transition-all hover:bg-pink-100 active:scale-90"
               title={`喂一条小鱼干 (当前有 ${fishCount} 条)`}
             >
               <span>🐟</span>
@@ -171,7 +171,7 @@ export function VoiceCatStage({
             <button
               type="button"
               onClick={onPraise}
-              className="flex items-center gap-1 rounded-full border border-pink-200 bg-white/90 px-2.5 py-0.5 text-[11px] font-bold text-pink-600 shadow-xs transition-all hover:bg-pink-100 active:scale-90"
+              className="flex items-center gap-1 rounded-full border border-pink-200 bg-white/90 px-2.5 py-0.5 text-xs font-bold text-pink-600 shadow-xs transition-all hover:bg-pink-100 active:scale-90"
               title="给小茜鼓鼓掌"
             >
               <span>👏</span>
@@ -181,7 +181,7 @@ export function VoiceCatStage({
         </div>
 
         {sttNotice && (
-          <span className="rounded-full border border-amber-300 bg-amber-50 px-3 py-0.5 text-[11px] font-bold text-amber-800 shadow-xs">
+          <span className="rounded-full border border-amber-300 bg-amber-50 px-3 py-0.5 text-xs font-bold text-amber-800 shadow-xs">
             {sttNotice}
           </span>
         )}

@@ -82,7 +82,7 @@ function ColorExploreImpl() {
             {COLORS.map(c => (
               <button key={c.name} onClick={()=>pickColor(c)} className="rounded-xl p-2 shadow-sm transition-all hover:scale-110 active:scale-95" style={{background:c.hex}}>
                 <span className="text-2xl block">{c.emoji}</span>
-                <span className="text-[10px] font-bold text-white/90">{c.name}</span>
+                <span className="text-xs font-bold text-white/90">{c.name}</span>
               </button>
             ))}
           </div>

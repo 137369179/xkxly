@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
 import { Panel } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
-import { sfxTap } from '@/lib/sfx';
+import { sfxTap, triggerHaptic } from '@/lib/sfx';
 import {
   FlatCat2D,
   type PetActionCategory,
@@ -101,7 +101,10 @@ export function CatStagePanel({
 }) {
   const { t } = useTranslation();
   const stageTheme = STAGE_THEME[envLighting];
-  const playMotion = (act: CatAction) => onTriggerMotion(act);
+  const playMotion = useCallback((act: CatAction) => {
+    triggerHaptic(20);
+    onTriggerMotion(act);
+  }, [onTriggerMotion]);
 
   const [tipIndex, setTipIndex] = useState(0);
 
@@ -112,8 +115,67 @@ export function CatStagePanel({
     return () => clearInterval(timer);
   }, []);
 
+  // 全局键盘快捷键
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === '1') {
+        e.preventDefault();
+        triggerHaptic(25);
+        onFeed();
+      } else if (e.key === '2') {
+        e.preventDefault();
+        triggerHaptic(25);
+        onPet();
+      } else if (e.key === '3') {
+        e.preventDefault();
+        triggerHaptic(25);
+        onBath();
+      } else if (e.key === '4') {
+        e.preventDefault();
+        triggerHaptic(25);
+        onAddFish();
+      } else if (e.key.toLowerCase() === 'd') {
+        e.preventDefault();
+        playMotion('dance');
+      } else if (e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        playMotion('stretch');
+      } else if (e.key.toLowerCase() === 'r') {
+        e.preventDefault();
+        playMotion('roll');
+      } else if (e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        playMotion('purr');
+      } else if (e.key.toLowerCase() === 'h') {
+        e.preventDefault();
+        playMotion('highFive');
+      } else if (e.key.toLowerCase() === 'v') {
+        e.preventDefault();
+        triggerHaptic(30);
+        onOpenVoice();
+      } else if (e.key.toLowerCase() === 'm') {
+        e.preventDefault();
+        triggerHaptic(30);
+        onOpenMiniGame();
+      } else if (e.key === ' ') {
+        e.preventDefault();
+        playMotion('jump');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onFeed, onPet, onBath, onAddFish, playMotion, onOpenVoice, onOpenMiniGame]);
+
   return (
     <Panel className={`text-center space-y-4 relative overflow-hidden transition-colors duration-500 ${stageTheme.panel}`}>
+      {/* 快捷操作提示条 */}
+      <div className="text-center relative z-10">
+        <span className="inline-block text-xs text-pink-900 font-bold bg-pink-50/90 px-3 py-1 rounded-xl border border-pink-200">
+          ⌨️ 键盘快捷操作：数字 1-3 护理 · D/S/R/H 动作 · V 语音对话 · M 接鱼小游戏 · 空格 跳跃
+        </span>
+      </div>
+
       {/* 氛围光晕层 */}
       <div
         className="pointer-events-none absolute inset-0 transition-opacity duration-700"
@@ -139,7 +201,7 @@ export function CatStagePanel({
               <div key={lv} className="relative aspect-square overflow-hidden">
                 <img src={EVOLVE_IMG[lv]} alt={`Lv.${lv}`} className="h-full w-full object-cover" loading="lazy" decoding="async" />
                 <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent text-center">
-                  <span className="text-[10px] font-black text-white">Lv.{lv}</span>
+                  <span className="text-xs font-black text-white">Lv.{lv}</span>
                 </div>
                 {catLevel === lv && (
                   <div className="absolute inset-0 border-4 border-yellow-300 bg-yellow-400/20 flex items-center justify-center">
@@ -168,7 +230,7 @@ export function CatStagePanel({
           }`}
         >
           <span>{realisticMode ? '🎮 3D WebGL 写实模式' : '✨ 3D 毛绒矢量模式'}</span>
-          <span className="text-[10px] opacity-80">({t('pet.clickSwitch')})</span>
+          <span className="text-xs opacity-80">({t('pet.clickSwitch')})</span>
         </button>
       </div>
 
@@ -242,7 +304,7 @@ export function CatStagePanel({
         )}
 
         {/* 身体触控微提示 */}
-        <span className="mt-1 text-[11px] font-bold text-pink-500">
+        <span className="mt-1 text-xs font-bold text-pink-500">
           ✨ 戳戳耳朵、捏捏脸蛋、碰碰小爪、摸摸肚皮有惊喜动作哦～
         </span>
       </div>
@@ -383,8 +445,8 @@ export function CatStagePanel({
         </div>
       </div>
 
-      {/* 交互护理按键 */}
-      <div className="flex justify-center flex-wrap gap-3 pt-2 relative z-10">
+      {/* 交互护理与趣味互动按键 */}
+      <div className="flex justify-center flex-wrap gap-2.5 pt-2 relative z-10">
         <CandyButton tone="orange" size="md" onClick={onFeed}>
           <span className="inline-flex items-center gap-1"><CatFishIcon size={20} /> {t('pet.feedBtn')} (-2)</span>
         </CandyButton>
@@ -394,7 +456,13 @@ export function CatStagePanel({
         <CandyButton tone="blue" size="md" onClick={onBath}>
           <span className="inline-flex items-center gap-1"><CatBathIcon size={20} /> {t('pet.bathBtn')}</span>
         </CandyButton>
-        <CandyButton tone="purple" variant="soft" size="sm" onClick={onAddFish}>
+        <CandyButton tone="purple" variant="soft" size="md" onClick={onOpenVoice}>
+          <span className="inline-flex items-center gap-1">🎙️ 和小茜说话</span>
+        </CandyButton>
+        <CandyButton tone="yellow" variant="soft" size="md" onClick={onOpenMiniGame}>
+          <span className="inline-flex items-center gap-1">🎮 接鱼小游戏</span>
+        </CandyButton>
+        <CandyButton tone="purple" variant="ghost" size="sm" onClick={onAddFish}>
           <span className="inline-flex items-center gap-1"><CatGiftIcon size={18} /> {t('pet.dailyFishBtn')} (+5)</span>
         </CandyButton>
       </div>

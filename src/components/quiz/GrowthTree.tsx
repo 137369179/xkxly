@@ -210,7 +210,7 @@ export function GrowthTree() {
           <span className="text-2xl">🏆</span>
           <span className="text-xs font-black text-pink-700">{t('growth.sevenDayReward')}</span>
         </div>
-        <span className="rounded-full bg-pink-500 px-2.5 py-0.5 text-[11px] font-black text-white">
+        <span className="rounded-full bg-pink-500 px-2.5 py-0.5 text-xs font-black text-white">
           {t('growth.streakReward')}
         </span>
       </div>

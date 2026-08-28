@@ -18,17 +18,17 @@ interface State {
 }
 
 export class GameErrorBoundary extends Component<Props, State> {
-  state: State = { hasError: false };
+  override state: State = { hasError: false };
 
   static getDerivedStateFromError(): State {
     return { hasError: true };
   }
 
-  componentDidCatch(): void {
+  override componentDidCatch(): void {
     // 生产可在此接错误监控；此处静默降级，避免打断孩子
   }
 
-  render(): ReactNode {
+  override render(): ReactNode {
     if (this.state.hasError) {
       return (
         this.props.fallback ?? (

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useActionState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSafeTimeout } from '@/lib/useTimer';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -15,9 +15,9 @@ interface AiVoiceModalProps {
 
 export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
   const { t: tr } = useTranslation();
-  const [status, setStatus] = useState<'idle' | 'listening' | 'thinking' | 'speaking'>('idle');
+  const [status, setStatus] = useState<'idle' | 'listening' | 'speaking'>('idle');
   const [transcript, setTranscript] = useState('');
-  const [aiResponse, setAiResponse] = useState('');
+  const [displayResponse, setDisplayResponse] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const supported = isSpeechRecogSupported();
   const activeStreamRef = useRef<boolean>(false);
@@ -71,7 +71,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
       stopSpeaking();
       setStatus('idle');
       setTranscript('');
-      setAiResponse('');
+      setDisplayResponse('');
       setErrorMsg('');
       return undefined;
     }
@@ -85,7 +85,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
       stopSpeaking();
       setStatus('idle');
       setTranscript('');
-      setAiResponse('');
+      setDisplayResponse('');
       setErrorMsg('');
     };
   }, [isOpen]);
@@ -94,16 +94,15 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
     return () => { speechRecog.stop(); };
   }, []);
 
-  const handleSendToAi = useCallback(async (raw: string) => {
-    // 输入护栏：拦截异常内容，绝不直送 AI
+  // useActionState 管理 AI 请求的生命周期，isPending 自动跟踪请求进行中状态，
+  // 替代手动 setStatus('thinking') / setStatus('idle') 的模式
+  const [, sendToAi, isAiPending] = useActionState(async (_prev: string, raw: string) => {
     const guarded = guardInput(raw);
     if (!guarded.ok) {
       setErrorMsg(guarded.reason || '这个问题我们换个说法聊聊吧～');
-      setStatus('idle');
-      return;
+      return '';
     }
     const question = guarded.text;
-    setStatus('thinking');
     activeStreamRef.current = true;
     abortRef.current?.abort();
     const ac = new AbortController();
@@ -122,7 +121,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
         if (!activeStreamRef.current) break;
         if (chunk.type === 'text') {
           fullText += chunk.text;
-          setAiResponse(fullText);
+          setDisplayResponse(fullText);
         }
       }
       // 出口护栏（P0-4）：最终展示/朗读的内容必须过 quiz.extend 场景 guardOutput，
@@ -130,7 +129,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
       const guardedOut = guardOutput(fullText, guardForScene('quiz.extend'));
       const safeText = guardedOut.ok ? guardedOut.text : '';
       if (safeText && activeStreamRef.current) {
-        setAiResponse(safeText);
+        setDisplayResponse(safeText);
         setStatus('speaking');
         sfxCorrect();
         speak(safeText, {
@@ -138,22 +137,24 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
           onEnd: () => { if (activeStreamRef.current) setStatus('idle'); },
         });
       } else {
-        setStatus('idle');
         if (fullText.trim()) {
           const fallback = '小茜没听懂这个问题，我们换个问题问吧～';
-          setAiResponse(fallback);
+          setDisplayResponse(fallback);
         }
       }
     } catch (err) {
       // 主动取消（关闭弹窗/重新提问）不算失败，静默退出即可
-      if (ac.signal.aborted) return;
+      if (ac.signal.aborted) return _prev;
       if (import.meta.env.DEV) console.error('AI Voice error:', err);
-      setStatus('idle');
       const fallback = '小茜刚刚走神啦，宝贝再问我一次好不好呀？';
-      setAiResponse(fallback);
+      setDisplayResponse(fallback);
       speak(fallback);
     }
-  }, [tr]);
+    return '';
+  }, '');
+
+  // 复合状态：AI 请求进行中（isPending）且未进入播报阶段时，视为 'thinking'
+  const derivedStatus = isAiPending && status !== 'speaking' ? 'thinking' : status;
 
   const handleStartListening = useCallback(async () => {
     if (!supported) {
@@ -168,7 +169,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
     }
     stopSpeaking();
     setTranscript('');
-    setAiResponse('');
+    setDisplayResponse('');
     setErrorMsg('');
     setStatus('listening');
     sfxTap();
@@ -178,7 +179,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
         setTranscript(text);
         if (isFinal && text.trim()) {
           speechRecog.stop();
-          void handleSendToAi(text.trim());
+          sendToAi(text.trim());
         }
       },
       onError: (err) => {
@@ -189,18 +190,18 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
         const currentStatus = statusRef.current;
         const currentTranscript = transcriptRef.current;
         if (currentStatus === 'listening' && currentTranscript.trim()) {
-          void handleSendToAi(currentTranscript.trim());
+          sendToAi(currentTranscript.trim());
         } else if (currentStatus === 'listening') {
           setStatus('idle');
         }
       },
     });
-  }, [supported, handleSendToAi, tr]);
+  }, [supported, sendToAi, tr]);
 
   const handleStopListening = () => {
     speechRecog.stop();
     if (transcript.trim() && status === 'listening') {
-      handleSendToAi(transcript.trim());
+      sendToAi(transcript.trim());
     } else {
       setStatus('idle');
     }
@@ -239,19 +240,19 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
           <div className="mx-auto my-3 flex justify-center">
             <motion.div
               animate={
-                status === 'listening'
+                derivedStatus === 'listening'
                   ? { scale: [1, 1.15, 1], rotate: [0, -5, 5, 0] }
-                  : status === 'thinking'
+                  : derivedStatus === 'thinking'
                   ? { rotate: [0, 360] }
-                  : status === 'speaking'
+                  : derivedStatus === 'speaking'
                   ? { y: [0, -6, 0] }
                   : {}
               }
-              transition={{ repeat: Infinity, duration: status === 'thinking' ? 2 : 1.2 }}
+              transition={{ repeat: Infinity, duration: derivedStatus === 'thinking' ? 2 : 1.2 }}
               className="relative grid h-24 w-24 place-items-center rounded-full bg-gradient-to-tr from-candy-blue to-candy-purple shadow-lg text-5xl border-4 border-white"
             >
               🤖
-              {status === 'listening' && (
+              {derivedStatus === 'listening' && (
                 <span className="absolute -top-1 -right-1 flex h-5 w-5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-candy-red opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-5 w-5 bg-candy-red"></span>
@@ -269,19 +270,19 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
                 </span>
               </div>
             )}
-            {status === 'thinking' && (
+            {derivedStatus === 'thinking' && (
               <div className="text-left font-bold text-candy-purple animate-pulse flex items-center gap-2">
                 <span>💭 小茜正在动脑筋思考中…</span>
               </div>
             )}
-            {aiResponse && (
+            {displayResponse && (
               <div className="text-left">
                 <span className="inline-block rounded-2xl rounded-tl-none bg-white border-2 border-candy-green px-3 py-2 text-sm font-bold text-ink-main shadow-sm">
-                  🤖 {aiResponse}
+                  🤖 {displayResponse}
                 </span>
               </div>
             )}
-            {!transcript && !aiResponse && status === 'idle' && (
+            {!transcript && !displayResponse && derivedStatus === 'idle' && (
               <div className="py-6 text-center text-sm font-medium text-ink-muted">
                 你可以问我："为什么天空是蓝色的？" 或 "告诉我一个小狮子的故事" 🦁
               </div>
@@ -291,7 +292,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
             )}
           </div>
           <div className="mt-6 flex flex-col items-center gap-3">
-            {status === 'listening' && (
+            {derivedStatus === 'listening' && (
               <div className="flex items-center justify-center gap-1.5 py-1">
                 {[0.4, 0.8, 1, 0.7, 0.3].map((h, i) => (
                   <motion.div
@@ -311,7 +312,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
             <button
               onPointerDown={(e) => {
                 e.preventDefault();
-                if (status === 'speaking') {
+                if (derivedStatus === 'speaking') {
                   stopSpeaking();
                   setStatus('idle');
                 } else {
@@ -320,27 +321,27 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
               }}
               onPointerUp={(e) => {
                 e.preventDefault();
-                if (status === 'listening') handleStopListening();
+                if (derivedStatus === 'listening') handleStopListening();
               }}
               onPointerCancel={handleStopListening}
               aria-label={
-                status === 'listening' ? tr('voice.listeningSend')
-                : status === 'thinking' ? tr('voice.thinking')
-                : status === 'speaking' ? '点击打断小茜播报'
+                derivedStatus === 'listening' ? tr('voice.listeningSend')
+                : derivedStatus === 'thinking' ? tr('voice.thinking')
+                : derivedStatus === 'speaking' ? '点击打断小茜播报'
                 : tr('voice.startTalk')
               }
               className={`relative flex h-20 w-full items-center justify-center gap-3 rounded-full text-xl font-black text-white shadow-xl transition-all active:scale-95 ${
-                status === 'listening' ? 'bg-gradient-to-r from-candy-red to-pink-500 animate-pulse'
-                : status === 'thinking' ? 'bg-candy-purple opacity-80 cursor-wait'
-                : status === 'speaking' ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-105'
+                derivedStatus === 'listening' ? 'bg-gradient-to-r from-candy-red to-pink-500 animate-pulse'
+                : derivedStatus === 'thinking' ? 'bg-candy-purple opacity-80 cursor-wait'
+                : derivedStatus === 'speaking' ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-105'
                 : 'bg-gradient-to-r from-candy-green via-candy-blue to-candy-purple hover:brightness-105'
               }`}
             >
-              <span className="text-3xl">{status === 'listening' ? '🎙️' : status === 'speaking' ? '⏹️' : '🎤'}</span>
+              <span className="text-3xl">{derivedStatus === 'listening' ? '🎙️' : derivedStatus === 'speaking' ? '⏹️' : '🎤'}</span>
               <span>
-                {status === 'listening' ? tr('voice.listeningSend')
-                : status === 'thinking' ? tr('voice.thinking')
-                : status === 'speaking' ? '点击打断播报 🛑'
+                {derivedStatus === 'listening' ? tr('voice.listeningSend')
+                : derivedStatus === 'thinking' ? tr('voice.thinking')
+                : derivedStatus === 'speaking' ? '点击打断播报 🛑'
                 : tr('voice.startTalk')}
               </span>
             </button>
