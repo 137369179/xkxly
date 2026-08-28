@@ -96,6 +96,7 @@ export default function LettersPage() {
           masteredCount={lettersDone}
           totalCount={26}
           stars={letterStars}
+          pressed={tab === 'wall'}
           testId="gamecard-wall"
           onEnter={() => { sfxTap(); setTab('wall'); }}
         />
@@ -108,6 +109,7 @@ export default function LettersPage() {
           masteredCount={lettersDone}
           totalCount={26}
           stars={letterStars}
+          pressed={tab === 'study'}
           testId="gamecard-study"
           onEnter={() => { sfxTap(); setTab('study'); }}
         />
@@ -120,6 +122,7 @@ export default function LettersPage() {
           masteredCount={lettersDone}
           totalCount={26}
           stars={letterStars}
+          pressed={tab === 'trace'}
           testId="gamecard-trace"
           onEnter={() => { sfxTap(); setTab('trace'); }}
         />
@@ -132,6 +135,7 @@ export default function LettersPage() {
           masteredCount={lettersDone}
           totalCount={26}
           stars={letterStars}
+          pressed={tab === 'order'}
           testId="gamecard-order"
           onEnter={() => { sfxTap(); setTab('order'); }}
         />
@@ -142,6 +146,7 @@ export default function LettersPage() {
           tone="purple"
           progress={unlockedPhonics ? 100 : 0}
           locked={!unlockedPhonics}
+          pressed={tab === 'arcade'}
           testId="gamecard-arcade"
           onEnter={() => { sfxTap(); setTab('arcade'); }}
         />
