@@ -23,7 +23,7 @@
  */
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { CAPSULE_PRIZES, REWARD_CATALOG } from '@/game/rewardEconomy';
-import { useRewardEconomy } from '@/game/useRewardEconomy';
+import { useUnifiedStars } from '@/game/useUnifiedStars';
 import { CapsuleMachine } from './CapsuleMachine';
 import { StarBank } from './StarBank';
 
@@ -66,7 +66,9 @@ export function RewardStation({
   const panelRef = useRef<HTMLDivElement | null>(null);
   const [tab, setTab] = useState<TabKey>('bank');
 
-  const economy = useRewardEconomy({ masteredCount });
+  // 统一星星出口：余额对齐成长荣誉馆（store 为真源），
+  // 收入双写、支出双写、账本偏离由统一层自动校平。
+  const economy = useUnifiedStars({ masteredCount });
   const seedOf = useCallback(
     () => (seedSource ? seedSource() : Date.now()),
     [seedSource],
@@ -150,6 +152,18 @@ export function RewardStation({
           </p>
         )}
 
+        {/* 账本校平告知：诚实告诉孩子余额为什么变了，增强数字可信度（R162 研究依据） */}
+        {economy.notice && (
+          <p
+            className="mb-3 rounded-2xl bg-[hsl(205_90%_93%)] p-2.5 text-xs leading-relaxed font-bold text-[#16607f]"
+            role="status"
+            aria-live="polite"
+            data-testid="reward-station-notice"
+          >
+            {economy.notice.message}
+          </p>
+        )}
+
         {/* 每日上限：认可式收尾，不是限制式提示（沿用持久化层的文案原则） */}
         {economy.earnedToday >= economy.dailyCap && (
           <p
@@ -164,7 +178,7 @@ export function RewardStation({
 
         {tab === 'bank' ? (
           <StarBank
-            balance={economy.balance}
+            balance={economy.available}
             earnedToday={economy.earnedToday}
             goal={economy.goal}
             catalog={REWARD_CATALOG}
@@ -174,7 +188,7 @@ export function RewardStation({
           />
         ) : (
           <CapsuleMachine
-            balance={economy.balance}
+            balance={economy.available}
             cost={REWARD_CATALOG[0].cost}
             pity={economy.pity}
             pityRemaining={economy.pityRemaining}
@@ -182,7 +196,7 @@ export function RewardStation({
             stats={economy.stats}
             collection={economy.collection}
             prizes={CAPSULE_PRIZES}
-            onDraw={() => economy.drawCapsule(seedOf())}
+            onDraw={() => economy.draw(seedOf())}
             reducedMotion={reducedMotion}
           />
         )}

@@ -66,6 +66,11 @@ function createFakeApi(init: {
       s.earnedToday += r.granted;
       return r;
     },
+    creditFromStore: (amount) => {
+      if (!(amount > 0)) return;
+      s.balance += amount;
+      s.lifetime += amount;
+    },
     unlock: (id) => {
       log.unlocks.push(id);
       const item = REWARD_CATALOG.find((entry) => entry.id === id);

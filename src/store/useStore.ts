@@ -116,6 +116,8 @@ export interface StoreState {
   markTraced: (id: string) => void;
   /** 兑换贴纸 */
   buySticker: (id: string, cost: number) => boolean;
+  /** 通用扣星（余额 = stars - spent）。供星星统一消费层做支出双写；余额不足时返回 false */
+  spendStars: (cost: number) => boolean;
   /** 清空错题本 */
   clearWrongBook: () => void;
   incPkCount: () => void;

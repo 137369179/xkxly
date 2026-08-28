@@ -22,6 +22,7 @@ export const createLearningSlice: SliceCreator<
     | 'resetTodayLesson'
     | 'markTraced'
     | 'buySticker'
+    | 'spendStars'
     | 'recordSpeed'
     | 'recordMath'
     | 'recordCount'
@@ -111,6 +112,13 @@ export const createLearningSlice: SliceCreator<
         stickers: [...q.stickers, id],
       })),
     );
+    return true;
+  },
+
+  spendStars: (cost) => {
+    const p = get().progress;
+    if (!(cost > 0) || p.stars - p.spent < cost) return false;
+    set((s) => _applyProgress(s, (q) => ({ ...q, spent: q.spent + cost })));
     return true;
   },
 

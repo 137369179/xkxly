@@ -110,9 +110,11 @@ describe('useUnifiedStars · 星星账本统一层', () => {
       try {
         const api = view.api();
         expect(api.available).toBe(80);
-        // 两边赚得额不一致的信息保留给观测，不直接抛给孩子
-        expect(api.divergence).toBe('store-ahead');
-        expect(api.gap).toBe(93);
+        // 持续对账把 store-ahead 的差额补进玩法层后，两本账重新对齐：
+        // 偏离归零，孩子不会再从任何界面看到第二个数字
+        expect(api.divergence).toBe('none');
+        expect(api.gap).toBe(0);
+        expect(api.notice).toBeNull();
       } finally {
         view.unmount();
       }

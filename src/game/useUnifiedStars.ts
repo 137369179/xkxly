@@ -24,6 +24,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useStore, useSpent, useStars } from '@/store/useStore';
 import { safeGetJSON, safeSetJSON } from '@/lib/safeStorage';
 import {
+  CAPSULE_ITEM,
   useRewardEconomy,
   type CapsuleStat,
   type DrawOutcome,
@@ -38,6 +39,7 @@ import type {
   RewardStage,
   SessionOutcome,
 } from './rewardEconomy';
+import { REWARD_CATALOG } from './rewardEconomy';
 import {
   describeDivergence,
   LEDGER_MIGRATION_KEY,
@@ -92,8 +94,10 @@ export interface UnifiedStarsApi {
   recordSession: (outcome: SessionOutcome) => EarnResult;
   /** 解锁一件目录奖励 */
   unlock: (itemId: string) => UnifiedRedeemResult;
-  /** 抽一次扭蛋 */
-  draw: () => DrawOutcome & { draw: CapsuleDrawResult | null; available: number };
+  /** 抽一次扭蛋（seed 供测试与确定性回放注入） */
+  draw: (
+    seed?: number,
+  ) => DrawOutcome & { draw: CapsuleDrawResult | null; available: number };
   /** 兑换贴纸（走 store 既有消费通道） */
   buySticker: (id: string, cost: number) => boolean;
 }
@@ -139,6 +143,19 @@ export function useUnifiedStars(options: UseRewardEconomyOptions = {}): UnifiedS
     });
   }, [reconciled]);
 
+  // —— 持续对账（只补 store-ahead）：收入已全双写，reward-ahead 的差额只会
+  // 来自历史存档，由上方一次性迁移处理（有标记防印星，二者不可叠加 —— 否则
+  // 同一份差额会被迁移和对账各补一次，凭空翻倍）。store-ahead 则可能持续产生：
+  // 既有 30+ 处旧代码仍直调 addStars，每次入账都会造成分叉，必须持续校平。
+  // max 口径下「补齐落后方」不产生新星星：统一总额仍由领先方账本决定。
+  const { creditFromStore } = reward;
+  const divergence = reconciled.divergence;
+  const gap = reconciled.gap;
+  useEffect(() => {
+    if (divergence !== 'store-ahead' || gap <= 0) return;
+    creditFromStore(gap);
+  }, [divergence, gap, creditFromStore]);
+
   const recordSession = useCallback(
     (outcome: SessionOutcome): EarnResult => {
       // 先过玩法层：拿到评级星 / 连击 / 全对 / 奖励淡出后的最终星数，
@@ -156,18 +173,39 @@ export function useUnifiedStars(options: UseRewardEconomyOptions = {}): UnifiedS
   const unlock = useCallback(
     (itemId: string): UnifiedRedeemResult => {
       const result = reward.unlock(itemId);
-      return { ...result, available: reconciled.unified.available };
+      let available = reconciled.unified.available;
+      if (result.ok) {
+        // 支出双写：经济层扣过的星星，store 同步扣 —— 两本账永不分叉
+        const spent = REWARD_CATALOG.find((item) => item.id === itemId)?.cost ?? 0;
+        if (spent > 0) useStore.getState().spendStars(spent);
+        available = Math.max(0, available - spent);
+      }
+      return { ...result, available };
     },
     [reward, reconciled.unified.available],
   );
 
-  const draw = useCallback((): DrawOutcome & {
-    draw: CapsuleDrawResult | null;
-    available: number;
-  } => {
-    const outcome = reward.drawCapsule();
-    return { ...outcome, available: reconciled.unified.available };
-  }, [reward, reconciled.unified.available]);
+  const draw = useCallback(
+    (seed?: number): DrawOutcome & {
+      draw: CapsuleDrawResult | null;
+      available: number;
+    } => {
+      const outcome = reward.drawCapsule(seed);
+      let available = reconciled.unified.available;
+      if (outcome.ok) {
+        // 支出双写：扭蛋扣款进 store；重复奖品的退款同步返还。
+        // 校平 effect 会先把两本账拉齐，这里 spendStars 与经济层校验同标准。
+        const store = useStore.getState();
+        const refund = outcome.draw?.refund ?? 0;
+        if (store.spendStars(CAPSULE_ITEM.cost) && refund > 0) {
+          store.addStars(refund);
+        }
+        available = Math.max(0, available - CAPSULE_ITEM.cost + refund);
+      }
+      return { ...outcome, available };
+    },
+    [reward, reconciled.unified.available],
+  );
 
   const buySticker = useCallback((id: string, cost: number): boolean => {
     // 贴纸消费已由 store 承载（成长荣誉馆在用），这里只做转发，

@@ -75,8 +75,9 @@ const OWNED_IDS: readonly string[] = REWARD_CATALOG.map((item) => item.id);
 /** 扭蛋奖品的合法 id 集合 */
 const PRIZE_IDS: readonly string[] = CAPSULE_PRIZES.map((prize) => prize.id);
 
-/** 扭蛋消耗来源：与 REWARD_CATALOG 同源，杜绝第二份价格常量漂移 */
-const CAPSULE_ITEM: RewardItem =
+/** 扭蛋消耗来源：与 REWARD_CATALOG 同源，杜绝第二份价格常量漂移。
+ *  导出供统一消费层（useUnifiedStars）做支出双写时引用同一价格。 */
+export const CAPSULE_ITEM: RewardItem =
   REWARD_CATALOG.find((item) => item.kind === 'capsule') ?? REWARD_CATALOG[0];
 
 // ─────────────────────────────────────────────────────────────
@@ -257,6 +258,13 @@ export interface RewardEconomyApi {
   degraded: boolean;
   /** 记录一节课结果并入账星星；返回明细供 UI 做「你因为 XX 拿到 N 颗星」 */
   recordSession: (outcome: SessionOutcome) => EarnResult;
+  /**
+   * 账本校平：把主账本（store）领先于本层的差额补进来。
+   * 供星星统一消费层（useUnifiedStars）在对账时调用，balance 与 lifetime
+   * 同额增加（保持「已花费 = lifetime - balance」的推导不变）。
+   * 只接受正数；调用方负责保证金额来自对账差额，防止凭空印星。
+   */
+  creditFromStore: (amount: number) => void;
   /** 用星星解锁一件目录奖励 */
   unlock: (itemId: string) => RedeemResult;
   /** 转一次扭蛋（消耗目录中的扭蛋项，重复返星） */
@@ -416,6 +424,20 @@ export function useRewardEconomy(options: UseRewardEconomyOptions = {}): RewardE
     commit(createRewardState());
   }, [commit]);
 
+  /** 账本校平：把主账本领先于本层的差额补进来（balance/lifetime 同增，不占当日上限） */
+  const creditFromStore = useCallback(
+    (amount: number): void => {
+      if (!(amount > 0)) return;
+      const prev = current();
+      commit({
+        ...prev,
+        balance: prev.balance + amount,
+        lifetime: prev.lifetime + amount,
+      });
+    },
+    [commit, current],
+  );
+
   const stage = useMemo(() => rewardStage(masteredCount), [masteredCount]);
   const odds = useMemo(() => capsuleOdds(), []);
   const goal = useMemo(
@@ -439,6 +461,7 @@ export function useRewardEconomy(options: UseRewardEconomyOptions = {}): RewardE
     pityRemaining: pityRemaining(state.pity),
     stage,
     goal,
+    creditFromStore,
     stats,
     degraded,
     recordSession,
