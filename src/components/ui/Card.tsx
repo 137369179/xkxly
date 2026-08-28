@@ -98,7 +98,8 @@ export function PageHeader({
             </span>
           ) : null}
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-wide" style={{ color: t.deep }}>
+            {/* clamp 流式字号：375px≈24px → 640px≈29px → ≥1024px 封顶 30px，替代断点跳跃 */}
+            <h1 className="text-[clamp(1.5rem,1rem+2vw,1.875rem)] font-black tracking-wide" style={{ color: t.deep }}>
               {title}
             </h1>
             {subtitle && <p className="text-xs sm:text-sm font-bold text-ink-soft mt-1">{subtitle}</p>}

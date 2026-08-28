@@ -304,7 +304,7 @@ export function CatStagePanel({
         )}
 
         {/* 身体触控微提示 */}
-        <span className="mt-1 text-xs font-bold text-pink-500">
+        <span className="mt-1 text-xs font-bold text-pink-700">
           ✨ 戳戳耳朵、捏捏脸蛋、碰碰小爪、摸摸肚皮有惊喜动作哦～
         </span>
       </div>

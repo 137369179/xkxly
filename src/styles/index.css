@@ -738,18 +738,27 @@
 }
 
 @utility text-rainbow {
+  /* 排版 P1：加深色标保证白底可读（浅色段 #ffd166/#a8d8f0 对比度 <2:1，
+     仅用于 ≥text-2xl 大标题，不支持 background-clip 时回落到实色） */
+  color: var(--color-candy-pink-deep);
   background-image: linear-gradient(
     100deg,
-    #ff6b96 0%,
-    #ff9f5a 25%,
-    #ffd166 45%,
-    #6ee7b7 65%,
-    #a8d8f0 85%,
-    #d9c6f5 100%
+    #e05a80 0%,
+    #e0742b 25%,
+    #b47805 45%,
+    #047857 65%,
+    #167aa9 85%,
+    #7c3aed 100%
   );
   background-clip: text;
   -webkit-background-clip: text;
-  color: transparent;
+}
+
+/* 排版 P1：统一页面内容宽度（儿童内容不宜铺满超宽屏） */
+@utility page-shell {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 56rem;
 }
 
 /* 安全区域（iPhone 刘海 / 底部横条） */

@@ -33,7 +33,7 @@ export function CategorySheet({
         className="mt-16 flex max-h-[82vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-[2.5rem] border-4 border-pink-200/90 bg-white/95 shadow-fluffy backdrop-blur-xl"
       >
         <div className="flex items-center justify-between px-4 py-3">
-          <h3 className="text-lg font-extrabold text-rainbow">{t('categories.title')}</h3>
+          <h3 className="text-xl font-extrabold text-rainbow">{t('categories.title')}</h3>
           <button
             type="button"
             onClick={() => {

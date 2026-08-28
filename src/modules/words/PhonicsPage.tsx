@@ -40,6 +40,8 @@ export function PhonicsPage() {
 
   return (
     <div className="space-y-5">
+      {/* 排版 P1：页面顶部为 Tab 栏，补语义 h1 供屏幕阅读器/SEO 导航 */}
+      <h1 className="sr-only">{tr('letters.title')}</h1>
       <div className="flex gap-2">
         <CandyButton tone={tab === 'letters' ? 'blue' : 'purple'} variant={tab === 'letters' ? 'solid' : 'soft'} size="sm" onClick={() => { setTab('letters'); setSelected(null); }}>
           {tr('words.letterSounds')} ({LETTER_SOUNDS.length})

@@ -113,7 +113,7 @@ export function ProfileSwitcher({ open, onClose }: { open: boolean; onClose: () 
         {/* 头部 */}
         <div className="mb-2 flex items-center justify-between px-1">
           {mode === 'list' ? (
-            <h3 className="text-base font-extrabold text-rainbow">{t('profile.title')}</h3>
+            <h3 className="text-base font-extrabold text-pink-700">{t('profile.title')}</h3>
           ) : (
             <button
               type="button"

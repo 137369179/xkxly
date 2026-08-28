@@ -215,6 +215,8 @@ export default function FunPage() {
 
   return (
     <div className="space-y-4">
+      {/* 排版 P1：页面无视觉大标题，补语义 h1 供屏幕阅读器/SEO 导航 */}
+      <h1 className="sr-only">趣味竞技场</h1>
       {/* 快捷操作提示条 */}
       <div className="text-center">
         <span className="inline-block text-xs text-purple-900 font-bold bg-purple-50/90 px-3 py-1 rounded-xl border border-purple-200">

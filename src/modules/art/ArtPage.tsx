@@ -355,7 +355,7 @@ export default function ArtPage() {
           <Panel className="border-2 border-pink-200 bg-white space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm font-black text-pink-900">🎨 已掌握 {masteredArt}/{COLOR_MIXES.length} 种调色</span>
-              <span className="text-xs font-bold text-pink-500">{Math.round((masteredArt / COLOR_MIXES.length) * 100)}%</span>
+              <span className="text-xs font-bold text-pink-700">{Math.round((masteredArt / COLOR_MIXES.length) * 100)}%</span>
             </div>
             <ProgressBar value={masteredArt} max={COLOR_MIXES.length} color="pink" size="md" />
           </Panel>

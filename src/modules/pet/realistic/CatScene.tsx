@@ -357,7 +357,7 @@ export function RealisticCatScene({
       >
         <FallbackCatView breed={breed} expression={expression} size={size} />
         {showControls && (
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-pink-500 bg-white/80 px-2 py-0.5 rounded-full">
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-pink-700 bg-white/80 px-2 py-0.5 rounded-full">
             💡 {tr('cat.fallbackMode')}
           </div>
         )}
