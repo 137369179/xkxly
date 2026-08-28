@@ -10,6 +10,8 @@ import {
   nextRewardGoal,
   drawCapsule,
   capsuleStats,
+  capsuleOdds,
+  pityRemaining,
   rewardStage,
   FADE_STAGES,
 } from './rewardEconomy';
@@ -303,5 +305,51 @@ describe('rewardEconomy · 扭蛋机', () => {
     const rare = stats.find((s) => s.tier === 'rare');
     expect(common?.ownedCount).toBe(1);
     expect(rare?.ownedCount).toBe(1);
+  });
+});
+
+describe('概率公示（合规 + 反操控）', () => {
+  it('三档概率之和为 100%，且百分比精确到两位小数', () => {
+    const odds = capsuleOdds();
+    expect(odds).toHaveLength(3);
+    const sum = odds.reduce((s, o) => s + o.rate, 0);
+    expect(sum).toBeCloseTo(1, 10);
+    for (const o of odds) {
+      // 监管要求的公示格式：百分比 + 两位小数，禁止「稀有」这类模糊表述
+      expect(o.percent).toMatch(/^\d+\.\d{2}%$/);
+    }
+    const percentSum = odds.reduce((s, o) => s + Number.parseFloat(o.percent), 0);
+    expect(percentSum).toBeCloseTo(100, 6);
+  });
+
+  it('公示概率与真实抽取频率一致（蒙特卡洛 20000 次，容忍 3 个百分点）', () => {
+    const odds = capsuleOdds();
+    const counts = new Map<string, number>();
+    // 每次都传空 owned 与 pity=0，确保走的是纯概率分支而非保底分支
+    for (let i = 0; i < 20000; i++) {
+      const result = drawCapsule({ seed: i + 1, owned: [], pity: 0 });
+      counts.set(result.prize.tier, (counts.get(result.prize.tier) ?? 0) + 1);
+    }
+    for (const o of odds) {
+      const actual = (counts.get(o.tier) ?? 0) / 20000;
+      // 去重优先会改变各档内部的分布，但档位命中率应与公示值一致
+      expect(Math.abs(actual - o.rate)).toBeLessThan(0.03);
+    }
+  });
+
+  it('各档奖品数与公示的分母一致（公示不能只覆盖部分奖池）', () => {
+    const odds = capsuleOdds();
+    for (const o of odds) {
+      expect(o.total).toBe(CAPSULE_PRIZES.filter((p) => p.tier === o.tier).length);
+      expect(o.total).toBeGreaterThan(0);
+    }
+  });
+
+  it('pityRemaining 随抽取进度递减，到保底为 0，且永不为负', () => {
+    expect(pityRemaining(0)).toBe(PITY_THRESHOLD);
+    expect(pityRemaining(2)).toBe(PITY_THRESHOLD - 2);
+    expect(pityRemaining(PITY_THRESHOLD)).toBe(0);
+    expect(pityRemaining(PITY_THRESHOLD + 99)).toBe(0);
+    expect(pityRemaining(-5)).toBe(PITY_THRESHOLD);
   });
 });

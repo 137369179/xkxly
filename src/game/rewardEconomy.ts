@@ -155,12 +155,24 @@ export interface RewardStage {
  * 系数下限 0.6，绝不归零——研究同样指出，并非所有反馈都有害，
  * 完全撤除认可会让低龄儿童失去「被看见」的感觉。
  */
+/**
+ * 内部查表行：在 RewardStage 之上多一个「掌握量上限」阈值。
+ *
+ * 刻意**不**把 maxMastered 放进 RewardStage —— 它是查表的实现细节，
+ * 对外只承诺「当前阶段如何折算」。未来若要细分或调整分段，
+ * 只改本表即可，调用方签名与单测断言不受影响。
+ * （同时避免 `satisfies` 对对象字面量的多余属性检查报错。）
+ */
+interface FadeStageRule extends RewardStage {
+  maxMastered: number;
+}
+
 export const FADE_STAGES = [
   { stage: 0, maxMastered: 19, bonusMultiplier: 1, emphasis: 'token', note: '起步期：用星星把孩子带进门' },
   { stage: 1, maxMastered: 59, bonusMultiplier: 0.85, emphasis: 'token', note: '上手期：仍以星星为主，开始强调连击' },
   { stage: 2, maxMastered: 119, bonusMultiplier: 0.7, emphasis: 'mixed', note: '稳定期：星星与能力反馈并重' },
   { stage: 3, maxMastered: Number.POSITIVE_INFINITY, bonusMultiplier: 0.6, emphasis: 'competence', note: '自主期：重心转向「我学会了什么」' },
-] as const satisfies readonly RewardStage[];
+] as const satisfies readonly FadeStageRule[];
 
 const FADE_HEAD: RewardStage = FADE_STAGES[0];
 
@@ -535,4 +547,56 @@ export function capsuleStats(owned: readonly string[]): { tier: RewardTier; owne
     const t: RewardTier = all[0]?.tier ?? head;
     return { tier: t, ownedCount: all.filter((p) => ownedSet.has(p.id)).length, total: all.length };
   });
+}
+
+// ─────────────────────────────────────────────────────────────
+// 5) 概率公示：把「惊喜」从黑箱变成可预期
+// ─────────────────────────────────────────────────────────────
+
+export interface CapsuleOdds {
+  tier: RewardTier;
+  /** 百分比字符串，精确到两位小数（监管要求的公示格式，禁止「稀有」等模糊表述） */
+  percent: string;
+  /** 数值概率 0~1 */
+  rate: number;
+  /** 该档位奖品数 */
+  total: number;
+}
+
+/** 百分比格式化：固定两位小数，避免 0.7 → 「70%」这类精度丢失 */
+function toPercent(rate: number): string {
+  return `${(rate * 100).toFixed(2)}%`;
+}
+
+/**
+ * 扭蛋各档位的真实抽取概率。
+ *
+ * 为什么要显式导出而不是让 UI 自己写死一份：概率一旦有两份实现，
+ * 算法调整后公示值与真实值就会漂移 —— 这正是监管点名的违规情形之一
+ * （「概率数值错误或与实际算法不符」「伪随机导致实际概率与公示概率
+ * 存在系统性偏差」）。这里与 rollTier 共用同一组常量，从根上杜绝漂移。
+ *
+ * 另一层意义是反操控：可变比率强化是斯金纳箱的核心机制，而**透明**
+ * 本身就是把「惊喜」拉回「可预期」的手段 —— 孩子和家长都能看见
+ * 「普通 70.00% / 稀有 25.00% / 史诗 5.00%」，而不是被一个黑箱牵着走。
+ */
+export function capsuleOdds(): readonly CapsuleOdds[] {
+  return TIERS.map((tier) => {
+    const rate = tier === 'rare' ? RARE_RATE : tier === 'epic' ? EPIC_RATE : 1 - RARE_RATE - EPIC_RATE;
+    return {
+      tier,
+      rate,
+      percent: toPercent(rate),
+      total: CAPSULE_PRIZES.filter((p) => p.tier === tier).length,
+    };
+  });
+}
+
+/**
+ * 距离触发保底还差几次。
+ * 监管要求「玩家必须能够清晰看到距离保底的剩余次数」，因此这里提供
+ * 可直接展示的剩余值（已到保底时为 0）。
+ */
+export function pityRemaining(pity: number): number {
+  return Math.max(0, PITY_THRESHOLD - Math.max(0, Math.floor(pity)));
 }
