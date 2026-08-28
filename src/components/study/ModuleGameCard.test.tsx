@@ -3,7 +3,7 @@
  * 游戏化功能卡（ModuleGameCard）单测
  * 覆盖：标题/描述渲染、未开始提示、掌握数、星星、锁定态、点击回调。
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { createElement, act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 
@@ -41,10 +41,6 @@ function byTest(id: string) {
 }
 
 describe('ModuleGameCard', () => {
-  beforeEach(() => {
-    host = document.createElement('div');
-    document.body.appendChild(host);
-  });
   afterEach(() => {
     act(() => root?.unmount());
     host.remove();
