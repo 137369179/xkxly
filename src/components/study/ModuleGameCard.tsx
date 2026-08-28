@@ -42,16 +42,6 @@ const toneChip: Record<Tone, string> = {
   orange: 'from-orange-300 to-orange-500 text-orange-950',
 };
 
-const toneBar: Record<Tone, 'blue' | 'green' | 'yellow' | 'red' | 'purple' | 'pink' | 'orange'> = {
-  blue: 'blue',
-  green: 'green',
-  yellow: 'yellow',
-  red: 'red',
-  purple: 'purple',
-  pink: 'pink',
-  orange: 'orange',
-};
-
 /**
  * 游戏化功能卡（ModuleGameCard）
  * 统一承载「每个学习功能独立玩法」的入口激励可视化：
@@ -119,7 +109,7 @@ export function ModuleGameCard({
         <ProgressBar
           value={pct}
           max={100}
-          color={toneBar[tone]}
+          color={tone}
           size="sm"
           showValue={false}
           animated
