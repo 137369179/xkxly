@@ -103,7 +103,7 @@ export function preloadCoreAudioAssets(): void {
       idx += 3;
 
       for (const l of batch) {
-        void loadAndCacheAudioBuffer(`letter_${l}`, `/audio/letters/letter_${l}.mp3`);
+        void loadAndCacheAudioBuffer(`letter_${l}`, `/audio/letters/letter_${l}.m4a`);
       }
 
       if ('requestIdleCallback' in window) {

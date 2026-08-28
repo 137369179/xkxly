@@ -83,8 +83,8 @@ export function playLetterVoice(char: string, onEnd?: () => void): Promise<void>
     return Promise.resolve();
   }
 
-  return playAudioFile(`/audio/letters/letter_${c}.mp3`, onEnd).catch(() =>
-    playAudioFile(`/audio/letters/letter_${c}.m4a`, onEnd),
+  return playAudioFile(`/audio/letters/letter_${c}.m4a`, onEnd).catch(() =>
+    playAudioFile(`/audio/letters/letter_${c}.mp3`, onEnd),
   );
 }
 
@@ -94,8 +94,8 @@ export function playLetterVoice(char: string, onEnd?: () => void): Promise<void>
 export function playWordVoice(char: string, onEnd?: () => void): Promise<void> {
   const c = char.toLowerCase().trim();
   if (!ALPHABET_SET.has(c)) return Promise.reject(new Error('not-letter'));
-  return playAudioFile(`/audio/letters/word_${c}.mp3`, onEnd).catch(() =>
-    playAudioFile(`/audio/letters/word_${c}.m4a`, onEnd),
+  return playAudioFile(`/audio/letters/word_${c}.m4a`, onEnd).catch(() =>
+    playAudioFile(`/audio/letters/word_${c}.mp3`, onEnd),
   );
 }
 
@@ -105,7 +105,7 @@ export function playWordVoice(char: string, onEnd?: () => void): Promise<void> {
 export function playPhonicsVoice(char: string, onEnd?: () => void): Promise<void> {
   const c = char.toLowerCase().trim();
   if (!ALPHABET_SET.has(c)) return Promise.reject(new Error('not-letter'));
-  return playAudioFile(`/audio/letters/phonics_${c}.mp3`, onEnd).catch(() =>
-    playAudioFile(`/audio/letters/phonics_${c}.m4a`, onEnd),
+  return playAudioFile(`/audio/letters/phonics_${c}.m4a`, onEnd).catch(() =>
+    playAudioFile(`/audio/letters/phonics_${c}.mp3`, onEnd),
   );
 }
