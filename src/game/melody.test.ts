@@ -29,13 +29,13 @@ describe('resultMelody', () => {
     const m: Melody = resultMelody('correct');
     expect(m.notes).toHaveLength(3);
     expect(m.label).toBe('correct');
-    expect(m.notes[2].freq).toBeGreaterThan(m.notes[0].freq);
+    expect(m.notes[2]!.freq).toBeGreaterThan(m.notes[0]!.freq);
   });
 
   it('wrong 返回温和两音（无刺耳不协和，末音低于首音）', () => {
     const m = resultMelody('wrong');
     expect(m.notes).toHaveLength(2);
-    expect(m.notes[1].freq).toBeLessThan(m.notes[0].freq);
+    expect(m.notes[1]!.freq).toBeLessThan(m.notes[0]!.freq);
   });
 
   it('levelup 返回五音号角式成就旋律', () => {
@@ -65,7 +65,7 @@ describe('poemToMelody', () => {
     const text = '床前明月光';
     const m = poemToMelody(text);
     expect(m.notes).toHaveLength(Array.from(text).length);
-    expect(m.notes[m.notes.length - 1].dur).toBe(1.5);
+    expect(m.notes[m.notes.length - 1]!.dur).toBe(1.5);
   });
 
   it('同一诗句确定性映射（利于记忆锚定）', () => {

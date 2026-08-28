@@ -11,6 +11,14 @@ import {
 
 const LEVELS: MasteryLevel[] = ['untouched', 'novice', 'skilled', 'master'];
 
+/** 各档位对应的最低分数（untouched 用 0） */
+const LEVEL_SCORES: Record<MasteryLevel, number> = {
+  untouched: 0,
+  novice: DEFAULT_THRESHOLDS.novice,
+  skilled: DEFAULT_THRESHOLDS.skilled,
+  master: DEFAULT_THRESHOLDS.master,
+};
+
 describe('getMasteryLevel', () => {
   it('将 0 与极小值归为 untouched', () => {
     expect(getMasteryLevel(0)).toBe('untouched');
@@ -49,13 +57,13 @@ describe('getMasteryLevel', () => {
 
 describe('getMasteryTier', () => {
   it('返回四档完整令牌，且形状随档位变化（色不独依）', () => {
-    const shapes = LEVELS.map((lv) => getMasteryTier(DEFAULT_THRESHOLDS[lv]).shape);
+    const shapes = LEVELS.map((lv) => getMasteryTier(LEVEL_SCORES[lv]).shape);
     expect(shapes).toEqual(['circle', 'triangle', 'square', 'star']);
   });
 
   it('每档都提供色盲友好变体且非空', () => {
     for (const lv of LEVELS) {
-      const tier = getMasteryTier(DEFAULT_THRESHOLDS[lv]);
+      const tier = getMasteryTier(LEVEL_SCORES[lv]);
       expect(tier.colorblindHex).toMatch(/^#[0-9A-Fa-f]{6}$/);
       expect(tier.hex).toMatch(/^#[0-9A-Fa-f]{6}$/);
       expect(tier.label).toBe(MASTERY_TIERS[lv].label);

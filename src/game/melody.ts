@@ -38,7 +38,7 @@ export function pentatonicFreq(degree: number): number {
   const len = PENTATONIC_RATIOS.length;
   const octave = Math.floor(degree / len);
   const idx = ((degree % len) + len) % len;
-  return BASE_FREQ * Math.pow(2, octave) * PENTATONIC_RATIOS[idx];
+  return BASE_FREQ * Math.pow(2, octave) * PENTATONIC_RATIOS[idx]!;
 }
 
 function makeNote(degree: number, dur: number): Note {
@@ -99,7 +99,8 @@ export function poemToMelody(text: string): Melody {
     return { notes: [makeNote(0, 1)], bpm: 80, label: 'empty' };
   }
   const notes: Note[] = chars.map((_, i) => makeNote(i % 5, 0.5));
-  notes[notes.length - 1] = { ...notes[notes.length - 1], dur: 1.5 };
+  const last = notes[notes.length - 1];
+  if (last) notes[notes.length - 1] = { ...last, dur: 1.5 };
   return { notes, bpm: 80, label: `poem-${chars.length}` };
 }
 

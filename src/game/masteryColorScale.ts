@@ -141,5 +141,5 @@ export function nextTierProgress(
   const upper = thresholds[ORDER[idx + 1] as keyof MasteryThresholds] as number;
   const s = clamp01(score);
   const progress = upper > lower ? (s - lower) / (upper - lower) : 0;
-  return { from: level, to: ORDER[idx + 1], progress: clamp01(progress) };
+  return { from: level, to: ORDER[idx + 1]!, progress: clamp01(progress) };
 }
