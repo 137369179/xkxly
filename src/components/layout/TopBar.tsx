@@ -6,9 +6,7 @@ import { useActiveProfileMeta } from '@/store/useProfilesStore';
 import { StarCounter } from '@/components/ui/Stars';
 import { OfflineBadge } from '@/components/OfflineIndicator';
 import { useTranslation } from '@/i18n/useTranslation';
-import type { Locale } from '@/i18n/config';
 import { ProfileSwitcher } from './ProfileSwitcher';
-import { CategorySheet } from './CategorySheet';
 
 // Part B · 懒加载 SoundMuteToggle：其依赖的 sound.ts（真实语音引擎链）只在
 // 首帧之后按需拉取，不再进入首屏主包（TopBar 仍即时渲染，仅静音钮稍后出现）。
@@ -20,25 +18,8 @@ export function TopBar() {
   const stars = useStars();
   const badgeCount = useBadgeCount();
   const activeProfile = useActiveProfileMeta();
-  const { t, locale, setLocale } = useTranslation();
+  const { t } = useTranslation();
   const [switcherOpen, setSwitcherOpen] = useState(false);
-  const [catOpen, setCatOpen] = useState(false);
-
-  const toggleLocale = () => {
-    sfxTap();
-    const next: Record<string, Locale> = {
-      'zh-CN': 'zh-TW',
-      'zh-TW': 'en-US',
-      'en-US': 'zh-CN',
-    };
-    setLocale(next[locale] ?? 'zh-CN');
-  };
-
-  const localeLabel: Record<string, string> = {
-    'zh-CN': '简',
-    'zh-TW': '繁',
-    'en-US': 'EN',
-  };
 
   return (
     <header className="pt-safe sticky top-0 z-30 px-2.5 py-1.5 sm:px-6 sm:py-2 transition-all">
@@ -72,34 +53,24 @@ export function TopBar() {
             </Suspense>
             <button
               type="button"
-              onClick={toggleLocale}
-              aria-label={locale === 'zh-CN' ? '切换到繁体中文' : locale === 'zh-TW' ? 'Switch to English' : '切换到简体中文'}
-              className="flex h-9 items-center gap-1 rounded-full px-2 text-xs font-black text-candy-purple-deep transition-all active:scale-95"
+              onClick={() => { sfxTap(); navigate('parent'); }}
+              aria-label="家长中心"
+              className="flex h-9 items-center gap-1 rounded-full px-2 text-xs font-black text-candy-green-deep transition-all active:scale-95"
             >
-              <span className="text-sm">🌐</span>
-              <span>{localeLabel[locale] ?? '简'}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => { sfxTap(); setCatOpen(true); }}
-              aria-label={t('categories.title')}
-              className="flex h-9 items-center gap-1 rounded-full px-2 text-xs font-black text-candy-pink-deep transition-all active:scale-95"
-            >
-              <span className="text-sm">🔎</span>
-              <span>{t('categories.title')}</span>
+              <span className="text-sm">👨‍👩‍👧</span>
+              <span>家长</span>
             </button>
           </div>
-          {catOpen && <CategorySheet open={catOpen} onClose={() => setCatOpen(false)} />}
 
-          {/* 移动端精简工具条：分类 + 静音（语言切换低频，仅桌面展示） */}
+          {/* 移动端精简工具条：家长 + 静音（分类入口改由乐园地图承担） */}
           <div className="flex shrink-0 items-center gap-1 sm:hidden">
             <button
               type="button"
-              onClick={() => { sfxTap(); setCatOpen(true); }}
-              aria-label={t('categories.title')}
-              className="grid h-9 w-9 place-items-center rounded-full bg-candy-pink-soft text-lg shadow-candy-sm active:scale-95 transition-all"
+              onClick={() => { sfxTap(); navigate('parent'); }}
+              aria-label="家长中心"
+              className="grid h-9 w-9 place-items-center rounded-full bg-candy-green-soft text-lg shadow-candy-sm active:scale-95 transition-all"
             >
-              🔎
+              👨‍👩‍👧
             </button>
             <Suspense fallback={null}>
               <SoundMuteToggle className="sm:hidden [&>button]:h-9 [&>button]:w-9 [&>button]:px-0" />
@@ -118,7 +89,7 @@ export function TopBar() {
             onClick={() => { sfxTap(); setSwitcherOpen((v) => !v); }}
             aria-label={t('profile.switchHint')}
             aria-expanded={switcherOpen}
-            className="flex shrink-0 items-center rounded-full bg-gradient-to-r from-candy-yellow to-amber-200 shadow-candy-sm border-2 border-white active:scale-95 transition-all"
+            className="flex min-h-[44px] shrink-0 items-center rounded-full bg-gradient-to-r from-candy-yellow to-amber-200 shadow-candy-sm border-2 border-white active:scale-95 transition-all"
           >
             {/* 移动端：纯头像圆钮；桌面：头像+名字+勋章胶囊 */}
             <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-lg shadow-sm">
@@ -126,7 +97,8 @@ export function TopBar() {
             </span>
             <span className="hidden min-w-0 pr-2.5 pl-1 text-xs font-black text-candy-orange-deep sm:inline">
               <span className="block max-w-[5rem] truncate leading-tight">{activeProfile?.name ?? '宝贝'}</span>
-              <span className="mt-0.5 flex items-center gap-1 rounded-full bg-gradient-to-r from-candy-purple-deep to-candy-purple px-2 py-0.5 text-xs font-extrabold text-white">
+              {/* 对比度铁律：原渐变 deep→soft 使白字在浅端不可见；改纯 deep 底 + 白字（6.5:1） */}
+              <span className="mt-0.5 flex items-center gap-1 rounded-full bg-candy-purple-deep px-2 py-0.5 text-xs font-extrabold text-white">
                 🏅 {badgeCount}
               </span>
             </span>
