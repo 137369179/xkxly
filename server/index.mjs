@@ -433,6 +433,10 @@ async function handleChat(req, res) {
   let messages = guarded.messages;
 
   // 多供应商自适应候选池：优先当前模型对应的供应商，若无 Key 或失败则平滑转移至其它已配置的供应商
+  // 注：isStep/isDeepSeek/isXunfei 改为内联表达式，避免 ReferenceError（原先未定义变量）
+  const isStep = model.startsWith('step');
+  const isDeepSeek = model.startsWith('deepseek');
+  const isXunfei = model.startsWith('xop') || model.includes('qwen');
   const allProviders = [
     {
       name: 'stepfun',
@@ -920,6 +924,9 @@ function extractJson(raw) {
 /** 内容持久化：本地 JSON 文件（Node 端替代 Worker KV），90 天 TTL */
 const CONTENT_STORE = path.join(ROOT, '.content-kv.json');
 
+// 串行队列：防止并发请求发生 read-modify-write 覆盖导致条目丢失
+let contentStoreQueue = Promise.resolve();
+
 function contentStoreRead() {
   try {
     if (!fs.existsSync(CONTENT_STORE)) return [];
@@ -936,6 +943,19 @@ function contentStoreWrite(items) {
   } catch {
     /* 持久化失败不影响本次响应 */
   }
+}
+
+async function contentStoreModify(updater) {
+  const task = contentStoreQueue.then(async () => {
+    const current = contentStoreRead();
+    const next = await updater(current);
+    if (next) {
+      contentStoreWrite(next);
+    }
+    return next;
+  });
+  contentStoreQueue = task.catch(() => {});
+  return task;
 }
 
 async function handleContentGenerate(req, res) {
@@ -1017,11 +1037,13 @@ async function handleContentGenerate(req, res) {
     source: 'ai',
     createdAt: Date.now(),
   };
-  // 90 天 TTL（与 worker expirationTtl 对齐）：落盘前剔除过期项
+  // 90 天 TTL（与 worker expirationTtl 对齐）：落盘前剔除过期项（通过串行队列防并发竞态）
   const cutoff = Date.now() - 90 * 24 * 60 * 60 * 1000;
-  const items = contentStoreRead().filter((x) => x.createdAt > cutoff);
-  items.push(item);
-  contentStoreWrite(items.slice(-200));
+  await contentStoreModify((current) => {
+    const filtered = current.filter((x) => x.createdAt > cutoff);
+    filtered.push(item);
+    return filtered.slice(-200);
+  });
   pushLog({ at: Date.now(), scene: 'content', model: 'agnes-2.5-flash', ms: Date.now() - started, ok: true, status: 200 });
   return sendJson(res, 200, { ok: true, item });
 }
@@ -1097,8 +1119,15 @@ function serveStatic(req, res, urlPath) {
 /* ------------------------------------------------------------------ */
 const server = http.createServer(async (req, res) => {
   const url = req.url || '/';
+  // 请求追踪 ID：支持透传或生成唯一 ID，便于日志关联与全链路排查
+  const reqId = req.headers['x-request-id'] || `req_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+  res.setHeader('X-Request-Id', reqId);
+
   // AI 接口（携带付费密钥）使用严格 CORS：未配置具体域名时拒绝跨域，杜绝盗刷。
-  res.corsHeaders = corsFor(req, url.startsWith('/api/ai/'));
+  res.corsHeaders = {
+    ...corsFor(req, url.startsWith('/api/ai/')),
+    'X-Request-Id': reqId,
+  };
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204, res.corsHeaders);
@@ -1112,18 +1141,17 @@ const server = http.createServer(async (req, res) => {
   if (url.startsWith('/api/ai/video') && req.method === 'POST') return handleVideoCreate(req, res);
 
   if (url.startsWith('/api/ai/health')) {
-    return sendJson(res, 200, {
-      ok: true,
-      model: process.env.VITE_AI_DEFAULT_MODEL || 'agnes-2.5-flash',
-      imageModel: IMAGE_MODEL,
-      videoModel: VIDEO_MODEL,
-      running,
-      queued: waiting.length,
-      calls: logs.length,
-      rateLimitPerMin: RATE_LIMIT,
-      serveStatic: SERVE_STATIC,
-      corsOrigin: ALLOW_ORIGIN.join(','),
-    });
+    // 基础 ok 对外公开（供前端心跳探测服务可用性）；
+    // 内部运行状态（并发/队列/调用数）仅在配置了 LOG_VIEW_TOKEN 且通过鉴权后返回，
+    // 防止攻击者读取并发负载后实施定时攻击。
+    const healthToken = process.env.LOG_VIEW_TOKEN;
+    const provided = req.headers['x-log-token'] || (req.headers['authorization'] || '').replace(/^Bearer\s+/i, '');
+    const authed = healthToken && provided === healthToken;
+    const base = { ok: true, model: process.env.VITE_AI_DEFAULT_MODEL || 'agnes-2.5-flash' };
+    const detail = authed
+      ? { imageModel: IMAGE_MODEL, videoModel: VIDEO_MODEL, running, queued: waiting.length, calls: logs.length, rateLimitPerMin: RATE_LIMIT, serveStatic: SERVE_STATIC, corsOrigin: ALLOW_ORIGIN.join(',') }
+      : {};
+    return sendJson(res, 200, { ...base, ...detail });
   }
 
   if (url.startsWith('/api/ai/logs') || url.startsWith('/api/log/view')) {
@@ -1149,10 +1177,22 @@ const server = http.createServer(async (req, res) => {
     } catch {
       return sendJson(res, 400, { error: { code: 'bad_json' } });
     }
+    // 白名单过滤前端上报字段（防止日志注入 / 磁盘 DoS）：
+    // 仅保留已知结构字段，每个字段截至 2000 字符，防止超大 payload 污染日志。
+    const ALLOWED_LOG_FIELDS = ['type', 'msg', 'url', 'ua', 'stack', 'buildVersion', 'fingerprint', 'vital', 'value'];
+    const safeBody = {};
+    for (const k of ALLOWED_LOG_FIELDS) {
+      if (k in body) {
+        const v = body[k];
+        safeBody[k] = typeof v === 'string' ? v.slice(0, 2000)
+          : typeof v === 'number' ? v
+          : undefined;
+      }
+    }
     // 补充服务端视角的 IP 和时间，便于排查"哪个用户什么时候报的错"
-    body.serverIp = ipOf(req);
-    body.serverAt = Date.now();
-    appendErrorLog(body);
+    safeBody.serverIp = ipOf(req);
+    safeBody.serverAt = Date.now();
+    appendErrorLog(safeBody);
     return sendJson(res, 200, { ok: true });
   }
 
