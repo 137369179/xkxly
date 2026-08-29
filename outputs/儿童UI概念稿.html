@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>儿童UI概念稿 v2 · 宝贝学习乐园</title>
+<style>
+/* ============================================================
+   概念原型 v3 · 对标 帮帮识字 / 洪恩识字 / 宝宝巴士 设计细节
+   令牌来源：彩格调《儿童风格设计系统规范 v1》（WCAG 逐对验算）
+   v2 新增对标细节：
+   [帮帮识字] 全图标+语音引导、字源演变条、七环节路径、拆礼物仪式感
+   [洪恩识字] 3D 宇宙探险星球地图、关卡节点与碎片解锁、进度可视化
+   [宝宝巴士] 沉浸式场景岛屿、常驻 IP 语音引导、大图标少文字、护眼提示
+   ⚠️ Phase 3 筑原型因配额 429 失败，本稿主理人兜底产出，未经严过审正式评审
+   ============================================================ */
+:root{
+  --pink:#FF5C8A;      --pink-deep:#C9285C;      --pink-soft:#FFE1EB;      --pink-on:#3D1424;
+  --orange:#FF9F2E;    --orange-deep:#B45F09;    --orange-soft:#FFF0DB;    --orange-on:#4A2B1F;
+  --yellow:#FFC53D;    --yellow-deep:#8A5B00;    --yellow-soft:#FFF6D9;    --yellow-on:#4A2B1F;
+  --green:#3FC26B;     --green-deep:#1B7A3D;     --green-soft:#DFF5E7;     --green-on:#123B21;
+  --blue:#3D9BFF;      --blue-deep:#0B5EC9;      --blue-soft:#DCEBFF;      --blue-on:#0C2D4F;
+  --purple:#8F5BFF;    --purple-deep:#5F2ECC;    --purple-soft:#EFE4FF;    --purple-on:#160830;
+
+  --bg:#FFF8EF; --card:#FFFFFF; --line:#F3E3CF; --ink:#4A2B1F; --ink-2:#8A6F5C;
+  --r-card:24px; --r-btn:9999px; --r-modal:28px; --r-hero:32px;
+  --s-1:8px; --s-2:12px; --s-3:16px; --s-4:24px; --s-5:32px; --space-hub:16px;
+  --ease-bounce:cubic-bezier(.34,1.56,.64,1);
+  --t-enter:240ms; --t-press:90ms; --t-celebrate:600ms;
+  --shadow-soft:0 8px 16px rgba(74,43,31,.12);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:#F1E6DA;color:var(--ink);min-height:100vh;
+  font-family:'Baloo 2','PingFang SC','HarmonyOS Sans SC','MiSans','Microsoft YaHei UI',sans-serif;
+  letter-spacing:-0.01em;padding:20px 16px 40px}
+.note{max-width:1240px;margin:0 auto 14px;font-size:19px;color:#8A6F5C;text-align:center;font-weight:600;line-height:1.5}
+.note b{color:var(--pink-deep)}
+
+.chrome{max-width:1240px;margin:0 auto 18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.chrome button{font:inherit;font-weight:900;font-size:19px;padding:12px 24px;border-radius:var(--r-btn);border:none;
+  background:#fff;color:var(--ink-2);cursor:pointer;box-shadow:0 4px 0 #E4D5C3;transition:transform var(--t-press) ease-out}
+.chrome button.on{background:var(--purple-deep);color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.chrome button:active{transform:translateY(4px);box-shadow:0 0 0 transparent}
+
+.stage{max-width:1240px;margin:0 auto;display:flex;gap:26px;justify-content:center;flex-wrap:wrap}
+.phone{width:min(430px,94vw);background:var(--bg);border-radius:36px;overflow:hidden;position:relative;
+  box-shadow:0 24px 60px rgba(74,43,31,.22);border:6px solid #fff}
+.screen{display:none;padding:18px 18px 108px;min-height:760px}
+.screen.on{display:block;animation:enter var(--t-enter) var(--ease-bounce) both}
+@keyframes enter{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+
+.row{display:flex;align-items:center;gap:12px}
+.spread{display:flex;align-items:center;justify-content:space-between;gap:12px}
+
+/* ============ 3D 玩具质感（对标三家 3D 制作/高质感） ============ */
+.toy{
+  display:grid;place-items:center;border-radius:28px;position:relative;overflow:hidden;
+  box-shadow:0 6px 0 rgba(0,0,0,.14), 0 10px 20px rgba(74,43,31,.18), inset 0 3px 0 rgba(255,255,255,.5);
+}
+.toy:after{ /* 顶部高光 */
+  content:'';position:absolute;left:8%;right:8%;top:6%;height:38%;border-radius:9999px;
+  background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0));pointer-events:none;
+}
+.toy i{font-style:normal;position:relative;z-index:1;filter:drop-shadow(0 3px 2px rgba(0,0,0,.22))}
+.toy.sm{width:56px;height:56px;border-radius:20px}
+.toy.sm i{font-size:30px}
+.toy.lg{width:104px;height:104px;font-size:52px}
+.toy.md{width:72px;height:72px}
+.toy.md i{font-size:38px}
+
+/* ============ 顶部状态条（对标：星星可见 + 家长锁角落） ============ */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.me{display:flex;align-items:center;gap:10px;background:#fff;border-radius:var(--r-btn);padding:6px 16px 6px 6px;
+  box-shadow:0 4px 0 var(--line)}
+.me .ava{width:44px;height:44px;border-radius:9999px;background:var(--yellow-soft);display:grid;place-items:center;font-size:26px}
+.me .who{font-size:19px;font-weight:900;line-height:1.1}
+.me .who small{display:block;font-size:19px;font-weight:700;color:var(--ink-2)}
+.starbox{display:flex;align-items:center;gap:6px;background:var(--yellow-soft);border-radius:var(--r-btn);
+  padding:8px 16px;font-weight:900;color:var(--yellow-on);box-shadow:0 4px 0 #E8CE8E;position:relative;overflow:hidden}
+.starbox b{font-size:22px}
+.starbox.fly b{animation:starfly 700ms var(--ease-bounce)}
+@keyframes starfly{0%{transform:translateY(-14px) scale(.5);opacity:0}60%{transform:translateY(0) scale(1.25)}100%{transform:none;opacity:1}}
+.lockbtn{width:48px;height:48px;border-radius:9999px;background:#fff;box-shadow:0 4px 0 var(--line);
+  display:grid;place-items:center;font-size:22px;border:none;cursor:pointer}
+
+/* ============ 吉祥物 + 语音引导（对标宝宝巴士「奇奇」全程语音引导） ============ */
+.guide{display:flex;align-items:flex-end;gap:10px;margin:10px 0 14px}
+.mascot{width:96px;height:96px;flex:none;border-radius:9999px;background:var(--purple-soft);display:grid;place-items:center;
+  font-size:52px;box-shadow:0 6px 0 rgba(0,0,0,.08),var(--shadow-soft);animation:float 4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
+.bubble{background:#fff;border-radius:var(--r-modal);padding:14px 18px;font-size:19px;font-weight:700;line-height:1.45;
+  box-shadow:var(--shadow-soft);position:relative;max-width:calc(100% - 116px)}
+.bubble:after{content:'';position:absolute;left:-10px;bottom:22px;border:10px solid transparent;border-right-color:#fff;border-left:0}
+.bubble .replay{margin-top:8px;display:inline-flex;align-items:center;gap:6px;background:var(--blue-soft);color:var(--blue-deep);
+  border:none;border-radius:var(--r-btn);padding:10px 20px;min-height:56px;font:inherit;font-weight:900;font-size:19px;cursor:pointer}
+
+/* ============ 主任务卡：关卡路径（对标洪恩星球地图关卡节点） ============ */
+.hero{background:linear-gradient(135deg,var(--blue) 0%,var(--blue-deep) 100%);border-radius:var(--r-hero);
+  padding:22px 20px 20px;color:var(--blue-on);box-shadow:0 6px 0 var(--blue-deep),var(--shadow-soft);position:relative;overflow:hidden}
+.hero:before{content:'';position:absolute;right:-30px;top:-30px;width:150px;height:150px;border-radius:9999px;background:rgba(255,255,255,.12)}
+.hero .ttl{font-size:26px;font-weight:900}
+.hero .sub{font-size:19px;font-weight:500;opacity:.92;margin-top:2px}
+.path{display:flex;align-items:center;justify-content:space-between;margin:18px 0 6px;position:relative}
+.path:before{content:'';position:absolute;left:24px;right:24px;top:24px;height:6px;border-radius:9999px;background:rgba(255,255,255,.35);z-index:0}
+.node{position:relative;z-index:1;display:grid;place-items:center;gap:4px}
+.node .dot{width:48px;height:48px;border-radius:9999px;display:grid;place-items:center;font-size:24px;font-weight:900;
+  background:rgba(255,255,255,.35);color:var(--blue-on);box-shadow:inset 0 0 0 3px rgba(255,255,255,.5)}
+.node.done .dot{background:#fff;color:var(--blue-deep)}
+.node.cur .dot{background:var(--yellow);color:var(--yellow-on);box-shadow:0 0 0 6px rgba(255,255,255,.45),0 6px 0 var(--yellow-deep);
+  animation:breathe 1.8s ease-in-out infinite}
+.node.lock .dot{background:rgba(255,255,255,.18);color:rgba(255,255,255,.7)}
+.node small{font-size:19px;font-weight:900;opacity:.9}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+/* ============ 主 CTA 呼吸动效（三家的共同手法） ============ */
+.btn{font:inherit;font-weight:900;border:none;cursor:pointer;border-radius:var(--r-btn);display:inline-flex;
+  align-items:center;justify-content:center;gap:10px;transition:transform var(--t-press) ease-out,box-shadow var(--t-press) ease-out}
+.btn:active{transform:translateY(4px);box-shadow:0 0 0 transparent!important}
+.btn-cta{min-height:88px;font-size:26px;width:100%;background:var(--orange);color:var(--orange-on);
+  box-shadow:0 6px 0 var(--orange-deep),var(--shadow-soft);animation:breathe 2.4s ease-in-out infinite}
+.btn-cta.green{background:var(--green);color:var(--green-on);box-shadow:0 6px 0 var(--green-deep),var(--shadow-soft)}
+.btn-cta.pink{background:var(--pink);color:var(--pink-on);box-shadow:0 6px 0 var(--pink-deep),var(--shadow-soft)}
+.btn-back{min-height:64px;font-size:19px;background:#fff;color:var(--ink);box-shadow:0 5px 0 var(--line),var(--shadow-soft);padding:0 22px}
+
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-3);margin-top:var(--s-4)}
+.qcard{background:#fff;border-radius:var(--r-card);padding:14px 8px;text-align:center;font-weight:900;font-size:19px;
+  box-shadow:0 4px 0 var(--line),var(--shadow-soft);cursor:pointer;transition:transform var(--t-press) ease-out}
+.qcard:active{transform:translateY(4px);box-shadow:0 0 0 transparent}
+.qcard .toy{margin:0 auto 8px}
+
+/* ============ 乐园地图（对标洪恩星球地图 + 宝宝巴士场景世界） ============ */
+.maphead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.maphead h2{font-size:32px;font-weight:900;margin:0}
+.islands{display:grid;gap:18px;position:relative}
+.islands:before{content:'';position:absolute;left:34px;top:40px;bottom:40px;width:6px;border-radius:9999px;
+  background:repeating-linear-gradient(180deg,var(--line) 0 10px,transparent 10px 20px);z-index:0}
+.island{position:relative;z-index:1;background:#fff;border-radius:var(--r-card);padding:16px;display:flex;align-items:center;gap:16px;
+  box-shadow:0 5px 0 var(--line),var(--shadow-soft);cursor:pointer;transition:transform var(--t-press) ease-out}
+.island:active{transform:translateY(4px);box-shadow:0 0 0 transparent}
+.island .info{flex:1;min-width:0}
+.island .nm{font-size:26px;font-weight:900}
+.island .ds{font-size:19px;font-weight:500;color:var(--ink-2);margin-top:2px}
+.pips{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.pip{width:22px;height:22px;border-radius:9999px;background:var(--line);display:grid;place-items:center;font-size:13px}
+.pip.on{background:var(--yellow)}
+.pip.cur{background:var(--orange);box-shadow:0 0 0 3px var(--orange-soft);animation:breathe 1.8s ease-in-out infinite}
+.island .chev{font-size:24px;color:var(--ink-2)}
+
+/* ============ 汉字页：字源演变 + 环节路径（对标帮帮识字） ============ */
+.bigchar{background:var(--green);border-radius:var(--r-hero);padding:22px;
+  color:var(--green-on);box-shadow:0 6px 0 var(--green-deep),var(--shadow-soft);text-align:center;position:relative}
+.bigchar .zi{font-size:96px;font-weight:900;line-height:1;text-shadow:0 4px 0 rgba(255,255,255,.45)}
+.bigchar .py{font-size:26px;font-weight:900;margin-top:4px}
+.bigchar .say{position:absolute;right:14px;top:14px;width:72px;height:72px;border-radius:9999px;border:none;cursor:pointer;
+  background:#fff;color:var(--green-deep);font-size:26px;box-shadow:0 4px 0 rgba(0,0,0,.12);display:grid;place-items:center}
+.evo{background:#fff;border-radius:var(--r-card);padding:14px;margin-top:14px;box-shadow:0 4px 0 var(--line),var(--shadow-soft)}
+.evo .hd{font-size:19px;font-weight:900;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.evo .row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.evo .cell{border-radius:18px;background:var(--green-soft);padding:12px 6px;text-align:center;cursor:pointer;
+  border:3px solid transparent;transition:transform var(--t-press) ease-out}
+.evo .cell:active{transform:translateY(3px)}
+.evo .cell.hi{border-color:var(--green);background:#fff}
+.evo .cell .g{font-size:40px;font-weight:900;line-height:1.1;color:var(--green-on)}
+.evo .cell .t{font-size:19px;font-weight:900;margin-top:4px}
+.steps{display:flex;align-items:center;justify-content:space-between;margin:16px 0 4px;position:relative}
+.steps:before{content:'';position:absolute;left:22px;right:22px;top:20px;height:4px;background:var(--line);border-radius:9999px}
+.stp{position:relative;z-index:1;text-align:center}
+.stp .dot{width:40px;height:40px;border-radius:9999px;background:#fff;border:3px solid var(--line);display:grid;place-items:center;
+  font-size:19px;font-weight:900;color:var(--ink-2);margin:0 auto}
+.stp.done .dot{background:var(--green-deep);border-color:var(--green-deep);color:#fff}
+.stp.cur .dot{background:var(--orange);border-color:var(--orange-deep);color:var(--orange-on);box-shadow:0 0 0 5px var(--orange-soft)}
+.stp small{display:block;font-size:19px;font-weight:900;margin-top:4px;color:var(--ink-2)}
+.acts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.acts button{font:inherit;font-weight:900;font-size:19px;border:none;background:#fff;border-radius:var(--r-card);padding:14px 6px;
+  cursor:pointer;box-shadow:0 4px 0 var(--line),var(--shadow-soft);display:grid;gap:6px;place-items:center;min-height:96px}
+.acts button:active{transform:translateY(4px);box-shadow:0 0 0 transparent}
+.acts button i{font-style:normal;font-size:32px}
+
+/* ============ 反馈：星星飞入 + 徽章 + 撤销 ============ */
+.demo{margin-top:16px;background:#fff;border-radius:var(--r-card);padding:16px;box-shadow:0 4px 0 var(--line),var(--shadow-soft)}
+.demo h4{margin:0 0 2px;font-size:22px;font-weight:900}
+.demo p{margin:0 0 12px;font-size:19px;color:var(--ink-2);font-weight:500}
+.track{position:relative;height:104px;display:grid;place-items:center;background:var(--purple-soft);border-radius:20px;overflow:hidden}
+.burst{position:absolute;inset:0;pointer-events:none;opacity:0}
+.burst.go{animation:burst var(--t-celebrate) var(--ease-bounce) forwards}
+.burst b{position:absolute;font-size:28px}
+@keyframes burst{0%{opacity:0;transform:scale(.4)}35%{opacity:1;transform:scale(1.15) rotate(8deg)}100%{opacity:1;transform:scale(1)}}
+.badge{position:absolute;background:var(--green-deep);color:#fff;font-weight:900;font-size:20px;padding:12px 22px;border-radius:var(--r-btn);
+  box-shadow:0 5px 0 rgba(0,0,0,.18);opacity:0;transform:scale(.5)}
+.badge.go{animation:pop var(--t-celebrate) var(--ease-bounce) forwards}
+@keyframes pop{0%{opacity:0;transform:scale(.5)}60%{opacity:1;transform:scale(1.15)}100%{opacity:1;transform:scale(1)}}
+.toast{position:absolute;left:16px;right:16px;bottom:92px;background:var(--ink);color:#fff;border-radius:var(--r-modal);
+  padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:700;font-size:19px;
+  opacity:0;transform:translateY(20px);transition:all 240ms var(--ease-bounce);pointer-events:none;z-index:20}
+.toast.show{opacity:1;transform:none;pointer-events:auto}
+.toast button{font:inherit;font-weight:900;background:var(--yellow);color:var(--yellow-on);border:none;border-radius:var(--r-btn);
+  padding:10px 18px;min-height:48px;cursor:pointer;box-shadow:0 4px 0 var(--yellow-deep)}
+.spark{position:absolute;font-size:22px;pointer-events:none;animation:spark 700ms ease-out forwards;z-index:30}
+@keyframes spark{0%{opacity:1;transform:translate(0,0) scale(.6)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1.2)}}
+
+/* ============ 底部大导航 ============ */
+.tabbar{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:4px solid var(--line);
+  display:grid;grid-template-columns:repeat(4,1fr);padding:6px 4px 10px;border-radius:28px 28px 0 0}
+.tabbar button{font:inherit;border:none;background:none;cursor:pointer;min-height:72px;display:grid;place-items:center;gap:2px;border-radius:20px;padding:6px 2px}
+.tabbar button i{font-style:normal;font-size:32px;line-height:1}
+.tabbar button span{font-size:19px;font-weight:900;color:var(--ink-2)}
+.tabbar button.on{background:var(--pink-soft)}
+.tabbar button.on span{color:var(--pink-deep)}
+.tabbar button.on i{animation:float 2.4s ease-in-out infinite}
+
+/* 护眼提示（对标：20 分钟休息） */
+.eye{margin-top:14px;text-align:center;font-size:19px;font-weight:700;color:var(--ink-2)}
+.foot{text-align:center;color:#8A6F5C;font-size:19px;font-weight:600;margin-top:24px;line-height:1.5}
+
+/* 桌面宽屏说明卡 */
+.padwrap{max-width:1240px;margin:24px auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.refcard{background:#fff;border-radius:var(--r-card);padding:20px;box-shadow:0 4px 0 var(--line)}
+.refcard h4{margin:0 0 8px;font-size:22px;font-weight:900}
+.refcard ul{margin:0;padding-left:22px;font-size:19px;font-weight:500;line-height:1.6;color:var(--ink-2)}
+.refcard li b{color:var(--ink)}
+
+/* 无障碍：偏好减少动态时关闭所有动画/过渡 */
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="note">
+概念原型 v3 · 对标细节版　|　<b>主理人兜底产出</b>（Phase 3 筑原型曾因模型配额 429 失败；已过严过审正式复评 PASS 19/25）
+</div>
+
+<div class="chrome">
+  <button class="on" data-go="s1">🏠 首页（关卡路径）</button>
+  <button data-go="s2">🗺️ 乐园地图（岛屿）</button>
+  <button data-go="s3">🀄 汉字乐园（字源+七环节）</button>
+</div>
+
+<div class="stage">
+<div class="phone">
+
+  <!-- ========== 屏幕 1：首页 ========== -->
+  <section class="screen on" id="s1">
+    <div class="topbar">
+      <div class="me">
+        <div class="ava">🐻</div>
+        <div class="who">宝贝<small>L2 · 已识 128 字</small></div>
+      </div>
+      <div class="starbox" id="starbox"><span>⭐</span><b id="starNum">128</b></div>
+      <button class="lockbtn" title="家长中心">👨‍👩‍👧</button>
+    </div>
+
+    <!-- 宝宝巴士式：常驻 IP + 语音引导 -->
+    <div class="guide">
+      <div class="mascot">🐼</div>
+      <div class="bubble">
+        今天我们学「山」字！<br/>点大按钮就开始闯关～
+        <div><button class="replay" onclick="spark(event,'🔊')">🔊 再听一遍</button></div>
+      </div>
+    </div>
+
+    <!-- 洪恩式：关卡路径主任务卡 -->
+    <div class="hero">
+      <div class="ttl">📅 今日课程</div>
+      <div class="sub">第 3 关 · 新字「山」 · 今日学 1 字 + 复习 2 字 · 约 10 分钟</div>
+      <div class="path">
+        <div class="node done"><div class="dot">✓</div><small>复习</small></div>
+        <div class="node done"><div class="dot">✓</div><small>拼音</small></div>
+        <div class="node cur"><div class="dot">3</div><small>学新字</small></div>
+        <div class="node lock"><div class="dot">🔒</div><small>练习</small></div>
+        <div class="node lock"><div class="dot">🔒</div><small>测验</small></div>
+      </div>
+      <button class="btn btn-cta" style="margin-top:12px" onclick="win(event)">🚀 开始今天的学习</button>
+    </div>
+
+    <div class="quick">
+      <div class="qcard" onclick="spark(event,'⭐')"><div class="toy sm" style="background:var(--green)"><i>🀄</i></div>继续上次<br/>汉字</div>
+      <div class="qcard" onclick="spark(event,'🎮')"><div class="toy sm" style="background:var(--purple);color:var(--purple-on)"><i>🎮</i></div>益智<br/>游戏</div>
+      <div class="qcard" onclick="spark(event,'🏆')"><div class="toy sm" style="background:var(--yellow)"><i>🏆</i></div>我的<br/>成长</div>
+    </div>
+
+    <div class="eye">👀 已学习 8 分钟 · 再学 12 分钟会提醒休息</div>
+  </section>
+
+  <!-- ========== 屏幕 2：乐园地图 ========== -->
+  <section class="screen" id="s2">
+    <div class="maphead">
+      <h2>🗺️ 乐园地图</h2>
+      <div class="starbox"><span>⭐</span><b>128</b></div>
+    </div>
+
+    <div class="islands">
+      <div class="island" onclick="spark(event,'📚')">
+        <div class="toy md" style="background:var(--green);color:var(--green-on)"><i>📚</i></div>
+        <div class="info">
+          <div class="nm">学习岛</div>
+          <div class="ds">汉字 · 拼音 · 数学 · 古诗</div>
+          <div class="pips">
+            <div class="pip on">✓</div><div class="pip on">✓</div><div class="pip cur">3</div>
+            <div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div>
+          </div>
+        </div>
+        <div class="chev">›</div>
+      </div>
+
+      <div class="island" onclick="spark(event,'📖')">
+        <div class="toy md" style="background:var(--pink);color:var(--pink-on)"><i>📖</i></div>
+        <div class="info">
+          <div class="nm">故事岛</div>
+          <div class="ds">绘本 · 儿歌 · 成语</div>
+          <div class="pips"><div class="pip on">✓</div><div class="pip cur">2</div><div class="pip"></div><div class="pip"></div></div>
+        </div>
+        <div class="chev">›</div>
+      </div>
+
+      <div class="island" onclick="spark(event,'🔬')">
+        <div class="toy md" style="background:var(--blue);color:var(--blue-on)"><i>🔬</i></div>
+        <div class="info">
+          <div class="nm">探索岛</div>
+          <div class="ds">科学 · 地理 · 安全</div>
+          <div class="pips"><div class="pip cur">1</div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div></div>
+        </div>
+        <div class="chev">›</div>
+      </div>
+
+      <div class="island" onclick="spark(event,'🎨')">
+        <div class="toy md" style="background:var(--orange);color:var(--orange-on)"><i>🎨</i></div>
+        <div class="info">
+          <div class="nm">创意岛</div>
+          <div class="ds">艺术 · 音乐 · 猫屋</div>
+          <div class="pips"><div class="pip on">✓</div><div class="pip on">✓</div><div class="pip cur">3</div><div class="pip"></div><div class="pip"></div><div class="pip"></div></div>
+        </div>
+        <div class="chev">›</div>
+      </div>
+    </div>
+
+    <div class="eye">🗺️ 4 座岛屿 · 24 个乐园 · 通关解锁下一站</div>
+  </section>
+
+  <!-- ========== 屏幕 3：汉字乐园 ========== -->
+  <section class="screen" id="s3">
+    <div class="spread">
+      <button class="btn btn-back" onclick="go('s2')">← 回地图</button>
+      <div class="starbox"><span>⭐</span><b id="starNum2">128</b></div>
+    </div>
+
+    <div class="bigchar" style="margin-top:14px">
+      <button class="say" onclick="spark(event,'🔊')">🔊</button>
+      <div class="zi">山</div>
+      <div class="py">shān</div>
+    </div>
+
+    <!-- 帮帮识字式：字源演变 -->
+    <div class="evo">
+      <div class="hd">🔍 汉字小剧场 · 字源演变</div>
+      <div class="row3">
+        <div class="cell" onclick="pick(this)"><div class="g">𡴂</div><div class="t">甲骨文</div></div>
+        <div class="cell" onclick="pick(this)"><div class="g">山</div><div class="t">金文</div></div>
+        <div class="cell hi" onclick="pick(this)"><div class="g">山</div><div class="t">楷书</div></div>
+      </div>
+    </div>
+
+    <!-- 帮帮识字式：字卡四要素（汉字+图片+组词+例句+拼音） -->
+    <div class="evo" style="display:flex;align-items:center;gap:16px">
+      <div class="toy md" style="background:var(--yellow);color:var(--yellow-on)"><i>⛰️</i></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:26px;font-weight:900">山　<span style="color:var(--ink-2);font-size:19px">shān</span></div>
+        <div style="font-size:19px;font-weight:700;margin-top:4px">组词：高山 · 爬山 · 山顶</div>
+        <div style="font-size:19px;font-weight:500;color:var(--ink-2);margin-top:2px">例句：我和爸爸去爬山。</div>
+      </div>
+      <button class="say" style="position:static;flex:none" onclick="spark(event,'🔊')">🔊</button>
+    </div>
+
+    <!-- 七环节路径 -->
+    <div class="steps">
+      <div class="stp done"><div class="dot">✓</div><small>学</small></div>
+      <div class="stp cur"><div class="dot">2</div><small>认</small></div>
+      <div class="stp"><div class="dot">3</div><small>读</small></div>
+      <div class="stp"><div class="dot">4</div><small>练</small></div>
+      <div class="stp"><div class="dot">5</div><small>写</small></div>
+      <div class="stp"><div class="dot">6</div><small>测</small></div>
+      <div class="stp"><div class="dot">7</div><small>复习</small></div>
+    </div>
+
+    <button class="btn btn-cta green" style="margin-top:12px" onclick="win(event)">▶ 开始闯关</button>
+
+    <div class="acts">
+      <button onclick="spark(event,'✏️')"><i>✍️</i>描红写字<br/><span style="font-size:19px;color:var(--ink-2)">动态笔顺</span></button>
+      <button onclick="spark(event,'🎤')"><i>🎤</i>跟读评分<br/><span style="font-size:19px;color:var(--ink-2)">AI 纠音</span></button>
+      <button onclick="spark(event,'📖')"><i>📖</i>组词造句<br/><span style="font-size:19px;color:var(--ink-2)">活学活用</span></button>
+    </div>
+
+    <div class="demo">
+      <h4>奖励反馈（点一下看效果）</h4>
+      <p>星星飞入计数 + 徽章弹出 + 5 秒内可撤销</p>
+      <div class="track">
+        <button class="btn btn-cta pink" style="width:auto;padding:0 32px" onclick="win(event)">✅ 做对啦</button>
+        <div class="burst" id="burst">
+          <b style="top:12%;left:14%">⭐</b><b style="top:8%;right:16%">✨</b>
+          <b style="bottom:10%;left:20%">🌟</b><b style="bottom:14%;right:12%">⭐</b>
+          <b style="top:40%;right:6%">✨</b>
+        </div>
+        <div class="badge" id="badge">真棒！+⭐10</div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast">
+      <span>已获得 10 颗星星</span>
+      <button onclick="undo()">撤销</button>
+    </div>
+  </section>
+
+  <nav class="tabbar">
+    <button class="on" onclick="go('s1')"><i>🏠</i><span>首页</span></button>
+    <button onclick="go('s2')"><i>🗺️</i><span>乐园地图</span></button>
+    <button onclick="go('s1')"><i>🎮</i><span>游戏乐园</span></button>
+    <button onclick="go('s1')"><i>🏆</i><span>我的成长</span></button>
+  </nav>
+</div>
+</div>
+
+<!-- 对标说明卡 -->
+<div class="padwrap">
+  <div class="refcard">
+    <h4>🟢 帮帮识字 · 采用细节</h4>
+    <ul>
+      <li><b>全图标 + 语音引导</b>：无文字导航，三步内完成（3 岁可独立启动）</li>
+      <li><b>字源演变条</b>：甲骨文→金文→楷书三格可点读</li>
+      <li><b>七环节路径</b>：学→认→读→练→写→测→复习</li>
+      <li><b>一字一玩</b>：「拆礼物」式仪式感，主 CTA 呼吸微动</li>
+    </ul>
+  </div>
+  <div class="refcard">
+    <h4>🔵 洪恩识字 · 采用细节</h4>
+    <ul>
+      <li><b>星球/岛屿地图</b>：主导航改地图路径，非列表菜单</li>
+      <li><b>关卡节点</b>：已完成 ✓ / 当前 ▶ / 未解锁 🔒 三态</li>
+      <li><b>进度可视化</b>：每岛 pip 圆点显示「学了几关」</li>
+      <li><b>动态笔顺 + 描红</b>：写字环节配实时反馈</li>
+    </ul>
+  </div>
+  <div class="refcard">
+    <h4>🟡 宝宝巴士 · 采用细节</h4>
+    <ul>
+      <li><b>常驻 IP 语音引导</b>：吉祥物 + 气泡 +「再听一遍」</li>
+      <li><b>场景化岛屿</b>：学习/故事/探索/创意四大场景世界</li>
+      <li><b>图标大、文字少</b>：卡片以 3D 玩具图标为主视觉</li>
+      <li><b>护眼提示</b>：学习时长可见，20 分钟提醒休息</li>
+    </ul>
+  </div>
+  <div class="refcard">
+    <h4>📐 权威可量化规范（Nielsen / Smashing）</h4>
+    <ul>
+      <li><b>触控目标 ≥75px</b>：9 岁以下 ≥2cm×2cm，是成人 4 倍；关键 CTA 88px</li>
+      <li><b>每屏 3-5 个选项</b>：首页「1 主任务 + 3 快捷位」压线达标</li>
+      <li><b>正文 18-19px</b>、图标 60-80px、按钮间距 ≥64px 防误触</li>
+      <li><b>注意力 8-10 分钟</b>：单课 3-5 分钟、今日课程包 10 分钟</li>
+      <li><b>触觉反馈</b>：完成速度 +17%、错误 -23%</li>
+    </ul>
+  </div>
+  <div class="refcard">
+    <h4>🟢 帮帮识字 · 新增细节</h4>
+    <ul>
+      <li><b>字卡四要素</b>：汉字 + 图片 + 组词 + 例句 + 拼音</li>
+      <li><b>1+1 学习法</b>：1 天学 + 1 天复习，每天 10 分钟 6 字</li>
+      <li><b>自动跳过已识字</b>：系统过滤已掌握字，只学新内容</li>
+      <li><b>星星商城兑换</b>：攒星换学习道具（对应 rewards/growth）</li>
+    </ul>
+  </div>
+</div>
+
+<div class="foot">对标 帮帮识字 / 洪恩识字 / 宝宝巴士 设计细节 · 设计原型专家团出品（画统筹汇编）</div>
+
+<script>
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  const idx={s1:0,s2:1,s3:1}[id]??0;
+  document.querySelectorAll('.tabbar button').forEach((b,i)=>b.classList.toggle('on',i===idx));
+}
+document.querySelectorAll('.chrome button').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('.chrome button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); go(b.dataset.go); window.scrollTo({top:110,behavior:'smooth'});
+  };
+});
+
+/* 字源演变：点任意一格高亮 */
+function pick(cell){
+  cell.parentElement.querySelectorAll('.cell').forEach(c=>c.classList.remove('hi'));
+  cell.classList.add('hi');
+}
+
+/* 点击星光粒子（点哪都有反应 —— 三家共同手法） */
+function spark(e,emoji){
+  const host=document.querySelector('.phone').getBoundingClientRect();
+  for(let i=0;i<3;i++){
+    const s=document.createElement('span');
+    s.className='spark'; s.textContent=emoji||'✨';
+    s.style.left=((e.clientX??host.left+host.width/2)-host.left-10)+'px';
+    s.style.top=((e.clientY??host.top+host.height/2)-host.top-10)+'px';
+    s.style.setProperty('--dx',(Math.random()*80-40)+'px');
+    s.style.setProperty('--dy',(-40-Math.random()*40)+'px');
+    s.style.animationDelay=(i*90)+'ms';
+    document.querySelector('.phone').appendChild(s);
+    setTimeout(()=>s.remove(),1100);
+  }
+}
+
+/* 奖励：星星飞入计数 + 徽章 + 可撤销 */
+let timer=null, gained=0;
+function win(e){
+  const badge=document.getElementById('badge'), burst=document.getElementById('burst'), toast=document.getElementById('toast');
+  badge.classList.remove('go'); burst.classList.remove('go'); void badge.offsetWidth;
+  badge.classList.add('go'); burst.classList.add('go');
+  gained=10;
+  ['starNum','starNum2'].forEach(id=>{
+    const n=document.getElementById(id); if(!n) return;
+    n.textContent=String(parseInt(n.textContent,10)+gained);
+    const box=n.closest('.starbox'); box.classList.remove('fly'); void box.offsetWidth; box.classList.add('fly');
+  });
+  if(toast){toast.classList.add('show'); clearTimeout(timer); timer=setTimeout(hideToast,5000);}
+  if(e&&e.currentTarget) e.currentTarget.animate(
+    [{transform:'translateY(4px)'},{transform:'translateY(-6px)'},{transform:'translateY(0)'}],
+    {duration:600,easing:'cubic-bezier(.34,1.56,.64,1)'});
+  spark(e,'⭐');
+}
+function hideToast(){reset();flash('奖励已保留');}
+function undo(){
+  ['starNum','starNum2'].forEach(id=>{
+    const n=document.getElementById(id); if(n) n.textContent=String(parseInt(n.textContent,10)-gained);
+  });
+  reset(); flash('已撤销，星星已退回');
+}
+function reset(){
+  const toast=document.getElementById('toast');
+  if(toast) toast.classList.remove('show');
+  const b=document.getElementById('badge'); if(b) b.classList.remove('go');
+  const s=document.getElementById('burst'); if(s) s.classList.remove('go');
+  clearTimeout(timer);
+}
+function flash(msg){
+  const d=document.createElement('div');
+  d.textContent=msg;
+  d.style.cssText='position:absolute;left:50%;transform:translateX(-50%);bottom:150px;background:#4A2B1F;color:#fff;'+
+    'padding:12px 20px;border-radius:9999px;font-weight:900;font-size:19px;z-index:40;animation:enter 240ms cubic-bezier(.34,1.56,.64,1)';
+  document.querySelector('.phone').appendChild(d);
+  setTimeout(()=>d.remove(),1600);
+}
+</script>
+</body>
+</html>
