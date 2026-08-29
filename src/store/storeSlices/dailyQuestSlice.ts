@@ -104,6 +104,9 @@ export const createDailyQuestSlice: SliceCreator<
         stars: p.stars + quest.reward,
         dailyLog: _bumpLog(p, { items: 1, ok: 1, stars: quest.reward }),
         chatHistory: { ...(p.chatHistory ?? {}), [claimedKey]: 1 },
+        // R163：完成并领取每日任务 = 发放一张连胜保护卡（封顶 5，与 grantFreeze 同规则）。
+        // 奖励的是「坚持的过程」而非结果，契合安全网设计意图。
+        streakFreezes: Math.min(5, (p.streakFreezes ?? 0) + 1),
       })),
     );
   },

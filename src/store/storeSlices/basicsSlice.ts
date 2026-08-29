@@ -1,7 +1,7 @@
 import type { ReciteStat } from '@/types';
-import { dateKey } from '@/lib/dailyPlan';
 import { createInitialProgress } from '@/lib/progress';
 import { sanitizeProgress } from '@/lib/backup';
+import { grantFreeze, registerActivity, todayISO, type StreakState } from '@/game/streakProtection';
 import { useSettingsStore } from '../useSettingsStore';
 import {
   applyProgress as _applyProgress,
@@ -11,7 +11,6 @@ import {
   toggleIn as _toggleIn,
 } from '../storeHelpers';
 import {
-  todayStr,
   deepMergeProgress,
   initialProgress,
   type SliceCreator,
@@ -35,6 +34,8 @@ export const createBasicsSlice: SliceCreator<
     | 'setGameBest'
     | 'completeLevel'
     | 'checkIn'
+    | 'grantStreakFreeze'
+    | 'clearStreakEvent'
     | 'consumeBadge'
     | 'resetAll'
     | 'restoreProgress'
@@ -182,14 +183,24 @@ export const createBasicsSlice: SliceCreator<
   checkIn: () =>
     set((s) =>
       _applyProgress(s, (p) => {
-        const today = todayStr();
+        const today = todayISO();
         if (p.lastVisit === today) return p;
-        const yesterday = dateKey(Date.now() - 86400000);
-        const streak = p.lastVisit === yesterday ? p.streak + 1 : 1;
+        // R163：接入 streakProtection 安全网 —— 断签 1 天且有保护卡时温和续接
+        // （不惩罚、不焦虑），替代旧「断签直接归 1」逻辑。
+        const prev: StreakState = {
+          current: p.streak,
+          longest: p.longestStreak ?? p.streak,
+          lastActiveDate: p.lastVisit || null,
+          freezesRemaining: p.streakFreezes ?? 0,
+        };
+        const update = registerActivity(prev, today);
         return {
           ...p,
           lastVisit: today,
-          streak,
+          streak: update.state.current,
+          longestStreak: update.state.longest,
+          streakFreezes: update.state.freezesRemaining,
+          streakEvent: update.event === 'protected' ? 'protected' : undefined,
           dailyLog: _bumpLog(p, {
             startMathTotal: p.mathTotal,
             startMathCorrect: p.mathCorrect,
@@ -199,7 +210,30 @@ export const createBasicsSlice: SliceCreator<
       }),
     ),
 
+  grantStreakFreeze: (count = 1) =>
+    set((s) =>
+      _applyProgress(s, (p) => {
+        const next = grantFreeze(
+          {
+            current: p.streak,
+            longest: p.longestStreak ?? p.streak,
+            lastActiveDate: p.lastVisit || null,
+            freezesRemaining: p.streakFreezes ?? 0,
+          },
+          count,
+        );
+        return { ...p, streakFreezes: next.freezesRemaining };
+      }),
+    ),
+
   consumeBadge: () => set((s) => ({ pendingBadges: s.pendingBadges.slice(1) })),
+
+  clearStreakEvent: () =>
+    set((s) =>
+      s.progress.streakEvent
+        ? _applyProgress(s, (p) => ({ ...p, streakEvent: undefined }))
+        : { progress: s.progress },
+    ),
 
   resetAll: () => set(() => ({ progress: createInitialProgress(), pendingBadges: [] })),
 

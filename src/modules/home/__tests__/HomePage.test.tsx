@@ -53,9 +53,10 @@ const mockProgress = {
 };
 
 vi.mock('@/store/useStore', () => ({
-  useStore: (selector: any) => (selector ? selector({ progress: mockProgress }) : { progress: mockProgress }),
+  useStore: (selector: any) => (selector ? selector({ progress: mockProgress, clearStreakEvent: () => {} }) : { progress: mockProgress }),
   useStars: () => 12,
   useStreak: () => 3,
+  useStreakFreezes: () => 0,
   useBadgeCount: () => 2,
   useDailyLog: () => ({}),
   useMastery: () => ({}),
@@ -90,13 +91,25 @@ describe('HomePage 首页全栈非重复与渲染测试', () => {
     container.remove();
   });
 
-  it('正确渲染首页核心结构且无重复模块入口', async () => {
+  it('一屏一事：只保留主任务与 3 个快捷位，旧版块已迁往乐园地图', async () => {
     await act(async () => {
       root.render(createElement(HomePage));
     });
 
-    expect(container.textContent).toContain('探索学习乐园');
-    expect(container.textContent).toContain('大厂专业级 · 特色启蒙');
-    expect(container.textContent).toContain('探索专题 · 知识画卷');
+    const text = container.textContent ?? '';
+
+    // 新结构：3 个次要快捷位（文案硬编码，不依赖 i18n）
+    expect(text).toContain('继续上次');
+    expect(text).toContain('益智游戏');
+    expect(text).toContain('我的成长');
+    // 乐园地图统一入口（用 aria-label 校验，同时覆盖无障碍契约）
+    expect(container.querySelector('[aria-label="去乐园地图"]')).not.toBeNull();
+
+    // 改版契约：这三个旧版块的内容已整体迁入乐园地图 hall，
+    // 首页不再堆叠入口（改版前首屏可点目标 20+）。
+    // 若它们重新出现在首页，说明一屏一事被破坏。
+    expect(text).not.toContain('探索学习乐园');
+    expect(text).not.toContain('大厂专业级 · 特色启蒙');
+    expect(text).not.toContain('探索专题 · 知识画卷');
   });
 });

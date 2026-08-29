@@ -1541,7 +1541,13 @@
     "heroTodayTodo": "今天还有 {count} 项等着你",
     "heroAgeHint": "已按 {age} 智能调整难度",
     "aiRecommendTitle": "小茜推荐",
-    "aiOfflineTip": "小茜暂时连不上，这是离线建议"
+    "aiOfflineTip": "小茜暂时连不上，这是离线建议",
+    "quickTitle": "常用入口",
+    "allParks": "去乐园地图"
+  },
+  "hall": {
+    "subtitle": "选一个乐园，马上开始玩",
+    "tip": "找不到想玩的？问问右下角的小伙伴吧～"
   },
   "pet": {
     "pageTitle": "3D 羊毛毡猫咪养育大本营",
@@ -2132,6 +2138,11 @@
     "judgeCorrect": "判断正确！太棒了！"
   },
   "today": {
+    "skipSection": "跳过这节",
+    "skipHint": "这节先不学也没关系，之后在地图上点一下就能回来学～",
+    "comeBackLater": "可回来学",
+    "backToToday": "回到今天这一节（第 {n} 关）",
+    "replayTip": "🔁 学过的关卡可以点回去重玩 · 不想学的这节也能点「跳过这节」先跳过",
     "subtitle": "跟着课程一步步学，每天进步一点点～",
     "aboutMinutes": "约 {count} 分钟",
     "toReview": "{count} 个要复习",
@@ -2998,6 +3009,7 @@
     "saved": "已收藏"
   },
   "growth": {
+    "undoHint": "已兑换贴纸，点撤销退回星星",
     "title": "成长博物馆",
     "subtitle": "看看你一路走来的闪亮成就！",
     "stars": "累计星星",
@@ -4558,7 +4570,9 @@
   "homeHeader": {
     "stars": "星星",
     "streak": "连续打卡",
-    "badges": "徽章"
+    "badges": "徽章",
+    "freezeCount": "还有 {n} 张连胜保护卡",
+    "protectedToast": "🛡️ 连胜保护卡帮你保住了连续天数！"
   },
   "generatingOverlay": {
     "hint1": "小茜正在想故事…",

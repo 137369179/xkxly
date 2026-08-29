@@ -95,6 +95,10 @@ export function App() {
   }, []);
 
   useEffect(() => {
+    // R163：每日打卡入口（同日幂等）。迁移时此调用随 usePageLifecycle 一并丢失，
+    // 导致 streak 恒为 0 —— 在此恢复，并让 streakProtection 安全网真正生效。
+    useStore.getState().checkIn();
+
     // P1-2：多档案启动迁移 —— 首次把当前进度转为「宝贝」档案，老数据零丢失；
     // 之后每次启动把运行时最新进度同步回 active 仓库，保证两份持久化一致。
     useProfilesStore.getState().ensureInit();
@@ -175,7 +179,7 @@ export function App() {
 
   return (
     <div
-        className="min-h-screen bg-gradient-to-br from-[#FFF0F4] via-[#FFE4EF] to-[#F2EAFD] selection:bg-pink-200"
+        className="min-h-screen bg-gradient-to-br from-[#FFF0F6] via-[#FFE4EF] to-[#F2EAFD] selection:bg-pink-200"
         data-eyecare={eyeCareMode ? 'on' : 'off'}
         data-motion={eyeCareMode ? 'density-low' : undefined}
       >

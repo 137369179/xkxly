@@ -244,6 +244,12 @@ export interface Progress {
   unlockedLevel: number;
   lastVisit: string;
   streak: number;
+  /** 连胜保护卡剩余数（R163 streakProtection 挂载；断签时自动消耗续接，封顶 5） */
+  streakFreezes?: number;
+  /** 历史最长连续天数（streakProtection 维护，断签不清零） */
+  longestStreak?: number;
+  /** 最近一次打卡事件（'protected' 时 UI 提示保护卡生效；读取后由 UI 清除） */
+  streakEvent?: 'protected';
   mastery: Record<string, MasteryItem>;
   /** 每日成长快照（最多保留约 4 个月），用于家长报告趋势曲线 */
   growth: GrowthSnapshot[];

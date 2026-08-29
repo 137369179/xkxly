@@ -94,6 +94,10 @@ export interface StoreState {
   recordLogic: (correct: boolean, skill?: string) => void;
   completeLevel: (levelId: number, stars: number) => void;
   checkIn: () => void;
+  /** R163：发放连胜保护卡（默认 +1，封顶 5；每日任务等奖励节点调用） */
+  grantStreakFreeze: (count?: number) => void;
+  /** R163：清除一次性打卡事件标记（UI 提示消费后调用） */
+  clearStreakEvent: () => void;
   consumeBadge: () => void;
   resetAll: () => void;
 
@@ -116,6 +120,8 @@ export interface StoreState {
   markTraced: (id: string) => void;
   /** 兑换贴纸 */
   buySticker: (id: string, cost: number) => boolean;
+  /** 撤销贴纸兑换（可撤销容错）：移除贴纸并退回已消耗的星星 */
+  refundSticker: (id: string, cost: number) => boolean;
   /** 通用扣星（余额 = stars - spent）。供星星统一消费层做支出双写；余额不足时返回 false */
   spendStars: (cost: number) => boolean;
   /** 清空错题本 */
@@ -315,6 +321,8 @@ export const useBadges = () => useStore((s) => s.progress.badges);
 export const useBadgeCount = () => useStore((s) => s.progress.badges.length);
 /** 当前连胜天数 */
 export const useStreak = () => useStore((s) => s.progress.streak);
+/** 连胜保护卡剩余数（R163） */
+export const useStreakFreezes = () => useStore((s) => s.progress.streakFreezes ?? 0);
 /** 已解锁关卡 */
 export const useUnlockedLevel = () => useStore((s) => s.progress.unlockedLevel);
 /** 关卡星星映射 */

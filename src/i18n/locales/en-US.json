@@ -1541,7 +1541,13 @@
     "heroTodayTodo": "{count} tasks waiting for you today",
     "heroAgeHint": "Difficulty auto-adjusted for {age}",
     "aiRecommendTitle": "Xiao Zhi Recommends",
-    "aiOfflineTip": "Xiao Zhi is offline. Here are offline suggestions."
+    "aiOfflineTip": "Xiao Zhi is offline. Here are offline suggestions.",
+    "quickTitle": "Quick access",
+    "allParks": "Go to Park Map"
+  },
+  "hall": {
+    "subtitle": "Pick a park and start playing",
+    "tip": "Can't find it? Ask the little buddy in the corner!"
   },
   "pet": {
     "pageTitle": "3D Felt Cat House 🐱",
@@ -2132,6 +2138,11 @@
     "judgeCorrect": "Correct! Well done!"
   },
   "today": {
+    "skipSection": "Skip this section",
+    "skipHint": "It's OK to skip this one — tap it on the map anytime to come back",
+    "comeBackLater": "Come back later",
+    "backToToday": "Back to today's section (level {n})",
+    "replayTip": "🔁 Tap any cleared level to replay · Not in the mood? Use \"Skip this section\"",
     "subtitle": "Follow the lessons step by step and improve a little every day~",
     "aboutMinutes": "About {count} min",
     "toReview": "{count} to review",
@@ -2998,6 +3009,7 @@
     "saved": "Saved"
   },
   "growth": {
+    "undoHint": "Sticker added — tap Undo to refund stars",
     "title": "Growth Museum",
     "subtitle": "Look how far you've come!",
     "stars": "Total Stars",
@@ -4558,7 +4570,9 @@
   "homeHeader": {
     "stars": "Stars",
     "streak": "Day Streak",
-    "badges": "Badges"
+    "badges": "Badges",
+    "freezeCount": "Streak freezes: {n}",
+    "protectedToast": "🛡️ A streak freeze kept your streak alive!"
   },
   "generatingOverlay": {
     "hint1": "Little Zhi is dreaming up a story…",

@@ -163,6 +163,8 @@ const OPTIONAL_KEYS: Record<string, unknown> = {
   ownedEquipment: [],
   equippedItems: {},
   bossRecords: {},
+  streakFreezes: 0,
+  longestStreak: 0,
 };
 
 /** 按模板形状对值做类型对齐 + 数值钳位 + 条数封顶 */
