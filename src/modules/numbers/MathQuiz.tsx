@@ -20,6 +20,7 @@ import { GentleFeedback } from "@/components/gamification/GentleFeedback";
 import { ReducedMotionToggle } from "@/components/gamification/ReducedMotionToggle";
 import { praiseByScene, encourageByScene } from "@/lib/praise";
 import { StarSettlementCard } from "@/components/gamification/StarSettlementCard";
+import { masteryNoteFor, newlyMasteredThisWeek } from "@/game/masteryNarrative";
 import { earnStars, type EarnResult } from "@/game/rewardEconomy";
 import { speak } from "@/lib/speech";
 
@@ -251,7 +252,16 @@ export function MathQuiz() {
         <MistakeBookPanel progress={progress} onReview={() => navigate('wrongbook')} />
         <ComboMeter count={combo} />
         {/* 展示**实际入账**的星数，与成长荣誉馆同一份数据 */}
-        {settlement && <StarSettlementCard result={settlement} moduleName="数学" />}
+        {settlement && (
+          <StarSettlementCard
+            result={settlement}
+            moduleName="数学"
+            masteryNote={masteryNoteFor(
+              newlyMasteredThisWeek(progress.mastery, ['math']),
+              '个数学本领',
+            )}
+          />
+        )}
         {feedback && <GentleFeedback correct={feedback.correct} message={feedback.msg} />}
         <RestReminder />
         <ReducedMotionToggle />

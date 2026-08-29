@@ -17,6 +17,7 @@ import { ReducedMotionToggle } from '@/components/gamification/ReducedMotionTogg
 import { useAdaptiveDifficulty, type DifficultyLevel } from '@/game';
 import { MistakeBookPanel } from '@/components/gamification/MistakeBookPanel';
 import { StarSettlementCard } from '@/components/gamification/StarSettlementCard';
+import { masteryNoteFor, newlyMasteredThisWeek } from '@/game/masteryNarrative';
 import { earnStars, type EarnResult } from '@/game/rewardEconomy';
 import { praiseByScene, encourageByScene } from '@/lib/praise';
 
@@ -232,7 +233,16 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
           })}
         </p>
 
-        {settlement && <StarSettlementCard result={settlement} moduleName="汉字" />}
+        {settlement && (
+          <StarSettlementCard
+            result={settlement}
+            moduleName="汉字"
+            masteryNote={masteryNoteFor(
+              newlyMasteredThisWeek(progress.mastery, ['hanzi']),
+              '个汉字',
+            )}
+          />
+        )}
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
           {currentHanzi && onSelectWriting && (

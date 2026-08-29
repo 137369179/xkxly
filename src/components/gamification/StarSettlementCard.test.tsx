@@ -5,7 +5,10 @@ import { createRoot } from 'react-dom/client';
 import { StarSettlementCard } from './StarSettlementCard';
 import { earnStars, type EarnResult, type SessionOutcome } from '@/game/rewardEconomy';
 
-function renderCard(result: EarnResult, extra: { moduleName?: string; reducedMotion?: boolean } = {}) {
+function renderCard(
+  result: EarnResult,
+  extra: { moduleName?: string; reducedMotion?: boolean; masteryNote?: string | null } = {},
+) {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
@@ -93,6 +96,33 @@ describe('StarSettlementCard · 星星结算卡', () => {
     const stillItem = still.container.querySelector<HTMLElement>('.ssc-item');
     expect(animatedItem?.style.animation).toBeTruthy();
     expect(stillItem?.style.animation).toBe('');
+  });
+
+  it('R164 掌握回路：传入 masteryNote 时渲染能力叙事句', () => {
+    const result = earnStars({ module: 'hanzi', total: 5, correct: 5, bestCombo: 5 });
+    const { container, text } = renderCard(result, {
+      masteryNote: '这周你新学会了 3 个汉字，这些本领已经是你自己的啦！',
+    });
+    expect(container.querySelector('.ssc-mastery-note')).not.toBeNull();
+    expect(text()).toContain('新学会了 3 个汉字');
+  });
+
+  it('R164 上限触顶时 masteryNote 仍然渲染（能力叙事不依赖星星是否入账）', () => {
+    const result = earnStars(
+      { module: 'hanzi', total: 5, correct: 5, bestCombo: 5 },
+      { earnedToday: 30, dailyCap: 30 },
+    );
+    expect(result.granted).toBe(0);
+    const { container } = renderCard(result, { masteryNote: '这周你新学会了 2 个汉字' });
+    expect(container.querySelector('.ssc-mastery-note')).not.toBeNull();
+  });
+
+  it('R164 未传 / 传 null 时不渲染叙事节点（宁缺毋滥）', () => {
+    const result = earnStars({ module: 'hanzi', total: 5, correct: 5 });
+    expect(renderCard(result).container.querySelector('.ssc-mastery-note')).toBeNull();
+    expect(
+      renderCard(result, { masteryNote: null }).container.querySelector('.ssc-mastery-note'),
+    ).toBeNull();
   });
 
   it('确定性：同一份 EarnResult 渲染结果完全一致（可快照、可复盘）', () => {

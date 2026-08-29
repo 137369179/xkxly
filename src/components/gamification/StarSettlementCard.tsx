@@ -43,6 +43,11 @@ interface StarSettlementCardProps {
   result: EarnResult;
   /** 模块中文名，用于无障碍标签（如「汉字」） */
   moduleName?: string;
+  /**
+   * R164 掌握回路：能力叙事句（如「这周你新学会了 3 个汉字…」）。
+   * 由 masteryNarrative 纯函数生成，本组件只呈现不计算；null/缺省时不渲染。
+   */
+  masteryNote?: string | null;
   /** 减弱动画：关闭逐项弹跳，仅保留静态呈现 */
   reducedMotion?: boolean;
   className?: string;
@@ -61,6 +66,7 @@ interface StarSettlementCardProps {
 export function StarSettlementCard({
   result,
   moduleName,
+  masteryNote,
   reducedMotion = false,
   className,
 }: StarSettlementCardProps) {
@@ -120,6 +126,34 @@ export function StarSettlementCard({
         </p>
       )}
 
+      {/* R164 掌握回路：能力叙事优先于星星明细 —— 上限触顶时（granted=0）
+          这句话是本次结算唯一的成就凭证，所以放在明细之前、两种状态都渲染。 */}
+      {masteryNote && (
+        <p
+          className="ssc-mastery-note"
+          data-animate="true"
+          style={{
+            marginTop: 10,
+            padding: '9px 13px',
+            borderRadius: 14,
+            background: 'rgba(168,216,240,.28)',
+            fontSize: 15,
+            fontWeight: 800,
+            color: '#16607f',
+            lineHeight: 1.55,
+            textAlign: 'center',
+            animation: reducedMotion
+              ? undefined
+              : 'sscPop 280ms ease 60ms both',
+          }}
+        >
+          <span aria-hidden="true" style={{ marginRight: 6 }}>
+            🌱
+          </span>
+          {masteryNote}
+        </p>
+      )}
+
       {/* 逐项明细：让「我为什么有这些星星」可被解释（Liao 2026 仪表盘可信度前提） */}
       {items.length > 0 && (
         <ul
@@ -171,7 +205,7 @@ export function StarSettlementCard({
       {capped && (
         <p
           className="ssc-cap-note mt-2 text-center"
-          style={{ fontSize: 12, fontWeight: 700, color: '#9b8fc7' }}
+          style={{ fontSize: 12, fontWeight: 700, color: '#ab81ff' }}
         >
           今天的星星口袋已经装得很满啦，这节课还有 {result.capped} 颗留给明天 🌙
         </p>

@@ -23,6 +23,7 @@ import { RestReminder } from '@/components/gamification/RestReminder';
 import { ReducedMotionToggle } from '@/components/gamification/ReducedMotionToggle';
 import { MistakeBookPanel } from '@/components/gamification/MistakeBookPanel';
 import { StarSettlementCard } from '@/components/gamification/StarSettlementCard';
+import { masteryNoteFor, newlyMasteredThisWeek } from '@/game/masteryNarrative';
 import { praiseByScene, encourageByScene } from '@/lib/praise';
 import { earnStars, type EarnResult } from '@/game/rewardEconomy';
 import { speak } from '@/lib/speech';
@@ -203,7 +204,16 @@ export function WordMatch() {
           </div>
         </div>
         {/* 展示**实际入账**的星数，与成长荣誉馆同一份数据 */}
-        {settlement && <StarSettlementCard result={settlement} moduleName="单词" />}
+        {settlement && (
+          <StarSettlementCard
+            result={settlement}
+            moduleName="单词"
+            masteryNote={masteryNoteFor(
+              newlyMasteredThisWeek(progress.mastery, ['word']),
+              '个单词',
+            )}
+          />
+        )}
         <CandyButton
           tone="green"
           size="sm"
