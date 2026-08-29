@@ -102,7 +102,7 @@ export function StorybookCreator({ onCreated }: StorybookCreatorProps) {
             onClick={handleGenerate}
             className={`px-8 py-3 rounded-full text-lg font-bold transition-colors ${
               style
-                ? 'bg-purple-400 text-white shadow-lg hover:bg-purple-500'
+                ? 'bg-purple-400 text-candy-purple-on shadow-lg hover:bg-purple-500'
                 : 'bg-gray-200 text-gray-400'
             }`}
           >

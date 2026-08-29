@@ -25,7 +25,7 @@ import {
   persistLocale,
   i18nConfig,
 } from './config';
-import { toTraditional } from './traditional';
+import { toTraditional, maybePrewarmCn2t } from './traditional';
 
 // 导入翻译包
 // 默认语言(zh-CN)及其补丁内联进主包，保证首屏即可用；
@@ -182,9 +182,12 @@ export function useTranslation(): UseTranslationReturn {
   }, []);
 
   // P1-5 i18n 分包：进入英文才按需加载 en-US 词典；加载完成后刷新 t()
+  // 繁体同理：仅当「可能需要繁体」时才于空闲期预热 opencc-js（约 506KB gzip），
+  // 使繁体用户切换时零等待，简体/英文用户零成本。
   useEffect(() => {
     const unsub = subscribeEnLoad(() => setEnTick((v) => v + 1));
     if (locale === 'en-US') void loadEnUs();
+    maybePrewarmCn2t(locale);
     return unsub;
   }, [locale]);
 

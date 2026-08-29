@@ -38,12 +38,12 @@ export function AiAvatar({
         <defs>
           <linearGradient id="zhi-body" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#c2a8ef" />
-            <stop offset="100%" stopColor="#8b6ef0" />
+            <stop offset="100%" stopColor="#8f5bff" />
           </linearGradient>
         </defs>
         {/* 天线 */}
-        <line x1="24" y1="4" x2="24" y2="11" stroke="#8b6ef0" strokeWidth="2.6" strokeLinecap="round" />
-        <circle cx="24" cy="4" r="3.2" fill="#FFC93C" />
+        <line x1="24" y1="4" x2="24" y2="11" stroke="#8f5bff" strokeWidth="2.6" strokeLinecap="round" />
+        <circle cx="24" cy="4" r="3.2" fill="#FFC53D" />
         {/* 头 */}
         <rect x="6" y="10" width="36" height="30" rx="12" fill="url(#zhi-body)" />
         {/* 面屏 */}
@@ -71,15 +71,15 @@ export function AiAvatar({
           <path d="M20.5 30 q3.5 2.6 7 0" stroke="#ff8db0" strokeWidth="2" fill="none" strokeLinecap="round" />
         )}
         {/* 耳朵 */}
-        <rect x="2.5" y="20" width="4" height="10" rx="2" fill="#8b6ef0" />
-        <rect x="41.5" y="20" width="4" height="10" rx="2" fill="#8b6ef0" />
+        <rect x="2.5" y="20" width="4" height="10" rx="2" fill="#8f5bff" />
+        <rect x="41.5" y="20" width="4" height="10" rx="2" fill="#8f5bff" />
       </svg>
     </motion.span>
   );
 }
 
 /** 思考中的三点动画 */
-export function AiDots({ color = '#8b6ef0' }: { color?: string }) {
+export function AiDots({ color = '#8f5bff' }: { color?: string }) {
   const { t } = useTranslation();
   return (
     <span className="inline-flex items-center gap-1" aria-label={t('aiAvatar.thinkingAria')}>

@@ -42,7 +42,7 @@ export function SoundMuteToggle({ className = '' }: { className?: string }) {
         className={`flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black shadow-sm transition-all border-2 ${
           muted
             ? 'border-slate-300 bg-slate-100 text-slate-400 hover:bg-slate-200'
-            : 'border-amber-300 bg-gradient-to-r from-amber-400 to-orange-400 text-white shadow-amber-200'
+            : 'border-amber-300 bg-gradient-to-r from-amber-400 to-orange-400 text-candy-orange-on shadow-amber-200'
         }`}
       >
         <span className="text-base">{muted ? '🔇' : '🔊'}</span>

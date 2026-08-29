@@ -11,22 +11,22 @@ import { shuffle } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
 
 const COLORS = [
-  { name: '红色', en: 'Red', hex: '#ff5c7a', emoji: '🔴', items: ['🍎苹果','🌹玫瑰','🚗消防车'] },
-  { name: '蓝色', en: 'Blue', hex: '#55aee0', emoji: '🔵', items: ['🌊大海','🦋蝴蝶','👖牛仔裤'] },
-  { name: '黄色', en: 'Yellow', hex: '#ffc93c', emoji: '🟡', items: ['☀️太阳','🍌香蕉','🌻向日葵'] },
-  { name: '绿色', en: 'Green', hex: '#5fd68b', emoji: '🟢', items: ['🌳大树','🍀四叶草','🐸青蛙'] },
-  { name: '橙色', en: 'Orange', hex: '#ff9f5a', emoji: '🟠', items: ['🍊橙子','🎃南瓜','🥕胡萝卜'] },
-  { name: '紫色', en: 'Purple', hex: '#8b6ef0', emoji: '🟣', items: ['🍇葡萄','🦄独角兽','💜爱心'] },
-  { name: '粉色', en: 'Pink', hex: '#ff6b96', emoji: '💗', items: ['🐷小猪','🌸樱花','🎀蝴蝶结'] },
+  { name: '红色', en: 'Red', hex: '#ff5c8a', emoji: '🔴', items: ['🍎苹果','🌹玫瑰','🚗消防车'] },
+  { name: '蓝色', en: 'Blue', hex: '#3d9bff', emoji: '🔵', items: ['🌊大海','🦋蝴蝶','👖牛仔裤'] },
+  { name: '黄色', en: 'Yellow', hex: '#ffc53d', emoji: '🟡', items: ['☀️太阳','🍌香蕉','🌻向日葵'] },
+  { name: '绿色', en: 'Green', hex: '#62cc8a', emoji: '🟢', items: ['🌳大树','🍀四叶草','🐸青蛙'] },
+  { name: '橙色', en: 'Orange', hex: '#ff9f2e', emoji: '🟠', items: ['🍊橙子','🎃南瓜','🥕胡萝卜'] },
+  { name: '紫色', en: 'Purple', hex: '#8f5bff', emoji: '🟣', items: ['🍇葡萄','🦄独角兽','💜爱心'] },
+  { name: '粉色', en: 'Pink', hex: '#ff5c8a', emoji: '💗', items: ['🐷小猪','🌸樱花','🎀蝴蝶结'] },
   { name: '棕色', en: 'Brown', hex: '#92400E', emoji: '🟤', items: ['🐻小熊','🍫巧克力','🌰板栗'] },
   { name: '白色', en: 'White', hex: '#fff9fa', emoji: '⚪', items: ['☁️白云','🐑绵羊','🥛牛奶'] },
-  { name: '黑色', en: 'Black', hex: '#5c2e3d', emoji: '⚫', items: ['🐼熊猫','🖤黑猫','🌑夜晚'] },
+  { name: '黑色', en: 'Black', hex: '#4a2b1f', emoji: '⚫', items: ['🐼熊猫','🖤黑猫','🌑夜晚'] },
 ];
 
 function ColorExploreImpl() {
   const { t } = useTranslation();
   const [mode, setMode] = useState<'learn'|'quiz'>('learn');
-  const [current, setCurrent] = useState(() => COLORS[0] ?? { name: '红色', en: 'Red', hex: '#ff5c7a', emoji: '🔴', items: ['🍎苹果','🌹玫瑰','🚗消防车'] });
+  const [current, setCurrent] = useState(() => COLORS[0] ?? { name: '红色', en: 'Red', hex: '#ff5c8a', emoji: '🔴', items: ['🍎苹果','🌹玫瑰','🚗消防车'] });
   const [options, setOptions] = useState(() => shuffle(COLORS).slice(0,4));
   const [feedback, setFeedback] = useState('');
   const [score, setScore] = useState(0);

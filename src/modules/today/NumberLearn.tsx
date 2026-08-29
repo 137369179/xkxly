@@ -60,6 +60,7 @@ export function NumberLearn({ nums, onDone }: { nums: string[]; onDone?: () => v
       label: '数',
       emoji: '🍎',
       gate: true,
+      autoAdvanceMs: 1400,
       render: (api) => (
         <QuizCard
           question={makeCountQuestion(1)}
@@ -80,6 +81,7 @@ export function NumberLearn({ nums, onDone }: { nums: string[]; onDone?: () => v
       label: '写',
       emoji: '✍️',
       gate: true,
+      autoAdvanceMs: 1400,
       render: (api) => (
         <div className="py-2">
           <TraceCanvas
@@ -100,6 +102,7 @@ export function NumberLearn({ nums, onDone }: { nums: string[]; onDone?: () => v
       label: '说',
       emoji: '🗣️',
       gate: true,
+      autoAdvanceMs: 1400,
       render: (api) => (
         <QuizCard
           question={makeNumberQuestion(1, first)}

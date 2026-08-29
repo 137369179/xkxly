@@ -17,6 +17,7 @@
  */
 import type { Progress } from '@/types';
 import { createInitialProgress } from '@/lib/progress';
+import { safeStorage } from '@/lib/safeStorage';
 
 /** 备份文件标识 */
 const BACKUP_MAGIC = 'baby-learning-park';
@@ -66,7 +67,10 @@ function isPlainObj(v: unknown): v is Record<string, unknown> {
 /** 获取（或首次生成）设备本地签名密钥 */
 async function getSigningKey(): Promise<CryptoKey | null> {
   if (typeof crypto === 'undefined' || !crypto.subtle) return null;
-  const existing = localStorage.getItem(BACKUP_SECRET_KEY);
+  // P1-2 修复：改用 safeStorage（三级降级：localStorage → sessionStorage → Memory），
+  // 防止 Safari 隐私模式 / 家长管控 WebView 下裸 localStorage 调用抛 SecurityError 导致
+  // 整个导入/导出功能崩溃。
+  const existing = safeStorage.getItem(BACKUP_SECRET_KEY);
   if (existing) {
     try {
       const bytes = Uint8Array.from(atob(existing), (c) => c.charCodeAt(0));
@@ -84,7 +88,7 @@ async function getSigningKey(): Promise<CryptoKey | null> {
     }
   }
   const bytes = crypto.getRandomValues(new Uint8Array(32));
-  localStorage.setItem(
+  safeStorage.setItem(
     BACKUP_SECRET_KEY,
     btoa(String.fromCharCode(...Array.from(bytes))),
   );

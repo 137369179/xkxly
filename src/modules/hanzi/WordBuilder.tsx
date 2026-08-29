@@ -322,7 +322,7 @@ export function WordBuilder({ initialChar: _initialChar }: { initialChar?: strin
             }}
             className={`py-1.5 px-3.5 rounded-xl font-black text-xs transition-all flex items-center gap-1 border ${
               mode === 'fusion'
-                ? 'bg-emerald-600 text-white border-emerald-700 shadow-sm'
+                ? 'bg-emerald-600 text-candy-green-on border-emerald-700 shadow-sm'
                 : 'bg-white text-slate-700 border-slate-200 hover:border-emerald-300'
             }`}
           >
@@ -339,7 +339,7 @@ export function WordBuilder({ initialChar: _initialChar }: { initialChar?: strin
             }}
             className={`py-1.5 px-3.5 rounded-xl font-black text-xs transition-all flex items-center gap-1 border ${
               mode === 'words'
-                ? 'bg-amber-500 text-white border-amber-600 shadow-sm'
+                ? 'bg-amber-500 text-candy-orange-on border-amber-600 shadow-sm'
                 : 'bg-white text-slate-700 border-slate-200 hover:border-amber-300'
             }`}
           >
@@ -447,7 +447,7 @@ export function WordBuilder({ initialChar: _initialChar }: { initialChar?: strin
                   key={pos}
                   className={`h-20 w-20 rounded-2xl border-3 flex items-center justify-center text-4xl font-black shadow transition-all ${
                     char
-                      ? 'bg-amber-500 text-white border-amber-600 scale-105'
+                      ? 'bg-amber-500 text-candy-orange-on border-amber-600 scale-105'
                       : 'bg-white border-dashed border-amber-300 text-slate-300'
                   }`}
                 >

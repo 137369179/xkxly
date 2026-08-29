@@ -91,7 +91,7 @@ export function PetDiaryModal({
             onClick={() => { sfxTap(); setViewMode('diary'); }}
             className={`flex-1 rounded-2xl py-2 text-xs font-black transition-all border-2 ${
               viewMode === 'diary'
-                ? 'bg-amber-500 text-white border-amber-500 shadow-sm'
+                ? 'bg-amber-500 text-candy-orange-on border-amber-500 shadow-sm'
                 : 'bg-white text-amber-800 border-amber-200'
             }`}
           >
@@ -102,7 +102,7 @@ export function PetDiaryModal({
             onClick={() => { sfxTap(); setViewMode('postcard'); }}
             className={`flex-1 rounded-2xl py-2 text-xs font-black transition-all border-2 ${
               viewMode === 'postcard'
-                ? 'bg-amber-500 text-white border-amber-500 shadow-sm'
+                ? 'bg-amber-500 text-candy-orange-on border-amber-500 shadow-sm'
                 : 'bg-white text-amber-800 border-amber-200'
             }`}
           >

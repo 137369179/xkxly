@@ -89,6 +89,8 @@ function SectionRunner({
         key={q.id}
         question={q}
         autoSpeak
+        // 答对 1200ms 自动进下一题（答错不自动推进）；与 DailySrsMission 先例一致
+        autoNextMs={1200}
         onAnswer={(correct) => {
           record(q, correct);
           struggle.record(correct);
@@ -275,6 +277,9 @@ function collectTodaySkills(sections: LessonSection[]): string[] {
   return skills;
 }
 
+/** 空跳过集合：模块级常量，保证引用稳定（换天 / 重新开始 时复用） */
+const NO_SKIPS: ReadonlySet<number> = new Set<number>();
+
 /* ========================================================================
  * 主页面
  * ===================================================================== */
@@ -312,17 +317,94 @@ export default function TodayPage() {
       ? Math.min(lessonStep, plan.sections.length)
       : 0;
 
+  /* ——————————————————————————————————————————————————————————————
+   * 自由选节 + 跳过本节（儿童化：学过的节随时点回去重学，不想学的可以先跳过）
+   * - maxStep：主线游标（store 的 lessonStep），即「已解锁到的最高节」，不可越过；
+   * - cur：当前正在学的节，可自由回到 cur ≤ maxStep 的任意一节，
+   *        但永远到不了从未解锁过的节（保留 maxReached 约束，防跳关刷星）。
+   * ——————————————————————————————————————————————————————— */
+  const lastIndex = plan.sections.length - 1;
+  // 夹到最后一节：历史遗留的 lessonStep 可能大于今天的节数（换天/课程变短），
+  // 不夹会导致最后一节学完既不推进也不结算，把孩子卡死。
+  const maxStep = Math.min(step, lastIndex);
+  const [focus, setFocus] = useState<number | null>(null);
+  const cur = focus !== null && focus >= 0 && focus <= maxStep ? focus : maxStep;
+
+  // 当天被跳过的节：只存组件内 state（按天隔离，换天自然失效），不写入 store
+  const [skipState, setSkipState] = useState<{ day: string; set: ReadonlySet<number> }>(() => ({
+    day: today,
+    set: NO_SKIPS,
+  }));
+  const skipped = skipState.day === today ? skipState.set : NO_SKIPS;
+
+  // 跳过后的短暂提示：儿童产品不弹强确认，只用温和的 aria-live 提示 + 可撤销（点回来即可）
+  const [skipHint, setSkipHint] = useState('');
+  const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showSkipHint = useCallback((text: string) => {
+    setSkipHint(text);
+    if (hintTimer.current) clearTimeout(hintTimer.current);
+    hintTimer.current = setTimeout(() => {
+      hintTimer.current = null;
+      setSkipHint('');
+    }, 2800);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (hintTimer.current) clearTimeout(hintTimer.current);
+    },
+    [],
+  );
+
+  /**
+   * 推进的唯一出口（完成一节 / 跳过一节 都走这里）：
+   * 只有走在主线游标上（cur === maxStep）才推进主线进度；
+   * 回去重学旧节完成时不改变主线进度，只是把视角交还主线。
+   */
   const handleDone = useCallback(() => {
-    const ns = step + 1;
-    if (ns >= plan.sections.length) {
-      finishLesson(3);
-      addFish(2);
-      sfxStar();
-      celebrateBig();
-    } else {
-      setLessonStep(ns);
+    const ns = cur + 1;
+    if (ns > maxStep) {
+      if (ns >= plan.sections.length) {
+        finishLesson(3);
+        addFish(2);
+        sfxStar();
+        celebrateBig();
+      } else {
+        setLessonStep(ns);
+      }
     }
-  }, [step, plan, finishLesson, addFish, setLessonStep]);
+    setFocus(null);
+    // 学完就摘掉「已跳过」标记
+    setSkipState((prev) => {
+      if (!prev.set.has(cur)) return prev;
+      const next = new Set(prev.set);
+      next.delete(cur);
+      return { day: prev.day, set: next };
+    });
+  }, [cur, maxStep, plan.sections.length, finishLesson, addFish, setLessonStep]);
+
+  /** 跳过当前这一节：先走 handleDone 统一推进，再打上「可回来学」标记 */
+  const handleSkip = useCallback(() => {
+    handleDone();
+    setSkipState((prev) => {
+      const next = new Set(prev.day === today ? prev.set : NO_SKIPS);
+      next.add(cur);
+      return { day: today, set: next };
+    });
+    showSkipHint(`已跳过「${plan.sections[cur]?.title ?? ''}」，下次还能回来学～`);
+  }, [handleDone, cur, today, plan.sections, showSkipHint]);
+
+  /** 关卡地图上自由选节（只能点已解锁过的节） */
+  const jumpTo = useCallback(
+    (i: number) => {
+      if (i < 0 || i > maxStep) return;
+      triggerHaptic(12);
+      sfxTap();
+      setFocus(i);
+    },
+    [maxStep],
+  );
 
   // 当天已学过的知识点（综合小挑战回扣用）
   const todaySkills = useMemo(
@@ -333,9 +415,13 @@ export default function TodayPage() {
   const restart = () => {
     triggerHaptic(20);
     setLessonStep(0);
+    setFocus(null);
+    setSkipState({ day: today, set: NO_SKIPS });
   };
 
-  const active: LessonSection | undefined = plan.sections[step];
+  const active: LessonSection | undefined = plan.sections[cur];
+  /** 只有「主线当前节」可跳过；最后一节必须学完才能开宝箱，避免连跳套奖励 */
+  const canSkip = cur === maxStep && cur < lastIndex;
 
   // 全局键盘快捷键响应 (Esc 返回主页)
   useEffect(() => {
@@ -362,9 +448,13 @@ export default function TodayPage() {
       <PageHeader emoji="📅" title={t('today.title')} subtitle={t('today.subtitle')} tone="purple" />
 
       {/* 快捷操作提示条 */}
-      <div className="text-center">
+      <div className="space-y-1.5 text-center">
         <span className="inline-block text-xs text-purple-900 font-bold bg-purple-50/90 px-3 py-1 rounded-xl border border-purple-200">
           ⌨️ 键盘快捷操作：点击或按对应题目按键闯关 · Esc 返回乐园主页
+        </span>
+        <br />
+        <span className="inline-block text-xs text-sky-900 font-bold bg-sky-50/90 px-3 py-1 rounded-xl border border-sky-200">
+          {t('today.replayTip')}
         </span>
       </div>
 
@@ -432,7 +522,20 @@ export default function TodayPage() {
             </div>
 
             {plan.sections.map((sec, i) => {
-              const state = i < step ? 'done' : i === step ? 'active' : 'locked';
+              const isSkipped = skipped.has(i);
+              // done  = 已通关；skipped = 被跳过（可回来学）；next = 主线下一节（孩子正回头重学时）
+              const state: 'active' | 'done' | 'skipped' | 'next' | 'locked' =
+                i === cur
+                  ? 'active'
+                  : i > maxStep
+                    ? 'locked'
+                    : isSkipped
+                      ? 'skipped'
+                      : i < maxStep
+                        ? 'done'
+                        : 'next';
+              // 已解锁过的节都能自由点回去重学，只有从未到达过的节才锁住
+              const clickable = state !== 'locked' && state !== 'active';
               return (
 
                 <div key={sec.id} className="relative flex items-center gap-3">
@@ -442,39 +545,60 @@ export default function TodayPage() {
                   )}
 
                   <button
-                    disabled={state !== 'active'}
+                    disabled={!clickable}
+                    aria-current={state === 'active' ? 'step' : undefined}
                     onClick={() => {
-                      if (state === 'active') sfxTap();
+                      if (clickable) jumpTo(i);
                     }}
                     className={cn(
                       'relative z-10 no-select flex w-full items-center gap-3.5 rounded-[1.8rem] px-4 py-3.5 text-left shadow-fluffy transition-all border-3',
                       state === 'active' && 'ring-4 ring-pink-400/60 scale-[1.02] border-pink-400 bg-white',
-                      state === 'done' && 'border-emerald-300 bg-emerald-50/90',
+                      state === 'done' && 'border-emerald-300 bg-emerald-50/90 hover:border-emerald-400 active:scale-[0.99]',
+                      state === 'skipped' && 'border-sky-300 bg-sky-50/80 opacity-80 hover:opacity-100 active:scale-[0.99]',
+                      state === 'next' && 'border-indigo-200 bg-white hover:border-indigo-300 active:scale-[0.99]',
                       state === 'locked' && 'opacity-60 grayscale border-gray-200 bg-white/70',
                     )}
                   >
                     <span
                       className={cn(
                         'grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-2xl font-black shadow-md border-2 border-white',
-                        state === 'done' && 'bg-emerald-400 text-white',
-                        state === 'active' && 'bg-pink-500 text-white animate-bounce-soft',
+                        state === 'done' && 'bg-emerald-400 text-candy-green-on',
+                        state === 'active' && 'bg-pink-500 text-candy-pink-on animate-bounce-soft',
+                        state === 'skipped' && 'bg-sky-200 text-sky-700',
+                        state === 'next' && 'bg-indigo-100 text-indigo-500',
                         state === 'locked' && 'bg-gray-200 text-gray-400',
                       )}
                     >
-                      {state === 'done' ? '✅' : state === 'locked' ? '🔒' : sec.emoji}
+                      {state === 'done'
+                        ? '✅'
+                        : state === 'skipped'
+                          ? '⏭️'
+                          : state === 'locked'
+                            ? '🔒'
+                            : sec.emoji}
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-2">
                         <span className="rounded-full bg-pink-100 px-2 py-0.5 text-xs font-black text-pink-600">
                           {t('today.levelN', { count: i + 1 })}
                         </span>
+                        {isSkipped && (
+                          <span className="shrink-0 rounded-full bg-sky-100 px-2 py-0.5 text-xs font-black text-sky-700">
+                            {t('today.comeBackLater')}
+                          </span>
+                        )}
                         <span className="truncate text-base font-black text-ink">{sec.title}</span>
                       </span>
                       <span className="block truncate text-xs font-bold text-ink-soft mt-0.5">{sec.sub}</span>
                     </span>
                     {state === 'active' && (
-                      <span className="shrink-0 rounded-full bg-pink-500 px-3 py-1 text-xs font-black text-white shadow-sm">
-                        {t('today.startLevel')}
+                      <span className="shrink-0 rounded-full bg-pink-500 px-3 py-1 text-xs font-black text-candy-pink-on shadow-sm">
+                        {i < maxStep ? '重新玩 🔁' : t('today.startLevel')}
+                      </span>
+                    )}
+                    {state === 'next' && (
+                      <span className="shrink-0 rounded-full bg-indigo-400 px-3 py-1 text-xs font-black text-candy-blue-on shadow-sm">
+                        去这一节 👉
                       </span>
                     )}
                   </button>
@@ -501,7 +625,7 @@ export default function TodayPage() {
           {/* 当前节活动 */}
           <AnimatePresence mode="wait">
             <motion.div
-              key={active?.kind ?? 'none'}
+              key={`${cur}-${active?.kind ?? 'none'}`}
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -521,8 +645,66 @@ export default function TodayPage() {
               </Panel>
             </motion.div>
           </AnimatePresence>
+
+          {/* 跳过这节：与「继续」完全不同的位置（活动卡片下方独立一行）+ 冷静蓝虚线配色，防误触 */}
+          {canSkip && (
+            <div className="flex flex-col items-center gap-2 pt-1">
+              <CandyButton
+                tone="blue"
+                variant="soft"
+                size="lg"
+                icon={<span aria-hidden="true">⏭️</span>}
+                className="w-full max-w-md border-4 border-dashed border-sky-300"
+                onClick={handleSkip}
+              >
+                {t('today.skipSection')}
+              </CandyButton>
+              <p className="text-center text-xs font-bold text-sky-700/80">
+                {t('today.skipHint')}
+              </p>
+            </div>
+          )}
+
+          {/* 回头重学旧节时的回主线入口，避免孩子回不去今天这一节 */}
+          {cur < maxStep && (
+            <div className="pt-1 text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic(12);
+                  sfxTap();
+                  setFocus(null);
+                }}
+                className="no-select min-h-[44px] rounded-2xl border-2 border-dashed border-pink-300 bg-white/80 px-4 py-2 text-sm font-black text-pink-600"
+              >
+                ↩️ {t('today.backToToday', { n: maxStep + 1 })}
+              </button>
+            </div>
+          )}
         </>
       )}
+
+      {/* 跳过提示：无惩罚的温和反馈（常驻容器 + role=status，保证读屏能播报） */}
+      <div
+        role="status"
+        aria-live="polite"
+        className="pointer-events-none fixed inset-x-0 bottom-28 z-50 flex justify-center px-4 md:bottom-6"
+      >
+        <AnimatePresence>
+          {skipHint && (
+            <motion.div
+              key="skip-hint"
+              initial={{ opacity: 0, y: 16, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              transition={{ duration: 0.22 }}
+              className="max-w-[92vw] rounded-full border-4 border-white bg-sky-600 px-5 py-3 text-center text-sm font-black text-candy-blue-on shadow-fluffy"
+            >
+              ⏭️ {skipHint}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

@@ -130,7 +130,7 @@ export function CapsuleMachine({
         @media (prefers-reduced-motion: reduce) { .cm-stop { animation: none !important } }
       `}</style>
 
-      <h3 id={titleId} className="mb-3 text-lg font-extrabold text-[#8b6ef0]">
+      <h3 id={titleId} className="mb-3 text-lg font-extrabold text-[#8f5bff]">
         🎁 星星扭蛋机
       </h3>
 
@@ -186,22 +186,22 @@ export function CapsuleMachine({
           disabled={shaking}
           className={`mt-3 rounded-full px-7 py-2.5 text-base font-extrabold transition-transform active:translate-y-[2px]${
             affordable
-              ? ' bg-[#8b6ef0] text-white shadow-[0_4px_0_#6a4fd0]'
+              ? ' bg-[#8f5bff] text-white shadow-[0_4px_0_#6a4fd0]'
               : ' bg-[#ece7f7] text-[#b0a6cf] shadow-[0_4px_0_#ddd4f0]'
-          } ${shaking ? ' cursor-wait' : ''} focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-[#8b6ef0]/50`}
+          } ${shaking ? ' cursor-wait' : ''} focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-[#8f5bff]/50`}
           aria-label={affordable ? `花 ${cost} 颗星抽一次扭蛋` : `抽扭蛋需要 ${cost} 颗星，星星还不够`}
           data-testid="capsule-draw"
         >
           {shaking ? '摇一摇…' : `抽一次 · ${cost}⭐`}
         </button>
-        <p className="mt-1 text-xs font-bold text-[#9b8fc7] tabular-nums" data-testid="capsule-balance">
+        <p className="mt-1 text-xs font-bold text-[#ab81ff] tabular-nums" data-testid="capsule-balance">
           我的星星 {safeBalance}
         </p>
       </div>
 
       {/* 结果播报 */}
       <p
-        className="mb-3 min-h-[1.5rem] text-center text-sm font-extrabold text-[#8b6ef0]"
+        className="mb-3 min-h-[1.5rem] text-center text-sm font-extrabold text-[#8f5bff]"
         role="status"
         aria-live="polite"
         data-testid="capsule-notice"
@@ -225,7 +225,7 @@ export function CapsuleMachine({
                     style={{ background: style.ring }}
                     aria-hidden="true"
                   />
-                  <span className="text-[#4a3f8a]">{style.label}</span>
+                  <span className="text-[#4a20a0]">{style.label}</span>
                   <span className="text-[#b0a6cf]">（{row.total} 款）</span>
                 </span>
                 <span className="text-[#6f62b8] tabular-nums" data-testid={`capsule-odds-${row.tier}`}>
@@ -235,9 +235,9 @@ export function CapsuleMachine({
             );
           })}
         </ul>
-        <p className="mt-1.5 text-xs leading-relaxed font-bold text-[#9b8fc7]" data-testid="capsule-pity">
+        <p className="mt-1.5 text-xs leading-relaxed font-bold text-[#ab81ff]" data-testid="capsule-pity">
           连续 {pity} 次没抽到稀有啦 —— 再抽{' '}
-          <span className="text-[#8b6ef0] tabular-nums">{pityRemaining}</span> 次，一定会出稀有或以上！
+          <span className="text-[#8f5bff] tabular-nums">{pityRemaining}</span> 次，一定会出稀有或以上！
         </p>
       </div>
 
@@ -252,7 +252,7 @@ export function CapsuleMachine({
                 <span className="text-xs font-extrabold" style={{ color: TIER_STYLE[stat.tier].ring }}>
                   {TIER_STYLE[stat.tier].label}
                 </span>
-                <span className="text-xs font-bold text-[#9b8fc7] tabular-nums">
+                <span className="text-xs font-bold text-[#ab81ff] tabular-nums">
                   {stat.ownedCount} / {stat.total}
                 </span>
               </div>

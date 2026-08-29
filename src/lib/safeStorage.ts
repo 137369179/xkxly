@@ -13,7 +13,20 @@
  *   - 写入失败派发 'storage-error' 事件，供 UI 轻提示（不走 console 报错刷屏）。
  */
 
+const MAX_MEMORY_FALLBACK_ENTRIES = 200;
 const memoryFallback = new Map<string, string>();
+
+function setMemoryFallback(name: string, value: string): void {
+  // 若已存在先删除再设置，确保 Map 迭代顺序反映最新访问 (LRU)
+  if (memoryFallback.has(name)) {
+    memoryFallback.delete(name);
+  } else if (memoryFallback.size >= MAX_MEMORY_FALLBACK_ENTRIES) {
+    // 达到上限淘汰最旧条目，防止无限制内存膨胀
+    const oldest = memoryFallback.keys().next().value;
+    if (oldest !== undefined) memoryFallback.delete(oldest);
+  }
+  memoryFallback.set(name, value);
+}
 
 function storageAvailable(kind: 'local' | 'session'): Storage | null {
   try {
@@ -83,7 +96,7 @@ export function safeGetItem(name: string): string | null {
 }
 
 export function safeSetItem(name: string, value: string): void {
-  memoryFallback.set(name, value);
+  setMemoryFallback(name, value);
   try {
     const ls = getLocal();
     if (ls) {
@@ -145,7 +158,7 @@ export function safeSetJSON(name: string, value: unknown): void {
     safeSetItem(name, JSON.stringify(value));
   } catch {
     // JSON.stringify 极少见失败（循环引用等）；写内存兜底避免丢失引用
-    memoryFallback.set(name, String(value));
+    setMemoryFallback(name, String(value));
   }
 }
 

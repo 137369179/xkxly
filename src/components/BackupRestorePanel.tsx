@@ -92,7 +92,7 @@ export function BackupRestorePanel({ onRestoreComplete }: { onRestoreComplete: (
         <div className="mt-6 flex gap-3">
           <button
             onClick={handleExport}
-            className="flex-1 rounded-xl bg-candy-purple py-3 text-base font-extrabold text-white transition active:translate-y-[2px]"
+            className="flex-1 rounded-xl bg-candy-purple py-3 text-base font-extrabold text-candy-purple-on transition active:translate-y-[2px]"
           >
             导出当前进度
           </button>

@@ -309,7 +309,7 @@ export function TaikoRhythmGame() {
             }}
             className={`min-h-[44px] px-4 py-2 rounded-2xl font-black text-xs transition-all focus-visible:ring-4 focus-visible:ring-rose-300 focus:outline-none ${
               selectedSongIdx === idx
-                ? 'bg-rose-500 text-white shadow-md scale-105'
+                ? 'bg-rose-500 text-candy-pink-on shadow-md scale-105'
                 : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 active:scale-95'
             }`}
           >
@@ -319,7 +319,7 @@ export function TaikoRhythmGame() {
       </div>
 
       {/* 顶部歌曲选择与分数看板 */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-gradient-to-r from-red-500 via-rose-500 to-amber-500 text-white rounded-3xl shadow-xl border-2 border-red-300">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-gradient-to-r from-red-500 via-rose-500 to-amber-500 text-candy-orange-on rounded-3xl shadow-xl border-2 border-red-300">
         <div className="flex items-center gap-3">
           <span className="text-4xl">🥁</span>
           <div>
@@ -400,8 +400,8 @@ export function TaikoRhythmGame() {
                 style={{ left: `${leftPx}px` }}
                 className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-14 h-14 rounded-full border-3 flex items-center justify-center text-xl shadow-lg transition-transform ${
                   note.type === 'don'
-                    ? 'bg-rose-500 border-white text-white shadow-rose-500/50'
-                    : 'bg-sky-500 border-white text-white shadow-sky-500/50'
+                    ? 'bg-rose-500 border-white text-candy-pink-on shadow-rose-500/50'
+                    : 'bg-sky-500 border-white text-candy-blue-on shadow-sky-500/50'
                 }`}
               >
                 <span>{note.type === 'don' ? '🔴 咚' : '🔵 咔'}</span>
@@ -418,7 +418,7 @@ export function TaikoRhythmGame() {
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.94 }}
           onClick={() => handleHitDrum('don')}
-          className="h-28 bg-gradient-to-br from-rose-500 to-red-600 rounded-3xl border-4 border-rose-300 shadow-xl flex flex-col items-center justify-center text-white font-black active:shadow-inner cursor-pointer focus-visible:ring-4 focus-visible:ring-rose-300 focus:outline-none select-none"
+          className="h-28 bg-gradient-to-br from-rose-500 to-red-600 rounded-3xl border-4 border-rose-300 shadow-xl flex flex-col items-center justify-center text-candy-pink-on font-black active:shadow-inner cursor-pointer focus-visible:ring-4 focus-visible:ring-rose-300 focus:outline-none select-none"
         >
           <span className="text-4xl">🥁</span>
           <span className="text-lg mt-1">🔴 咚 (敲鼓心 · F/J)</span>
@@ -429,7 +429,7 @@ export function TaikoRhythmGame() {
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.94 }}
           onClick={() => handleHitDrum('ka')}
-          className="h-28 bg-gradient-to-br from-sky-500 to-blue-600 rounded-3xl border-4 border-sky-300 shadow-xl flex flex-col items-center justify-center text-white font-black active:shadow-inner cursor-pointer focus-visible:ring-4 focus-visible:ring-sky-300 focus:outline-none select-none"
+          className="h-28 bg-gradient-to-br from-sky-500 to-blue-600 rounded-3xl border-4 border-sky-300 shadow-xl flex flex-col items-center justify-center text-candy-blue-on font-black active:shadow-inner cursor-pointer focus-visible:ring-4 focus-visible:ring-sky-300 focus:outline-none select-none"
         >
           <span className="text-4xl">🥢</span>
           <span className="text-lg mt-1">🔵 咔 (敲鼓边 · D/K)</span>
@@ -451,10 +451,10 @@ export function TaikoRhythmGame() {
             节拍节奏感超强，你就是乐园的小小鼓手！
           </p>
           <div className="flex justify-center gap-4 pt-2">
-            <span className="px-4 py-1.5 bg-amber-500 text-white font-black text-xs rounded-xl shadow">
+            <span className="px-4 py-1.5 bg-amber-500 text-candy-orange-on font-black text-xs rounded-xl shadow">
               ⭐ +6 节奏星
             </span>
-            <span className="px-4 py-1.5 bg-orange-500 text-white font-black text-xs rounded-xl shadow">
+            <span className="px-4 py-1.5 bg-orange-500 text-candy-orange-on font-black text-xs rounded-xl shadow">
               🐟 +2 小鱼干
             </span>
           </div>

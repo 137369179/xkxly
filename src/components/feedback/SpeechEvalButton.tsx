@@ -43,6 +43,12 @@ interface SpeechEvalButtonProps {
   onResult?: (result: PronunciationResult) => void;
   /** 是否启用 AI 建议（默认开，需联网） */
   enableAiAdvice?: boolean;
+  /**
+   * 弱化得分展示（默认关）。
+   * 汉字跟读属于「认字」环节，得分大圆盘 + 撒花会让孩子追分数而不看字形，
+   * 开启后改为小号分数条、不放庆祝动效，只保留「读对/再试一次」的功能性反馈。
+   */
+  lowKey?: boolean;
   /** 自定义类名 */
   className?: string;
 }
@@ -65,6 +71,7 @@ export function SpeechEvalButton({
   onPass,
   onResult,
   enableAiAdvice = true,
+  lowKey = false,
   className = '',
 }: SpeechEvalButtonProps) {
   const { t: tr } = useTranslation();
@@ -129,7 +136,8 @@ export function SpeechEvalButton({
 
       if (evalResult.passed) {
         sfxWin();
-        celebrateBig();
+        // 弱化模式（汉字认字环节）不放撒花庆祝：跟读只是手段，字形才是主角
+        if (!lowKey) celebrateBig();
         void speak(lang === 'zh-CN' ? '读得太棒了！' : 'Great job!', { lang, rate: 0.85, module: 'praise' });
         onPass?.(evalResult);
       } else {
@@ -158,7 +166,7 @@ export function SpeechEvalButton({
         }
       }
     },
-    [targetText, lang, threshold, onPass, onResult, enableAiAdvice],
+    [targetText, lang, threshold, onPass, onResult, enableAiAdvice, lowKey],
   );
 
   /** 进入「大声朗读即通过」降级模式：检测到孩子开口即通过 */
@@ -184,7 +192,7 @@ export function SpeechEvalButton({
           setResult(fakeResult);
           onResult?.(fakeResult);
           sfxWin();
-          celebrateBig();
+          if (!lowKey) celebrateBig();
           onPass?.(fakeResult);
           setPhase('done');
         } else {
@@ -193,7 +201,7 @@ export function SpeechEvalButton({
         }
       });
     },
-    [targetText, lang, threshold, onPass, onResult, tr, clearListenTimeout, stopVoiceDetector],
+    [targetText, lang, threshold, onPass, onResult, tr, clearListenTimeout, stopVoiceDetector, lowKey],
   );
 
   const startListening = useCallback(() => {
@@ -400,9 +408,9 @@ export function SpeechEvalButton({
         disabled={isEvaluating}
         className={`no-select flex items-center gap-2 rounded-2xl px-6 py-3 text-base font-black transition-all active:scale-95 disabled:opacity-50 ${
           isListening
-            ? 'animate-pulse bg-rose-500 text-white shadow-lg shadow-rose-300'
+            ? 'animate-pulse bg-rose-500 text-candy-pink-on shadow-lg shadow-rose-300'
             : passed
-              ? 'bg-emerald-500 text-white shadow-md shadow-emerald-200'
+              ? 'bg-emerald-500 text-candy-green-on shadow-md shadow-emerald-200'
               : 'bg-pink-100 text-pink-700 hover:bg-pink-200 border-2 border-pink-300'
         }`}
       >
@@ -446,13 +454,21 @@ export function SpeechEvalButton({
             exit={{ opacity: 0 }}
             className="w-full space-y-3"
           >
-            {/* 得分条 */}
+            {/* 得分条（弱化模式下缩成小号胶囊，不再抢戏） */}
             <div className="flex items-center justify-center gap-3">
-              <div className={`flex h-16 w-16 flex-col items-center justify-center rounded-full text-white ${
-                passed ? 'bg-emerald-500' : 'bg-amber-500'
+              <div className={`flex flex-col items-center justify-center rounded-full text-white ${
+                lowKey
+                  ? `h-8 px-3 text-sm font-extrabold ${passed ? 'bg-emerald-400/80' : 'bg-amber-400/80'}`
+                  : `h-16 w-16 ${passed ? 'bg-emerald-500' : 'bg-amber-500'}`
               }`}>
-                <span className="text-2xl font-extrabold">{result.score}</span>
-                <span className="text-xs">{tr('tts.pts')}</span>
+                {lowKey ? (
+                  <span className="text-sm font-extrabold leading-none">{result.score}{tr('tts.pts')}</span>
+                ) : (
+                  <>
+                    <span className="text-2xl font-extrabold">{result.score}</span>
+                    <span className="text-xs">{tr('tts.pts')}</span>
+                  </>
+                )}
               </div>
               <div className="flex-1">
                 <p className="text-sm font-extrabold text-ink">{result.feedback}</p>

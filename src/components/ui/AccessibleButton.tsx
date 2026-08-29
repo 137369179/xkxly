@@ -13,11 +13,13 @@ interface AccessibleButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> 
   children?: React.ReactNode;
 }
 
+// 对比度铁律：主色按钮保持「白字」视觉惯例，改用更深一档底色达标
+// （blue-500 白字 3.7:1 不达 AA；blue-600 4.8:1 / red-600 4.8:1 达标）
 const variants = {
-  primary: 'bg-blue-500 text-white hover:bg-blue-600 focus:ring-blue-300',
+  primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-300',
   secondary: 'bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-300',
   ghost: 'bg-transparent text-gray-600 hover:bg-gray-100 focus:ring-gray-200',
-  danger: 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-300',
+  danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-300',
 };
 
 const sizes = {

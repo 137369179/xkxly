@@ -671,7 +671,7 @@ export function CityRescueSim() {
             <button
               type="button"
               onClick={handleQuickAction}
-              className="px-5 py-3 rounded-2xl font-black text-sm text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-md active:scale-95 transition-transform flex items-center gap-2"
+              className="px-5 py-3 rounded-2xl font-black text-sm text-candy-orange-on bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-md active:scale-95 transition-transform flex items-center gap-2"
             >
               <span>{currentStep.emoji}</span>
               <span>{currentStep.actionButtonText}</span>

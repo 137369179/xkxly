@@ -282,7 +282,7 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
             sfxTap();
             void speak(`${hanzi.c}，${hanzi.p}`).catch(() => {});
           }}
-          className="px-4 py-2 bg-candy-pink hover:bg-candy-pink-deep text-white font-black rounded-xl shadow-jelly active:scale-95 flex items-center gap-1.5 text-sm"
+          className="px-4 py-2 bg-candy-pink hover:bg-candy-pink-deep text-candy-pink-on hover:text-white font-black rounded-xl shadow-jelly active:scale-95 flex items-center gap-1.5 text-sm"
         >
           <span>🔊 {hanzi.p}</span>
         </button>
@@ -290,7 +290,7 @@ export function HanziStrokeWriter({ hanzi, onComplete, onClose }: HanziStrokeWri
         <button
           onClick={handlePlayStrokes}
           disabled={isAnimating}
-          className="px-4 py-2 bg-candy-blue hover:bg-candy-blue-deep text-white font-black rounded-xl shadow-jelly active:scale-95 flex items-center gap-1.5 text-sm disabled:opacity-50"
+          className="px-4 py-2 bg-candy-blue hover:bg-candy-blue-deep text-candy-blue-on hover:text-white font-black rounded-xl shadow-jelly active:scale-95 flex items-center gap-1.5 text-sm disabled:opacity-50"
         >
           <span>{t('hanziStrokeWriter.playStrokes')}</span>
         </button>

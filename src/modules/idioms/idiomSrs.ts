@@ -47,7 +47,7 @@ export function idrLog(stage: string, extra?: Record<string, unknown>): void {
   if (!isIdrDebug()) return;
   const t = ((typeof performance !== 'undefined' ? performance.now() : Date.now()) - T0).toFixed(1);
   // eslint-disable-next-line no-console
-  console.log(`%c[IdiomReview] ${stage}`, 'color:#7c3aed;font-weight:bold', { t_ms: t, ...extra });
+  console.log(`%c[IdiomReview] ${stage}`, 'color:#5f2ecc;font-weight:bold', { t_ms: t, ...extra });
 }
 
 /** from skillId → idiom id（如 'idiom:i3' → 'i3'） */

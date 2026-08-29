@@ -39,7 +39,7 @@ export function WorksheetGenerator() {
             type="button"
             onClick={() => { sfxTap(); setMode('letters'); }}
             className={`rounded-xl px-3 py-1.5 text-xs font-black transition-all ${
-              mode === 'letters' ? 'bg-pink-500 text-white shadow-sm' : 'bg-pink-50 text-pink-700'
+              mode === 'letters' ? 'bg-pink-500 text-candy-pink-on shadow-sm' : 'bg-pink-50 text-pink-700'
             }`}
           >
             {t('worksheetGenerator.lettersBtn')}
@@ -48,7 +48,7 @@ export function WorksheetGenerator() {
             type="button"
             onClick={() => { sfxTap(); setMode('hanzi'); }}
             className={`rounded-xl px-3 py-1.5 text-xs font-black transition-all ${
-              mode === 'hanzi' ? 'bg-purple-500 text-white shadow-sm' : 'bg-purple-50 text-purple-700'
+              mode === 'hanzi' ? 'bg-purple-500 text-candy-purple-on shadow-sm' : 'bg-purple-50 text-purple-700'
             }`}
           >
             {t('worksheetGenerator.hanziBtn')}
@@ -57,7 +57,7 @@ export function WorksheetGenerator() {
             type="button"
             onClick={() => { sfxTap(); setMode('weak_targeted'); }}
             className={`rounded-xl px-3 py-1.5 text-xs font-black transition-all ${
-              mode === 'weak_targeted' ? 'bg-amber-500 text-white shadow-sm' : 'bg-amber-50 text-amber-700'
+              mode === 'weak_targeted' ? 'bg-amber-500 text-candy-orange-on shadow-sm' : 'bg-amber-50 text-amber-700'
             }`}
           >
             🎯 易错点靶向字帖 ({weakItems.length})

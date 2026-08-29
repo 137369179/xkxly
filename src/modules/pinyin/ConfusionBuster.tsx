@@ -253,7 +253,7 @@ export function ConfusionBuster() {
           onClick={() => { sfxTap(); setTab('quiz'); }}
           className={`flex-1 py-2 rounded-xl text-xs font-black transition-all ${
             tab === 'quiz'
-              ? 'bg-indigo-500 text-white shadow-md'
+              ? 'bg-indigo-500 text-candy-blue-on shadow-md'
               : 'bg-white text-slate-500 border border-slate-200'
           }`}
         >
@@ -342,7 +342,7 @@ export function ConfusionBuster() {
           </div>
 
           {/* 播放目标音按钮 */}
-          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-6 text-center text-white shadow-lg space-y-3">
+          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-6 text-center text-candy-blue-on shadow-lg space-y-3">
             <p className="text-xs font-bold text-indigo-200">仔细听！哪个是老师读的字？</p>
             <button
               type="button"

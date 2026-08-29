@@ -18,7 +18,7 @@ export function CatEvolveSection({
     <Panel className="border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-yellow-50 text-center space-y-3">
       <h3 className="text-lg font-black text-amber-950 flex items-center justify-center gap-2">
         <span className="icon-chip">🌟</span> {t('pet.evolveTitle')}
-        <span className="ml-1 rounded-full bg-amber-500 px-3 py-0.5 text-sm text-white shadow-sm">
+        <span className="ml-1 rounded-full bg-amber-500 px-3 py-0.5 text-sm text-candy-orange-on shadow-sm">
           Lv.{catLevel} · {t(EVOLVE_INFO[catLevel]?.title ?? 'pet.unknownForm')}
         </span>
       </h3>
@@ -120,7 +120,7 @@ export function CatEvolveSection({
               disabled={!canEvolve}
               className={`mt-2 w-full rounded-xl py-2 text-base font-black transition active:scale-95 ${
                 canEvolve
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 animate-pulse shadow-md'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-candy-orange-on hover:from-amber-600 hover:to-orange-600 animate-pulse shadow-md'
                   : 'cursor-not-allowed bg-gray-200 text-gray-400'
               }`}
             >

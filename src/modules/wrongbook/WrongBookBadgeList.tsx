@@ -93,7 +93,7 @@ export function WrongBookBadgeList() {
               {/* 名称 */}
               <div
                 className="mt-1 text-sm font-extrabold"
-                style={{ color: b.unlocked ? tone.deep : '#b38894' }}
+                style={{ color: b.unlocked ? tone.deep : '#a0806f' }}
               >
                 {b.name}
               </div>

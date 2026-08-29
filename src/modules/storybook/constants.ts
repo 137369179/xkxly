@@ -8,7 +8,7 @@ export const THEMES: ThemePreset[] = [
     tone: 'orange',
     characters: ['小狮子', '小兔子', '小大象', '小狐狸'],
     sceneEmojis: ['🦊', '🐰', '🐿️', '🦉', '🌳'],
-    bgGradient: 'linear-gradient(180deg, #f0faf4 0%, #b8f0d8 100%)',
+    bgGradient: 'linear-gradient(180deg, #f0faf3 0%, #bcebce 100%)',
   },
   {
     id: 'space',
@@ -26,7 +26,7 @@ export const THEMES: ThemePreset[] = [
     tone: 'pink',
     characters: ['小公主', '花仙子', '美人鱼'],
     sceneEmojis: ['👑', '💎', '🦢', '🌸', '🏰'],
-    bgGradient: 'linear-gradient(180deg, #ffe4ee 0%, #ffb6c9 100%)',
+    bgGradient: 'linear-gradient(180deg, #ffe1eb 0%, #ffa6c1 100%)',
   },
   {
     id: 'dinosaur',
@@ -35,7 +35,7 @@ export const THEMES: ThemePreset[] = [
     tone: 'green',
     characters: ['小恐龙', '翼龙宝宝', '三角龙'],
     sceneEmojis: ['🦖', '🌴', '🥚', '🌋', '🦴'],
-    bgGradient: 'linear-gradient(180deg, #fff3ec 0%, #ffc9a8 100%)',
+    bgGradient: 'linear-gradient(180deg, #fff3ec 0%, #ffdeb0 100%)',
   },
   {
     id: 'ocean',
@@ -44,7 +44,7 @@ export const THEMES: ThemePreset[] = [
     tone: 'blue',
     characters: ['小海豚', '小乌龟', '小螃蟹'],
     sceneEmojis: ['🐢', '🦀', '🌊', '🐚', '🫧'],
-    bgGradient: 'linear-gradient(180deg, #dcecfa 0%, #55aee0 100%)',
+    bgGradient: 'linear-gradient(180deg, #dcebff 0%, #3d9bff 100%)',
   },
   {
     id: 'forest',
@@ -53,7 +53,7 @@ export const THEMES: ThemePreset[] = [
     tone: 'green',
     characters: ['小蘑菇', '小松鼠', '小萤火虫'],
     sceneEmojis: ['🐌', '🦋', '🍃', '🌳', '🌿'],
-    bgGradient: 'linear-gradient(180deg, #f0faf4 0%, #b8f0d8 100%)',
+    bgGradient: 'linear-gradient(180deg, #f0faf3 0%, #bcebce 100%)',
   },
 ];
 

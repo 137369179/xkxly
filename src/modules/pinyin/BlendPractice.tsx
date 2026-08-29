@@ -233,7 +233,7 @@ export function BlendPractice() {
               exit={{ opacity: 0, scale: 0.8 }}
               className="mt-2 flex justify-center"
             >
-              <span className="rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-1 text-xs font-black text-white shadow-md">
+              <span className="rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-1 text-xs font-black text-candy-blue-on shadow-md">
                 🔥 {combo} 连击达成！拼读小能手！
               </span>
             </motion.div>

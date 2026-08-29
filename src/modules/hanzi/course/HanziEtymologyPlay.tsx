@@ -148,7 +148,7 @@ export function HanziEtymologyPlay({ char, onComplete }: Props) {
                 onClick={() => handleStageClick(i)}
                 className={`flex flex-col items-center p-2 rounded-xl border text-xs font-bold transition-all ${
                   active
-                    ? 'bg-amber-500 text-white border-amber-600 shadow-md scale-105'
+                    ? 'bg-amber-500 text-candy-orange-on border-amber-600 shadow-md scale-105'
                     : 'bg-white/80 text-slate-700 border-amber-200 hover:bg-amber-100'
                 }`}
               >
@@ -179,7 +179,7 @@ export function HanziEtymologyPlay({ char, onComplete }: Props) {
         <button
           type="button"
           onClick={handleFinish}
-          className="flex-1 py-3 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-white rounded-2xl font-black text-sm shadow-lg shadow-orange-300/50 flex items-center justify-center gap-2 transition-transform active:scale-98"
+          className="flex-1 py-3 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-candy-orange-on rounded-2xl font-black text-sm shadow-lg shadow-orange-300/50 flex items-center justify-center gap-2 transition-transform active:scale-98"
         >
           <span>🌟 探险完成，进入「认字理」</span>
           <span>➔</span>

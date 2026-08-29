@@ -225,8 +225,8 @@ export function CatStagePanel({
           }}
           className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black border-2 transition-all shadow-md ${
             realisticMode
-              ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white border-purple-300'
-              : 'bg-gradient-to-r from-pink-400 to-rose-500 text-white border-pink-200'
+              ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-candy-blue-on border-purple-300'
+              : 'bg-gradient-to-r from-pink-400 to-rose-500 text-candy-pink-on border-pink-200'
           }`}
         >
           <span>{realisticMode ? '🎮 3D WebGL 写实模式' : '✨ 3D 毛绒矢量模式'}</span>
@@ -318,7 +318,7 @@ export function CatStagePanel({
         <button
           onClick={() => setEnvLighting('nebula')}
           className={`px-3 py-1 rounded-full border ${
-            envLighting === 'nebula' ? 'bg-pink-500 text-white border-pink-600' : 'bg-white text-pink-900 border-pink-200'
+            envLighting === 'nebula' ? 'bg-pink-500 text-candy-pink-on border-pink-600' : 'bg-white text-pink-900 border-pink-200'
           }`}
         >
           {t('pet.sceneNebula')}
@@ -326,7 +326,7 @@ export function CatStagePanel({
         <button
           onClick={() => setEnvLighting('sunlight')}
           className={`px-3 py-1 rounded-full border ${
-            envLighting === 'sunlight' ? 'bg-amber-500 text-white border-amber-600' : 'bg-white text-amber-900 border-amber-200'
+            envLighting === 'sunlight' ? 'bg-amber-500 text-candy-orange-on border-amber-600' : 'bg-white text-amber-900 border-amber-200'
           }`}
         >
           {t('pet.sceneSunlight')}
@@ -345,7 +345,7 @@ export function CatStagePanel({
       <div className="flex justify-center flex-wrap gap-3 my-3 relative z-10">
         <button
           onClick={onOpenVoice}
-          className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-pink-500 text-white font-black text-sm shadow-lg hover:scale-105 active:scale-95 transition-all border-2 border-white animate-bounce-soft"
+          className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-pink-500 text-candy-orange-on font-black text-sm shadow-lg hover:scale-105 active:scale-95 transition-all border-2 border-white animate-bounce-soft"
         >
           <span className="text-lg">🎙️</span>
           <span>{t('pet.voiceChatBtn')}</span>
@@ -353,7 +353,7 @@ export function CatStagePanel({
 
         <button
           onClick={onOpenMiniGame}
-          className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-black text-sm shadow-lg hover:scale-105 active:scale-95 transition-all border-2 border-white"
+          className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-candy-pink-on font-black text-sm shadow-lg hover:scale-105 active:scale-95 transition-all border-2 border-white"
         >
           <span className="text-lg">🎮</span>
           <span>{t('pet.fishCatchChallengeBtn')}</span>

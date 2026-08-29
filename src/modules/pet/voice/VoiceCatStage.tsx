@@ -118,11 +118,11 @@ export function VoiceCatStage({
         <span
           className={`flex items-center gap-2 rounded-full px-3.5 py-1 text-xs font-black shadow-sm ${
             isTtsSpeaking
-              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-candy-pink-on'
               : status === 'streaming'
                 ? 'bg-amber-400 text-amber-950'
                 : isListening
-                  ? 'bg-emerald-500 text-white'
+                  ? 'bg-emerald-500 text-candy-green-on'
                   : 'bg-pink-100 text-pink-700 border border-pink-200'
           }`}
         >

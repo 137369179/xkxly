@@ -30,7 +30,7 @@ export function StarRating({
   rating,
   maxStars = 5,
   size = 'md',
-  color = '#e5ac2e',
+  color = '#d9860a',
   interactive = false,
   onChange,
   showValue = false,

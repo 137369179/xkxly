@@ -240,7 +240,7 @@ export function MatchGame() {
               initial={{ scale: 0, y: 10, rotate: -6 }}
               animate={{ scale: 1.1, y: 0, rotate: 0 }}
               exit={{ scale: 0, opacity: 0 }}
-              className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3.5 py-1 text-xs font-black text-white shadow-md"
+              className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3.5 py-1 text-xs font-black text-candy-orange-on shadow-md"
             >
               <span>🔥 连对 Combo x{combo}!</span>
             </motion.div>
@@ -253,8 +253,8 @@ export function MatchGame() {
             onClick={() => setAiMode((v) => !v)}
             className="mt-3 flex w-full items-center gap-2.5 rounded-2xl border-2 px-3.5 py-2.5 text-left transition active:translate-y-[2px]"
             style={{
-              background: aiMode ? '#dcecfa' : '#FFFFFF',
-              borderColor: aiMode ? '#55aee0' : '#e2c4cb',
+              background: aiMode ? '#dcebff' : '#FFFFFF',
+              borderColor: aiMode ? '#3d9bff' : '#e2c4cb',
             }}
           >
             <AiAvatar size={28} mood={aiLoading ? 'talking' : aiMode ? 'talking' : 'sleep'} />
@@ -272,7 +272,7 @@ export function MatchGame() {
             </span>
             <span
               className="grid h-7 w-12 shrink-0 items-center rounded-full px-1 transition"
-              style={{ background: aiMode ? '#55aee0' : '#f0dde2' }}
+              style={{ background: aiMode ? '#3d9bff' : '#e6d8ce' }}
             >
               <span
                 className="block h-5 w-5 rounded-full bg-white transition-transform"

@@ -140,7 +140,7 @@ export function StarWallet({
         }
       `}</style>
 
-      <h3 id={titleId} className="mb-3 text-lg font-extrabold text-[#8b6ef0]">
+      <h3 id={titleId} className="mb-3 text-lg font-extrabold text-[#8f5bff]">
         {competenceFirst ? '🌟 我学会啦' : '⭐ 我的星星'}
       </h3>
 
@@ -156,15 +156,15 @@ export function StarWallet({
         >
           <span aria-hidden="true">⭐</span> {balance}
         </div>
-        <div className="flex-1 pb-1 text-xs text-[#9b8fc7]">
+        <div className="flex-1 pb-1 text-xs text-[#ab81ff]">
           {competenceFirst ? (
             <div>
-              已经掌握 <b className="text-[#4a3f8a]">{masteredCount}</b> 个内容啦
+              已经掌握 <b className="text-[#4a20a0]">{masteredCount}</b> 个内容啦
             </div>
           ) : null}
           <div>
-            今天收集 <b className="text-[#4a3f8a]">{earnedToday}</b> 颗 · 累计{' '}
-            <b className="text-[#4a3f8a]">{lifetime}</b> 颗
+            今天收集 <b className="text-[#4a20a0]">{earnedToday}</b> 颗 · 累计{' '}
+            <b className="text-[#4a20a0]">{lifetime}</b> 颗
           </div>
           {todayFull ? (
             <div className="mt-1 text-[#ff9f1c]">今天收集的星星够多啦，明天再来！</div>
@@ -182,10 +182,10 @@ export function StarWallet({
       {goal ? (
         <div className="mt-3" id={goalId}>
           <div className="mb-1 flex items-baseline justify-between text-sm">
-            <span className="font-extrabold text-[#4a3f8a]">
+            <span className="font-extrabold text-[#4a20a0]">
               <span aria-hidden="true">🎯 </span>下一个目标
             </span>
-            <span className="text-[#9b8fc7]">
+            <span className="text-[#ab81ff]">
               {goal.shortfall > 0 ? `还差 ${goal.shortfall} 颗星` : '可以解锁啦！'}
             </span>
           </div>
@@ -206,12 +206,12 @@ export function StarWallet({
               style={{ width: `${Math.round(goal.progress * 100)}%` }}
             />
           </div>
-          <div className="mt-1 text-xs text-[#9b8fc7]">
+          <div className="mt-1 text-xs text-[#ab81ff]">
             {KIND_ICON[goal.item.kind]} {goal.item.label} · {goal.item.description}
           </div>
         </div>
       ) : (
-        <p className="mt-3 rounded-lg bg-[#faf7ff] p-2 text-sm text-[#4a3f8a]">
+        <p className="mt-3 rounded-lg bg-[#faf7ff] p-2 text-sm text-[#4a20a0]">
           🎉 全部奖励都解锁啦，你太棒了！
         </p>
       )}
@@ -219,7 +219,7 @@ export function StarWallet({
       {/* ③ 奖励小屋：花 → 解锁 */}
       {showRewards ? (
         <div className="mt-4" id={rewardsId}>
-          <h4 className="mb-2 text-sm font-extrabold text-[#4a3f8a]">
+          <h4 className="mb-2 text-sm font-extrabold text-[#4a20a0]">
             <span aria-hidden="true">🎁 </span>奖励小屋
           </h4>
           <ul className="flex flex-wrap gap-2" aria-label="可解锁的奖励">
@@ -237,7 +237,7 @@ export function StarWallet({
                       isOwned
                         ? 'bg-[#e8f7ee] text-[#2f855a]'
                         : affordable
-                          ? 'bg-[#faf7ff] text-[#4a3f8a]'
+                          ? 'bg-[#faf7ff] text-[#4a20a0]'
                           : 'bg-[#f6f5fa] text-[#a9a3c2]'
                     }`}
                     style={{
@@ -263,7 +263,7 @@ export function StarWallet({
       {/* ④ 扭蛋机 + 概率公示 + 保底可见 */}
       {showCapsule ? (
         <div className="mt-4 rounded-xl bg-[#faf7ff] p-3" id={capsuleId}>
-          <h4 className="mb-2 text-sm font-extrabold text-[#4a3f8a]">
+          <h4 className="mb-2 text-sm font-extrabold text-[#4a20a0]">
             <span aria-hidden="true">🎰 </span>扭蛋机
           </h4>
 
@@ -276,13 +276,13 @@ export function StarWallet({
               aria-label={`转一次扭蛋，需要 ${capsuleCost} 颗星`}
               className="sw-anim rounded-xl px-4 py-2 text-sm font-extrabold text-white disabled:opacity-50"
               style={{
-                background: canDraw ? 'linear-gradient(135deg,#ff7eb3 0%,#8b6ef0 100%)' : '#c9c4dd',
+                background: canDraw ? 'linear-gradient(135deg,#ff7eb3 0%,#8f5bff 100%)' : '#c9c4dd',
                 animation: reducedMotion || !canDraw ? undefined : 'swShine 2s ease-in-out infinite',
               }}
             >
               转一转 · {capsuleCost}⭐
             </button>
-            <div className="text-xs text-[#9b8fc7]">
+            <div className="text-xs text-[#ab81ff]">
               {canDraw
                 ? `再抽 ${pityRemaining} 次必出稀有`
                 : `再集 ${capsuleCost - balance} 颗星就能转啦`}
@@ -291,7 +291,7 @@ export function StarWallet({
 
           {/* 概率公示：显著位置 + 百分比 + 两位小数（不可折叠、不可省略） */}
           <dl
-            className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#9b8fc7]"
+            className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#ab81ff]"
             data-testid="capsule-odds"
             aria-label="扭蛋各档位抽取概率"
           >
@@ -323,7 +323,7 @@ export function StarWallet({
       {/* ⑤ 收集册 */}
       {showCollection ? (
         <div className="mt-4" id={collectionId}>
-          <h4 className="mb-2 text-sm font-extrabold text-[#4a3f8a]">
+          <h4 className="mb-2 text-sm font-extrabold text-[#4a20a0]">
             <span aria-hidden="true">📖 </span>收集册
           </h4>
           <ul className="flex flex-wrap gap-2 text-xs" aria-label="收集册进度">
@@ -348,7 +348,7 @@ export function StarWallet({
         role="status"
         aria-live="polite"
         data-testid="wallet-notice"
-        className="mt-3 min-h-[1.25rem] text-sm font-bold text-[#8b6ef0]"
+        className="mt-3 min-h-[1.25rem] text-sm font-bold text-[#8f5bff]"
       >
         {notice}
       </p>

@@ -288,7 +288,7 @@ export function FillBlank({ rhyme, tone }: FillBlankProps) {
                         ? (isCorrect ? TONE_STYLE.green.soft : '#FFE0E0')
                         : 'white',
                       borderColor: showResult
-                        ? (isCorrect ? TONE_STYLE.green.main : '#ff5c7a')
+                        ? (isCorrect ? TONE_STYLE.green.main : '#ff5c8a')
                         : 'white',
                       color: showResult
                         ? (isCorrect ? TONE_STYLE.green.deep : '#C53030')

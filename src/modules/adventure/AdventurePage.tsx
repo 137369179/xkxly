@@ -349,7 +349,7 @@ export default function AdventurePage(_: { param?: string }) {
 
                       {/* BOSS标签 */}
                       {isBoss && (
-                        <span className="absolute top-1.5 right-2 rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-black text-white">
+                        <span className="absolute top-1.5 right-2 rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-black text-candy-pink-on">
                           BOSS
                         </span>
                       )}

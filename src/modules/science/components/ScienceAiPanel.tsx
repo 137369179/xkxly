@@ -49,7 +49,7 @@ function ScienceAiPanelImpl({ topic, label, triggerLabel = '🤖 小茜讲讲', 
           'w-full rounded-xl px-4 py-2.5 text-sm font-extrabold transition-all active:scale-95',
           status === 'thinking' || status === 'streaming'
             ? 'bg-green-200 text-green-600'
-            : 'bg-green-500 text-white shadow-md hover:bg-green-600'
+            : 'bg-green-500 text-candy-green-on shadow-md hover:bg-green-600'
         )}
       >
         {status === 'thinking' ? '🤔 ' + tr('science.thinking') : status === 'streaming' ? '✨ ' + tr('science.storyTelling') : status === 'done' ? '🔄 ' + tr('science.listenAgain') : defaultTrigger}

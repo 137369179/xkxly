@@ -451,7 +451,7 @@ export function TangramBuilder() {
             }}
             className={`min-h-[44px] py-1.5 px-3 rounded-2xl text-xs font-black transition-all flex items-center gap-1 border-2 focus-visible:ring-4 focus-visible:ring-purple-300 focus:outline-none ${
               isFreeMode
-                ? 'bg-purple-500 text-white border-purple-600 shadow-md scale-[1.03]'
+                ? 'bg-purple-500 text-candy-purple-on border-purple-600 shadow-md scale-[1.03]'
                 : 'bg-white text-slate-700 border-slate-200 hover:border-purple-300 active:scale-95'
             }`}
           >
@@ -588,7 +588,7 @@ export function TangramBuilder() {
             <button
               type="button"
               onClick={handleSnapAndComplete}
-              className="min-h-[44px] px-5 py-2 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black text-xs shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all focus-visible:ring-4 focus-visible:ring-orange-300"
+              className="min-h-[44px] px-5 py-2 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 text-candy-orange-on font-black text-xs shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all focus-visible:ring-4 focus-visible:ring-orange-300"
             >
               ✨ 吸附拼装 & 唤醒小动物
             </button>

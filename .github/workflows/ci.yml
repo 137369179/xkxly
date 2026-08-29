@@ -77,6 +77,14 @@ jobs:
         run: npm run lint:budget
         continue-on-error: true
 
+      - name: 对比度铁律门禁（只许降不许涨）
+        id: contrast
+        # P4-a11y：白字压浅/中饱和背景属 WCAG 2.1 AA 对比度违规。守卫扫描 src 下所有
+        # .tsx，比对 scripts/contrast-baseline.json 基线，新增违规即失败；减项自动刷新基线。
+        # 失败不阻断后续步骤，最终由 status 步骤统一判定。
+        run: npm run audit:contrast
+        continue-on-error: true
+
       - name: 依赖安全审计（npm audit）
         id: audit
         # P1-14：供应链安全门禁。GitHub runner 使用默认 npmjs registry（支持 audit 端点），
@@ -171,6 +179,7 @@ jobs:
             const tsc = '${{ steps.tsc.outcome }}';
             const lint = '${{ steps.lint.outcome }}';
             const lintBudget = '${{ steps.lint-budget.outcome }}';
+            const contrast = '${{ steps.contrast.outcome }}';
             const audit = '${{ steps.audit.outcome }}';
             const build = '${{ steps.build.outcome }}';
             const smoke = '${{ steps.smoke.outcome }}';
@@ -185,6 +194,7 @@ jobs:
               `| TypeScript 类型检查 | ${icon(tsc)} ${tsc} |`,
               `| ESLint 静态检查 | ${icon(lint)} ${lint} |`,
               `| ESLint 告警预算门禁 | ${icon(lintBudget)} ${lintBudget} |`,
+              `| 对比度铁律门禁 | ${icon(contrast)} ${contrast} |`,
               `| 依赖安全审计 | ${icon(audit)} ${audit} |`,
               `| 全量单元测试 | ${icon(unittest)} ${unittest} |`,
               `| Stuck 日志专项测试 | ${icon(stuck)} ${stuck} |`,

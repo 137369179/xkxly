@@ -92,7 +92,7 @@ export function EmotionPop() {
                 </p>
               )}
               {(stream.status === 'streaming' || stream.status === 'done') && (
-                <p className="text-lg leading-8 font-medium whitespace-pre-wrap" style={{ color: '#5c2e3d' }}>
+                <p className="text-lg leading-8 font-medium whitespace-pre-wrap" style={{ color: '#4a2b1f' }}>
                   {stream.text}
                   {stream.status === 'streaming' && (
                     <motion.span

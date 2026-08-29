@@ -164,7 +164,7 @@ export default function WrongBookDashboard() {
                   onClick={() => setTrainMode('adaptive')}
                   className={`rounded-xl px-4 py-2 text-sm font-extrabold transition ${
                     trainMode === 'adaptive'
-                      ? 'bg-candy-purple text-white shadow-sm'
+                      ? 'bg-candy-purple text-candy-purple-on shadow-sm'
                       : 'bg-candy-purple-soft text-candy-purple-deep hover:bg-candy-purple/30'
                   }`}
                 >
@@ -174,7 +174,7 @@ export default function WrongBookDashboard() {
                   onClick={() => setTrainMode('speed')}
                   className={`rounded-xl px-4 py-2 text-sm font-extrabold transition ${
                     trainMode === 'speed'
-                      ? 'bg-candy-orange text-white shadow-sm'
+                      ? 'bg-candy-orange text-candy-orange-on shadow-sm'
                       : 'bg-candy-orange-soft text-candy-orange-deep hover:bg-candy-orange/30'
                   }`}
                 >

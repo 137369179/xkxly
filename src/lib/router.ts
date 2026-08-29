@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { resolveRedirect } from './routeRedirects';
 
 /**
  * 极简 hash 路由（无依赖）
@@ -8,6 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 export const ROUTES = [
   'home',
+  'hall',
   'today',
   'companion',
   'letters',
@@ -71,8 +73,9 @@ function parseHash(): Location {
     raw = path && !path.startsWith('index.html') ? path : '';
   }
   const [first, second] = raw.split('/');
-  const route = (ROUTES as readonly string[]).includes(first!) ? (first as RouteId) : 'home';
-  return { route, param: second || undefined };
+  const matched = (ROUTES as readonly string[]).includes(first!) ? (first as RouteId) : 'home';
+  // 合并组重定向前置：旧路由（rewards/story/fun…）继续可访问，但渲染到新入口
+  return { route: resolveRedirect(matched), param: second || undefined };
 }
 
 const listeners = new Set<(loc: Location) => void>();

@@ -164,7 +164,7 @@ export default function ParentChildDuel() {
       </div>
 
       {/* 比分牌与连击指示 */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 text-white rounded-[2rem] p-5 shadow-fluffy font-black text-center border-4 border-white/90">
+      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 text-candy-pink-on rounded-[2rem] p-5 shadow-fluffy font-black text-center border-4 border-white/90">
         <div className="flex items-center justify-between relative z-10">
           <div className="w-1/3">
             <span className="text-xs opacity-85 block mb-0.5">👨‍🦰 家长端</span>
@@ -286,7 +286,7 @@ export default function ParentChildDuel() {
                   key={opt}
                   type="button"
                   onClick={() => handleChildAnswer(opt)}
-                  className="w-full min-h-[64px] rounded-2xl border-4 border-pink-400 bg-gradient-to-r from-pink-400 to-rose-400 text-white text-3xl font-black shadow-lg hover:scale-103 active:scale-95 transition-all"
+                  className="w-full min-h-[64px] rounded-2xl border-4 border-pink-400 bg-gradient-to-r from-pink-400 to-rose-400 text-candy-pink-on text-3xl font-black shadow-lg hover:scale-103 active:scale-95 transition-all"
                 >
                   {opt}
                 </button>

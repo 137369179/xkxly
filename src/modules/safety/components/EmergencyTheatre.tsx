@@ -376,7 +376,7 @@ export function EmergencyTheatre() {
                 }}
                 className={`py-2 px-3 min-h-[44px] rounded-2xl font-black text-xs transition-all border-2 flex items-center gap-1.5 shadow-sm focus:outline-none focus-visible:ring-4 focus-visible:ring-rose-300 ${
                   isSel
-                    ? 'bg-rose-500 text-white border-rose-600 shadow-md scale-105'
+                    ? 'bg-rose-500 text-candy-pink-on border-rose-600 shadow-md scale-105'
                     : 'bg-white text-slate-700 border-slate-200 hover:border-rose-300'
                 }`}
               >
@@ -414,7 +414,7 @@ export function EmergencyTheatre() {
           <button
             type="button"
             onClick={handleReciteRhyme}
-            className="py-1.5 px-3 min-h-[44px] rounded-xl bg-rose-500 text-white text-xs font-black shadow hover:bg-rose-600 active:scale-95 flex items-center gap-1 focus:outline-none focus-visible:ring-4 focus-visible:ring-rose-300"
+            className="py-1.5 px-3 min-h-[44px] rounded-xl bg-rose-500 text-candy-pink-on text-xs font-black shadow hover:bg-rose-600 active:scale-95 flex items-center gap-1 focus:outline-none focus-visible:ring-4 focus-visible:ring-rose-300"
           >
             <span>📢</span>
             <span>读安全口诀</span>
@@ -438,7 +438,7 @@ export function EmergencyTheatre() {
               onClick={() => handleChoice('safe')}
               className={`p-4 rounded-2xl border-2 text-left transition-all shadow-sm flex items-start gap-3 ${
                 selectedChoice === 'safe'
-                  ? 'bg-emerald-500 text-white border-emerald-600 ring-4 ring-emerald-200'
+                  ? 'bg-emerald-500 text-candy-green-on border-emerald-600 ring-4 ring-emerald-200'
                   : selectedChoice === 'danger'
                     ? 'bg-white/80 border-slate-200 opacity-60'
                     : 'bg-white border-emerald-200 hover:border-emerald-500 hover:bg-emerald-50/40'
@@ -466,7 +466,7 @@ export function EmergencyTheatre() {
               onClick={() => handleChoice('danger')}
               className={`p-4 rounded-2xl border-2 text-left transition-all shadow-sm flex items-start gap-3 ${
                 selectedChoice === 'danger'
-                  ? 'bg-rose-500 text-white border-rose-600 ring-4 ring-rose-200'
+                  ? 'bg-rose-500 text-candy-pink-on border-rose-600 ring-4 ring-rose-200'
                   : selectedChoice === 'safe'
                     ? 'bg-white/80 border-slate-200 opacity-60'
                     : 'bg-white border-rose-200 hover:border-rose-500 hover:bg-rose-50/40'
@@ -506,7 +506,7 @@ export function EmergencyTheatre() {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="py-2.5 px-6 rounded-xl bg-gradient-to-r from-rose-500 to-orange-500 text-white text-sm font-black shadow hover:opacity-95 active:scale-95"
+                  className="py-2.5 px-6 rounded-xl bg-gradient-to-r from-rose-500 to-orange-500 text-candy-orange-on text-sm font-black shadow hover:opacity-95 active:scale-95"
                 >
                   演练下一幕场景 ➔
                 </button>

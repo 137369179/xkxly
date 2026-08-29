@@ -278,7 +278,7 @@ export function ChantBar({ poem }: { poem: DeepPoem }) {
                 {ln.tokens.map((t, k) => {
                   const w = Math.max(6, (t.holdMs / maxMs) * 100);
                   const bg =
-                    t.role === '平' ? '#7cc3e8' : t.role === '仄' ? '#ffabc5' : t.role === '入' ? '#ffd166' : '#f0dde2';
+                    t.role === '平' ? '#7cc3e8' : t.role === '仄' ? '#ffabc5' : t.role === '入' ? '#ffd166' : '#e6d8ce';
                   return (
                     <div
                       key={k}
@@ -296,7 +296,7 @@ export function ChantBar({ poem }: { poem: DeepPoem }) {
                 <div className="mt-1 flex h-3 items-stretch gap-[2px]">
                   {chars.map((c, k) => {
                     const w = Math.max(4, (c.durMs / maxChar) * 100);
-                    const bg = c.role === '平' ? '#2e93c9' : c.role === '仄' ? '#ff6b96' : '#ff9f5a';
+                    const bg = c.role === '平' ? '#0b5ec9' : c.role === '仄' ? '#ff5c8a' : '#ff9f2e';
                     return (
                       <div
                         key={k}
@@ -317,7 +317,7 @@ export function ChantBar({ poem }: { poem: DeepPoem }) {
                   onPointerLeave={() => recLine === i && stopRec(i)}
                   className={cn(
                     'no-select rounded-full px-3 py-1 text-xs font-extrabold transition-colors',
-                    recLine === i ? 'bg-candy-red text-white' : 'bg-candy-orange-soft text-candy-orange-deep',
+                    recLine === i ? 'bg-candy-red text-candy-orange-on' : 'bg-candy-orange-soft text-candy-orange-deep',
                   )}
                 >
                   {recLine === i ? tr('poem.recRelease') : tr('poem.recHold')}

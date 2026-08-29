@@ -50,8 +50,8 @@ export function VoiceChatInput({
         aria-label={isListening ? t('catCompanion.voice.doneSpeaking') : t('catCompanion.voice.speakAgain')}
         className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg font-black transition-all active:scale-90 ${
           isListening
-            ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/40 animate-pulse ring-4 ring-rose-300/50'
-            : 'bg-gradient-to-tr from-pink-500 to-rose-400 text-white shadow-md hover:scale-105'
+            ? 'bg-rose-500 text-candy-pink-on shadow-lg shadow-rose-500/40 animate-pulse ring-4 ring-rose-300/50'
+            : 'bg-gradient-to-tr from-pink-500 to-rose-400 text-candy-pink-on shadow-md hover:scale-105'
         }`}
         title={isListening ? '点击结束录音' : '按住/点击说话'}
       >
@@ -90,7 +90,7 @@ export function VoiceChatInput({
       <button
         type="submit"
         disabled={disabled || !inputText.trim()}
-        className="flex h-10 px-4 shrink-0 items-center justify-center gap-1 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-500 to-rose-500 text-xs font-black text-white shadow-md transition-all hover:opacity-95 hover:shadow-lg active:scale-95 disabled:opacity-40 disabled:pointer-events-none"
+        className="flex h-10 px-4 shrink-0 items-center justify-center gap-1 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-500 to-rose-500 text-xs font-black text-candy-pink-on shadow-md transition-all hover:opacity-95 hover:shadow-lg active:scale-95 disabled:opacity-40 disabled:pointer-events-none"
       >
         <span>{t('catCompanion.send')}</span>
         <span>🚀</span>

@@ -82,7 +82,7 @@ export default function SongsPage() {
             className="w-32 h-32 shrink-0 rounded-2xl object-cover border-4 border-white shadow-md transform hover:scale-105 transition-transform"
           />
           <div className="flex-1 text-center sm:text-left">
-            <span className="inline-block rounded-full bg-pink-500 px-3 py-0.5 text-xs font-black text-white">
+            <span className="inline-block rounded-full bg-pink-500 px-3 py-0.5 text-xs font-black text-candy-pink-on">
               {t('song.specialEpisode')}
             </span>
             <h3 className="mt-1 text-xl font-black text-pink-900">{t('song.feltBookTitle')}</h3>

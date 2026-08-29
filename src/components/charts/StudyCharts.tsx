@@ -10,6 +10,7 @@ import { useDailyLog, useMastery, useWrongBook } from '@/store/useStore';
 import { dateKey } from '@/lib/dailyPlan';
 import { SUBJECTS, subjectLabel, subjectColor } from '@/lib/srs';
 import { useTranslation } from '@/i18n/useTranslation';
+import { CHART } from '@/lib/chartTokens';
 
 /* ------------------------------------------------------------------ */
 /* 工具：取近 N 天日期列表                                              */
@@ -64,23 +65,23 @@ export function StudyTimeChart() {
                 width={w}
                 height={h}
                 rx={0.5}
-                fill={today ? '#e5ac2e' : '#55aee0'}
+                fill={today ? CHART.series.amber : CHART.series.blue}
                 opacity={d.sec > 0 ? 0.85 : 0.2}
               />
               {d.sec > 0 && (
-                <text x={x + w / 2} y={y - 0.8} fontSize={2.2} textAnchor="middle" fill="#5b3f49" fontWeight="bold">
+                <text x={x + w / 2} y={y - 0.8} fontSize={2.2} textAnchor="middle" fill={CHART.text} fontWeight="bold">
                   {Math.round(d.sec / 60)}
                 </text>
               )}
               {(i % 2 === 0 || today) && (
-                <text x={x + w / 2} y={39} fontSize={2} textAnchor="middle" fill="#cda6b0">
+                <text x={x + w / 2} y={39} fontSize={2} textAnchor="middle" fill={CHART.textMuted}>
                   {d.date.slice(5)}
                 </text>
               )}
             </g>
           );
         })}
-        <line x1={0} y1={36} x2={100} y2={36} stroke="#f0dde2" strokeWidth={0.3} />
+        <line x1={0} y1={36} x2={100} y2={36} stroke={CHART.grid} strokeWidth={0.3} />
       </svg>
     </div>
   );
@@ -130,7 +131,7 @@ export function MasteryRadar() {
               return `${cx + Math.cos(angle) * r * ratio},${cy + Math.sin(angle) * r * ratio}`;
             }).join(' ')}
             fill="none"
-            stroke="#f0dde2"
+            stroke={CHART.grid}
             strokeWidth={0.3}
           />
         ))}
@@ -144,13 +145,13 @@ export function MasteryRadar() {
               y1={cy}
               x2={cx + Math.cos(angle) * r}
               y2={cy + Math.sin(angle) * r}
-              stroke="#f0dde2"
+              stroke={CHART.grid}
               strokeWidth={0.3}
             />
           );
         })}
         {/* 数据多边形 */}
-        <polygon points={polygonPoints} fill="rgba(85,174,224,0.25)" stroke="#2e93c9" strokeWidth={0.6} />
+        <polygon points={polygonPoints} fill={CHART.area.blue} stroke={CHART.series.blue} strokeWidth={0.6} />
         {/* 维度标签 */}
         {RADAR_DIMS.map((dim, i) => {
           const angle = i * angleStep - Math.PI / 2;
@@ -173,7 +174,7 @@ export function MasteryRadar() {
                 y={cy + Math.sin(angle) * labelR + 3.5}
                 fontSize={2.2}
                 textAnchor="middle"
-                fill="#cda6b0"
+                fill={CHART.textMuted}
               >
                 {Math.round(values[i] ?? 0)}%
               </text>
@@ -251,10 +252,10 @@ export function WrongDistribution() {
             );
           })}
           <circle cx={cx} cy={cy} r={14} fill="#fff" />
-          <text x={cx} y={cy - 1} fontSize={5} textAnchor="middle" fill="#5b3f49" fontWeight="bold">
+          <text x={cx} y={cy - 1} fontSize={5} textAnchor="middle" fill={CHART.text} fontWeight="bold">
             {wrongBook.length}
           </text>
-          <text x={cx} y={cy + 4} fontSize={2.5} textAnchor="middle" fill="#cda6b0">
+          <text x={cx} y={cy + 4} fontSize={2.5} textAnchor="middle" fill={CHART.textMuted}>
             {tr('charts.wrongCount')}
           </text>
         </svg>
@@ -300,7 +301,8 @@ export function StudyHeatmap() {
     return w;
   }, [dailyLog]);
 
-  const levelColors = ['#f0dde2', '#b8f0d8', '#5fd68b', '#33a863', '#047857'];
+  // 热力条等级色统一走图表令牌，避免各图表各写一份
+  const levelColors = [...CHART.levelColors];
 
   return (
     <div className="space-y-2">

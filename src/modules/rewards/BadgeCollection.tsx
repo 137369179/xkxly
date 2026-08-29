@@ -41,7 +41,7 @@ export function BadgeCollection() {
       />
 
       {/* 护照封面风格 */}
-      <div className="mb-4 rounded-2xl bg-gradient-to-br from-purple-600 via-pink-600 to-rose-500 p-4 text-white shadow-fluffy relative overflow-hidden">
+      <div className="mb-4 rounded-2xl bg-gradient-to-br from-purple-600 via-pink-600 to-rose-500 p-4 text-candy-pink-on shadow-fluffy relative overflow-hidden">
         <div className="flex items-center justify-between relative z-10">
           <div>
             <p className="text-xs font-extrabold tracking-widest text-pink-200 uppercase">BABY LEARNING PARK</p>

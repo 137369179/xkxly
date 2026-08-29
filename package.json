@@ -20,6 +20,7 @@
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "lint:budget": "node scripts/lint-warn-budget.mjs",
+    "audit:contrast": "node scripts/audit-contrast.mjs --baseline=scripts/contrast-baseline.json",
     "smoke": "node scripts/smoke.mjs",
     "smoke:full": "npm run build && node scripts/smoke.mjs"
   },

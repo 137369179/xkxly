@@ -185,7 +185,7 @@ export function StorybookReader({
               setShowPinyin((v) => !v);
             }}
             className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
-              showPinyin ? 'bg-pink-500 text-white border-pink-600 shadow-sm' : 'bg-pink-50 text-pink-600 border-pink-200'
+              showPinyin ? 'bg-pink-500 text-candy-pink-on border-pink-600 shadow-sm' : 'bg-pink-50 text-pink-600 border-pink-200'
             }`}
           >
             {showPinyin ? '🔤 纯汉字' : '拼 拼音'}
@@ -197,7 +197,7 @@ export function StorybookReader({
             className={`px-4 py-1.5 rounded-full text-sm font-bold transition-colors ${
               saved
                 ? 'bg-gray-200 text-gray-400'
-                : 'bg-purple-400 text-white shadow-md hover:bg-purple-500'
+                : 'bg-purple-400 text-candy-purple-on shadow-md hover:bg-purple-500'
             }`}
           >
             {saved ? tr('storybookReader.saved') : tr('storybookReader.save')}

@@ -115,14 +115,6 @@ export interface ReciteStat {
 /** ---------------- 题目与练习 ---------------- */
 export type QuestionKind = 'math' | 'count' | 'number' | 'letter' | 'logic' | 'poem';
 
-export interface OptionItem {
-
-  id: string;
-  label?: string;
-  emoji?: string;
-  shapes?: string[];
-}
-
 export interface QuizOption {
   id: string;
   label?: string;
@@ -130,6 +122,9 @@ export interface QuizOption {
   shapes?: string[];
   correct?: boolean;
 }
+
+/** 选项基础类型（不含 correct 标注），兼容旧有类型引用 */
+export type OptionItem = Omit<QuizOption, 'correct'>;
 
 export interface Question {
   id: string;
@@ -155,9 +150,18 @@ export interface MasteryItem {
   /** 首次达到 lv>=1（即「已掌握」）的日期 YYYY-MM-DD，用于每日「新掌握」目标统计；旧数据缺失视为非今日 */
   firstSeen?: string;
   interval?: number;
+  /**
+   * @deprecated 旧字段，已统一改用 `due`。仅旧版数据可能携带，新代码请读写 `due`。
+   * 迁移时：若 `due` 缺失但 `dueAt` 存在，以 `dueAt` 为准。
+   */
   dueAt?: number;
+  /** 下次复习时间戳（ms）—— 统一字段，srs.ts 读写此字段 */
   due?: number;
+  /**
+   * @deprecated 旧字段，已统一改用 `last`。仅旧版数据可能携带，新代码请读写 `last`。
+   */
   lastAt?: number;
+  /** 上次练习时间戳（ms）—— 统一字段，srs.ts 读写此字段 */
   last?: number;
   ok: number;
   ng: number;
@@ -219,6 +223,12 @@ export interface DailyStat {
   startMathCorrect?: number;
   /** 当日逻辑起始值（每日首次登录时记录，用于计算当日增量） */
   startLogicTotal?: number;
+  /**
+   * 当日逻辑答对起始值（每日首次登录时记录，用于计算「今日答对逻辑题」增量）。
+   * 与 startMathCorrect 对称；storeHelpers.ts 已在读写此字段，
+   * 此前类型定义缺失导致 TS2339 / TS2322 阻塞构建。
+   */
+  startLogicCorrect?: number;
 }
 
 export interface Progress {
@@ -287,12 +297,10 @@ export interface Progress {
   unlockedOutfits?: string[];
   /** 学习养宠：当前佩戴的装扮 (key: type, value: outfitId) */
   equippedOutfits?: Record<string, string>;
-  /** 小茜陪伴伙伴：
-   * - key = `explained_YYYY-MM-DD`，value = string[]（当天已讲解的主题 ID）
-   * - key = `chatCount_YYYY-MM-DD`，value = number（当天聊天轮数）
-   * 用于进度感知（已讲主题 ✓）+ 成就系统（聊天达人徽章）
+  /** companion 专用：键如 'chatCount_YYYY-MM-DD'(number) / 'explained_YYYY-MM-DD'(string[])
+   * - `explained_YYYY-MM-DD`：当天已讲解的主题 ID 列表（进度感知 ✓）
+   * - `chatCount_YYYY-MM-DD`：当天聊天轮数（成就系统：聊天达人徽章）
    */
-  /** companion 专用：键如 'chatCount_YYYY-MM-DD'(number) / 'explained_YYYY-MM-DD'(string[]) */
   chatHistory?: Record<string, string | number | string[]>;
 
   // —— S2 新增：学习搭子 ——

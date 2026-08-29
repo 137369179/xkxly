@@ -36,13 +36,13 @@ interface TabConfig {
 }
 
 const TABS: TabConfig[] = [
-  { id: 'botany', labelKey: '植物昆虫实验室', emoji: '🌱', color: 'text-emerald-700', activeColor: 'bg-emerald-600 text-white' },
-  { id: 'archaeology', labelKey: '恐龙考古发掘', emoji: '⛏️', color: 'text-amber-700', activeColor: 'bg-amber-500 text-white' },
-  { id: 'dino', labelKey: 'sciencePage.tabDino', emoji: '🦖', color: 'text-green-700', activeColor: 'bg-green-400 text-white' },
-  { id: 'space', labelKey: 'sciencePage.tabSpace', emoji: '🪐', color: 'text-blue-700', activeColor: 'bg-blue-400 text-white' },
-  { id: 'weather', labelKey: 'sciencePage.tabWeather', emoji: '🌈', color: 'text-orange-700', activeColor: 'bg-orange-400 text-white' },
-  { id: 'animal', labelKey: 'sciencePage.tabAnimal', emoji: '🦁', color: 'text-emerald-700', activeColor: 'bg-emerald-400 text-white' },
-  { id: 'body', labelKey: 'sciencePage.tabBody', emoji: '🫀', color: 'text-red-700', activeColor: 'bg-red-400 text-white' },
+  { id: 'botany', labelKey: '植物昆虫实验室', emoji: '🌱', color: 'text-emerald-700', activeColor: 'bg-emerald-600 text-candy-green-on' },
+  { id: 'archaeology', labelKey: '恐龙考古发掘', emoji: '⛏️', color: 'text-amber-700', activeColor: 'bg-amber-500 text-candy-orange-on' },
+  { id: 'dino', labelKey: 'sciencePage.tabDino', emoji: '🦖', color: 'text-green-700', activeColor: 'bg-green-400 text-candy-green-on' },
+  { id: 'space', labelKey: 'sciencePage.tabSpace', emoji: '🪐', color: 'text-blue-700', activeColor: 'bg-blue-400 text-candy-blue-on' },
+  { id: 'weather', labelKey: 'sciencePage.tabWeather', emoji: '🌈', color: 'text-orange-700', activeColor: 'bg-orange-400 text-candy-orange-on' },
+  { id: 'animal', labelKey: 'sciencePage.tabAnimal', emoji: '🦁', color: 'text-emerald-700', activeColor: 'bg-emerald-400 text-candy-green-on' },
+  { id: 'body', labelKey: 'sciencePage.tabBody', emoji: '🫀', color: 'text-red-700', activeColor: 'bg-red-400 text-candy-pink-on' },
 ];
 
 /** 加载占位 */

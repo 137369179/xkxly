@@ -134,6 +134,7 @@ export function PinyinLearn({ entry, onDone }: { entry: PinyinEntry; onDone: () 
       label: '读',
       emoji: '🗣️',
       gate: true,
+      autoAdvanceMs: 1400,
       render: (api) => (
         <div className="space-y-4">
           <Panel className="text-center">
@@ -161,6 +162,7 @@ export function PinyinLearn({ entry, onDone }: { entry: PinyinEntry; onDone: () 
       label: '练',
       emoji: '✏️',
       gate: true,
+      autoAdvanceMs: 1400,
       render: (api) => (
         <div className="space-y-4">
           <QuizCard
@@ -188,6 +190,7 @@ export function PinyinLearn({ entry, onDone }: { entry: PinyinEntry; onDone: () 
       label: '写',
       emoji: '✍️',
       gate: true,
+      autoAdvanceMs: 1400,
       render: (api) => (
         <div className="space-y-4">
           <div className="text-center">

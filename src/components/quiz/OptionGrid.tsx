@@ -64,13 +64,13 @@ export function OptionGrid({ options, wrongIds, solved, answerId, shakeId, onPic
               <motion.span
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="absolute -top-2 -right-2 grid h-9 w-9 place-items-center rounded-full bg-candy-green text-lg text-white shadow-candy-sm"
+                className="absolute -top-2 -right-2 grid h-9 w-9 place-items-center rounded-full bg-candy-green text-lg text-candy-green-on shadow-candy-sm"
               >
                 ✓
               </motion.span>
             )}
             {isWrong && (
-              <span className="absolute -top-2 -right-2 grid h-9 w-9 place-items-center rounded-full bg-candy-orange text-lg text-white">
+              <span className="absolute -top-2 -right-2 grid h-9 w-9 place-items-center rounded-full bg-candy-orange text-lg text-candy-orange-on">
                 ✕
               </span>
             )}

@@ -432,7 +432,7 @@ export function WorldSafariExplorer() {
             }}
             className={`py-1.5 px-3.5 min-h-[44px] rounded-xl font-black text-xs transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 ${
               activeTab === 'continents'
-                ? 'bg-emerald-600 text-white shadow-sm'
+                ? 'bg-emerald-600 text-candy-green-on shadow-sm'
                 : 'text-slate-600 hover:text-emerald-700'
             }`}
           >
@@ -468,7 +468,7 @@ export function WorldSafariExplorer() {
             }}
             className={`py-1.5 px-3.5 min-h-[44px] rounded-xl font-black text-xs transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-amber-300 ${
               activeTab === 'passport'
-                ? 'bg-amber-600 text-white shadow-sm'
+                ? 'bg-amber-600 text-candy-orange-on shadow-sm'
                 : 'text-slate-600 hover:text-amber-700'
             }`}
           >
@@ -501,7 +501,7 @@ export function WorldSafariExplorer() {
                   className={`py-2 px-3 min-h-[44px] rounded-2xl font-black text-xs transition-all border-2 flex items-center gap-1 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 ${
                     isSel
                       ? activeTab === 'continents'
-                        ? 'bg-emerald-600 text-white border-emerald-700 shadow-md scale-105'
+                        ? 'bg-emerald-600 text-candy-green-on border-emerald-700 shadow-md scale-105'
                         : 'bg-blue-600 text-white border-blue-700 shadow-md scale-105'
                       : 'bg-white text-slate-700 border-slate-200 hover:border-emerald-300'
                   }`}
@@ -541,7 +541,7 @@ export function WorldSafariExplorer() {
               <button
                 type="button"
                 onClick={() => speak(currentItem.funFact, { lang: 'zh-CN' })}
-                className="px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-black shadow-sm hover:bg-emerald-700 active:scale-95 transition-all"
+                className="px-3.5 py-2 rounded-xl bg-emerald-600 text-candy-green-on text-xs font-black shadow-sm hover:bg-emerald-700 active:scale-95 transition-all"
               >
                 🔊 听科普小知识
               </button>
@@ -588,9 +588,9 @@ export function WorldSafariExplorer() {
                       onClick={() => handleAnswerQuiz(opt)}
                       className={`py-3 px-4 rounded-2xl font-black text-sm transition-all border-2 shadow-sm ${
                         showCorrect
-                          ? 'bg-emerald-500 text-white border-emerald-600 ring-4 ring-emerald-200 scale-105'
+                          ? 'bg-emerald-500 text-candy-green-on border-emerald-600 ring-4 ring-emerald-200 scale-105'
                           : showWrong
-                            ? 'bg-rose-500 text-white border-rose-600 opacity-75'
+                            ? 'bg-rose-500 text-candy-pink-on border-rose-600 opacity-75'
                             : 'bg-slate-50 text-slate-800 border-slate-200 hover:border-emerald-400 hover:bg-emerald-50/50'
                       }`}
                     >
@@ -649,7 +649,7 @@ export function WorldSafariExplorer() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-gradient-to-r from-amber-500 to-yellow-600 rounded-2xl p-5 text-white text-center shadow-lg space-y-1"
+              className="bg-gradient-to-r from-amber-500 to-yellow-600 rounded-2xl p-5 text-candy-orange-on text-center shadow-lg space-y-1"
             >
               <p className="text-lg font-black">👑 荣获【全球地理超级小博士】金质勋章！</p>
               <p className="text-xs font-extrabold opacity-95">

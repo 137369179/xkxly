@@ -194,7 +194,7 @@ export function CvcWordBuilder() {
               whileTap={isSlotFilled ? { scale: 0.95 } : {}}
               className={`flex h-20 w-20 flex-col items-center justify-center rounded-2xl border-3 text-4xl font-black leading-tight shadow-md transition-all sm:text-5xl ${
                 isSlotFilled
-                  ? 'border-candy-pink-deep bg-gradient-to-b from-candy-pink-deep to-pink-500 text-white'
+                  ? 'border-candy-pink-deep bg-gradient-to-b from-candy-pink-deep to-pink-500 text-candy-pink-on'
                   : 'border-dashed border-pink-300 bg-white/90 text-gray-300'
               } ${isHighlight ? 'ring-4 ring-candy-yellow-deep scale-110' : ''}`}
             >

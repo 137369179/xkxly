@@ -122,7 +122,7 @@ export function StreakBar({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className="rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-0.5 text-xs font-black text-white shadow-md"
+            className="rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-0.5 text-xs font-black text-candy-orange-on shadow-md"
           >
             {celebrateText.replace('{n}', String(streak))}
           </motion.span>

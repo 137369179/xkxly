@@ -162,7 +162,7 @@ export function MathStarQuest() {
           initial={{ opacity: 0, y: 12, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0 }}
-          className="mt-3 flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-4 py-3 text-white shadow-lg"
+          className="mt-3 flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-4 py-3 text-candy-orange-on shadow-lg"
         >
           <span className="text-2xl" aria-hidden="true">
             {banner.emoji}

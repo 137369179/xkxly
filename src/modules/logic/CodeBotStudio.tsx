@@ -51,12 +51,12 @@ interface CommandDef {
 }
 
 const COMMAND_DEFS: CommandDef[] = [
-  { type: 'forward', label: '前进 1 格', emoji: '⬆️', color: 'bg-blue-500 text-white border-blue-600', desc: '朝当前方向走 1 格' },
-  { type: 'turn-left', label: '向左转 90°', emoji: '↺', color: 'bg-purple-500 text-white border-purple-600', desc: '原地向左转' },
-  { type: 'turn-right', label: '向右转 90°', emoji: '↻', color: 'bg-indigo-500 text-white border-indigo-600', desc: '原地向右转' },
-  { type: 'collect', label: '拾取晶石', emoji: '💎', color: 'bg-emerald-500 text-white border-emerald-600', desc: '收集脚下的能量晶石' },
-  { type: 'switch', label: '按下开关', emoji: '🔘', color: 'bg-amber-500 text-white border-amber-600', desc: '踩踏解除前方激光门' },
-  { type: 'repeat-3', label: '重复 3 次前进', emoji: '🔁×3', color: 'bg-rose-500 text-white border-rose-600', desc: '快速连续前进 3 步' },
+  { type: 'forward', label: '前进 1 格', emoji: '⬆️', color: 'bg-blue-500 text-candy-blue-on border-blue-600', desc: '朝当前方向走 1 格' },
+  { type: 'turn-left', label: '向左转 90°', emoji: '↺', color: 'bg-purple-500 text-candy-purple-on border-purple-600', desc: '原地向左转' },
+  { type: 'turn-right', label: '向右转 90°', emoji: '↻', color: 'bg-indigo-500 text-candy-blue-on border-indigo-600', desc: '原地向右转' },
+  { type: 'collect', label: '拾取晶石', emoji: '💎', color: 'bg-emerald-500 text-candy-green-on border-emerald-600', desc: '收集脚下的能量晶石' },
+  { type: 'switch', label: '按下开关', emoji: '🔘', color: 'bg-amber-500 text-candy-orange-on border-amber-600', desc: '踩踏解除前方激光门' },
+  { type: 'repeat-3', label: '重复 3 次前进', emoji: '🔁×3', color: 'bg-rose-500 text-candy-pink-on border-rose-600', desc: '快速连续前进 3 步' },
 ];
 
 // ── 关卡数据 ──
@@ -645,8 +645,8 @@ export function CodeBotStudio() {
                       animate={{ scale: 1, opacity: 1 }}
                       className={`py-1.5 px-2.5 rounded-xl font-black text-xs flex items-center gap-1.5 border shadow-sm transition-all ${
                         isCurrentExecuting
-                          ? 'ring-4 ring-amber-400 bg-amber-500 text-white scale-110 z-10'
-                          : `${def?.color ?? 'bg-blue-500 text-white'}`
+                          ? 'ring-4 ring-amber-400 bg-amber-500 text-candy-orange-on scale-110 z-10'
+                          : `${def?.color ?? 'bg-blue-500 text-candy-blue-on'}`
                       }`}
                     >
                       <span>{def?.emoji}</span>
@@ -672,7 +672,7 @@ export function CodeBotStudio() {
                 type="button"
                 disabled={running || pipeline.length === 0}
                 onClick={handleRunPipeline}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-green-600 text-white font-black text-sm shadow-md hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-green-600 text-candy-green-on font-black text-sm shadow-md hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
               >
                 <span>🚀</span>
                 <span>{running ? '程序运行中...' : '运行编写好的程序'}</span>

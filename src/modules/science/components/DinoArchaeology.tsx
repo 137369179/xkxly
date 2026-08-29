@@ -320,7 +320,7 @@ export function DinoArchaeology() {
             }}
             className={`px-4 py-2.5 rounded-2xl font-black text-xs whitespace-nowrap transition-all flex items-center gap-1.5 border-2 shadow-sm ${
               selectedDinoIdx === idx
-                ? 'bg-amber-600 text-white border-amber-700 shadow-md scale-105'
+                ? 'bg-amber-600 text-candy-orange-on border-amber-700 shadow-md scale-105'
                 : 'bg-white text-slate-700 border-amber-200 hover:bg-amber-50'
             }`}
           >
@@ -438,7 +438,7 @@ export function DinoArchaeology() {
           </motion.div>
 
           <div className="space-y-1">
-            <div className="inline-block px-3 py-1 bg-amber-600 text-white rounded-full text-xs font-black shadow-sm">
+            <div className="inline-block px-3 py-1 bg-amber-600 text-candy-orange-on rounded-full text-xs font-black shadow-sm">
               🦖 史前恐龙奇迹复活
             </div>
             <h3 className="text-3xl font-black text-slate-800">
@@ -476,12 +476,12 @@ export function DinoArchaeology() {
             <button
               type="button"
               onClick={() => playRoarSfx(currentDino.roarTone)}
-              className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-black text-xs rounded-2xl shadow-md transition-transform active:scale-95 flex items-center gap-1.5"
+              className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-candy-orange-on font-black text-xs rounded-2xl shadow-md transition-transform active:scale-95 flex items-center gap-1.5"
             >
               <span>🔊</span>
               <span>聆听恐龙咆哮声</span>
             </button>
-            <span className="px-4 py-2 bg-emerald-600 text-white font-black text-xs rounded-2xl shadow-md flex items-center gap-1">
+            <span className="px-4 py-2 bg-emerald-600 text-candy-green-on font-black text-xs rounded-2xl shadow-md flex items-center gap-1">
               <span>⭐</span>
               <span>+8 探索星</span>
             </span>

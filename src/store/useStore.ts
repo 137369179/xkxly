@@ -42,11 +42,14 @@ function isPlainObj(v: unknown): v is Record<string, unknown> {
 }
 
 /**
- * 真正深合并（P2-8）：原 `restoreProgress` / `merge` 用 `{ ...initialProgress, ...override }` 是浅合并，
+ * 单层深合并（P2-8）：原 `restoreProgress` / `merge` 用 `{ ...initialProgress, ...override }` 是浅合并，
  * 老数据升级时若新增了嵌套字段（如 researchStats.exploreSeconds），覆盖层（旧 backup）里没有该键，
  * 浅合并会直接用旧对象整体替换初始值对象，导致新字段丢失为 undefined。
- * 这里对嵌套纯对象做一层「以初始值为底、覆盖层优先」的合并，补齐缺失的新字段默认值；
+ * 这里对嵌套纯对象做「以初始值为底、覆盖层优先」的 **一层** 展开合并，补齐一级嵌套字段的缺失默认值；
+ * 对于二级以上的嵌套（如 researchStats.subField.xxx），覆盖层对象会整体覆盖，不做递归补全。
  * 数组与原始值直接以覆盖层为准（符合进度语义，避免按索引合并出错）。
+ *
+ * ⚠️ 若将来新增三层嵌套默认值，需将此函数改为递归合并，或在各 slice 中单独补全。
  */
 function deepMergeProgress(base: Progress, override: Partial<Progress>): Progress {
   const out: Record<string, unknown> = { ...base };

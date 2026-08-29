@@ -400,7 +400,7 @@ export function MagicColoringBook() {
                 onClick={() => handleSelectTemplate(idx)}
                 className={`py-2 px-3 min-h-[44px] rounded-2xl font-black text-xs transition-all border-2 flex items-center gap-1 shadow-sm focus:outline-none focus-visible:ring-4 focus-visible:ring-pink-300 ${
                   isSel
-                    ? 'bg-pink-500 text-white border-pink-600 shadow-md scale-105'
+                    ? 'bg-pink-500 text-candy-pink-on border-pink-600 shadow-md scale-105'
                     : 'bg-white text-slate-700 border-slate-200 hover:border-pink-300'
                 }`}
               >
@@ -457,7 +457,7 @@ export function MagicColoringBook() {
             <button
               type="button"
               onClick={handleMagicAutoFill}
-              className="py-1.5 px-3 min-h-[44px] rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white text-xs font-black shadow-sm hover:opacity-95 active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-pink-300"
+              className="py-1.5 px-3 min-h-[44px] rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-candy-pink-on text-xs font-black shadow-sm hover:opacity-95 active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-pink-300"
             >
               🪄 魔力上色
             </button>
@@ -564,7 +564,7 @@ export function MagicColoringBook() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
-              className="bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 rounded-2xl p-4 text-white text-center shadow-lg space-y-1"
+              className="bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 rounded-2xl p-4 text-candy-pink-on text-center shadow-lg space-y-1"
             >
               <p className="text-base font-black">🎉【{template.name}】苏醒复活啦！</p>
               <p className="text-xs font-extrabold opacity-95">

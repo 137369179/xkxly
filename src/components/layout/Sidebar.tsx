@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { useRef } from 'react';
-import { NAV_ITEMS, navByCategory, NAV_CATEGORY_META, type NavItem } from '@/data/nav';
+import { NAV_ITEMS, type NavItem } from '@/data/nav';
 import { navigate, type RouteId } from '@/lib/router';
 import { TONE_STYLE } from '@/lib/tones';
 import { cn } from '@/lib/utils';
@@ -11,24 +11,27 @@ import { FluffyIcon } from '@/components/ui/FluffyIcon';
 import { useTranslation } from '@/i18n/useTranslation';
 import { announceToScreenReader, useKeyboardNavigation } from '@/components/Accessibility';
 
-/** 核心入口（不归入品类分组，置顶常驻） */
-const CORE_IDS = ['home', 'today'] as const;
-
+/**
+ * 主导航（改版 Phase B4）
+ * 只保留 4 个核心入口（首页 / 乐园地图 / 游戏乐园 / 成长荣誉馆），
+ * 其余 38 个模块全部交给乐园地图 hall —— 替代原来的 8 品类 × 32 项平铺。
+ */
 export function Sidebar({ active }: { active: RouteId }) {
   const { t: translate } = useTranslation();
   const stars = useStars();
   const badgeCount = useBadgeCount();
   const streak = useStreak();
   const btnRefs = useRef<Map<string, HTMLElement>>(new Map());
+  /** 核心 4 入口：复用 NAV_ITEMS 的 bottom 标记，与移动端底栏同一数据源 */
+  const items = NAV_ITEMS.filter((i) => i.bottom);
 
   // 键盘方向键导航
   const { containerRef } = useKeyboardNavigation({
-    items: [...NAV_ITEMS].map((item) => ({
+    items: items.map((item) => ({
       id: item.id,
       element: btnRefs.current.get(item.id),
     })),
     onNavigate: (idx) => {
-      const items = [...NAV_ITEMS];
       if (items[idx]) {
         sfxTap();
         navigate(items[idx]?.id ?? 'home');
@@ -83,8 +86,7 @@ export function Sidebar({ active }: { active: RouteId }) {
     );
   };
 
-  const coreItems = NAV_ITEMS.filter((i) => CORE_IDS.includes(i.id as (typeof CORE_IDS)[number]));
-  const groups = navByCategory();
+  const coreItems = items;
 
   return (
     <aside ref={containerRef} className="hidden w-[248px] shrink-0 flex-col gap-3 p-4 lg:flex xl:w-[276px] rounded-[2.2rem] border-4 border-pink-200/90 bg-white/95 shadow-fluffy"
@@ -111,21 +113,25 @@ export function Sidebar({ active }: { active: RouteId }) {
       <nav className="flex flex-col gap-2.5 overflow-y-auto pr-1">
         {coreItems.map(renderItem)}
 
-        {groups.map((g) => {
-          const meta = NAV_CATEGORY_META.find((m) => m.key === g.key) ?? { key: g.key, label: g.key, emoji: '📚', tone: 'blue' };
-          const tone = TONE_STYLE[meta.tone];
-          return (
-            <div key={g.key} className="mt-1">
-              <div className="mb-1.5 flex items-center gap-1.5 px-2">
-                <span className="text-sm">{meta.emoji}</span>
-                <span className="text-xs font-extrabold uppercase tracking-wider" style={{ color: tone.deep }}>
-                  {translate(`categories.${g.key}`) || g.key}
-                </span>
-              </div>
-              <div className="flex flex-col gap-2">{g.items.map(renderItem)}</div>
-            </div>
-          );
-        })}
+        {/* 其余模块统一走乐园地图：一个大入口替代 32 项平铺 */}
+        <button
+          onClick={() => {
+            sfxTap();
+            navigate('hall');
+          }}
+          className={cn(
+            'no-select mt-1 flex min-h-[52px] items-center gap-3 rounded-[1.3rem] px-3.5 py-2.5 text-left',
+            'bg-candy-purple-soft transition-all duration-150 active:translate-y-[2px]',
+          )}
+        >
+          <span className="text-2xl" aria-hidden="true">🗺️</span>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-[16px] leading-tight font-extrabold text-candy-purple-deep">
+              全部乐园
+            </span>
+            <span className="block truncate text-xs font-semibold text-ink-soft">42 个乐园都在地图里</span>
+          </span>
+        </button>
       </nav>
 
       {/* 底部星星统计 */}

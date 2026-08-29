@@ -177,7 +177,7 @@ export default function GeographyPage() {
                 type="button"
                 onClick={() => handleSelect(c)}
                 className={`rounded-2xl border-2 px-3.5 py-2 text-sm font-black transition-transform active:scale-95 ${
-                  selected.id === c.id ? 'bg-emerald-600 text-white border-emerald-700 scale-105 shadow-md' : 'bg-white text-emerald-900 border-emerald-200 hover:scale-102'
+                  selected.id === c.id ? 'bg-emerald-600 text-candy-green-on border-emerald-700 scale-105 shadow-md' : 'bg-white text-emerald-900 border-emerald-200 hover:scale-102'
                 }`}
               >
                 {c.emoji} {c.nameZh}

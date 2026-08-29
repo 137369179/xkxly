@@ -21,6 +21,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 // 详情 / 训练 / 计划 都依赖 poems-deep（519KB，gzip ~100KB），懒加载切成独立 chunk，
 // 只有真正切到「训练 / 计划」或打开某首诗详情时才拉取，诗库列表首开不背这 100KB。
 import type { DetailTab } from './PoemDetail';
+import { TodayPoemHero } from './TodayPoemHero';
 const PoemDetail = lazy(() => import('./PoemDetail'));
 const TrainView = lazy(() => import('./TrainView'));
 const PlanView = lazy(() => import('./PlanView'));
@@ -31,6 +32,43 @@ const PoetWorks = lazy(() => import('./PoetWorks').then(m => ({ default: m.PoetW
 const FlyingFlowers = lazy(() => import('./FlyingFlowerDuel').then(m => ({ default: m.FlyingFlowerDuel })));
 
 type ViewKey = 'lib' | 'train' | 'plan' | 'notes' | 'timeline' | 'archive' | 'works' | 'flying';
+
+/** 顶部主入口（4 个）：孩子真正会用的三个 + 「更多」收起成人向视图 */
+const MAIN_VIEWS: ViewKey[] = ['lib', 'train', 'flying'];
+/** 收进「更多」的视图（功能不删，只是降低层级） */
+const MORE_VIEWS: { k: ViewKey; e: string; l: string }[] = [
+  { k: 'plan', e: '🗺️', l: '计划' },
+  { k: 'notes', e: '📝', l: '笔记' },
+  { k: 'timeline', e: '⏳', l: '诗人' },
+  { k: 'archive', e: '📜', l: '档案' },
+  { k: 'works', e: '📖', l: '作品' },
+];
+
+/**
+ * 儿童化主题大卡（8 个）
+ * 原 45 个 themes + 51 个 imagery 全是纯文字 chip，不识字的孩子完全无法使用。
+ * 这里取 themes 里覆盖最广的 8 个做成大卡：山水/励志/春天/思乡/植物/花/秋天/动物，
+ * 末尾 4 个为并列同位次时优先挑儿童可感知的（动物 > 月亮）。
+ * 过滤逻辑与数据完全不动，只换渲染层。
+ */
+const THEME_CARDS: { key: string; emoji: string }[] = [
+  { key: '山水', emoji: '🏔️' },
+  { key: '励志', emoji: '💪' },
+  { key: '春天', emoji: '🌱' },
+  { key: '思乡', emoji: '🏠' },
+  { key: '植物', emoji: '🌿' },
+  { key: '花', emoji: '🌺' },
+  { key: '秋天', emoji: '🍁' },
+  { key: '动物', emoji: '🐾' },
+];
+
+/** 难度星星卡：复用数据里已有的 difficulty 字段（1-5），收敛成 3 档 */
+type DiffKey = 'easy' | 'mid' | 'hard';
+const DIFFICULTY_CARDS: { key: DiffKey; label: string; stars: string; test: (d: number) => boolean }[] = [
+  { key: 'easy', label: '简单', stars: '🌟', test: (d) => d <= 2 },
+  { key: 'mid', label: '中等', stars: '🌟🌟', test: (d) => d === 3 },
+  { key: 'hard', label: '挑战', stars: '🌟🌟🌟', test: (d) => d >= 4 },
+];
 
 /** 诗卡 —— memo 化，只有 read/fav/deep 状态变化时才重渲染 */
 const PoemCard = memo(function PoemCard({
@@ -96,12 +134,21 @@ export default function PoemsPage({ param }: { param?: string }) {
   const [gen, setGen] = useState<Set<string>>(new Set());
   const [thm, setThm] = useState<Set<string>>(new Set());
   const [img, setImg] = useState<Set<string>>(new Set());
+  // 难度星星卡：Set<DiffKey>，为空即「全部」
+  const [diff, setDiff] = useState<Set<DiffKey>>(new Set());
 
   const toggle = (set: Set<string>, setter: (s: Set<string>) => void, v: string) => {
     const n = new Set(set);
     if (n.has(v)) n.delete(v);
     else n.add(v);
     setter(n);
+  };
+
+  const toggleDiff = (v: DiffKey) => {
+    const n = new Set(diff);
+    if (n.has(v)) n.delete(v);
+    else n.add(v);
+    setDiff(n);
   };
 
   const dossierIds = useMemo(() => new Set(Object.keys(DOSSIERS)), []);
@@ -111,6 +158,19 @@ export default function PoemsPage({ param }: { param?: string }) {
   const THEMES = useMemo(() => [...new Set(POEMS.flatMap((p) => p.themes))].sort(), []);
   const IMAGERY = useMemo(() => [...new Set(POEMS.flatMap((p) => p.imagery))].sort(), []);
 
+  /** 主题大卡上的诗数（385 首只扫一遍，列表渲染不参与） */
+  const THEME_COUNTS = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const p of POEMS) for (const t of p.themes) m.set(t, (m.get(t) ?? 0) + 1);
+    return m;
+  }, []);
+  /** 难度星星卡上的诗数 */
+  const DIFF_COUNTS = useMemo(() => {
+    const m = new Map<DiffKey, number>();
+    for (const c of DIFFICULTY_CARDS) m.set(c.key, POEMS.filter((p) => c.test(p.difficulty ?? 0)).length);
+    return m;
+  }, []);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return POEMS.filter((p) => {
@@ -119,6 +179,8 @@ export default function PoemsPage({ param }: { param?: string }) {
       if (gen.size && !gen.has(p.genre)) return false;
       if (thm.size && !p.themes.some((t) => thm.has(t))) return false;
       if (img.size && !p.imagery.some((i) => img.has(i))) return false;
+      // 难度星星卡：命中任一被选中的档位即保留；未选任何档位 = 全部
+      if (diff.size && !DIFFICULTY_CARDS.some((c) => diff.has(c.key) && c.test(p.difficulty ?? 0))) return false;
       if (!q) return true;
       return (
         p.title.toLowerCase().includes(q) ||
@@ -128,7 +190,7 @@ export default function PoemsPage({ param }: { param?: string }) {
         p.themes.some((t) => t.toLowerCase().includes(q))
       );
     });
-  }, [query, favOnly, dyn, gen, thm, img, favSet]);
+  }, [query, favOnly, dyn, gen, thm, img, diff, favSet]);
 
   // 性能优化（核心加强 P）：诗卡分页加载
   // 最多 385 首诗一次性渲染 385 个 motion.button，DOM 节点 + 动画监听开销大。
@@ -140,7 +202,7 @@ export default function PoemsPage({ param }: { param?: string }) {
   // 筛选条件变化时重置分页
   useEffect(() => {
     setPoemVisible(POEM_PAGE_SIZE);
-  }, [query, favOnly, dyn, gen, thm, img, favSet]);
+  }, [query, favOnly, dyn, gen, thm, img, diff, favSet]);
 
   const poemVisible_list = filtered.slice(0, poemVisible);
   const poemHasMore = poemVisible < filtered.length;
@@ -217,6 +279,10 @@ export default function PoemsPage({ param }: { param?: string }) {
       } else if (e.key === '3') {
         e.preventDefault();
         triggerHaptic(20);
+        setView('flying');
+      } else if (e.key === '4') {
+        e.preventDefault();
+        triggerHaptic(20);
         setView('plan');
       } else if (e.key === 'f' || e.key === 'F') {
         e.preventDefault();
@@ -236,11 +302,11 @@ export default function PoemsPage({ param }: { param?: string }) {
       {/* 快捷操作提示条 */}
       <div className="text-center mb-3">
         <span className="inline-block text-xs text-pink-900 font-bold bg-pink-50/90 px-3 py-1 rounded-xl border border-pink-200">
-          ⌨️ 键盘快捷操作：数字 1-3 切换主专区 (诗库/训练/计划) · F 飞花令对决 · Esc 关闭详情
+          ⌨️ 键盘快捷操作：数字 1-3 切换专区（诗库/训练/飞花令）· F 飞花令对决 · Esc 关闭详情
         </span>
       </div>
 
-      {/* 主导航：核心 3 个 + 「更多」下拉 */}
+      {/* 主导航：孩子常用的 3 个 + 「更多」下拉（成人向视图收进更多，功能不删） */}
       <div className="mb-4 flex gap-2">
         <Seg
           active={view === 'lib'}
@@ -261,17 +327,17 @@ export default function PoemsPage({ param }: { param?: string }) {
           label={t('poem.train')}
         />
         <Seg
-          active={view === 'plan'}
+          active={view === 'flying'}
           onClick={() => {
             triggerHaptic(20);
-            setView('plan');
+            setView('flying');
           }}
-          emoji="🗺️"
-          label={t('poem.plan')}
+          emoji="🌸"
+          label={t('poem.flying')}
         />
         <div className="relative">
           <Seg
-            active={!['lib', 'train', 'plan'].includes(view)}
+            active={!MAIN_VIEWS.includes(view)}
             onClick={() => {
               triggerHaptic(20);
               setShowMoreMenu((v) => !v);
@@ -281,13 +347,7 @@ export default function PoemsPage({ param }: { param?: string }) {
           />
           {showMoreMenu && (
             <div className="absolute right-0 top-full z-20 mt-2 w-48 overflow-hidden rounded-2xl border border-gray-100 bg-white/95 p-1 shadow-candy-sm backdrop-blur">
-              {[
-                { k: 'notes', e: '📝', l: t('poem.notes') },
-                { k: 'timeline', e: '⏳', l: t('poem.poets') },
-                { k: 'archive', e: '📜', l: t('poem.archive') },
-                { k: 'works', e: '📖', l: t('poem.works') },
-                { k: 'flying', e: '🌸', l: t('poem.flying') },
-              ].map((m) => (
+              {MORE_VIEWS.map((m) => (
                 <button
                   key={m.k}
                   onClick={() => {
@@ -297,7 +357,7 @@ export default function PoemsPage({ param }: { param?: string }) {
                   }}
                   className={cn(
                     'flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-extrabold transition-colors',
-                    view === m.k ? 'bg-candy-pink text-white' : 'text-ink-soft hover:bg-pink-50',
+                    view === m.k ? 'bg-candy-pink text-candy-pink-on' : 'text-ink-soft hover:bg-pink-50',
                   )}
                 >
                   <span>{m.e}</span>
@@ -311,6 +371,9 @@ export default function PoemsPage({ param }: { param?: string }) {
 
       {view === 'lib' && (
         <>
+          {/* 今日推荐诗：首页直达「开始学」，从古诗首页到学一首诗 ≤2 层 */}
+          <TodayPoemHero onOpen={openPoem} />
+
           {/* 一行完成：搜索 + 收藏 + 拼音 + 高级筛选入口 */}
           <Panel className="!py-3">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -331,17 +394,67 @@ export default function PoemsPage({ param }: { param?: string }) {
                   {t('poem.pinyinToggle')}
                 </ChipBtn>
                 <ChipBtn
-                  active={showAdvanced || (dyn.size + gen.size + thm.size + img.size) > 0}
+                  active={showAdvanced || (dyn.size + gen.size + img.size) > 0}
                   onClick={() => setShowAdvanced((v) => !v)}
                   emoji="🎛️"
-                  badge={(dyn.size + gen.size + thm.size + img.size) || undefined}
+                  badge={(dyn.size + gen.size + img.size) || undefined}
                 >
                   {t('poem.advanced')}
                 </ChipBtn>
               </div>
             </div>
 
-            {/* 高级筛选：默认折叠，点开才显示 */}
+            {/* 挑一挑：主题大卡 + 难度星星卡（点一下即筛选，不识字的孩子看图就能选） */}
+            <div className="mt-3 border-t border-gray-100 pt-3">
+              <p className="mb-2 text-sm font-black text-ink">🎯 挑一挑 · 想读哪一类？</p>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {THEME_CARDS.map((c) => (
+                  <BigPickCard
+                    key={c.key}
+                    emoji={c.emoji}
+                    label={c.key}
+                    count={THEME_COUNTS.get(c.key) ?? 0}
+                    selected={thm.has(c.key)}
+                    onClick={() => {
+                      sfxTap();
+                      triggerHaptic(20);
+                      toggle(thm, setThm, c.key);
+                    }}
+                  />
+                ))}
+              </div>
+
+              <p className="mb-2 mt-3 text-sm font-black text-ink">⭐ 选难度 · 能读多难的？</p>
+              <div className="grid grid-cols-3 gap-2">
+                {DIFFICULTY_CARDS.map((c) => (
+                  <BigPickCard
+                    key={c.key}
+                    emoji={c.stars}
+                    label={c.label}
+                    count={DIFF_COUNTS.get(c.key) ?? 0}
+                    selected={diff.has(c.key)}
+                    onClick={() => {
+                      sfxTap();
+                      triggerHaptic(20);
+                      toggleDiff(c.key);
+                    }}
+                  />
+                ))}
+              </div>
+
+              {(thm.size > 0 || diff.size > 0) && (
+                <div className="mt-2 flex justify-end">
+                  <button
+                    className="text-xs font-extrabold text-ink-soft underline-offset-2 hover:text-candy-pink hover:underline"
+                    onClick={() => { setThm(new Set()); setDiff(new Set()); }}
+                  >
+                    不看分类，看全部
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* 高级筛选：成人向的文字分面（朝代 / 体裁 / 全量主题 / 意象），默认折叠 */}
             {showAdvanced && (
               <div className="mt-3 space-y-2 border-t border-gray-100 pt-3">
                 <FacetCompact label={t('poem.dynastyLabel')} values={DYNASTIES} sel={dyn} onToggle={(v) => toggle(dyn, setDyn, v)} />
@@ -351,7 +464,7 @@ export default function PoemsPage({ param }: { param?: string }) {
                 <div className="flex justify-end">
                   <button
                     className="text-xs font-extrabold text-ink-soft underline-offset-2 hover:text-candy-pink hover:underline"
-                    onClick={() => { setDyn(new Set()); setGen(new Set()); setThm(new Set()); setImg(new Set()); }}
+                    onClick={() => { setDyn(new Set()); setGen(new Set()); setThm(new Set()); setImg(new Set()); setDiff(new Set()); }}
                   >
                     {t('poem.clearFilters')}
                   </button>
@@ -477,7 +590,7 @@ function Seg({ active, onClick, emoji, label }: { active: boolean; onClick: () =
       onClick={onClick}
       className={cn(
         'no-select flex flex-1 items-center justify-center gap-1.5 rounded-2xl px-3 py-2.5 text-sm font-extrabold transition-all active:translate-y-[2px] sm:text-base',
-        active ? 'bg-candy-pink text-white shadow-candy-sm' : 'bg-gray-100 text-ink-soft hover:bg-pink-100',
+        active ? 'bg-candy-pink text-candy-pink-on shadow-candy-sm' : 'bg-gray-100 text-ink-soft hover:bg-pink-100',
       )}
     >
       <span>{emoji}</span>
@@ -498,7 +611,7 @@ function ChipBtn({
       onClick={onClick}
       className={cn(
         'tap-target relative inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-extrabold transition-colors sm:text-sm',
-        active ? 'bg-candy-pink text-white shadow-candy-sm' : 'bg-gray-100 text-ink-soft hover:bg-pink-100',
+        active ? 'bg-candy-pink text-candy-pink-on shadow-candy-sm' : 'bg-gray-100 text-ink-soft hover:bg-pink-100',
       )}
     >
       <span>{emoji}</span>
@@ -508,6 +621,43 @@ function ChipBtn({
           {badge}
         </span>
       )}
+    </button>
+  );
+}
+
+/**
+ * 儿童化筛选大卡（≥88px 触控，图标 + 中文名 + 数量）
+ * 选中态：粉底 + 粉边 + 右上角 ✅，孩子一眼看得出「我选了这个」。
+ */
+function BigPickCard({
+  emoji, label, count, selected, onClick,
+}: {
+  emoji: string;
+  label: string;
+  count: number;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={selected}
+      className={cn(
+        'no-select relative flex min-h-[88px] flex-col items-center justify-center gap-0.5 rounded-3xl border-4 px-2 py-2 transition-transform active:translate-y-[2px]',
+        selected
+          ? 'border-candy-pink bg-candy-pink-soft shadow-candy-sm'
+          : 'border-white bg-white/85 hover:bg-candy-pink-soft/50',
+      )}
+    >
+      {selected && (
+        <span className="absolute right-1.5 top-1.5 text-sm leading-none">✅</span>
+      )}
+      <span className="text-2xl leading-none">{emoji}</span>
+      <span className={cn('text-base font-black', selected ? 'text-candy-pink-deep' : 'text-ink')}>
+        {label}
+      </span>
+      <span className="text-xs font-bold text-ink-soft">{count} 首</span>
     </button>
   );
 }
@@ -525,7 +675,7 @@ function FacetCompact({ label, values, sel, onToggle }: { label: string; values:
             onClick={() => onToggle(v)}
             className={cn(
               'tap-target rounded-full px-2.5 py-0.5 text-xs font-extrabold transition-colors',
-              sel.has(v) ? 'bg-candy-pink text-white shadow-candy-xs' : 'bg-gray-100 text-ink-soft hover:bg-pink-100',
+              sel.has(v) ? 'bg-candy-pink text-candy-pink-on shadow-candy-xs' : 'bg-gray-100 text-ink-soft hover:bg-pink-100',
             )}
           >
             {v}

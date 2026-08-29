@@ -76,7 +76,7 @@ export function ParentPosterSection() {
               <a
                 href={posterUrl}
                 download={translate('parent.posterFileName')}
-                className="flex-1 rounded-2xl bg-candy-purple py-2.5 text-center font-extrabold text-white shadow-md hover:bg-candy-purple-deep transition-colors"
+                className="flex-1 rounded-2xl bg-candy-purple py-2.5 text-center font-extrabold text-candy-purple-on shadow-md hover:bg-candy-purple-deep transition-colors"
               >
                 {translate('parent.downloadPoster')}
               </a>

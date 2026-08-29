@@ -189,7 +189,7 @@ export function LogicDetective() {
               onClick={() => handleSelectCase(idx)}
               className={`px-4 py-2.5 rounded-2xl font-black text-xs whitespace-nowrap transition-all flex items-center gap-1.5 shadow-sm border-2 ${
                 active
-                  ? 'bg-emerald-600 text-white border-emerald-700 shadow-md scale-105'
+                  ? 'bg-emerald-600 text-candy-green-on border-emerald-700 shadow-md scale-105'
                   : 'bg-white text-slate-700 border-emerald-100 hover:bg-emerald-50'
               }`}
             >

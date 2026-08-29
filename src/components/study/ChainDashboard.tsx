@@ -186,7 +186,7 @@ export function ChainDashboard() {
                 <div className="mt-2 flex gap-1">
                   <button
                     onClick={() => handleReset(f.key)}
-                    className="flex-1 rounded-md bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white"
+                    className="flex-1 rounded-md bg-red-500 px-1.5 py-0.5 text-xs font-bold text-candy-pink-on"
                   >
                     确认重置
                   </button>

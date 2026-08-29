@@ -409,7 +409,7 @@ export function TraceCanvas({ char, tone = 'blue', onPass, hint }: TraceCanvasPr
             <motion.div
               initial={{ scale: 0, rotate: -20 }}
               animate={{ scale: 1, rotate: -12 }}
-              className="pointer-events-none absolute -right-2 -top-2 rounded-full bg-candy-green px-4 py-2 text-lg font-black text-white shadow-lg"
+              className="pointer-events-none absolute -right-2 -top-2 rounded-full bg-candy-green px-4 py-2 text-lg font-black text-candy-green-on shadow-lg"
             >
               {tr('hanzi.goodJob')}
             </motion.div>

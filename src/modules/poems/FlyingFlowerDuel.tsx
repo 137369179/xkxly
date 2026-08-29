@@ -396,7 +396,7 @@ export function FlyingFlowerDuel() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleNextLine}
-                className="py-3.5 px-8 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 text-white text-base font-black shadow-lg shadow-pink-200"
+                className="py-3.5 px-8 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 text-candy-pink-on text-base font-black shadow-lg shadow-pink-200"
               >
                 ✨ 答对对决！下一句名诗
               </motion.button>

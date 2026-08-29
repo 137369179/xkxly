@@ -23,6 +23,7 @@ import { TONE_STYLE, type Tone } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 import { PageHeader, Panel, PanelTitle } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
+import { UndoToast, useUndoToast } from '@/components/feedback/UndoToast';
 import { CandyButton } from '@/components/ui/Button';
 import { StarCounter } from '@/components/ui/Stars';
 import { BigPraise } from '@/components/ui/Feedback';
@@ -66,6 +67,9 @@ export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?:
   const mastery = useMastery();
   const available = useAvailableStars();
   const buySticker = useStore((s) => s.buySticker);
+  const refundSticker = useStore((s) => s.refundSticker);
+  /** 可撤销容错：兑换贴纸后 5 秒内可退回星星 */
+  const undoToast = useUndoToast();
 
   const ownedBadges = useMemo(() => new Set(badges), [badges]);
   const ownedStickers = useMemo(() => new Set(stickerList), [stickerList]);
@@ -140,6 +144,11 @@ export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?:
       celebrateBig();
       if (justGotTimerRef.current) clearTimeout(justGotTimerRef.current);
       justGotTimerRef.current = setTimeout(() => setJustGot(null), 2200);
+      // 可撤销容错：误兑换可在 5 秒内退回星星（对标用户要求「防误触与可撤销」）
+      undoToast.show(t('growth.undoHint') || '已兑换贴纸，点撤销退回星星', () => {
+        refundSticker(id, cost);
+        setJustGot((cur) => (cur === id ? null : cur));
+      });
     }
   };
 
@@ -428,6 +437,14 @@ export default function GrowthMuseumPage({ initialTab = 'tree' }: { initialTab?:
       </AnimatePresence>
 
       <BigPraise show={!!justGot} text={t('rewards.exchangeSuccess')} emoji={justGot ? STICKER_MAP.get(justGot)?.emoji ?? '🌟' : '🌟'} />
+
+      {/* 兑换撤销（5 秒窗口，防误触） */}
+      <UndoToast
+        open={undoToast.open}
+        message={undoToast.message}
+        onUndo={undoToast.undo}
+        onClose={undoToast.hide}
+      />
     </div>
   );
 }

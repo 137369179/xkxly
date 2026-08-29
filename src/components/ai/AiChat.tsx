@@ -124,7 +124,7 @@ export function AiChat({
                 setShowPinyin((v) => !v);
               }}
               className={`rounded-lg px-2 py-0.5 text-xs transition border ${
-                showPinyin ? 'bg-pink-500 text-white border-pink-600' : 'bg-white text-pink-600 border-pink-200'
+                showPinyin ? 'bg-pink-500 text-candy-pink-on border-pink-600' : 'bg-white text-pink-600 border-pink-200'
               }`}
             >
               {showPinyin ? '🔤 纯汉字' : '拼 拼音'}
@@ -164,7 +164,7 @@ export function AiChat({
             <div className="flex items-start gap-2">
               <AiAvatar size={30} />
               <div className="max-w-[85%] rounded-[1.1rem] rounded-tl-md bg-white p-3.5 shadow-sm">
-                <div className="text-base leading-relaxed font-medium text-[#5c2e3d]">
+                <div className="text-base leading-relaxed font-medium text-[#4a2b1f]">
                   {showPinyin ? <RubyText text={x.a} clickable /> : <span>{x.a}</span>}
                 </div>
                 <div className="mt-2 flex justify-end">
@@ -255,7 +255,7 @@ export function AiChat({
         </button>
       </div>
 
-      {tip && <p className="text-sm font-bold text-[#c2410c]">{tip}</p>}
+      {tip && <p className="text-sm font-bold text-[#b45f09]">{tip}</p>}
     </div>
   );
 }

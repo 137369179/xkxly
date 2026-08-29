@@ -314,7 +314,7 @@ function SeasonMatchGame() {
         >
           <p className="text-lg font-black text-orange-700">{t('weather.allMatched')}</p>
           <p className="text-sm font-bold text-orange-600">⭐⭐⭐ {t('learning.excellent')}</p>
-          <button type="button" onClick={reset} className="mt-2 rounded-lg bg-orange-300 px-3 py-1.5 min-h-[44px] text-xs font-bold text-white hover:bg-orange-400 focus:outline-none focus-visible:ring-4 focus-visible:ring-orange-300">
+          <button type="button" onClick={reset} className="mt-2 rounded-lg bg-orange-300 px-3 py-1.5 min-h-[44px] text-xs font-bold text-candy-orange-on hover:bg-orange-400 focus:outline-none focus-visible:ring-4 focus-visible:ring-orange-300">
             {t('weather.playAgain')}
           </button>
         </motion.div>
@@ -350,7 +350,7 @@ function WeatherLabImpl() {
           aria-selected={tab === 'generator'}
           type="button"
           onClick={() => handleSelectTab('generator')}
-          className={cn('rounded-xl px-4 py-2 min-h-[44px] text-sm font-extrabold transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-orange-300', tab === 'generator' ? 'bg-orange-400 text-white shadow-md' : 'bg-white text-ink-soft shadow-sm')}
+          className={cn('rounded-xl px-4 py-2 min-h-[44px] text-sm font-extrabold transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-orange-300', tab === 'generator' ? 'bg-orange-400 text-candy-orange-on shadow-md' : 'bg-white text-ink-soft shadow-sm')}
         >
           {t('weather.tabGenerator')}
         </button>
@@ -359,7 +359,7 @@ function WeatherLabImpl() {
           aria-selected={tab === 'match'}
           type="button"
           onClick={() => handleSelectTab('match')}
-          className={cn('rounded-xl px-4 py-2 min-h-[44px] text-sm font-extrabold transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-pink-300', tab === 'match' ? 'bg-pink-400 text-white shadow-md' : 'bg-white text-ink-soft shadow-sm')}
+          className={cn('rounded-xl px-4 py-2 min-h-[44px] text-sm font-extrabold transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-pink-300', tab === 'match' ? 'bg-pink-400 text-candy-pink-on shadow-md' : 'bg-white text-ink-soft shadow-sm')}
         >
           {t('weather.tabMatch')}
         </button>
@@ -368,7 +368,7 @@ function WeatherLabImpl() {
           aria-selected={tab === 'info'}
           type="button"
           onClick={() => handleSelectTab('info')}
-          className={cn('rounded-xl px-4 py-2 min-h-[44px] text-sm font-extrabold transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300', tab === 'info' ? 'bg-blue-400 text-white shadow-md' : 'bg-white text-ink-soft shadow-sm')}
+          className={cn('rounded-xl px-4 py-2 min-h-[44px] text-sm font-extrabold transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300', tab === 'info' ? 'bg-blue-400 text-candy-blue-on shadow-md' : 'bg-white text-ink-soft shadow-sm')}
         >
           {t('weather.tabInfo')}
         </button>

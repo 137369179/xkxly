@@ -1,4 +1,4 @@
-import { useEffect, useMemo, lazy, Suspense } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRoute } from '@/lib/router';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -7,6 +7,7 @@ import { stopSpeaking } from '@/lib/speechCore';
 import HomePage from '@/modules/home/HomePage';
 const CompanionPage = lazy(() => import('@/modules/companion/CompanionPage'));
 const TodayPage = lazy(() => import('@/modules/today/TodayPage'));
+const HallPage = lazy(() => import('@/modules/hall/HallPage'));
 const LettersPage = lazy(() => import('@/modules/letters/LettersPage'));
 const PoemsPage = lazy(() => import('@/modules/poems/PoemsPage'));
 const NumbersPage = lazy(() => import('@/modules/numbers/NumbersPage'));
@@ -52,15 +53,20 @@ export default function Page() {
   const { route, param } = useRoute();
 
   useEffect(() => {
-    // 切页副作用：停语音 + 回顶部
+    // 切页副作用：停语音 + 回顶部 + 辅助功能焦点同步至主要内容
     stopSpeaking();
     window.scrollTo({ top: 0 });
+    const mainEl = document.getElementById('main-content');
+    if (mainEl && typeof mainEl.focus === 'function') {
+      mainEl.focus({ preventScroll: true });
+    }
   }, [route, param]);
 
-  const page = useMemo(() => {
+  function renderPage() {
     switch (route) {
       case 'home': return <HomePage />;
       case 'today': return <TodayPage />;
+      case 'hall': return <HallPage />;
       case 'companion': return <CompanionPage />;
       case 'letters': return <LettersPage />;
       case 'poems': return <PoemsPage />;
@@ -104,7 +110,7 @@ export default function Page() {
       case 'duel': return <ParentChildDuel />;
       default: return <HomePage />;
     }
-  }, [route]);
+  }
 
   return (
     <ErrorBoundary resetKey={`${route}:${param ?? ''}`} >
@@ -117,7 +123,7 @@ export default function Page() {
           transition={{ duration: 0.22, ease: 'easeOut' }}
         >
           {/* P1-7：路由级轻量骨架屏（内容骨架占位，替代全屏 Loading，减少 CLS） */}
-          <Suspense fallback={<RouteSkeleton />}>{page}</Suspense>
+          <Suspense fallback={<RouteSkeleton />}>{renderPage()}</Suspense>
         </motion.div>
       </AnimatePresence>
     </ErrorBoundary>

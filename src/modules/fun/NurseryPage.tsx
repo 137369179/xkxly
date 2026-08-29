@@ -14,10 +14,10 @@ import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/i18n/useTranslation';
 
 const THEME_COLORS: Record<RhymeTheme, string> = {
-  animals: '#ff5c7a',
-  nature: '#5fd68b',
-  number: '#e5ac2e',
-  daily: '#b8f0d8',
+  animals: '#ff5c8a',
+  nature: '#62cc8a',
+  number: '#d9860a',
+  daily: '#bcebce',
   family: '#ff8db0',
 };
 
@@ -108,7 +108,7 @@ export function NurseryPage() {
           const rhymes = byTheme[theme] ?? [];
           if (!rhymes?.length) return null;
           const tl = THEME_LABEL[theme] ?? { emoji: '🎵', label: theme };
-          const color = THEME_COLORS[theme] ?? '#ff5c7a';
+          const color = THEME_COLORS[theme] ?? '#ff5c8a';
           return (
             <div key={theme}>
               <div className="mb-2 flex items-center gap-2">

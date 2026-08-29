@@ -74,7 +74,7 @@ export function ScreenTimeReport() {
               className="h-full rounded-full transition-all duration-500"
               style={{
                 width: `${todayPercent}%`,
-                background: todayPercent >= 100 ? '#e05a80' : '#8b6ef0',
+                background: todayPercent >= 100 ? '#c9285c' : '#8f5bff',
               }}
             />
           </div>

@@ -23,7 +23,7 @@ interface StrokeAnimationProps {
   strokeMs?: number;
 }
 
-const INK = '#5c2e3d'; // 主墨色（--color-ink 暖墨）
+const INK = '#4a2b1f'; // 主墨色（--color-ink 暖墨）
 const INK_DONE = '#471f2c';
 const GUIDE = '#ece5ff';
 

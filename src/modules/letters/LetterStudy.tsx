@@ -56,7 +56,7 @@ export function LetterStudy({ initialUpper }: { initialUpper?: string }) {
             onClick={() => { sfxTap(); setFilter('all'); }}
             className={cn(
               'rounded-full px-3 py-1 text-xs font-black transition active:scale-95',
-              filter === 'all' ? 'bg-candy-blue-deep text-white shadow-sm' : 'bg-white text-ink-soft hover:bg-blue-100'
+              filter === 'all' ? 'bg-candy-blue-deep text-candy-blue-on shadow-sm' : 'bg-white text-ink-soft hover:bg-blue-100'
             )}
           >
             全部 (26)
@@ -65,7 +65,7 @@ export function LetterStudy({ initialUpper }: { initialUpper?: string }) {
             onClick={() => { sfxTap(); setFilter('vowel'); }}
             className={cn(
               'rounded-full px-3 py-1 text-xs font-black transition active:scale-95',
-              filter === 'vowel' ? 'bg-candy-orange-deep text-white shadow-sm' : 'bg-white text-ink-soft hover:bg-orange-100'
+              filter === 'vowel' ? 'bg-candy-orange-deep text-candy-orange-on shadow-sm' : 'bg-white text-ink-soft hover:bg-orange-100'
             )}
           >
             🍎 元音 (5)
@@ -74,7 +74,7 @@ export function LetterStudy({ initialUpper }: { initialUpper?: string }) {
             onClick={() => { sfxTap(); setFilter('consonant1'); }}
             className={cn(
               'rounded-full px-3 py-1 text-xs font-black transition active:scale-95',
-              filter === 'consonant1' ? 'bg-candy-pink-deep text-white shadow-sm' : 'bg-white text-ink-soft hover:bg-pink-100'
+              filter === 'consonant1' ? 'bg-candy-pink-deep text-candy-pink-on shadow-sm' : 'bg-white text-ink-soft hover:bg-pink-100'
             )}
           >
             🐱 常用辅音 (15)
@@ -83,7 +83,7 @@ export function LetterStudy({ initialUpper }: { initialUpper?: string }) {
             onClick={() => { sfxTap(); setFilter('consonant2'); }}
             className={cn(
               'rounded-full px-3 py-1 text-xs font-black transition active:scale-95',
-              filter === 'consonant2' ? 'bg-candy-purple-deep text-white shadow-sm' : 'bg-white text-ink-soft hover:bg-purple-100'
+              filter === 'consonant2' ? 'bg-candy-purple-deep text-candy-purple-on shadow-sm' : 'bg-white text-ink-soft hover:bg-purple-100'
             )}
           >
             🦄 拓展字母 (6)

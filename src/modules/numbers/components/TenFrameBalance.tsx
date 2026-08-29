@@ -113,7 +113,7 @@ export function TenFrameBalance() {
           }}
           className={`px-5 py-3 rounded-2xl font-black text-sm transition-all flex items-center gap-2 border-2 ${
             activeTab === 'tenframe'
-              ? 'bg-amber-500 text-white border-amber-600 shadow-lg scale-105'
+              ? 'bg-amber-500 text-candy-orange-on border-amber-600 shadow-lg scale-105'
               : 'bg-white text-slate-700 border-amber-200 hover:bg-amber-50'
           }`}
         >
@@ -129,7 +129,7 @@ export function TenFrameBalance() {
           }}
           className={`px-5 py-3 rounded-2xl font-black text-sm transition-all flex items-center gap-2 border-2 ${
             activeTab === 'balance'
-              ? 'bg-indigo-500 text-white border-indigo-600 shadow-lg scale-105'
+              ? 'bg-indigo-500 text-candy-blue-on border-indigo-600 shadow-lg scale-105'
               : 'bg-white text-slate-700 border-indigo-200 hover:bg-indigo-50'
           }`}
         >
@@ -211,14 +211,14 @@ export function TenFrameBalance() {
               type="button"
               onClick={handleAddBlueDot}
               disabled={frameDots + userFillCount >= 10}
-              className="px-4 py-2 bg-sky-500 text-white rounded-2xl font-black text-sm shadow-md hover:bg-sky-600 disabled:opacity-40"
+              className="px-4 py-2 bg-sky-500 text-candy-blue-on rounded-2xl font-black text-sm shadow-md hover:bg-sky-600 disabled:opacity-40"
             >
               ➕ 放入一个 🔵
             </button>
             <button
               type="button"
               onClick={handleCheckTenFrame}
-              className="px-6 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-2xl font-black text-sm shadow-lg hover:scale-105"
+              className="px-6 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-candy-orange-on rounded-2xl font-black text-sm shadow-lg hover:scale-105"
             >
               ✨ 验证凑十
             </button>

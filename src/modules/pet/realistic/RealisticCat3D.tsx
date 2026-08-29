@@ -154,7 +154,7 @@ export function RealisticCat3D({
               onClick={() => handleSwitchAnimation(anim)}
               className={`px-2 py-0.5 text-xs rounded-full border transition-all ${
                 currentAnimation === anim
-                  ? 'bg-pink-500 text-white border-pink-600 shadow-sm'
+                  ? 'bg-pink-500 text-candy-pink-on border-pink-600 shadow-sm'
                   : 'bg-white text-pink-900 border-pink-200 hover:bg-pink-50'
               }`}
             >

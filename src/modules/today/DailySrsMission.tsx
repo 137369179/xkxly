@@ -167,7 +167,7 @@ export function DailySrsMission({ onComplete }: { onComplete?: () => void }) {
           <button
             type="button"
             onClick={handleStart}
-            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-black text-sm shadow-md hover:scale-[1.01] active:scale-[0.98] transition-all"
+            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 text-candy-blue-on font-black text-sm shadow-md hover:scale-[1.01] active:scale-[0.98] transition-all"
           >
             🌟 立即开启 3 分钟复习
           </button>
@@ -237,7 +237,7 @@ export function DailySrsMission({ onComplete }: { onComplete?: () => void }) {
           <button
             type="button"
             onClick={handleStart}
-            className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-black shadow-md transition-all"
+            className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-candy-green-on rounded-2xl text-xs font-black shadow-md transition-all"
           >
             🔄 再刷一次
           </button>

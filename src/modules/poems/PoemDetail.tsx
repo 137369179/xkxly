@@ -1,10 +1,15 @@
 /**
- * 古诗详情面板（5 标签）
+ * 古诗详情面板（4 分组 / 6 标签）
  * ------------------------------------------------------------
- * 原文（阅读 + 标难点 + 节奏条）/ 注解（逐句串讲 + 典故溯源）/ 格律（标准谱对照）/
- * 语境（作者史料 + 外链）/ 研读（批注 + 对比 + 自测 + 背诵 + 复习计划）。
+ * 儿童化改造：6 个 DetailTab 字面量值一个都不变（被 PoemsPage / TrainView / PlanView
+ * 共享，改值会连锁编译错误），只把 UI 从「6 个平铺 tab」收敛成 4 个分组：
+ *   📖 读一读 —— 原文（阅读 + 标难点 + 节奏条）/ 注解（逐句串讲 + 典故溯源）
+ *   🎮 玩一玩 —— 九宫拼诗小游戏（PoemFill，原孤儿组件，此处首次挂载）
+ *   🎒 学一学 —— 语境（作者史料 + 外链）/ 研读（批注 + 对比 + 自测 + 背诵 + 复习计划）/ 问小茜
+ *   🎓 小博士 —— 格律（标准谱对照 + AI 解读），成人专业向，默认折叠
+ * 功能零删除，只是重新分组成人/儿童的阅读优先级。
  */
-import { useMemo, useState } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
 import type { DeepPoem } from '@/types';
 import DEEP_POEMS from '@/data/poems-deep';
 import { useStore, usePoemFavorites, usePoemNote, useSettings } from '@/store/useStore';
@@ -16,9 +21,31 @@ import { poemTutorTask, poemImagineTask, poemCompareTask, poemProsodyTask, poetS
 import type { PoemCtx, PoemCompareInput } from '@/lib/ai/prompts';
 import { useAiStream } from '@/lib/ai/useAi';
 import { useTranslation } from '@/i18n/useTranslation';
+import { cn } from '@/lib/utils';
+
+// 九宫拼诗是「玩一玩」才用到的游戏，懒加载成独立 chunk，不拖慢详情页首屏。
+const PoemFill = lazy(() => import('./PoemFill').then((m) => ({ default: m.PoemFill })));
 
 export type DetailTab = '原文' | '注解' | '格律' | '语境' | '研读' | '问小茜';
-const TABS: DetailTab[] = ['原文', '注解', '格律', '语境', '研读', '问小茜'];
+
+/** 儿童向分组：组内再细分 tab，组是孩子唯一需要理解的一层 */
+type DetailGroup = '读一读' | '玩一玩' | '学一学' | '小博士';
+
+const GROUPS: { key: DetailGroup; emoji: string; hint: string; tabs: DetailTab[] }[] = [
+  { key: '读一读', emoji: '📖', hint: '读诗 · 懂意思', tabs: ['原文', '注解'] },
+  { key: '玩一玩', emoji: '🎮', hint: '九宫拼诗', tabs: [] },
+  { key: '学一学', emoji: '🎒', hint: '故事 · 自测 · 提问', tabs: ['语境', '研读', '问小茜'] },
+  { key: '小博士', emoji: '🎓', hint: '给爸爸妈妈 / 大朋友', tabs: ['格律'] },
+];
+
+const GROUP_OF_TAB: Record<DetailTab, DetailGroup> = {
+  '原文': '读一读',
+  '注解': '读一读',
+  '格律': '小博士',
+  '语境': '学一学',
+  '研读': '学一学',
+  '问小茜': '学一学',
+};
 
 const TAB_KEYS: Record<DetailTab, string> = {
   '原文': 'poem.detail.tabOriginal',
@@ -46,6 +73,20 @@ export default function PoemDetail({
   const favSet = useMemo(() => new Set(favorites), [favorites]);
   const togglePoemFavorite = useStore((s) => s.togglePoemFavorite);
   const [tab, setTab] = useState<DetailTab>(initialTab);
+  const [group, setGroup] = useState<DetailGroup>(() => GROUP_OF_TAB[initialTab]);
+  // 小博士（格律）是成人专业向内容，默认折叠，需再点一次「展开」才显示
+  const [proOpen, setProOpen] = useState(false);
+
+  const groupTabs = GROUPS.find((g) => g.key === group)?.tabs ?? [];
+  // 组内当前 tab：切组时自动落到该组第一个 tab，避免出现「组和内容不一致」
+  const activeTab: DetailTab = groupTabs.includes(tab) ? tab : groupTabs[0] ?? tab;
+
+  const switchGroup = (g: DetailGroup) => {
+    setGroup(g);
+    const tabs = GROUPS.find((x) => x.key === g)?.tabs ?? [];
+    if (tabs[0] && !tabs.includes(tab)) setTab(tabs[0]);
+    if (g !== '小博士') setProOpen(false);
+  };
 
   const rec = useMemo(() => recommend(poem), [poem]);
 
@@ -64,17 +105,61 @@ export default function PoemDetail({
         </div>
       </div>
 
-      {/* Tab 切换 */}
-      <div className="mb-4 flex flex-wrap gap-1.5">
-        {TABS.map((tk) => (
-          <CandyButton key={tk} tone={tab === tk ? 'pink' : 'purple'} variant={tab === tk ? 'solid' : 'soft'} size="sm" onClick={() => setTab(tk)}>
-            {tr(TAB_KEYS[tk] ?? 'poem.detail.tabOriginal')}
-          </CandyButton>
-        ))}
+      {/* 分组切换：4 张大卡（≥88px），孩子只需要认识这一层 */}
+      <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {GROUPS.map((g) => {
+          const on = group === g.key;
+          return (
+            <button
+              key={g.key}
+              type="button"
+              onClick={() => switchGroup(g.key)}
+              className={cn(
+                'no-select flex min-h-[88px] flex-col items-center justify-center gap-0.5 rounded-3xl border-4 px-2 py-2 transition-transform active:translate-y-[2px]',
+                on
+                  ? 'border-candy-pink bg-candy-pink-soft shadow-candy-sm'
+                  : 'border-white bg-white/80 hover:bg-candy-pink-soft/60',
+              )}
+            >
+              <span className="text-3xl leading-none">{g.emoji}</span>
+              <span className={cn('text-base font-black', on ? 'text-candy-pink-deep' : 'text-ink')}>
+                {g.key}
+              </span>
+              <span className="text-center text-[11px] font-bold leading-tight text-ink-soft">{g.hint}</span>
+            </button>
+          );
+        })}
       </div>
 
+      {/* 组内细分：只有多 tab 的组才需要，且小博士展开后才出现 */}
+      {groupTabs.length > 1 && !(group === '小博士' && !proOpen) && (
+        <div className="mb-4 flex flex-wrap gap-1.5">
+          {groupTabs.map((tk) => (
+            <CandyButton key={tk} tone={activeTab === tk ? 'pink' : 'purple'} variant={activeTab === tk ? 'solid' : 'soft'} size="sm" onClick={() => setTab(tk)}>
+              {tr(TAB_KEYS[tk] ?? 'poem.detail.tabOriginal')}
+            </CandyButton>
+          ))}
+        </div>
+      )}
+
       <div className="rounded-3xl bg-white/70 p-4">
-        {tab === '原文' && (
+        {group === '玩一玩' && (
+          <Suspense fallback={<p className="py-10 text-center text-base font-extrabold text-ink-soft">🎮 小游戏加载中…</p>}>
+            <PoemFill />
+          </Suspense>
+        )}
+
+        {group === '小博士' &&
+          (proOpen ? (
+            <div className="space-y-4">
+              <ProsodyGrid poem={poem} />
+              <PoemProsodyAI poem={poem} />
+            </div>
+          ) : (
+            <ProsodyLocked onExpand={() => setProOpen(true)} />
+          ))}
+
+        {group === '读一读' && activeTab === '原文' && (
           <div className="space-y-4">
             <MarkPanel poem={poem} showPinyin={showPinyin} />
             <div>
@@ -84,26 +169,21 @@ export default function PoemDetail({
             <PoemImagine poem={poem} />
           </div>
         )}
-        {tab === '注解' && (
+        {group === '读一读' && activeTab === '注解' && (
           <div className="space-y-4">
             <Annotations poem={poem} />
             <LineGloss poem={poem} />
           </div>
         )}
-        {tab === '格律' && (
-          <div className="space-y-4">
-            <ProsodyGrid poem={poem} />
-            <PoemProsodyAI poem={poem} />
-          </div>
-        )}
-        {tab === '语境' && (
+
+        {group === '学一学' && activeTab === '语境' && (
           <div className="space-y-4">
             <Context poem={poem} />
             <PoetCard poem={poem} />
             <PoetStoryAI poem={poem} />
           </div>
         )}
-        {tab === '研读' && (
+        {group === '学一学' && activeTab === '研读' && (
           <div className="space-y-4">
             <StudyTab poem={poem} sim={rec.sim} adv={rec.adv} onOpen={onOpen} />
             <div>
@@ -117,7 +197,7 @@ export default function PoemDetail({
             <PlanSummary poem={poem} />
           </div>
         )}
-        {tab === '问小茜' && (
+        {group === '学一学' && activeTab === '问小茜' && (
           <div className="space-y-3">
             <p className="font-extrabold text-candy-pink-deep">{tr('poem.detail.aiTutorTitle')}</p>
             <PoemTutor poem={poem} />
@@ -132,6 +212,22 @@ export default function PoemDetail({
         </IconButton>
         <CandyButton tone="green" variant="soft" size="lg" fullWidth onClick={onClose}>{tr('poem.detail.collapseBtn')}</CandyButton>
       </div>
+    </div>
+  );
+}
+
+/** 小博士（格律）折叠态：明确标注成人向，孩子不会被专业术语劝退 */
+function ProsodyLocked({ onExpand }: { onExpand: () => void }) {
+  return (
+    <div className="space-y-3 py-2 text-center">
+      <div className="text-4xl">🎓</div>
+      <p className="text-base font-black text-ink">这里是「格律」小知识</p>
+      <p className="text-sm font-bold text-ink-soft">
+        平仄、押韵、对仗…有点难，是给爸爸妈妈 / 大朋友看的，小朋友可以先跳过哦。
+      </p>
+      <CandyButton tone="purple" variant="soft" size="lg" onClick={onExpand}>
+        我是大朋友，展开看看
+      </CandyButton>
     </div>
   );
 }

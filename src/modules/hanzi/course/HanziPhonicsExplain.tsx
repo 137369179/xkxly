@@ -112,7 +112,7 @@ export function HanziPhonicsExplain({ char, onComplete }: Props) {
                   onClick={() => handlePlayWord(w, i)}
                   className={`p-2.5 rounded-xl border text-center font-bold text-sm transition-all shadow-sm ${
                     active
-                      ? 'bg-sky-500 text-white border-sky-600 scale-105'
+                      ? 'bg-sky-500 text-candy-blue-on border-sky-600 scale-105'
                       : 'bg-white text-slate-800 border-sky-200 hover:bg-sky-50'
                   }`}
                 >
@@ -166,7 +166,7 @@ export function HanziPhonicsExplain({ char, onComplete }: Props) {
         <button
           type="button"
           onClick={handleFinish}
-          className="flex-1 py-3 bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white rounded-2xl font-black text-sm shadow-lg shadow-sky-300/50 flex items-center justify-center gap-2 transition-transform active:scale-98"
+          className="flex-1 py-3 bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-candy-blue-on rounded-2xl font-black text-sm shadow-lg shadow-sky-300/50 flex items-center justify-center gap-2 transition-transform active:scale-98"
         >
           <span>🎯 字理已明，进入「趣味练」</span>
           <span>➔</span>

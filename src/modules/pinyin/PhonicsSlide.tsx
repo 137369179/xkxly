@@ -288,7 +288,7 @@ export function PhonicsSlide() {
               setMode('challenge');
             }}
             className={`min-h-[44px] py-1.5 px-3.5 rounded-xl font-black text-xs transition-all ${
-              mode === 'challenge' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:text-emerald-700'
+              mode === 'challenge' ? 'bg-emerald-600 text-candy-green-on shadow-sm' : 'text-slate-600 hover:text-emerald-700'
             }`}
           >
             🎯 拼读寻宝大挑战
@@ -312,7 +312,7 @@ export function PhonicsSlide() {
           <button
             type="button"
             onClick={() => speak(`请拼出：${targetChallenge.pinyin}，${targetChallenge.word}！`, { lang: 'zh-CN' })}
-            className="py-2 px-3 rounded-xl bg-emerald-600 text-white text-xs font-black shadow-sm hover:bg-emerald-700 transition-colors"
+            className="py-2 px-3 rounded-xl bg-emerald-600 text-candy-green-on text-xs font-black shadow-sm hover:bg-emerald-700 transition-colors"
           >
             🔊 重听目标音
           </button>
@@ -376,7 +376,7 @@ export function PhonicsSlide() {
               <motion.div
                 animate={isSliding ? { x: [0, 80, 0] } : {}}
                 transition={{ duration: 0.6 }}
-                className="h-20 w-20 rounded-2xl bg-blue-500 text-white flex flex-col items-center justify-center shadow-md border-2 border-blue-600"
+                className="h-20 w-20 rounded-2xl bg-blue-500 text-candy-blue-on flex flex-col items-center justify-center shadow-md border-2 border-blue-600"
               >
                 <span className="text-xs font-bold opacity-80">声母</span>
                 <span className="text-3xl font-black">{initial}</span>
@@ -388,7 +388,7 @@ export function PhonicsSlide() {
               <motion.div
                 animate={isSliding ? { x: [0, -80, 0] } : {}}
                 transition={{ duration: 0.6 }}
-                className="h-20 w-20 rounded-2xl bg-purple-500 text-white flex flex-col items-center justify-center shadow-md border-2 border-purple-600"
+                className="h-20 w-20 rounded-2xl bg-purple-500 text-candy-purple-on flex flex-col items-center justify-center shadow-md border-2 border-purple-600"
               >
                 <span className="text-xs font-bold opacity-80">韵母</span>
                 <span className="text-3xl font-black">{formatTonedFinal(final, tone)}</span>
@@ -397,7 +397,7 @@ export function PhonicsSlide() {
               <span className="text-2xl font-black text-blue-400">🟰</span>
 
               {/* 合体结果卡片 */}
-              <div className="h-20 min-w-[80px] px-3 rounded-2xl bg-emerald-500 text-white flex flex-col items-center justify-center shadow-md border-2 border-emerald-600">
+              <div className="h-20 min-w-[80px] px-3 rounded-2xl bg-emerald-500 text-candy-green-on flex flex-col items-center justify-center shadow-md border-2 border-emerald-600">
                 <span className="text-xs font-bold opacity-80">合体读音</span>
                 <span className="text-2xl font-black">
                   {mergedResult ? mergedResult.pinyin : `${initial}${formatTonedFinal(final, tone)}`}
@@ -513,7 +513,7 @@ export function PhonicsSlide() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleVerifyChallenge}
-              className="py-3.5 px-8 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-base font-black shadow-lg shadow-emerald-200"
+              className="py-3.5 px-8 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-candy-green-on text-base font-black shadow-lg shadow-emerald-200"
             >
               ✅ 验证拼读答案
             </motion.button>
@@ -523,7 +523,7 @@ export function PhonicsSlide() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleTriggerSlide}
-              className="py-3.5 px-8 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500 text-white text-base font-black shadow-lg shadow-blue-200"
+              className="py-3.5 px-8 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500 text-candy-blue-on text-base font-black shadow-lg shadow-blue-200"
             >
               🚀 发射滑梯，开始拼读！
             </motion.button>

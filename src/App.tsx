@@ -8,7 +8,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useTtsStore } from '@/store/useTtsStore';
 import { useProfilesStore } from '@/store/useProfilesStore';
 import { useTranslation } from '@/i18n/useTranslation';
-import { startAutoBackup, useBackupDetection } from '@/lib/autoBackup';
+import { startAutoBackup, useBackupDetection, createBackup } from '@/lib/autoBackup';
 import { useStore } from '@/store/useStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { putStorybookContent } from '@/lib/storybookStore';
@@ -80,13 +80,13 @@ export function App() {
   // P0-2: 自动备份定时器
   useEffect(() => {
     const cleanup = startAutoBackup(() => {
+      // 复用统一备份入口：5槽轮换 + PIN 字段剥离，与手动导出口径一致。
+      // 通过 getState() 读取最新进度（不依赖定时器传参，保证数据新鲜）。
       const { progress } = useStore.getState();
-      // 尝试创建备份（简单实现）
+      // Settings 无 string 索引签名，无法直接断言为 Record（TS2352）；经 unknown 中转即可。
+      const settings = useSettingsStore.getState().settings as unknown as Record<string, unknown>;
       try {
-        localStorage.setItem('bb_backup_last', JSON.stringify({
-          timestamp: Date.now(),
-          progress
-        }));
+        createBackup(progress, settings);
       } catch (e) {
         console.warn('[Backup] 自动备份失败:', e);
       }
@@ -175,7 +175,10 @@ export function App() {
     }
     // 页面切换时通知屏幕阅读器
     announceToScreenReader(item?.label ?? t('app.name'));
-  }, [route]);
+    // 依赖完整，无需禁用 exhaustive-deps：
+    // item 由 NAV_MAP.get(route) 派生、child 来自 useProfilesStore.getState()（非订阅），
+    // 仅 route 与 t 是响应式依赖。此前多余的 disable 指令会产生「未使用指令」告警。
+  }, [route, t]);
 
   return (
     <div
@@ -183,10 +186,17 @@ export function App() {
         data-eyecare={eyeCareMode ? 'on' : 'off'}
         data-motion={eyeCareMode ? 'density-low' : undefined}
       >
+        {/* 无障碍 Skip Navigation：键盘 Tab 第一站，可直接跳过顶部与侧边栏导航进入主要学习区域 */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-2xl focus:bg-pink-500 focus:px-4 focus:py-2.5 focus:text-sm focus:font-bold focus:text-white focus:shadow-xl focus:outline-none focus:ring-2 focus:ring-pink-300"
+        >
+          跳至主要学习内容
+        </a>
         <TopBar />
         <div className="mx-auto flex max-w-7xl items-start gap-4 px-2 sm:px-4 py-3 sm:py-6">
           <Sidebar active={route} />
-          <main className="flex-1 min-w-0 pb-24 md:pb-8">
+          <main id="main-content" tabIndex={-1} className="flex-1 min-w-0 pb-24 md:pb-8 focus:outline-none">
             <Page />
           </main>
         </div>

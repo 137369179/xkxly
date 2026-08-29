@@ -171,7 +171,7 @@ export function SkipCounting() {
             key={sequence[currentIdx]}
             initial={{ scale: 0.8, y: -10 }}
             animate={{ scale: 1, y: 0 }}
-            className="mx-auto flex h-36 w-36 flex-col items-center justify-center rounded-[2.5rem] bg-gradient-to-b from-green-300 to-emerald-400 text-white shadow-candy-md border-4 border-white"
+            className="mx-auto flex h-36 w-36 flex-col items-center justify-center rounded-[2.5rem] bg-gradient-to-b from-green-300 to-emerald-400 text-candy-green-on shadow-candy-md border-4 border-white"
           >
             <span className="text-3xl">🐸</span>
             <span className="text-4xl font-black">{sequence[currentIdx]}</span>
@@ -192,7 +192,7 @@ export function SkipCounting() {
                   onClick={() => jumpTo(i)}
                   className={`flex h-12 w-12 items-center justify-center rounded-2xl text-sm font-black border-2 transition-all ${
                     isCurrent
-                      ? 'border-emerald-500 bg-emerald-400 text-white shadow-md scale-110'
+                      ? 'border-emerald-500 bg-emerald-400 text-candy-green-on shadow-md scale-110'
                       : 'border-green-200 bg-white text-ink hover:bg-green-100'
                   }`}
                 >

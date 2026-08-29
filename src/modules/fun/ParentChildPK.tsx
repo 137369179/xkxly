@@ -107,19 +107,19 @@ export function ParentChildPK() {
         <div className="flex gap-1.5">
           <button aria-label={t('fun.parentPk.math')}
             onClick={() => { setSubject('math'); handleReset(); }}
-            className={`rounded-xl px-2.5 py-1 text-xs font-black transition-all ${subject === 'math' ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-700'}`}
+            className={`rounded-xl px-2.5 py-1 text-xs font-black transition-all ${subject === 'math' ? 'bg-orange-500 text-candy-orange-on' : 'bg-gray-100 text-gray-700'}`}
           >
             {t('fun.parentPk.math')}
           </button>
           <button aria-label={t('fun.parentPk.eng')}
             onClick={() => { setSubject('eng'); handleReset(); }}
-            className={`rounded-xl px-2.5 py-1 text-xs font-black transition-all ${subject === 'eng' ? 'bg-pink-500 text-white' : 'bg-gray-100 text-gray-700'}`}
+            className={`rounded-xl px-2.5 py-1 text-xs font-black transition-all ${subject === 'eng' ? 'bg-pink-500 text-candy-pink-on' : 'bg-gray-100 text-gray-700'}`}
           >
             {t('fun.parentPk.eng')}
           </button>
           <button aria-label={t('fun.parentPk.science')}
             onClick={() => { setSubject('science'); handleReset(); }}
-            className={`rounded-xl px-2.5 py-1 text-xs font-black transition-all ${subject === 'science' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-700'}`}
+            className={`rounded-xl px-2.5 py-1 text-xs font-black transition-all ${subject === 'science' ? 'bg-green-500 text-candy-green-on' : 'bg-gray-100 text-gray-700'}`}
           >
             {t('fun.parentPk.science')}
           </button>

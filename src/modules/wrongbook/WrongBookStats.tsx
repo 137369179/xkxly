@@ -10,6 +10,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { useGrowth, useWrongBook, useMastery, useWrongHistory } from '@/store/useStore';
 import { dateKey } from '@/lib/dailyPlan';
 import { SUBJECTS } from '@/lib/srs';
+import { CHART } from '@/lib/chartTokens';
 
 /* ------------------------------------------------------------------ */
 /* 工具                                                                */
@@ -75,11 +76,11 @@ export function WrongTrendChart() {
         <span className="text-sm font-bold text-ink-soft">{tr('wrongbook.trend7Days')}</span>
         <div className="flex items-center gap-3 text-xs">
           <span className="flex items-center gap-1 font-bold text-ink-soft">
-            <span className="h-2 w-2 rounded-full" style={{ background: '#ff5c7a' }} />
+            <span className="h-2 w-2 rounded-full" style={{ background: CHART.series.pink }} />
             {tr('wrongbook.totalWrong')}
           </span>
           <span className="flex items-center gap-1 font-bold text-ink-soft">
-            <span className="h-2 w-2 rounded-full" style={{ background: '#e5ac2e' }} />
+            <span className="h-2 w-2 rounded-full" style={{ background: CHART.series.amber }} />
             {tr('wrongbook.new')}
           </span>
         </div>
@@ -93,7 +94,7 @@ export function WrongTrendChart() {
             y1={padY + plotH * (1 - r)}
             x2={W - padX}
             y2={padY + plotH * (1 - r)}
-            stroke="#f0dde2"
+            stroke={CHART.grid}
             strokeWidth={0.2}
             strokeDasharray="1,1"
           />
@@ -102,7 +103,7 @@ export function WrongTrendChart() {
         <polyline
           points={totalPoints.join(' ')}
           fill="none"
-          stroke="#ff5c7a"
+          stroke={CHART.series.pink}
           strokeWidth={0.8}
           strokeLinejoin="round"
           strokeLinecap="round"
@@ -117,8 +118,8 @@ export function WrongTrendChart() {
               cx={x}
               cy={y}
               r={isToday ? 1.6 : 1}
-              fill={isToday ? '#ff5c7a' : '#fff'}
-              stroke="#ff5c7a"
+              fill={isToday ? CHART.series.pink : '#fff'}
+              stroke={CHART.series.pink}
               strokeWidth={0.5}
             />
           );
@@ -127,7 +128,7 @@ export function WrongTrendChart() {
         <polyline
           points={newPoints.join(' ')}
           fill="none"
-          stroke="#e5ac2e"
+          stroke={CHART.series.amber}
           strokeWidth={0.8}
           strokeLinejoin="round"
           strokeLinecap="round"
@@ -142,7 +143,7 @@ export function WrongTrendChart() {
               cx={x}
               cy={y}
               r={0.8}
-              fill="#e5ac2e"
+              fill={CHART.series.amber}
             />
           );
         })}
@@ -154,7 +155,7 @@ export function WrongTrendChart() {
             y={H - 1}
             fontSize={2}
             textAnchor="middle"
-            fill={d.date === today ? '#ff5c7a' : '#b38894'}
+            fill={d.date === today ? CHART.series.pink : CHART.neutral}
             fontWeight={d.date === today ? 'bold' : 'normal'}
           >
             {d.date.slice(5)}
@@ -184,7 +185,7 @@ export function WeaknessRadar() {
       return {
         key,
         label: subject?.label ?? key,
-        color: subject?.color ?? '#b38894',
+        color: subject?.color ?? CHART.neutral,
         wrong,
         total,
         ratio,
@@ -220,7 +221,7 @@ export function WeaknessRadar() {
               })
               .join(' ')}
             fill="none"
-            stroke="#f0dde2"
+            stroke={CHART.grid}
             strokeWidth={0.3}
           />
         ))}
@@ -234,7 +235,7 @@ export function WeaknessRadar() {
               y1={cy}
               x2={cx + Math.cos(angle) * r}
               y2={cy + Math.sin(angle) * r}
-              stroke="#f0dde2"
+              stroke={CHART.grid}
               strokeWidth={0.3}
             />
           );
@@ -243,7 +244,7 @@ export function WeaknessRadar() {
         <polygon
           points={polygonPoints}
           fill="rgba(255,92,122,0.2)"
-          stroke="#ff5c7a"
+          stroke={CHART.series.pink}
           strokeWidth={0.6}
         />
         {/* 维度标签 */}
@@ -268,7 +269,7 @@ export function WeaknessRadar() {
                 y={cy + Math.sin(angle) * labelR + 3.5}
                 fontSize={2.2}
                 textAnchor="middle"
-                fill="#b38894"
+                fill={CHART.neutral}
               >
                 {d.wrong}/{d.total || 0}
               </text>
@@ -314,7 +315,7 @@ export function KillProgressRing() {
             cy={cy}
             r={r}
             fill="none"
-            stroke="#f0dde2"
+            stroke={CHART.grid}
             strokeWidth={6}
           />
           {/* 进度圆环 */}
@@ -323,7 +324,7 @@ export function KillProgressRing() {
             cy={cy}
             r={r}
             fill="none"
-            stroke="#33a863"
+            stroke={CHART.series.green}
             strokeWidth={6}
             strokeLinecap="round"
             strokeDasharray={`${dashLen} ${circumference}`}
@@ -331,13 +332,13 @@ export function KillProgressRing() {
             style={{ transition: 'stroke-dasharray 0.5s ease' }}
           />
           {/* 中心文字 */}
-          <text x={cx} y={cy - 2} fontSize={10} textAnchor="middle" fill="#33a863" fontWeight="bold">
+          <text x={cx} y={cy - 2} fontSize={10} textAnchor="middle" fill={CHART.series.green} fontWeight="bold">
             {pct}%
           </text>
-          <text x={cx} y={cy + 6} fontSize={3.5} textAnchor="middle" fill="#b38894">
+          <text x={cx} y={cy + 6} fontSize={3.5} textAnchor="middle" fill={CHART.neutral}>
             {tr('wrongbook.killRate')}
           </text>
-          <text x={cx} y={cy + 12} fontSize={2.8} textAnchor="middle" fill="#b38894">
+          <text x={cx} y={cy + 12} fontSize={2.8} textAnchor="middle" fill={CHART.neutral}>
             {tr('wrongbook.killCount', { cleared, current })}
           </text>
         </svg>
@@ -367,10 +368,10 @@ export function WrongBookStatCards() {
     const cleared = wrongHistory?.cleared ?? 0;
 
     return [
-      { label: tr('wrongbook.totalWrong'), value: wrongBook.length, emoji: '📝', color: '#ff5c7a' },
-      { label: tr('wrongbook.killed'), value: cleared, emoji: '✅', color: '#33a863' },
-      { label: tr('wrongbook.toReview'), value: due, emoji: '⏰', color: '#e5ac2e' },
-      { label: tr('wrongbook.todayNew'), value: todayNew, emoji: '🆕', color: '#2e93c9' },
+      { label: tr('wrongbook.totalWrong'), value: wrongBook.length, emoji: '📝', color: CHART.series.pink },
+      { label: tr('wrongbook.killed'), value: cleared, emoji: '✅', color: CHART.series.green },
+      { label: tr('wrongbook.toReview'), value: due, emoji: '⏰', color: CHART.series.amber },
+      { label: tr('wrongbook.todayNew'), value: todayNew, emoji: '🆕', color: CHART.series.blue },
     ];
   }, [wrongBook, mastery, growth, wrongHistory, tr]);
 

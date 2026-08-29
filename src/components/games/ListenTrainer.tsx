@@ -196,7 +196,7 @@ export function ListenTrainer() {
           <div className="flex items-center justify-center gap-3">
             <button aria-label="🔊"
               onClick={replay}
-              className="grid h-16 w-16 place-items-center rounded-full bg-candy-blue-main text-3xl text-white active:scale-95"
+              className="grid h-16 w-16 place-items-center rounded-full bg-candy-blue-main text-3xl text-candy-blue-on active:scale-95"
             >
               🔊
             </button>

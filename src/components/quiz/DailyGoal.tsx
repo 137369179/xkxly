@@ -15,7 +15,12 @@ import { celebrateSmall } from '@/lib/celebrate';
 import { motion } from 'motion/react';
 import { safeGetItem, safeSetItem } from '@/lib/safeStorage';
 
-interface DailyGoal {
+/**
+ * 单个每日目标的定义。
+ * 命名为 DailyGoalItem 而非 DailyGoal：本文件同时导出同名组件 `DailyGoal`，
+ * 若类型也叫 DailyGoal 会与组件在导出空间重名（TS2323）。
+ */
+export interface DailyGoalItem {
   id: string;
   emoji: string;
   labelKey: string;
@@ -24,7 +29,9 @@ interface DailyGoal {
   reward: number;
 }
 
-const GOAL_POOL: DailyGoal[] = [
+// 导出供首页 Hero 复用同一套目标定义与选取算法，保证两处进度口径完全一致
+// （避免首页另算一套导致「首页显示 1/3、目标卡显示 2/3」的不一致）。
+export const GOAL_POOL: DailyGoalItem[] = [
   { id: 'practice', emoji: '✏️', labelKey: 'dailyGoal.practice', target: 10, current: p => p.dailyLog[dateKey()]?.items ?? 0, reward: 2 },
   { id: 'new-hanzi', emoji: '🀄', labelKey: 'dailyGoal.newHanzi', target: 3, current: p => Object.keys(p.mastery).filter(k => k.startsWith('hanzi:') && (p.mastery[k]?.lv ?? 0) >= 1 && p.mastery[k]?.firstSeen === dateKey()).length, reward: 2 },
   { id: 'read-poem', emoji: '🌸', labelKey: 'dailyGoal.readPoem', target: 1, current: p => p.poemsRead.filter(() => { const entry = p.dailyLog[dateKey()]; return entry; }).length > 0 ? 1 : 0, reward: 2 },
@@ -35,7 +42,7 @@ const GOAL_POOL: DailyGoal[] = [
   { id: 'word', emoji: '🔤', labelKey: 'dailyGoal.word', target: 3, current: p => Object.keys(p.mastery).filter(k => k.startsWith('word:') && (p.mastery[k]?.lv ?? 0) >= 1 && p.mastery[k]?.firstSeen === dateKey()).length, reward: 2 },
 ];
 
-function pickGoals(dateStr: string): DailyGoal[] {
+export function pickGoals(dateStr: string): DailyGoalItem[] {
   const seed = dateStr.split('-').join('').split('').reduce((a, b) => a + parseInt(b), 0);
   const shuffled = [...GOAL_POOL].sort((a, b) => {
     const ha = (a.id.charCodeAt(0) + seed) % 7;
@@ -82,7 +89,7 @@ export function DailyGoal() {
     return cur >= g.target || claimed.has(g.id);
   });
 
-  const handleClaim = (goal: DailyGoal) => {
+  const handleClaim = (goal: DailyGoalItem) => {
     if (claimed.has(goal.id)) return;
     const cur = goal.current(progress);
     if (cur < goal.target) return;

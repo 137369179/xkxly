@@ -119,7 +119,7 @@ export function AiPanel({
             }}
             className={cn(
               'rounded-xl px-2.5 py-1 text-xs font-black transition active:scale-95 border',
-              showPinyin ? 'bg-pink-500 text-white border-pink-600' : 'bg-white text-pink-700 border-pink-200',
+              showPinyin ? 'bg-pink-500 text-candy-pink-on border-pink-600' : 'bg-white text-pink-700 border-pink-200',
             )}
           >
             {showPinyin ? '🔤 纯汉字' : '拼 拼音'}
@@ -144,7 +144,7 @@ export function AiPanel({
                 'whitespace-pre-wrap break-words font-medium',
                 compact ? 'text-base leading-relaxed' : 'text-lg leading-8',
               )}
-              style={{ color: '#5c2e3d' }}
+              style={{ color: '#4a2b1f' }}
             >
               {showPinyin ? <RubyText text={text} /> : text}
               {status === 'streaming' && (

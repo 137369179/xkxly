@@ -53,6 +53,14 @@ export interface QuizCardProps {
   timeLimitMs?: number;
   /** Boss战：打乱选项顺序 */
   shuffleOptions?: boolean;
+  /**
+   * 答对后自动进入下一题（毫秒）。默认不开启（undefined = 完全保持原行为，零影响其他模块）。
+   * 设计约束（对标 DailySrsMission 的 1200ms 自动切题先例）：
+   *   - 仅答对时自动推进；答错绝不自动推进（孩子需要看错因与 AI 讲解）；
+   *   - AI 知识扩展弹出时暂停自动推进（避免把内容切走）；
+   *   - 由父组件按「每题 key 重挂载」的模式使用，天然不会重复触发。
+   */
+  autoNextMs?: number;
 }
 
 export function QuizCard({
@@ -67,6 +75,7 @@ export function QuizCard({
   hideHint = false,
   timeLimitMs,
   shuffleOptions = false,
+  autoNextMs,
 }: QuizCardProps) {
   const { t: translate } = useTranslation();
   const [wrongIds, setWrongIds] = useState<string[]>([]);
@@ -112,6 +121,16 @@ export function QuizCard({
   useEffect(() => {
     solvedRef.current = solved;
   }, [solved]);
+
+  // —— 答对自动进入下一题（opt-in autoNextMs）——
+  // 仅答对时推进；答错不推进（孩子要看错因/AI 讲解）；AI 知识扩展弹出时暂停。
+  useEffect(() => {
+    if (autoNextMs == null || !solved || feedback.kind !== 'correct' || showExtend || !onNext) {
+      return;
+    }
+    const t = setTimeout(() => onNext(), autoNextMs);
+    return () => clearTimeout(t);
+  }, [autoNextMs, solved, feedback.kind, showExtend, onNext]);
 
   // —— Boss战：倒计时 ——
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);

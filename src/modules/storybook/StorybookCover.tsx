@@ -45,7 +45,7 @@ export function StorybookCover({ book, onOpen, onDelete, onToggleFavorite }: Sto
             }}
             className={cn(
               'absolute -top-2 -left-2 grid h-7 w-7 place-items-center rounded-full text-sm shadow-md transition-transform active:scale-90',
-              book.favorite ? 'bg-rose-500 text-white' : 'bg-white/95 text-rose-400',
+              book.favorite ? 'bg-rose-500 text-candy-pink-on' : 'bg-white/95 text-rose-400',
             )}
           >
             {book.favorite ? '❤️' : '🤍'}
@@ -59,7 +59,7 @@ export function StorybookCover({ book, onOpen, onDelete, onToggleFavorite }: Sto
               e.stopPropagation();
               onDelete();
             }}
-            className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-400 text-white text-xs flex items-center justify-center shadow-md"
+            className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-400 text-candy-pink-on text-xs flex items-center justify-center shadow-md"
           >
             ×
           </button>

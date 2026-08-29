@@ -44,8 +44,8 @@ export function VoiceMessageList({
             <div
               className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-black shadow-sm ${
                 isUser
-                  ? 'bg-gradient-to-tr from-purple-600 to-pink-500 text-white'
-                  : 'bg-gradient-to-tr from-amber-400 to-orange-400 text-white'
+                  ? 'bg-gradient-to-tr from-purple-600 to-pink-500 text-candy-pink-on'
+                  : 'bg-gradient-to-tr from-amber-400 to-orange-400 text-candy-orange-on'
               }`}
             >
               {isUser ? '👶' : '🐱'}
@@ -101,7 +101,7 @@ export function VoiceMessageList({
 
       {streaming && (
         <div className="flex items-start gap-2.5">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-amber-400 to-orange-400 text-sm font-black text-white shadow-sm">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-amber-400 to-orange-400 text-sm font-black text-candy-orange-on shadow-sm">
             🐱
           </div>
           <div className="max-w-[82%] rounded-3xl rounded-tl-xs border border-pink-200/80 bg-pink-50/90 px-3.5 py-2.5 text-sm font-bold text-ink shadow-xs">

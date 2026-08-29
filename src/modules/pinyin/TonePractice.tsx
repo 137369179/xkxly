@@ -290,7 +290,7 @@ export function TonePractice() {
             exit={{ opacity: 0, scale: 0.8 }}
             className="flex justify-center"
           >
-            <span className="rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-1 text-xs font-black text-white shadow-md">
+            <span className="rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-1 text-xs font-black text-candy-orange-on shadow-md">
               🔥 {combo} 连击达成！棒极了！
             </span>
           </motion.div>
@@ -360,7 +360,7 @@ export function TonePractice() {
                   {tc.desc}
                 </div>
                 {picked !== null && isAnswer && (
-                  <span className="absolute -top-2.5 -right-2 rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-black text-white shadow-sm">
+                  <span className="absolute -top-2.5 -right-2 rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-black text-candy-green-on shadow-sm">
                     ✅ 正确
                   </span>
                 )}

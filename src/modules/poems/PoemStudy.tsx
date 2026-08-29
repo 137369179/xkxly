@@ -69,7 +69,7 @@ export function MarkPanel({ poem, showPinyin = true }: { poem: DeepPoem; showPin
                 onClick={() => mode === 'mark' && toggleLine(poem.id, li)}
                 className={cn(
                   'grid w-8 shrink-0 place-items-center rounded-xl text-xs font-extrabold',
-                  lineMarked ? 'bg-candy-orange text-white' : 'bg-white/70 text-ink-soft',
+                  lineMarked ? 'bg-candy-orange text-candy-orange-on' : 'bg-white/70 text-ink-soft',
                 )}
                 title={tr('poem.markLineTip')}
               >
@@ -338,11 +338,11 @@ function RhymeRail({ feet }: { feet: string[] }) {
   return (
     <div className="flex flex-col items-center">
       <svg width="40" height={feet.length * 46} className="overflow-visible">
-        <line x1="20" y1="14" x2="20" y2={feet.length * 46 - 14} stroke="#33a863" strokeWidth="2.5" strokeDasharray="4 4" />
+        <line x1="20" y1="14" x2="20" y2={feet.length * 46 - 14} stroke="#3fc26b" strokeWidth="2.5" strokeDasharray="4 4" />
         {feet.map((c, i) => (
           <g key={`c-${i}`} transform={`translate(20,${i * 46 + 14})`}>
-            <circle r="13" fill="#f0faf4" stroke="#33a863" strokeWidth="2.5" />
-            <text textAnchor="middle" dy="5" fontSize="15" fontWeight="bold" fill="#33a863">
+            <circle r="13" fill="#f0faf3" stroke="#3fc26b" strokeWidth="2.5" />
+            <text textAnchor="middle" dy="5" fontSize="15" fontWeight="bold" fill="#3fc26b">
               {c}
             </text>
           </g>

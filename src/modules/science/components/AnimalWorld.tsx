@@ -190,7 +190,7 @@ function HabitatMap() {
           {/* 澳大利亚 */}
           <path d="M 80 35 Q 88 33 90 40 Q 86 43 82 42 Z" fill="#8fe7bc" opacity="0.5" />
           {/* 南极 */}
-          <ellipse cx="50" cy="49" rx="35" ry="3" fill="#cda6b0" opacity="0.6" />
+          <ellipse cx="50" cy="49" rx="35" ry="3" fill="#bb9f8f" opacity="0.6" />
         </svg>
 
         {/* 动物标记 */}
@@ -261,13 +261,13 @@ function AnimalWorldImpl() {
       <div className="flex justify-center gap-2">
         <button
           onClick={() => { sfxTap(); setShowMap(false); }}
-          className={cn('rounded-xl px-4 py-2 text-sm font-extrabold transition-all', !showMap ? 'bg-green-400 text-white shadow-md' : 'bg-white text-ink-soft shadow-sm')}
+          className={cn('rounded-xl px-4 py-2 text-sm font-extrabold transition-all', !showMap ? 'bg-green-400 text-candy-green-on shadow-md' : 'bg-white text-ink-soft shadow-sm')}
         >
           {tr('animalWorld.tabList')}
         </button>
         <button
           onClick={() => { sfxTap(); setShowMap(true); }}
-          className={cn('rounded-xl px-4 py-2 text-sm font-extrabold transition-all', showMap ? 'bg-green-400 text-white shadow-md' : 'bg-white text-ink-soft shadow-sm')}
+          className={cn('rounded-xl px-4 py-2 text-sm font-extrabold transition-all', showMap ? 'bg-green-400 text-candy-green-on shadow-md' : 'bg-white text-ink-soft shadow-sm')}
         >
           {tr('animalWorld.tabMap')}
         </button>
@@ -284,7 +284,7 @@ function AnimalWorldImpl() {
             <div className="flex flex-wrap gap-1.5">
               <button
                 onClick={() => { sfxTap(); setFilter(null); }}
-                className={cn('rounded-lg px-2.5 py-1 text-xs font-bold', !filter ? 'bg-green-500 text-white' : 'bg-white text-ink-soft shadow-sm')}
+                className={cn('rounded-lg px-2.5 py-1 text-xs font-bold', !filter ? 'bg-green-500 text-candy-green-on' : 'bg-white text-ink-soft shadow-sm')}
               >
                 {tr('animalWorld.all', { count: String(ANIMALS.length) })}
               </button>
@@ -292,7 +292,7 @@ function AnimalWorldImpl() {
                 <button
                   key={cls}
                   onClick={() => { sfxTap(); setFilter(cls); }}
-                  className={cn('rounded-lg px-2.5 py-1 text-xs font-bold', filter === cls ? 'bg-green-500 text-white' : 'bg-white text-ink-soft shadow-sm')}
+                  className={cn('rounded-lg px-2.5 py-1 text-xs font-bold', filter === cls ? 'bg-green-500 text-candy-green-on' : 'bg-white text-ink-soft shadow-sm')}
                 >
                   {CLASS_EMOJI[cls]} {tr(CLASS_KEY[cls] ?? '')} ({ANIMALS_BY_CLASS[cls].length})
                 </button>

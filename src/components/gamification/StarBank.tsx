@@ -108,7 +108,7 @@ export function StarBank({
         @media (prefers-reduced-motion: reduce) { .sb-stop { animation: none !important } }
       `}</style>
 
-      <h3 id={titleId} className="mb-3 text-lg font-extrabold text-[#8b6ef0]">
+      <h3 id={titleId} className="mb-3 text-lg font-extrabold text-[#8f5bff]">
         ⭐ 我的星星银行
       </h3>
 
@@ -140,10 +140,10 @@ export function StarBank({
         {goal ? (
           <>
             <div className="mb-1.5 flex items-baseline justify-between">
-              <span id={goalId} className="truncate text-sm font-extrabold text-[#4a3f8a]">
+              <span id={goalId} className="truncate text-sm font-extrabold text-[#4a20a0]">
                 下一个目标：{goal.item.label}
               </span>
-              <span className="shrink-0 text-xs font-bold text-[#9b8fc7]">
+              <span className="shrink-0 text-xs font-bold text-[#ab81ff]">
                 {safeBalance} / {goal.item.cost}
               </span>
             </div>
@@ -169,7 +169,7 @@ export function StarBank({
                 data-testid="star-bank-goal-bar"
               />
             </div>
-            <p className="mt-1.5 text-xs font-bold text-[#8b6ef0]">
+            <p className="mt-1.5 text-xs font-bold text-[#8f5bff]">
               再集 {goal.shortfall} 颗星，就能解锁「{goal.item.label}」啦！
             </p>
           </>
@@ -208,10 +208,10 @@ export function StarBank({
                 {style.emoji}
               </span>
               <span className="flex min-w-0 flex-1 flex-col">
-                <span className={`truncate font-extrabold ${isOwned ? 'text-[#5a8f70]' : 'text-[#4a3f8a]'}`}>
+                <span className={`truncate font-extrabold ${isOwned ? 'text-[#5a8f70]' : 'text-[#4a20a0]'}`}>
                   {item.label}
                 </span>
-                <span className="truncate text-xs text-[#9b8fc7]">{item.description}</span>
+                <span className="truncate text-xs text-[#ab81ff]">{item.description}</span>
               </span>
               <span className="flex shrink-0 flex-col items-end gap-1">
                 <span className="text-sm font-extrabold text-[#e0a008] tabular-nums">{item.cost}⭐</span>
@@ -226,9 +226,9 @@ export function StarBank({
                     disabled={!isReady}
                     className={`rounded-full px-3 py-1 text-xs font-extrabold transition-transform active:translate-y-[1px]${
                       isReady
-                        ? ' bg-[#8b6ef0] text-white shadow-[0_2px_0_#6a4fd0]'
+                        ? ' bg-[#8f5bff] text-white shadow-[0_2px_0_#6a4fd0]'
                         : ' cursor-not-allowed bg-[#ece7f7] text-[#b0a6cf]'
-                    } focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-[#8b6ef0]/50`}
+                    } focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-[#8f5bff]/50`}
                     aria-label={isReady ? `用 ${item.cost} 颗星解锁${item.label}` : `${item.label}需要 ${item.cost} 颗星，星星还不够`}
                   >
                     {isReady ? '解锁' : '未解锁'}
@@ -242,7 +242,7 @@ export function StarBank({
 
       {/* 结果播报：live region 让读屏与孩子同步收到反馈 */}
       <p
-        className="mt-3 min-h-[1.5rem] text-center text-sm font-extrabold text-[#8b6ef0]"
+        className="mt-3 min-h-[1.5rem] text-center text-sm font-extrabold text-[#8f5bff]"
         role="status"
         aria-live="polite"
         data-testid="star-bank-notice"

@@ -82,11 +82,11 @@ export interface ProfileColorDef {
 
 /** 预设主题色（糖果色系，与全站视觉一致） */
 export const PROFILE_COLORS: ProfileColorDef[] = [
-  { key: 'pink', hex: '#ff6b96', soft: '#ffe4ee' },
-  { key: 'blue', hex: '#55aee0', soft: '#dcecfa' },
-  { key: 'green', hex: '#5fd68b', soft: '#f0faf4' },
-  { key: 'orange', hex: '#ff9f5a', soft: '#fff3ec' },
-  { key: 'purple', hex: '#8b6ef0', soft: '#ece5ff' },
+  { key: 'pink', hex: '#ff5c8a', soft: '#ffe1eb' },
+  { key: 'blue', hex: '#3d9bff', soft: '#dcebff' },
+  { key: 'green', hex: '#62cc8a', soft: '#f0faf3' },
+  { key: 'orange', hex: '#ff9f2e', soft: '#fff3ec' },
+  { key: 'purple', hex: '#8f5bff', soft: '#ece5ff' },
   { key: 'teal', hex: '#35bcc0', soft: '#ecfbfa' },
 ];
 

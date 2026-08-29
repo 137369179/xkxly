@@ -11,6 +11,7 @@
 import { useState, useEffect } from 'react';
 import type { Progress } from '@/types';
 import { safeGetJSON, safeSetJSON, safeStorage } from './safeStorage';
+import { reportError } from './monitor';
 
 const BACKUP_KEY_PREFIX = 'bb_backup_';
 const MAX_BACKUPS = 5;
@@ -57,16 +58,16 @@ export function createBackup(progress: Progress, settings?: Record<string, unkno
     settings: sanitizeSettings(settings),
   };
 
-  // 保存为新备份
-  safeSetJSON(`${BACKUP_KEY_PREFIX}${1}`, backup);
-
-  // 旧备份后移
+  // 先把旧备份后移（从末位向前逐槽覆盖，避免先写槽1导致后移时读到新数据）
   for (let i = MAX_BACKUPS - 1; i >= 1; i--) {
     const current = safeGetJSON<BackupRecord | null>(`${BACKUP_KEY_PREFIX}${i}`, null);
     if (current) {
       safeSetJSON(`${BACKUP_KEY_PREFIX}${i + 1}`, current);
     }
   }
+
+  // 再把新备份写入槽1
+  safeSetJSON(`${BACKUP_KEY_PREFIX}${1}`, backup);
 
   return backup;
 }
@@ -80,14 +81,14 @@ export function isProgressDataCorrupted(progress: Progress): boolean {
   for (const field of requiredFields) {
     const value = ((progress as unknown) as Record<string, unknown>)[field];
     if (value === undefined || value === null) {
-      console.warn('[Backup] 检测到进度数据缺失字段:', field);
+      reportError('backup', `检测到进度数据缺失字段: ${field}`);
       return true;
     }
   }
 
   // 检查mastery格式
   if (typeof progress.mastery !== 'object' || progress.mastery === null) {
-    console.warn('[Backup] mastery字段格式错误');
+    reportError('backup', 'mastery字段格式错误');
     return true;
   }
 
@@ -109,42 +110,47 @@ export function detectStorageCorruption(): { corrupted: boolean; lastBackup?: Ba
       };
     }
   } catch (e) {
-    console.error('[Backup] 检测存储损坏失败:', e);
+    reportError('backup', `检测存储损坏失败: ${(e as Error)?.message || e}`);
     return { corrupted: true };
   }
 
   return { corrupted: false };
 }
 
-/** 设置自动备份定时器 */
-let autoBackupTimer: ReturnType<typeof setTimeout> | null = null;
+/**
+ * 启动自动备份定时器。
+ *
+ * @param onTick 定时触发时调用的回调。回调应通过自身闭包（如 zustand getState）
+ *   获取最新进度并调用 createBackup()。注意：不要依赖本函数传给回调的参数——
+ *   该参数仅为触发通知，不携带实际进度数据（进度由调用方按需读取，保证数据新鲜）。
+ * @returns 清理函数，调用后停止定时器。
+ */
+export function startAutoBackup(onTick: () => void): () => void {
+  // 使用局部变量而非模块级单例：每次调用拥有独立的 timer 引用，
+  // React StrictMode 双调用时两份 cleanup 各自清理自己的 timer，不会竞争。
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  let active = true;
 
-export function startAutoBackup(callback: (backup: BackupRecord) => void): () => void {
   const scheduleBackup = () => {
-    autoBackupTimer = setTimeout(() => {
+    timer = setTimeout(() => {
+      if (!active) return;
       try {
-        // 触发回调，由外部（App.tsx）传入完整的进度数据
-        callback({
-          id: `auto_${Date.now()}`,
-          timestamp: Date.now(),
-        });
+        onTick();
       } catch (e) {
-        console.error('[AutoBackup] 定时备份失败:', e);
+        reportError('backup', `定时备份失败: ${(e as Error)?.message || e}`);
       } finally {
-        // 重新调度下一次备份
-        scheduleBackup();
+        if (active) scheduleBackup();
       }
     }, AUTO_BACKUP_INTERVAL_MS);
   };
 
-  // 启动第一个定时器
   scheduleBackup();
 
-  // 返回清理函数
   return () => {
-    if (autoBackupTimer) {
-      clearTimeout(autoBackupTimer);
-      autoBackupTimer = null;
+    active = false;
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
     }
   };
 }
@@ -155,10 +161,9 @@ export function startAutoBackup(callback: (backup: BackupRecord) => void): () =>
 export function createManualBackup(progress: Progress, settings?: Record<string, unknown>): BackupRecord | null {
   try {
     const backup = createBackup(progress, settings);
-    console.warn(`[AutoBackup] 手动备份已创建: ${backup.id}`);
     return backup;
   } catch (e) {
-    console.error('[AutoBackup] 手动备份失败:', e);
+    reportError('backup', `手动备份失败: ${(e as Error)?.message || e}`);
     return null;
   }
 }

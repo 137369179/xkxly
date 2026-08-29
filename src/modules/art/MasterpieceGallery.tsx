@@ -209,7 +209,7 @@ export function MasterpieceGallery() {
               onClick={() => handleSelectMasterpiece(idx)}
               className={`px-4 py-2.5 rounded-2xl font-black text-xs whitespace-nowrap transition-all flex items-center gap-1.5 shadow-sm border-2 ${
                 active
-                  ? 'bg-amber-600 text-white border-amber-700 shadow-md scale-105'
+                  ? 'bg-amber-600 text-candy-orange-on border-amber-700 shadow-md scale-105'
                   : 'bg-white text-slate-700 border-amber-200 hover:bg-amber-50'
               }`}
             >

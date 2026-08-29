@@ -96,7 +96,7 @@ export function DailySummary({ plan }: { plan: ReturnType<typeof buildDailyPlan>
         <button
           type="button"
           onClick={() => navigate('cat_house')}
-          className="rounded-xl bg-amber-500 px-3 py-1.5 text-xs font-black text-white shadow hover:bg-amber-600 active:scale-95 transition-all"
+          className="rounded-xl bg-amber-500 px-3 py-1.5 text-xs font-black text-candy-orange-on shadow hover:bg-amber-600 active:scale-95 transition-all"
         >
           去看猫咪 ➔
         </button>
@@ -179,6 +179,7 @@ export function PoemActivity({ poemId, onDone }: { poemId: string; onDone: () =>
       label: '读',
       emoji: '📖',
       gate: true,
+      autoAdvanceMs: 1400,
       render: (api: FlowStepApi) => (
         <div className="flex flex-col items-center gap-3 py-2">
           <div className="w-full space-y-1 rounded-2xl bg-white/70 p-4 text-center">
@@ -209,6 +210,7 @@ export function PoemActivity({ poemId, onDone }: { poemId: string; onDone: () =>
       label: '填',
       emoji: '✏️',
       gate: true,
+      autoAdvanceMs: 1400,
       render: (api: FlowStepApi) => (
         <QuizCard
           question={makePoemQuestion(POEMS, 1, poem.id) ?? makePoemQuestion(POEMS, 1) ?? makeMathQuestion(1)}
@@ -349,6 +351,7 @@ export function WordActivity({ word, onDone }: { word: string; onDone: () => voi
           label: '说',
           emoji: '🗣️',
           gate: true,
+      autoAdvanceMs: 1400,
           render: (api: FlowStepApi) => (
             <div className="flex flex-col items-center gap-4 py-4">
               <p className="text-base font-bold text-ink">{tr('today.followReadWord', { word: entry.word })}</p>

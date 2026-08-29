@@ -218,7 +218,7 @@ export default function VehiclesPage() {
                 type="button"
                 onClick={() => handleSelectV(v)}
                 className={`rounded-2xl border-2 px-3.5 py-2 text-sm font-black transition-transform active:scale-95 ${
-                  selectedV.id === v.id ? 'bg-amber-500 text-white border-amber-600 scale-105 shadow-md' : 'bg-white text-amber-900 border-amber-200 hover:scale-102'
+                  selectedV.id === v.id ? 'bg-amber-500 text-candy-orange-on border-amber-600 scale-105 shadow-md' : 'bg-white text-amber-900 border-amber-200 hover:scale-102'
                 }`}
               >
                 {v.emoji} {t(VEHICLE_NAME_KEYS[v.id] ?? 'vehicle.fireEngineName', { defaultValue: v.nameZh })}

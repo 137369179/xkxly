@@ -94,7 +94,7 @@ export function ChatPanel({ personality, onPersonalityChange, onTalk }: Props) {
             key={p.id}
             onClick={() => onPersonalityChange(p.id)}
             className={`rounded-full px-2.5 py-1 text-xs font-bold transition ${
-              p.id === personality ? 'bg-purple-500 text-white' : 'bg-white/70 text-ink hover:bg-white'
+              p.id === personality ? 'bg-purple-500 text-candy-purple-on' : 'bg-white/70 text-ink hover:bg-white'
             }`}
           >
             {p.emoji} {p.label}
@@ -110,7 +110,7 @@ export function ChatPanel({ personality, onPersonalityChange, onTalk }: Props) {
           <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div
               className={`max-w-[80%] rounded-2xl px-3 py-1.5 text-sm leading-relaxed ${
-                m.role === 'user' ? 'bg-purple-500 text-white' : 'bg-white text-ink'
+                m.role === 'user' ? 'bg-purple-500 text-candy-purple-on' : 'bg-white text-ink'
               }`}
             >
               {m.content || '思考中…'}
@@ -131,7 +131,7 @@ export function ChatPanel({ personality, onPersonalityChange, onTalk }: Props) {
         <button
           onClick={() => void send()}
           disabled={busy}
-          className="rounded-xl bg-purple-500 px-4 py-2 text-sm font-bold text-white transition active:translate-y-[1px] disabled:opacity-50"
+          className="rounded-xl bg-purple-500 px-4 py-2 text-sm font-bold text-candy-purple-on transition active:translate-y-[1px] disabled:opacity-50"
         >
           {busy ? '…' : '发送'}
         </button>

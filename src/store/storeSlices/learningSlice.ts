@@ -22,6 +22,7 @@ export const createLearningSlice: SliceCreator<
     | 'resetTodayLesson'
     | 'markTraced'
     | 'buySticker'
+    | 'refundSticker'
     | 'spendStars'
     | 'recordSpeed'
     | 'recordMath'
@@ -110,6 +111,20 @@ export const createLearningSlice: SliceCreator<
         ...q,
         spent: q.spent + cost,
         stickers: [...q.stickers, id],
+      })),
+    );
+    return true;
+  },
+
+  /** 撤销贴纸兑换（可撤销容错）：移除贴纸并退回已消耗的星星 */
+  refundSticker: (id, cost) => {
+    const p = get().progress;
+    if (!p.stickers.includes(id)) return false;
+    set((s) =>
+      _applyProgress(s, (q) => ({
+        ...q,
+        spent: Math.max(0, q.spent - cost),
+        stickers: q.stickers.filter((x) => x !== id),
       })),
     );
     return true;

@@ -23,14 +23,14 @@ import { useStore, useMastery } from '@/store/useStore';
 // Web Audio API 调音引擎
 const FREQS = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25];
 const NOTES = [
-  { name: 'Do', note: '1', emoji: '🔴', color: 'bg-red-400 border-red-500 text-white' },
-  { name: 'Re', note: '2', emoji: '🟠', color: 'bg-orange-400 border-orange-500 text-white' },
-  { name: 'Mi', note: '3', emoji: '🟡', color: 'bg-amber-400 border-amber-500 text-white' },
-  { name: 'Fa', note: '4', emoji: '🟢', color: 'bg-green-400 border-green-500 text-white' },
-  { name: 'Sol', note: '5', emoji: '青', color: 'bg-teal-400 border-teal-500 text-white' },
-  { name: 'La', note: '6', emoji: '🔵', color: 'bg-blue-400 border-blue-500 text-white' },
-  { name: 'Ti', note: '7', emoji: '🟣', color: 'bg-purple-400 border-purple-500 text-white' },
-  { name: 'High Do', note: 'i', emoji: '💖', color: 'bg-pink-400 border-pink-500 text-white' },
+  { name: 'Do', note: '1', emoji: '🔴', color: 'bg-red-400 border-red-500 text-candy-pink-on' },
+  { name: 'Re', note: '2', emoji: '🟠', color: 'bg-orange-400 border-orange-500 text-candy-orange-on' },
+  { name: 'Mi', note: '3', emoji: '🟡', color: 'bg-amber-400 border-amber-500 text-candy-orange-on' },
+  { name: 'Fa', note: '4', emoji: '🟢', color: 'bg-green-400 border-green-500 text-candy-green-on' },
+  { name: 'Sol', note: '5', emoji: '青', color: 'bg-teal-400 border-teal-500 text-candy-green-on' },
+  { name: 'La', note: '6', emoji: '🔵', color: 'bg-blue-400 border-blue-500 text-candy-blue-on' },
+  { name: 'Ti', note: '7', emoji: '🟣', color: 'bg-purple-400 border-purple-500 text-candy-purple-on' },
+  { name: 'High Do', note: 'i', emoji: '💖', color: 'bg-pink-400 border-pink-500 text-candy-pink-on' },
 ];
 
 function playNote(freq: number) {
@@ -194,7 +194,7 @@ export default function MusicPage() {
             onClick={() => setActiveTab(tab)}
             className={`rounded-xl px-4 py-2 text-sm font-black transition-all ${
               activeTab === tab
-                ? 'bg-pink-500 text-white shadow-md scale-105'
+                ? 'bg-pink-500 text-candy-pink-on shadow-md scale-105'
                 : 'bg-white text-pink-600 border border-pink-200 hover:bg-pink-50'
             }`}
           >

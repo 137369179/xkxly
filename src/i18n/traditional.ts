@@ -25,6 +25,36 @@ export function ensureCn2t(): Promise<ConverterFunction> {
   return initPromise;
 }
 
+/** requestIdleCallback 的类型（不引入 lib.dom 的 IdleRequestOptions 依赖） */
+type IdleScheduler = (cb: () => void, opts?: { timeout: number }) => void;
+
+/**
+ * 条件预热繁体转换器
+ * ------------------------------------------------------------
+ * opencc-js 约 506KB(gzip)，**无条件预热会拖慢所有简体用户**，
+ * 与「惰性初始化避免首屏加载大字典」的设计意图冲突。
+ *
+ * 故仅在用户「可能需要繁体」时才于浏览器空闲期预加载：
+ *   ① 当前 locale 已是 zh-TW；② 系统语言属繁体地区（zh-TW/HK/MO、zh-Hant）。
+ * 效果：繁体用户切换时零等待（不再先闪简体再变繁体），简体用户零成本。
+ *
+ * @param locale 当前语言（可选，传入即可判断条件 ①）
+ */
+export function maybePrewarmCn2t(locale?: string): void {
+  if (converter || initPromise) return; // 已就绪或已在加载中
+  const sysLang = typeof navigator === 'undefined' ? '' : navigator.language || '';
+  const wantsTraditional =
+    locale === 'zh-TW' || /^zh[-_](tw|hk|mo)$|^zh-hant/i.test(sysLang);
+  if (!wantsTraditional) return;
+
+  const run = () => {
+    void ensureCn2t().catch(() => {}); // 失败静默忽略，仍会回退简体原文
+  };
+  const ric = (globalThis as { requestIdleCallback?: IdleScheduler }).requestIdleCallback;
+  if (typeof ric === 'function') ric(run, { timeout: 3000 });
+  else setTimeout(run, 1500);
+}
+
 /** 简体 → 繁体（同步；若转换器尚未就绪则返回原文，并异步预热） */
 export function toTraditional(text: string): string {
   if (!text || !converter) {

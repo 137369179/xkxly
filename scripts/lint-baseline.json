@@ -1,14 +1,14 @@
 {
-  "updatedAt": "2026-08-24T17:47:24.959Z",
+  "updatedAt": "2026-08-28T18:38:42.989Z",
   "rules": {
-    "@typescript-eslint/no-explicit-any": 21,
-    "react-hooks/exhaustive-deps": 58,
+    "@typescript-eslint/no-explicit-any": 24,
+    "react-hooks/exhaustive-deps": 79,
     "no-console": 6,
-    "@typescript-eslint/no-non-null-assertion": 466
+    "@typescript-eslint/no-non-null-assertion": 457
   },
   "a11y": {
-    "A11Y-CLICK-NO-ROLE": 935,
-    "A11Y-BUTTON-DIV": 910,
-    "A11Y-ARIA-HIDDEN-FOC": 2
+    "A11Y-CLICK-NO-ROLE": 1096,
+    "A11Y-BUTTON-DIV": 1045,
+    "A11Y-ARIA-HIDDEN-FOC": 13
   }
 }

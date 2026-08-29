@@ -217,7 +217,7 @@ export function StrokeTrace({ char, tone = 'green', onPass }: StrokeTraceProps) 
             ))}
             {/* 已完成的笔：墨色实心 */}
             {data?.s.map((d, i) =>
-              i < doneStrokes ? <path key={`f${i}`} d={d} fill="#5c2e3d" /> : null,
+              i < doneStrokes ? <path key={`f${i}`} d={d} fill="#4a2b1f" /> : null,
             )}
             {/* 当前笔：呼吸高亮轮廓 */}
             {data && strokeIdx < total && status !== 'pass' && (
@@ -230,7 +230,7 @@ export function StrokeTrace({ char, tone = 'green', onPass }: StrokeTraceProps) 
             )}
             {/* 起笔提示点 */}
             {startDot && status !== 'pass' && (
-              <circle cx={startDot[0]} cy={startDot[1]} r={34} fill="#e5ac2e" className="animate-ping" />
+              <circle cx={startDot[0]} cy={startDot[1]} r={34} fill="#d9860a" className="animate-ping" />
             )}
             {/* 当前轨迹 */}
             {trailPath && (
@@ -251,7 +251,7 @@ export function StrokeTrace({ char, tone = 'green', onPass }: StrokeTraceProps) 
             <motion.div
               initial={{ scale: 0, rotate: -20 }}
               animate={{ scale: 1, rotate: -12 }}
-              className="pointer-events-none absolute -right-2 -top-2 rounded-full bg-candy-green px-4 py-2 text-lg font-black text-white shadow-lg"
+              className="pointer-events-none absolute -right-2 -top-2 rounded-full bg-candy-green px-4 py-2 text-lg font-black text-candy-green-on shadow-lg"
             >
               {translate('hanzi.strokeAllRight')}
             </motion.div>
@@ -270,7 +270,7 @@ export function StrokeTrace({ char, tone = 'green', onPass }: StrokeTraceProps) 
                 i < doneStrokes ? 'scale-110' : i === strokeIdx ? 'animate-pulse' : '',
               )}
               style={{
-                background: i < doneStrokes ? '#33a863' : i === strokeIdx ? t.main : '#f0dde2',
+                background: i < doneStrokes ? '#3fc26b' : i === strokeIdx ? t.main : '#e6d8ce',
               }}
             />
           ))}

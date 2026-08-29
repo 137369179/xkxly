@@ -57,6 +57,7 @@ export function LetterLearn({ upper, onDone }: { upper: string; onDone?: () => v
       emoji: '🎈',
       // gate: 必须点击"听一听，我认识它啦"按钮触发 api.ready() 后才能解锁"认"步骤
       gate: true,
+      autoAdvanceMs: 1400,
       render: (api) => (
         <div className="flex flex-col items-center gap-3 py-2 text-center">
           <div className="relative grid h-36 w-36 sm:h-40 sm:w-40 place-items-center rounded-[2.2rem] border-4 border-white bg-gradient-to-br from-candy-blue-soft to-blue-100 shadow-pop">
@@ -118,6 +119,7 @@ export function LetterLearn({ upper, onDone }: { upper: string; onDone?: () => v
       label: '认',
       emoji: '👀',
       gate: true,
+      autoAdvanceMs: 1400,
       render: (api) => (
         <QuizCard
           question={makeLetterQuestion(1, upper)}
@@ -139,6 +141,7 @@ export function LetterLearn({ upper, onDone }: { upper: string; onDone?: () => v
       label: '练',
       emoji: '✏️',
       gate: true,
+      autoAdvanceMs: 1400,
       render: (api) => (
         <QuizCard
           question={makeLetterQuestion(2, upper)}
@@ -160,6 +163,7 @@ export function LetterLearn({ upper, onDone }: { upper: string; onDone?: () => v
       label: '写',
       emoji: '✍️',
       gate: true,
+      autoAdvanceMs: 1400,
       render: (api) => (
         <div className="py-2">
           <TraceCanvas

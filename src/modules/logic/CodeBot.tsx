@@ -271,7 +271,7 @@ export function CodeBot() {
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   onClick={() => removeCmd(i)}
-                  className={`grid h-10 w-10 place-items-center rounded-lg text-xl font-bold ${execStep === i && executing ? 'bg-candy-orange-main text-white' : 'bg-white text-ink'}`}
+                  className={`grid h-10 w-10 place-items-center rounded-lg text-xl font-bold ${execStep === i && executing ? 'bg-candy-orange-main text-candy-orange-on' : 'bg-white text-ink'}`}
                   disabled={executing}
                 >
                   {DIR_EMOJI[cmd]}

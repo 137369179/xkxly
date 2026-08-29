@@ -122,7 +122,7 @@ export default function ContentStationPage() {
             className={cn(
               'no-select flex flex-1 items-center justify-center gap-1.5 rounded-2xl border-2 px-3 py-2.5 text-sm font-extrabold shadow-sm transition-transform active:scale-95',
               tab === ty.id
-                ? 'border-pink-400 bg-gradient-to-r from-pink-500 to-rose-400 text-white'
+                ? 'border-pink-400 bg-gradient-to-r from-pink-500 to-rose-400 text-candy-pink-on'
                 : 'border-pink-200 bg-white text-ink-soft',
             )}
           >

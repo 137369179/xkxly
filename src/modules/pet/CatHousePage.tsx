@@ -302,7 +302,7 @@ export default function CatHousePage({ initialRealisticMode = false }: { initial
         <button
           type="button"
           onClick={() => { sfxTap(); setShowDiaryModal(true); }}
-          className="rounded-2xl bg-amber-500 px-4 py-2 text-xs sm:text-sm font-black text-white shadow-md hover:bg-amber-600 active:scale-95 transition-all shrink-0"
+          className="rounded-2xl bg-amber-500 px-4 py-2 text-xs sm:text-sm font-black text-candy-orange-on shadow-md hover:bg-amber-600 active:scale-95 transition-all shrink-0"
         >
           翻开手账 📖
         </button>

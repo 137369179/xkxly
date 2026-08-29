@@ -34,7 +34,7 @@ const PUZZLES: Puzzle[] = [
   { id: 'bird', name: '小鸟', emoji: '🐦', hint: '翅膀展开' },
 ];
 
-const COLORS = ['#ff5c7a', '#35bcc0', '#ffd166', '#8fe7bc', '#ff8db0', '#a8d8f0', '#b8f0d8'];
+const COLORS = ['#ff5c8a', '#35bcc0', '#ffd166', '#8fe7bc', '#ff8db0', '#b7d8ff', '#bcebce'];
 
 const INITIAL_PIECES: Piece[] = [
   { id: 'p1', shape: 'triangle-lg', color: COLORS[0] as string, x: 50, y: 50, rotation: 0 },

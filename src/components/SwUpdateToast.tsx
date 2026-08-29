@@ -77,7 +77,7 @@ export function SwUpdateToast() {
             <div className="flex shrink-0 items-center gap-2">
               <button
                 onClick={handleRefresh}
-                className="min-h-[40px] rounded-xl bg-candy-green px-3 text-sm font-extrabold text-white shadow-sm transition active:translate-y-[2px]"
+                className="min-h-[40px] rounded-xl bg-candy-green px-3 text-sm font-extrabold text-candy-green-on shadow-sm transition active:translate-y-[2px]"
               >
                 {t('swUpdateToast.refreshNow')}
               </button>

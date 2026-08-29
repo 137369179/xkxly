@@ -110,7 +110,7 @@ export function VoiceSettings() {
                   <span
                     className={`absolute -top-3 right-4 rounded-full px-2.5 py-0.5 text-xs font-black shadow-xs ${
                       isSelected
-                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
+                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-candy-orange-on'
                         : 'bg-slate-100 text-slate-500 border border-slate-200'
                     }`}
                   >

@@ -233,7 +233,7 @@ export function SocialEmotionGame() {
           }}
           className={`min-h-[44px] px-5 py-3 rounded-2xl font-black text-sm transition-all flex items-center gap-2 border-2 focus-visible:ring-4 focus-visible:ring-rose-300 focus:outline-none ${
             activeTab === 'emotion'
-              ? 'bg-rose-500 text-white border-rose-600 shadow-lg scale-105'
+              ? 'bg-rose-500 text-candy-pink-on border-rose-600 shadow-lg scale-105'
               : 'bg-white text-slate-700 border-rose-200 hover:bg-rose-50 active:scale-95'
           }`}
         >
@@ -252,7 +252,7 @@ export function SocialEmotionGame() {
           }}
           className={`min-h-[44px] px-5 py-3 rounded-2xl font-black text-sm transition-all flex items-center gap-2 border-2 focus-visible:ring-4 focus-visible:ring-violet-300 focus:outline-none ${
             activeTab === 'social'
-              ? 'bg-violet-500 text-white border-violet-600 shadow-lg scale-105'
+              ? 'bg-violet-500 text-candy-purple-on border-violet-600 shadow-lg scale-105'
               : 'bg-white text-slate-700 border-violet-200 hover:bg-violet-50 active:scale-95'
           }`}
         >
@@ -271,7 +271,7 @@ export function SocialEmotionGame() {
                 onClick={() => handleSelectEmotion(idx)}
                 className={`min-h-[44px] p-4 rounded-2xl border-2 font-black text-sm flex flex-col items-center justify-center gap-2 transition-all focus-visible:ring-4 focus-visible:ring-rose-300 focus:outline-none ${
                   selectedEmotionIdx === idx
-                    ? 'bg-rose-500 text-white border-rose-600 shadow-lg scale-105'
+                    ? 'bg-rose-500 text-candy-pink-on border-rose-600 shadow-lg scale-105'
                     : 'bg-rose-50 border-rose-100 text-slate-700 hover:bg-rose-100 active:scale-95'
                 }`}
               >

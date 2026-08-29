@@ -32,6 +32,15 @@ export interface FlowStep {
   emoji: string;
   /** 需要完成动作才能继续 */
   gate?: boolean;
+  /**
+   * 仅对 gate 步骤生效（opt-in）：孩子完成动作（api.ready() 触发 done）后，
+   * 延迟 autoAdvanceMs 毫秒自动进入下一步，省掉「下一步」的仪式性点击。
+   * 安全约束：
+   *   - 非 gate 步骤绝不自动推进（玩/说等自由探索步骤，孩子想看多久看多久）；
+   *   - 不自动完成最后一课（最后一课的「完成」仍需孩子亲手点击，保留仪式感）；
+   *   - 依赖 useEffect cleanup，切步/卸载自动取消。
+   */
+  autoAdvanceMs?: number;
   render: (api: FlowStepApi) => ReactNode;
 }
 
@@ -80,6 +89,16 @@ export function LearnFlow({ steps, tone = 'blue', onFinish, finishLabel = '完�
 
   const api = useMemo<FlowStepApi>(() => ({ ready, next, done }), [ready, next, done]);
 
+  // —— gate 步骤完成动作后自动进入下一步（opt-in autoAdvanceMs）——
+  // 非 gate 步骤不自动推进；最后一课不自动完成（保留「完成」的仪式感）。
+  useEffect(() => {
+    const ms = step?.autoAdvanceMs;
+    if (ms == null || !step?.gate || !done || isLast) return;
+    const t = setTimeout(() => next(), ms);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx, done, isLast]);
+
   // A2 · 步骤切换时朗读引导语；首次挂载不朗读，避免与进入页面的 announcePage 互相打断
   const firstRun = useRef(true);
   useEffect(() => {
@@ -117,7 +136,7 @@ export function LearnFlow({ steps, tone = 'blue', onFinish, finishLabel = '完�
                 disabled={i > idx}
                 className={cn(
                   'flex h-10 min-w-10 items-center justify-center gap-1 rounded-2xl px-2.5 text-sm font-extrabold transition-all border-2',
-                  active && 'scale-105 bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-md border-white ring-2 ring-pink-300/50',
+                  active && 'scale-105 bg-gradient-to-r from-pink-500 to-rose-400 text-candy-pink-on shadow-md border-white ring-2 ring-pink-300/50',
                   !active && passed && 'bg-pink-100 text-pink-700 border-pink-200',
                   !active && !passed && 'bg-gray-100 text-gray-400 border-gray-200 opacity-60',
                 )}

@@ -52,7 +52,7 @@ export function GradedBooksSection() {
   return (
     <div className="space-y-6">
       {/* 顶部学情与自主阅读能力看板 (Header Dashboard) */}
-      <div className="p-5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 rounded-3xl shadow-xl text-white flex flex-col sm:flex-row items-center justify-between gap-4 border-2 border-amber-200">
+      <div className="p-5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 rounded-3xl shadow-xl text-candy-orange-on flex flex-col sm:flex-row items-center justify-between gap-4 border-2 border-amber-200">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-4xl shadow-inner">
             📚
@@ -110,7 +110,7 @@ export function GradedBooksSection() {
               }}
               className={`px-4 py-2.5 rounded-2xl font-black text-xs whitespace-nowrap transition-all flex items-center gap-1.5 shadow-sm border ${
                 active
-                  ? 'bg-amber-500 text-white border-amber-600 shadow-md scale-102'
+                  ? 'bg-amber-500 text-candy-orange-on border-amber-600 shadow-md scale-102'
                   : 'bg-white text-slate-700 border-amber-200 hover:bg-amber-50'
               }`}
             >
@@ -191,7 +191,7 @@ export function GradedBooksSection() {
                 <button
                   type="button"
                   onClick={() => handleStartRead(book)}
-                  className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-black text-xs shadow-md active:scale-95 transition-transform"
+                  className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-candy-orange-on rounded-xl font-black text-xs shadow-md active:scale-95 transition-transform"
                 >
                   🚀 开始伴读
                 </button>
@@ -217,7 +217,7 @@ export function GradedBooksSection() {
           <button
             type="button"
             onClick={handleGenerateCustomBook}
-            className="px-6 py-3.5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-orange-300/50 hover:scale-105 active:scale-95 transition-transform"
+            className="px-6 py-3.5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-candy-orange-on rounded-2xl font-black text-sm shadow-xl shadow-orange-300/50 hover:scale-105 active:scale-95 transition-transform"
           >
             ✨ 立即生成并开启朗读
           </button>

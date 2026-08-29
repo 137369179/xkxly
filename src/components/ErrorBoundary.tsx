@@ -16,6 +16,14 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { reportRenderError } from '@/lib/monitor';
 
+/** 生产环境只暴露错误消息首行，隐藏完整堆栈（防止源码路径泄露） */
+const isDev = import.meta.env.DEV;
+function safeStack(error: Error, stack?: string): string {
+  if (isDev) return `${error.message}${stack ? `\n${stack}` : ''}`;
+  // 生产：只取 message 第一行（去掉可能包含路径的后续内容）
+  return error.message.split('\n')[0] ?? '未知错误';
+}
+
 interface ErrorBoundaryProps {
   children: ReactNode;
   /** 用于在路由变化时自动重置错误状态 */
@@ -67,7 +75,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
             <button
               type="button"
               onClick={() => this.setState({ error: null, stack: undefined })}
-              className="mt-3 min-h-[40px] rounded-xl bg-candy-green px-4 text-sm font-extrabold text-white transition active:translate-y-[2px]"
+              className="mt-3 min-h-[40px] rounded-xl bg-candy-green px-4 text-sm font-extrabold text-candy-green-on transition active:translate-y-[2px]"
             >
               重新试一次
             </button>
@@ -76,8 +84,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
                 错误详情
               </summary>
               <pre className="mt-2 max-h-32 overflow-auto rounded-lg bg-[#fbf6f7] p-2 text-xs leading-relaxed whitespace-pre-wrap text-ink-soft">
-                {error.message}
-                {stack ? `\n${stack}` : ''}
+                {safeStack(error, stack)}
               </pre>
             </details>
           </div>
@@ -98,7 +105,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
             <button
               type="button"
               onClick={() => this.setState({ error: null, stack: undefined })}
-              className="min-h-[48px] rounded-2xl bg-candy-green px-5 text-base font-extrabold text-white transition active:translate-y-[2px]"
+              className="min-h-[48px] rounded-2xl bg-candy-green px-5 text-base font-extrabold text-candy-green-on transition active:translate-y-[2px]"
             >
               重新试一次
             </button>
@@ -118,8 +125,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
               给家长看的错误详情
             </summary>
             <pre className="mt-2 max-h-40 overflow-auto rounded-xl bg-[#fbf6f7] p-3 text-xs leading-relaxed whitespace-pre-wrap text-ink-soft">
-              {error.message}
-              {stack ? `\n${stack}` : ''}
+              {safeStack(error, stack)}
             </pre>
           </details>
         </div>

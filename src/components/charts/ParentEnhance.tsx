@@ -13,6 +13,7 @@ import type { Progress } from '@/types';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { SUBJECTS } from '@/lib/srs';
 import { useTranslation } from '@/i18n/useTranslation';
+import { CHART } from '@/lib/chartTokens';
 
 /* 工具：近 N 天日期（YYYY-MM-DD） */
 function recentDays(n: number): string[] {
@@ -69,7 +70,7 @@ export function GrowthTrend() {
         <svg viewBox="0 0 100 42" className="w-full" style={{ height: 130 }}>
           {/* 网格线 */}
           {[0.25, 0.5, 0.75, 1].map((r) => (
-            <line key={r} x1={0} y1={40 - r * 36} x2={100} y2={40 - r * 36} stroke="#f0dde2" strokeWidth={0.3} />
+            <line key={r} x1={0} y1={40 - r * 36} x2={100} y2={40 - r * 36} stroke={CHART.grid} strokeWidth={0.3} />
           ))}
           {/* 面积 + 折线 */}
           {(() => {
@@ -83,16 +84,16 @@ export function GrowthTrend() {
             const area = `0,40 ${line} 100,40`;
             return (
               <>
-                <polygon points={area} fill="rgba(46,147,201,0.12)" />
-                <polyline points={line} fill="none" stroke="#2e93c9" strokeWidth={0.8} strokeLinejoin="round" />
+                <polygon points={area} fill={CHART.area.blue} />
+                <polyline points={line} fill="none" stroke={CHART.series.blue} strokeWidth={0.8} strokeLinejoin="round" />
                 {pts.map((p, i) => (
-                  <circle key={`p-${i}`} cx={p[0]} cy={p[1]} r={0.9} fill="#2e93c9" />
+                  <circle key={`p-${i}`} cx={p[0]} cy={p[1]} r={0.9} fill={CHART.series.blue} />
                 ))}
               </>
             );
           })()}
           {/* 趋势标注 */}
-          <text x={2} y={4} fontSize={2.4} fill="#cda6b0">
+          <text x={2} y={4} fontSize={2.4} fill={CHART.textMuted}>
             {tr('parent.startPoint', { pct: Math.round(first * 100) })}
           </text>
         </svg>
@@ -124,20 +125,20 @@ function SubjectRadar({ data }: { data: { label: string; color: string; pct: num
           key={ri}
           points={data.map((_, i) => pt(i, r).join(',')).join(' ')}
           fill="none"
-          stroke="#f0dde2"
+          stroke={CHART.grid}
           strokeWidth={0.6}
         />
       ))}
       {/* 轴线 */}
       {data.map((_, i) => {
         const [x, y] = pt(i, 1);
-        return <line key={`_-${i}`} x1={cx} y1={cy} x2={x} y2={y} stroke="#f0dde2" strokeWidth={0.6} />;
+        return <line key={`_-${i}`} x1={cx} y1={cy} x2={x} y2={y} stroke={CHART.grid} strokeWidth={0.6} />;
       })}
       {/* 数据多边形 */}
       <polygon
         points={data.map((d, i) => pt(i, Math.max(0, Math.min(1, d.pct))).join(',')).join(' ')}
-        fill="rgba(168,85,247,0.18)"
-        stroke="#8b6ef0"
+        fill={CHART.area.purple}
+        stroke={CHART.series.purple}
         strokeWidth={1.3}
         strokeLinejoin="round"
       />

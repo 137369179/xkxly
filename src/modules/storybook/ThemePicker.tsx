@@ -28,7 +28,7 @@ export function ThemePicker({ value, onChange }: ThemePickerProps) {
             className="relative flex flex-col items-center justify-center gap-2 rounded-[1.5rem] p-4 sm:p-6 transition-colors"
             style={{
               backgroundColor: selected ? tone.soft : '#ffffff',
-              border: `4px solid ${selected ? tone.main : '#f0dde2'}`,
+              border: `4px solid ${selected ? tone.main : '#e6d8ce'}`,
               boxShadow: selected ? `0 6px 0 ${tone.deep}` : '0 4px 0 #e2c4cb',
             }}
           >

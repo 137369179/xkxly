@@ -85,7 +85,7 @@ export function VoiceStudyReport() {
           onClick={handleTogglePlay}
           className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-black transition-all shadow-md active:scale-95 ${
             isPlaying
-              ? 'bg-rose-500 text-white hover:bg-rose-600 animate-pulse'
+              ? 'bg-rose-500 text-candy-pink-on hover:bg-rose-600 animate-pulse'
               : 'bg-indigo-600 text-white hover:bg-indigo-700'
           }`}
         >

@@ -223,9 +223,9 @@ export function StudyBuddyMode() {
                 onClick={() => handleJudge(true)}
                 className="min-h-[56px] rounded-2xl text-lg font-extrabold transition active:translate-y-[3px]"
                 style={{
-                  background: '#5FD68B',
+                  background: '#62CC8A',
                   color: '#FFFFFF',
-                  boxShadow: '0 5px 0 0 #33A863',
+                  boxShadow: '0 5px 0 0 #3FC26B',
                 }}
               >
                 ✅ {tr('buddy.correctBtn')}
@@ -235,9 +235,9 @@ export function StudyBuddyMode() {
                 onClick={() => handleJudge(false)}
                 className="min-h-[56px] rounded-2xl text-lg font-extrabold transition active:translate-y-[3px]"
                 style={{
-                  background: '#FF9F5A',
+                  background: '#FF9F2E',
                   color: '#FFFFFF',
-                  boxShadow: '0 5px 0 0 #c2410c',
+                  boxShadow: '0 5px 0 0 #b45f09',
                 }}
               >
                 ❌ {tr('buddy.wrongBtn')}

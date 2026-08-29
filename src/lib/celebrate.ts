@@ -25,7 +25,7 @@ async function safeConfetti(fn: () => void): Promise<void> {
   }
 }
 
-const CANDY_COLORS = ['#ff6b96', '#55aee0', '#FFC93C', '#5FD68B', '#8b6ef0', '#FF9F5A'];
+const CANDY_COLORS = ['#ff5c8a', '#3d9bff', '#FFC53D', '#62CC8A', '#8f5bff', '#FF9F2E'];
 
 /**
  * P2-1: 答对庆祝效果变化池
@@ -64,7 +64,7 @@ const CELEBRATE_VARIANTS: CelebrateVariant[] = [
     scalar: 1.1,
     ticks: 160,
     gravity: 0.85,
-    colors: ['#FFC93C', '#FFD86B', '#FF9F5A', '#FFF0C8'],
+    colors: ['#FFC53D', '#FFD86B', '#FF9F2E', '#FFF0C8'],
     shapes: ['star'],
   },
   // 变体 C：圆形 + 粉紫系（柔和可爱）
@@ -75,7 +75,7 @@ const CELEBRATE_VARIANTS: CelebrateVariant[] = [
     scalar: 1.0,
     ticks: 150,
     gravity: 0.92,
-    colors: ['#ff6b96', '#8b6ef0', '#FFB3D1', '#c2a8ef'],
+    colors: ['#ff5c8a', '#8f5bff', '#FFB3D1', '#c2a8ef'],
     shapes: ['circle'],
   },
   // 变体 D：高扩散 + 多彩（热闹感）
@@ -97,7 +97,7 @@ const CELEBRATE_VARIANTS: CelebrateVariant[] = [
     scalar: 1.3,
     ticks: 180,
     gravity: 0.88,
-    colors: ['#5FD68B', '#55aee0', '#FFC93C', '#ff6b96'],
+    colors: ['#62CC8A', '#3d9bff', '#FFC53D', '#ff5c8a'],
     shapes: ['star'],
   },
 ];
@@ -182,7 +182,7 @@ export async function celebrateStars(count = 3): Promise<void> {
       scalar: 1.25,
       ticks: 190,
       shapes: ['star'],
-      colors: ['#FFC93C', '#FFD86B', '#FF9F5A', '#FFF0C8'],
+      colors: ['#FFC53D', '#FFD86B', '#FF9F2E', '#FFF0C8'],
       origin: { x: 0.5, y: 0.42 },
       disableForReducedMotion: true,
     }));

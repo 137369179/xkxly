@@ -257,7 +257,7 @@ export function StoryBook() {
                   type="button"
                   onClick={handleVoiceInput}
                   className={`absolute right-2 grid h-9 w-9 place-items-center rounded-xl transition-all ${
-                    isListening ? 'bg-candy-red text-white animate-pulse' : 'bg-candy-purple/20 text-candy-purple hover:bg-candy-purple/30'
+                    isListening ? 'bg-candy-red text-candy-purple-on animate-pulse' : 'bg-candy-purple/20 text-candy-purple hover:bg-candy-purple/30'
                   }`}
                   title={tr('storybook.voiceInput')}
                 >

@@ -27,7 +27,8 @@ export function BottomTabs({ active }: { active: RouteId }) {
                 aria-current={isActive ? 'page' : undefined}
                 aria-label={translate(`nav.${item.id}.label`) || item.label}
                 className={cn(
-                  'no-select relative flex min-h-[58px] w-full flex-col items-center justify-center gap-0.5 rounded-2xl px-1 py-1',
+                  // 改版：底栏触控 ≥72px（儿童触控标准 ≥75px），图标 32 + 文字 17
+                  'no-select relative flex min-h-[72px] w-full flex-col items-center justify-center gap-0.5 rounded-2xl px-1 py-1',
                   'transition-transform duration-150 active:scale-95',
                 )}
               >
@@ -42,11 +43,23 @@ export function BottomTabs({ active }: { active: RouteId }) {
                 <motion.div
                   animate={isActive ? { scale: [1, 1.15, 1.08] } : { scale: 1 }}
                   transition={{ duration: 0.25 }}
+                  className="relative"
                 >
-                  <FluffyIcon type={item.id} size="sm" className={cn('transition-transform', isActive && 'scale-110 border-pink-400')} />
+                  {item.brandIcon ? (
+                    <img
+                      src={item.brandIcon}
+                      alt=""
+                      aria-hidden="true"
+                      width={36}
+                      height={36}
+                      className={cn('h-9 w-9 transition-transform', isActive && 'scale-110')}
+                    />
+                  ) : (
+                    <FluffyIcon type={item.id} size="md" className={cn('transition-transform', isActive && 'scale-110 border-pink-400')} />
+                  )}
                 </motion.div>
                 <span
-                  className={cn("text-xs leading-tight font-black transition-colors", isActive ? "text-pink-700 font-extrabold" : "text-ink-soft")}
+                  className={cn("text-[17px] leading-tight font-black transition-colors", isActive ? "text-pink-700 font-extrabold" : "text-ink-soft")}
                 >
                   {translate(`nav.${item.id}.short`) || item.short}
                 </span>

@@ -6,7 +6,7 @@ interface StoryCanvasProps {
   emoji?: string;
 }
 
-export function StoryCanvas({ theme = 'space', bgColor = '#dcecfa', emoji = '🚀' }: StoryCanvasProps) {
+export function StoryCanvas({ theme = 'space', bgColor = '#dcebff', emoji = '🚀' }: StoryCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {

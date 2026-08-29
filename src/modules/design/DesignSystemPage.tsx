@@ -19,36 +19,39 @@ import { navigate } from '@/lib/router';
 // 顶部 Tabs 区可切换的章节标识：用联合类型约束，避免传入非法 id
 type SectionTab = 'color' | 'tone' | 'shape';
 
+// 设计系统 v1（2026-08-29 全量换肤）：色值与 src/styles/index.css 的 @theme、
+// src/lib/tones.ts 的 TONE_STYLE 保持单一事实来源，改动此处请同步那两处。
 const PINK_FAMILY = [
-  { name: 'candy-pink', hex: '#FF6B96', note: '主粉' },
-  { name: 'candy-pink-soft', hex: '#FFB6C9', note: '浅粉' },
-  { name: 'candy-pink-light', hex: '#FFF0F4', note: '柔底' },
-  { name: 'candy-pink-deep', hex: '#E05A80', note: '深粉' },
-  { name: 'candy-red', hex: '#FF5C7A', note: '强调' },
+  { name: 'candy-pink', hex: '#FF5C8A', note: '主粉' },
+  { name: 'candy-pink-soft', hex: '#FFE1EB', note: '浅粉' },
+  { name: 'candy-pink-light', hex: '#FFF0F6', note: '柔底' },
+  { name: 'candy-pink-deep', hex: '#C9285C', note: '深粉' },
+  // 语义别名：错误态刻意复用主粉，避免引入第七色 —— 与 candy-pink 同值属设计意图，非遗漏
+  { name: 'candy-red', hex: '#FF5C8A', note: '强调/错误（= candy-pink 别名）' },
 ];
 
 // 糖果六色家族（蓝/黄/绿/紫/橙），与 --color-candy-* 令牌一一对应
 const CANDY_FAMILY = [
-  { name: 'candy-blue', hex: '#A8D8F0', note: '主蓝' },
-  { name: 'candy-yellow', hex: '#FFE5A8', note: '主黄' },
-  { name: 'candy-green', hex: '#B8F0D8', note: '主绿' },
-  { name: 'candy-purple', hex: '#D9C6F5', note: '主紫' },
-  { name: 'candy-orange', hex: '#FFC9A8', note: '主橙' },
+  { name: 'candy-blue', hex: '#DCEBFF', note: '主蓝' },
+  { name: 'candy-yellow', hex: '#FFF6D9', note: '主黄' },
+  { name: 'candy-green', hex: '#DFF5E7', note: '主绿' },
+  { name: 'candy-purple', hex: '#EFE4FF', note: '主紫' },
+  { name: 'candy-orange', hex: '#FFF0DB', note: '主橙' },
 ];
 
 // 糖果语义色（图表/徽章常用），与 TONE_STYLE 主色一致
 const CANDY_SEMANTIC = [
-  { name: 'candy-blue-deep', hex: '#2E93C9', note: '蓝主色' },
-  { name: 'candy-yellow-deep', hex: '#E5AC2E', note: '黄主色' },
-  { name: 'candy-green-deep', hex: '#33A863', note: '绿主色' },
-  { name: 'candy-purple-deep', hex: '#8B6EF0', note: '紫主色' },
-  { name: 'candy-orange-deep', hex: '#FF9F5A', note: '橙主色' },
+  { name: 'candy-blue-deep', hex: '#0B5EC9', note: '蓝主色' },
+  { name: 'candy-yellow-deep', hex: '#8A5B00', note: '黄主色' },
+  { name: 'candy-green-deep', hex: '#1B7A3D', note: '绿主色' },
+  { name: 'candy-purple-deep', hex: '#5F2ECC', note: '紫主色' },
+  { name: 'candy-orange-deep', hex: '#B45F09', note: '橙主色' },
 ];
 
 const NEUTRALS = [
-  { name: 'cream', hex: '#FFF9FA', note: '暖白' },
-  { name: 'ink', hex: '#5C2E3D', note: '墨棕' },
-  { name: 'ink-soft', hex: '#8A7A7E', note: '弱墨' },
+  { name: 'cream', hex: '#FFF8EF', note: '暖白' },
+  { name: 'ink', hex: '#4A2B1F', note: '墨棕' },
+  { name: 'ink-soft', hex: '#8A6F5C', note: '弱墨' },
 ];
 
 const RADII = [
@@ -69,7 +72,7 @@ const FLUFFY_ICON_SAMPLES: FluffyIconType[] = [
 const MEDAL_SAMPLES = ['scholar', 'pinyin', 'math', 'nurture', 'words', 'poems'] as const;
 
 // 浅色表面（柔白/暖白）需改用弱墨文字，避免浅底上用深粉导致对比不足
-const LIGHT_SURFACES = new Set(['#fff0f4', '#fff9fa']);
+const LIGHT_SURFACES = new Set(['#fff0f6', '#fff9fa']);
 
 function Swatch({ name, hex, note }: { name: string; hex: string; note: string }) {
   const useMutedText = LIGHT_SURFACES.has(hex.toLowerCase());
@@ -107,7 +110,7 @@ function Section({
   return (
     <section id={id} className="mb-14 scroll-mt-24">
       <div className="mb-5 flex items-end gap-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-candy-pink text-lg font-black text-white shadow-jelly">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-candy-pink text-lg font-black text-candy-pink-on shadow-jelly">
           {index}
         </span>
         <div>
@@ -158,7 +161,7 @@ export default function DesignSystemPage() {
 
       {/* ===== Hero ===== */}
       <header className="jelly-shine relative mb-12 overflow-hidden rounded-[2rem] p-7 shadow-jelly-lg sm:p-10"
-        style={{ background: 'linear-gradient(135deg,#FFF0F4 0%,#FFE4EF 48%,#F2EAFD 100%)' }}
+        style={{ background: 'linear-gradient(135deg,#FFF0F6 0%,#FFE1EB 48%,#EFE4FF 100%)' }}
       >
         <button
           onClick={() => navigate('home')}
@@ -167,7 +170,7 @@ export default function DesignSystemPage() {
           ← 返回乐园
         </button>
         <div className="flex flex-wrap items-center gap-3">
-          <span className="rounded-full bg-candy-pink px-3 py-1 text-xs font-black text-white shadow-jelly">
+          <span className="rounded-full bg-candy-pink px-3 py-1 text-xs font-black text-candy-pink-on shadow-jelly">
             v1.0 · 儿童友好
           </span>
           <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-bold text-candy-pink-deep">
@@ -413,11 +416,11 @@ export default function DesignSystemPage() {
         <Panel className="!p-0">
           <pre className="overflow-x-auto rounded-[2rem] bg-ink/95 p-5 text-[12px] leading-relaxed text-pink-100">
 {`/* 果冻粉主色板 */
---color-candy-pink:      #FF6B96;
---color-candy-pink-soft: #FFB6C9;
---color-candy-pink-light:#FFF0F4;
---color-candy-pink-deep: #E05A80;
---color-candy-red:       #FF5C7A;
+--color-candy-pink:      #FF5C8A;
+--color-candy-pink-soft: #FFA6C1;
+--color-candy-pink-light:#FFF0F6;
+--color-candy-pink-deep: #C9285C;
+--color-candy-red:       #FF5C8A;
 
 /* 6 语义色调 */
 --color-candy-blue / yellow / green / purple / orange
@@ -459,7 +462,7 @@ export default function DesignSystemPage() {
         </p>
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-candy-pink px-4 py-1.5 text-sm font-bold text-white shadow-jelly transition hover:scale-105 active:scale-95"
+          className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-candy-pink px-4 py-1.5 text-sm font-bold text-candy-pink-on shadow-jelly transition hover:scale-105 active:scale-95"
         >
           ↑ 回到顶部
         </button>

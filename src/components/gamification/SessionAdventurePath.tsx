@@ -84,7 +84,7 @@ export function SessionAdventurePath({
         @keyframes sapPop { from { transform: scale(0.6); opacity: 0 } to { transform: scale(1); opacity: 1 } }
         @media (prefers-reduced-motion: reduce) { .sap-stop { animation: none !important } }
       `}</style>
-      <h3 id={titleId} className="mb-3 text-lg font-extrabold text-[#8b6ef0]">
+      <h3 id={titleId} className="mb-3 text-lg font-extrabold text-[#8f5bff]">
         🗺️ {MODULE_LABEL[module]}课 · 今天的冒险路线
       </h3>
       <ol
@@ -110,8 +110,8 @@ export function SessionAdventurePath({
               {mode.label.slice(0, 2)}
             </span>
             <span className="flex min-w-0 flex-1 flex-col">
-              <span className="truncate font-extrabold text-[#4a3f8a]">{mode.label}</span>
-              <span className="truncate text-xs text-[#9b8fc7]">{mode.hint}</span>
+              <span className="truncate font-extrabold text-[#4a20a0]">{mode.label}</span>
+              <span className="truncate text-xs text-[#ab81ff]">{mode.hint}</span>
             </span>
             <span
               className="shrink-0 text-sm"

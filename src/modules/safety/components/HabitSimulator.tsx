@@ -168,7 +168,7 @@ export function HabitSimulator() {
           }}
           className={`px-5 py-3 min-h-[44px] rounded-2xl font-black text-sm transition-all flex items-center gap-2 border-2 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-300 ${
             activeMode === 'teeth'
-              ? 'bg-sky-500 text-white border-sky-600 shadow-lg scale-105'
+              ? 'bg-sky-500 text-candy-blue-on border-sky-600 shadow-lg scale-105'
               : 'bg-white text-slate-700 border-sky-200 hover:bg-sky-50'
           }`}
         >
@@ -187,7 +187,7 @@ export function HabitSimulator() {
           }}
           className={`px-5 py-3 min-h-[44px] rounded-2xl font-black text-sm transition-all flex items-center gap-2 border-2 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 ${
             activeMode === 'hand'
-              ? 'bg-emerald-500 text-white border-emerald-600 shadow-lg scale-105'
+              ? 'bg-emerald-500 text-candy-green-on border-emerald-600 shadow-lg scale-105'
               : 'bg-white text-slate-700 border-emerald-200 hover:bg-emerald-50'
           }`}
         >
@@ -304,7 +304,7 @@ export function HabitSimulator() {
                   <span className="px-3 py-1 bg-amber-400 text-amber-950 font-black text-xs rounded-xl shadow">
                     ⭐ +5 星星
                   </span>
-                  <span className="px-3 py-1 bg-orange-400 text-white font-black text-xs rounded-xl shadow">
+                  <span className="px-3 py-1 bg-orange-400 text-candy-orange-on font-black text-xs rounded-xl shadow">
                     🐟 +2 小鱼干
                   </span>
                 </div>
@@ -351,7 +351,7 @@ export function HabitSimulator() {
             </motion.div>
 
             <div className="flex-1 space-y-2 text-center sm:text-left">
-              <div className="inline-block px-3 py-1 bg-emerald-500 text-white rounded-full text-xs font-black">
+              <div className="inline-block px-3 py-1 bg-emerald-500 text-candy-green-on rounded-full text-xs font-black">
                 口诀第 {washStep + 1} 字：{HAND_WASH_STEPS[washStep]?.name}
               </div>
               <h4 className="text-2xl font-black text-slate-800">
@@ -366,7 +366,7 @@ export function HabitSimulator() {
                   <button
                     type="button"
                     onClick={handleNextWashStep}
-                    className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl font-black text-sm shadow-lg shadow-emerald-200 hover:scale-105 active:scale-95 transition-transform flex items-center gap-2 mx-auto sm:mx-0"
+                    className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-candy-green-on rounded-2xl font-black text-sm shadow-lg shadow-emerald-200 hover:scale-105 active:scale-95 transition-transform flex items-center gap-2 mx-auto sm:mx-0"
                   >
                     <span>🫧 我做好了，下一步</span>
                     <span>➔</span>

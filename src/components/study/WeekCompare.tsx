@@ -7,6 +7,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { useDailyLog } from '@/store/useStore';
 import { dateKey } from '@/lib/dailyPlan';
+import { CHART } from '@/lib/chartTokens';
 
 interface WeekData {
   minutes: number;
@@ -57,7 +58,7 @@ function RingChart({ value, max, label, color }: { value: number; max: number; l
   return (
     <div className="flex flex-col items-center">
       <svg width="80" height="80" className="-rotate-90">
-        <circle cx="40" cy="40" r={r} fill="none" stroke="#f0dde2" strokeWidth="6" />
+        <circle cx="40" cy="40" r={r} fill="none" stroke={CHART.grid} strokeWidth="6" />
         <circle
           cx="40" cy="40" r={r} fill="none" stroke={color} strokeWidth="6"
           strokeDasharray={c} strokeDashoffset={offset}
@@ -96,7 +97,7 @@ export function WeekCompare() {
 
       {/* 环形图对比 */}
       <div className="mb-4 flex items-center justify-around">
-        <RingChart value={thisWeek.minutes} max={maxMin} label={t('weekCompare.thisWeekMin')} color="#5fd68b" />
+        <RingChart value={thisWeek.minutes} max={maxMin} label={t('weekCompare.thisWeekMin')} color="#62cc8a" />
         <div className="text-2xl font-black text-ink-soft">VS</div>
         <RingChart value={lastWeek.minutes} max={maxMin} label={t('weekCompare.lastWeekMin')} color="#ff8db0" />
       </div>

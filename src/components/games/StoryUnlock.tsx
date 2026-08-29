@@ -73,7 +73,7 @@ export function StoryUnlock({
               className="mx-auto my-4 grid h-28 w-28 place-items-center rounded-full text-6xl"
               style={{
                 background: 'linear-gradient(135deg, #FFF3D2 0%, #FFE4EF 100%)',
-                boxShadow: '0 0 0 6px #FFC93C22, 0 10px 26px -6px #FF9F5A',
+                boxShadow: '0 0 0 6px #FFC93C22, 0 10px 26px -6px #FF9F2E',
               }}
             >
               <motion.span

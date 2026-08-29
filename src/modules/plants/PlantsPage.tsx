@@ -169,7 +169,7 @@ export default function PlantsPage() {
               key={p.id}
               onClick={() => handleSelectP(p)}
               className={`rounded-2xl border-2 px-2 py-2.5 text-xs font-black transition-transform active:scale-95 ${
-                selectedP.id === p.id ? 'bg-emerald-600 text-white border-emerald-700 scale-105 shadow-md' : 'bg-white text-emerald-900 border-emerald-200 hover:scale-102'
+                selectedP.id === p.id ? 'bg-emerald-600 text-candy-green-on border-emerald-700 scale-105 shadow-md' : 'bg-white text-emerald-900 border-emerald-200 hover:scale-102'
               }`}
             >
               <span className="text-2xl block mb-0.5">{p.emoji}</span>

@@ -235,7 +235,7 @@ export default function FunPage() {
               className={cn(
                 'no-select flex-1 rounded-xl py-2 text-center text-xs sm:text-sm font-black transition-all',
                 active
-                  ? 'bg-candy-purple text-white shadow-sm scale-[1.02]'
+                  ? 'bg-candy-purple text-candy-purple-on shadow-sm scale-[1.02]'
                   : 'text-ink-soft hover:text-ink hover:bg-black/5',
               )}
             >

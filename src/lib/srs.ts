@@ -159,17 +159,17 @@ const SUBJECT_ORDER = [
 
 /** 图表配色：注册表的 SubjectDef 不含 color 字段，这里按学科 key 补齐 */
 const SUBJECT_COLOR: Record<string, string> = {
-  letter: '#2e93c9',
-  number: '#e5ac2e',
-  math: '#33a863',
-  poem: '#ff6b96',
-  hanzi: '#33a863',
-  pinyin: '#8b6ef0',
-  word: '#ff9f5a',
-  logic: '#8b6ef0',
-  idiom: '#ff5c7a',
+  letter: '#0b5ec9',
+  number: '#d9860a',
+  math: '#3fc26b',
+  poem: '#ff5c8a',
+  hanzi: '#3fc26b',
+  pinyin: '#8f5bff',
+  word: '#ff9f2e',
+  logic: '#8f5bff',
+  idiom: '#ff5c8a',
   sentence: '#1fb982',
-  research: '#8b6ef0',
+  research: '#8f5bff',
 };
 
 /**
@@ -203,7 +203,7 @@ export const SUBJECTS: {
     label: meta.label,
     emoji: meta.emoji,
     tone: meta.tone as Tone,
-    color: SUBJECT_COLOR[key] ?? '#b38894',
+    color: SUBJECT_COLOR[key] ?? '#a0806f',
   };
 });
 
@@ -250,7 +250,7 @@ export function subjectTone(skillOrKey: string): Tone {
 /** 学科图表配色（单一真相源），未知返回灰色。 */
 export function subjectColor(skillOrKey: string): string {
   const key = subjectKeyOf(skillOrKey);
-  return SUBJECTS.find((s) => s.key === key)?.color ?? '#b38894';
+  return SUBJECTS.find((s) => s.key === key)?.color ?? '#a0806f';
 }
 
 const LOGIC_NAME: Record<string, string> = {

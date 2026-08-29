@@ -151,7 +151,7 @@ export function TenFrameMath() {
           <button
             onClick={() => { sfxTap(); triggerHaptic(20); setMode('add'); setStep('initial'); }}
             className={`rounded-2xl px-4 py-2.5 text-base font-black transition-all ${
-              mode === 'add' ? 'bg-candy-orange-deep text-white shadow-sm scale-105' : 'bg-orange-100 text-orange-800'
+              mode === 'add' ? 'bg-candy-orange-deep text-candy-orange-on shadow-sm scale-105' : 'bg-orange-100 text-orange-800'
             }`}
           >
             ✨ 凑十法 (加法进位)
@@ -159,7 +159,7 @@ export function TenFrameMath() {
           <button
             onClick={() => { sfxTap(); triggerHaptic(20); setMode('sub'); setStep('initial'); }}
             className={`rounded-2xl px-4 py-2.5 text-base font-black transition-all ${
-              mode === 'sub' ? 'bg-candy-purple-deep text-white shadow-sm scale-105' : 'bg-purple-100 text-purple-800'
+              mode === 'sub' ? 'bg-candy-purple-deep text-candy-purple-on shadow-sm scale-105' : 'bg-purple-100 text-purple-800'
             }`}
           >
             ✂️ 破十法 (退位减法)

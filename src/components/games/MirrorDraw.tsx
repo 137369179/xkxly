@@ -8,7 +8,7 @@ import { sfxTap } from '@/lib/sfx';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
 
-const COLORS = ['#ff5c7a','#ff9f5a','#ffc93c','#5fd68b','#55aee0','#8b6ef0','#ff6b96','#000000'];
+const COLORS = ['#ff5c8a','#ff9f2e','#ffc53d','#62cc8a','#3d9bff','#8f5bff','#ff5c8a','#000000'];
 
 function MirrorDrawImpl() {
   const { t } = useTranslation();

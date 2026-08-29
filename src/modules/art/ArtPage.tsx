@@ -75,14 +75,14 @@ function mixSkillKey(a: ColorCode, b: ColorCode): string {
 
 /** Canvas 画板可用颜色（8 个基本色） */
 const CANVAS_COLORS: { name: string; css: string }[] = [
-  { name: '红',  css: '#ff5c7a' },
-  { name: '橙',  css: '#ff9f5a' },
-  { name: '黄',  css: '#e5ac2e' },
-  { name: '绿',  css: '#33a863' },
+  { name: '红',  css: '#ff5c8a' },
+  { name: '橙',  css: '#ff9f2e' },
+  { name: '黄',  css: '#d9860a' },
+  { name: '绿',  css: '#3fc26b' },
   { name: '青',  css: '#35bcc0' },
-  { name: '蓝',  css: '#2e93c9' },
-  { name: '紫',  css: '#8b6ef0' },
-  { name: '粉',  css: '#ff6b96' },
+  { name: '蓝',  css: '#0b5ec9' },
+  { name: '紫',  css: '#8f5bff' },
+  { name: '粉',  css: '#ff5c8a' },
 ];
 
 const CANVAS_SIZE = 300;
@@ -116,7 +116,7 @@ export default function ArtPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawingRef = useRef(false);
   const lastPosRef = useRef<{ x: number; y: number } | null>(null);
-  const [canvasColor, setCanvasColor] = useState(CANVAS_COLORS[0]?.css ?? '#ff5c7a');
+  const [canvasColor, setCanvasColor] = useState(CANVAS_COLORS[0]?.css ?? '#ff5c8a');
 
   // 全局键盘快捷键响应 (1-5 切换专区)
   useEffect(() => {

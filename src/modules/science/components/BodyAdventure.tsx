@@ -1616,7 +1616,7 @@ function DigestiveLab() {
               }}
               className={`px-2.5 py-1 rounded-xl text-xs font-black transition-all border ${
                 selectedFood.name === fd.name
-                  ? 'bg-red-500 text-white border-red-400 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
+                  ? 'bg-red-500 text-candy-pink-on border-red-400 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
                   : 'bg-slate-800 text-slate-300 border-slate-700'
               }`}
             >
@@ -1656,7 +1656,7 @@ function DigestiveLab() {
       <button
         type="button"
         onClick={handleNextStep}
-        className="w-full py-3 rounded-2xl bg-gradient-to-r from-red-600 to-orange-500 text-white font-black text-sm shadow-[0_0_15px_rgba(239,68,68,0.4)] hover:brightness-110 active:scale-98 transition-all"
+        className="w-full py-3 rounded-2xl bg-gradient-to-r from-red-600 to-orange-500 text-candy-orange-on font-black text-sm shadow-[0_0_15px_rgba(239,68,68,0.4)] hover:brightness-110 active:scale-98 transition-all"
       >
         {currentStep.btn}
       </button>
@@ -1781,7 +1781,7 @@ function HeartLab() {
           <span>🫀</span>
           <span>心脏四腔加压泵 (物理连击)</span>
         </h4>
-        <span className="px-3 py-1 bg-rose-500 text-white font-mono font-black text-xs rounded-full shadow-[0_0_10px_rgba(244,63,94,0.6)] transition-all">
+        <span className="px-3 py-1 bg-rose-500 text-candy-pink-on font-mono font-black text-xs rounded-full shadow-[0_0_10px_rgba(244,63,94,0.6)] transition-all">
           {bpm} BPM
         </span>
       </div>
@@ -1814,7 +1814,7 @@ function HeartLab() {
         <button
           type="button"
           onPointerDown={handlePump}
-          className="w-full py-4 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-black text-lg shadow-[0_0_20px_rgba(244,63,94,0.6)] active:scale-95 transition-all select-none touch-none border-b-4 border-rose-700 active:border-b-0 active:translate-y-1"
+          className="w-full py-4 rounded-2xl bg-rose-500 hover:bg-rose-600 text-candy-pink-on font-black text-lg shadow-[0_0_20px_rgba(244,63,94,0.6)] active:scale-95 transition-all select-none touch-none border-b-4 border-rose-700 active:border-b-0 active:translate-y-1"
         >
           🖐️ 快速连击泵血！
         </button>
@@ -1878,7 +1878,7 @@ function NervesLab() {
             : state === 'waiting'
               ? 'bg-amber-500 border-amber-400 text-slate-950'
               : state === 'success'
-                ? 'bg-emerald-600 border-emerald-400 text-white shadow-[0_0_25px_rgba(16,185,129,0.5)]'
+                ? 'bg-emerald-600 border-emerald-400 text-candy-green-on shadow-[0_0_25px_rgba(16,185,129,0.5)]'
                 : 'bg-slate-950/80 border-purple-500/30 text-white'
         }`}
       >
@@ -2074,7 +2074,7 @@ function BodyAdventureImpl() {
             }}
             className={`py-2 px-3.5 rounded-2xl font-black text-xs transition-all flex items-center gap-1.5 border-2 ${
               mode === 'quiz'
-                ? 'bg-amber-500 text-white border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.5)] scale-[1.02]'
+                ? 'bg-amber-500 text-candy-orange-on border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.5)] scale-[1.02]'
                 : 'bg-white text-slate-700 border-slate-200 hover:border-amber-300'
             }`}
           >
@@ -2099,7 +2099,7 @@ function BodyAdventureImpl() {
             }}
             className={`py-2 px-3.5 rounded-2xl font-black text-xs transition-all flex items-center gap-1.5 border-2 ${
               healthMode === 'unhealthy'
-                ? 'bg-rose-500 text-white border-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.5)] animate-pulse'
+                ? 'bg-rose-500 text-candy-pink-on border-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.5)] animate-pulse'
                 : 'bg-slate-800 text-slate-300 border-slate-600 hover:border-rose-400'
             }`}
           >
@@ -2261,7 +2261,7 @@ function BodyAdventureImpl() {
               }}
               className={`py-2 px-3 rounded-2xl font-black text-xs transition-all border-2 flex items-center gap-1 ${
                 labType === 'digest'
-                  ? 'bg-red-500 text-white border-red-400 shadow-[0_0_15px_rgba(239,68,68,0.5)]'
+                  ? 'bg-red-500 text-candy-pink-on border-red-400 shadow-[0_0_15px_rgba(239,68,68,0.5)]'
                   : 'bg-white text-slate-700 border-slate-200'
               }`}
             >
@@ -2293,7 +2293,7 @@ function BodyAdventureImpl() {
               }}
               className={`py-2 px-3 rounded-2xl font-black text-xs transition-all border-2 flex items-center gap-1 ${
                 labType === 'heart'
-                  ? 'bg-rose-500 text-white border-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.5)]'
+                  ? 'bg-rose-500 text-candy-pink-on border-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.5)]'
                   : 'bg-white text-slate-700 border-slate-200'
               }`}
             >
@@ -2362,7 +2362,7 @@ function BodyAdventureImpl() {
                       isSelected
                         ? isCorrect
                           ? 'bg-emerald-500 text-slate-950 border-emerald-400 ring-4 ring-emerald-500/30'
-                          : 'bg-rose-500 text-white border-rose-400 ring-4 ring-rose-500/30'
+                          : 'bg-rose-500 text-candy-pink-on border-rose-400 ring-4 ring-rose-500/30'
                         : selectedAnswer !== null && isCorrect
                           ? 'bg-emerald-950 text-emerald-300 border-emerald-500/50'
                           : 'bg-slate-800 text-slate-200 border-slate-700 hover:border-amber-400/60'

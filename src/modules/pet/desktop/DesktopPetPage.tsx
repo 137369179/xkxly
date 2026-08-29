@@ -76,7 +76,7 @@ function PetManager() {
           )}
           <button
             onClick={() => { dispatch({ type: 'home', value: !state.home }); }}
-            className="rounded-full bg-pink-500 px-3 py-1.5 text-sm font-bold text-white transition active:translate-y-[1px]"
+            className="rounded-full bg-pink-500 px-3 py-1.5 text-sm font-bold text-candy-pink-on transition active:translate-y-[1px]"
           >
             🏠 {state.home ? '出门玩' : '回家'}
           </button>
@@ -243,7 +243,7 @@ function PomodoroPanel({ state, dispatch }: { state: PetState; dispatch: (a: Pet
             <button
               key={m}
               onClick={() => applyConfig(m, r)}
-              className={`rounded-full px-2 py-0.5 text-xs font-bold transition active:translate-y-[1px] ${w === m ? 'bg-purple-500 text-white' : 'bg-white/80 text-ink'}`}
+              className={`rounded-full px-2 py-0.5 text-xs font-bold transition active:translate-y-[1px] ${w === m ? 'bg-purple-500 text-candy-purple-on' : 'bg-white/80 text-ink'}`}
             >
               专注{m}分
             </button>
@@ -255,8 +255,8 @@ function PomodoroPanel({ state, dispatch }: { state: PetState; dispatch: (a: Pet
       <div className="flex gap-2">
         {phase === 'idle' ? (
           <>
-            <button onClick={() => dispatch({ type: 'pomodoro-start', phase: 'work' })} className="flex-1 rounded-xl bg-purple-500 px-3 py-2 text-sm font-bold text-white active:translate-y-[1px]">▶ 开始专注</button>
-            <button onClick={() => dispatch({ type: 'pomodoro-start', phase: 'rest' })} className="flex-1 rounded-xl bg-teal-500 px-3 py-2 text-sm font-bold text-white active:translate-y-[1px]">☕ 开始休息</button>
+            <button onClick={() => dispatch({ type: 'pomodoro-start', phase: 'work' })} className="flex-1 rounded-xl bg-purple-500 px-3 py-2 text-sm font-bold text-candy-purple-on active:translate-y-[1px]">▶ 开始专注</button>
+            <button onClick={() => dispatch({ type: 'pomodoro-start', phase: 'rest' })} className="flex-1 rounded-xl bg-teal-500 px-3 py-2 text-sm font-bold text-candy-green-on active:translate-y-[1px]">☕ 开始休息</button>
           </>
         ) : (
           <button onClick={() => dispatch({ type: 'pomodoro-reset' })} className="flex-1 rounded-xl bg-white/80 px-3 py-2 text-sm font-bold text-ink active:translate-y-[1px]">⏹ 停止</button>
@@ -285,7 +285,7 @@ function TodoPanel({ state, onAdd, onToggle, onRemove }: {
           placeholder="添加一个任务…"
           aria-label="新增待办"
         />
-        <button onClick={() => { if (text.trim()) { onAdd(text); setText(''); } }} className="rounded-xl bg-purple-500 px-3 py-2 text-sm font-bold text-white active:translate-y-[1px]">添加</button>
+        <button onClick={() => { if (text.trim()) { onAdd(text); setText(''); } }} className="rounded-xl bg-purple-500 px-3 py-2 text-sm font-bold text-candy-purple-on active:translate-y-[1px]">添加</button>
       </div>
       <div className="space-y-1.5">
         {state.todos.length === 0 && <p className="py-3 text-center text-sm text-ink/50">还没有任务，加一个吧～</p>}
@@ -293,7 +293,7 @@ function TodoPanel({ state, onAdd, onToggle, onRemove }: {
           <div key={t.id} className="flex items-center gap-2 rounded-xl bg-white/70 px-3 py-2">
             <button
               onClick={() => onToggle(t.id)}
-              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-sm ${t.done ? 'border-pink-400 bg-pink-400 text-white' : 'border-ink/30 text-transparent'}`}
+              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-sm ${t.done ? 'border-pink-400 bg-pink-400 text-candy-pink-on' : 'border-ink/30 text-transparent'}`}
               aria-label={t.done ? '标记未完成' : '标记完成'}
             >
               ✓
@@ -374,7 +374,7 @@ function PixelEditorPanel({ initial, onSave, onToast }: {
           </div>
           <div className="flex flex-wrap gap-1.5">
             <button onClick={() => setGrid(blankGrid())} className="rounded-lg bg-white/80 px-2.5 py-1.5 text-xs font-bold text-ink active:translate-y-[1px]">清空</button>
-            <button onClick={() => { onSave(serialize(grid)); onToast('💾 已应用为宠物外观！'); }} className="rounded-lg bg-purple-500 px-2.5 py-1.5 text-xs font-bold text-white active:translate-y-[1px]">保存并应用</button>
+            <button onClick={() => { onSave(serialize(grid)); onToast('💾 已应用为宠物外观！'); }} className="rounded-lg bg-purple-500 px-2.5 py-1.5 text-xs font-bold text-candy-purple-on active:translate-y-[1px]">保存并应用</button>
           </div>
         </div>
       </div>

@@ -12,6 +12,9 @@
  * BFF 端 /api/log 接口接收后落盘到 logs/error.log（server）或 Cache API（worker）。
  */
 
+// vite.config.ts 通过 define 注入 package.json 版本号
+declare const __APP_VERSION__: string;
+
 /** 上报载荷 */
 interface ErrorReport {
   type: 'error' | 'vital';
@@ -47,8 +50,8 @@ const recentReports = new Map<string, number>();
 /** 是否开发环境（开发环境只 console 不上报） */
 const isDev = import.meta.env.DEV;
 
-/** 构建版本：从 Vite 注入的 BASE_URL 或时间戳兜底 */
-const BUILD_VERSION = import.meta.env.MODE + '-' + 'v6';
+/** 构建版本：从 vite.config.ts define 注入的 package.json version，避免手工维护 */
+const BUILD_VERSION = `${import.meta.env.MODE}-v${__APP_VERSION__}`;
 
 /** 生成错误指纹，用于去重 */
 function fingerprint(r: ErrorReport): string {
@@ -98,6 +101,20 @@ function send(report: ErrorReport): void {
   }
 }
 
+function currentRoute(): string {
+  if (typeof window !== 'undefined' && window.location) {
+    return window.location.hash || window.location.pathname || '';
+  }
+  return '';
+}
+
+function currentUserAgent(): string {
+  if (typeof navigator !== 'undefined' && navigator.userAgent) {
+    return navigator.userAgent;
+  }
+  return 'unknown';
+}
+
 /** 主动上报渲染期错误（ErrorBoundary 调用） */
 export function reportRenderError(error: Error, componentStack?: string): void {
   send({
@@ -106,8 +123,8 @@ export function reportRenderError(error: Error, componentStack?: string): void {
     message: error.message,
     stack: error.stack || componentStack,
     at: Date.now(),
-    route: location.hash || location.pathname,
-    ua: navigator.userAgent,
+    route: currentRoute(),
+    ua: currentUserAgent(),
     build: BUILD_VERSION,
   });
 }
@@ -120,8 +137,8 @@ export function reportError(category: string, message: string, stack?: string): 
     message,
     stack,
     at: Date.now(),
-    route: location.hash || location.pathname,
-    ua: navigator.userAgent,
+    route: currentRoute(),
+    ua: currentUserAgent(),
     build: BUILD_VERSION,
   });
 }
@@ -134,8 +151,8 @@ function reportVital(metric: string, value: number, rating: string): void {
     value,
     rating,
     at: Date.now(),
-    route: location.hash || location.pathname,
-    ua: navigator.userAgent,
+    route: currentRoute(),
+    ua: currentUserAgent(),
     build: BUILD_VERSION,
   });
 }

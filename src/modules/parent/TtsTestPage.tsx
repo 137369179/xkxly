@@ -392,7 +392,7 @@ export default function TtsTestPage() {
               className={cn(
                 'rounded-xl px-3 py-1.5 text-sm font-bold transition',
                 mockIdx === i
-                  ? 'bg-candy-purple text-white shadow-sm'
+                  ? 'bg-candy-purple text-candy-purple-on shadow-sm'
                   : 'bg-black/5 text-ink-soft hover:bg-black/10',
               )}
             >
@@ -460,7 +460,7 @@ function Chip({ active, onClick, children }: { active?: boolean; onClick: () => 
       onClick={onClick}
       className={cn(
         'rounded-full px-3 py-1 text-xs font-extrabold transition-colors',
-        active ? 'bg-candy-pink text-white' : 'bg-white/70 text-ink-soft hover:bg-candy-pink-soft',
+        active ? 'bg-candy-pink text-candy-pink-on' : 'bg-white/70 text-ink-soft hover:bg-candy-pink-soft',
       )}
     >
       {children}

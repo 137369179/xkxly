@@ -528,7 +528,7 @@ ${styleLine}
 规则：
 - pages 必须包含恰好 4 个连续的页面（pageNumber 1 到 4）
 - 故事必须情节完整：起因 → 发展 → 高潮 → 欢快大团圆
-- bgColor 使用好看柔和的马卡龙浅色 HEX code（如 #FFF4D6, #DCE8FA, #F0FAF4, #F8F0FD）
+- bgColor 使用好看柔和的马卡龙浅色 HEX code（如 #FFF4D6, #DCE8FA, #F0FAF3, #F8F0FD）
 - emoji 选择与该页故事情节最契合的卡通表情`,
     ),
     user(`主角小伙伴：${character}\n故事场景/主题：${theme}${userPrompt ? `\n宝贝的特别点子：${userPrompt}` : ''}`),

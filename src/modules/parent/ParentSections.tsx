@@ -3,7 +3,10 @@
  * 从 ParentPage.tsx 提取的 AI 报告 / 错题分析 / 统计组件
  */
 import { useMemo } from 'react';
-import { useStore, useGrowth, useProgress } from '@/store/useStore';
+// 修复：本文件使用了细粒度 hook（useMastery/useWrongHistory/useStreak），
+// 但此前仅导入了整块 useProgress，导致 TS2552 找不到名字而阻塞构建。
+// 这些 hook 与下方注释「细粒度订阅，避免整块 progress」的意图一致，故补齐导入。
+import { useStore, useGrowth, useMastery, useWrongHistory, useStreak } from '@/store/useStore';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { parentDeepReportTask, wrongAnalyzeTask, parentActionsTask } from '@/lib/ai/tasks';

@@ -143,7 +143,7 @@ export function VoiceToys({
           onClick={handleBlowBubbles}
           className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-black transition-all active:scale-95 shadow-xs ${
             activeToy === 'bubble'
-              ? 'bg-gradient-to-r from-pink-500 to-rose-400 text-white'
+              ? 'bg-gradient-to-r from-pink-500 to-rose-400 text-candy-pink-on'
               : 'border border-pink-200 bg-white/90 text-pink-700 hover:bg-pink-100/70'
           }`}
         >
@@ -156,7 +156,7 @@ export function VoiceToys({
           onClick={handlePlayWand}
           className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-black transition-all active:scale-95 shadow-xs ${
             activeToy === 'wand'
-              ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white'
+              ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-candy-orange-on'
               : 'border border-amber-200 bg-white/90 text-amber-800 hover:bg-amber-100/70'
           }`}
         >
@@ -169,7 +169,7 @@ export function VoiceToys({
           onClick={handlePlayYarn}
           className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-black transition-all active:scale-95 shadow-xs ${
             activeToy === 'yarn'
-              ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white'
+              ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-candy-blue-on'
               : 'border border-purple-200 bg-white/90 text-purple-700 hover:bg-purple-100/70'
           }`}
         >
@@ -182,7 +182,7 @@ export function VoiceToys({
           onClick={handlePlayBell}
           className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-black transition-all active:scale-95 shadow-xs ${
             activeToy === 'bell'
-              ? 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white'
+              ? 'bg-gradient-to-r from-yellow-500 to-amber-500 text-candy-orange-on'
               : 'border border-yellow-200 bg-white/90 text-yellow-800 hover:bg-yellow-100/70'
           }`}
         >
@@ -198,7 +198,7 @@ export function VoiceToys({
           }}
           className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-black transition-all active:scale-95 shadow-xs ${
             activeToy === 'outfit'
-              ? 'bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white'
+              ? 'bg-gradient-to-r from-fuchsia-500 to-pink-500 text-candy-pink-on'
               : 'border border-pink-200 bg-white/90 text-pink-800 hover:bg-pink-100/70'
           }`}
         >
@@ -211,7 +211,7 @@ export function VoiceToys({
           onClick={handlePlayMusicBox}
           className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-black transition-all active:scale-95 shadow-xs ${
             activeToy === 'music'
-              ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-white'
+              ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-candy-green-on'
               : 'border border-emerald-200 bg-white/90 text-emerald-800 hover:bg-emerald-100/70'
           }`}
         >

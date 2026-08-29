@@ -323,7 +323,7 @@ function CustomSpeakBox({ character }: { character: VoiceCharacter }) {
         type="button"
         onClick={handleSpeak}
         className={`px-4 py-2 rounded-2xl text-sm font-black transition-all ${
-          speaking ? `${character.bgColor} ${character.color} animate-pulse border-2 ${character.borderColor}` : 'bg-indigo-500 text-white hover:bg-indigo-600'
+          speaking ? `${character.bgColor} ${character.color} animate-pulse border-2 ${character.borderColor}` : 'bg-indigo-500 text-candy-blue-on hover:bg-indigo-600'
         }`}
       >
         {speaking ? '⏹️' : '▶️'}
@@ -567,7 +567,7 @@ function FollowReadStudio({ character }: { character: VoiceCharacter }) {
               reset();
             }}
             className={`flex-1 min-h-[44px] rounded-2xl py-2 text-sm font-black border-2 transition-all focus-visible:ring-4 focus-visible:ring-indigo-300 focus:outline-none ${
-              level === lv ? 'bg-indigo-500 text-white border-indigo-500 shadow-md scale-[1.02]' : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-200'
+              level === lv ? 'bg-indigo-500 text-candy-blue-on border-indigo-500 shadow-md scale-[1.02]' : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-200'
             }`}
           >
             {lv === 1 ? '🟢 词语' : lv === 2 ? '🟡 句子' : '🔴 古诗'}
@@ -622,10 +622,10 @@ function FollowReadStudio({ character }: { character: VoiceCharacter }) {
         disabled={isEvaluating}
         className={`min-h-[56px] w-full rounded-3xl py-4 text-lg font-black transition-all flex items-center justify-center gap-3 focus-visible:ring-4 focus-visible:ring-indigo-300 focus:outline-none ${
           isListening
-            ? 'animate-pulse bg-rose-500 text-white shadow-xl shadow-rose-300'
+            ? 'animate-pulse bg-rose-500 text-candy-pink-on shadow-xl shadow-rose-300'
             : isEvaluating
-              ? 'bg-amber-400 text-white'
-              : 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg hover:shadow-xl active:scale-[0.99]'
+              ? 'bg-amber-400 text-candy-orange-on'
+              : 'bg-gradient-to-r from-indigo-500 to-purple-500 text-candy-blue-on shadow-lg hover:shadow-xl active:scale-[0.99]'
         }`}
       >
         <span className="text-2xl">{isEvaluating ? '⏳' : isListening ? '⏹️' : '🎙️'}</span>
@@ -661,7 +661,7 @@ function FollowReadStudio({ character }: { character: VoiceCharacter }) {
           >
             {/* Score */}
             <div className="flex items-center justify-center gap-4">
-              <div className={`flex h-20 w-20 flex-col items-center justify-center rounded-full text-white ${result.passed ? 'bg-emerald-500' : 'bg-amber-500'}`}>
+              <div className={`flex h-20 w-20 flex-col items-center justify-center rounded-full text-candy-orange-on ${result.passed ? 'bg-emerald-500' : 'bg-amber-500'}`}>
                 <span className="text-3xl font-black">{result.score}</span>
                 <span className="text-xs">分</span>
               </div>
@@ -727,7 +727,7 @@ function FollowReadStudio({ character }: { character: VoiceCharacter }) {
                 <button
                   type="button"
                   onClick={nextItem}
-                  className="min-h-[44px] px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl text-sm font-black active:scale-95 transition-all focus-visible:ring-4 focus-visible:ring-emerald-300"
+                  className="min-h-[44px] px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-candy-green-on rounded-2xl text-sm font-black active:scale-95 transition-all focus-visible:ring-4 focus-visible:ring-emerald-300"
                 >
                   ➡️ 下一题
                 </button>
@@ -883,7 +883,7 @@ export default function VoiceStudioPage() {
               setActiveTab(tab);
             }}
             className={`min-h-[44px] flex-1 rounded-2xl py-2.5 text-sm font-black border-2 transition-all focus-visible:ring-4 focus-visible:ring-indigo-300 focus:outline-none ${
-              activeTab === tab ? 'bg-indigo-500 text-white border-indigo-500 shadow-md scale-[1.02]' : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-200'
+              activeTab === tab ? 'bg-indigo-500 text-candy-blue-on border-indigo-500 shadow-md scale-[1.02]' : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-200'
             }`}
           >
             {tab === 'voice' ? '🎭 角色音色' : '🎙️ 跟读评测'}

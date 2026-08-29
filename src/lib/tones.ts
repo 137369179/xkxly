@@ -14,14 +14,15 @@ interface ToneStyle {
 }
 
 export const TONE_STYLE: Record<Tone, ToneStyle> = {
-  // P1-6 对比度修复：实心按钮 white-on-bright 低对比(≈2.0-3.8:1)，改为同相位深色前景
-  // 字(全部 ≥3:1, 部分 ≥4:1)，保留糖果亮色背景，最小化视觉风格变化。
-  pink: { main: '#ff6b96', deep: '#e05a80', soft: '#ffe4ee', on: '#8a1f4a' },
-  blue: { main: '#55aee0', deep: '#2e93c9', soft: '#dcecfa', on: '#1f4b78' },
-  yellow: { main: '#ffc93c', deep: '#e5ac2e', soft: '#fff4d6', on: '#5a4408' },
-  green: { main: '#5fd68b', deep: '#33a863', soft: '#f0faf4', on: '#1e6b3c' },
-  purple: { main: '#8b6ef0', deep: '#6631c7', soft: '#ece5ff', on: '#2f1a72' },
-  orange: { main: '#ff9f5a', deep: '#c2410c', soft: '#fff3ec', on: '#8f3d0d' },
+  // 儿童风格设计系统 v1（对标帮帮识字/洪恩识字/宝宝巴士）：高饱和卡通 main 色
+  // 不承载白字（实测仅 1.6-2.9:1），main 用深 on 字、deep 承载白字，双通道均 ≥4.5:1。
+  // 色值经 WCAG 相对亮度公式逐对验算（见 docs/2026-08-28-儿童风格设计系统规范.md）。
+  pink: { main: '#FF5C8A', deep: '#C9285C', soft: '#FFE1EB', on: '#3D1424' },
+  blue: { main: '#3D9BFF', deep: '#0B5EC9', soft: '#DCEBFF', on: '#0C2D4F' },
+  yellow: { main: '#FFC53D', deep: '#8A5B00', soft: '#FFF6D9', on: '#4A2B1F' },
+  green: { main: '#3FC26B', deep: '#1B7A3D', soft: '#DFF5E7', on: '#123B21' },
+  purple: { main: '#8F5BFF', deep: '#5F2ECC', soft: '#EFE4FF', on: '#160830' },
+  orange: { main: '#FF9F2E', deep: '#B45F09', soft: '#FFF0DB', on: '#4A2B1F' },
 };
 
 /** 按索引循环取色，用于列表着色 */

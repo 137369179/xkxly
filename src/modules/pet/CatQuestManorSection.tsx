@@ -59,7 +59,7 @@ function QuestCard({
       {isDone && (
         <button
           onClick={onClaim}
-          className="mt-3 w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 py-1.5 text-white font-black hover:from-amber-600 hover:to-orange-600 active:scale-95 animate-pulse"
+          className="mt-3 w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 py-1.5 text-candy-orange-on font-black hover:from-amber-600 hover:to-orange-600 active:scale-95 animate-pulse"
         >
           {t('pet.claimBtn', { count: config.reward })}
         </button>

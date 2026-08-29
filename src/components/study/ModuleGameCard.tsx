@@ -33,12 +33,12 @@ export interface ModuleGameCardProps {
 }
 
 const toneChip: Record<Tone, string> = {
-  blue: 'from-sky-400 to-blue-500 text-white',
-  green: 'from-emerald-400 to-green-500 text-white',
+  blue: 'from-sky-400 to-blue-500 text-candy-blue-on',
+  green: 'from-emerald-400 to-green-500 text-candy-green-on',
   yellow: 'from-amber-300 to-yellow-500 text-amber-950',
-  red: 'from-rose-400 to-red-500 text-white',
-  purple: 'from-violet-400 to-purple-500 text-white',
-  pink: 'from-[#FF6B96] to-[#FF9EBA] text-white',
+  red: 'from-rose-400 to-red-500 text-candy-pink-on',
+  purple: 'from-violet-400 to-purple-500 text-candy-purple-on',
+  pink: 'from-[#FF5C8A] to-[#FF9EBA] text-white',
   orange: 'from-orange-300 to-orange-500 text-orange-950',
 };
 

@@ -138,8 +138,14 @@ export function bumpLog(p: Progress, patch: Partial<DailyStat>): Record<string, 
       ok: cur.ok + (patch.ok ?? 0),
       stars: cur.stars + (patch.stars ?? 0),
       lesson: patch.lesson ?? cur.lesson,
+      // 「今日开始时基准值」类字段：首次设置后不再覆盖（幂等），
+      // 用于 DailyGoal 计算"今日增量"（当前值 - 基准值）。
       startMathTotal: cur.startMathTotal ?? patch.startMathTotal,
       startLogicTotal: cur.startLogicTotal ?? patch.startLogicTotal,
+      // P1-1 修复：startMathCorrect / startLogicCorrect 同理，
+      // 原先 bumpLog 未合并这两个字段，导致 DailyGoal 数学正确率基准值永远丢失。
+      startMathCorrect: cur.startMathCorrect ?? patch.startMathCorrect,
+      startLogicCorrect: cur.startLogicCorrect ?? patch.startLogicCorrect,
     },
   };
   const keys = Object.keys(next).sort();
@@ -184,7 +190,10 @@ export function applyWrongBook(p: Progress, skill: string, correct: boolean, m: 
         }
       }
     }
-    if (removeIdx >= 0) filtered.splice(removeIdx, 1);
+    const trimmed = removeIdx >= 0
+      ? filtered.filter((_, idx) => idx !== removeIdx)
+      : filtered;
+    return [skill, ...trimmed].slice(0, WRONG_CAP);
   }
   return [skill, ...filtered].slice(0, WRONG_CAP);
 }

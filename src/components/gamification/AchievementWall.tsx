@@ -20,9 +20,9 @@ export function AchievementWall({ progress }: Props) {
 
   return (
     <section aria-label="成就墙" className="rounded-2xl bg-white/80 p-4 shadow-sm">
-      <h3 className="mb-2 text-lg font-extrabold text-[#8b6ef0]">🏆 我的成就墙</h3>
+      <h3 className="mb-2 text-lg font-extrabold text-[#8f5bff]">🏆 我的成就墙</h3>
       <p className="mb-3 font-bold text-[#5a4ba8]">
-        已点亮 <span className="text-xl text-[#ff6b96]">{achieved}</span> / {total} 个成长里程碑
+        已点亮 <span className="text-xl text-[#ff5c8a]">{achieved}</span> / {total} 个成长里程碑
       </p>
       {badges.length > 0 ? (
         <ul className="flex flex-wrap gap-2" aria-label="已解锁徽章">
@@ -37,7 +37,7 @@ export function AchievementWall({ progress }: Props) {
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-[#9b8fc7]">继续加油，第一个成就就在前方！</p>
+        <p className="text-sm text-[#ab81ff]">继续加油，第一个成就就在前方！</p>
       )}
     </section>
   );

@@ -60,7 +60,7 @@ export const BODY_SYSTEMS: BodySystemItem[] = [
     storyFallback: '小苹果被宝贝咬了一口，扑通掉进嘴巴里！牙齿把它嚼碎，和口水混在一起变成糊糊。然后经过一条滑梯一样的食道，来到一个酸酸的袋子里——那是胃，会把小苹果搅来搅去。然后来到弯弯曲曲的小肠，营养被吸走了，送到全身各处。最后到大肠，水分被吸干，变成便便排出来。小苹果的旅行结束啦！',
     aiPrompt: '给宝贝讲消化系统：食物从嘴巴进去，经过食道、胃、小肠、大肠，最后变成便便。让宝贝跟着一个苹果一起探险。用拟人化方式介绍。',
     aiFallback: '哈喽，我是消化系统！我就像一条长长的管道，从嘴巴一直到便便。食物先在嘴巴里被牙齿嚼碎，然后通过食道滑到胃里。胃像一个搅拌机，加上酸酸的胃液把食物搅成糊糊。然后到小肠，营养被吸收送到全身。最后到大肠，水分被吸干，就变成便便啦！全程大约 24-72 小时！',
-    color: '#ff5c7a',
+    color: '#ff5c8a',
     organs: [
       { id: 'mouth', nameZh: '嘴巴', nameEn: 'Mouth', emoji: '👄', position: { x: 50, y: 17 }, function: '咀嚼食物，和口水混合开始消化', funFact: '成人有 32 颗牙齿', sizeComparison: '嘴巴能张开约 4 厘米' },
       { id: 'esophagus', nameZh: '食道', nameEn: 'Esophagus', emoji: '🍝', position: { x: 50, y: 26 }, function: '把食物从嘴巴运到胃里', funFact: '食道肌肉会波浪式收缩推食物下行', sizeComparison: '约 25 厘米长，像一根吸管' },
@@ -110,7 +110,7 @@ export const BODY_SYSTEMS: BodySystemItem[] = [
     storyFallback: '宝贝变小变小，跳到一个红细胞上！红细胞从心脏的左心室出发，带着满满的氧气，在血管里飞快地跑。跑到手指尖、脚趾尖、头顶，把氧气送给每一个细胞，顺便带上二氧化碳。然后回到心脏的右心房，再去肺里换新鲜氧气，又开始新一轮旅行！心脏就像一个超级水泵，一天跳 10 万次！',
     aiPrompt: '给宝贝讲循环系统：心脏像水泵，把血液泵到全身送氧气和营养，再带回二氧化碳。用拟人化方式介绍。',
     aiFallback: '哈喽，我是循环系统！我的核心是心脏，它像一个大水泵，一天跳 10 万次，泵出 7000 升血液！血液在血管里流动，把氧气和营养送到全身每一个角落，再把废物带回来。你全身的血管连起来有 10 万公里长，能绕地球 2 圈半呢！',
-    color: '#ff6b96',
+    color: '#ff5c8a',
     organs: [
       { id: 'heart', nameZh: '心脏', nameEn: 'Heart', emoji: '🫀', position: { x: 52, y: 39 }, function: '泵血到全身', funFact: '心脏只有拳头大小，但一天跳 10 万次', sizeComparison: '和你的拳头一样大' },
       { id: 'artery', nameZh: '主动脉', nameEn: 'Aorta', emoji: '🔴', position: { x: 49, y: 33 }, function: '把含氧血液从心脏送到全身', funFact: '动脉血是鲜红色的', sizeComparison: '最粗的主动脉直径 2.5 厘米' },
@@ -180,7 +180,7 @@ export const BODY_SYSTEMS: BodySystemItem[] = [
     storyFallback: '哈喽，我们是五感小分队！我是眼睛，能看到五颜六色的世界，每分钟眨 15 次！我是耳朵，能听到各种声音，还有内耳帮你保持平衡！我是鼻子，能识别 1 万种气味！我是舌头，上面有 1 万个味蕾，能尝出酸甜苦咸鲜！我是皮肤，全身最大的器官，能感受冷热软硬！我们五个一起帮宝贝认识世界！',
     aiPrompt: '给宝贝讲五感：眼睛看、耳朵听、鼻子闻、舌头尝、皮肤摸。用拟人化方式让每个器官自我介绍。',
     aiFallback: '哈喽，我是感觉系统！我有五个小分队：眼睛负责看，能看到千万种颜色；耳朵负责听，还能帮你保持平衡；鼻子负责闻，能识别 1 万种气味；舌头负责尝，有 1 万个味蕾；皮肤负责摸，是全身最大的器官！我们五感一起帮宝贝认识这个美丽的世界！',
-    color: '#5fd68b',
+    color: '#62cc8a',
     organs: [
       { id: 'eye', nameZh: '眼睛', nameEn: 'Eye', emoji: '👁️', position: { x: 46, y: 11 }, function: '看东西，识别颜色', funFact: '每分钟眨眼 15 次', sizeComparison: '和一颗弹珠差不多' },
       { id: 'ear', nameZh: '耳朵', nameEn: 'Ear', emoji: '👂', position: { x: 61, y: 13 }, function: '听声音，保持平衡', funFact: '内耳有液体帮你保持平衡', sizeComparison: '耳朵里面的耳蜗只有豌豆大' },

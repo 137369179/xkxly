@@ -246,7 +246,7 @@ export function WordMatch() {
           }}
           className={`px-3 py-1.5 rounded-xl font-black text-xs whitespace-nowrap transition-all border ${
             themeFilter === 'all'
-              ? 'bg-emerald-600 text-white border-emerald-700 shadow-sm'
+              ? 'bg-emerald-600 text-candy-green-on border-emerald-700 shadow-sm'
               : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
           }`}
         >
@@ -263,7 +263,7 @@ export function WordMatch() {
             }}
             className={`px-3 py-1.5 rounded-xl font-black text-xs whitespace-nowrap transition-all border flex items-center gap-1 ${
               themeFilter === t.id
-                ? 'bg-emerald-600 text-white border-emerald-700 shadow-sm'
+                ? 'bg-emerald-600 text-candy-green-on border-emerald-700 shadow-sm'
                 : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
             }`}
           >

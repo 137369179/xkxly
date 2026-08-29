@@ -12,9 +12,12 @@
 }
 
 /* ============================================================
-   宝贝学习乐园 · 果冻粉（jelly/pastel pink）儿童设计系统
-   2026-08-16 全站果冻粉化：candy-* token 映射至果冻粉家族
-   主色 #FF6B96 · 浅粉 #FFB6C9 · 柔底 #FFF0F4 · 深 #E05A80
+   宝贝学习乐园 · 儿童风格设计系统 v1（对标帮帮识字/洪恩识字/宝宝巴士）
+   2026-08-29 全量换肤：candy-* 与 Tailwind 默认色板统一至六色新家族
+   主色 #FF5C8A · 浅粉 #FFE1EB · 柔底 #FFF0F6 · 深 #C9285C
+   正文墨 #4A2B1F · 次级 #8A6F5C · 页面底 #FFF8EF
+   铁律：高饱和 main 色不承载白字；main 配 on 深字，deep 承载白字
+   完整规范见 docs/2026-08-28-儿童风格设计系统规范.md
    ============================================================ */
 :root {
   /* 明确声明亮色方案，避免系统深色模式导致原生控件（autofill/scrollbar/select）反色（UI审计 P3） */
@@ -30,41 +33,58 @@
 }
 
 @theme {
-  /* —— 果冻粉主色板（jelly pink）—— */
-  --color-candy-pink: #ff6b96;
-  --color-candy-pink-soft: #ffb6c9;
-  --color-candy-pink-light: #fff0f4;
-  --color-candy-pink-deep: #e05a80;
+  /* —— 儿童风格设计系统 v1 主色板（对标帮帮识字/洪恩识字/宝宝巴士）——
+     high-sat 卡通 main 色不承载白字（实测 1.6-2.9:1），main 用深 on 字、deep 承载白字，双通道均 ≥4.5:1 */
+  --color-candy-pink: #ff5c8a;
+  --color-candy-pink-soft: #ffe1eb;
+  --color-candy-pink-light: #fff0f6;
+  --color-candy-pink-deep: #c9285c;
+  /* 设计系统 v1「主色上的文字色」：高饱和 main 色不承载白字（实测 1.6-2.9:1），
+     统一用 on 深字（与 TONE_STYLE.*.on 对齐，WCAG 逐对验算 ≥4.5:1）。
+     见 docs/2026-08-28-儿童风格设计系统规范.md。 */
+  --color-candy-pink-on: #3d1424;
+  --color-candy-blue-on: #0c2d4f;
+  --color-candy-yellow-on: #4a2b1f;
+  --color-candy-green-on: #123b21;
+  --color-candy-purple-on: #160830;
+  --color-candy-orange-on: #4a2b1f;
 
-  --color-candy-blue: #a8d8f0;
-  --color-candy-blue-soft: #f2f6fd;
-  --color-candy-blue-deep: #167aa9;
+  --color-candy-blue: #dcebff;
+  --color-candy-blue-soft: #eef6ff;
+  --color-candy-blue-deep: #0b5ec9;
 
-  --color-candy-yellow: #ffe5a8;
-  --color-candy-yellow-soft: #fff4d6;
-  --color-candy-yellow-deep: #b47805;
+  --color-candy-yellow: #fff6d9;
+  --color-candy-yellow-soft: #fffbeb;
+  --color-candy-yellow-deep: #8a5b00;
 
-  --color-candy-green: #b8f0d8;
-  --color-candy-green-soft: #f0faf4;
-  --color-candy-green-deep: #047857;
+  --color-candy-green: #dff5e7;
+  --color-candy-green-soft: #f0faf3;
+  --color-candy-green-deep: #1b7a3d;
 
-  --color-candy-purple: #d9c6f5;
-  --color-candy-purple-soft: #f8f4fd;
-  --color-candy-purple-deep: #7c3aed;
+  --color-candy-purple: #efe4ff;
+  --color-candy-purple-soft: #f8f4ff;
+  --color-candy-purple-deep: #5f2ecc;
 
-  --color-candy-orange: #ffc9a8;
-  --color-candy-orange-soft: #fff3ec;
-  --color-candy-orange-deep: #c2410c;
+  --color-candy-orange: #fff0db;
+  --color-candy-orange-soft: #fff8ec;
+  --color-candy-orange-deep: #b45f09;
 
-  /* 果冻粉红（强调/错误语义）——修复 35 处 TS 引用但 token 缺失的 bug */
-  --color-candy-red: #ff5c7a;
+  /* 果冻粉红（强调/错误语义）—— 错误语义复用 pink main，不引入第七色 */
+  --color-candy-red: #ff5c8a;
   --color-candy-red-deep: #c2254a;
-  --color-candy-red-soft: #ffe9ee;
+  --color-candy-red-soft: #ffe1eb;
 
-  --color-cream: #fff9fa;
-  --color-ink: #5c2e3d;
-  /* UI审计 P4：由 #8a7a7e(3.9:1) 加深至 #6b5560(6.5:1)，全站满足 WCAG AA 正文 4.5:1 */
-  --color-ink-soft: #6b5560;
+  /* 语义色（设计系统 v1 新增） */
+  --color-success: #3fc26b;
+  --color-warning: #ffc53d;
+  --color-error: #ff5c8a;
+  --color-info: #3d9bff;
+
+  --color-cream: #fff8ef;
+  --color-bg: #fff8ef;
+  --color-ink: #4a2b1f;
+  /* 暖棕次级文字，白卡上对比度 6.5:1 */
+  --color-ink-soft: #8a6f5c;
 
   /* —— 字体 —— */
   --font-round: 'Baloo 2', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
@@ -72,26 +92,36 @@
   --font-han: 'STKaiti', 'KaiTi', 'PingFang SC', 'Hiragino Sans GB', 'Songti SC', 'Noto Serif CJK SC',
     'Microsoft YaHei', serif;
 
-  /* —— 阴影：果冻粉双层柔和软阴影 —— */
-  --shadow-candy: 0 4px 0 0 rgb(255 107 150 / 0.12), 0 10px 24px -4px rgb(255 107 150 / 0.25);
-  --shadow-candy-sm: 0 2px 0 0 rgb(255 107 150 / 0.10), 0 6px 16px -4px rgb(255 107 150 / 0.20);
-  --shadow-pop: 0 4px 12px -2px rgb(255 107 150 / 0.15), 0 16px 36px -8px rgb(255 107 150 / 0.32);
-  --shadow-fluffy: 0 4px 10px -2px rgba(255, 107, 150, 0.14), 0 12px 30px -6px rgba(255, 107, 150, 0.22);
+  /* —— 形状（设计系统 v1 新增）—— */
+  --radius-hero: 32px;
+  --radius-card: 24px;
+  --radius-base: 12px;
+  --radius-modal: 28px;
 
-  /* —— 果冻 Q 弹阴影（设计方案 01 阴影高光参数）—— */
-  --shadow-jelly: 0 4px 0 0 rgb(255 107 150 / 0.14), 0 10px 24px -4px rgb(255 107 150 / 0.28);
-  --shadow-jelly-lg: 0 6px 0 0 rgb(255 107 150 / 0.16), 0 20px 44px -8px rgb(255 107 150 / 0.36);
+  /* —— 间距（设计系统 v1 新增）—— */
+  --space-hub: 16px;
 
-  /* —— 默认阴影粉化（Q 弹感统一收尾）——
-     覆盖 Tailwind 默认 shadow-xs~2xl 为粉色调果冻软阴影，
-     全站残留的 shadow-sm/md/lg 等 124 处无需改组件，一处生效变 Q 弹。 */
-  --shadow-2xs: 0 1px rgb(255 107 150 / 0.06);
-  --shadow-xs: 0 1px 2px 0 rgb(255 107 150 / 0.07);
-  --shadow-sm: 0 1px 3px 0 rgb(255 107 150 / 0.08), 0 1px 2px -1px rgb(255 107 150 / 0.08);
-  --shadow-md: 0 4px 6px -1px rgb(255 107 150 / 0.10), 0 2px 4px -2px rgb(255 107 150 / 0.08);
-  --shadow-lg: 0 10px 15px -3px rgb(255 107 150 / 0.14), 0 4px 6px -4px rgb(255 107 150 / 0.10);
-  --shadow-xl: 0 20px 25px -5px rgb(255 107 150 / 0.18), 0 8px 10px -6px rgb(255 107 150 / 0.12);
-  --shadow-2xl: 0 25px 50px -12px rgb(255 107 150 / 0.26);
+  /* —— 阴影：果冻暖调软阴影（deep #c9285c）—— */
+  --shadow-candy: 0 4px 0 0 rgb(201 40 92 / 0.12), 0 10px 24px -4px rgb(201 40 92 / 0.22);
+  --shadow-candy-sm: 0 2px 0 0 rgb(201 40 92 / 0.10), 0 6px 16px -4px rgb(201 40 92 / 0.18);
+  --shadow-pop: 0 4px 12px -2px rgb(201 40 92 / 0.15), 0 16px 36px -8px rgb(201 40 92 / 0.30);
+  --shadow-fluffy: 0 4px 10px -2px rgba(201, 40, 92, 0.14), 0 12px 30px -6px rgba(201, 40, 92, 0.20);
+
+  /* —— 果冻 Q 弹阴影 —— */
+  --shadow-jelly: 0 4px 0 0 rgb(201 40 92 / 0.16), 0 8px 16px rgb(74 43 31 / 0.12);
+  --shadow-jelly-lg: 0 6px 0 0 rgb(201 40 92 / 0.18), 0 20px 44px -8px rgb(201 40 92 / 0.34);
+
+  /* —— 默认阴影（果冻暖调统一收尾，覆盖 Tailwind 默认 shadow-xs~2xl）—— */
+  --shadow-2xs: 0 1px rgb(74 43 31 / 0.06);
+  --shadow-xs: 0 1px 2px 0 rgb(74 43 31 / 0.07);
+  --shadow-sm: 0 1px 3px 0 rgb(74 43 31 / 0.08), 0 1px 2px -1px rgb(74 43 31 / 0.08);
+  --shadow-md: 0 4px 6px -1px rgb(74 43 31 / 0.10), 0 2px 4px -2px rgb(74 43 31 / 0.08);
+  --shadow-lg: 0 10px 15px -3px rgb(74 43 31 / 0.14), 0 4px 6px -4px rgb(74 43 31 / 0.10);
+  --shadow-xl: 0 20px 25px -5px rgb(74 43 31 / 0.18), 0 8px 10px -6px rgb(74 43 31 / 0.12);
+  --shadow-2xl: 0 25px 50px -12px rgb(74 43 31 / 0.26);
+
+  /* —— 动效缓动（设计系统 v1 核心 Q 弹缓动：命名令牌供 ease-jelly 工具类复用，与 --animate-* 内联曲线一致）—— */
+  --ease-jelly: cubic-bezier(.34, 1.56, .64, 1);
 
   /* —— 动画 —— */
   --animate-float: float 4s ease-in-out infinite;
@@ -103,6 +133,7 @@
   --animate-twinkle: twinkle 1.8s ease-in-out infinite;
   --animate-squishy: squishy 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   --animate-squish: squish 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --animate-celebrate: celebrate 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* —— 果冻 Q 弹补充动画 —— */
   --animate-jelly-bounce: jellyBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -110,115 +141,140 @@
   --animate-jelly-pop: jellyPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* ============================================================
-     糖果化默认色板（颜色统一核心）
-     全站 580 处 tailwind 默认色类（bg-pink-100 / border-purple-200 …）
-     无需改动组件，在 token 层覆盖为果冻六色家族，一处生效全站统一。
-     仅覆盖装饰档 50~500，语义深档 600+ 保留原值供文字强调。
+     六色主色板（对标帮帮识字/洪恩识字/宝宝巴士的高饱和暖多色）
+     覆盖 Tailwind 默认色类，token 层统一，组件无需改动
      ============================================================ */
-  --color-pink-50: #fff0f4;
-  --color-pink-100: #ffe4ee;
+  --color-pink-50: #fff0f6;
+  --color-pink-100: #ffe1eb;
   --color-pink-200: #ffc9da;
-  --color-pink-300: #ffabc5;
-  --color-pink-400: #ff8db0;
-  --color-pink-500: #ff6b96;
-  --color-pink-600: #e05a80;
-  --color-pink-700: #c14d6e;
-  --color-pink-800: #9e3e5b;
-  --color-pink-900: #7c3047;
+  --color-pink-300: #ffa6c1;
+  --color-pink-400: #ff83a7;
+  --color-pink-500: #ff5c8a;
+  --color-pink-600: #e04473;
+  --color-pink-700: #c9285c;
+  --color-pink-800: #a31d49;
+  --color-pink-900: #7d1639;
 
-  --color-rose-50: #ffe9ee;
-  --color-rose-100: #ffd3de;
-  --color-rose-200: #ffabc0;
-  --color-rose-300: #ff84a3;
-  --color-rose-400: #ff6b8d;
-  --color-rose-500: #ff5c7a;
-  --color-rose-600: #c2254a;
-  --color-rose-700: #a11e3e;
-  --color-rose-800: #831a34;
-  --color-rose-900: #65142a;
+  --color-rose-50: #ffeff3;
+  --color-rose-100: #ffe1eb;
+  --color-rose-200: #ffc4d5;
+  --color-rose-300: #ff9db9;
+  --color-rose-400: #ff759b;
+  --color-rose-500: #ff5c8a;
+  --color-rose-600: #e2446f;
+  --color-rose-700: #c2254a;
+  --color-rose-800: #9e1c3c;
+  --color-rose-900: #79152e;
 
   --color-fuchsia-50: #fdf2ff;
-  --color-fuchsia-100: #f9e4ff;
-  --color-fuchsia-200: #efc7fb;
-  --color-fuchsia-300: #e2a6f5;
-  --color-fuchsia-400: #d184ee;
-  --color-fuchsia-500: #c065e6;
+  --color-fuchsia-100: #fae5ff;
+  --color-fuchsia-200: #f0c9ff;
+  --color-fuchsia-300: #e0a6ff;
+  --color-fuchsia-400: #c87fff;
+  --color-fuchsia-500: #a95df0;
+  --color-fuchsia-600: #8b3fd0;
+  --color-fuchsia-700: #6f2eab;
+  --color-fuchsia-800: #572286;
+  --color-fuchsia-900: #401963;
 
-  --color-purple-50: #f8f4fd;
-  --color-purple-100: #ece5ff;
-  --color-purple-200: #d9c6f5;
-  --color-purple-300: #c2a8ef;
-  --color-purple-400: #a78bfa;
-  --color-purple-500: #8b6ef0;
-  --color-purple-600: #7c3aed;
-  --color-purple-700: #6631c7;
-  --color-purple-800: #53289f;
-  --color-purple-900: #40207a;
+  --color-purple-50: #f8f4ff;
+  --color-purple-100: #efe4ff;
+  --color-purple-200: #ddc8ff;
+  --color-purple-300: #c6a6ff;
+  --color-purple-400: #ab81ff;
+  --color-purple-500: #8f5bff;
+  --color-purple-600: #7440e0;
+  --color-purple-700: #5f2ecc;
+  --color-purple-800: #4a20a0;
+  --color-purple-900: #371878;
 
-  --color-violet-50: #f6f3ff;
-  --color-violet-100: #e9e2ff;
-  --color-violet-200: #d2c2fb;
-  --color-violet-300: #b59ff5;
-  --color-violet-400: #987cf0;
-  --color-violet-500: #7d5ceb;
+  --color-violet-50: #f7f4ff;
+  --color-violet-100: #efe6ff;
+  --color-violet-200: #ddc6ff;
+  --color-violet-300: #c4a0ff;
+  --color-violet-400: #a878ff;
+  --color-violet-500: #8f5bff;
+  --color-violet-600: #7740e8;
+  --color-violet-700: #5f2ecc;
+  --color-violet-800: #4a2299;
+  --color-violet-900: #36186b;
 
-  --color-indigo-50: #f0f2ff;
-  --color-indigo-100: #dde1fc;
-  --color-indigo-200: #b9c1f7;
-  --color-indigo-300: #909df0;
-  --color-indigo-400: #6b7ce8;
-  --color-indigo-500: #4f5ed8;
+  --color-indigo-50: #f1f3ff;
+  --color-indigo-100: #e2e6ff;
+  --color-indigo-200: #c3c9ff;
+  --color-indigo-300: #9ea8ff;
+  --color-indigo-400: #7b86ff;
+  --color-indigo-500: #5b67e8;
+  --color-indigo-600: #4649c0;
+  --color-indigo-700: #3637a0;
+  --color-indigo-800: #292a80;
+  --color-indigo-900: #1e1f62;
 
-  --color-blue-50: #f2f6fd;
-  --color-blue-100: #dcecfa;
-  --color-blue-200: #a8d8f0;
-  --color-blue-300: #7cc3e8;
-  --color-blue-400: #55aee0;
-  --color-blue-500: #2e93c9;
-  --color-blue-600: #167aa9;
-  --color-blue-700: #12658c;
-  --color-blue-800: #0e4f6e;
-  --color-blue-900: #0a3a50;
+  --color-blue-50: #eef6ff;
+  --color-blue-100: #dcebff;
+  --color-blue-200: #b7d8ff;
+  --color-blue-300: #8dc0ff;
+  --color-blue-400: #62a8ff;
+  --color-blue-500: #3d9bff;
+  --color-blue-600: #0b5ec9;
+  --color-blue-700: #0a4ea6;
+  --color-blue-800: #093d82;
+  --color-blue-900: #082e63;
 
-  --color-sky-50: #eef8fd;
-  --color-sky-100: #d6effa;
-  --color-sky-200: #a8d8f0;
-  --color-sky-300: #7ac3e6;
-  --color-sky-400: #4fabdc;
-  --color-sky-500: #2e93c9;
+  --color-sky-50: #eff8ff;
+  --color-sky-100: #dcebff;
+  --color-sky-200: #b7d8ff;
+  --color-sky-300: #8dc0ff;
+  --color-sky-400: #62a8ff;
+  --color-sky-500: #3d9bff;
+  --color-sky-600: #2a82e0;
+  --color-sky-700: #1f68b8;
+  --color-sky-800: #19508f;
+  --color-sky-900: #133b68;
 
-  --color-cyan-50: #ecfbfa;
-  --color-cyan-100: #cdf3f2;
-  --color-cyan-200: #9be4e4;
-  --color-cyan-300: #63d2d4;
+  --color-cyan-50: #ecfbfb;
+  --color-cyan-100: #cdf3f3;
+  --color-cyan-200: #9be4e6;
+  --color-cyan-300: #63d2d6;
   --color-cyan-400: #35bcc0;
   --color-cyan-500: #14a3a8;
+  --color-cyan-600: #0f8589;
+  --color-cyan-700: #0b686b;
+  --color-cyan-800: #084d4f;
+  --color-cyan-900: #063739;
 
-  --color-teal-50: #effbf6;
-  --color-teal-100: #d7f5e8;
-  --color-teal-200: #a8ecd0;
-  --color-teal-300: #76dfb5;
+  --color-teal-50: #effbf7;
+  --color-teal-100: #d7f5ea;
+  --color-teal-200: #a8ecd2;
+  --color-teal-300: #76dfb8;
   --color-teal-400: #46d09a;
   --color-teal-500: #1fb982;
+  --color-teal-600: #159a6a;
+  --color-teal-700: #117a54;
+  --color-teal-800: #0d5d40;
+  --color-teal-900: #09432e;
 
-  --color-emerald-50: #f0faf4;
-  --color-emerald-100: #ddf7e7;
-  --color-emerald-200: #b8f0d8;
-  --color-emerald-300: #8fe7bc;
-  --color-emerald-400: #5fd68b;
-  --color-emerald-500: #33a863;
-  --color-emerald-600: #047857;
-  --color-emerald-700: #03614a;
-  --color-emerald-800: #024a3a;
-  --color-emerald-900: #01372b;
+  --color-emerald-50: #effbf4;
+  --color-emerald-100: #dff5e7;
+  --color-emerald-200: #bcebce;
+  --color-emerald-300: #8fdcad;
+  --color-emerald-400: #62cc8a;
+  --color-emerald-500: #3fc26b;
+  --color-emerald-600: #2a9c53;
+  --color-emerald-700: #1b7a3d;
+  --color-emerald-800: #155c2e;
+  --color-emerald-900: #0e4220;
 
-  --color-green-50: #f0faf4;
-  --color-green-100: #ddf7e7;
-  --color-green-200: #b8f0d8;
-  --color-green-300: #8fe7bc;
-  --color-green-400: #5fd68b;
-  --color-green-500: #33a863;
-  --color-green-600: #047857;
+  --color-green-50: #f0faf3;
+  --color-green-100: #dff5e7;
+  --color-green-200: #bcebce;
+  --color-green-300: #8fdcad;
+  --color-green-400: #62cc8a;
+  --color-green-500: #3fc26b;
+  --color-green-600: #1b7a3d;
+  --color-green-700: #166236;
+  --color-green-800: #114b29;
+  --color-green-900: #0c361e;
 
   --color-lime-50: #f6fbe8;
   --color-lime-100: #eaf6cd;
@@ -226,86 +282,108 @@
   --color-lime-300: #b9df6a;
   --color-lime-400: #9ed23c;
   --color-lime-500: #83bd1f;
+  --color-lime-600: #689a16;
+  --color-lime-700: #507810;
+  --color-lime-800: #3b5a0c;
+  --color-lime-900: #2a4008;
 
-  --color-amber-50: #fff4d6;
-  --color-amber-100: #ffe9ad;
-  --color-amber-200: #ffe5a8;
-  --color-amber-300: #ffd166;
-  --color-amber-400: #ffc93c;
-  --color-amber-500: #e5ac2e;
-  --color-amber-600: #b47805;
-  --color-amber-700: #95620a;
-  --color-amber-800: #774e08;
-  --color-amber-900: #593a06;
+  --color-amber-50: #fff8ec;
+  --color-amber-100: #fff0db;
+  --color-amber-200: #ffe0ad;
+  --color-amber-300: #ffce73;
+  --color-amber-400: #ffbc3d;
+  --color-amber-500: #ffa71f;
+  --color-amber-600: #d9860a;
+  --color-amber-700: #ad6a06;
+  --color-amber-800: #844e03;
+  --color-amber-900: #5e3602;
 
-  --color-yellow-50: #fff9e8;
-  --color-yellow-100: #fff1c8;
-  --color-yellow-200: #ffe5a8;
-  --color-yellow-300: #ffd876;
-  --color-yellow-400: #ffcc4d;
-  --color-yellow-500: #f2b52e;
+  --color-yellow-50: #fffbeb;
+  --color-yellow-100: #fff6d9;
+  --color-yellow-200: #ffeba6;
+  --color-yellow-300: #ffdf6f;
+  --color-yellow-400: #ffd24f;
+  --color-yellow-500: #ffc53d;
+  --color-yellow-600: #8a5b00;
+  --color-yellow-700: #6e4700;
+  --color-yellow-800: #533500;
+  --color-yellow-900: #3a2400;
 
-  --color-orange-50: #fff3ec;
-  --color-orange-100: #ffe7d6;
-  --color-orange-200: #ffd0b0;
-  --color-orange-300: #ffb88a;
-  --color-orange-400: #ffa86e;
-  --color-orange-500: #ff9f5a;
-  --color-orange-600: #e0742b;
-  --color-orange-700: #bc5f24;
-  --color-orange-800: #974b1e;
-  --color-orange-900: #733918;
+  --color-orange-50: #fff8ec;
+  --color-orange-100: #fff0db;
+  --color-orange-200: #ffdeb0;
+  --color-orange-300: #ffc87e;
+  --color-orange-400: #ffb453;
+  --color-orange-500: #ff9f2e;
+  --color-orange-600: #b45f09;
+  --color-orange-700: #904b06;
+  --color-orange-800: #6c3804;
+  --color-orange-900: #4d2702;
 
   /* ============================================================
      暖调中性灰（颜色统一收尾）
-     gray / slate / zinc / neutral 四族 → 同一暖粉棕灰，
-     保留「灰暗感」的语义（禁用/锁定/次要文字）但不再发冷，
-     与果冻粉家族天然协调。语义亮红 red-* / 深档 600+ 均保留原值。
+     gray / slate / zinc / neutral 四族 → 同一暖棕灰，与暖棕 ink 协调
      ============================================================ */
-  --color-gray-50: #fbf6f7;
-  --color-gray-100: #f7edf0;
-  --color-gray-200: #f0dde2;
-  --color-gray-300: #e2c4cb;
-  --color-gray-400: #cda6b0;
-  --color-gray-500: #b38894;
-  --color-gray-600: #966b78;
-  --color-gray-700: #78535f;
-  --color-gray-800: #5b3f49;
-  --color-gray-900: #3f2b33;
+  --color-gray-50: #faf6f2;
+  --color-gray-100: #f3ece6;
+  --color-gray-200: #e6d8ce;
+  --color-gray-300: #d4beb0;
+  --color-gray-400: #bb9f8f;
+  --color-gray-500: #a0806f;
+  --color-gray-600: #866758;
+  --color-gray-700: #6b5145;
+  --color-gray-800: #503c34;
+  --color-gray-900: #372a24;
 
-  --color-slate-50: #fbf6f7;
-  --color-slate-100: #f7edf0;
-  --color-slate-200: #f0dde2;
-  --color-slate-300: #e2c4cb;
-  --color-slate-400: #cda6b0;
-  --color-slate-500: #b38894;
-  --color-slate-600: #966b78;
-  --color-slate-700: #78535f;
-  --color-slate-800: #5b3f49;
-  --color-slate-900: #3f2b33;
-  --color-slate-950: #2c1e24;
+  --color-slate-50: #faf6f2;
+  --color-slate-100: #f3ece6;
+  --color-slate-200: #e6d8ce;
+  --color-slate-300: #d4beb0;
+  --color-slate-400: #bb9f8f;
+  --color-slate-500: #a0806f;
+  --color-slate-600: #866758;
+  --color-slate-700: #6b5145;
+  --color-slate-800: #503c34;
+  --color-slate-900: #372a24;
+  --color-slate-950: #241a16;
 
-  --color-zinc-50: #fbf6f7;
-  --color-zinc-100: #f7edf0;
-  --color-zinc-200: #f0dde2;
-  --color-zinc-300: #e2c4cb;
-  --color-zinc-400: #cda6b0;
-  --color-zinc-500: #b38894;
-  --color-zinc-600: #966b78;
-  --color-zinc-700: #78535f;
-  --color-zinc-800: #5b3f49;
-  --color-zinc-900: #3f2b33;
+  --color-zinc-50: #faf6f2;
+  --color-zinc-100: #f3ece6;
+  --color-zinc-200: #e6d8ce;
+  --color-zinc-300: #d4beb0;
+  --color-zinc-400: #bb9f8f;
+  --color-zinc-500: #a0806f;
+  --color-zinc-600: #866758;
+  --color-zinc-700: #6b5145;
+  --color-zinc-800: #503c34;
+  --color-zinc-900: #372a24;
 
-  --color-neutral-50: #fbf6f7;
-  --color-neutral-100: #f7edf0;
-  --color-neutral-200: #f0dde2;
-  --color-neutral-300: #e2c4cb;
-  --color-neutral-400: #cda6b0;
-  --color-neutral-500: #b38894;
-  --color-neutral-600: #966b78;
-  --color-neutral-700: #78535f;
-  --color-neutral-800: #5b3f49;
-  --color-neutral-900: #3f2b33;
+  --color-neutral-50: #faf6f2;
+  --color-neutral-100: #f3ece6;
+  --color-neutral-200: #e6d8ce;
+  --color-neutral-300: #d4beb0;
+  --color-neutral-400: #bb9f8f;
+  --color-neutral-500: #a0806f;
+  --color-neutral-600: #866758;
+  --color-neutral-700: #6b5145;
+  --color-neutral-800: #503c34;
+  --color-neutral-900: #372a24;
+}
+
+/* 庆祝弹入（设计系统 v1 · 奖励反馈，配合 --animate-celebrate） */
+@keyframes celebrate {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes float {
@@ -572,13 +650,13 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #ffb6c9;
+    background: #ffa6c1;
     border-radius: 999px;
     border: 2px solid transparent;
     background-clip: padding-box;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #ff6b96;
+    background: #ff5c8a;
     background-clip: padding-box;
   }
 }
@@ -743,12 +821,12 @@
   color: var(--color-candy-pink-deep);
   background-image: linear-gradient(
     100deg,
-    #e05a80 0%,
-    #e0742b 25%,
-    #b47805 45%,
-    #047857 65%,
-    #167aa9 85%,
-    #7c3aed 100%
+    #c9285c 0%,
+    #b45f09 25%,
+    #8a5b00 45%,
+    #1b7a3d 65%,
+    #0b5ec9 85%,
+    #5f2ecc 100%
   );
   background-clip: text;
   -webkit-background-clip: text;
@@ -1001,9 +1079,9 @@ main,
   border: 1px solid rgba(255, 255, 255, 0.35);
 }
 /* 色档：amber 价格 / pink 穿戴 / emerald 已拥有 / gray 买不起 */
-.badge-chip--amber   { background: linear-gradient(135deg, #e5ac2e 0%, #ff5c7a 70%, #ff9f5a 100%); }
-.badge-chip--pink    { background: linear-gradient(135deg, #ff6b96 0%, #ff8db0 50%, #ff5c7a 100%); }
-.badge-chip--emerald { background: linear-gradient(135deg, #33a863 0%, #047857 60%, #5fd68b 100%); }
+.badge-chip--amber   { background: linear-gradient(135deg, #d9860a 0%, #ff5c8a 70%, #ff9f2e 100%); }
+.badge-chip--pink    { background: linear-gradient(135deg, #ff5c8a 0%, #ff83a7 50%, #c2254a 100%); }
+.badge-chip--emerald { background: linear-gradient(135deg, #2a9c53 0%, #1b7a3d 60%, #62cc8a 100%); }
 .badge-chip--gray    { background: linear-gradient(135deg, #cda6b0 0%, #966b78 100%); opacity: 0.95; }
 
 /* 识字模块·部件拼装动画（P2 字理可视化） */

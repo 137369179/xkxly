@@ -219,7 +219,7 @@ export default function CompanionPage() {
           type="button"
           onClick={() => { sfxTap(); triggerHaptic(30); openVoiceModal(); }}
           aria-label="打开语音对话，跟小茜说话"
-          className="flex shrink-0 flex-col items-center gap-1 rounded-2xl border-2 border-white bg-gradient-to-b from-candy-purple to-candy-blue px-3 py-2.5 text-white shadow-md transition-transform active:scale-95"
+          className="flex shrink-0 flex-col items-center gap-1 rounded-2xl border-2 border-white bg-gradient-to-b from-candy-purple to-candy-blue px-3 py-2.5 text-candy-purple-on shadow-md transition-transform active:scale-95"
         >
           <span className="text-2xl leading-none">🎤</span>
           <span className="text-xs font-extrabold whitespace-nowrap">语音对话</span>

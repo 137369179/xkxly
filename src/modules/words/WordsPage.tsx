@@ -203,7 +203,7 @@ export default function WordsPage() {
                       <p className="text-base font-extrabold text-ink">
                         {tr('words.courseStage')} {def.stage} · {def.name}
                         {completed && <span className="ml-2 text-xs text-candy-green-deep">✅ {tr('words.courseDone')}</span>}
-                        {isCurrent && !completed && <span className="ml-2 rounded-full bg-purple-500 px-2 py-0.5 text-xs font-black text-white">{tr('words.courseNow')}</span>}
+                        {isCurrent && !completed && <span className="ml-2 rounded-full bg-purple-500 px-2 py-0.5 text-xs font-black text-candy-purple-on">{tr('words.courseNow')}</span>}
                       </p>
                       <span className="text-xs font-bold text-ink-soft">{done}/{def.targetCount}</span>
                     </div>
@@ -325,7 +325,7 @@ export default function WordsPage() {
             className="w-28 h-28 shrink-0 rounded-2xl object-cover border-4 border-white shadow-fluffy"
           />
           <div className="flex-1 text-center sm:text-left">
-            <span className="inline-block rounded-full bg-pink-500 px-3 py-0.5 text-xs font-black text-white">
+            <span className="inline-block rounded-full bg-pink-500 px-3 py-0.5 text-xs font-black text-candy-pink-on">
               {tr('words.sightWordsBadge')}
             </span>
             <h3 className="mt-1 text-lg font-black text-pink-900">{tr('words.sightWordsTitle')}</h3>
@@ -337,7 +337,7 @@ export default function WordsPage() {
                 <button
                   key={g}
                   onClick={() => { sfxTap(); setSightGrade(g as 1 | 2 | 3); }}
-                  className={`no-select rounded-full px-3 py-1 text-xs font-extrabold transition-transform hover:scale-105 active:scale-95 ${sightGrade === g ? 'bg-pink-500 text-white' : 'bg-white text-pink-700 border border-pink-200'}`}
+                  className={`no-select rounded-full px-3 py-1 text-xs font-extrabold transition-transform hover:scale-105 active:scale-95 ${sightGrade === g ? 'bg-pink-500 text-candy-pink-on' : 'bg-white text-pink-700 border border-pink-200'}`}
                 >
                   {tr('words.sightGrade' + g)}
                 </button>
@@ -367,7 +367,7 @@ export default function WordsPage() {
           <button
             key={t.id}
             onClick={() => { sfxTap(); setThemeId(t.id); }}
-            className={`no-select rounded-full px-3 py-1 text-xs font-extrabold transition-transform hover:scale-105 ${themeId === t.id ? 'bg-blue-500 text-white' : 'bg-white text-ink-soft border border-blue-200'}`}
+            className={`no-select rounded-full px-3 py-1 text-xs font-extrabold transition-transform hover:scale-105 ${themeId === t.id ? 'bg-blue-500 text-candy-blue-on' : 'bg-white text-ink-soft border border-blue-200'}`}
           >
             {t.emoji} {t.name}
           </button>

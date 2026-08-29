@@ -120,7 +120,7 @@ function DinoCompare() {
             onClick={() => { sfxTap(); setSelected(d); }}
             className={cn(
               'rounded-lg px-2.5 py-1 text-xs font-bold transition-all',
-              selected.id === d.id ? 'bg-green-500 text-white shadow-md' : 'bg-white text-ink-soft hover:bg-green-50'
+              selected.id === d.id ? 'bg-green-500 text-candy-green-on shadow-md' : 'bg-white text-ink-soft hover:bg-green-50'
             )}
           >
             {d.emoji} {d.nameZh}
@@ -133,7 +133,7 @@ function DinoCompare() {
         <div className="flex flex-col items-center">
           <svg width="30" height={humanHeight * scale} viewBox={`0 0 30 ${humanHeight * scale}`}>
             <circle cx="15" cy="10" r="8" fill="#FFD8A8" />
-            <rect x="10" y="18" width="10" height={humanHeight * scale - 40} fill="#55aee0" rx="3" />
+            <rect x="10" y="18" width="10" height={humanHeight * scale - 40} fill="#3d9bff" rx="3" />
             <rect x="5" y={humanHeight * scale - 25} width="6" height="22" fill="#333" rx="2" />
             <rect x="19" y={humanHeight * scale - 25} width="6" height="22" fill="#333" rx="2" />
           </svg>
@@ -182,7 +182,7 @@ function DinoWorldImpl() {
       <div className="flex flex-wrap gap-1.5">
         <button
           onClick={() => { sfxTap(); setFilter(null); }}
-          className={cn('rounded-lg px-2.5 py-1 text-xs font-bold', !filter ? 'bg-green-500 text-white' : 'bg-white text-ink-soft shadow-sm')}
+          className={cn('rounded-lg px-2.5 py-1 text-xs font-bold', !filter ? 'bg-green-500 text-candy-green-on' : 'bg-white text-ink-soft shadow-sm')}
         >
           {tr('common.all')}
         </button>
@@ -190,7 +190,7 @@ function DinoWorldImpl() {
           <button
             key={f}
             onClick={() => { sfxTap(); setFilter(f); }}
-            className={cn('rounded-lg px-2.5 py-1 text-xs font-bold', filter === f ? 'bg-green-500 text-white' : 'bg-white text-ink-soft shadow-sm')}
+            className={cn('rounded-lg px-2.5 py-1 text-xs font-bold', filter === f ? 'bg-green-500 text-candy-green-on' : 'bg-white text-ink-soft shadow-sm')}
           >
             {f}
           </button>

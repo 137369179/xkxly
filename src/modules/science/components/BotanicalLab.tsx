@@ -3860,7 +3860,7 @@ export function BotanicalLab() {
             }}
             className={`min-h-[44px] py-2 px-3.5 rounded-2xl font-black text-xs transition-all flex items-center gap-1.5 border-2 focus-visible:ring-4 focus-visible:ring-emerald-300 focus:outline-none ${
               mode === 'plant'
-                ? 'bg-emerald-600 text-white border-emerald-700 shadow-md scale-[1.02]'
+                ? 'bg-emerald-600 text-candy-green-on border-emerald-700 shadow-md scale-[1.02]'
                 : 'bg-white text-slate-700 border-slate-200 hover:border-emerald-300 active:scale-95'
             }`}
           >
@@ -3879,7 +3879,7 @@ export function BotanicalLab() {
             }}
             className={`min-h-[44px] py-2 px-3.5 rounded-2xl font-black text-xs transition-all flex items-center gap-1.5 border-2 focus-visible:ring-4 focus-visible:ring-amber-300 focus:outline-none ${
               mode === 'insect'
-                ? 'bg-amber-500 text-white border-amber-600 shadow-md scale-[1.02]'
+                ? 'bg-amber-500 text-candy-orange-on border-amber-600 shadow-md scale-[1.02]'
                 : 'bg-white text-slate-700 border-slate-200 hover:border-amber-300 active:scale-95'
             }`}
           >
@@ -3936,7 +3936,7 @@ export function BotanicalLab() {
             }}
             className={`min-h-[44px] py-2 px-3.5 rounded-2xl font-black text-xs transition-all flex items-center gap-1.5 border-2 focus-visible:ring-4 focus-visible:ring-orange-300 focus:outline-none ${
               mode === 'quiz'
-                ? 'bg-orange-500 text-white border-orange-600 shadow-md scale-[1.02]'
+                ? 'bg-orange-500 text-candy-orange-on border-orange-600 shadow-md scale-[1.02]'
                 : 'bg-white text-slate-700 border-slate-200 hover:border-orange-300 active:scale-95'
             }`}
           >
@@ -3971,7 +3971,7 @@ export function BotanicalLab() {
                     }}
                     className={`py-1.5 px-3 rounded-2xl font-black text-xs transition-all flex items-center gap-1 border-2 ${
                       isSel
-                        ? 'bg-emerald-600 text-white border-emerald-700 shadow-md scale-105'
+                        ? 'bg-emerald-600 text-candy-green-on border-emerald-700 shadow-md scale-105'
                         : isNight
                           ? 'bg-slate-800 text-slate-200 border-slate-700'
                           : 'bg-white text-slate-700 border-slate-200 hover:border-emerald-300'
@@ -4041,7 +4041,7 @@ export function BotanicalLab() {
                       sfxTap();
                       setPlantViewMode(plantViewMode === 'timelapse' ? 'photo' : 'timelapse');
                     }}
-                    className="px-3 py-1 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow transition-all flex items-center gap-1 border border-emerald-400/40"
+                    className="px-3 py-1 rounded-full bg-emerald-600 hover:bg-emerald-700 text-candy-green-on text-xs font-black shadow transition-all flex items-center gap-1 border border-emerald-400/40"
                   >
                     <span>{plantViewMode === 'timelapse' ? '🔬 剖面延时生长' : '📸 真实微距实拍'}</span>
                     <span className="text-xs opacity-75">(点击切换)</span>
@@ -4057,7 +4057,7 @@ export function BotanicalLab() {
                       setIsPlaying(!isPlaying);
                     }}
                     className={`px-2.5 py-1 rounded-xl text-xs font-black transition-all ${
-                      isPlaying ? 'bg-amber-500 text-slate-950 shadow-md' : 'bg-emerald-600 text-white hover:bg-emerald-500'
+                      isPlaying ? 'bg-amber-500 text-slate-950 shadow-md' : 'bg-emerald-600 text-candy-orange-on hover:bg-emerald-500'
                     }`}
                   >
                     {isPlaying ? '⏸️ 暂停' : '▶️ 延时播放'}
@@ -4198,7 +4198,7 @@ export function BotanicalLab() {
                   <button
                     type="button"
                     onClick={handleWater}
-                    className="py-2 px-1 rounded-xl bg-blue-500 hover:bg-blue-600 active:scale-95 text-white font-black text-xs shadow transition-all flex flex-col items-center justify-center gap-0.5"
+                    className="py-2 px-1 rounded-xl bg-blue-500 hover:bg-blue-600 active:scale-95 text-candy-blue-on font-black text-xs shadow transition-all flex flex-col items-center justify-center gap-0.5"
                   >
                     <span className="text-base">💧</span>
                     <span>浇水+4天</span>
@@ -4207,7 +4207,7 @@ export function BotanicalLab() {
                   <button
                     type="button"
                     onClick={handleSunlight}
-                    className="py-2 px-1 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-black text-xs shadow transition-all flex flex-col items-center justify-center gap-0.5"
+                    className="py-2 px-1 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-candy-orange-on font-black text-xs shadow transition-all flex flex-col items-center justify-center gap-0.5"
                   >
                     <span className="text-base">☀️</span>
                     <span>光照+4天</span>
@@ -4216,7 +4216,7 @@ export function BotanicalLab() {
                   <button
                     type="button"
                     onClick={handleFertilizer}
-                    className="py-2 px-1 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-black text-xs shadow transition-all flex flex-col items-center justify-center gap-0.5"
+                    className="py-2 px-1 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-candy-green-on font-black text-xs shadow transition-all flex flex-col items-center justify-center gap-0.5"
                   >
                     <span className="text-base">🧪</span>
                     <span>施肥+5天</span>
@@ -4307,7 +4307,7 @@ export function BotanicalLab() {
                     }}
                     className={`py-1.5 px-3 rounded-2xl font-black text-xs transition-all flex items-center gap-1 border-2 ${
                       isSel
-                        ? 'bg-amber-500 text-white border-amber-600 shadow-md scale-105'
+                        ? 'bg-amber-500 text-candy-orange-on border-amber-600 shadow-md scale-105'
                         : 'bg-white text-slate-700 border-slate-200 hover:border-amber-300'
                     }`}
                   >
@@ -4934,7 +4934,7 @@ export function BotanicalLab() {
                       isSelected
                         ? isCorrect
                           ? 'bg-emerald-500 text-slate-950 border-emerald-400 ring-4 ring-emerald-500/30'
-                          : 'bg-rose-500 text-white border-rose-400 ring-4 ring-rose-500/30'
+                          : 'bg-rose-500 text-candy-pink-on border-rose-400 ring-4 ring-rose-500/30'
                         : selectedAnswer !== null && isCorrect
                           ? 'bg-emerald-950 text-emerald-300 border-emerald-500/50'
                           : 'bg-slate-800 text-slate-200 border-slate-700 hover:border-orange-400/60'

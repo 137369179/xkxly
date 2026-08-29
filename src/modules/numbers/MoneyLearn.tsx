@@ -208,7 +208,7 @@ export function MoneyLearn() {
             </button>
             <button
               onClick={handlePay}
-              className="rounded-2xl bg-candy-green-deep px-6 py-2 text-sm font-black text-white shadow-md hover:bg-green-600 active:scale-95 transition-all"
+              className="rounded-2xl bg-candy-green-deep px-6 py-2 text-sm font-black text-candy-green-on shadow-md hover:bg-green-600 active:scale-95 transition-all"
             >
               💳 确认付款并结账
             </button>

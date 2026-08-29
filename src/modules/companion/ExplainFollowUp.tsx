@@ -148,7 +148,7 @@ export function ExplainFollowUp({
                 style={
                   t.role === 'user'
                     ? { background: tone.main, color: tone.on }
-                    : { color: '#5c2e3d' }
+                    : { color: '#4a2b1f' }
                 }
               >
                 {t.role === 'assistant' && (
@@ -257,7 +257,7 @@ export function ExplainFollowUp({
             key={i}
             className="h-2 w-8 rounded-full transition"
             style={{
-              background: i < round ? tone.main : i === round ? `${tone.main}88` : '#f0dde2',
+              background: i < round ? tone.main : i === round ? `${tone.main}88` : '#e6d8ce',
             }}
           />
         ))}

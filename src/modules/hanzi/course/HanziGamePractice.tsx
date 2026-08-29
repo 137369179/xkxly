@@ -143,7 +143,7 @@ export function HanziGamePractice({ char, onComplete }: Props) {
                 sfxTap();
                 speak(char.pd);
               }}
-              className="px-5 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl font-black text-base shadow-md flex items-center gap-2 animate-pulse hover:scale-105 transition-transform"
+              className="px-5 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-candy-green-on rounded-2xl font-black text-base shadow-md flex items-center gap-2 animate-pulse hover:scale-105 transition-transform"
             >
               <span>🔊</span>
               <span>点击听发音 [{char.pd}]</span>
@@ -220,7 +220,7 @@ export function HanziGamePractice({ char, onComplete }: Props) {
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
-              className="absolute inset-0 bg-emerald-500/90 rounded-3xl flex flex-col items-center justify-center text-white p-4 text-center z-10"
+              className="absolute inset-0 bg-emerald-500/90 rounded-3xl flex flex-col items-center justify-center text-candy-green-on p-4 text-center z-10"
             >
               <span className="text-5xl mb-1">🎉 答对啦！</span>
               <span className="text-sm font-bold">棒极了！继续下一关！</span>

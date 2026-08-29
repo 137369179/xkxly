@@ -399,7 +399,7 @@ export function IdiomMatchGame() {
             <button
               type="button"
               onClick={() => handleSelectLevel(levelIdx + 1)}
-              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-500 text-white font-black text-sm shadow-lg hover:brightness-110 active:scale-95 transition-all"
+              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-500 text-candy-pink-on font-black text-sm shadow-lg hover:brightness-110 active:scale-95 transition-all"
             >
               🎉 挑战下一关：{MATCH_LEVELS[levelIdx + 1]?.name} →
             </button>

@@ -131,8 +131,8 @@ export function HanziSpeechReview({ char, totalStars, onComplete }: Props) {
               disabled={isRecording}
               className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl shadow-xl transition-all border-4 ${
                 isRecording
-                  ? 'bg-rose-500 text-white border-rose-300 animate-pulse'
-                  : 'bg-gradient-to-tr from-pink-500 to-rose-500 text-white border-pink-200'
+                  ? 'bg-rose-500 text-candy-pink-on border-rose-300 animate-pulse'
+                  : 'bg-gradient-to-tr from-pink-500 to-rose-500 text-candy-pink-on border-pink-200'
               }`}
             >
               {isRecording ? '🎙️' : '🎤'}
@@ -146,7 +146,7 @@ export function HanziSpeechReview({ char, totalStars, onComplete }: Props) {
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="w-full bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 text-white p-4 rounded-2xl shadow-lg text-center space-y-2"
+            className="w-full bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 text-candy-orange-on p-4 rounded-2xl shadow-lg text-center space-y-2"
           >
             <span className="text-4xl block">🏆 识字小状元通关卡</span>
             <p className="text-sm font-bold">
@@ -174,7 +174,7 @@ export function HanziSpeechReview({ char, totalStars, onComplete }: Props) {
           disabled={!isPassed}
           className={`w-full py-3.5 rounded-2xl font-black text-base shadow-lg flex items-center justify-center gap-2 transition-all ${
             isPassed
-              ? 'bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 text-white shadow-pink-300/50 hover:scale-102 active:scale-98 cursor-pointer'
+              ? 'bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 text-candy-pink-on shadow-pink-300/50 hover:scale-102 active:scale-98 cursor-pointer'
               : 'bg-slate-200 text-slate-400 cursor-not-allowed'
           }`}
         >

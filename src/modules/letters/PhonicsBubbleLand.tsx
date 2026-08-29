@@ -343,7 +343,7 @@ export function PhonicsBubbleLand() {
             }}
             className={`min-h-[44px] py-1.5 px-3 rounded-xl font-black text-xs transition-all flex items-center gap-1 border focus-visible:ring-4 focus-visible:ring-sky-300 focus:outline-none ${
               mode === 'bubbles'
-                ? 'bg-sky-500 text-white border-sky-600 shadow-sm'
+                ? 'bg-sky-500 text-candy-blue-on border-sky-600 shadow-sm'
                 : 'bg-white text-slate-700 border-slate-200 hover:border-sky-300 active:scale-95'
             }`}
           >
@@ -381,7 +381,7 @@ export function PhonicsBubbleLand() {
             }}
             className={`min-h-[44px] py-1.5 px-3 rounded-xl font-black text-xs transition-all flex items-center gap-1 border focus-visible:ring-4 focus-visible:ring-emerald-300 focus:outline-none ${
               mode === 'family'
-                ? 'bg-emerald-600 text-white border-emerald-700 shadow-sm'
+                ? 'bg-emerald-600 text-candy-green-on border-emerald-700 shadow-sm'
                 : 'bg-white text-slate-700 border-slate-200 hover:border-emerald-300 active:scale-95'
             }`}
           >
@@ -402,7 +402,7 @@ export function PhonicsBubbleLand() {
             }}
             className={`min-h-[44px] py-1.5 px-3 rounded-xl font-black text-xs transition-all flex items-center gap-1 border focus-visible:ring-4 focus-visible:ring-amber-300 focus:outline-none ${
               mode === 'quiz'
-                ? 'bg-amber-500 text-white border-amber-600 shadow-sm'
+                ? 'bg-amber-500 text-candy-orange-on border-amber-600 shadow-sm'
                 : 'bg-white text-slate-700 border-slate-200 hover:border-amber-300 active:scale-95'
             }`}
           >
@@ -451,7 +451,7 @@ export function PhonicsBubbleLand() {
                   sfxTap();
                   void speak(`${selectedLetter.letter}, ${selectedLetter.phonics}, ${selectedLetter.word}!`, { lang: 'en-US' });
                 }}
-                className="px-4 py-2 rounded-2xl bg-sky-500 text-white font-black text-xs shadow-md flex items-center gap-1.5 hover:bg-sky-600"
+                className="px-4 py-2 rounded-2xl bg-sky-500 text-candy-blue-on font-black text-xs shadow-md flex items-center gap-1.5 hover:bg-sky-600"
               >
                 <span>🔊</span>
                 <span>标准跟读</span>
@@ -472,7 +472,7 @@ export function PhonicsBubbleLand() {
                   onClick={() => handlePickBubble(item)}
                   className={`p-2.5 rounded-2xl border-2 flex flex-col items-center justify-center transition-all ${
                     isSelected
-                      ? 'bg-sky-500 text-white border-sky-600 shadow-md ring-4 ring-sky-200 scale-105'
+                      ? 'bg-sky-500 text-candy-blue-on border-sky-600 shadow-md ring-4 ring-sky-200 scale-105'
                       : 'bg-white text-slate-700 border-slate-200 hover:border-sky-300'
                   }`}
                 >
@@ -539,7 +539,7 @@ export function PhonicsBubbleLand() {
           <button
             type="button"
             onClick={handleCvcFuse}
-            className="px-8 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-500 text-white font-black text-sm shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
+            className="px-8 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-500 text-candy-pink-on font-black text-sm shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
           >
             ⚡ 魔法合体连读 ➔ {currentCvc.word.toUpperCase()} {currentCvc.emoji}
           </button>
@@ -564,7 +564,7 @@ export function PhonicsBubbleLand() {
                   }}
                   className={`py-2 px-3.5 rounded-2xl font-black text-xs transition-all border-2 flex items-center gap-1.5 shadow-sm ${
                     isSel
-                      ? 'bg-emerald-600 text-white border-emerald-700 shadow-md scale-105'
+                      ? 'bg-emerald-600 text-candy-green-on border-emerald-700 shadow-md scale-105'
                       : 'bg-white text-slate-700 border-slate-200 hover:border-emerald-300'
                   }`}
                 >
@@ -586,15 +586,15 @@ export function PhonicsBubbleLand() {
 
             {/* 单词组装车厢 */}
             <div className="flex items-center justify-center gap-2 py-2">
-              <div className="h-16 w-16 rounded-2xl bg-sky-500 text-white font-black text-3xl flex items-center justify-center shadow">
+              <div className="h-16 w-16 rounded-2xl bg-sky-500 text-candy-blue-on font-black text-3xl flex items-center justify-center shadow">
                 {currentFamilyWord.prefix}
               </div>
               <span className="text-2xl font-black text-emerald-600">+</span>
-              <div className="h-16 w-24 rounded-2xl bg-emerald-600 text-white font-black text-3xl flex items-center justify-center shadow">
+              <div className="h-16 w-24 rounded-2xl bg-emerald-600 text-candy-green-on font-black text-3xl flex items-center justify-center shadow">
                 {currentFamily.family}
               </div>
               <span className="text-2xl font-black text-slate-400">=</span>
-              <div className="h-16 px-5 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-500 text-white font-black text-3xl flex items-center justify-center shadow-lg">
+              <div className="h-16 px-5 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-500 text-candy-pink-on font-black text-3xl flex items-center justify-center shadow-lg">
                 {currentFamilyWord.word}
               </div>
             </div>
@@ -614,7 +614,7 @@ export function PhonicsBubbleLand() {
                     onClick={() => handleFamilyWordClick(wIdx)}
                     className={`p-3 rounded-2xl border-2 font-black transition-all flex flex-col items-center gap-1 shadow-sm ${
                       isCur
-                        ? 'bg-emerald-500 text-white border-emerald-600 ring-4 ring-emerald-200 scale-105'
+                        ? 'bg-emerald-500 text-candy-green-on border-emerald-600 ring-4 ring-emerald-200 scale-105'
                         : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-emerald-400'
                     }`}
                   >

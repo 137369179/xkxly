@@ -31,9 +31,9 @@ interface TierConfig {
 }
 
 const TIER_CONFIG: Record<Tier, TierConfig> = {
-  gold: { label: '金牌成就', emoji: '🥇', tone: 'yellow', ring: '#e5ac2e', bg: 'linear-gradient(135deg, #FFF3D2, #FFE6A8)' },
-  silver: { label: '银牌成就', emoji: '🥈', tone: 'blue', ring: '#2e93c9', bg: 'linear-gradient(135deg, #dcecfa, #f2f6fd)' },
-  bronze: { label: '铜牌成就', emoji: '🥉', tone: 'orange', ring: '#c2410c', bg: 'linear-gradient(135deg, #FFEBDB, #FFE0CC)' },
+  gold: { label: '金牌成就', emoji: '🥇', tone: 'yellow', ring: '#d9860a', bg: 'linear-gradient(135deg, #FFF3D2, #FFE6A8)' },
+  silver: { label: '银牌成就', emoji: '🥈', tone: 'blue', ring: '#0b5ec9', bg: 'linear-gradient(135deg, #dcebff, #f2f6fd)' },
+  bronze: { label: '铜牌成就', emoji: '🥉', tone: 'orange', ring: '#b45f09', bg: 'linear-gradient(135deg, #FFEBDB, #FFE0CC)' },
 };
 
 /** 金色：通关类 + 全通类 */

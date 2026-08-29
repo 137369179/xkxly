@@ -20,7 +20,7 @@ export function StarIcon({
     >
       <path
         d="M12 2.6l2.83 5.98 6.42.93-4.65 4.63 1.1 6.5L12 17.58 6.3 20.64l1.1-6.5L2.75 9.5l6.42-.93L12 2.6z"
-        fill={filled ? '#FFC93C' : 'rgba(0,0,0,0.09)'}
+        fill={filled ? '#FFC53D' : 'rgba(0,0,0,0.09)'}
         stroke={filled ? '#E5A516' : 'rgba(0,0,0,0.06)'}
         strokeWidth="1.4"
         strokeLinejoin="round"

@@ -33,7 +33,7 @@ export function VoiceControls({
       <button
         type="button"
         onClick={onHangUp}
-        className="flex items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-rose-500 to-red-500 py-2.5 text-xs font-black text-white shadow-md transition-all hover:from-rose-600 hover:to-red-600 active:scale-95"
+        className="flex items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-rose-500 to-red-500 py-2.5 text-xs font-black text-candy-pink-on shadow-md transition-all hover:from-rose-600 hover:to-red-600 active:scale-95"
       >
         {t('catCompanion.voice.hangUp')}
       </button>
@@ -112,7 +112,7 @@ export function QuickPhrases({ onSend }: { onSend: (text: string) => void }) {
             }}
             className={`flex-shrink-0 rounded-full px-2.5 py-0.5 text-xs font-black transition-all ${
               activeCategory === cat.id
-                ? 'bg-pink-500 text-white shadow-xs'
+                ? 'bg-pink-500 text-candy-pink-on shadow-xs'
                 : 'bg-pink-100/70 text-pink-700 hover:bg-pink-200/80'
             }`}
           >

@@ -19,7 +19,7 @@ export function LevelProgress({ progress }: Props) {
 
   return (
     <section aria-label="掌握进度" className="rounded-2xl bg-white/80 p-4 shadow-sm">
-      <h3 className="mb-2 text-lg font-extrabold text-[#33a863]">📈 我的学习进度</h3>
+      <h3 className="mb-2 text-lg font-extrabold text-[#3fc26b]">📈 我的学习进度</h3>
       <div
         role="progressbar"
         aria-valuenow={rate}
@@ -29,7 +29,7 @@ export function LevelProgress({ progress }: Props) {
         className="h-4 w-full overflow-hidden rounded-full bg-[#e6f5ec]"
       >
         <div
-          className="h-full rounded-full bg-[#5FD68B] transition-[width]"
+          className="h-full rounded-full bg-[#62CC8A] transition-[width]"
           style={{ width: `${rate}%` }}
         />
       </div>

@@ -208,7 +208,7 @@ export function CodeMaze() {
             onClick={() => newLevel(i)}
             className={cn(
               'min-h-[44px] rounded-xl px-3 py-1.5 text-xs font-extrabold transition-all focus-visible:ring-4 focus-visible:ring-purple-300 focus:outline-none',
-              levelIdx === i ? 'bg-candy-purple-deep text-white shadow-md scale-105' : 'bg-white text-ink-soft shadow-sm hover:bg-purple-50'
+              levelIdx === i ? 'bg-candy-purple-deep text-candy-purple-on shadow-md scale-105' : 'bg-white text-ink-soft shadow-sm hover:bg-purple-50'
             )}
           >
             {tr('codeMaze.levelN', { i: String(i + 1) })}
