@@ -60,7 +60,7 @@ export function HanziCourseRunner({ char, onClose }: Props) {
     <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
       <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border-4 border-amber-200 overflow-hidden flex flex-col min-h-[580px]">
         {/* 顶部导航与步进器 (Top Stepper) */}
-        <div className="p-4 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white flex items-center justify-between shadow-md">
+        <div className="p-4 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-candy-orange-on flex items-center justify-between shadow-md">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-2xl font-black shadow-inner">
               {char.c}
@@ -81,7 +81,7 @@ export function HanziCourseRunner({ char, onClose }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 text-white font-black text-xl flex items-center justify-center transition-colors"
+            className="w-11 h-11 rounded-full bg-white/20 hover:bg-white/30 text-white font-black text-xl flex items-center justify-center transition-colors"
             aria-label="关闭精学课程"
           >
             ✕
@@ -98,7 +98,7 @@ export function HanziCourseRunner({ char, onClose }: Props) {
                 key={step.id}
                 className={`flex flex-col items-center p-1.5 rounded-xl text-center transition-all ${
                   isCurrent
-                    ? 'bg-amber-500 text-white shadow-md font-black'
+                    ? 'bg-amber-500 text-candy-orange-on shadow-md font-black'
                     : isDone
                     ? 'bg-emerald-100 text-emerald-800 font-bold'
                     : 'bg-white/60 text-slate-400 font-medium'
@@ -183,7 +183,7 @@ export function HanziCourseRunner({ char, onClose }: Props) {
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-full max-w-sm mx-auto py-3.5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white rounded-2xl font-black text-base shadow-xl shadow-orange-300/50 hover:scale-102 active:scale-98 transition-transform"
+                  className="w-full max-w-sm mx-auto py-3.5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-candy-orange-on rounded-2xl font-black text-base shadow-xl shadow-orange-300/50 hover:scale-102 active:scale-98 transition-transform"
                 >
                   太棒了，完成并返回
                 </button>

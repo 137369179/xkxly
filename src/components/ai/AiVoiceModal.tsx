@@ -233,7 +233,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
             ref={closeBtnRef}
             onClick={() => { activeStreamRef.current = false; abortRef.current?.abort(); onClose(); }}
             aria-label="关闭语音对话"
-            className="absolute top-4 right-4 grid h-10 w-10 place-items-center rounded-full bg-cream-dark text-ink-soft hover:bg-candy-yellow transition-colors font-bold text-xl"
+            className="absolute top-4 right-4 grid h-11 w-11 place-items-center rounded-full bg-cream-dark text-ink-soft hover:bg-candy-yellow transition-colors font-bold text-xl"
           >
             ✕
           </button>
@@ -265,7 +265,7 @@ export function AiVoiceModal({ isOpen, onClose }: AiVoiceModalProps) {
           <div className="mt-5 min-h-[100px] max-h-[160px] overflow-y-auto rounded-2xl bg-cream-light p-4 text-left border-2 border-dashed border-candy-blue/30">
             {transcript && (
               <div className="mb-3 text-right">
-                <span className="inline-block rounded-2xl rounded-tr-none bg-candy-blue px-3 py-2 text-sm font-bold text-white shadow-sm">
+                <span className="inline-block rounded-2xl rounded-tr-none bg-candy-blue px-3 py-2 text-sm font-bold text-candy-blue-on shadow-sm">
                   🗣️ {transcript}
                 </span>
               </div>

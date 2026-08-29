@@ -64,7 +64,7 @@ export function PwaInstallBanner() {
           <button
             onClick={() => setDismissed(true)}
             aria-label={t('pwaInstallBanner.close')}
-            className="text-xs font-bold text-ink/40 hover:text-ink px-1"
+            className="min-touch-target text-xs font-bold text-ink/40 hover:text-ink px-1"
           >
             ✕
           </button>

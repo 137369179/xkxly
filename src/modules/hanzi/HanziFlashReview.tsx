@@ -167,7 +167,7 @@ export function HanziFlashReview() {
                 speak(current.c, { lang: 'zh-CN', module: 'hanzi' });
               }}
               aria-label={t('hanziFlashReview.readAria', { char: current.c })}
-              className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-candy-blue-soft text-candy-blue-deep"
+              className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-candy-blue-soft text-candy-blue-deep"
             >
               🔊
             </button>

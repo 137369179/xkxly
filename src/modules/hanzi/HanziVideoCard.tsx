@@ -118,7 +118,7 @@ const HanziVideoCard = memo(function HanziVideoCard({
         
         {/* 汉字配图 */}
         <img 
-          src={`/hanzi-imgs/${char}.png`} 
+          src={`/hanzi-imgs/${char}.webp`}
           alt={char}
           className="w-full h-20 object-cover rounded-t-xl"
           onError={(e) => {
@@ -156,7 +156,7 @@ const HanziVideoCard = memo(function HanziVideoCard({
         <button
           type="button"
           onClick={handlePlayVideo}
-          className="absolute bottom-2 right-2 w-7 h-7 rounded-full bg-candy-purple-deep/90 flex items-center justify-center hover:bg-candy-purple-deep transition-colors"
+          className="absolute bottom-2 right-2 w-11 h-11 rounded-full bg-candy-purple-deep/90 flex items-center justify-center hover:bg-candy-purple-deep transition-colors"
           aria-label={t('hanziVideoCard.playAria', { char })}
         >
           <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -178,7 +178,7 @@ const HanziVideoCard = memo(function HanziVideoCard({
             {/* 关闭按钮 */}
             <button
               onClick={handleCloseVideo}
-              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center hover:bg-black/70 transition-colors"
+              className="absolute top-3 right-3 z-10 w-11 h-11 rounded-full bg-black/50 flex items-center justify-center hover:bg-black/70 transition-colors"
               aria-label={t('hanziVideoCard.close')}
             >
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

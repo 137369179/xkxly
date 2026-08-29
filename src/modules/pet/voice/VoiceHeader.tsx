@@ -48,7 +48,7 @@ export function VoiceHeader({
             onClick={onToggleMute}
             aria-label={isMuted ? '取消静音' : '静音'}
             title={isMuted ? '点击开启小茜语音朗读' : '点击静音小茜语音'}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-pink-200 bg-white/80 text-sm font-bold text-pink-600 shadow-xs transition-all hover:bg-pink-50 active:scale-90"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-pink-200 bg-white/80 text-sm font-bold text-pink-600 shadow-xs transition-all hover:bg-pink-50 active:scale-90"
           >
             {isMuted ? '🔇' : '🔊'}
           </button>
@@ -60,7 +60,7 @@ export function VoiceHeader({
             onClick={onClear}
             aria-label="清空对话"
             title="清空当前对话记录"
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-pink-200 bg-white/80 text-xs font-bold text-pink-600 shadow-xs transition-all hover:bg-pink-50 active:scale-90"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-pink-200 bg-white/80 text-xs font-bold text-pink-600 shadow-xs transition-all hover:bg-pink-50 active:scale-90"
           >
             🗑️
           </button>

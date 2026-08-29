@@ -104,13 +104,13 @@ export function RewardStation({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-between">
-          <h2 id={titleId} className="text-xl font-extrabold text-[#8b6ef0]">
+          <h2 id={titleId} className="text-xl font-extrabold text-[#8f5bff]">
             🏠 星星小屋
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f1ecfa] text-lg font-extrabold text-[#8b6ef0] active:translate-y-[1px] focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-[#8b6ef0]/50"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-[#f1ecfa] text-lg font-extrabold text-[#8f5bff] active:translate-y-[1px] focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-[#8f5bff]/50"
             aria-label="关闭星星小屋"
             data-testid="reward-station-close"
           >
@@ -129,8 +129,8 @@ export function RewardStation({
                 role="tab"
                 aria-selected={selected}
                 onClick={() => setTab(item.key)}
-                className={`flex-1 rounded-full px-3 py-2 text-sm font-extrabold transition-transform active:translate-y-[1px] focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-[#8b6ef0]/50${
-                  selected ? ' bg-[#8b6ef0] text-white shadow-[0_3px_0_#6a4fd0]' : ' bg-[#f1ecfa] text-[#8b6ef0]'
+                className={`flex-1 rounded-full px-3 py-2 text-sm font-extrabold transition-transform active:translate-y-[1px] focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-[#8f5bff]/50${
+                  selected ? ' bg-[#8f5bff] text-white shadow-[0_3px_0_#6a4fd0]' : ' bg-[#f1ecfa] text-[#8f5bff]'
                 }`}
                 data-testid={`reward-station-tab-${item.key}`}
               >

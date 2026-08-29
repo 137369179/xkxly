@@ -91,7 +91,7 @@ export function VoiceScoreModal({ isOpen, poemTitle, onClose }: VoiceScoreModalP
               onClose();
             }}
             aria-label={t('voiceScoreModal.closeAria')}
-            className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-black/5 text-lg font-bold text-ink/60 hover:bg-black/10"
+            className="absolute right-4 top-4 grid h-11 w-11 place-items-center rounded-full bg-black/5 text-lg font-bold text-ink/60 hover:bg-black/10"
           >
             ✕
           </button>

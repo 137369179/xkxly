@@ -128,7 +128,7 @@ export function ProfileSwitcher({ open, onClose }: { open: boolean; onClose: () 
             type="button"
             onClick={() => { sfxTap(); onClose(); }}
             aria-label={t('common.close')}
-            className="rounded-full px-2 py-1 text-lg font-bold text-gray-400 active:translate-y-[1px]"
+            className="min-touch-target rounded-full px-2 py-1 text-lg font-bold text-gray-400 active:translate-y-[1px]"
           >
             ✕
           </button>
@@ -194,7 +194,7 @@ export function ProfileSwitcher({ open, onClose }: { open: boolean; onClose: () 
                         <button
                           type="button"
                           onClick={() => doDelete(m.id)}
-                          className="rounded-full bg-red-500 px-2 py-1 text-xs font-bold text-white active:translate-y-[1px]"
+                          className="rounded-full bg-red-500 px-2 py-1 text-xs font-bold text-candy-pink-on active:translate-y-[1px]"
                         >
                           {t('common.delete')}
                         </button>
@@ -270,7 +270,7 @@ export function ProfileSwitcher({ open, onClose }: { open: boolean; onClose: () 
                     type="button"
                     onClick={() => { sfxTap(); setColor(c.key); }}
                     aria-label={c.key}
-                    className="h-8 w-8 rounded-full border-2 transition active:translate-y-[1px]"
+                    className="h-11 w-11 rounded-full border-2 transition active:translate-y-[1px]"
                     style={{
                       background: c.hex,
                       borderColor: color === c.key ? '#333' : 'transparent',
@@ -306,7 +306,7 @@ export function ProfileSwitcher({ open, onClose }: { open: boolean; onClose: () 
             <button
               type="button"
               onClick={mode === 'add' ? doCreate : doSave}
-              className="mt-1 rounded-2xl bg-candy-purple py-2.5 text-sm font-extrabold text-white shadow-candy-sm active:translate-y-[1px]"
+              className="mt-1 rounded-2xl bg-candy-purple py-2.5 text-sm font-extrabold text-candy-purple-on shadow-candy-sm active:translate-y-[1px]"
             >
               {mode === 'add' ? `✨ ${t('profile.create')}` : `💾 ${t('common.save')}`}
             </button>

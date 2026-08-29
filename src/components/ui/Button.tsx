@@ -7,18 +7,18 @@ import { sfxTap } from '@/lib/sfx';
 type Size = 'sm' | 'md' | 'lg' | 'xl';
 
 /**
- * 各尺寸最小高度保证（A1 · 大按钮防误触）：
- *   - sm ≥ 40px（实测 44px，留余量）
- *   - md ≥ 48px（实测 52px）
- *   - lg ≥ 56px（实测 64px）
- *   - xl 更大，给主要 CTA 用
- * 全部同时满足 WCAG ≥ 44×44px 触控目标推荐。
+ * 各尺寸最小高度保证（儿童触控标准 · 设计系统 v1）：
+ *   - sm ≥ 44px（次要/工具）
+ *   - md ≥ 56px（常规操作）
+ *   - lg ≥ 72px（卡片内行动钮）
+ *   - xl ≥ 88px（每屏唯一主 CTA，对标 Nielsen 儿童 2cm 触控标准）
+ * 全部同时满足 WCAG ≥ 44×44px；关键触控（lg/xl）≥ 75px 儿童标准。
  */
 const SIZE: Record<Size, string> = {
   sm: 'min-h-[44px] min-w-[44px] px-4 text-base rounded-2xl',
-  md: 'min-h-[52px] min-w-[52px] px-6 text-lg rounded-[1.25rem]',
-  lg: 'min-h-[64px] min-w-[64px] px-8 text-xl rounded-[1.5rem]',
-  xl: 'min-h-[76px] min-w-[76px] px-10 text-2xl rounded-[1.75rem]',
+  md: 'min-h-[56px] min-w-[56px] px-6 text-lg rounded-[1.25rem]',
+  lg: 'min-h-[72px] min-w-[72px] px-8 text-xl rounded-[1.5rem]',
+  xl: 'min-h-[88px] min-w-[88px] px-10 text-2xl rounded-[1.75rem]',
 };
 
 /** 二次确认的超时窗口（毫秒）：2 秒内再次点击才执行 */
@@ -148,6 +148,7 @@ export function IconButton({
   onClick,
   silent,
   label,
+  minTouchTarget,
   ...rest
 }: Omit<CandyButtonProps, 'size' | 'variant'> & { label: string }) {
   const ts = TONE_STYLE[tone] ?? TONE_STYLE.purple;
@@ -169,6 +170,8 @@ export function IconButton({
         'no-select grid h-12 w-12 place-items-center rounded-full text-xl font-black border-2 border-white/60',
         'transition-all duration-100 active:translate-y-[4px] active:shadow-none hover:scale-105',
         'focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-candy-purple/60',
+        // R167：显式声明时保证点击区域 ≥44×44（min-height 优先于 !h-* 覆盖）
+        minTouchTarget && 'min-touch-target',
         className,
       )}
     >

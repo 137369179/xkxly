@@ -204,7 +204,7 @@ export function CatCompanion() {
           ))}
 
           {/* 小鱼干徽章数量 */}
-          <div className="absolute -top-1 -left-1 flex h-6 px-2 items-center justify-center rounded-full border border-pink-300 bg-pink-500 text-xs font-black text-white shadow-md">
+          <div className="absolute -top-1 -left-1 flex h-6 px-2 items-center justify-center rounded-full border border-pink-300 bg-pink-500 text-xs font-black text-candy-pink-on shadow-md">
             🐟 {fishCount}
           </div>
 
@@ -216,7 +216,7 @@ export function CatCompanion() {
               e.stopPropagation();
               setShowChatModal(true);
             }}
-            className="absolute -bottom-1 -right-1 flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border-2 border-white bg-gradient-to-tr from-purple-600 via-pink-500 to-rose-400 text-sm font-bold text-white shadow-lg transition-all hover:scale-115 active:scale-90"
+            className="absolute -bottom-1 -right-1 flex h-11 w-11 items-center justify-center rounded-full border-2 border-white bg-gradient-to-tr from-purple-600 via-pink-500 to-rose-400 text-sm font-bold text-candy-pink-on shadow-lg transition-all hover:scale-115 active:scale-90"
             title={t('catCompanion.chatTitle')}
           >
             <span className="relative flex items-center justify-center">

@@ -158,7 +158,7 @@ export function GradedReaderModal({ book, onClose }: Props) {
         </div>
 
         {/* 顶部标题栏与进度 */}
-        <div className="p-4 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white flex items-center justify-between shadow-md">
+        <div className="p-4 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-candy-orange-on flex items-center justify-between shadow-md">
           <div className="flex items-center gap-3">
             <span className="text-3xl select-none">{book.coverEmoji}</span>
             <div>
@@ -181,7 +181,7 @@ export function GradedReaderModal({ book, onClose }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 text-white font-black text-xl flex items-center justify-center transition-colors"
+            className="w-11 h-11 rounded-full bg-white/20 hover:bg-white/30 text-white font-black text-xl flex items-center justify-center transition-colors"
             aria-label="关闭分级阅读器"
           >
             ✕
@@ -216,7 +216,7 @@ export function GradedReaderModal({ book, onClose }: Props) {
                       onClick={handleReplayAudio}
                       className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm transition-transform ${
                         isPlayingAudio
-                          ? 'bg-amber-500 text-white animate-pulse'
+                          ? 'bg-amber-500 text-candy-orange-on animate-pulse'
                           : 'bg-white/80 text-amber-900 hover:bg-white'
                       }`}
                     >
@@ -331,7 +331,7 @@ export function GradedReaderModal({ book, onClose }: Props) {
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-full max-w-sm mx-auto py-3.5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white rounded-2xl font-black text-base shadow-xl shadow-orange-300/50 hover:scale-102 active:scale-98 transition-transform"
+                  className="w-full max-w-sm mx-auto py-3.5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-candy-orange-on rounded-2xl font-black text-base shadow-xl shadow-orange-300/50 hover:scale-102 active:scale-98 transition-transform"
                 >
                   完成阅读，返回分级书架
                 </button>
@@ -372,7 +372,7 @@ export function GradedReaderModal({ book, onClose }: Props) {
               <button
                 type="button"
                 onClick={handleNextPage}
-                className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-2xl font-black text-xs shadow-md hover:scale-105 active:scale-95 transition-transform flex items-center gap-1"
+                className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-candy-orange-on rounded-2xl font-black text-xs shadow-md hover:scale-105 active:scale-95 transition-transform flex items-center gap-1"
               >
                 <span>{currentPageIdx < totalPages - 1 ? '下一页' : '去测验'}</span>
                 <span>➔</span>

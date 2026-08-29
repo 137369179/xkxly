@@ -111,7 +111,7 @@ export function OnboardingModal({ onComplete }: { onComplete: (name: string, ava
                   type="button"
                   onClick={() => { sfxTap(); setColor(c.key); }}
                   aria-label={c.key}
-                  className="h-9 w-9 rounded-full border-2 transition active:translate-y-[1px]"
+                  className="h-11 w-11 rounded-full border-2 transition active:translate-y-[1px]"
                   style={{
                     background: c.hex,
                     borderColor: color === c.key ? '#333' : 'transparent',
@@ -169,7 +169,7 @@ export function OnboardingModal({ onComplete }: { onComplete: (name: string, ava
             onClick={start}
             disabled={!privacyAgreed}
             whileTap={{ scale: 0.96 }}
-            className="mt-1 rounded-2xl bg-candy-purple py-3 text-base font-extrabold text-white shadow-candy active:translate-y-[1px] disabled:opacity-40"
+            className="mt-1 rounded-2xl bg-candy-purple py-3 text-base font-extrabold text-candy-purple-on shadow-candy active:translate-y-[1px] disabled:opacity-40"
           >
             🚀 {t('onboarding.start')}
           </motion.button>

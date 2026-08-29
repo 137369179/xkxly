@@ -81,7 +81,7 @@ export function AiVariantModal({ skillId, isOpen, onClose }: AiVariantModalProps
             </div>
             <button
               onClick={onClose}
-              className="grid h-8 w-8 place-items-center rounded-full bg-cream-dark text-ink-soft hover:bg-cream font-bold"
+              className="grid h-11 w-11 place-items-center rounded-full bg-cream-dark text-ink-soft hover:bg-cream font-bold"
             >
               ✕
             </button>
@@ -113,8 +113,8 @@ export function AiVariantModal({ skillId, isOpen, onClose }: AiVariantModalProps
                   const isTarget = opt.trim() === data.answer.trim();
                   let btnBg = 'bg-white hover:bg-purple-50 text-ink border-2 border-purple-100';
                   if (isAnswered) {
-                    if (isTarget) btnBg = 'bg-green-500 text-white border-2 border-green-600 font-black';
-                    else if (isChosen) btnBg = 'bg-rose-500 text-white border-2 border-rose-600 font-black';
+                    if (isTarget) btnBg = 'bg-green-500 text-candy-green-on border-2 border-green-600 font-black';
+                    else if (isChosen) btnBg = 'bg-rose-500 text-candy-pink-on border-2 border-rose-600 font-black';
                   }
 
                   return (

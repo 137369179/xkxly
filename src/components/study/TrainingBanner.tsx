@@ -29,7 +29,7 @@ export function TrainingBanner({
           sfxTap();
           onClose();
         }}
-        className="shrink-0 rounded-full bg-white/80 px-2.5 py-1 text-xs font-bold text-ink-soft hover:bg-white"
+        className="min-touch-target shrink-0 rounded-full bg-white/80 px-2.5 py-1 text-xs font-bold text-ink-soft hover:bg-white"
       >
         ✕
       </button>

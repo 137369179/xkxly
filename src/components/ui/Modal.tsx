@@ -1,7 +1,61 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { Component, useEffect, useRef, type ErrorInfo, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { useSafeTimeout } from '@/lib/useTimer';
+import { reportRenderError } from '@/lib/monitor';
+
+/**
+ * 弹窗级错误边界（R167）—— 兜底 Modal 内渲染异常
+ * ------------------------------------------------------------------
+ * 弹窗内组件抛错时，整个弹窗卡死无法关闭，孩子只能看到空白。
+ * 现在兜住渲染期异常，显示友好提示 + 关闭按钮，家长可反馈堆栈。
+ */
+export class ModalErrorBoundary extends Component<
+  { children: ReactNode; onClose?: () => void },
+  { error: Error | null; stack?: string }
+> {
+  override state: { error: Error | null; stack?: string } = { error: null, stack: undefined };
+
+  static getDerivedStateFromError(error: Error): { error: Error | null; stack?: string } {
+    return { error };
+  }
+
+  override componentDidCatch(error: Error, info: ErrorInfo) {
+    this.setState({ stack: info.componentStack ?? undefined });
+    console.error('[宝贝学习乐园] 弹窗渲染出错：', error, info.componentStack);
+    reportRenderError(error, info.componentStack ?? undefined);
+  }
+
+  override render() {
+    const { error, stack } = this.state;
+    if (!error) return this.props.children;
+
+    return (
+      <div className="grid place-items-center px-4 py-8">
+        <div className="w-full max-w-sm rounded-2xl bg-white p-4 text-center shadow-md">
+          <div className="text-4xl">🙈</div>
+          <p className="mt-2 text-sm font-bold text-ink-soft">弹窗里出了点小问题</p>
+          <button
+            type="button"
+            onClick={() => this.props.onClose?.()}
+            className="mt-3 min-h-[44px] rounded-xl bg-candy-green px-4 text-sm font-extrabold text-candy-green-on transition active:translate-y-[2px]"
+          >
+            关闭弹窗
+          </button>
+          <details className="mt-3 text-left">
+            <summary className="cursor-pointer text-xs font-bold text-ink-soft/70">
+              错误详情
+            </summary>
+            <pre className="mt-2 max-h-32 overflow-auto rounded-lg bg-[#fbf6f7] p-2 text-xs leading-relaxed whitespace-pre-wrap text-ink-soft">
+              {error.message}
+              {stack ? `\n${stack}` : ''}
+            </pre>
+          </details>
+        </div>
+      </div>
+    );
+  }
+}
 
 export function Modal({
   open,
@@ -91,7 +145,11 @@ export function Modal({
               className,
             )}
           >
-            {children}
+            {/* R167 弹窗级兜底：内容渲染异常时显示友好提示 + 关闭按钮，
+                弹窗随 open=false 卸载时错误状态自动重置（重开即恢复） */}
+            <ModalErrorBoundary onClose={dismissable ? onClose : undefined}>
+              {children}
+            </ModalErrorBoundary>
           </motion.div>
         </motion.div>
       )}

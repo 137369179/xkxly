@@ -41,7 +41,7 @@ export function CategorySheet({
               onClose();
             }}
             aria-label={t('common.close')}
-            className="rounded-full px-3 py-1 text-xl font-bold text-gray-400 active:translate-y-[1px]"
+            className="min-touch-target rounded-full px-3 py-1 text-xl font-bold text-gray-400 active:translate-y-[1px]"
           >
             ✕
           </button>

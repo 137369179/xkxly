@@ -103,13 +103,14 @@ function RecommendCard({
       className="relative w-full overflow-hidden rounded-[1.5rem] p-5 text-left shadow-candy-sm active:translate-y-[2px]"
       style={{ background: toneStyle.soft }}
     >
-      {/* 脉冲光圈动画 */}
+      {/* 背景柔光：原为 ping/pulse 强动效，会把注意力从汉字上抢走，
+          认字入口保持安静，让孩子第一眼看到的就是字本身 */}
       <span
-        className="pointer-events-none absolute right-8 top-1/2 h-28 w-28 -translate-y-1/2 rounded-full animate-ping"
+        className="pointer-events-none absolute right-8 top-1/2 h-28 w-28 -translate-y-1/2 rounded-full"
         style={{ background: toneStyle.main + '33' }}
       />
       <span
-        className="pointer-events-none absolute right-12 top-1/2 h-20 w-20 -translate-y-1/2 rounded-full animate-pulse"
+        className="pointer-events-none absolute right-12 top-1/2 h-20 w-20 -translate-y-1/2 rounded-full"
         style={{ background: toneStyle.main + '22' }}
       />
       {/* 今日推荐标签 */}
@@ -121,7 +122,7 @@ function RecommendCard({
       </span>
       {/* 汉字 + 拼音 */}
       <div className="relative mt-2 flex items-center gap-4">
-        <span className="text-7xl font-black text-ink animate-bounce-soft" style={{ lineHeight: 1 }}>
+        <span className="text-7xl font-black text-ink" style={{ lineHeight: 1 }}>
           {hanzi.c}
         </span>
         <div>
@@ -179,7 +180,7 @@ function MiniQuiz({ questions, onClose }: { questions: Question[]; onClose: () =
           </span>
           <button aria-label={t('hanzi.close')}
             onClick={onClose}
-            className="rounded-full bg-white/80 px-3 py-1 text-xs font-bold text-ink-soft"
+            className="min-touch-target rounded-full bg-white/80 px-3 py-1 text-xs font-bold text-ink-soft"
           >
             ✕ {t('hanzi.close')}
           </button>
@@ -402,6 +403,11 @@ export default function HanziPage() {
               <p className="mt-1 text-sm font-bold text-ink-soft">{t('hanzi.allDoneTip')}</p>
             </div>
           )}
+
+          {/* 学习方法小贴士：先看字形再听读音，组词只用学过的字，写字多练几遍 */}
+          <p className="text-center text-xs font-bold text-ink-soft">
+            💡 小提示：先看清字形，再跟着读；组词例句只用学过的字，写字多练几遍记得更牢
+          </p>
 
           {/* 闯关解锁地图（对标洪恩：单字解锁路径） */}
           <Panel>
