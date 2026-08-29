@@ -3,12 +3,13 @@
  * 从 ParentPage.tsx 提取的 AI 报告 / 错题分析 / 统计组件
  */
 import { useMemo } from 'react';
-import { useStore, useGrowth } from '@/store/useStore';
+import { useStore, useGrowth, useProgress } from '@/store/useStore';
 import { Panel, PanelTitle } from '@/components/ui/Card';
 import { CandyButton } from '@/components/ui/Button';
 import { parentDeepReportTask, wrongAnalyzeTask, parentActionsTask } from '@/lib/ai/tasks';
 import { useAiTask as useAiTaskWA } from '@/lib/ai/useAi';
 import type { WrongAnalyze, DeepReport, ParentActionPlan } from '@/lib/ai/prompts';
+import { parentProcessNote } from '@/game/parentProcessNote';
 import { useTranslation } from '@/i18n/useTranslation';
 
 /* AI 学情周报 */
@@ -21,6 +22,15 @@ export function AiReport() {
     false,
   );
   const data = result?.data;
+  // R166 反依赖提示：基于真实进度数据的过程叙事，与报告是否 AI 生成无关。
+  // 细粒度订阅（mastery / wrongHistory / streak），避免整块 progress
+  const mastery = useMastery();
+  const wrongHistory = useWrongHistory();
+  const streak = useStreak();
+  const processNote = useMemo(
+    () => parentProcessNote({ mastery, wrongHistory, streak }),
+    [mastery, wrongHistory, streak],
+  );
 
   return (
     <Panel>
@@ -54,6 +64,12 @@ export function AiReport() {
       {result && data && (
         <div className="space-y-3">
           {result.fallback && <p className="text-xs font-bold text-ink-soft">小茜暂时连不上，下面是离线分析</p>}
+          {/* R166 反依赖提示：把家长注意力从奖励数字引向过程行为 */}
+          {processNote && (
+            <div className="rounded-2xl border border-candy-purple-soft bg-candy-purple-soft/40 p-3">
+              <p className="text-sm font-bold leading-relaxed text-candy-purple-deep">💡 {processNote}</p>
+            </div>
+          )}
           <div className="rounded-2xl bg-gradient-to-r from-candy-green-soft to-candy-blue-soft p-4">
             <p className="text-xs font-extrabold text-candy-green-deep">总评</p>
             <p className="mt-1 text-base font-bold text-ink">{data.summary}</p>
@@ -126,9 +142,9 @@ export function DeepSparkline() {
   return (
     <svg viewBox="0 0 100 42" className="mt-2 w-full" style={{ height: 64 }} aria-hidden>
       <polygon points={`0,40 ${line} 100,40`} fill="rgba(51,168,99,0.12)" />
-      <polyline points={line} fill="none" stroke="#33a863" strokeWidth={0.9} strokeLinejoin="round" />
+      <polyline points={line} fill="none" stroke="#3fc26b" strokeWidth={0.9} strokeLinejoin="round" />
       {pts.map((p, i) => (
-        <circle key={`pt-${i}`} cx={p[0]} cy={p[1]} r={0.8} fill="#33a863" />
+        <circle key={`pt-${i}`} cx={p[0]} cy={p[1]} r={0.8} fill="#3fc26b" />
       ))}
     </svg>
   );
