@@ -8,6 +8,7 @@ import {
 } from './tasks/explain';
 import { safetyRoleplayTask } from './tasks/culture';
 import { fallbackStoryBranch } from './tasks/storybook';
+import { localDailyQuestPlan } from './tasks/companion';
 import { localParentActions } from './tasks/report';
 import { rhymeCreateTask, localWrongVariant } from './tasks/generate';
 import {
@@ -150,6 +151,21 @@ describe('AI 本地规则引擎新场景兜底', () => {
     const resExp = getSmartFallback('science.experiment', {});
     expect(resExp?.ok).toBe(true);
     expect(resExp?.text).toContain('准备道具');
+  });
+});
+
+describe('R165 每日任务叙事化兜底', () => {
+  it('localDailyQuestPlan 每条任务都带故事语境，且 route 全部是有效路由', () => {
+    const plan = localDailyQuestPlan(3, 0);
+    expect(plan.quests.length).toBe(3);
+    const validRoutes = new Set<string>([
+      '/numbers', '/poems', '/logic', '/hanzi', '/words', '/gamecenter',
+    ]);
+    for (const q of plan.quests) {
+      expect(q.story.length).toBeGreaterThan(0);
+      expect(q.title.length).toBeLessThanOrEqual(8);
+      expect(validRoutes.has(q.route)).toBe(true);
+    }
   });
 });
 

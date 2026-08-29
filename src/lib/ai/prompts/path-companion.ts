@@ -267,15 +267,25 @@ export function dailyQuestMessages(streak: number, weakSkills: string, itemsToda
     {
       "id": "quest-math-5",
       "type": "math",
-      "title": "练5道数学题",
+      "title": "修好星星桥",
+      "story": "小茜的星星桥断啦，做对5道题就能把它修好",
       "targetCount": 5,
       "reward": 5,
-      "route": "/math",
+      "route": "/numbers",
       "emoji": "🧮"
     }
   ],
   "cheer": "一句加油话，不超过20字"
-}`),
+}
+
+规则：
+- quests 恰好 3 条，type 只能从 math/poem/logic/hanzi/word/game 里选
+- title 是故事任务名（不超过8字），不要写成「练5道数学题」这种任务清单口吻
+- story 讲清「谁遇到了困难、孩子要做什么、做完会怎样」（不超过24字），
+  把练习量藏进故事里，让孩子觉得是在帮朋友完成任务，而不是在被布置作业
+- 优先安排孩子的薄弱知识点，但也要用故事包装
+- route 与 type 必须按下表对应（写错会跳回首页）：math→/numbers，poem→/poems，
+  logic→/logic，hanzi→/hanzi，word→/words，game→/gamecenter`),
     user(`连续学习${streak}天，薄弱点：${weakSkills || '暂无'}，今日已学：${itemsToday}题`),
   ];
 }

@@ -134,6 +134,8 @@ export interface DailyQuestPlan {
     id: string;
     type: 'math' | 'poem' | 'logic' | 'hanzi' | 'word' | 'game';
     title: string;
+    /** R165 叙事任务化：故事语境句，把练习量藏进「帮小茜完成任务」的剧情里 */
+    story: string;
     targetCount: number;
     reward: number;
     route: string;
@@ -145,9 +147,9 @@ export interface DailyQuestPlan {
 /** 本地兜底每日任务 */
 export function localDailyQuestPlan(streak: number, _itemsToday: number): DailyQuestPlan {
   const templates = [
-    { id: 'quest-math', type: 'math' as const, title: '练5道数学题', targetCount: 5, reward: 5, route: '/math', emoji: '🧮' },
-    { id: 'quest-poem', type: 'poem' as const, title: '读1首古诗', targetCount: 1, reward: 3, route: '/poems', emoji: '🌸' },
-    { id: 'quest-logic', type: 'logic' as const, title: '玩1关逻辑闯关', targetCount: 1, reward: 4, route: '/logic', emoji: '🧩' },
+    { id: 'quest-math', type: 'math' as const, title: '修好星星桥', story: '小茜的星星桥断啦，做对5道题就能修好它', targetCount: 5, reward: 5, route: '/numbers', emoji: '🧮' },
+    { id: 'quest-poem', type: 'poem' as const, title: '唤醒古诗花', story: '花园里的古诗花睡着了，读1首就能唤醒它', targetCount: 1, reward: 3, route: '/poems', emoji: '🌸' },
+    { id: 'quest-logic', type: 'logic' as const, title: '解开魔法锁', story: '宝箱上了魔法锁，过1关逻辑就能打开', targetCount: 1, reward: 4, route: '/logic', emoji: '🧩' },
   ];
   return {
     greeting: streak > 0 ? `小勇士好！你已经连续学习${streak}天啦！` : '小勇士好！今天开始新冒险吧！',

@@ -42,6 +42,10 @@ function QuestCard({ quest, tone, onClaim }: {
         <span className="text-3xl">{quest.emoji}</span>
         <div className="min-w-0 flex-1">
           <p className="text-base font-extrabold text-ink">{quest.title}</p>
+          {/* R165 叙事任务化：故事语境把「被布置作业」翻转成「去帮朋友的忙」 */}
+          {quest.story && (
+            <p className="mt-0.5 text-xs leading-relaxed font-bold text-ink-soft">{quest.story}</p>
+          )}
           <p className="text-xs font-bold text-ink-soft">
             {tr('quest.rewardStars', { count: quest.reward })}
           </p>
@@ -73,7 +77,7 @@ function QuestCard({ quest, tone, onClaim }: {
             className="h-full rounded-full"
             style={{
               background: quest.completed
-                ? 'linear-gradient(90deg, #5FD68B, #33A863)'
+                ? 'linear-gradient(90deg, #62CC8A, #3FC26B)'
                 : `linear-gradient(90deg, ${tone.main}, ${tone.deep})`,
             }}
           />
@@ -88,9 +92,9 @@ function QuestCard({ quest, tone, onClaim }: {
           onClick={() => { triggerHaptic(45); onClaim(quest.id); }}
           className="min-h-[48px] w-full rounded-full text-base font-extrabold transition active:translate-y-[2px]"
           style={{
-            background: '#FFC93C',
+            background: '#FFC53D',
             color: '#5A4408',
-            boxShadow: '0 4px 0 0 #e5ac2e',
+            boxShadow: '0 4px 0 0 #d9860a',
           }}
         >
           🎁 {tr('quest.claimReward')}

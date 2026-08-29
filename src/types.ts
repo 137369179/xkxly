@@ -412,6 +412,8 @@ export interface DailyQuest {
   id: string;
   type: 'math' | 'poem' | 'logic' | 'hanzi' | 'word' | 'game';
   title: string;
+  /** R165 叙事任务化：任务的故事语境（如「帮小茜修好星星桥」），缺失时卡片不渲染该行 */
+  story?: string;
   targetCount: number;
   currentCount: number;
   reward: number;
