@@ -21,7 +21,7 @@ mkdirSync(VID_DIR, { recursive: true });
 mkdirSync(VOICE_DIR, { recursive: true });
 
 // 加载已有状态
-let existingImg = new Set(readdirSync(IMG_DIR).filter(f => f.endsWith('.png')).map(f => f.replace('.png', '')));
+let existingImg = new Set(readdirSync(IMG_DIR).filter(f => /\.(png|webp)$/i.test(f)).map(f => f.replace(/\.(png|webp)$/i, '')));
 let existingVid = new Set(readdirSync(VID_DIR).filter(f => f.endsWith('.mp4')).map(f => f.replace('-教学.mp4', '')));
 
 // 加载缓存
@@ -426,7 +426,7 @@ async function phase1GenerateImages() {
 async function phase2GenerateVideos() {
   // 重新扫描
   existingVid = new Set(readdirSync(VID_DIR).filter(f => f.endsWith('.mp4')).map(f => f.replace('-教学.mp4', '')));
-  existingImg = new Set(readdirSync(IMG_DIR).filter(f => f.endsWith('.png')).map(f => f.replace('.png', '')));
+  existingImg = new Set(readdirSync(IMG_DIR).filter(f => /\.(png|webp)$/i.test(f)).map(f => f.replace(/\.(png|webp)$/i, '')));
   
   const missing = hanziList.filter(h => !existingVid.has(h.c) && existingImg.has(h.c));
   if (missing.length === 0) { console.log('✅ 所有视频已存在'); return { done: 0, failed: 0 }; }

@@ -135,7 +135,7 @@ async function main() {
   log('Hanzi Media Generator - Full Batch Mode');
   log('='.repeat(60));
   
-  const existingImgs = new Set(readdirSync(IMG_DIR).filter(f => f.endsWith('.png')).map(f => f.replace('.png', '')));
+  const existingImgs = new Set(readdirSync(IMG_DIR).filter(f => /\.(png|webp)$/i.test(f)).map(f => f.replace(/\.(png|webp)$/i, '')));
   const existingVids = new Set(readdirSync(VID_DIR).filter(f => f.endsWith('.mp4')).map(f => f.replace('-教学.mp4', '')));
   const hanziData = loadHanziData();
   const allChars = Object.keys(hanziData);
@@ -147,7 +147,7 @@ async function main() {
   
   for (let run = 0; run < MAX_RUNS; run++) {
     // Refresh lists
-    const freshImgs = new Set(readdirSync(IMG_DIR).filter(f => f.endsWith('.png')).map(f => f.replace('.png', '')));
+    const freshImgs = new Set(readdirSync(IMG_DIR).filter(f => /\.(png|webp)$/i.test(f)).map(f => f.replace(/\.(png|webp)$/i, '')));
     const freshVids = new Set(readdirSync(VID_DIR).filter(f => f.endsWith('.mp4')).map(f => f.replace('-教学.mp4', '')));
     const missingImgs = allChars.filter(c => !freshImgs.has(c)).sort();
     const missingVids = allChars.filter(c => freshImgs.has(c) && !freshVids.has(c)).sort();
@@ -180,7 +180,7 @@ async function main() {
     }
     
     // Phase 2: Generate videos
-    const freshImgs2 = new Set(readdirSync(IMG_DIR).filter(f => f.endsWith('.png')).map(f => f.replace('.png', '')));
+    const freshImgs2 = new Set(readdirSync(IMG_DIR).filter(f => /\.(png|webp)$/i.test(f)).map(f => f.replace(/\.(png|webp)$/i, '')));
     const vidsToGen = allChars.filter(c => freshImgs2.has(c) && !freshVids.has(c)).sort();
     if (vidsToGen.length > 0) {
       const batch = vidsToGen.slice(0, BATCH);
@@ -209,13 +209,13 @@ async function main() {
     writeFileSync(STATE_FILE, JSON.stringify(state));
     
     // Check progress
-    const finalImgs = new Set(readdirSync(IMG_DIR).filter(f => f.endsWith('.png')).map(f => f.replace('.png', '')));
+    const finalImgs = new Set(readdirSync(IMG_DIR).filter(f => /\.(png|webp)$/i.test(f)).map(f => f.replace(/\.(png|webp)$/i, '')));
     const finalVids = new Set(readdirSync(VID_DIR).filter(f => f.endsWith('.mp4')).map(f => f.replace('-教学.mp4', '')));
     log(`  Progress: imgs=${finalImgs.size}/${allChars.length}, vids=${finalVids.size}/${allChars.length}`);
   }
   
   // Final summary
-  const finalImgs = new Set(readdirSync(IMG_DIR).filter(f => f.endsWith('.png')).map(f => f.replace('.png', '')));
+  const finalImgs = new Set(readdirSync(IMG_DIR).filter(f => /\.(png|webp)$/i.test(f)).map(f => f.replace(/\.(png|webp)$/i, '')));
   const finalVids = new Set(readdirSync(VID_DIR).filter(f => f.endsWith('.mp4')).map(f => f.replace('-教学.mp4', '')));
   const stillMissing = allChars.filter(c => !finalVids.has(c));
   

@@ -209,7 +209,7 @@ async function main() {
   }
   
   // Re-scan
-  const freshImgs = new Set(readdirSync(IMG_DIR).filter(f => f.endsWith('.png')).map(f => f.replace('.png', '')));
+  const freshImgs = new Set(readdirSync(IMG_DIR).filter(f => /\.(png|webp)$/i.test(f)).map(f => f.replace(/\.(png|webp)$/i, '')));
   const freshVids = new Set(readdirSync(VID_DIR).filter(f => f.endsWith('.mp4')).map(f => f.replace('-教学.mp4', '')));
   
   // Phase 2: Videos
@@ -246,7 +246,7 @@ async function main() {
   }
   
   // Final summary
-  const finalImgs = new Set(readdirSync(IMG_DIR).filter(f => f.endsWith('.png')).map(f => f.replace('.png', '')));
+  const finalImgs = new Set(readdirSync(IMG_DIR).filter(f => /\.(png|webp)$/i.test(f)).map(f => f.replace(/\.(png|webp)$/i, '')));
   const finalVids = new Set(readdirSync(VID_DIR).filter(f => f.endsWith('.mp4')).map(f => f.replace('-教学.mp4', '')));
   const stillMissing = allChars.filter(c => !finalVids.has(c));
   

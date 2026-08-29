@@ -178,11 +178,15 @@ async function smokeRoute(cdp, route) {
   let last = { root: 0, title: '' };
   while (Date.now() < deadline) {
     await sleep(700);
-    const info = await cdp.eval(`(() => { try { return JSON.stringify({ root: (document.getElementById('root') && document.getElementById('root').innerHTML.length) || 0, title: document.title, errs: (window.__smoke && window.__smoke.errors) || [], bodyText: (document.getElementById('root') ? document.getElementById('root').innerText.slice(0,120) : '') }); } catch (e) { return JSON.stringify({ root: 0, title: document.title, errs: [], bodyText: '' }); } })()`);
+    // placeholder：root 内是否仍是未被 React 替换的静态 LCP 占位（hero_jelly）。
+    // 仅凭 root 长度判定会「虚假通过」——静态占位本身就有 453 字节，
+    // 即使 React 完全没水合也会满足 root > 300。
+    const info = await cdp.eval(`(() => { try { return JSON.stringify({ root: (document.getElementById('root') && document.getElementById('root').innerHTML.length) || 0, placeholder: (document.getElementById('root') ? document.getElementById('root').innerHTML.indexOf('hero_jelly') !== -1 : true), title: document.title, errs: (window.__smoke && window.__smoke.errors) || [], bodyText: (document.getElementById('root') ? document.getElementById('root').innerText.slice(0,120) : '') }); } catch (e) { return JSON.stringify({ root: 0, placeholder: true, title: document.title, errs: [], bodyText: '' }); } })()`);
     let parsed;
     try { parsed = JSON.parse(info || '{}'); } catch { continue; }
     last = parsed;
-    if (parsed.root > 300) break; // 已挂载
+    // 「已挂载」= root 有内容 且 静态占位已被 React 替换（否则视为未水合，继续等到超时）
+    if (parsed.root > 300 && !parsed.placeholder) break;
   }
   return last;
 }
@@ -266,10 +270,12 @@ async function main() {
     const ix = await interactionSmoke(cdp, route);
     totalErr += mountCrashes.length + ix.crashes.length;
 
-    results.push({ route, root: r.root, mountCrashes, ix });
-    const bad = mountCrashes.length || ix.crashes.length || crashedUI;
+    // 未水合（静态占位仍在）同样属于失败：此前只看崩溃，导致 React 完全没渲染也报 ok
+    const notHydrated = !!r.placeholder;
+    results.push({ route, root: r.root, mountCrashes, ix, notHydrated });
+    const bad = mountCrashes.length || ix.crashes.length || crashedUI || notHydrated;
     const tag = bad ? 'FAIL' : 'ok  ';
-    const line = `  [${tag}] /${route}/  root=${r.root}  mountCrash=${mountCrashes.length}  click=${ix.clicked ? 'Y' : 'n'} nav=${ix.navigated ? 'Y' : 'n'} ixCrash=${ix.crashes.length}${crashedUI ? ' CRASH-UI' : ''}`;
+    const line = `  [${tag}] /${route}/  root=${r.root}  mountCrash=${mountCrashes.length}  click=${ix.clicked ? 'Y' : 'n'} nav=${ix.navigated ? 'Y' : 'n'} ixCrash=${ix.crashes.length}${notHydrated ? ' NOT-HYDRATED' : ''}${crashedUI ? ' CRASH-UI' : ''}`;
     lines.push(line); console.log(line);
     mountCrashes.slice(0, 2).forEach((e) => { const m = `        mount - ${String(e).slice(0, 200)}`; lines.push(m); console.log(m); });
     ix.crashes.slice(0, 2).forEach((e) => { const m = `        click - ${String(e).slice(0, 200)}`; lines.push(m); console.log(m); });
@@ -279,7 +285,7 @@ async function main() {
 
   if (cdp) { try { await cdp.detach(); } catch {} }
 
-  const failRoutes = results.filter((r) => r.mountCrashes.length || r.ix.crashes.length || false);
+  const failRoutes = results.filter((r) => r.mountCrashes.length || r.ix.crashes.length || r.notHydrated);
   const summary = `\n冒烟完成：${results.length} 路由，异常路由 ${failRoutes.length}，累计应用层崩溃 ${totalErr}`;
   lines.push(summary); console.log(summary);
   if (failRoutes.length) {

@@ -24,7 +24,9 @@ for m in re.finditer(pattern, content):
 
 # Load existing assets
 videos = set(f.replace('-教学.mp4', '') for f in os.listdir(VIDEO_DIR) if f.endswith('.mp4'))
-imgs = set(f.replace('.png', '') for f in os.listdir(IMG_DIR) if f.endswith('.png'))
+# 2026-08-29：汉字配图已全量转 WebP（975MB → 68MB），需同时认 webp，
+# 否则会误报「全部图片缺失」。
+imgs = set(re.sub(r'\.(png|webp)$', '', f) for f in os.listdir(IMG_DIR) if f.endswith('.png') or f.endswith('.webp'))
 voices = set(f.replace('.mp3', '') for f in os.listdir(VOICE_DIR) if f.endswith('.mp3'))
 
 # Check coverage

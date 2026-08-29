@@ -4,7 +4,7 @@
  * Phase 1: Generate images for all missing chars
  * Phase 2: Generate videos using Agnes AIGC image-to-video
  */
-import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync, unlinkSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
@@ -20,8 +20,37 @@ mkdirSync(OUTPUT_IMG, { recursive: true });
 mkdirSync(OUTPUT_VID, { recursive: true });
 mkdirSync(VOICE_DIR, { recursive: true });
 
+/**
+ * 图片存在性判定（兼容 WebP 瘦身后的资产）
+ * ------------------------------------------------------------------
+ * 2026-08-29：1278 张汉字图已由 PNG 全量转为 WebP（975MB → 68MB）。
+ * 若此处仍只认 .png，脚本会误判「全部图片缺失」而重复调用 AI 生成，
+ * 白白消耗大量积分。故 png / webp 任一存在即视为已生成。
+ */
+const IMG_EXT_RE = /\.(png|webp)$/i;
+const stripImgExt = (f) => f.replace(/\.(png|webp)$/i, '');
+
 // ─── Load existing state ────────────────────────────────────────────
-const existingImg = new Set(readdirSync(OUTPUT_IMG).filter(f => f.endsWith('.png')).map(f => f.replace('.png', '')));
+const existingImg = new Set(readdirSync(OUTPUT_IMG).filter(f => IMG_EXT_RE.test(f)).map(stripImgExt));
+
+/**
+ * 写入汉字配图：落 PNG 后即转 WebP 并删除 PNG，保持资产格式统一（WebP）。
+ * 若 cwebp 不可用则降级保留 PNG（不阻断生成流程）。
+ */
+const CWEBP = '/Applications/ServBay/bin/cwebp';
+function writeHanziImage(char, buf) {
+  const pngPath = resolve(OUTPUT_IMG, `${char}.png`);
+  const webpPath = resolve(OUTPUT_IMG, `${char}.webp`);
+  writeFileSync(pngPath, buf);
+  try {
+    execSync(`"${CWEBP}" -q 82 "${pngPath}" -o "${webpPath}"`, { stdio: 'ignore' });
+    if (existsSync(webpPath) && statSync(webpPath).size > 0) {
+      unlinkSync(pngPath);
+    }
+  } catch {
+    // cwebp 不可用 → 降级保留 PNG（脚本仍能工作，仅体积未优化）
+  }
+}
 const existingVid = new Set(readdirSync(OUTPUT_VID).filter(f => f.endsWith('.mp4')).map(f => f.replace('-教学.mp4', '')));
 
 let ttsCache = {};
@@ -266,7 +295,7 @@ async function phase1GenerateImages() {
         if (!dataUrl) { failed++; return; }
         const imgRes = await fetch(dataUrl);
         const buf = await imgRes.arrayBuffer();
-        writeFileSync(resolve(OUTPUT_IMG, `${char}.png`), Buffer.from(buf));
+        writeHanziImage(char, Buffer.from(buf));
         existingImg.add(char);
         done++;
       } catch (e) { failed++; }
@@ -281,7 +310,7 @@ async function phase1GenerateImages() {
 // ─── PHASE 2: Generate missing videos ────────────────────────────────
 async function phase2GenerateVideos() {
   // Re-scan after phase 1
-  const newExistingImg = new Set(readdirSync(OUTPUT_IMG).filter(f => f.endsWith('.png')).map(f => f.replace('.png', '')));
+  const newExistingImg = new Set(readdirSync(OUTPUT_IMG).filter(f => IMG_EXT_RE.test(f)).map(stripImgExt));
   const newExistingVid = new Set(readdirSync(OUTPUT_VID).filter(f => f.endsWith('.mp4')).map(f => f.replace('-教学.mp4', '')));
 
   const missing = allChars.filter(h => !newExistingVid.has(h.c) && newExistingImg.has(h.c));
@@ -295,7 +324,10 @@ async function phase2GenerateVideos() {
     const batch = missing.slice(i, i + BATCH);
     await Promise.all(batch.map(async (h) => {
       const char = h.c;
-      const imgPath = resolve(OUTPUT_IMG, `${char}.png`);
+      // 配图可能为 webp（WebP 瘦身后）或 png（降级保留），任一存在即可用于生成视频
+      const imgPath = existsSync(resolve(OUTPUT_IMG, `${char}.webp`))
+        ? resolve(OUTPUT_IMG, `${char}.webp`)
+        : resolve(OUTPUT_IMG, `${char}.png`);
       if (!existsSync(imgPath)) { failed++; return; }
       process.stdout.write(`[${i + 1}/${missing.length}] ${char} ... `);
       const result = await generateVideo(h, imgPath);

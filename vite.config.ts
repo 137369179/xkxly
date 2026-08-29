@@ -7,6 +7,10 @@ import { fileURLToPath, URL } from 'node:url';
 export default defineConfig(({ mode }) => ({
   base: './',
   plugins: [react(), tailwindcss()],
+  // 将 package.json 版本号注入为全局常量，供 monitor.ts BUILD_VERSION 使用
+  define: {
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? '0.0.0'),
+  },
   esbuild: {
     // 生产构建移除 console.log/debug 和 debugger
     drop: mode === 'production' ? ['console', 'debugger'] : [],
@@ -51,7 +55,13 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    target: 'es2022',
+    // 兼容性修复（2026-08-29）：原为 es2022，其「类静态初始化块」(static{}) 需
+    // Chrome 94+ / Safari 16.4+ 才支持，导致旧设备（家长常用的旧平板/旧安卓）
+    // 打开即白屏 —— 实测本机 Chrome 87 在 vendor-three chunk 第 9679 列直接抛
+    // SyntaxError，整个模块图加载失败、React 无法水合。
+    // 降为 es2020（Chrome 80+ / Safari 13.1+ / Firefox 72+）以覆盖儿童 App 的真实设备谱系，
+    // 代价仅为少量语法降级带来的体积微增，换取「老设备不白屏」。
+    target: 'es2020',
     // 关闭自动清空 dist：本机安全工具（如 macOS 安全删除机制）会拦截 vite 对
     // dist/icons 等子目录的批量删除（>50 文件），导致 build 在 prepare-out-dir 阶段失败。
     // 改为覆盖写入，旧 hash chunk 不被 index.html 引用，无害。

@@ -51,8 +51,10 @@ else:
 # Check images
 existing_images = set()
 for f in os.listdir(IMG_DIR):
-    if f.endswith('.png'):
-        existing_images.add(f.replace('.png', ''))
+    # 2026-08-29：汉字配图已全量转 WebP（975MB → 68MB），需同时认 webp，
+    # 否则会误报「全部图片缺失」。
+    if f.endswith('.png') or f.endswith('.webp'):
+        existing_images.add(re.sub(r'\.(png|webp)$', '', f))
 
 print(f"\nExisting images: {len(existing_images)}")
 missing_img = sorted(all_chars - existing_images)
