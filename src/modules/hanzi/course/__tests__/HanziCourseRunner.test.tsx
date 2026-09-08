@@ -64,7 +64,7 @@ const { HanziCourseRunner } = await import('../HanziCourseRunner');
 let host: HTMLDivElement;
 let root: Root;
 
-describe('HanziCourseRunner (洪恩五步精学闭环主控)', () => {
+describe('HanziCourseRunner (小莤五步精学闭环主控)', () => {
   beforeEach(() => {
     host = document.createElement('div');
     document.body.appendChild(host);
@@ -96,7 +96,7 @@ describe('HanziCourseRunner (洪恩五步精学闭环主控)', () => {
       root.render(createElement(HanziCourseRunner, { char, onClose }));
     });
 
-    expect(host.textContent).toContain('洪恩五步精学');
+    expect(host.textContent).toContain('小莤五步精学');
     expect(host.textContent).toContain('「山」字的奇妙诞生记');
     expect(host.textContent).toContain('象形溯源与互动探险');
   });

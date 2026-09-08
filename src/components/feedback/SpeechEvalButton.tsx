@@ -295,7 +295,7 @@ export function SpeechEvalButton({
         }, QUIET_TIMEOUT_MS);
       };
 
-      reco.onresult = (event: any) => {
+      reco.onresult = (event: SpeechRecognitionEvent) => {
         clearListenTimeout();
         if (sessionRef.current !== session) return;
         gotResult = true;
@@ -315,7 +315,7 @@ export function SpeechEvalButton({
         }
       };
 
-      reco.onerror = (event: any) => {
+      reco.onerror = (event: SpeechRecognitionErrorEvent) => {
         clearListenTimeout();
         if (sessionRef.current !== session || gotResult) return;
         ended = true;

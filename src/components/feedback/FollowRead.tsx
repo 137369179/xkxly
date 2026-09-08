@@ -21,6 +21,7 @@ import { sfxTap } from '@/lib/sfx';
 import type { PronunciationResult } from '@/lib/pronunciationEval';
 import { useTranslation } from '@/i18n/useTranslation';
 import { safeGetItem } from '@/lib/safeStorage';
+import { logger } from '@/lib/logger';
 
 /**
  * 性能日志工具
@@ -41,12 +42,7 @@ function isFrDebug(): boolean {
 function frLog(stage: string, extra?: Record<string, unknown>): void {
   if (!isFrDebug()) return;
   const tRel = ((typeof performance !== 'undefined' ? performance.now() : Date.now()) - FR_T0).toFixed(1);
-  // eslint-disable-next-line no-console
-  console.log(
-    `%c[FollowRead] ${stage}`,
-    'color:#ff6b96;font-weight:bold',
-    { t_ms: tRel, ...extra },
-  );
+  logger.debug(`[FollowRead] ${stage}`, { t_ms: tRel, ...extra });
 }
 
 export interface FollowReadProps {

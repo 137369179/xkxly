@@ -12,7 +12,7 @@
 }
 
 /* ============================================================
-   宝贝学习乐园 · 儿童风格设计系统 v1（对标帮帮识字/洪恩识字/宝宝巴士）
+   宝贝学习乐园 · 儿童风格设计系统 v1（对标帮帮识字/小莤识字/宝宝巴士）
    2026-08-29 全量换肤：candy-* 与 Tailwind 默认色板统一至六色新家族
    主色 #FF5C8A · 浅粉 #FFE1EB · 柔底 #FFF0F6 · 深 #C9285C
    正文墨 #4A2B1F · 次级 #8A6F5C · 页面底 #FFF8EF
@@ -33,7 +33,7 @@
 }
 
 @theme {
-  /* —— 儿童风格设计系统 v1 主色板（对标帮帮识字/洪恩识字/宝宝巴士）——
+  /* —— 儿童风格设计系统 v1 主色板（对标帮帮识字/小莤识字/宝宝巴士）——
      high-sat 卡通 main 色不承载白字（实测 1.6-2.9:1），main 用深 on 字、deep 承载白字，双通道均 ≥4.5:1 */
   --color-candy-pink: #ff5c8a;
   --color-candy-pink-soft: #ffe1eb;
@@ -49,23 +49,27 @@
   --color-candy-purple-on: #160830;
   --color-candy-orange-on: #4a2b1f;
 
-  --color-candy-blue: #dcebff;
+  /* ⚠️ 令牌修正（2026-08-30）：此前 blue/yellow/green/purple/orange 五族的 main
+     被误写成各自 soft 的浅色值（#dcebff/#fff6d9/#dff5e7/#efe4ff/#fff0db），
+     导致所有 bg-candy-* 界面苍白无色、视觉全毁（ tones.ts 是对的，仅此文件错）。
+     现对齐设计文档与 TONE_STYLE 的饱和 main 值，on 深字在其上实测 4.60~8.03:1 全达标。 */
+  --color-candy-blue: #3d9bff;
   --color-candy-blue-soft: #eef6ff;
   --color-candy-blue-deep: #0b5ec9;
 
-  --color-candy-yellow: #fff6d9;
+  --color-candy-yellow: #ffc53d;
   --color-candy-yellow-soft: #fffbeb;
   --color-candy-yellow-deep: #8a5b00;
 
-  --color-candy-green: #dff5e7;
+  --color-candy-green: #3fc26b;
   --color-candy-green-soft: #f0faf3;
   --color-candy-green-deep: #1b7a3d;
 
-  --color-candy-purple: #efe4ff;
+  --color-candy-purple: #8f5bff;
   --color-candy-purple-soft: #f8f4ff;
   --color-candy-purple-deep: #5f2ecc;
 
-  --color-candy-orange: #fff0db;
+  --color-candy-orange: #ff9f2e;
   --color-candy-orange-soft: #fff8ec;
   --color-candy-orange-deep: #b45f09;
 
@@ -141,7 +145,7 @@
   --animate-jelly-pop: jellyPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* ============================================================
-     六色主色板（对标帮帮识字/洪恩识字/宝宝巴士的高饱和暖多色）
+     六色主色板（对标帮帮识字/小莤识字/宝宝巴士的高饱和暖多色）
      覆盖 Tailwind 默认色类，token 层统一，组件无需改动
      ============================================================ */
   --color-pink-50: #fff0f6;

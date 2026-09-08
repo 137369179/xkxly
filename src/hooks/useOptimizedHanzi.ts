@@ -3,7 +3,7 @@
  * ------------------------------------------------------------
  */
 
-import { useMemo, useEffect, useRef } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { useStore } from '@/store/useStore';
 
 /**
@@ -34,23 +34,12 @@ export function useOptimizedHanziQuery() {
  * 延迟 delay ms 后返回最新值，避免每次按键都触发重渲染
  */
 export function useDebounceSearch<T>(value: T, delay: number): T {
-  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const debouncedRef = useRef(value);
+  const [debounced, setDebounced] = useState(value);
 
   useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    timerRef.current = setTimeout(() => {
-      debouncedRef.current = value;
-    }, delay);
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
   }, [value, delay]);
 
-  return debouncedRef.current;
+  return debounced;
 }

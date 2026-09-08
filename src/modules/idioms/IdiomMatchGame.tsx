@@ -1,12 +1,12 @@
 /**
- * 🎴 叫叫阅读/洪恩级「成语消消乐与成语大对决」 (Idiom Match Game Pro)
+ * 🎴 叫叫阅读/小莤级「成语消消乐与成语大对决」 (Idiom Match Game Pro)
  * ------------------------------------------------------------------
  * 1. 4 组四字成语（16 块汉字乱序排列在 4x4 网格中）；
  * 2. 依次点选 4 个字组词消除，播放真人成语发音与典故微释义；
  * 3. 消除金光粒子动效、Combo 连击判定与「成语大宗师」荣誉勋章！
  */
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { speak } from '@/lib/speech';
 import { sfxTap, sfxCorrect, sfxWrong, sfxWin, triggerHaptic } from '@/lib/sfx';
@@ -119,6 +119,17 @@ export function IdiomMatchGame() {
   const [lastSolvedIdiom, setLastSolvedIdiom] = useState<MatchLevel['idioms'][0] | null>(null);
   const [hintWord, setHintWord] = useState<string | null>(null);
 
+  // 交互反馈定时器（提示自动消失 / 匹配失败重置）：统一登记，卸载时清理，
+  // 避免快速切页时定时器回调在组件卸载后触发。
+  const timersRef = useRef<number[]>([]);
+  const scheduleTimeout = useCallback((fn: () => void, ms: number) => {
+    timersRef.current.push(window.setTimeout(fn, ms));
+  }, []);
+  useEffect(() => () => {
+    timersRef.current.forEach((t) => clearTimeout(t));
+    timersRef.current = [];
+  }, []);
+
   const currentLevel = useMemo(() => {
     return MATCH_LEVELS[levelIdx % MATCH_LEVELS.length] ?? MATCH_LEVELS[0] ?? FALLBACK_LEVEL;
   }, [levelIdx]);
@@ -165,10 +176,10 @@ export function IdiomMatchGame() {
     const target = uncleared[0]!;
     setHintWord(target.word);
     void speak(`提示：找一找「${target.word}」！`, { lang: 'zh-CN' });
-    setTimeout(() => {
+    scheduleTimeout(() => {
       setHintWord(null);
     }, 2500);
-  }, [currentLevel, clearedIdioms]);
+  }, [currentLevel, clearedIdioms, scheduleTimeout]);
 
   // 点选字块
   const handlePickCard = (card: { char: string; gridId: string; idiomWord: string }) => {
@@ -214,7 +225,7 @@ export function IdiomMatchGame() {
         sfxWrong();
         triggerHaptic(20);
         void speak('这四个字不构成完整成语哦，再试一次吧！', { lang: 'zh-CN' });
-        setTimeout(() => {
+        scheduleTimeout(() => {
           setSelectedChars([]);
         }, 600);
       }

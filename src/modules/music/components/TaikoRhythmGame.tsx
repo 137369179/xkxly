@@ -141,7 +141,7 @@ function playTaikoSound(type: 'don' | 'ka') {
       osc.stop(now + 0.09);
     }
   } catch (e) {
-    console.warn('Taiko WebAudio error', e);
+    if (import.meta.env.DEV) console.warn('Taiko WebAudio error', e);
   }
 }
 

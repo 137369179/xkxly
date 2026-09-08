@@ -1,5 +1,5 @@
 /**
- * 🫧 洪恩/叽里呱啦级「自然拼读气泡乐园与 CVC 词族韵律小火车」 (Phonics Bubble Land Pro)
+ * 🫧 小莤/叽里呱啦级「自然拼读气泡乐园与 CVC 词族韵律小火车」 (Phonics Bubble Land Pro)
  * ----------------------------------------------------------------------------------
  * 1. 26 个字母自然拼读自然发音 (Letter Sound vs Letter Name)；
  * 2. 16 个经典 CVC 辅音-元音-辅音 (Consonant-Vowel-Consonant) 魔法拼读机；

@@ -18,6 +18,9 @@ import { updateAppBadge } from '@/lib/badgeSync';
 import { performLogArchival } from '@/lib/indexedDbStore';
 import { preloadCoreAudioAssets } from '@/lib/audioCache';
 import { preloadHighFrequencyRoutes } from '@/lib/routerPreload';
+// 该模块已被 TopBar 静态引入主包（OfflineBadge），此处直接静态导入，
+// 避免无效的假懒加载（Rollup: dynamic import will not move module into another chunk）
+import { OfflineToast } from '@/components/OfflineIndicator';
 
 // Page 组件懒加载，延迟 motion 库 124KB 的解析执行，减少 TBT
 const Page = lazy(() => import('@/Page'));
@@ -45,9 +48,6 @@ const SwUpdateToast = lazy(() =>
 );
 const BackupRestorePanel = lazy(() =>
   import('@/components/BackupRestorePanel').then((m) => ({ default: m.BackupRestorePanel })),
-);
-const OfflineToast = lazy(() =>
-  import('@/components/OfflineIndicator').then((m) => ({ default: m.OfflineToast })),
 );
 const ComboIndicator = lazy(() =>
   import('@/components/feedback/ComboIndicator').then((m) => ({ default: m.ComboIndicator })),
@@ -122,23 +122,27 @@ export function App() {
         const results = await Promise.all(
           list.filter((b) => b.data).map(async (b) => [b, await putStorybookContent(b)] as const),
         );
-        const failedIds = new Set(results.filter(([, ok]) => !ok).map(([b]) => b.id));
-        const stripped = list.map((b) => {
-          if (!b.data || failedIds.has(b.id)) return b;
-          return {
-            id: b.id,
-            title: b.title ?? b.data.bookTitle,
-            theme: b.theme,
-            style: b.style,
-            character: b.character,
-            createdAt: b.createdAt,
-            readCount: b.readCount,
-            favorite: b.favorite,
-          };
+        const okIds = new Set(results.filter(([, ok]) => ok).map(([b]) => b.id));
+        if (okIds.size === 0) return;
+        // 函数式更新：await 期间孩子可能产生新进度，必须基于最新 state 剥离，
+        // 不能用 await 前的旧快照整体覆盖（会丢 await 窗口内的新数据）。
+        useStore.setState((s) => {
+          const latest = s.progress.storybooks ?? [];
+          const stripped = latest.map((b) => {
+            if (!b.data || !okIds.has(b.id)) return b;
+            return {
+              id: b.id,
+              title: b.title ?? b.data.bookTitle,
+              theme: b.theme,
+              style: b.style,
+              character: b.character,
+              createdAt: b.createdAt,
+              readCount: b.readCount,
+              favorite: b.favorite,
+            };
+          });
+          return { progress: { ...s.progress, storybooks: stripped } };
         });
-        if (stripped.length !== list.length || stripped.some((b, i) => b !== list[i])) {
-          useStore.setState({ progress: { ...p, storybooks: stripped } });
-        }
       };
       void migrateStorybooks();
 
@@ -147,7 +151,20 @@ export function App() {
         const p = useStore.getState().progress;
         const { hotLogs, archivedCount } = await performLogArchival(p.dailyLog ?? {});
         if (archivedCount > 0) {
-          useStore.setState({ progress: { ...p, dailyLog: hotLogs } });
+          useStore.setState((s) => {
+            // 函数式更新：只删除本次确已归档的旧键（快照里有、hotLogs 里无），
+            // await 期间新写入的日志（快照里没有）原样保留。
+            const latest = s.progress.dailyLog ?? {};
+            const next = { ...latest };
+            let changed = false;
+            for (const date of Object.keys(p.dailyLog ?? {})) {
+              if (!(date in hotLogs) && date in next) {
+                delete next[date];
+                changed = true;
+              }
+            }
+            return changed ? { progress: { ...s.progress, dailyLog: next } } : s;
+          });
         }
       };
       void archiveLogs();
@@ -205,28 +222,47 @@ export function App() {
         <ErrorBoundary>
           <Suspense fallback={null}><CatCompanion /></Suspense>
         </ErrorBoundary>
-        <Suspense fallback={null}><BadgeUnlock /></Suspense>
-        <Suspense fallback={null}><ComboIndicator /></Suspense>
-        <Suspense fallback={null}><StudyGuard /></Suspense>
+        {/* 其他懒加载组件也添加独立 ErrorBoundary，防止单点故障影响全局 */}
+        <ErrorBoundary>
+          <Suspense fallback={null}><BadgeUnlock /></Suspense>
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <Suspense fallback={null}><ComboIndicator /></Suspense>
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <Suspense fallback={null}><StudyGuard /></Suspense>
+        </ErrorBoundary>
         {/* E2 · 护眼模式暖色滤镜叠加层（pointer-events:none，绝不拦截交互） */}
         <div className="eyecare-overlay" aria-hidden="true" />
-        <Suspense fallback={null}><OfflineToast /></Suspense>
-        <Suspense fallback={null}><PwaInstallBanner /></Suspense>
-        <Suspense fallback={null}><SwUpdateToast /></Suspense>
+        <ErrorBoundary>
+          <OfflineToast />
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <Suspense fallback={null}><PwaInstallBanner /></Suspense>
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <Suspense fallback={null}><SwUpdateToast /></Suspense>
+        </ErrorBoundary>
         {showRestorePanel && (
-          <Suspense fallback={null}>
-            <BackupRestorePanel onRestoreComplete={handleRestoreComplete} />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={null}>
+              <BackupRestorePanel onRestoreComplete={handleRestoreComplete} />
+            </Suspense>
+          </ErrorBoundary>
         )}
-        <Suspense fallback={null}>
-          <AiVoiceModal isOpen={voiceModalOpen} onClose={closeVoiceModal} />
-        </Suspense>
-        {!onboarded && (
+        <ErrorBoundary>
           <Suspense fallback={null}>
-            <OnboardingModal
-              onComplete={(n, a, c, age) => completeOnboarding(n, a, c, age)}
-            />
+            <AiVoiceModal isOpen={voiceModalOpen} onClose={closeVoiceModal} />
           </Suspense>
+        </ErrorBoundary>
+        {!onboarded && (
+          <ErrorBoundary>
+            <Suspense fallback={null}>
+              <OnboardingModal
+                onComplete={(n, a, c, age) => completeOnboarding(n, a, c, age)}
+              />
+            </Suspense>
+          </ErrorBoundary>
         )}
       </div>
   );

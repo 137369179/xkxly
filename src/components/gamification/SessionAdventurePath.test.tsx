@@ -18,7 +18,7 @@ function renderPath(props: SessionAdventurePathProps) {
 const MODULES: ModuleKey[] = ['hanzi', 'words', 'numbers'];
 
 describe('SessionAdventurePath · 玩法轮换可视化消费层', () => {
-  it('默认渲染 5 个玩法站点（对齐洪恩「每 5 字一单元」）', () => {
+  it('默认渲染 5 个玩法站点（对齐小莤「每 5 字一单元」）', () => {
     const { container } = renderPath({ module: 'hanzi', level: 2 });
     const stops = container.querySelectorAll('.sap-stop');
     expect(stops).toHaveLength(5);

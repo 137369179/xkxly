@@ -11,6 +11,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { SKILL } from '@/lib/srs';
 import { safeGetItem } from '@/lib/safeStorage';
 import type { MasteryItem } from '@/types';
+import { logger } from '@/lib/logger';
 
 /** 每日复习上限（儿童版 srs 约定，超出自然顺延） */
 export const MAX_DAILY = 10;
@@ -46,8 +47,7 @@ export function isIdrDebug(): boolean {
 export function idrLog(stage: string, extra?: Record<string, unknown>): void {
   if (!isIdrDebug()) return;
   const t = ((typeof performance !== 'undefined' ? performance.now() : Date.now()) - T0).toFixed(1);
-  // eslint-disable-next-line no-console
-  console.log(`%c[IdiomReview] ${stage}`, 'color:#5f2ecc;font-weight:bold', { t_ms: t, ...extra });
+  logger.debug(`[IdiomReview] ${stage}`, { t_ms: t, ...extra });
 }
 
 /** from skillId → idiom id（如 'idiom:i3' → 'i3'） */

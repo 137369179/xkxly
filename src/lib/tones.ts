@@ -14,7 +14,7 @@ interface ToneStyle {
 }
 
 export const TONE_STYLE: Record<Tone, ToneStyle> = {
-  // 儿童风格设计系统 v1（对标帮帮识字/洪恩识字/宝宝巴士）：高饱和卡通 main 色
+  // 儿童风格设计系统 v1（对标帮帮识字/小莤识字/宝宝巴士）：高饱和卡通 main 色
   // 不承载白字（实测仅 1.6-2.9:1），main 用深 on 字、deep 承载白字，双通道均 ≥4.5:1。
   // 色值经 WCAG 相对亮度公式逐对验算（见 docs/2026-08-28-儿童风格设计系统规范.md）。
   pink: { main: '#FF5C8A', deep: '#C9285C', soft: '#FFE1EB', on: '#3D1424' },

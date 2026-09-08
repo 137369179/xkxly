@@ -1,19 +1,9 @@
 /**
  * 汉字真实笔顺数据层
  * ------------------------------------------------------------------
- * 数据源：hanzi-writer-data（Make Me a Hanzi 项目）。两路合并：
- *   ① `scripts/fetch-hanzi-strokes.mjs` 从 CDN 抓取精编字（300 核心 + 500 常用）；
- *   ② `scripts/gen-hanzi-strokes-expanded.mjs` 融合 luomor-web/hanzi-study 上游
- *      dataWriter.js/dataWriter1.js（同源 Make Me a Hanzi），扩充至 1277 字全覆盖，
- *      并补齐 radStrokes（部首笔画序号，字段 r）喂给「部首魔法」。
- *   产物：public/data/hanzi-strokes.json。
- *
- * 坐标系约定（与 hanzi-writer 一致）：
- *   - 原始数据为 1024×1024 空间，y 轴向上（书法坐标）
- *   - SVG 渲染时需外套 <g transform="scale(1,-1) translate(0,-900)"> 翻转
- *
- * 加载策略：运行时才 fetch，模块级 Promise 缓存，避免重复请求；
- *           SW 对 /data/*.json 已配置 stale-while-revalidate，二次访问离线可用。
+ * 数据源：hanzi-writer-data（Make Me a Hanzi 项目）。
+ * 优化：支持内存 + IndexedDB 本地二级缓存，首次拉取后永久离线秒开，
+ * 避免频繁下载/重复反序列化 ~3MB JSON。
  */
 
 export interface StrokeData {
@@ -27,20 +17,81 @@ export interface StrokeData {
 
 type StrokeTable = Record<string, StrokeData>;
 
+const IDB_KEY = "hanzi_strokes_table_v1";
 let tablePromise: Promise<StrokeTable> | null = null;
+let cachedTable: StrokeTable | null = null;
 
-/** 懒加载完整笔顺表（融合后约 2.9MB 原始 / ~1.2MB gzip，仅进入写字环节时才拉取一次） */
+/** 从 IndexedDB 读取笔顺缓存 */
+async function loadFromIdb(): Promise<StrokeTable | null> {
+  if (typeof indexedDB === "undefined") return null;
+  return new Promise((resolve) => {
+    try {
+      const req = indexedDB.open("baby-learning-park-strokes", 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains("strokes")) {
+          db.createObjectStore("strokes");
+        }
+      };
+      req.onsuccess = () => {
+        const db = req.result;
+        const tx = db.transaction("strokes", "readonly");
+        const store = tx.objectStore("strokes");
+        const getReq = store.get(IDB_KEY);
+        getReq.onsuccess = () => resolve(getReq.result || null);
+        getReq.onerror = () => resolve(null);
+      };
+      req.onerror = () => resolve(null);
+    } catch {
+      resolve(null);
+    }
+  });
+}
+
+/** 异步写入 IndexedDB 缓存（后台静默进行，不阻塞主流程） */
+async function saveToIdb(data: StrokeTable): Promise<void> {
+  if (typeof indexedDB === "undefined" || !data || Object.keys(data).length === 0) return;
+  try {
+    const req = indexedDB.open("baby-learning-park-strokes", 1);
+    req.onsuccess = () => {
+      const db = req.result;
+      const tx = db.transaction("strokes", "readwrite");
+      const store = tx.objectStore("strokes");
+      store.put(data, IDB_KEY);
+    };
+  } catch {
+    /* noop */
+  }
+}
+
+/** 懒加载完整笔顺表（支持 IDB 二级缓存 + 模块级 Promise 缓存） */
 export function loadStrokeTable(): Promise<StrokeTable> {
+  if (cachedTable) return Promise.resolve(cachedTable);
   if (!tablePromise) {
-    tablePromise = fetch(`${import.meta.env.BASE_URL}data/hanzi-strokes.json`)
-      .then((r) => (r.ok ? r.json() : {}))
-      .catch(() => ({}));
+    tablePromise = (async () => {
+      // 1. 尝试从本地 IndexedDB 恢复
+      const idbData = await loadFromIdb();
+      if (idbData && Object.keys(idbData).length > 0) {
+        cachedTable = idbData;
+        return idbData;
+      }
+      // 2. 远端拉取
+      try {
+        const r = await fetch(`${import.meta.env.BASE_URL}data/hanzi-strokes.json`);
+        if (r.ok) {
+          const json = await r.json();
+          cachedTable = json;
+          saveToIdb(json);
+          return json;
+        }
+      } catch {
+        /* fetch error */
+      }
+      return {};
+    })();
   }
   return tablePromise;
 }
-
-/** 同步取某个字的笔顺数据；未加载或缺失返回 null（调用方需先 await loadStrokeTable） */
-let cachedTable: StrokeTable | null = null;
 
 export function getStrokeData(char: string): StrokeData | null {
   return cachedTable?.[char] ?? null;
@@ -61,12 +112,12 @@ export async function warmupStrokes(): Promise<void> {
 export function densifyMedian(median: [number, number][], step = 16): [number, number][] {
   if (median.length < 2) return median;
   const first = median[0];
-  if (first === undefined) return median; // 防御：length>=2 时必存在
+  if (first === undefined) return median;
   const out: [number, number][] = [first];
   for (let i = 1; i < median.length; i++) {
     const prev = median[i - 1];
     const cur = median[i];
-    if (prev === undefined || cur === undefined) continue; // 防御：索引在界内
+    if (prev === undefined || cur === undefined) continue;
     const [x0, y0] = prev;
     const [x1, y1] = cur;
     const dist = Math.hypot(x1 - x0, y1 - y0);
@@ -84,7 +135,7 @@ export function medianLength(median: [number, number][]): number {
   for (let i = 1; i < median.length; i++) {
     const a = median[i];
     const b = median[i - 1];
-    if (a === undefined || b === undefined) continue; // 防御：索引在界内
+    if (a === undefined || b === undefined) continue;
     len += Math.hypot(a[0] - b[0], a[1] - b[1]);
   }
   return len;

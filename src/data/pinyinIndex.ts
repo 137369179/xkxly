@@ -1,7 +1,7 @@
 /**
  * 拼音索引文件 — 宝贝学习乐园
  *
- * 从 pinyin.ts 导出所有数据和工具函数，提供统一的导入入口
+ * 从 pinyin.ts 与 pinyinKingdomData.ts 导出所有数据和工具函数，提供统一的导入入口
  */
 
 import { getAllPinyin } from './pinyin';
@@ -27,6 +27,18 @@ export {
   searchPinyin,
 } from './pinyin';
 
+// ── 小莤拼音王国架构导出 ──
+export {
+  KINGDOM_ISLANDS,
+  KINGDOM_LEVELS,
+  getKingdomLevel,
+  type KingdomIsland,
+  type KingdomPinyinLevel,
+  type PinyinPersonification,
+  type FourLineGridSpec,
+  type ToneCarItem,
+} from './pinyinKingdomData';
+
 /**
  * 推荐下一个要学的拼音（按 order 升序 + 未在 mastery 中）
  *
@@ -38,7 +50,7 @@ export function nextPinyin(mastery: Record<string, { lv: number }>): PinyinEntry
   // 按 order 升序遍历所有拼音
   const all = getAllPinyin().slice().sort((a, b) => a.order - b.order);
   for (const item of all) {
-    const m = mastery[`pinyin:${item.p}`]!
+    const m = mastery[`pinyin:${item.p}`];
     // 未记录或等级不足 1，视为待学
     if (!m || m.lv < 1) return item;
   }

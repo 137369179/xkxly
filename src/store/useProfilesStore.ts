@@ -19,7 +19,8 @@ import type { Progress } from '@/types';
 import { createInitialProgress } from '@/lib/progress';
 import { useStore } from './useStore';
 import { createThrottledStorage } from './storeHelpers';
-import { safeGetItem } from '@/lib/safeStorage';
+import { safeGetItem, safeSetItem } from '@/lib/safeStorage';
+import { logger } from '@/lib/logger';
 
 /** 主 Store 的持久化 key —— 用于判定「是否曾使用过应用（老用户）」 */
 const LEGACY_STORE_KEY = 'baby-learning-park-v1';
@@ -279,6 +280,19 @@ export const useProfilesStore = create<ProfilesState>()(
         initialized: s.initialized,
         onboarded: s.onboarded,
       }),
+      // 水合失败保护：键损坏 / 解析异常时，zustand 回落默认空状态，随后
+      // ensureInit 会把「单一档案」写回并覆盖损坏键——其余孩子的进度将永久丢失。
+      // 这里先把原始值存为带时间戳的救援副本，保留人工/备份恢复的机会。
+      onRehydrateStorage: () => (_state, error) => {
+        if (!error) return;
+        logger.error('[profiles] 档案水合失败（存储可能损坏），已保留救援副本', error);
+        try {
+          const raw = safeGetItem('baby-learning-park-profiles-v1');
+          if (raw) safeSetItem(`baby-learning-park-profiles-v1.rescue-${Date.now()}`, raw);
+        } catch {
+          /* 救援副本写入失败也不阻塞启动 */
+        }
+      },
     },
   ),
 );

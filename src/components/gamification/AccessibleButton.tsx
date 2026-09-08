@@ -9,7 +9,8 @@
  * 与 <button> 行为一致；支持 aria-pressed（开关态）/ disabled / 前置图标。
  * 纯展示、零学习逻辑改动、零网络、零 PII。
  */
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, ReactNode, MouseEvent } from 'react';
+import { useSound, type SoundKind } from '@/game/useSound';
 import '@/components/gamification/a11y.css';
 
 interface AccessibleButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -17,20 +18,34 @@ interface AccessibleButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> 
   icon?: ReactNode;
   /** 是否为开关态：提供时渲染 aria-pressed，便于读屏与键盘用户识别状态 */
   pressed?: boolean;
+  /** 点击音效反馈（默认 tap，传 null 或 false 时禁用） */
+  sound?: SoundKind | null;
 }
 
 export function AccessibleButton({
   icon,
   pressed,
+  sound,
   className,
   children,
   type = 'button',
+  onClick,
   ...rest
 }: AccessibleButtonProps) {
+  const { play } = useSound();
+
+  const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
+    if (sound !== null && sound !== undefined) {
+      play(sound);
+    }
+    onClick?.(e);
+  };
+
   return (
     <button
       type={type}
       aria-pressed={pressed}
+      onClick={handleClick}
       className={[
         'a11y-min-target a11y-focusable inline-flex items-center justify-center gap-2 rounded-2xl px-4 font-bold',
         className ?? '',

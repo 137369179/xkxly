@@ -31,6 +31,7 @@ import {
   guardMessages,
   redactPII,
   redactSSEChunk,
+  filterLogFields,
   buildImageBody,
   buildVideoBody,
   validateVideoId,
@@ -1177,18 +1178,9 @@ const server = http.createServer(async (req, res) => {
     } catch {
       return sendJson(res, 400, { error: { code: 'bad_json' } });
     }
-    // 白名单过滤前端上报字段（防止日志注入 / 磁盘 DoS）：
-    // 仅保留已知结构字段，每个字段截至 2000 字符，防止超大 payload 污染日志。
-    const ALLOWED_LOG_FIELDS = ['type', 'msg', 'url', 'ua', 'stack', 'buildVersion', 'fingerprint', 'vital', 'value'];
-    const safeBody = {};
-    for (const k of ALLOWED_LOG_FIELDS) {
-      if (k in body) {
-        const v = body[k];
-        safeBody[k] = typeof v === 'string' ? v.slice(0, 2000)
-          : typeof v === 'number' ? v
-          : undefined;
-      }
-    }
+    // 白名单过滤前端上报字段（防日志注入 / 磁盘 DoS）：
+    // 与 worker 端共用 shared.filterLogFields 单一来源（字段白名单 + 2000 字符截断）。
+    const safeBody = filterLogFields(body);
     // 补充服务端视角的 IP 和时间，便于排查"哪个用户什么时候报的错"
     safeBody.serverIp = ipOf(req);
     safeBody.serverAt = Date.now();

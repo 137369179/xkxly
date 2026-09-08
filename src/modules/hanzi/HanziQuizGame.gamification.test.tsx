@@ -65,7 +65,7 @@ describe('HanziQuizGame 游戏化接线（R147）', () => {
     expect(bar?.getAttribute('aria-valuenow')).toBe('0');
   });
 
-  it('挂载错字本（MistakeBookPanel·任务 #5 错题复习闭环·参考宝宝巴士/洪恩错字复习）', () => {
+  it('挂载错字本（MistakeBookPanel·任务 #5 错题复习闭环·参考宝宝巴士/小莤错字复习）', () => {
     const c = renderGame();
     // 错题本空态仍渲染「我的错题本」标题与可访问 aria-label，证明生产级复习入口已接入汉字练习闭环
     expect(c.textContent).toContain('我的错题本');

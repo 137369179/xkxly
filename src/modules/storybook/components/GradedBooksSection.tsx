@@ -59,7 +59,7 @@ export function GradedBooksSection() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-xl font-black">洪恩分级阅读与自集字绘本</h3>
+              <h3 className="text-xl font-black">小莤分级阅读与自集字绘本</h3>
               <span className="bg-amber-300 text-amber-950 text-xs font-bold px-2 py-0.5 rounded-full">
                 科学分级
               </span>

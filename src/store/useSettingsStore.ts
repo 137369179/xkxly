@@ -136,6 +136,15 @@ export const useSettingsStore = create<SettingsStoreState>()(
     }),
     {
       name: 'baby-learning-settings',
+      version: 1,
+      // 版本迁移通道：版本不匹配且无 migrate 时，zustand 会丢弃全部已存设置。
+      // 此处透传旧数据；新增字段由下方 merge 用默认值回填。
+      migrate: (persisted) => persisted,
+      // 老数据缺新字段时逐项回填默认值，避免依赖散落的 `!== false` 兜底
+      merge: (persisted, current) => {
+        const p = persisted as { settings?: Partial<Settings> } | undefined;
+        return { ...current, settings: { ...initialSettings, ...(p?.settings ?? {}) } };
+      },
       storage: createJSONStorage(() => throttledLocalStorage),
     }
   )

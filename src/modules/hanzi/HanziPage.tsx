@@ -409,7 +409,7 @@ export default function HanziPage() {
             💡 小提示：先看清字形，再跟着读；组词例句只用学过的字，写字多练几遍记得更牢
           </p>
 
-          {/* 闯关解锁地图（对标洪恩：单字解锁路径） */}
+          {/* 闯关解锁地图（对标小莤：单字解锁路径） */}
           <Panel>
             <HanziTrailMap onSelect={(h) => {
               triggerHaptic(25);

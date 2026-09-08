@@ -49,7 +49,7 @@ export interface SessionAdventurePathProps {
   recent?: readonly string[];
   /** 随机种子（同种子 → 同路线，便于课堂可复现与测试） */
   seed?: number;
-  /** 本节课站点数，默认 5（对齐洪恩「每 5 字一单元」） */
+  /** 本节课站点数，默认 5（对齐小莤「每 5 字一单元」） */
   length?: number;
   /** 是否降低动效（无障碍 / 家长护眼场景） */
   reducedMotion?: boolean;

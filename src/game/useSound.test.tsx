@@ -76,6 +76,13 @@ describe('useSound', () => {
     act(() => apiRef.current!.play('success'));
     expect(createOscSpy).toHaveBeenCalled();
 
+    // 验证新增音效类型（pop / flip / chime / streak）正常合成
+    act(() => apiRef.current!.play('pop'));
+    act(() => apiRef.current!.play('flip'));
+    act(() => apiRef.current!.play('chime'));
+    act(() => apiRef.current!.play('streak'));
+    expect(createOscSpy).toHaveBeenCalledTimes(2 + 1 + 1 + 2 + 4); // success(2) + pop(1) + flip(1) + chime(2) + streak(4) = 10
+
     act(() => apiRef.current!.setMuted(true));
     const before = createOscSpy.mock.calls.length;
     act(() => apiRef.current!.play('tap'));

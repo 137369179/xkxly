@@ -19,7 +19,7 @@ export interface NavItem {
   island?: Island;
   /** 合并后的重定向目标（路由不删，仅更换渲染目标，见 lib/routeRedirects.ts） */
   redirect?: RouteId;
-  /** 品牌级 3D 图标资产路径（对标宝宝巴士/洪恩质感）；缺省回落到 emoji 渲染 */
+  /** 品牌级 3D 图标资产路径（对标宝宝巴士/小莤质感）；缺省回落到 emoji 渲染 */
   brandIcon?: string;
 }
 
@@ -75,7 +75,7 @@ export const NAV_MAP = new Map(NAV_ITEMS.map((n) => [n.id, n]));
  * ===================================================================== */
 export type NavCategory = 'home' | 'learn' | 'game' | 'story' | 'create' | 'ai' | 'parent' | 'growth' | 'research' | 'design';
 
-/** 乐园地图四大岛屿（对标洪恩星球地图 / 宝宝巴士场景世界） */
+/** 乐园地图四大岛屿（对标小莤星球地图 / 宝宝巴士场景世界） */
 export type Island = 'learn' | 'story' | 'explore' | 'create';
 
 export const ISLAND_META: { key: Island; label: string; emoji: string; tone: NavItem['tone']; brandIcon?: string }[] = [

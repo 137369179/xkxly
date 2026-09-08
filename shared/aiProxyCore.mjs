@@ -146,6 +146,29 @@ export function redactPII(s) {
 }
 
 /**
+ * 前端日志上报字段白名单过滤（server / worker 单一来源，防止双端漂移）。
+ * 仅保留已知结构字段（防任意字段写入 / 日志注入），字符串截 2000 字符（防磁盘/缓存 DoS）；
+ * msg / stack 为自由文本可能含儿童隐私，额外做 PII 脱敏（url 保留页面路径不脱敏，保排查价值）。
+ */
+const ALLOWED_LOG_FIELDS = ['type', 'msg', 'url', 'ua', 'stack', 'buildVersion', 'fingerprint', 'vital', 'value'];
+const REDACTED_LOG_FIELDS = new Set(['msg', 'stack']);
+export function filterLogFields(body) {
+  const safe = {};
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return safe;
+  for (const k of ALLOWED_LOG_FIELDS) {
+    if (!(k in body)) continue;
+    const v = body[k];
+    if (typeof v === 'string') {
+      const clipped = v.slice(0, 2000);
+      safe[k] = REDACTED_LOG_FIELDS.has(k) ? redactPII(clipped) : clipped;
+    } else if (typeof v === 'number') {
+      safe[k] = v;
+    }
+  }
+  return safe;
+}
+
+/**
  * 对单个 SSE 文本块脱敏：逐行解析 data: JSON，屏蔽 delta/message.content 中的 PII；
  * 解析失败的脏行回落 redactPII 兜底；跨 chunk 截断的内容由 redactPII 双保险覆盖。
  */

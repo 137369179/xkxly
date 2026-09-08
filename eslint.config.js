@@ -22,6 +22,7 @@ export default [
       'src/test/**',
       '_*.mjs',
       'scripts/**',
+      'scripts-*.mjs',
     ],
   },
 
@@ -59,6 +60,49 @@ export default [
 
       // console 警告：DEV 守卫已覆盖，此处只提示裸调用
       'no-console': ['warn', { allow: ['warn', 'error'] }],
+    },
+  },
+
+  // BFF / Worker：.mjs 纯 JS 文件，无 TS parser。
+  // server/（wrangler dev 本地 Node 运行时）用 Node globals；
+  // worker/（Cloudflare Worker 运行时）用浏览器类 globals。
+  // 此前未配置导致 135 个 no-undef 误报（setTimeout/fetch/URL 等）。
+  {
+    files: ['server/**/*.mjs'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: { ...globals.node, ...globals.es2022 },
+    },
+  },
+  {
+    files: ['worker/**/*.mjs'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: { ...globals.browser, ...globals.es2022 },
+    },
+  },
+  // worker/test.mjs 由 `node` 直接执行（用 process.exit），覆盖为 Node globals
+  {
+    files: ['worker/test.mjs'],
+    languageOptions: {
+      globals: { ...globals.node },
+    },
+  },
+
+  // Service Worker：独立全局环境（self / caches / fetch / Response），
+  // 经典脚本（无 import/export）；catch 参数为有意忽略（SW 容错策略）。
+  {
+    files: ['public/sw.js'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'script',
+      globals: { ...globals.serviceworker },
+    },
+    rules: {
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrors: 'none' }],
+      '@typescript-eslint/no-unused-vars': 'off',
     },
   },
 ];

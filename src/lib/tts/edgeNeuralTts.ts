@@ -89,7 +89,7 @@ async function fetchEdgeAudioBlob(text: string, options: EdgeTtsOptions = {}): P
     voice = 'zh-CN-XiaoxiaoNeural',
     rate = 1.0,
     pitch = 1.0,
-    timeoutMs = 3800,
+    timeoutMs = 1800,
   } = options;
 
   return new Promise<Blob>((resolve, reject) => {

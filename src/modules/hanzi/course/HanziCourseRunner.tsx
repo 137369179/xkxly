@@ -67,7 +67,7 @@ export function HanziCourseRunner({ char, onClose }: Props) {
             </div>
             <div>
               <div className="flex items-center gap-1.5 font-black text-lg">
-                <span>洪恩五步精学</span>
+                <span>小莤五步精学</span>
                 <span className="text-xs bg-amber-300 text-amber-950 font-bold px-2 py-0.5 rounded-full">
                   {char.pd}
                 </span>

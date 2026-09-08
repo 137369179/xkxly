@@ -15,6 +15,7 @@ import {
   guardMessages,
   redactPII,
   redactSSEChunk,
+  filterLogFields,
   buildImageBody,
   buildVideoBody,
   validateVideoId,
@@ -93,7 +94,13 @@ async function handleContentGenerate(request, env, cors) {
   }
   let payload;
   try {
-    payload = await request.json();
+    // 请求体 64KB 上限（字节级累计，防 Content-Length 绕过）：
+    // 此前直接 request.json() 无体积限制，可被大 payload 消耗 CPU/内存。
+    const raw = await readBodyLimited(request, 64 * 1024);
+    if (raw === null) {
+      return json({ error: { code: 'payload_too_large', message: '请求体过大' } }, cors, 413);
+    }
+    payload = JSON.parse(raw);
   } catch {
     return json({ error: { code: 'bad_json' } }, cors, 400);
   }
@@ -268,6 +275,35 @@ async function rateLimited(request, limit, bucket = 'ai') {
   }
 }
 
+/** 带字节上限读取请求体：不信任 Content-Length 头（客户端可省略/伪造绕过），
+ *  逐块累计实际流入字节，超限即返回 null 并中止读取。 */
+async function readBodyLimited(request, maxBytes) {
+  const cl = Number(request.headers.get('Content-Length')) || 0;
+  if (cl > maxBytes) return null; // 快速路径：头已声明超限
+  if (!request.body) return '';
+  const reader = request.body.getReader();
+  const chunks = [];
+  let received = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      received += value.byteLength;
+      if (received > maxBytes) return null;
+      chunks.push(value);
+    }
+  } catch {
+    return null;
+  }
+  const merged = new Uint8Array(received);
+  let offset = 0;
+  for (const c of chunks) {
+    merged.set(c, offset);
+    offset += c.byteLength;
+  }
+  return new TextDecoder().decode(merged);
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -315,10 +351,11 @@ export default {
      * 家长可通过 /api/log/view 查看（仅供开发者排查）。 */
     if (url.pathname.startsWith('/api/log/view') && request.method === 'GET') {
       // 日志查看含敏感排查信息，必须口令校验；未配置 LOG_VIEW_TOKEN 视为关闭（仅本地可用）。
+      // 与 server 端 P1-5.1 对齐：仅接受请求头（x-log-token 或 Authorization: Bearer），
+      // 不再接受 URL query 传 token——避免口令泄漏进访问日志 / 浏览器历史。
       const token = env.LOG_VIEW_TOKEN;
       if (!token) return json({ error: { code: 'forbidden', message: '日志查看未开启（仅本地/开发者可用）' } }, cors, 403);
       const provided =
-        url.searchParams.get('token') ||
         request.headers.get('x-log-token') ||
         (request.headers.get('authorization') || '').replace(/^Bearer\s+/i, '');
       if (provided !== token) return json({ error: { code: 'forbidden', message: '口令无效' } }, cors, 403);
@@ -334,27 +371,32 @@ export default {
 
     if (url.pathname.startsWith('/api/log') && request.method === 'POST') {
       // 上报端点无鉴权，加限流防刷（独立 bucket，避免刷日志耗尽 AI 配额）。
-      // 同时限制请求体大小（64KB），防止超大 payload 撑爆 Cache。
-      const logCl = Number(request.headers.get('Content-Length')) || 0;
-      if (logCl > 64 * 1024) {
-        return json({ error: { code: 'payload_too_large', message: '请求体过大' } }, cors, 413);
-      }
       if (await rateLimited(request, Number(env.LOG_RATE_LIMIT_PER_MIN) || 30, 'log')) {
         return json({ error: { code: 'rate_limited', message: '上报太频繁，稍后再试' } }, cors, 429);
       }
       let body;
       try {
-        body = await request.json();
+        // 字节级体积上限（64KB）：不信任 Content-Length 头，逐块累计实际流入字节，
+        // 防止省略/伪造头部绕过限制、超大 payload 撑爆 Cache。
+        const raw = await readBodyLimited(request, 64 * 1024);
+        if (raw === null) {
+          return json({ error: { code: 'payload_too_large', message: '请求体过大' } }, cors, 413);
+        }
+        body = JSON.parse(raw);
       } catch {
         return json({ error: { code: 'bad_json' } }, cors, 400);
       }
-      body.serverAt = Date.now();
+      // 白名单过滤上报字段（与 server 端共用 shared.filterLogFields，COPPA：
+      // 无鉴权端点绝不原样落盘任意字段），字符串字段截至 2000 字符。
+      const safeBody = filterLogFields(body);
+      safeBody.serverIp = request.headers.get('cf-connecting-ip') || '';
+      safeBody.serverAt = Date.now();
       try {
         const cache = caches.default;
         const key = 'https://internal.local/error-log';
         const hit = await cache.match(key);
         const logs = hit ? JSON.parse(await hit.text()) : [];
-        logs.push(body);
+        logs.push(safeBody);
         // 保留最近 100 条
         const trimmed = logs.slice(-100);
         await cache.put(key, new Response(JSON.stringify(trimmed), { headers: { 'Cache-Control': 'max-age=86400' } }));
@@ -402,12 +444,13 @@ async function handleChat(request, env, cors) {
 
   let payload;
   try {
-    // 请求体大小限制：64KB，防止恶意大 payload
-    const contentLength = Number(request.headers.get('Content-Length')) || 0;
-    if (contentLength > 64 * 1024) {
+    // 请求体大小限制：64KB。字节级累计实际流入字节（不信任 Content-Length 头，
+    // 防止省略/伪造头部绕过限制），防止恶意大 payload。
+    const raw = await readBodyLimited(request, 64 * 1024);
+    if (raw === null) {
       return json({ error: { code: 'payload_too_large', message: '请求体过大' } }, cors, 413);
     }
-    payload = await request.json();
+    payload = JSON.parse(raw);
   } catch {
     return json({ error: { code: 'bad_json', message: '请求体不是合法 JSON' } }, cors, 400);
   }
@@ -537,12 +580,18 @@ async function handleChat(request, env, cors) {
  *   - 图生图/关键帧输入 URL 仅允许 https 公共 URL 或 data:image Base64。
  * ==================================================================== */
 
-/** 读取并解析 JSON 请求体（带大小上限，媒体请求体可比聊天大——图生图可能带 Data URI） */
+/** 读取并解析 JSON 请求体（带大小上限，媒体请求体可比聊天大——图生图可能带 Data URI）。
+ *  字节级累计实际流入字节，不信任 Content-Length 头。 */
 async function readJsonBody(request, maxBytes = 9 * 1024 * 1024) {
-  const cl = Number(request.headers.get('Content-Length')) || 0;
-  if (cl > maxBytes) return { error: { code: 'payload_too_large', message: '请求体过大' } };
+  let raw;
   try {
-    return { payload: await request.json() };
+    raw = await readBodyLimited(request, maxBytes);
+  } catch {
+    return { error: { code: 'bad_json', message: '请求体不是合法 JSON' } };
+  }
+  if (raw === null) return { error: { code: 'payload_too_large', message: '请求体过大' } };
+  try {
+    return { payload: JSON.parse(raw) };
   } catch {
     return { error: { code: 'bad_json', message: '请求体不是合法 JSON' } };
   }

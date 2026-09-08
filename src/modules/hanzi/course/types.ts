@@ -1,5 +1,5 @@
 /**
- * 洪恩级五步闭环识字课程类型系统 (Hanzi 5-Step Literacy Course Types)
+ * 小莤级五步闭环识字课程类型系统 (Hanzi 5-Step Literacy Course Types)
  * ------------------------------------------------------------
  * 玩 (play) -> 认 (recognize) -> 练 (practice) -> 写 (write) -> 说 (speak)
  */

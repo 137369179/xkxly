@@ -206,7 +206,15 @@ async function main() {
   await new Promise((res) => server.listen(PORT, '127.0.0.1', res));
   const baseUrl = `http://127.0.0.1:${PORT}`;
 
-  const { chrome, wsUrl } = await launchChrome();
+  let chromeInfo;
+  try {
+    chromeInfo = await launchChrome();
+  } catch (err) {
+    console.warn(`[prerender] 提示：无头 Chrome 启动受限或不可用 (${(err && err.message) || err})。已保留标准 SPA 静态产物（构建不阻断）。`);
+    server.close();
+    return;
+  }
+  const { chrome, wsUrl } = chromeInfo;
   const ws = new WebSocket(wsUrl);
   await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
   ws.onmessage = (ev) => {

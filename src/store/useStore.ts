@@ -8,6 +8,7 @@ import { createInitialProgress } from '@/lib/progress';
 import { useSettingsStore } from './useSettingsStore';
 import { useTtsStore } from './useTtsStore';
 import { registerTtsBridge } from '@/lib/speechCore';
+import { logger } from '@/lib/logger';
 import { createThrottledStorage } from './storeHelpers';
 
 import { createBasicsSlice } from './storeSlices/basicsSlice';
@@ -253,12 +254,22 @@ export const useStore = create<StoreState>()(
     {
       name: 'baby-learning-park-v1',
       version: 3,
+      // 版本升级通道：zustand 在版本不匹配且无 migrate 时直接丢弃全部已存数据
+      // （下次 schema 升级 bump version 会静默丢失全部进度）。此处透传旧数据，
+      // 新增字段由下方 merge 的深合并回填默认值。将来结构变更时在此实现转换。
+      migrate: (persisted) => persisted,
       // 仅持久化 progress；settings 已由 useSettingsStore 单独持久化
       storage: createJSONStorage(() => throttledLocalStorage),
       // pendingBadges 是瞬时 UI 队列，不写入 localStorage
       partialize: (s) => ({ progress: s.progress }),
       // 恢复后把 AI 开关同步给服务层（client 是模块级单例，不读 store）
-      onRehydrateStorage: () => (state) => {
+      onRehydrateStorage: () => (state, error) => {
+        if (error) {
+          // 水合失败（存储损坏/版本异常）不能静默：否则 ensureInit 会用初始进度
+          // 覆盖写盘，孩子的历史进度永久丢失。显式报错便于监控上报与家长中心恢复。
+          logger.error('[store] progress 水合失败（存储可能损坏）', error);
+          return;
+        }
         if (state?.progress) {
           // settings 从 useSettingsStore 独立读取，无需再同步
           const settings = useSettingsStore.getState().settings;

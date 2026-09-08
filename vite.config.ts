@@ -3,10 +3,25 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath, URL } from 'node:url';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig(({ mode }) => ({
   base: './',
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    // Bundle 体积分析工具（仅在 ANALYZE=true 时生成并输出到 .report/stats.html，不污染生产 dist）
+    ...(process.env.ANALYZE === "true"
+      ? [
+          visualizer({
+            open: true,
+            gzipSize: true,
+            brotliSize: true,
+            filename: ".report/stats.html",
+          }),
+        ]
+      : []),
+  ],
   // 将 package.json 版本号注入为全局常量，供 monitor.ts BUILD_VERSION 使用
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? '0.0.0'),

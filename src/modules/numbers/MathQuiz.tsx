@@ -45,7 +45,7 @@ export function MathQuiz() {
   const [poolSize, setPoolSize] = useState(0);
   /** 连击计数（任务 #1 积分/连击激励）：由 onAnswered 维护，驱动 @/game ComboMeter 实时能量条 */
   const [combo, setCombo] = useState(0);
-  /** 即时反馈气泡状态（任务 #3）：正确积极强化 / 错误温和引导，无障碍 aria-live，与洪恩/宝宝巴士温和反馈一致 */
+  /** 即时反馈气泡状态（任务 #3）：正确积极强化 / 错误温和引导，无障碍 aria-live，与小莤/宝宝巴士温和反馈一致 */
   const [feedback, setFeedback] = useState<{ correct: boolean; msg: string } | null>(null);
   /** 每回合 5 题；与 RoundRunner 的 questionsPerRound 保持一致 */
   const QUESTIONS_PER_ROUND = 5;

@@ -152,10 +152,12 @@ function makeQuestion(overrides: Partial<Question> = {}): Question {
 
 /** 提取所有 [stuck] 前缀的日志 */
 function stuckLogs(logSpy: ReturnType<typeof vi.spyOn>): string[] {
-  return logSpy.mock.calls.map((c: unknown[]) => String(c[0])).filter((s: string) => s.includes('[stuck]'));
+  // logger 输出形如 console.debug('[Debug]', message) —— 聚合全部参数再过滤，
+  // 避免 '[Debug]' 前缀占据首参导致 includes('[stuck]') 失配
+  return logSpy.mock.calls.map((c: unknown[]) => c.map(String).join(' ')).filter((s: string) => s.includes('[stuck]'));
 }
 function stuckWarns(warnSpy: ReturnType<typeof vi.spyOn>): string[] {
-  return warnSpy.mock.calls.map((c: unknown[]) => String(c[0])).filter((s: string) => s.includes('[stuck]'));
+  return warnSpy.mock.calls.map((c: unknown[]) => c.map(String).join(' ')).filter((s: string) => s.includes('[stuck]'));
 }
 
 describe('QuizCard 超时干预日志', () => {
@@ -169,7 +171,8 @@ describe('QuizCard 超时干预日志', () => {
     container = document.createElement('div');
     document.body.appendChild(container);
     root = createRoot(container);
-    logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    // 日志已统一走 logger.debug → console.debug（logger 在 test 模式输出），故 spy debug 通道
+    logSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
     warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
   });
 

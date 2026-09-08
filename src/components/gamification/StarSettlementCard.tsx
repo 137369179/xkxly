@@ -28,7 +28,9 @@
  * - ScreenWise 2026《Dopamine-Learning Trap》：可变比率强化是斯金纳箱核心。
  *   本卡刻意**不**做随机翻倍、不显示「再抽一次」，收益完全可预期。
  */
+import { useEffect } from 'react';
 import type { EarnResult, StarBreakdown } from '@/game/rewardEconomy';
+import { useSound } from '@/game/useSound';
 
 /** 明细来源的展示元数据（emoji + 短标签），UI 与文案收敛在一处避免散落 */
 const SOURCE_META: Record<StarBreakdown['source'], { emoji: string; label: string }> = {
@@ -70,8 +72,15 @@ export function StarSettlementCard({
   reducedMotion = false,
   className,
 }: StarSettlementCardProps) {
+  const { play } = useSound();
   const items = result.breakdown;
   const capped = result.capped > 0;
+
+  useEffect(() => {
+    if (result.granted > 0) {
+      play('chime');
+    }
+  }, [result.granted, play]);
 
   return (
     <section

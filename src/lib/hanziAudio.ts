@@ -1,7 +1,7 @@
 /**
  * 汉字本地发音播放器
  * ------------------------------------------------------------
- * 资源：public/hanzi-voices/{char}.mp3（339 个单字，由 macOS 系统音色
+ * 资源：public/hanzi-voices/{char}.{mp3|wav}（300 个单字，由 macOS 系统音色
  *   "Mei-Jia" 生成的高质量合成发音，已随应用打包）。
  *
  * 定位：为 `speak()` 提供「本地发音优先」的旁路——当朗读内容恰好是
@@ -26,9 +26,10 @@ export function isSingleHanziVoice(text: string): boolean {
   return s.length === 1 && HANZI_VOICE_CHARS.has(s);
 }
 
-/** 取某个字的本地 mp3 相对 URL（不含 BASE_URL，由调用方决定是否拼前缀） */
+/** 取某个字的本地语音相对 URL（尝试 mp3 和 wav 格式） */
 export function hanziVoiceUrl(char: string): string {
-  return `/hanzi-voices/${char}.mp3`;
+  // 优先尝试 mp3，回退到 wav
+  return `/hanzi-voices/${char}.wav`;
 }
 
 /** 模块级复用的 Audio 元素（同一时刻只播一个字，天然互斥） */

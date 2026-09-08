@@ -67,10 +67,11 @@ describe('核心页面架构与渲染冒烟测试', () => {
     await act(async () => {
       root.render(createElement(PinyinPage));
     });
-    expect(container.textContent).toContain('拼音字母表');
-    expect(container.textContent).toContain('声韵滑滑梯');
-    expect(container.textContent).toContain('易混大辨析');
-    expect(container.textContent).toContain('闯关与听写');
+    expect(container.textContent).toContain('小莤拼音王国');
+    expect(container.textContent).toContain('拼音王国');
+    expect(container.textContent).toContain('拼读游乐场');
+    expect(container.textContent).toContain('易混消消乐');
+    expect(container.textContent).toContain('听音挑战');
   });
 
   it('WordsPage 正常渲染主导航', async () => {

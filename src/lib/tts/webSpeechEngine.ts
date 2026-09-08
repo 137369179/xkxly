@@ -50,16 +50,17 @@ export class WebSpeechEngine implements TtsEngine {
       return;
     }
     await new Promise<void>((resolve) => {
-      const t = setTimeout(() => resolve(), 1200);
-      synth.addEventListener(
-        'voiceschanged',
-        () => {
-          clearTimeout(t);
-          this.readyFlag = true;
-          resolve();
-        },
-        { once: true },
-      );
+      const onVoices = () => {
+        clearTimeout(t);
+        this.readyFlag = true;
+        resolve();
+      };
+      const t = setTimeout(() => {
+        // 超时兜底时移除监听，避免重复 init 累积残留 voiceschanged 监听器
+        synth.removeEventListener('voiceschanged', onVoices);
+        resolve();
+      }, 1200);
+      synth.addEventListener('voiceschanged', onVoices, { once: true });
     });
   }
 
@@ -103,7 +104,11 @@ export class WebSpeechEngine implements TtsEngine {
         const v = opts.voiceURI ? pickByURI(opts.voiceURI) : bestZhVoice();
         if (v) u.voice = v;
         let ended = false;
-        let fallbackTimer: ReturnType<typeof setTimeout> | undefined;
+        // 兜底超时：避免极端情况下 Promise 永久挂起
+        const est = Math.max(2000, s.length * 420 + 1500);
+        const fallbackTimer = setTimeout(() => {
+          if (!ended) end();
+        }, est);
         const end = () => {
           if (ended) return;
           ended = true;
@@ -118,11 +123,6 @@ export class WebSpeechEngine implements TtsEngine {
           /* noop */
         }
         synth.speak(u);
-        // 兜底超时：避免极端情况下 Promise 永久挂起
-        const est = Math.max(2000, s.length * 420 + 1500);
-        fallbackTimer = setTimeout(() => {
-          if (!ended) end();
-        }, est);
       });
 
     const loop = async () => {

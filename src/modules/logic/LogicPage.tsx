@@ -140,7 +140,7 @@ export default function LogicPage() {
 
       {tab !== 'code' && tab !== 'maze' && tab !== 'sudoku' && tab !== 'detective' && (
         <>
-          {/* 🎮 阶梯式难度：三档对应分龄认知（对齐帮帮识字/洪恩分龄体系） */}
+          {/* 🎮 阶梯式难度：三档对应分龄认知（对齐帮帮识字/小莤分龄体系） */}
           <div className="mb-2 flex gap-2.5">
             {DIFFS.map((d) => (
               <CandyButton

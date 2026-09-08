@@ -172,7 +172,8 @@ describe('FollowRead 跟读评测组件', () => {
     container = document.createElement('div');
     document.body.appendChild(container);
     root = createRoot(container);
-    logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    // 日志已统一走 logger.debug → console.debug（logger 在 test 模式输出），故 spy debug 通道
+    logSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
     speakMock.mockClear();
     stopSpeakingMock.mockClear();
     karaokeRenderSpy.mockClear();

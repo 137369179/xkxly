@@ -19,7 +19,7 @@ interface StorybookPageProps {
 }
 
 const TAB_META = [
-  { id: 'graded' as StoryTab, label: '🌟 洪恩分级阅读', emoji: '🌟' },
+  { id: 'graded' as StoryTab, label: '🌟 小莤分级阅读', emoji: '🌟' },
   { id: 'create' as StoryTab, labelKey: 'storybookPage.createTab', emoji: '✨' },
   { id: 'shelf' as StoryTab, labelKey: 'storybookPage.shelfTab', emoji: '📚' },
   { id: 'library' as StoryTab, labelKey: 'storylib.title', emoji: '🏰' },
@@ -101,7 +101,7 @@ export default function StorybookPage({ defaultTab = 'graded' }: StorybookPagePr
       <PageHeader
         iconType="storybook"
         title="📖 奇妙故事岛"
-        subtitle="洪恩分级自集字阅读 · AI 绘本个性化创作 · 经典绘本书架 · 故事分馆"
+        subtitle="小莤分级自集字阅读 · AI 绘本个性化创作 · 经典绘本书架 · 故事分馆"
         tone="pink"
       />
 

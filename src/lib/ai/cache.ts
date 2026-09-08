@@ -138,16 +138,6 @@ export function cacheGet(key: string): string | null {
   return e.v;
 }
 
-// 从 Web Worker 异步加载缓存（不阻塞主线程），仅在内存未命中时调用
-export async function cacheGetWorker(key: string): Promise<string | null> {
-  try {
-    const { aiCacheWorker } = await import('./cacheWorker');
-    return await aiCacheWorker.get(key) ?? null;
-  } catch {
-    return null;
-  }
-}
-
 export function cacheSet(key: string, value: string, ttl = CACHE_TTL) {
   if (!key || !value) return;
   const s = load();
@@ -168,12 +158,6 @@ export function cacheSet(key: string, value: string, ttl = CACHE_TTL) {
     }
   }
   scheduleFlush();
-  // 非阻塞地推送到 Web Worker，避免主线程序列化大文本时掉帧
-  try {
-    import('./cacheWorker').then(({ aiCacheWorker }) => {
-      aiCacheWorker.set(key, value);
-    }).catch(() => {});
-  } catch { /* worker 不可用，静默降级 */ }
 }
 
 export function cacheClear() {

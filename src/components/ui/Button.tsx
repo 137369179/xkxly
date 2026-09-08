@@ -41,6 +41,8 @@ export interface CandyButtonProps extends ButtonHTMLAttributes<HTMLButtonElement
    * - 超时自动恢复为初始态
    */
   requireConfirm?: boolean;
+  /** 防重复快速点击节流窗口（毫秒），如 250ms 防止儿童连击 */
+  throttleMs?: number;
 }
 
 export function CandyButton({
@@ -52,6 +54,7 @@ export function CandyButton({
   silent,
   minTouchTarget,
   requireConfirm,
+  throttleMs,
   className,
   children,
   onClick,
@@ -87,7 +90,17 @@ export function CandyButton({
           }
         : { background: 'transparent', color: ts.deep, boxShadow: 'none' };
 
+  const lastClickRef = useRef<number>(0);
+
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (throttleMs && throttleMs > 0) {
+      const now = Date.now();
+      if (now - lastClickRef.current < throttleMs) {
+        e.preventDefault();
+        return;
+      }
+      lastClickRef.current = now;
+    }
     if (requireConfirm) {
       if (armed) {
         if (confirmTimer.current) {

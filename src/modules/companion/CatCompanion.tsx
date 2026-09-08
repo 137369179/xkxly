@@ -10,7 +10,7 @@ import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStore } from '@/store/useStore';
 import { sfxCorrect, sfxPurr } from '@/lib/sfx';
-import { speak } from '@/lib/speech';
+import { speak, stopSpeaking } from '@/lib/speech';
 import { useSafeTimeout } from '@/lib/useTimer';
 import { useAiStream } from '@/lib/ai/useAi';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -66,8 +66,19 @@ export function CatCompanion() {
     if (stream.status !== 'done' || !stream.text.trim()) return;
     const reply = stream.text.trim();
     setChatLog((prev) => [...prev, { sender: 'cat', text: reply }]);
-    setExpression('happy');
-    speak(reply, { lang: 'zh-CN', rate: 0.95 });
+    setExpression('excited');
+    
+    let cancelled = false;
+    void speak(reply, { lang: 'zh-CN', rate: 0.95 }).then(() => {
+      if (!cancelled) {
+        setExpression('happy');
+      }
+    });
+    
+    return () => {
+      cancelled = true;
+      stopSpeaking();
+    };
   }, [stream.status, stream.text]);
 
   // 卸载时中止进行中的请求

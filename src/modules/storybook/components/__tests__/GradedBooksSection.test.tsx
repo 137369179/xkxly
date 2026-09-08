@@ -83,7 +83,7 @@ describe('GradedBooksSection', () => {
     act(() => {
       root?.render(createElement(GradedBooksSection));
     });
-    expect(container?.textContent).toContain('洪恩分级阅读与自集字绘本');
+    expect(container?.textContent).toContain('小莤分级阅读与自集字绘本');
     expect(container?.textContent).toContain('L1 启蒙阶');
     expect(container?.textContent).toContain('L2 萌芽阶');
     expect(container?.textContent).toContain('L3 进阶阶');

@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { celebrateSmall } from '@/lib/celebrate';
 import { safeGetItem } from '@/lib/safeStorage';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 /**
  * StreakBar 达标庆祝调试日志。
@@ -23,8 +24,7 @@ import { cn } from '@/lib/utils';
 const SB_DEBUG = 'sb_debug';
 function sbLog(stage: string, extra?: Record<string, unknown>): void {
   if (safeGetItem(SB_DEBUG) !== '1') return;
-  // eslint-disable-next-line no-console
-  console.log(`%c[StreakBar] ${stage}`, 'color:#f59e0b;font-weight:bold', { ...extra });
+  logger.debug(`[StreakBar] ${stage}`, extra);
 }
 
 interface Props {

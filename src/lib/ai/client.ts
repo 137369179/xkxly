@@ -22,6 +22,7 @@ import {
 } from './config';
 import { cacheGet, cacheSet } from './cache';
 import type { AiChunk, AiError, AiLogEntry, AiResult, AiUsage, ChatOptions } from './types';
+import { logger } from '@/lib/logger';
 
 /** Health check endpoint: 由 PROXY_URL 去掉 /chat 后缀得到；若 PROXY_URL 本身不含 /chat，则复用其前缀作为健康检查地址（原 `|| '/api/ai/health'` 分支恒为死代码，已移除） */
 const HEALTH_URL = PROXY_URL.replace(/\/chat$/, '/health');
@@ -55,12 +56,12 @@ function log(entry: AiLogEntry) {
     try {
       f();
     } catch (e) {
-      if (import.meta.env.DEV) console.warn('[ai] log listener threw', e);
+      if (import.meta.env.DEV) logger.warn('[ai] log listener threw', e);
     }
   });
   if (import.meta.env.DEV) {
     const tag = entry.cached ? 'cache' : entry.ok ? 'ok' : 'fail';
-    console.debug(`[ai:${tag}] ${entry.scene} ${entry.model} ${entry.ms}ms`, entry.errCode ?? '');
+    logger.debug(`[ai:${tag}] ${entry.scene} ${entry.model} ${entry.ms}ms`, entry.errCode ?? '');
   }
 }
 

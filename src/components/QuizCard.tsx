@@ -21,6 +21,7 @@ import { ReplayButton } from '@/components/quiz/ReplayButton';
 import { StuckHintBar } from '@/components/quiz/StuckHintBar';
 import { BossTimerBar } from '@/components/quiz/BossTimerBar';
 import { WrongReasonBox } from '@/components/quiz/WrongReasonBox';
+import { logger } from '@/lib/logger';
 
 /** 把选项渲染成一段可以喂给模型的纯文本 */
 function optionText(o: { label?: string; emoji?: string; shapes?: string[] } | undefined): string {
@@ -176,12 +177,10 @@ export function QuizCard({
   const clearStuckTimer = (reason: 'answered' | 'new-question' | 'unmount' | 'replay') => {
     if (stuckTimerRef.current) {
       const elapsed = stuckStartRef.current != null ? Date.now() - stuckStartRef.current : null;
-      if (import.meta.env.DEV) {
-        console.log(
-          `[stuck] clear qid=${question.id} skill=${question.skill ?? '-'} reason=${reason}` +
-            ` elapsed=${elapsed != null ? `${elapsed}ms` : '-'} wrong=${wrongIds.length} solved=${solved}`,
-        );
-      }
+      logger.debug(
+        `[stuck] clear qid=${question.id} skill=${question.skill ?? '-'} reason=${reason}` +
+          ` elapsed=${elapsed != null ? `${elapsed}ms` : '-'} wrong=${wrongIds.length} solved=${solved}`,
+      );
       clearTimeout(stuckTimerRef.current);
       stuckTimerRef.current = null;
       stuckStartRef.current = null;
@@ -263,20 +262,16 @@ export function QuizCard({
     setShowStuckHint(false);
     clearStuckTimer('new-question');
     if (solved) return;
-    if (import.meta.env.DEV) {
-      console.log(
-        `[stuck] arm qid=${question.id} skill=${question.skill ?? '-'} autoSpeak=${autoSpeak}` +
-          ` wrong=${wrongIds.length} threshold=60000ms`,
-      );
-    }
+    logger.debug(
+      `[stuck] arm qid=${question.id} skill=${question.skill ?? '-'} autoSpeak=${autoSpeak}` +
+        ` wrong=${wrongIds.length} threshold=60000ms`,
+    );
     stuckStartRef.current = Date.now();
     stuckTimerRef.current = setTimeout(() => {
-      if (import.meta.env.DEV) {
-        console.warn(
-          `[stuck] trigger qid=${question.id} skill=${question.skill ?? '-'}` +
-            ` after 60000ms wrong=${wrongIds.length} —— 孩子已 60s 未作答，弹出"再听一遍"提示`,
-        );
-      }
+      logger.warn(
+        `[stuck] trigger qid=${question.id} skill=${question.skill ?? '-'}` +
+          ` after 60000ms wrong=${wrongIds.length} —— 孩子已 60s 未作答，弹出"再听一遍"提示`,
+      );
       setShowStuckHint(true);
       // 温和语音提醒，吸引注意
       void speak('需要小茜再读一遍题目吗？', { lang: 'zh-CN', rate: 0.9, module: 'praise' });
@@ -287,12 +282,10 @@ export function QuizCard({
 
   /** 用户点击"再听一遍"：重新朗读题干并隐藏提示 */
   const handleReplayPrompt = () => {
-    if (import.meta.env.DEV) {
-      console.log(
-        `[stuck] replay qid=${question.id} skill=${question.skill ?? '-'} wrong=${wrongIds.length}` +
-          ` —— 用户点击"再听一遍"`,
-      );
-    }
+    logger.debug(
+      `[stuck] replay qid=${question.id} skill=${question.skill ?? '-'} wrong=${wrongIds.length}` +
+        ` —— 用户点击"再听一遍"`,
+    );
     setShowStuckHint(false);
     clearStuckTimer('replay');
     if (question.speak) {

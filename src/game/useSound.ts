@@ -9,7 +9,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { safeGetItem, safeSetItem } from '@/lib/safeStorage';
 
-export type SoundKind = 'success' | 'error' | 'achievement' | 'tap';
+export type SoundKind = 'success' | 'error' | 'achievement' | 'tap' | 'pop' | 'flip' | 'chime' | 'streak';
 
 const MUTE_KEY = 'babystudy.sound.muted';
 
@@ -21,12 +21,24 @@ interface ToneSpec {
 }
 
 const TONES: Record<SoundKind, ToneSpec[]> = {
-  tap: [{ freq: 660, dur: 0.06, type: 'sine', gain: 0.05 }],
+  tap: [{ freq: 660, dur: 0.05, type: 'sine', gain: 0.05 }],
+  pop: [{ freq: 880, dur: 0.04, type: 'sine', gain: 0.07 }],
+  flip: [{ freq: 440, dur: 0.06, type: 'triangle', gain: 0.04 }],
   success: [
     { freq: 660, dur: 0.09, type: 'sine', gain: 0.08 },
     { freq: 880, dur: 0.12, type: 'sine', gain: 0.08 },
   ],
   error: [{ freq: 320, dur: 0.16, type: 'triangle', gain: 0.06 }],
+  chime: [
+    { freq: 587.33, dur: 0.12, type: 'sine', gain: 0.08 },
+    { freq: 880, dur: 0.18, type: 'sine', gain: 0.07 },
+  ],
+  streak: [
+    { freq: 523.25, dur: 0.07, type: 'sine', gain: 0.07 },
+    { freq: 659.25, dur: 0.07, type: 'sine', gain: 0.08 },
+    { freq: 783.99, dur: 0.07, type: 'sine', gain: 0.08 },
+    { freq: 1046.5, dur: 0.14, type: 'sine', gain: 0.09 },
+  ],
   achievement: [
     { freq: 523, dur: 0.1, type: 'sine', gain: 0.09 },
     { freq: 659, dur: 0.1, type: 'sine', gain: 0.09 },

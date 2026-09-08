@@ -1,5 +1,5 @@
 /**
- * 🎢 洪恩/叫叫级「声韵滑滑梯与物理声调过山车」 (Interactive Phonics Coaster & Fusion Pro - Commercial Grade)
+ * 🎢 小莤/叫叫级「声韵滑滑梯与物理声调过山车」 (Interactive Phonics Coaster & Fusion Pro - Commercial Grade)
  * ---------------------------------------------------------------------------------------------------------
  * 1. 🚀 声母滑车 🚂 与韵母站台 🛩️ 真实物理重力加速滑行与相撞合体火花爆破；
  * 2. 🎢 4 种声调过山车真实曲率轨道（平直高速轨、冲天爬坡轨、大V型回旋轨、高空大俯冲轨）；
@@ -10,6 +10,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { speak } from '@/lib/speech';
+import { speakPhonicsSpellOut } from '@/lib/pinyinSpeechEngine';
 import { sfxTap, sfxCorrect, sfxWin, triggerHaptic } from '@/lib/sfx';
 import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
@@ -173,7 +174,7 @@ export function PhonicsSlide() {
         triggerHaptic([60, 40, 60, 40, 100]);
         addStars(1);
         practice(`pinyin:${match.pinyin}`, true, 2, 1);
-        void speak(`${match.initial}——${match.final}——${match.pinyin}！${match.hanzi}，${match.word}！`, { lang: 'zh-CN' });
+        speakPhonicsSpellOut(match.initial, match.final, match.pinyin, match.word, match.hanzi);
       } else {
         const fallbackPinyin = `${initial}${formatTonedFinal(final, tone)}`;
         void speak(`${initial}，${formatTonedFinal(final, tone)}，读作 ${fallbackPinyin}！`, { lang: 'zh-CN' });

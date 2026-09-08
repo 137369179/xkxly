@@ -35,19 +35,31 @@ import hanziListenZh from './locales/hanziListen.zh-CN.json';
 import patchZh from './locales/patch.zh-CN.json';
 import achievementCenterZh from './locales/achievementCenter.zh-CN.json';
 
-/** 深度合并：将模块级翻译增量并入全局字典（不改动全局 i18n 文件，规避并发 WIP 冲突） */
-function deepMergeLocale(base: any, extra: any): any {
-  const out: any = Array.isArray(base) ? [...base] : { ...base };
-  for (const k of Object.keys(extra)) {
+/** 翻译数据结构：支持嵌套对象和字符串值。
+ *  用 interface 而非 type alias：Record 形式的自引用类型别名会触发
+ *  TS2456（circularly references itself），interface 自引用则合法。 */
+interface LocaleData {
+  [key: string]: string | LocaleData;
+}
+
+/** 深度合并：将模块级翻译增量并入全局字典（不改动全局 i18n 文件，规避并发 WIP 冲突）。
+ *  泛型 T 保留 base 的具体结构类型（JSON 导入的字面量类型），使 zhPack / enTranslationCache
+ *  的下游 typeof 推断不丢精度；extra 侧仅作增量来源，签名上放宽为 object（JSON 具体类型
+ *  无法直接赋给 index-signature 类型，是 TS 的固有限制，在函数内部统一收窄）。 */
+function deepMergeLocale<T extends object>(base: T, extra: object): T {
+  const out = (Array.isArray(base) ? [...base] : { ...base }) as LocaleData;
+  const ex = extra as LocaleData;
+  for (const k of Object.keys(ex)) {
+    const ev = ex[k];
     const bv = out[k];
-    const ev = extra[k];
     if (ev && typeof ev === 'object' && !Array.isArray(ev) && bv && typeof bv === 'object' && !Array.isArray(bv)) {
       out[k] = deepMergeLocale(bv, ev);
-    } else {
+    } else if (ev !== undefined) {
+      // noUncheckedIndexedAccess 下 ex[k] 含 undefined；undefined 键直接跳过（无合并意义）
       out[k] = ev;
     }
   }
-  return out;
+  return out as unknown as T;
 }
 
 type TranslationData = typeof zhCN;
@@ -59,7 +71,7 @@ type TranslationData = typeof zhCN;
  * 优先把「剩余段合并为字面量键」直查，找不到再逐层下钻——
  * 否则 'mathExtra.subTabs.mul' 会被按 3 层下钻，永远命中不了扁平键
  * （此前导致 MathExtra/VerticalMath 的 Tab 标签在 UI 渲染成原始 key 路径）。 */
-function getNestedValue(obj: any, path: string): string {
+function getNestedValue(obj: object | undefined, path: string): string {
   const raw = resolvePath(obj, path.split('.'));
   if (raw === undefined || raw === null) return path;
   if (typeof raw === 'string') return raw;
@@ -70,15 +82,18 @@ function getNestedValue(obj: any, path: string): string {
 }
 
 /** 逐层下钻：每层先试「剩余段整体作为字面量键」，命中即返回 */
-function resolvePath(obj: any, segments: string[]): unknown {
-  if (!obj || typeof obj !== 'object') return undefined;
+function resolvePath(obj: object | undefined, segments: string[]): unknown {
+  // object 无索引签名（TS7053），此处收窄为记录视图做动态键查询
+  const rec = obj as Record<string, unknown> | undefined;
+  if (!rec || typeof rec !== 'object') return undefined;
   const literal = segments.join('.');
-  const viaLiteral = obj[literal];
+  const viaLiteral = rec[literal];
   if (viaLiteral !== undefined && viaLiteral !== null) return viaLiteral;
   if (segments.length === 1) return undefined;
   const first = segments[0];
   if (!first) return undefined;
-  return resolvePath(obj[first], segments.slice(1));
+  const next = rec[first];
+  return resolvePath(typeof next === 'object' && next !== null ? next : undefined, segments.slice(1));
 }
 
 /** 执行插值替换 */

@@ -1,7 +1,9 @@
 {
   "short_name": "宝贝乐园",
   "name": "宝贝学习乐园 - 幼小衔接AI智能伴学",
+  "description": "AI 儿童成长学习乐园：字母、古诗、数学、汉字、英语、逻辑、闯关冒险，还有 AI 小老师陪孩子聊天、出题、讲故事。",
   "id": "/?source=pwa",
+  "categories": ["education", "kids", "games"],
   "icons": [
     {
       "src": "/icons/icon-144.png",
@@ -34,9 +36,39 @@
       "purpose": "maskable"
     }
   ],
+  "shortcuts": [
+    {
+      "name": "今日学习任务",
+      "short_name": "今日任务",
+      "description": "查看今日推荐练习与艾宾浩斯复习",
+      "url": "/#/today",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "AI 小老师伴学",
+      "short_name": "AI 伴学",
+      "description": "与 AI 小老师互动对话学习",
+      "url": "/#/companion",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "汉字闯关",
+      "short_name": "汉字学习",
+      "description": "象形字演变与趣味汉字闯关",
+      "url": "/#/hanzi",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "数学工坊",
+      "short_name": "数学冒险",
+      "description": "数感与加减法趣味互动",
+      "url": "/#/numbers",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
   "start_url": "/",
-  "background_color": "#FAF5FF",
-  "theme_color": "#9333ea",
+  "background_color": "#FFF6FA",
+  "theme_color": "#FFF6FA",
   "display": "standalone",
   "orientation": "any"
 }

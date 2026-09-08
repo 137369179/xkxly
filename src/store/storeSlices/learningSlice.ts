@@ -34,7 +34,7 @@ export const createLearningSlice: SliceCreator<
     | 'clearWrongBook'
     | 'completeDailyReview'
   >
-> = (set, get) => ({
+> = (set, _get) => ({
   practice: (skill, correct, star = 1, difficulty, latencyMs) =>
     set((s) => _applyProgress(s, (p) => _applyPractice(p, skill, correct, star, difficulty, latencyMs))),
 
@@ -103,38 +103,47 @@ export const createLearningSlice: SliceCreator<
     ),
 
   buySticker: (id, cost) => {
-    const p = get().progress;
-    if (p.stickers.includes(id)) return false;
-    if (p.stars - p.spent < cost) return false;
-    set((s) =>
-      _applyProgress(s, (q) => ({
-        ...q,
-        spent: q.spent + cost,
-        stickers: [...q.stickers, id],
-      })),
-    );
-    return true;
+    // 守卫必须放在 set 回调内与写入原子执行：get() 预检在快速连点下是陈旧快照，
+    // 两次点击可携同一快照穿过余额检查造成双花（与 catSlice 的原子校验模式对齐）。
+    let ok = false;
+    set((s) => {
+      const q = s.progress;
+      if (q.stickers.includes(id) || q.stars - q.spent < cost) return s;
+      ok = true;
+      return _applyProgress(s, (p) => ({
+        ...p,
+        spent: p.spent + cost,
+        stickers: [...p.stickers, id],
+      }));
+    });
+    return ok;
   },
 
   /** 撤销贴纸兑换（可撤销容错）：移除贴纸并退回已消耗的星星 */
   refundSticker: (id, cost) => {
-    const p = get().progress;
-    if (!p.stickers.includes(id)) return false;
-    set((s) =>
-      _applyProgress(s, (q) => ({
-        ...q,
-        spent: Math.max(0, q.spent - cost),
-        stickers: q.stickers.filter((x) => x !== id),
-      })),
-    );
-    return true;
+    let ok = false;
+    set((s) => {
+      const q = s.progress;
+      if (!q.stickers.includes(id)) return s;
+      ok = true;
+      return _applyProgress(s, (p) => ({
+        ...p,
+        spent: Math.max(0, p.spent - cost),
+        stickers: p.stickers.filter((x) => x !== id),
+      }));
+    });
+    return ok;
   },
 
   spendStars: (cost) => {
-    const p = get().progress;
-    if (!(cost > 0) || p.stars - p.spent < cost) return false;
-    set((s) => _applyProgress(s, (q) => ({ ...q, spent: q.spent + cost })));
-    return true;
+    let ok = false;
+    set((s) => {
+      const q = s.progress;
+      if (!(cost > 0) || q.stars - q.spent < cost) return s;
+      ok = true;
+      return _applyProgress(s, (p) => ({ ...p, spent: p.spent + cost }));
+    });
+    return ok;
   },
 
   recordSpeed: (correct) =>

@@ -1,134 +1,114 @@
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
+import { type PinyinEntry } from '@/data/pinyinIndex';
+import { getKingdomLevel, type KingdomPinyinLevel } from '@/data/pinyinKingdomData';
 import { LearnFlow, type FlowStep } from '@/components/LearnFlow';
-import { TraceCanvas } from '@/components/TraceCanvas';
-import { QuizCard } from '@/components/QuizCard';
-import { SpeechEvalButton } from '@/components/feedback/SpeechEvalButton';
-import { AiPanel } from '@/components/ai';
-import { CandyButton } from '@/components/ui/Button';
 import { Panel } from '@/components/ui/Card';
-import { useAiStream } from '@/lib/ai/useAi';
-import { pinyinTutorTask } from '@/lib/ai/tasks';
+import { CandyButton } from '@/components/ui/Button';
 import { speak } from '@/lib/speech';
 import { sfxTap, sfxCorrect, sfxWin, triggerHaptic } from '@/lib/sfx';
-import { celebrateSmall, celebrateBig } from '@/lib/celebrate';
+import { celebrateBig } from '@/lib/celebrate';
 import { useStore } from '@/store/useStore';
-import { getAllPinyin, type PinyinEntry } from '@/data/pinyinIndex';
-import type { Question } from '@/types';
-import { useTranslation } from '@/i18n/useTranslation';
+import { PinyinInteractiveScene } from './components/PinyinInteractiveScene';
+import { PinyinToneCar } from './components/PinyinToneCar';
+import { PinyinVoiceStudio } from './components/PinyinVoiceStudio';
+import { PinyinFourLineCanvas } from './components/PinyinFourLineCanvas';
+import { PinyinPracticeMiniGames } from './components/PinyinPracticeMiniGames';
 
-// 拼音池用于生成干扰项
-const PINYIN_POOL = getAllPinyin();
-
-function pick<T>(arr: T[], n: number): T[] {
-  const copy = [...arr]; const out: T[] = [];
-  for (let i = 0; i < n && copy.length; i++) out.push(copy.splice(Math.floor(Math.random() * copy.length), 1)[0]!);
-  return out;
+interface PinyinLearnProps {
+  entry: PinyinEntry;
+  onDone: () => void;
 }
 
-export function PinyinLearn({ entry, onDone }: { entry: PinyinEntry; onDone: () => void }) {
-  const { t: tr } = useTranslation();
-  const learnSkill = useStore(s => s.learnSkill);
-  const practice = useStore(s => s.practice);
-  const markTraced = useStore(s => s.markTraced);
-  const addStars = useStore(s => s.addStars);
-  const tutor = useAiStream();
+export function PinyinLearn({ entry, onDone }: PinyinLearnProps) {
+  const learnSkill = useStore((s) => s.learnSkill);
+  const practice = useStore((s) => s.practice);
+  const addStars = useStore((s) => s.addStars);
 
   const skill = `pinyin:${entry.p}`;
-  const typeLabel = entry.type === 'shengmu' ? tr('pinyin.shengmu') : entry.type === 'yunmu' ? tr('pinyin.yunmu') : tr('pinyin.wholeSyllable');
-
-  // 键盘快捷监听
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        triggerHaptic(20);
-        onDone();
-      } else if (e.key === 'r' || e.key === 'R') {
-        e.preventDefault();
-        triggerHaptic(20);
-        void speak(`${entry.p}。${entry.rhyme}`, { lang: 'zh-CN', rate: 0.7 });
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [entry, onDone]);
-
-  function createQuestion(): Question {
-    const correct = entry.rhyme;
-    const all = PINYIN_POOL.filter(p => p.p !== entry.p);
-    const distractors = pick(all, 3).map(p => p.rhyme);
-    const opts = pick([correct, ...distractors], 4);
-    return {
-      id: `pinyin-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
-      kind: 'pinyin-quiz',
-      skill,
-      prompt: tr('pinyin.rhymePrompt', { p: entry.p }),
-      display: entry.p,
-      speak: entry.p,
-      options: opts.map((r, i) => ({ id: `o${i}`, label: r, emoji: '' })),
-      answerId: `o${opts.indexOf(correct)}`,
-      hint: entry.sound,
-      why: `${entry.p}：${entry.sound}`,
-    };
-  }
-
-  const [question, setQuestion] = useState<Question>(createQuestion);
-
-  const nextQuestion = () => setQuestion(createQuestion());
-
-
+  const level: KingdomPinyinLevel = useMemo(() => getKingdomLevel(entry.p), [entry.p]);
 
   const steps: FlowStep[] = [
+    // ── 1. 玩 (Play: 拟人动画情境交互) ──
     {
-      key: 'know',
-      label: '认',
-      emoji: '👀',
+      key: 'play',
+      label: '玩',
+      emoji: '🎮',
+      gate: true,
+      autoAdvanceMs: 1200,
       render: (api) => (
         <div className="space-y-4">
-          <Panel className="text-center">
-            <div className="text-8xl font-black text-ink">{entry.p}</div>
-            <p className="mt-2 text-lg font-bold text-candy-blue-deep">{typeLabel}</p>
-            <div className="mt-4 space-y-2 text-left">
-              <p className="text-sm font-bold text-ink-soft">{tr('pinyin.sound')}</p>
-              <p className="text-base font-semibold text-ink">{entry.sound}</p>
-              <p className="text-sm font-bold text-ink-soft mt-2">{tr('pinyin.mouth')}</p>
-              <p className="text-base font-semibold text-ink">{entry.mouth}</p>
-              <p className="text-sm font-bold text-ink-soft mt-2">{tr('pinyin.rhyme')}</p>
-              <p className="text-xl font-extrabold text-candy-purple-deep">{entry.rhyme}</p>
+          <PinyinInteractiveScene
+            symbol={level.p}
+            name={level.name}
+            rhyme={level.rhyme}
+            personification={level.personification}
+            onInteracted={() => {
+              api.ready();
+            }}
+          />
+        </div>
+      ),
+    },
+
+    // ── 2. 认 (Recognize: 四声调过山车与口型要领) ──
+    {
+      key: 'recognize',
+      label: '认',
+      emoji: '💡',
+      gate: true,
+      autoAdvanceMs: 1400,
+      render: (api) => (
+        <div className="space-y-4 max-w-md mx-auto">
+          {/* 四声调小汽车过山车 */}
+          <PinyinToneCar basePinyin={level.p} tones={level.tones} />
+
+          {/* 发音口型指引与拼读音节 */}
+          <Panel className="p-4 bg-purple-50/90 border-2 border-purple-200 shadow-sm">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-xl">👄</span>
+              <span className="text-sm font-black text-candy-purple-deep">标准发音口型要领</span>
             </div>
-            {entry.tones && (
-              <div className="mt-4">
-                <p className="text-sm font-bold text-ink-soft">{tr('pinyin.tones')}</p>
-                <div className="mt-1 flex justify-center gap-3">
-                  {entry.tones.map(t => (
-                    <button key={t} onClick={() => speak(t, { lang: 'zh-CN', rate: 0.6 })} className="text-3xl font-black text-candy-orange-deep active:scale-95">{t}</button>
-                  ))}
-                </div>
-              </div>
-            )}
-            {entry.examples.length > 0 && (
-              <div className="mt-4">
-                <p className="text-sm font-bold text-ink-soft">{tr('pinyin.examples')}</p>
-                <div className="mt-1 flex justify-center gap-2">
-                  {entry.examples.map(ex => (
-                    <button key={ex} onClick={() => speak(ex, { lang: 'zh-CN', rate: 0.7 })} className="rounded-full bg-candy-pink-soft px-4 py-2 text-xl font-bold text-candy-pink-deep active:scale-95">{ex}</button>
+            <p className="text-xs font-bold text-ink mb-3 leading-relaxed">{level.mouthGuide}</p>
+
+            {level.syllables && level.syllables.length > 0 && (
+              <div>
+                <div className="text-xs font-black text-purple-900 mb-1.5">🔊 常用拼读组合：</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {level.syllables.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => {
+                        sfxTap();
+                        speak(s, { lang: 'zh-CN', rate: 0.65 });
+                      }}
+                      className="px-3 py-1 rounded-xl bg-white border border-purple-300 text-xs font-black text-purple-900 shadow-xs hover:bg-purple-100 active:scale-95 transition-all cursor-pointer font-sans"
+                    >
+                      {s}
+                    </button>
                   ))}
                 </div>
               </div>
             )}
           </Panel>
-          <div className="flex justify-center gap-3">
-            <CandyButton tone="blue" size="sm" onClick={() => speak(entry.p, { lang: 'zh-CN', rate: 0.6 })}>{tr('common.listen')}</CandyButton>
-            <CandyButton tone="purple" size="sm" variant="soft" onClick={() => { sfxTap(); tutor.run(pinyinTutorTask({ symbol: entry.p, type: entry.type === 'shengmu' ? 'initial' : entry.type === 'yunmu' ? 'final' : 'whole' })); }}>{tr('pinyin.aiTeach')}</CandyButton>
-          </div>
-          <AiPanel state={tutor} tone="purple" title={tr('pinyin.aiTitle')} />
-          <div className="flex justify-center">
-            <CandyButton tone="green" size="lg" onClick={() => { learnSkill(skill); api.ready(); }}>{tr('pinyin.knowIt')}</CandyButton>
+
+          <div className="flex justify-center pt-1">
+            <CandyButton
+              tone="green"
+              size="lg"
+              onClick={() => {
+                sfxCorrect();
+                triggerHaptic(30);
+                api.ready();
+              }}
+            >
+              我记牢啦 ➔
+            </CandyButton>
           </div>
         </div>
       ),
     },
+
+    // ── 3. 读 (Read: 变声魔镜智能录音跟读棚) ──
     {
       key: 'read',
       label: '读',
@@ -137,54 +117,18 @@ export function PinyinLearn({ entry, onDone }: { entry: PinyinEntry; onDone: () 
       autoAdvanceMs: 1400,
       render: (api) => (
         <div className="space-y-4">
-          <Panel className="text-center">
-            <div className="text-6xl font-black text-ink">{entry.p}</div>
-            <p className="mt-2 text-lg font-bold text-candy-purple-deep">{entry.rhyme}</p>
-            <div className="mt-4 flex flex-wrap justify-center gap-2">
-              <CandyButton tone="blue" size="md" onClick={() => speak(entry.p, { lang: 'zh-CN', rate: 0.6 })}>{tr('pinyin.readPinyin')}</CandyButton>
-              <CandyButton tone="purple" size="md" onClick={() => speak(entry.rhyme, { lang: 'zh-CN', rate: 0.7 })}>{tr('pinyin.readRhyme')}</CandyButton>
-              {entry.syllables.map(s => (
-                <CandyButton key={s} tone="orange" size="md" variant="soft" onClick={() => speak(s, { lang: 'zh-CN', rate: 0.7 })}>🔊 {s}</CandyButton>
-              ))}
-            </div>
-          </Panel>
-          <div className="flex justify-center">
-            <CandyButton tone="green" size="lg" onClick={() => {
-              triggerHaptic(30);
+          <PinyinVoiceStudio
+            level={level}
+            onPass={() => {
+              addStars(2);
               api.ready();
-            }}>{tr('pinyin.readDone1')}</CandyButton>
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: 'practice',
-      label: '练',
-      emoji: '✏️',
-      gate: true,
-      autoAdvanceMs: 1400,
-      render: (api) => (
-        <div className="space-y-4">
-          <QuizCard
-            question={question}
-            onAnswer={(correct: boolean) => {
-              practice(skill, correct);
-              if (correct) {
-                sfxCorrect();
-                triggerHaptic(45);
-                celebrateSmall();
-                addStars(1);
-                api.ready();
-              } else {
-                triggerHaptic(20);
-                nextQuestion();
-              }
             }}
-            onNext={() => {}}
           />
         </div>
       ),
     },
+
+    // ── 4. 写 (Write: 四线三格魔法描红书写) ──
     {
       key: 'write',
       label: '写',
@@ -193,110 +137,77 @@ export function PinyinLearn({ entry, onDone }: { entry: PinyinEntry; onDone: () 
       autoAdvanceMs: 1400,
       render: (api) => (
         <div className="space-y-4">
-          <div className="text-center">
-            <div className="text-6xl font-black text-ink">{entry.p}</div>
-          </div>
-          <TraceCanvas
-            char={entry.p}
-            tone="blue"
+          <PinyinFourLineCanvas
+            symbol={level.p}
+            gridSpec={level.fourLineGrid}
             onPass={() => {
-              triggerHaptic(45);
-              markTraced(`pinyin:${entry.p}`);
+              learnSkill(skill);
+              addStars(1);
               api.ready();
             }}
           />
         </div>
       ),
     },
-    {
-      key: 'speak',
-      label: '说',
-      emoji: '🗣️',
-      render: (api) => (
-        <div className="space-y-4">
-          <Panel className="text-center">
-            <div className="text-6xl font-black text-ink">{entry.p}</div>
-            <p className="mt-2 text-lg font-bold text-candy-purple-deep">{entry.rhyme}</p>
-            
-            {/* 智能语音跟读评测 */}
-            <div className="my-4 p-3 bg-blue-50/80 rounded-2xl border border-blue-200">
-              <p className="text-xs font-bold text-blue-900 mb-2">🎙️ 大声读出拼音「{entry.p}」，小茜为你评分：</p>
-              <SpeechEvalButton
-                targetText={entry.p}
-                lang="zh-CN"
-                onPass={() => {
-                  sfxWin();
-                  triggerHaptic([60, 40, 60, 40, 100]);
-                  celebrateBig();
-                  learnSkill(skill);
-                  addStars(2);
-                  api.ready();
-                }}
-              />
-            </div>
 
-            {entry.tones && (
-              <div className="mt-3">
-                <p className="text-sm font-bold text-ink-soft">{tr('pinyin.tonesChain')}</p>
-                <div className="mt-1 flex justify-center gap-3">
-                  {entry.tones.map(t => (
-                    <button
-                      key={t}
-                      onClick={() => {
-                        triggerHaptic(20);
-                        speak(t, { lang: 'zh-CN', rate: 0.6 });
-                      }}
-                      className="text-3xl font-black text-candy-orange-deep active:scale-95"
-                    >
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </Panel>
-          <div className="flex flex-col gap-3">
-            <CandyButton tone="blue" size="lg" fullWidth onClick={() => {
-              triggerHaptic(20);
-              speak(entry.p, { lang: 'zh-CN', rate: 0.6 });
-            }}>
-              {tr('pinyin.followRead')}
-            </CandyButton>
-            <CandyButton tone="purple" size="md" variant="soft" fullWidth onClick={() => {
-              triggerHaptic(20);
-              speak(entry.rhyme, { lang: 'zh-CN', rate: 0.7 });
-            }}>
-              {tr('pinyin.readRhyme')}
-            </CandyButton>
-          </div>
-          <div className="flex justify-center">
-            <CandyButton tone="green" size="lg" onClick={() => {
-              triggerHaptic(30);
+    // ── 5. 练 (Practice: 3大趣味小游戏闯关) ──
+    {
+      key: 'practice',
+      label: '练',
+      emoji: '🧩',
+      gate: true,
+      render: (api) => (
+        <div className="space-y-4 flex flex-col items-center">
+          <PinyinPracticeMiniGames
+            level={level}
+            onPass={() => {
+              practice(skill, true, 1);
               learnSkill(skill);
+              addStars(3);
               api.ready();
-            }}>
-              {tr('pinyin.readDone2')}
-            </CandyButton>
-          </div>
+            }}
+          />
         </div>
       ),
     },
   ];
 
   return (
-    <div className="space-y-4">
-      {/* 顶部操作提示条 */}
-      <div className="flex items-center justify-between text-xs text-blue-800 font-bold bg-blue-50/90 px-3 py-1.5 rounded-xl border border-blue-200">
-        <span>⌨️ 键盘快捷操作：R 听拼音口诀 · Esc 返回拼音表</span>
+    <div className="space-y-4 select-none max-w-2xl mx-auto pb-10">
+      {/* ── 小莤顶部木纹状态栏 ── */}
+      <div className="flex items-center justify-between px-4 py-2.5 bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 text-amber-100 rounded-3xl border-3 border-yellow-400 shadow-xl">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-2xl bg-amber-400 text-amber-950 font-black text-xl flex items-center justify-center shadow-md">
+            {level.personification.emoji}
+          </div>
+          <div>
+            <div className="text-xs font-bold text-amber-200">当前关卡</div>
+            <div className="text-sm font-black text-white">
+              {level.name} · {level.personification.character}
+            </div>
+          </div>
+        </div>
+
         <button
           onClick={onDone}
-          className="text-xs text-blue-700 hover:text-blue-900 underline font-black"
+          className="px-3.5 py-1.5 rounded-full bg-black/25 hover:bg-black/40 text-amber-200 hover:text-white text-xs font-black border border-yellow-300/60 shadow transition-all cursor-pointer"
         >
-          返回拼音表 ➔
+          返回拼音王国 ➔
         </button>
       </div>
 
-      <LearnFlow steps={steps} tone="blue" finishLabel={tr('learning.finish')} onFinish={onDone} />
+      {/* ── 小莤 5 步超级教学闭环流 ── */}
+      <LearnFlow
+        steps={steps}
+        tone="purple"
+        finishLabel="🎉 完美通关！返回王国"
+        onFinish={() => {
+          sfxWin();
+          triggerHaptic([60, 40, 80, 50, 120]);
+          celebrateBig();
+          onDone();
+        }}
+      />
     </div>
   );
 }

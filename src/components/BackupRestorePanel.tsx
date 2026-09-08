@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react';
 import { getBackupHistory, detectStorageCorruption } from '@/lib/autoBackup';
 import { useStore } from '@/store/useStore';
+import { logger } from '@/lib/logger';
 
 export function BackupRestorePanel({ onRestoreComplete }: { onRestoreComplete: () => void }) {
   const [backups, setBackups] = useState<Awaited<ReturnType<typeof getBackupHistory>>>([]);
@@ -21,10 +22,7 @@ export function BackupRestorePanel({ onRestoreComplete }: { onRestoreComplete: (
     setRestoring(true);
     try {
       // 在实际实现中，这里会从备份恢复进度数据
-      // 由于简化演示，仅记录日志（生产环境不输出，与全仓 DEV 守卫约定一致）
-      if (import.meta.env.DEV) {
-        console.log('[BackupRestore] 正在恢复备份:', backupId);
-      }
+      logger.info('[BackupRestore] 正在恢复备份:', backupId);
       
       // 模拟恢复过程
       await new Promise(resolve => setTimeout(resolve, 1000));
