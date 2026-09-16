@@ -13,11 +13,9 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { useAdaptiveDifficultyState } from "@/store/adaptiveDifficulty";
 import { AdaptiveDifficultyHint } from "@/components/study/AdaptiveDifficultyHint";
 import { MathStarQuest } from "./MathStarQuest";
-import { RestReminder } from "@/components/gamification/RestReminder";
 import { MistakeBookPanel } from "@/components/gamification/MistakeBookPanel";
-import { ComboMeter } from "@/components/gamification/ComboMeter";
-import { GentleFeedback } from "@/components/gamification/GentleFeedback";
 import { ReducedMotionToggle } from "@/components/gamification/ReducedMotionToggle";
+import { ModuleGameShell } from "@/components/gamification/ModuleGameShell";
 import { praiseByScene, encourageByScene } from "@/lib/praise";
 import { StarSettlementCard } from "@/components/gamification/StarSettlementCard";
 import { masteryNoteFor, newlyMasteredThisWeek } from "@/game/masteryNarrative";
@@ -140,8 +138,20 @@ export function MathQuiz() {
     [aiMode, aiOn, refill],
   );
 
+  /** 已掌握数学本领量：驱动星星奖励淡出阶段 */
+  const masteredCount = Object.keys(progress.mastery).filter((k) => k.startsWith("math"))
+    .length;
+
   return (
-    <>
+    <ModuleGameShell
+      module="numbers"
+      level={diff}
+      progress={progress}
+      combo={combo}
+      feedback={feedback ? { correct: feedback.correct, message: feedback.msg } : null}
+      masteredCount={masteredCount}
+      title="数学闯关"
+    >
       <RoundRunner
         key={`${diff}-${aiMode}`}
         makeQuestion={make}
@@ -247,10 +257,14 @@ export function MathQuiz() {
           </div>
         }
       />
+      {/*
+        ComboMeter / GentleFeedback / RestReminder 由外壳的 GameHud 统一渲染，
+        此处不再重复挂载（原实现与 HUD 并存会同时出现两条连击条、两个反馈气泡）。
+        ReducedMotionToggle 是 GameHud 未覆盖的无障碍开关，保留。
+      */}
       <section className="space-y-3">
         <MathStarQuest />
         <MistakeBookPanel progress={progress} onReview={() => navigate('wrongbook')} />
-        <ComboMeter count={combo} />
         {/* 展示**实际入账**的星数，与成长荣誉馆同一份数据 */}
         {settlement && (
           <StarSettlementCard
@@ -262,10 +276,8 @@ export function MathQuiz() {
             )}
           />
         )}
-        {feedback && <GentleFeedback correct={feedback.correct} message={feedback.msg} />}
-        <RestReminder />
         <ReducedMotionToggle />
       </section>
-    </>
+    </ModuleGameShell>
   );
 }

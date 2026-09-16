@@ -15,20 +15,39 @@ vi.mock('@/lib/celebrate', () => ({
   celebrateBig: vi.fn(),
 }));
 
-const fakeState = {
+/**
+ * R168：外壳（ModuleGameShell）经 useStars / useSpent / getState 读星星账本，
+ * 测试替身须一并提供，否则外壳一挂载就取不到余额。
+ * `vi.mock` 会被提升到文件顶部，工厂里引用的变量必须用 `vi.hoisted` 提前建好，
+ * 否则报「Cannot access 'x' before initialization」。
+ */
+const fakeState = vi.hoisted(() => ({
   addFish: vi.fn(),
   practice: vi.fn(),
   addStars: vi.fn(),
+  spendStars: vi.fn(() => true),
+  buySticker: vi.fn(() => true),
   setDiffOverride: vi.fn(),
   progress: {
-    mastery: {},
-    diffOverrides: {},
-    wrongBook: [],
+    mastery: {} as Record<string, unknown>,
+    diffOverrides: {} as Record<string, unknown>,
+    wrongBook: [] as unknown[],
+    stars: 0,
+    spent: 0,
+    badges: [] as string[],
   },
-};
-vi.mock('@/store/useStore', () => ({
-  useStore: (sel?: any) => (sel ? sel(fakeState) : fakeState),
 }));
+
+vi.mock('@/store/useStore', () => {
+  const useStoreMock = (sel?: (s: unknown) => unknown) =>
+    sel ? sel(fakeState) : fakeState;
+  (useStoreMock as unknown as { getState: () => unknown }).getState = () => fakeState;
+  return {
+    useStore: useStoreMock,
+    useStars: () => fakeState.progress.stars,
+    useSpent: () => fakeState.progress.spent,
+  };
+});
 
 const { HanziQuizGame } = await import('./HanziQuizGame');
 

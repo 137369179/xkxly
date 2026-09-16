@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { CandyButton } from '@/components/ui/Button';
 import { Panel } from '@/components/ui/Card';
@@ -10,16 +10,20 @@ import { useRoute } from '@/lib/router';
 import { getHanziByLevel, type HanziEntry } from '@/data/hanziIndex';
 import { useTranslation } from '@/i18n/useTranslation';
 import { HanziStarQuest } from './HanziStarQuest';
-import { ComboMeter } from '@/components/gamification/ComboMeter';
-import { GentleFeedback } from '@/components/gamification/GentleFeedback';
-import { RestReminder } from '@/components/gamification/RestReminder';
 import { ReducedMotionToggle } from '@/components/gamification/ReducedMotionToggle';
 import { useAdaptiveDifficulty, type DifficultyLevel } from '@/game';
 import { MistakeBookPanel } from '@/components/gamification/MistakeBookPanel';
 import { StarSettlementCard } from '@/components/gamification/StarSettlementCard';
+import { ModuleGameShell } from '@/components/gamification/ModuleGameShell';
 import { masteryNoteFor, newlyMasteredThisWeek } from '@/game/masteryNarrative';
 import { earnStars, type EarnResult } from '@/game/rewardEconomy';
 import { praiseByScene, encourageByScene } from '@/lib/praise';
+import { shuffle } from '@/lib/utils';
+
+/** 每关题量：对齐帮帮识字「五字一测 · 及时巩固」的节奏 */
+const ROUND_SIZE = 5;
+/** 答完一题到切下一题的间隔（ms）：留出看清正解与听清读音的时间 */
+const ADVANCE_DELAY = 1800;
 
 interface HanziQuizGameProps {
   level?: number;
@@ -62,11 +66,32 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
     initialLevel: (Math.min(3, Math.max(1, Math.round(level))) as DifficultyLevel),
   });
 
-  // 初始化关卡题目池 (5 题)
-  useEffect(() => {
-    const rawPool = getHanziByLevel(level);
-    const shuffled = [...rawPool].sort(() => Math.random() - 0.5).slice(0, 5);
-    setPool(shuffled);
+  /**
+   * 延迟切题定时器（R168 修复）。
+   *
+   * 原实现把 `setTimeout(…, 1800)` 的句柄丢掉：孩子在这 1.8 秒内切走关卡、
+   * 或点击「再闯一次」，定时器仍会照常触发 `setCurrentIndex` / `settleRound`——
+   * 轻则在新一关里凭空跳题，重则在已卸载组件上 setState 打 React 警告。
+   * 这里统一收进 ref，卸载与新回合开始时各清一次。
+   */
+  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** 朗读定时器同理：切题后旧读音必须取消，否则两道题的读音会叠在一起 */
+  const speakTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /**
+   * 重开一关 —— 三个入口（关卡切换 / 再闯一次按钮 / 键盘 R）的唯一实现。
+   *
+   * R168 修复的真实缺陷：原来「再闯一次」按钮内联复制了一份重置代码，却
+   * **漏掉了 `adapt.reset()` 与 `setFeedback(null)`** —— 孩子重开后挑战等级
+   * 停在上轮的满级星星上、上一题的反馈气泡还挂在屏幕里，且旧定时器未清。
+   * 三处复制必然漂移，收敛成一个回调才是根治。
+   */
+  const resetRound = useCallback(() => {
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+    advanceTimerRef.current = null;
+    if (speakTimerRef.current) clearTimeout(speakTimerRef.current);
+    speakTimerRef.current = null;
+    setPool(shuffle(getHanziByLevel(level)).slice(0, ROUND_SIZE));
     setCurrentIndex(0);
     setStreak(0);
     setBestCombo(0);
@@ -77,21 +102,39 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
     adapt.reset();
   }, [level, adapt.reset]);
 
+  // 初始化关卡题目池
+  useEffect(() => {
+    resetRound();
+  }, [resetRound]);
+
+  // 卸载时清空在途定时器
+  useEffect(
+    () => () => {
+      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+      if (speakTimerRef.current) clearTimeout(speakTimerRef.current);
+    },
+    [],
+  );
+
   // 当索引切换时设置题目与选项
   useEffect(() => {
-    if (!pool.length || currentIndex >= pool.length) return;
+    const currentHanzi = pool[currentIndex];
+    if (!currentHanzi) return;
 
-    const currentHanzi = pool[currentIndex]!;
     const allCandidates = getHanziByLevel(level).filter((h) => h.c !== currentHanzi.c);
-    const distractorCandidates = [...allCandidates].sort(() => Math.random() - 0.5).slice(0, 3);
-    const opts = [currentHanzi, ...distractorCandidates].sort(() => Math.random() - 0.5);
+    // Fisher-Yates 无偏洗牌：原 `sort(() => Math.random() - 0.5)` 是**有偏**的，
+    // 某些排列出现概率显著偏高，孩子会反复撞见同一组干扰项顺序。
+    const distractorCandidates = shuffle(allCandidates).slice(0, 3);
+    const opts = shuffle([currentHanzi, ...distractorCandidates]);
 
     setOptions(opts);
     setSelectedAnswer(null);
     setIsCorrect(null);
 
     // 播放提示音
-    setTimeout(() => {
+    if (speakTimerRef.current) clearTimeout(speakTimerRef.current);
+    speakTimerRef.current = setTimeout(() => {
+      speakTimerRef.current = null;
       void speak(`请选出汉字：${currentHanzi.c}，拼音是 ${currentHanzi.p}`).catch(() => {});
     }, 300);
   }, [currentIndex, pool, level]);
@@ -149,7 +192,9 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
       practice(`hanzi:${currentHanzi.c}`, false);
     }
 
-    setTimeout(() => {
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+    advanceTimerRef.current = setTimeout(() => {
+      advanceTimerRef.current = null;
       if (currentIndex + 1 < pool.length) {
         setCurrentIndex((prev) => prev + 1);
       } else {
@@ -163,7 +208,7 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
         const finalBestCombo = correct ? Math.max(bestCombo, streak + 1) : bestCombo;
         settleRound(pool.length, finalCorrect, finalBestCombo);
       }
-    }, 1800);
+    }, ADVANCE_DELAY);
   }, [selectedAnswer, currentHanzi, currentIndex, pool.length, totalStars, streak, bestCombo, settleRound, addFish, practice, adapt.onCorrect, adapt.onWrong]);
 
   const handlePlayVoice = useCallback(() => {
@@ -173,23 +218,12 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
     speak(`${currentHanzi.c}，${currentHanzi.p}`);
   }, [currentHanzi]);
 
+  // 重开统一走 resetRound（含清定时器 + 清挑战等级 + 清反馈气泡）
   const handleRestart = useCallback(() => {
     sfxTap();
     triggerHaptic(30);
-    const rawPool = getHanziByLevel(level);
-    const shuffled = [...rawPool].sort(() => Math.random() - 0.5).slice(0, 5);
-    setPool(shuffled);
-    setCurrentIndex(0);
-    // 计分必须一并清零：否则「再闯一次」会把上一轮的星星继续往上累加，
-    // 孩子看到的是一串与本节表现无关、且永不入账的虚高数字。
-    setStreak(0);
-    setBestCombo(0);
-    setTotalStars(0);
-    setIsCompleted(false);
-    setSettlement(null);
-    setFeedback(null);
-    adapt.reset();
-  }, [level, adapt.reset]);
+    resetRound();
+  }, [resetRound]);
 
   // 键盘快捷键监听
   useEffect(() => {
@@ -220,8 +254,30 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isCompleted, selectedAnswer, options, handleSelectOption, handlePlayVoice, handleRestart]);
 
+  /** 已掌握汉字量：驱动星星奖励淡出阶段（R160 防过度理由效应护栏） */
+  const masteredCount = Object.keys(progress.mastery).filter((k) => k.startsWith('hanzi:'))
+    .length;
+
+  /**
+   * 统一外壳包裹：冒险路线 + 星星小屋（奖励解锁）+ 成就墙 + 错误边界。
+   * 三个出口（结算 / 空池 / 练习中）共用同一层包裹，避免任一分支漏挂游戏化。
+   */
+  const wrap = (body: ReactNode) => (
+    <ModuleGameShell
+      module="hanzi"
+      level={adapt.level}
+      progress={progress}
+      combo={streak}
+      feedback={feedback ? { correct: feedback.correct, message: feedback.msg } : null}
+      masteredCount={masteredCount}
+      title="汉字闯关"
+    >
+      {body}
+    </ModuleGameShell>
+  );
+
   if (isCompleted) {
-    return (
+    return wrap(
       <Panel className="text-center p-6 space-y-4 max-w-lg mx-auto border-4 border-candy-pink-deep">
         <div className="text-4xl">🏆</div>
         <h3 className="text-2xl font-black text-candy-pink-deep">{t('hanziQuizGame.completedTitle')}</h3>
@@ -255,31 +311,35 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
             </CandyButton>
           )}
 
-          <CandyButton
-            tone="green"
-            size="md"
-            onClick={() => {
-              const rawPool = getHanziByLevel(level);
-              const shuffled = [...rawPool].sort(() => Math.random() - 0.5).slice(0, 5);
-              setPool(shuffled);
-              setCurrentIndex(0);
-              setStreak(0);
-              setBestCombo(0);
-              setTotalStars(0);
-              setIsCompleted(false);
-              setSettlement(null);
-            }}
-          >
+          <CandyButton tone="green" size="md" onClick={handleRestart}>
             🔄 {t('hanziQuizGame.again')}
           </CandyButton>
         </div>
-      </Panel>
+      </Panel>,
     );
   }
 
-  if (!currentHanzi) return null;
+  /**
+   * 空题目池兜底（R168 新增）。
+   * 原实现 `if (!currentHanzi) return null` —— 关卡号来自路由参数，一旦传入
+   * 数据里没有的关卡（或题库尚未下发完成），孩子看到的是**一片空白**。
+   * 空白是儿童产品里最糟的失败形态：孩子不会报告「没内容」，只会认为
+   * 「不好玩」然后离开。这里给一个可操作出口：回启蒙关重开。
+   */
+  if (!currentHanzi) {
+    return wrap(
+      <Panel className="mx-auto max-w-lg space-y-3 border-4 border-amber-300 p-6 text-center">
+        <div className="text-4xl">🧭</div>
+        <h3 className="text-xl font-black text-amber-800">这一关的汉字还在路上</h3>
+        <p className="text-sm font-bold text-ink-soft">先去别的关看看，或者再试一次吧～</p>
+        <CandyButton tone="green" size="md" onClick={handleRestart}>
+          🔄 再试一次
+        </CandyButton>
+      </Panel>,
+    );
+  }
 
-  return (
+  return wrap(
     <div className="w-full max-w-xl mx-auto space-y-4">
       {/* 快捷操作提示条 */}
       <div className="text-center">
@@ -294,7 +354,6 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
           <span className="text-xs font-black px-3 py-1 bg-amber-100 text-amber-900 rounded-full">
             {t('hanziQuizGame.progress', { current: currentIndex + 1, total: pool.length })}
           </span>
-          <ComboMeter count={streak} />
           {/* 渐进式难度指示（任务 #2）：随连对表现实时爬坡，进度条对标通关连对目标 */}
           <div className="flex items-center gap-1.5" title="连续答对越多，挑战等级越高">
             <span className="text-xs font-black text-amber-700 whitespace-nowrap">挑战等级</span>
@@ -392,14 +451,16 @@ export function HanziQuizGame({ level = 1, onSelectWriting }: HanziQuizGameProps
         })}
       </div>
 
-      {feedback && <GentleFeedback correct={feedback.correct} message={feedback.msg} />}
-
+      {/*
+        ComboMeter / GentleFeedback / RestReminder 已由外壳的 GameHud 统一渲染，
+        此处不再重复挂载（原实现与 HUD 并存会出现两条连击条、两个反馈气泡）。
+        ReducedMotionToggle 是 GameHud 未覆盖的无障碍开关，保留在此。
+      */}
       <section className="space-y-3">
         <HanziStarQuest />
         <MistakeBookPanel progress={progress} onReview={() => navigate('wrongbook')} />
-        <RestReminder />
         <ReducedMotionToggle />
       </section>
-    </div>
+    </div>,
   );
 }

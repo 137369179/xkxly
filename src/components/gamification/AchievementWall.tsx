@@ -16,7 +16,13 @@ interface Props {
 export function AchievementWall({ progress }: Props) {
   const achieved = useMemo(() => achievedCount(progress), [progress]);
   const total = milestoneCount();
-  const badges = progress.badges.slice(0, 24);
+  /**
+   * 防御：Progress 来自 localStorage 快照，旧存档 / 迁移中断都可能缺 `badges`。
+   * 成就墙是 GameHud 的子件，一旦这里抛错，整块游戏化面板（乃至三核心页面）
+   * 会被错误边界整体降级 —— 孩子为了一个徽章字段看不到整节课的反馈。
+   * 因此缺字段时按「还没有徽章」处理，而不是崩溃。
+   */
+  const badges = (progress.badges ?? []).slice(0, 24);
 
   return (
     <section aria-label="成就墙" className="rounded-2xl bg-white/80 p-4 shadow-sm">
